@@ -1396,6 +1396,22 @@ async function main() {
     const rule = allCssRules.find(r => r.selectorText === "#fcWordsToReview .section-icon-btn");
     return !!rule && rule.style.display === "none";
   })());
+  check("Words to Review opts into the column-visibility toggles so you can quiz off it", (() => {
+    const sampleRow = window.RaumeStudy.data.vocabularyTables[0].rows.find(r => r.id);
+    const withToggles = window.RaumeStudy.vocab.buildVocabSection({
+      id: "wtr", title: "Words to review", rows: [sampleRow], presort: false,
+      controls: { print: true, viewMode: true }
+    });
+    const without = window.RaumeStudy.vocab.buildVocabSection({
+      id: "wtr", title: "Words to review", rows: [sampleRow], presort: false, controls: { print: true }
+    });
+    const wrap = document.createElement("div");
+    wrap.innerHTML = withToggles;
+    const cols = [...wrap.querySelectorAll(".section-head .view-mode button")].map(b => b.dataset.col);
+    return typeof window.RaumeStudy.vocab.applyColVisibility === "function"
+      && !/view-mode/.test(without)
+      && ["japanese", "furigana", "romaji", "english"].every(k => cols.includes(k));
+  })());
 
   const goAccountBtn = document.getElementById("fcGoAccount");
   check("guest mode offers a way to switch to syncing", !!goAccountBtn);

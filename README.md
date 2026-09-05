@@ -210,9 +210,12 @@ the word is added. (The star and hide-row icons share that same cluster.) The
   reviewed), a New → Learning →
   Review progress bar, a reviews-this-week chart (a plain "no reviews yet this
   week" line until you've studied), a "Missed today" shortlist, and a **Words
-  to review** table for words missed more than once. Until there's any review
-  history the last two fold into a single "Words to review" line rather than
-  two near-empty cards.
+  to review** table for words missed more than once. That table carries the
+  same Japanese / Furigana / Romaji / English column toggles as the reference
+  pages, so you can cover one side and quiz yourself off it — the toggles are
+  the shared ones, so a column hidden here is also hidden on Vocabulary /
+  Grammar / Travel. Until there's any review history the last two fold into a
+  single "Words to review" line rather than two near-empty cards.
 - **Manage** — every table by category, filterable to All / My flashcards /
   Archived. One button per table: **Add table**, then **Pause table** once it's
   fully added. Expand a table to add or pause individual words. "Add table" is

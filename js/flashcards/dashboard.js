@@ -253,9 +253,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
   // "Words to Review" is one of the standard vocabulary table sections
   // (RaumeStudy.vocab.buildVocabSection) filled with the entries missed most
-  // often -- so it sorts and prints exactly like every other table. Scoped CSS
-  // on #fcWordsToReview keeps its header quiet so it reads as a dashboard card,
-  // not a full vocabulary-page section.
+  // often -- so it sorts, prints, and (via viewMode) hides columns exactly
+  // like every other table. The column toggles drive the same global
+  // body.hide-* state the reference pages use. Scoped CSS on #fcWordsToReview
+  // keeps its header quiet so it reads as a dashboard card, not a full
+  // vocabulary-page section.
   function renderWordsToReview() {
     var host = document.getElementById("fcWordsToReview");
     if (!host) return;
@@ -268,9 +270,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     }
     host.innerHTML = window.RaumeStudy.vocab.buildVocabSection({
       id: "wtr", title: "Words to review", rows: rows, presort: false,
-      controls: { print: true }
+      controls: { print: true, viewMode: true }
     });
     window.RaumeStudy.flashcards.refreshRowToggleButtons();
+    // Sync the just-drawn view-mode buttons (and this table's cell aria-hidden)
+    // to whatever columns are currently hidden globally.
+    if (window.RaumeStudy.vocab.applyColVisibility) window.RaumeStudy.vocab.applyColVisibility();
   }
 
   // Card-state breakdown -- a single stacked bar (New/Learning/Review) as a

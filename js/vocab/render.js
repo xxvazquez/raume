@@ -194,6 +194,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function rowsHtmlFor(rows) {
     return rows.map(function (row) { return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row); }).join('\n    ');
   }
+  // Column-visibility toggles, identical to the reference toolbar's set
+  // (index.html). The click handler is delegated on document (js/vocab/
+  // interactions.js), so this works wherever the markup lands; it drives the
+  // global `body.hide-*` state, so a column hidden here stays hidden on the
+  // reference pages too.
+  var VIEW_MODE_CONTROL =
+    '<div class="view-mode" aria-label="Column visibility">' +
+    '<button type="button" data-col="japanese" aria-pressed="false" title="Hide the Japanese column">Japanese</button>' +
+    '<button type="button" data-col="furigana" aria-pressed="false" title="Hide the furigana readings">Furigana</button>' +
+    '<button type="button" data-col="romaji" aria-pressed="false" title="Hide the Romaji column">Romaji</button>' +
+    '<button type="button" data-col="english" aria-pressed="false" title="Hide the English column">English</button>' +
+    '</div>';
   // Shared table-section markup -- every vocabulary table on the page goes
   // through here so it's structurally identical: same columns, sort controls,
   // print button, furigana markup, and every feature that keys off
@@ -201,6 +213,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function sectionMarkup(o) {
     var controls = o.controls || {};
     var ctrlParts =['<span class="rows-hidden-status" hidden><span class="rows-hidden-count"></span> · <button type="button" class="show-all-rows">Show all</button></span>'];
+    if (controls.viewMode) ctrlParts.push(VIEW_MODE_CONTROL);
     // Secondary actions collapse into a quiet overflow menu so only its icon
     // sits next to the title. Print is a standalone icon on desktop, but on
     // narrow screens the full title takes priority, so print folds into the

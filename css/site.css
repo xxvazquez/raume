@@ -2280,6 +2280,11 @@ body.starred-mode .expand-bar { display: none !important; }
 #fcWordsToReview .section-icon-btn { display: none; }
 #fcWordsToReview .section-title-text { font-size: var(--fs-subhead); font-weight: 500; }
 #fcWordsToReview .section-toggle-icon { width: 20px; height: 20px; }
+/* The column-visibility toggles are a wide control for a section head -- let
+   them fall onto their own line under the title rather than crushing it when
+   the card is narrow. */
+#fcWordsToReview .section-head { flex-wrap: wrap; row-gap: 10px; }
+#fcWordsToReview .section-head .view-mode { flex-wrap: wrap; }
 
 /* Printing the Words to Review table from the Dashboard: strip the Flashcards
    chrome so only that one table (title + grid) reaches the page, matching how

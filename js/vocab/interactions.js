@@ -581,6 +581,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         });
       });
     }
+    // Exposed so synthetic tables rendered outside this page (the Flashcards
+    // dashboard's "Words to review") can sync a freshly-drawn `.view-mode`
+    // control -- and their cells' aria-hidden -- to the current column state.
+    vocab.applyColVisibility = applyColVisibility;
     function toggleColumn(key) {
       const cls = 'hide-' + key;
       const willHide = !document.body.classList.contains(cls);
