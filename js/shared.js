@@ -22,14 +22,29 @@ window.RaumeStudy.shared = (function () {
     function getVoices() {
       return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     }
-    function findJapaneseVoice() {
-      var voices = getVoices();
-      for (var i = 0; i < voices.length; i++) {
-        if (/^ja/i.test(voices[i].lang)) return voices[i];
-      }
-      return null;
+    function japaneseVoices() {
+      return getVoices().filter(function (v) { return /^ja/i.test(v.lang); });
     }
-    function hasJapaneseVoice() { return !!findJapaneseVoice(); }
+    // Known-good Japanese system voices, most reliable first. Taking the bare
+    // first `ja` voice getVoices() returns is a trap on current macOS / iOS:
+    // the list often leads with the "novelty" set (Eddy, Grandma, Rocko, ...),
+    // some of which are on-demand downloads that stay silent until fetched.
+    // Prefer a real one by name, then any local ja-JP voice, then any local
+    // voice, and only then whatever's first.
+    var GOOD_JA_VOICE = /kyoko|otoya|o-?ren|hattori|sayaka|nanami|haruka|ayumi|ichiro|keita|(google).*(日本語|japanese)/i;
+    function findJapaneseVoice() {
+      var ja = japaneseVoices();
+      if (!ja.length) return null;
+      var byName = null, localJP = null, anyLocal = null;
+      for (var i = 0; i < ja.length; i++) {
+        var v = ja[i];
+        if (!byName && GOOD_JA_VOICE.test(v.name || "")) byName = v;
+        if (!localJP && v.localService && /^ja-JP$/i.test(v.lang)) localJP = v;
+        if (!anyLocal && v.localService) anyLocal = v;
+      }
+      return byName || localJP || anyLocal || ja[0];
+    }
+    function hasJapaneseVoice() { return japaneseVoices().length > 0; }
     // getVoices() is empty until the browser populates its voice list --
     // synchronous on some browsers, only ready after the async "voiceschanged"
     // event on others (notably Chrome). callback fires once a Japanese voice
@@ -51,12 +66,19 @@ window.RaumeStudy.shared = (function () {
     function speak(text) {
       var synth = window.speechSynthesis;
       if (!synth || !text || typeof SpeechSynthesisUtterance === "undefined") return;
-      synth.cancel(); // a second click shouldn't queue up behind the first
       var utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "ja-JP";
       var voice = findJapaneseVoice();
       if (voice) utterance.voice = voice;
+      // Interrupt a still-speaking utterance so a second click doesn't queue up
+      // behind the first -- but *only* then. Calling cancel() unconditionally
+      // right before speak() is what leaves the queue wedged in some Chromium
+      // builds, so the new utterance never starts and nothing plays.
+      if (synth.speaking || synth.pending) synth.cancel();
       synth.speak(utterance);
+      // Chrome can strand the engine in a paused state after an earlier
+      // cancel(); a resume() when it isn't paused is a harmless no-op.
+      if (synth.paused) synth.resume();
     }
     return { hasJapaneseVoice: hasJapaneseVoice, onJapaneseVoiceReady: onJapaneseVoiceReady, speak: speak };
   })();

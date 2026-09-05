@@ -208,21 +208,62 @@ async function main() {
       window.speechSynthesis = original;
       return fired === true;
     })());
-    check("speak() cancels any previous utterance and speaks the text in ja-JP using a Japanese voice", (() => {
+    check("speak() speaks the text in ja-JP with a Japanese voice, and does NOT cancel when nothing is playing (an unconditional cancel() before speak() wedges the queue in some Chromium builds)", (() => {
       const originalSynth = window.speechSynthesis;
       const originalUtterance = window.SpeechSynthesisUtterance;
       let cancelled = false, spoken = null;
-      const jaVoice = { lang: "ja-JP", name: "Test JA" };
+      const jaVoice = { lang: "ja-JP", name: "Kyoko", localService: true };
       window.speechSynthesis = {
+        speaking: false, pending: false, paused: false,
         getVoices: () => [{ lang: "en-US" }, jaVoice],
         cancel: () => { cancelled = true; },
+        resume: () => {},
         speak: (u) => { spoken = u; }
       };
       window.SpeechSynthesisUtterance = function (text) { this.text = text; };
       speech.speak("チャーシュー");
       window.speechSynthesis = originalSynth;
       window.SpeechSynthesisUtterance = originalUtterance;
-      return cancelled === true && !!spoken && spoken.text === "チャーシュー" && spoken.lang === "ja-JP" && spoken.voice === jaVoice;
+      return cancelled === false && !!spoken && spoken.text === "チャーシュー" && spoken.lang === "ja-JP" && spoken.voice === jaVoice;
+    })());
+    check("speak() DOES interrupt a still-speaking utterance so a second click doesn't queue behind the first", (() => {
+      const originalSynth = window.speechSynthesis;
+      const originalUtterance = window.SpeechSynthesisUtterance;
+      let cancelled = false;
+      window.speechSynthesis = {
+        speaking: true, pending: false, paused: false,
+        getVoices: () => [{ lang: "ja-JP", name: "Kyoko", localService: true }],
+        cancel: () => { cancelled = true; },
+        resume: () => {},
+        speak: () => {}
+      };
+      window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+      speech.speak("みず");
+      window.speechSynthesis = originalSynth;
+      window.SpeechSynthesisUtterance = originalUtterance;
+      return cancelled === true;
+    })());
+    check("the Japanese voice picker skips the novelty voices for a known-good one (Kyoko), not just the first in the list", (() => {
+      const originalSynth = window.speechSynthesis;
+      const originalUtterance = window.SpeechSynthesisUtterance;
+      const kyoko = { lang: "ja-JP", name: "Kyoko", localService: true };
+      let spoken = null;
+      window.speechSynthesis = {
+        speaking: false, pending: false, paused: false,
+        // getVoices() order mirrors current macOS: novelty voices first, Kyoko buried
+        getVoices: () => [
+          { lang: "ja-JP", name: "Eddy (Japanese (Japan))", localService: true },
+          { lang: "ja-JP", name: "Grandma (Japanese (Japan))", localService: true },
+          kyoko,
+          { lang: "ja-JP", name: "Rocko (Japanese (Japan))", localService: true }
+        ],
+        cancel: () => {}, resume: () => {}, speak: (u) => { spoken = u; }
+      };
+      window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+      speech.speak("あぶら");
+      window.speechSynthesis = originalSynth;
+      window.SpeechSynthesisUtterance = originalUtterance;
+      return !!spoken && spoken.voice === kyoko;
     })());
     check("speak() is a no-op (never throws) with no speechSynthesis, no text, or no Utterance constructor", (() => {
       const originalSynth = window.speechSynthesis;
