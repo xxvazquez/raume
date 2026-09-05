@@ -1110,6 +1110,45 @@ async function main() {
   document.getElementById("fcBackToDashboard").click();
   check("Back to Dashboard leaves the session for the dashboard", !document.querySelector(".fc-session-done") && !!document.querySelector(".fc-stats-grid"));
 
+  console.log("Flashcards: the daily new-card allowance holds across sessions, not just one queue build");
+  {
+    // The regression this guards: buildQueue used to hand out up to
+    // queue_new_cards_per_day fresh cards on every call with no memory of
+    // cards already introduced earlier the same day -- so three short
+    // sessions in a day gave three times the configured allowance. Exercise
+    // it directly against the real cache/scheduler rather than the UI, and
+    // restore whatever was there before so later checks in this file are
+    // unaffected.
+    const fcStore = window.RaumeStudy.flashcards.store;
+    const fcSched = window.RaumeStudy.flashcards.scheduling;
+    const c = fcStore.getCache();
+    const saved = { settings: c.settings, day: c.day, cards: c.cards };
+    c.settings = Object.assign({}, c.settings, { queue_new_cards_per_day: 2 });
+    c.day = null;
+    c.cards = {};
+    for (let i = 0; i < 5; i++) {
+      const id = "dailycap-test-" + i;
+      c.cards[id] = { id, vocabId: "v0001", direction: "jp-en", active: true, state: 0, due: new Date().toISOString(), stability: 0, difficulty: 0, scheduled_days: 0, reps: 0, lapses: 0, learning_steps: 0, last_review: null };
+    }
+    fcStore.saveCache();
+    const now = new Date();
+    const q1 = fcSched.buildQueue(now);
+    check("a fresh day's queue offers exactly the configured allowance of new cards", q1.length === 2);
+    const farFuture = new Date(now.getTime() + 365 * 86400000).toISOString();
+    q1.forEach((id) => {
+      const card = fcStore.getCache().cards[id];
+      card.state = 2; card.due = farFuture; // out of the ready-to-study window, isolating just the new-card allowance
+      fcSched.bumpNewToday(now);
+    });
+    fcStore.saveCache();
+    check("a second session the same day offers zero more new cards once the allowance is used",
+      fcSched.buildQueue(now).length === 0);
+    const tomorrow = new Date(now.getTime() + 86400000);
+    check("the allowance resets on a new calendar day", fcSched.buildQueue(tomorrow).length === 2);
+    c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
+    fcStore.saveCache();
+  }
+
   console.log("Flashcards: Kana tab");
   const kd = window.RaumeStudy.flashcards.kanaData;
   check("the kana tables expose the named groups per script with counts", (() => {

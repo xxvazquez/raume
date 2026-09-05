@@ -79,7 +79,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -104,6 +104,14 @@ window.RaumeStudy.flashcards.store = (function () {
       // it can't grow forever; older {date}-only entries are still valid.
       reviewLogs: Array.isArray(raw.reviewLogs) ? raw.reviewLogs.filter(function (e) { return e && typeof e.date === "string"; }).slice(-1000) : [],
       settings: mergeSettings(raw.settings),
+      // New cards introduced today, so the daily allowance holds across
+      // multiple sessions in one day, not just within a single queue build --
+      // same {date, count} shape as the Kana trainer's identical tracker
+      // (js/flashcards/kana.js). Device-local only, like Kana's: not synced
+      // to Supabase, so two devices studied the same day each get their own
+      // allowance -- a pre-existing limitation this shares with Kana, not a
+      // new one.
+      day: raw.day && typeof raw.day.date === "string" ? { date: raw.day.date, count: raw.day.count | 0 } : null,
       lastSyncedAt: raw.lastSyncedAt || null
     };
   }

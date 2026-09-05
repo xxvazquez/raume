@@ -12,7 +12,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   "use strict";
 
   var store = window.RaumeStudy.flashcards.store;
-  var getCache = store.getCache;
+  var getCache = store.getCache, localDateStr = store.localDateStr;
   var RATING_NAMES = store.RATING_NAMES;
 
   function getScheduler(settings) {
@@ -150,18 +150,36 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       return due <= t;
     });
   }
+  // New cards introduced today, across every session -- not just the one
+  // being built right now. Without this, "New cards per day" only capped a
+  // single queue build: study three short sessions in a day instead of one
+  // and you'd get three times the configured new-card allowance. Same
+  // {date, count} tracker as the Kana trainer (js/flashcards/kana.js
+  // todayNew/bumpNew), reset the first time a new day sees a bump.
+  function todayNewCount(now) {
+    var day = getCache().day;
+    return day && day.date === localDateStr(now) ? day.count : 0;
+  }
+  function bumpNewToday(now) {
+    var c = getCache();
+    var today = localDateStr(now);
+    if (!c.day || c.day.date !== today) c.day = { date: today, count: 0 };
+    c.day.count++;
+  }
   // What's studied in a session is: every card that's ready (readyToStudy)
-  // plus that day's allowance of brand-new cards. These used to be kept in
-  // strict learning -> review -> new order, which meant the same due cards
-  // led every single session -- it never *felt* random even though each
-  // bucket was shuffled. Now the whole lot is pooled and shuffled together,
-  // so the order is genuinely different every day regardless of what's due
-  // or what was just added. It's still spaced by word afterwards (so the
-  // same word's other directions never land back to back).
+  // plus whatever's left of that day's allowance of brand-new cards. These
+  // used to be kept in strict learning -> review -> new order, which meant
+  // the same due cards led every single session -- it never *felt* random
+  // even though each bucket was shuffled. Now the whole lot is pooled and
+  // shuffled together, so the order is genuinely different every day
+  // regardless of what's due or what was just added. It's still spaced by
+  // word afterwards (so the same word's other directions never land back
+  // to back).
   function buildQueue(now) {
     var c = getCache();
+    var allowance = Math.max(0, c.settings.queue_new_cards_per_day - todayNewCount(now));
     var fresh = shuffle(studyableCards().filter(function (card) { return card.state === 0; }))
-      .slice(0, Math.max(0, c.settings.queue_new_cards_per_day));
+      .slice(0, allowance);
     return spaceByVocab(shuffle(readyToStudy(now).concat(fresh)))
       .map(function (card) { return card.id; });
   }
@@ -198,6 +216,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     retrievabilityOf: retrievabilityOf, formatInterval: formatInterval,
     fsrsRowFields: fsrsRowFields,
     activeCards: activeCards, studyableCards: studyableCards, shuffle: shuffle,
-    readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats
+    readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats,
+    todayNewCount: todayNewCount, bumpNewToday: bumpNewToday
   };
 })();

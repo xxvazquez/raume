@@ -20,6 +20,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var uuid = store.uuid, RATING_NAMES = store.RATING_NAMES, DIRECTION_LABEL = store.DIRECTION_LABEL;
   var studyableCards = sched.studyableCards, buildQueue = sched.buildQueue, shuffle = sched.shuffle;
   var readyToStudy = sched.readyToStudy;
+  var todayNewCount = sched.todayNewCount, bumpNewToday = sched.bumpNewToday;
   var previewRatings = sched.previewRatings, getScheduler = sched.getScheduler, applyRating = sched.applyRating, fsrsRowFields = sched.fsrsRowFields;
   var getVocabIndex = vidx.getVocabIndex, promptFor = vidx.promptFor, askLabelFor = vidx.askLabelFor;
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
@@ -97,7 +98,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       reviewInsightsLoading = true;
       loadReviewInsights().catch(function () { reviewInsights = emptyInsights(); }).then(function () { reviewInsightsLoading = false; rerender(); });
     }
-    var newInSession = Math.min(stats.newCount, Math.max(0, settings.queue_new_cards_per_day));
+    var newInSession = Math.min(stats.newCount, Math.max(0, settings.queue_new_cards_per_day - todayNewCount(now)));
     // On a quiet account "Missed today" and "Words to Review" are two full-width
     // cards each holding one sentence -- fold them into a single line until
     // there's review history to show. (Still null while insights load: keep
@@ -602,8 +603,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var now = new Date();
     var base = fsrsRowFields(card);
     var baseReps = card.reps; // captured before mutation -- the sync guard's version number
+    var wasNew = card.state === 0; // captured before mutation -- see bumpNewToday below
     var result = applyRating(scheduler, base, now, ratingName);
     Object.assign(card, result.card);
+    // Counts against today's new-card allowance the moment a new card is
+    // actually studied, not when it's merely offered -- a card queued but
+    // never reached (session ended early) shouldn't use up the allowance.
+    if (wasNew) bumpNewToday(now);
     if (isGuestMode()) {
       // No server -- keep a capped local history. Beyond the day (for the
       // weekly chart) each entry carries what the Dashboard's mistake

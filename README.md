@@ -227,6 +227,9 @@ the word is added. (The star and hide-row icons share that same cluster.) The
   button. The two trainers' knobs are independent. Values save locally first,
   then sync. Each field's label sits right next to its control, not flung to
   the row's far edge with the helper paragraph starting under the gap.
+  New-cards-per-day is a genuine daily allowance, not a per-session one — it
+  holds across however many separate sessions you run in a day (device-local,
+  same as everything else on this page not explicitly marked as synced).
 - **Help** — pausing, the Manage status icons (○ ● ◷ ◌), and the review
   keyboard shortcuts (Space/Enter to check, 1–4 to rate).
 - **Kana** — a separate hiragana/katakana trainer (below).
