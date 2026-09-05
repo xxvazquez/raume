@@ -451,10 +451,16 @@ The **Flashcards dashboard** is the one place the quiet-everywhere rule is
 loosened: a data surface needs to be scannable. Still no gradients or shadows
 and the same cool character, but the card-progress bar uses a three-step slate
 ramp (`--fc-state-new` / `-learning` / `-review`, an ordinal New → Learning →
-Review; steps validated for lightness separation and AA in both themes), the
-stat tiles (day-streak included) and reviews-this-week bars pick up the
-Flashcards section tone with today's bar at full strength, and the "Missed
-today" list gets a thin `--wrong` left rule — the one warm note on the surface.
+Review; steps validated for lightness separation and AA in both themes), and
+reviews-this-week bars pick up the Flashcards section tone with today's bar at
+full strength. The four stat tiles' left rule is quiet (`--line-strong`) by
+default — Total cards and Reviews completed are plain running counts with
+nothing to signal — except Day streak (the section tone; it's already an
+achievement) and Estimated retention, which turns the same muted amber as the
+rating row's Hard (`.fc-stat-attention`, reusing `--fc-hard`) only once it
+drops meaningfully under the target set in Settings, so colour there means
+something rather than decorating every tile alike. The "Missed today" list
+gets a thin `--wrong` left rule — the one warm note on the surface otherwise.
 All of it is scoped to `.page-flashcards`; the reference side stays monochrome.
 The review card's rating row is the one other exception: it needs a fourth
 hue (Again/Good/Easy reuse `--wrong` / `--right` / `--accent`, but Hard gets

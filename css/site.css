@@ -1540,9 +1540,18 @@ body.starred-mode .expand-bar { display: none !important; }
    two-up cards, not prose). */
 #fcPanelDashboard { max-width: 900px; }
 
-/* Dashboard stat tiles -- flat bordered cards, plus a left rule in the
-   Flashcards section tone (a colour hint, not a loud fill) so the row reads
-   as one grouped set rather than four identical grey boxes. */
+/* Dashboard stat tiles -- flat bordered cards. Four numbers of genuinely
+   different kinds used to get one identical coloured rule each, which read
+   as one undifferentiated row: no cue for which number actually means
+   something right now. The left rule now carries real weight instead of
+   uniform decoration: quiet (--line-strong) for the two plain running
+   tallies (Total cards, Reviews completed) so they recede as context; the
+   Flashcards section tone for Day streak, the one tile that's already an
+   achievement in its own right; amber (.fc-stat-attention, reusing the
+   rating row's --fc-hard) only on Estimated retention, and only once it's
+   meaningfully under the target set in Settings -- healthy retention looks
+   exactly like the quiet tiles, so colour only appears when it's actually
+   worth a glance. */
 /* 2x2 on narrow screens (four tiles, so it stays even -- no orphan on its
    own row), one row of four once there's width for it -- on the shared 12-col
    grid below, so the tile seams line up with the panels above and below. */
@@ -1554,15 +1563,15 @@ body.starred-mode .expand-bar { display: none !important; }
 }
 .fc-stat-tile::before {
   content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px;
-  background: var(--section);
+  background: var(--line-strong);
 }
+.fc-stat-streak::before { background: var(--section); }
+.fc-stat-attention::before { background: var(--fc-hard); }
+.fc-stat-attention .fc-stat-value { color: var(--fc-hard-strong); }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
 .fc-stat-label { display: block; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
 .fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
-/* The streak tile reads as an achievement from its label and number -- it
-   doesn't need the only green pip on the page (nothing else echoed it), so it
-   takes the section tone like its three siblings. */
 .fc-longest-streak { margin-top: -10px; margin-bottom: 16px; }
 
 /* Dashboard visualizations -- kept flat/bordered like everything else on the

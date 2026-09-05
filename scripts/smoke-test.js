@@ -1020,6 +1020,14 @@ async function main() {
       const val = tile && tile.querySelector(".fc-stat-value").textContent;
       return tile && tile.classList.contains("fc-stat-tile-pending") && val !== "—" && /reviews/i.test(val);
     })());
+    check("only Day streak carries a coloured stat-tile variant -- Total cards and Reviews completed stay the plain, quiet tile", (() => {
+      const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")];
+      const byLabel = (re) => tiles.find(t => re.test(t.querySelector(".fc-stat-label").textContent));
+      const hasVariant = (t) => !!t && (t.classList.contains("fc-stat-streak") || t.classList.contains("fc-stat-attention"));
+      return hasVariant(byLabel(/Day streak/))
+        && !hasVariant(byLabel(/Total cards/))
+        && !hasVariant(byLabel(/Reviews completed/));
+    })());
     check("the dashboard is capped, not run to the full sheet -- a 2-up row shouldn't balloon", (() => {
       const rule = allCssRules.find(r => r.selectorText === "#fcPanelDashboard");
       return !!rule && parseInt(rule.style.maxWidth, 10) > 0;
@@ -1147,6 +1155,36 @@ async function main() {
     check("the allowance resets on a new calendar day", fcSched.buildQueue(tomorrow).length === 2);
     c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
     fcStore.saveCache();
+  }
+
+  console.log("Flashcards: Estimated retention colours the tile only once it's meaningfully under target");
+  {
+    // Give a few cards enough review history to be scored, but stale enough
+    // (long overdue against a low stability) that FSRS predicts poor recall --
+    // forces stats.estimatedRetention well under the 0.9 default target.
+    const fcStore = window.RaumeStudy.flashcards.store;
+    const c = fcStore.getCache();
+    const saved = { cards: c.cards };
+    c.cards = {};
+    for (let i = 0; i < 6; i++) {
+      const id = "retention-test-" + i;
+      c.cards[id] = {
+        id, vocabId: "v0001", direction: "jp-en", active: true, state: 2,
+        due: new Date(Date.now() - 30 * 86400000).toISOString(),
+        stability: 1, difficulty: 5, scheduled_days: 5, reps: 3, lapses: 0, learning_steps: 0,
+        last_review: new Date(Date.now() - 35 * 86400000).toISOString()
+      };
+    }
+    fcStore.saveCache();
+    window.RaumeStudy.flashcards.render();
+    check("a retention well under target gets the amber attention tile, not the plain quiet rule", (() => {
+      const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")];
+      const tile = tiles.find(t => /Estimated retention/.test(t.querySelector(".fc-stat-label").textContent));
+      return !!tile && tile.classList.contains("fc-stat-attention") && !tile.classList.contains("fc-stat-tile-pending");
+    })());
+    c.cards = saved.cards;
+    fcStore.saveCache();
+    window.RaumeStudy.flashcards.render();
   }
 
   console.log("Flashcards: Kana tab");

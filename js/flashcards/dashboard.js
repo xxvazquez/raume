@@ -88,6 +88,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var retentionPending = stats.estimatedRetention == null;
     var retentionText = retentionPending ? "Not enough reviews yet" : Math.round(stats.estimatedRetention * 100) + "%";
     var settings = getCache().settings;
+    // A couple of points under target is normal noise, not a real dip -- only
+    // flag it once it's meaningfully below what Settings asks FSRS to aim for,
+    // so the tile isn't flickering color over nothing.
+    var retentionLow = !retentionPending && stats.estimatedRetention < settings.fsrs_request_retention - 0.02;
     var streak = settings.current_streak || 0;
     var now = new Date();
     if (weeklyActivity === null && !weeklyActivityLoading) {
@@ -120,7 +124,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       statTile(streak, "Day streak", "streak") +
       statTile(stats.total, "Total cards") +
       statTile(stats.reviewsCompleted, "Reviews completed") +
-      statTile(retentionText, "Estimated retention", null, retentionPending) +
+      statTile(retentionText, "Estimated retention", retentionLow ? "attention" : null, retentionPending) +
       "</div>" +
       (settings.longest_streak > streak ? '<p class="fc-note fc-longest-streak">Longest streak: ' + settings.longest_streak + " day" + (settings.longest_streak === 1 ? "" : "s") + ".</p>" : "") +
       (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note">"Estimated retention" is FSRS’s forecasted recall probability across your reviewed cards — not a directly measured pass rate.</p>') +
