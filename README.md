@@ -174,11 +174,17 @@ the word is added. (The star and hide-row icons share that same cluster.) The
 - Fully keyboard-driven: type the answer, **Enter** to check (works straight from
   the answer field), then **1–4** to rate and move on. Space also checks when the
   field isn't focused.
-- Works with a screen reader: the answer field is named with its prompt, and
-  checking moves focus to the result — which announces the outcome, what you
-  typed, and the correct answer — so the pass/fail signal isn't carried by the
-  colour wash alone and focus never drops to the page body between cards. The
-  wrap-up heading takes focus the same way.
+- The card is a persistent shell — the answer field is the same element from the
+  first card to the last, kept focused through check → rate → next. Only the
+  prompt and the result region under it are swapped in place. Rebuilding the card
+  each step (the earlier approach) dropped focus and closed the on-screen
+  keyboard on every card on a phone, with no way back in.
+- Works with a screen reader: the answer field is named with its prompt; the
+  result region is an `aria-live` area, so checking announces the outcome, what
+  you typed and the correct answer without moving focus off the field (that focus
+  move was what closed the mobile keyboard). The result stays reachable
+  (`tabindex="-1"`, an aria-label with the full summary). The wrap-up heading
+  does take focus, since the session's over and there's nothing to type.
 - The reveal below a checked answer shows one extra field of context, not
   just the one you were tested on — whichever of Japanese/romaji/English
   isn't already on screen as the prompt, so every review reinforces the
@@ -252,8 +258,10 @@ direction is its own FSRS-6 card.
   doesn't count.
 - Both directions are typed and checked the same way, and both count toward the
   wrap-up accuracy. Both are on by default; the picker keeps at least one on.
-- Same review card as the vocab sessions, including the screen-reader behaviour
-  (prompt-named answer field, focus and spoken outcome on check).
+- Same review card as the vocab sessions, including the persistent-shell
+  behaviour (one answer field kept focused across every card) and the
+  screen-reader behaviour (prompt-named field, the result announced from an
+  `aria-live` region without the focus leaving the field).
 - Scheduling uses its own FSRS knobs (retention, max interval, fuzz, new-per-day)
   set in the Settings tab — separate from the vocabulary cards, so kana can run a
   tighter or looser schedule than words.

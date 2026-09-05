@@ -225,7 +225,9 @@ window.RaumeStudy.flashcards.kana = (function () {
     session.checked = true;
     var base = load().cards[cardKey(unit.item, unit.dir)] || newCard(new Date());
     session.preview = previewRatings(getScheduler(fsrs()), base, new Date());
-    rerender();
+    // Update in place so the answer field keeps focus (a phone keyboard stays
+    // open); full render only if the shell is gone.
+    if (!syncReviewCard()) rerender();
   }
 
   // Rating commits the review and moves straight on -- no separate "next"
@@ -267,7 +269,9 @@ window.RaumeStudy.flashcards.kana = (function () {
     session.correct = null;
     session.userAnswer = "";
     session.preview = null;
-    rerender();
+    // Advance in place where we can (keeps the answer field + a phone keyboard
+    // alive); full render for the wrap-up at the end of the queue.
+    if (session.done || session.index >= session.queue.length || !advanceReviewCard()) rerender();
   }
 
   // -----------------------------------------------------------------------
@@ -337,73 +341,120 @@ window.RaumeStudy.flashcards.kana = (function () {
       }).join("") + "</div>";
   }
 
+  function currentUnit() {
+    var unit = session && session.queue[session.index];
+    return unit && unit.item ? unit : null;
+  }
+
+  // The review card is a persistent shell (progress line, prompt, answer field,
+  // an aria-live result region) built once per full render; check and rate then
+  // update it in place via syncReviewCard(). Rebuilding it with innerHTML each
+  // step -- what this used to do -- destroys the focused <input>, which on a
+  // phone closes the on-screen keyboard for every card and won't reopen (a
+  // programmatic focus with no user gesture is ignored). Same fix as the
+  // vocabulary review card (js/flashcards/dashboard.js).
   function renderReview(panel) {
-    var unit = session.queue[session.index];
-    var item = unit.item, r2k = unit.dir === "r2k";
-    var wordCls = item.word ? " fc-prompt-kana-word" : "";
-    var html = '<div class="fc-review-card">' +
-      '<div class="fc-review-meta"><span>' + esc(DIR_LABEL[unit.dir]) + " · " + (session.index + 1) + " / " + session.queue.length + "</span>" +
-      '<button type="button" class="fc-session-exit" id="fcKanaEnd">End session</button></div>';
-
-    // The prompt: the kana glyph for k2r, the romaji for r2k.
-    html += r2k
-      ? '<div class="fc-prompt-label">Type the kana</div>' +
-        '<div class="fc-prompt fc-prompt-romaji">' + esc(item.romaji) + "</div>"
-      : '<div class="fc-prompt-label">Type the romaji reading</div>' +
-        '<div class="fc-prompt fc-prompt-kana' + wordCls + '" lang="ja">' + esc(item.kana) + "</div>";
-
-    // The same typed-answer form for both directions -- r2k just wants kana in
-    // the field (lang="ja" so a system IME picks the right keyboard).
-    html += '<form class="fc-answer-form" id="fcKanaForm"><input id="fcKanaInput" type="text" ' +
-      'autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ' +
-      (r2k ? 'lang="ja" placeholder="Kana…" ' : 'placeholder="Romaji…" ') +
-      (session.checked ? "disabled" : "autofocus") + ">" +
-      (session.checked ? "" : '<button type="submit" class="fc-btn fc-btn-primary">Check</button>') +
-      "</form>";
-
-    if (session.checked) {
-      // tabindex so focus can land here after a check -- innerHTML rebuilds the
-      // panel every check, otherwise dropping a screen-reader user to <body>
-      // with no word on whether they were right. Spoken summary set as
-      // aria-label below, once the node exists.
-      html += '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
-        '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
-        (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
-        "</div>" +
-        '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">' + (r2k ? "Kana" : "Answer") + "</span>" +
-        (r2k
-          ? '<span class="fc-expected fc-expected-kana' + wordCls + '" lang="ja">' + esc(item.kana) + "</span>"
-          : '<span class="fc-expected">' + esc(item.romaji) + "</span>") +
-        "</div>" +
-        ratingRowHtml(session.correct === false);
-    }
-    html += "</div>";
-    panel.innerHTML = html;
+    if (!currentUnit()) { renderDone(panel); return; }
+    panel.innerHTML =
+      '<div class="fc-review-card">' +
+      '<div class="fc-review-meta"><span class="fc-review-progress"></span>' +
+      '<button type="button" class="fc-session-exit" id="fcKanaEnd">End session</button></div>' +
+      '<div class="fc-prompt-label"></div>' +
+      '<div class="fc-prompt"></div>' +
+      // r2k wants kana in the field -- lang is set per card in syncReviewCard so
+      // a system IME picks the right keyboard.
+      '<form class="fc-answer-form" id="fcKanaForm">' +
+      '<input id="fcKanaInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      '<button type="submit" class="fc-btn fc-btn-primary fc-check-btn">Check</button>' +
+      '</form>' +
+      '<div class="fc-review-dynamic" aria-live="polite"></div>' +
+      "</div>";
 
     var end = document.getElementById("fcKanaEnd");
     if (end) end.addEventListener("click", endSession);
-    var input = document.getElementById("fcKanaInput");
-    if (input && !session.checked) {
-      // Name the field with its prompt, so a screen-reader user dropped onto it
-      // between cards knows what to type without hunting for the visual label.
-      input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));
-      input.focus();
-    }
-    if (session.checked) {
-      var resultEl = panel.querySelector(".fc-result");
-      if (resultEl) {
-        resultEl.setAttribute("aria-label",
-          (session.correct ? "Correct." : "Not quite.") +
-          (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
-          " Answer: " + (r2k ? item.kana : item.romaji) + ".");
-        resultEl.focus();
-      }
-    }
     var form = document.getElementById("fcKanaForm");
     if (form) form.addEventListener("submit", function (e) { e.preventDefault(); submitCheck(); });
-    panel.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
+
+    syncReviewCard();
+    var input = document.getElementById("fcKanaInput");
+    if (input && !session.checked) input.focus();
+  }
+
+  // Reflect the current session state onto the live review-card shell. Returns
+  // false when the shell isn't in the DOM (caller should full-render instead).
+  function syncReviewCard() {
+    var shell = document.querySelector("#fcPanelKana .fc-review-card");
+    var unit = currentUnit();
+    if (!shell || !unit) return false;
+    var item = unit.item, r2k = unit.dir === "r2k";
+    var wordCls = item.word ? " fc-prompt-kana-word" : "";
+
+    shell.querySelector(".fc-review-progress").textContent =
+      DIR_LABEL[unit.dir] + " · " + (session.index + 1) + " / " + session.queue.length;
+    shell.querySelector(".fc-prompt-label").textContent = r2k ? "Type the kana" : "Type the romaji reading";
+
+    var promptEl = shell.querySelector(".fc-prompt");
+    if (r2k) {
+      promptEl.className = "fc-prompt fc-prompt-romaji";
+      promptEl.removeAttribute("lang");
+      promptEl.textContent = item.romaji;
+    } else {
+      promptEl.className = "fc-prompt fc-prompt-kana" + wordCls;
+      promptEl.setAttribute("lang", "ja");
+      promptEl.textContent = item.kana;
+    }
+
+    var input = shell.querySelector("#fcKanaInput");
+    if (r2k) { input.setAttribute("lang", "ja"); input.placeholder = "Kana…"; }
+    else { input.removeAttribute("lang"); input.placeholder = "Romaji…"; }
+    // Name the field with its prompt, so a screen-reader user dropped onto it
+    // between cards knows what to type without hunting for the visual label.
+    input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));
+    input.value = session.userAnswer || "";
+
+    var checkBtn = shell.querySelector(".fc-check-btn");
+    var dyn = shell.querySelector(".fc-review-dynamic");
+
+    if (!session.checked) {
+      input.classList.remove("fc-answer-locked");
+      if (checkBtn) checkBtn.hidden = false;
+      dyn.innerHTML = "";
+      return true;
+    }
+
+    input.classList.add("fc-answer-locked");
+    if (checkBtn) checkBtn.hidden = true;
+    dyn.innerHTML =
+      '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
+      '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
+      (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
+      "</div>" +
+      '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">' + (r2k ? "Kana" : "Answer") + "</span>" +
+      (r2k
+        ? '<span class="fc-expected fc-expected-kana' + wordCls + '" lang="ja">' + esc(item.kana) + "</span>"
+        : '<span class="fc-expected">' + esc(item.romaji) + "</span>") +
+      "</div>" +
+      ratingRowHtml(session.correct === false);
+
+    var resultEl = dyn.querySelector(".fc-result");
+    if (resultEl) resultEl.setAttribute("aria-label",
+      (session.correct ? "Correct." : "Not quite.") +
+      (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
+      " Answer: " + (r2k ? item.kana : item.romaji) + ".");
+    dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });
+    return true;
+  }
+
+  // Next card in place (keeping the answer field + its focus, so a phone
+  // keyboard survives). False if the queue is spent / no live shell.
+  function advanceReviewCard() {
+    if (session.index >= session.queue.length || !currentUnit()) return false;
+    if (!syncReviewCard()) return false;
+    var input = document.getElementById("fcKanaInput");
+    if (input) input.focus(); // within the rating click / keydown, so mobile honours it
+    return true;
   }
 
   function renderDone(panel) {

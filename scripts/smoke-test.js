@@ -1075,6 +1075,18 @@ async function main() {
   // to the form's implicit submission (which some browsers won't fire here).
   document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
   check("pressing Enter in the answer field checks and reveals the four rating buttons", document.querySelectorAll(".fc-rating-btn").length === 4);
+  check("checking updates the card in place -- same <input> node, focus kept (a phone keyboard stays up)", () =>
+    document.getElementById("fcAnswerInput") === answerInput
+    && document.activeElement === answerInput
+    && answerInput.classList.contains("fc-answer-locked"));
+  check("the Check button is gone once checked -- and CSS actually hides it, not just [hidden]", () => {
+    const btn = document.querySelector(".fc-answer-form .fc-check-btn");
+    return !!btn && btn.hidden === true && window.getComputedStyle(btn).display === "none";
+  });
+  check("the result drops into an aria-live region, so it's announced without moving focus off the field", () => {
+    const dyn = document.querySelector(".fc-review-dynamic");
+    return !!dyn && dyn.getAttribute("aria-live") === "polite" && dyn.contains(document.querySelector(".fc-result"));
+  });
   check("the checked result is focusable and announces the outcome plus the answer", (() => {
     const res = document.querySelector(".fc-result");
     const al = res && res.getAttribute("aria-label") || "";
@@ -1107,6 +1119,12 @@ async function main() {
   })());
   document.querySelector('.fc-rating-btn[data-rating="again"]').click();
   await flush();
+  check("rating advances in place -- the answer field survives to the next card, ratings + lock cleared", () =>
+    document.getElementById("fcAnswerInput") === answerInput
+    && document.querySelectorAll(".fc-rating-btn").length === 0
+    && !answerInput.classList.contains("fc-answer-locked")
+    && answerInput.value === ""
+    && /\b2 \/ /.test(document.querySelector(".fc-review-progress").textContent));
   document.getElementById("fcEndSession").click();
   const doneText = (document.querySelector(".fc-session-done") || {}).textContent || "";
   check("ending mid-session shows a wrap-up, not a blank panel", /reviewed/.test(doneText));
@@ -1269,8 +1287,16 @@ async function main() {
     const res = document.querySelector("#fcPanelKana .fc-result");
     return !!res && res.getAttribute("tabindex") === "-1" && /^(Correct|Not quite)\./.test(res.getAttribute("aria-label") || "");
   })());
+  check("checking updates the kana card in place -- same <input> node, focus kept", () =>
+    document.getElementById("fcKanaInput") === kanaInput
+    && document.activeElement === kanaInput
+    && document.querySelector("#fcPanelKana .fc-review-dynamic")?.getAttribute("aria-live") === "polite");
   document.querySelector('#fcPanelKana .fc-rating-btn[data-rating="good"]').click();
   check("rating advances to the next card", /2 \/ /.test(document.querySelector("#fcPanelKana .fc-review-meta span").textContent));
+  check("rating advances the kana card in place too -- the answer field survives", () =>
+    document.getElementById("fcKanaInput") === kanaInput
+    && document.querySelectorAll("#fcPanelKana .fc-rating-btn").length === 0
+    && !kanaInput.classList.contains("fc-answer-locked"));
   if (storageUsable) check("the reviewed kana is now an FSRS card in local storage", /"reps":1/.test(readLocalStorage("raume-kana-v1") || ""));
   document.getElementById("fcKanaEnd").click();
   check("ending shows a wrap-up", /reviewed/.test((document.querySelector("#fcPanelKana .fc-session-done") || {}).textContent || ""));

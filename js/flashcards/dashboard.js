@@ -529,7 +529,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.correct = checkAnswer(entry, card.direction, input.value);
     session.checked = true;
     session.preview = previewRatings(getScheduler(getCache().settings), card, new Date());
-    rerender();
+    // Update the card in place so the answer field keeps focus -- rebuilding
+    // the panel here would drop focus to <body> and close a phone's on-screen
+    // keyboard on every single card. Full render only if the shell is gone.
+    if (!syncReviewCard()) rerender();
   }
 
   function renderSessionDone(panel) {
@@ -560,85 +563,130 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (more) more.addEventListener("click", function () { startSession(); });
   }
 
+  // The review card is a persistent shell (progress line, prompt, answer field,
+  // an aria-live region for the result) built once per full render; check and
+  // rate then update it in place via syncReviewCard(). Rebuilding it with
+  // innerHTML on every state change -- what this used to do -- destroys the
+  // focused <input>, which on a phone closes the on-screen keyboard for every
+  // card and won't reopen (a programmatic focus with no user gesture is
+  // ignored). Keeping the same node alive keeps the keyboard up.
+  function currentReviewCard() {
+    var card = getCache().cards[session.queue[session.index]];
+    var entry = card && getVocabIndex()[card.vocabId];
+    return card && card.active && entry ? { card: card, entry: entry } : null;
+  }
   function renderReview(panel) {
     if (session.done || !session.queue.length || session.index >= session.queue.length) {
       renderSessionDone(panel);
       return;
     }
-    var cardId = session.queue[session.index];
-    var card = getCache().cards[cardId];
-    var entry = getVocabIndex()[card.vocabId];
-    if (!card || !card.active || !entry) { session.index++; renderReview(panel); return; }
-    var prompt = promptFor(entry, card.direction);
-    var context = contextDisplayFor(entry, card.direction);
-    var now = new Date();
+    if (!currentReviewCard()) { session.index++; renderReview(panel); return; }
 
-    var html = '<div class="fc-review-card">' +
-      '<div class="fc-review-meta"><span>' + esc(DIRECTION_LABEL[card.direction]) + " · " + (session.index + 1) + " / " + session.queue.length + "</span>" +
+    panel.innerHTML =
+      '<div class="fc-review-card">' +
+      '<div class="fc-review-meta"><span class="fc-review-progress"></span>' +
       '<button type="button" class="fc-session-exit" id="fcEndSession">End session</button></div>' +
-      '<div class="fc-prompt-label">' + esc(askLabelFor(card.direction)) + "</div>" +
-      '<div class="fc-prompt"' + (prompt.lang ? ' lang="ja"' : "") + ">" + (prompt.html || esc(prompt.text)) + "</div>" +
-      '<form class="fc-answer-form" id="fcAnswerForm"><input id="fcAnswerInput" type="text" autocomplete="off" placeholder="' + esc(answerPlaceholderFor(card.direction)) + '" ' + (session.checked ? "disabled" : "autofocus") + '>' +
-      (session.checked ? "" : '<button type="submit" class="fc-btn fc-btn-primary">Check</button>') +
-      "</form>";
-
-    if (session.checked) {
-      // tabindex so focus can land here after a check -- the panel is rebuilt
-      // by innerHTML every check, which otherwise drops focus to <body> and
-      // leaves a screen-reader user with no word of whether they were right.
-      // The spoken summary (outcome + what you typed + the answer) is set as
-      // aria-label below, once the node exists.
-      html += '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
-        '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
-        (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
-        "</div>" +
-        '<div class="fc-answer-context"><span class="fc-answer-reveal-label">' + esc(context.label) + "</span>" +
-        '<span class="fc-context-value">' + esc(context.value) + "</span></div>" +
-        '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">Answer</span>' +
-        '<span class="fc-expected">' + esc(expectedDisplayFor(entry, card.direction)) + "</span></div>" +
-        // After a wrong (or blank) answer the honest ratings are Again / Hard,
-        // so Good / Easy are dimmed -- still one click away (typos happen), just
-        // not the default read.
-        '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name, i) {
-          var p = session.preview[name];
-          return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-key">' + (i + 1) + '</span><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
-        }).join("") + "</div>";
-    }
-    html += "</div>";
-    panel.innerHTML = html;
+      '<div class="fc-prompt-label"></div>' +
+      '<div class="fc-prompt"></div>' +
+      '<form class="fc-answer-form" id="fcAnswerForm">' +
+      '<input id="fcAnswerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      '<button type="submit" class="fc-btn fc-btn-primary fc-check-btn">Check</button>' +
+      '</form>' +
+      // aria-live so the result is announced when it drops in, without moving
+      // focus off the answer field (that focus move was the mobile-keyboard bug).
+      '<div class="fc-review-dynamic" aria-live="polite"></div>' +
+      "</div>";
 
     var endBtn = document.getElementById("fcEndSession");
     if (endBtn) endBtn.addEventListener("click", endSession);
-    panel.querySelectorAll(".jp-speak-btn").forEach(function (btn) {
+    var form = document.getElementById("fcAnswerForm");
+    if (form) form.addEventListener("submit", function (event) { event.preventDefault(); submitCheck(); });
+
+    syncReviewCard();
+    var input = document.getElementById("fcAnswerInput");
+    if (input && !session.checked) input.focus();
+  }
+
+  // Reflect the current session state onto the live review-card shell. Returns
+  // false when the shell isn't in the DOM (caller should full-render instead).
+  function syncReviewCard() {
+    var shell = document.querySelector("#fcPanelDashboard .fc-review-card");
+    var cur = session && currentReviewCard();
+    if (!shell || !cur) return false;
+    var card = cur.card, entry = cur.entry;
+    var prompt = promptFor(entry, card.direction);
+    var context = contextDisplayFor(entry, card.direction);
+
+    shell.querySelector(".fc-review-progress").textContent =
+      DIRECTION_LABEL[card.direction] + " · " + (session.index + 1) + " / " + session.queue.length;
+    shell.querySelector(".fc-prompt-label").textContent = askLabelFor(card.direction);
+    var promptEl = shell.querySelector(".fc-prompt");
+    if (prompt.lang) promptEl.setAttribute("lang", "ja"); else promptEl.removeAttribute("lang");
+    promptEl.innerHTML = prompt.html || esc(prompt.text);
+    promptEl.querySelectorAll(".jp-speak-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { window.RaumeStudy.shared.speech.speak(btn.dataset.jpSpeak); });
     });
-    var input = document.getElementById("fcAnswerInput");
-    if (input && !session.checked) {
-      // Name the field with the prompt it belongs to, so a screen-reader user
-      // who is dropped onto it between cards knows what they're answering
-      // without leaving the field to hunt for the (visual-only) prompt label.
-      input.setAttribute("aria-label", askLabelFor(card.direction) + ": " + (prompt.text || entry.jpPlain));
-      input.focus();
+
+    var input = shell.querySelector("#fcAnswerInput");
+    // Name the field with the prompt it belongs to, so a screen-reader user
+    // dropped onto it between cards knows what they're answering.
+    input.setAttribute("aria-label", askLabelFor(card.direction) + ": " + (prompt.text || entry.jpPlain));
+    input.placeholder = answerPlaceholderFor(card.direction);
+    input.value = session.userAnswer || "";
+    var checkBtn = shell.querySelector(".fc-check-btn");
+    var dyn = shell.querySelector(".fc-review-dynamic");
+
+    if (!session.checked) {
+      input.classList.remove("fc-answer-locked");
+      if (checkBtn) checkBtn.hidden = false;
+      dyn.innerHTML = "";
+      return true;
     }
-    if (session.checked) {
-      var resultEl = panel.querySelector(".fc-result");
-      if (resultEl) {
-        resultEl.setAttribute("aria-label",
-          (session.correct ? "Correct." : "Not quite.") +
-          (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
-          " " + context.label + ": " + context.value + "." +
-          " Answer: " + expectedDisplayFor(entry, card.direction) + ".");
-        resultEl.focus();
-      }
-    }
-    var form = document.getElementById("fcAnswerForm");
-    if (form) form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      submitCheck();
-    });
-    panel.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
+
+    // Checked: the field is inert now (rate with the buttons or 1-4) -- keep it
+    // in the DOM and styled-quiet rather than disabled, so it holds focus and
+    // the keyboard stays put for the next card.
+    input.classList.add("fc-answer-locked");
+    if (checkBtn) checkBtn.hidden = true;
+    dyn.innerHTML =
+      '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
+      '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
+      (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
+      "</div>" +
+      '<div class="fc-answer-context"><span class="fc-answer-reveal-label">' + esc(context.label) + "</span>" +
+      '<span class="fc-context-value">' + esc(context.value) + "</span></div>" +
+      '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">Answer</span>' +
+      '<span class="fc-expected">' + esc(expectedDisplayFor(entry, card.direction)) + "</span></div>" +
+      // After a wrong (or blank) answer the honest ratings are Again / Hard,
+      // so Good / Easy are dimmed -- still one click away (typos happen), just
+      // not the default read.
+      '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name, i) {
+        var p = session.preview[name];
+        return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-key">' + (i + 1) + '</span><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
+      }).join("") + "</div>";
+
+    var resultEl = dyn.querySelector(".fc-result");
+    if (resultEl) resultEl.setAttribute("aria-label",
+      (session.correct ? "Correct." : "Not quite.") +
+      (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
+      " " + context.label + ": " + context.value + "." +
+      " Answer: " + expectedDisplayFor(entry, card.direction) + ".");
+    dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });
+    return true;
+  }
+
+  // Move to the next card in place (keeping the answer field + its focus, so a
+  // phone keyboard survives). Returns false if there's no live shell or the
+  // queue is spent -- caller falls back to a full render / the wrap-up.
+  function advanceReviewCard() {
+    while (session.index < session.queue.length && !currentReviewCard()) session.index++;
+    if (session.index >= session.queue.length) return false;
+    if (!syncReviewCard()) return false;
+    var input = document.getElementById("fcAnswerInput");
+    if (input) input.focus(); // within the rating click / keydown, so mobile honours it
+    return true;
   }
 
   // Rating immediately commits the review and advances to the next card --
@@ -693,7 +741,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.index++;
     session.checked = false;
     session.userAnswer = "";
-    rerender();
+    // Advance in place where we can (keeps the answer field + a phone keyboard
+    // alive); full render for the wrap-up at the end of the queue.
+    if (session.done || session.index >= session.queue.length || !advanceReviewCard()) rerender();
   }
 
   // Review keyboard shortcuts. Space / Enter check the answer (Space is left

@@ -1806,6 +1806,13 @@ body.starred-mode .expand-bar { display: none !important; }
   padding: 0 11px; font-size: var(--fs-body); color: var(--ink); background: var(--field-fill);
 }
 .fc-answer-form input:focus-visible { border-color: var(--section); }
+/* Locked answer field -- checked, waiting for a rating. Kept in the DOM and
+   focused (so a phone's on-screen keyboard doesn't drop between cards) but
+   quietened: the rating row below is the live control now. */
+.fc-answer-form input.fc-answer-locked { color: var(--muted); background: var(--field-fill); }
+/* .fc-btn sets display:inline-flex, which beats the [hidden] UA rule -- restore
+   it so the Check button really goes away once the answer is checked. */
+.fc-answer-form .fc-check-btn[hidden] { display: none; }
 /* Answer feedback: a status line, not a filled panel -- a left rule plus the
    verdict word carrying the study-feedback colour on the text itself, one
    size up so it's the most legible thing on the card for a beat. The card
@@ -1947,6 +1954,19 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-answer-form input[lang="ja"] { font-size: 16px; }
 .fc-answer-reveal .fc-expected-kana { font-size: 24px; line-height: 1.2; }
 .fc-answer-reveal .fc-expected-kana.fc-prompt-kana-word { font-size: 19px; }
+/* Phone: the study card and its four-up rating row are laid out for a desktop
+   column. Tighten the padding and type so the ratings sit on one comfortable
+   row and the card doesn't need scanning to read. */
+@media (max-width: 560px) {
+  .fc-review-card { padding: 18px 15px; }
+  .fc-review-card .fc-prompt { font-size: 22px; }
+  .fc-review-card .fc-prompt-kana { font-size: 28px; }
+  .fc-answer-context, .fc-answer-reveal { padding-left: 10px; padding-right: 10px; }
+  .fc-rating-row { gap: 5px; }
+  .fc-rating-btn { padding: 7px 2px; }
+  .fc-rating-btn .fc-rating-name { font-size: var(--fs-micro); margin: 1px 0; }
+  .fc-rating-btn .fc-rating-interval { font-size: 10px; }
+}
 /* flex-start, not the default stretch: "Directions" has two rows against the
    scripts' five, and stretching it to match left a tall box mostly empty.
    Top-aligned, it's just a smaller box -- which is what it is. */
