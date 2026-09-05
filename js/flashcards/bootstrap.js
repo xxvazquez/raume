@@ -278,6 +278,21 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   }
   onSyncStateChange(updateSyncChip);
 
+  // While offline (or between a review and its sync) the Dashboard computes its
+  // history -- "Today", the weekly chart, "Words to review" -- from the local
+  // outbox (see dashboard.js). Once the outbox drains, or we reconnect with
+  // nothing queued, those caches are stale: refresh them from the server.
+  var lastSyncPending = null;
+  onSyncStateChange(function (st) {
+    var drained = st.online && st.pending === 0 && lastSyncPending !== null && lastSyncPending !== 0;
+    lastSyncPending = st.pending;
+    if (drained && !isGuestMode() && activeTab === "dashboard" &&
+        !dashboard.getSession() && document.body.dataset.activePage === "flashcards") {
+      invalidateInsights();
+      render();
+    }
+  });
+
   // Called back into by the view modules (dashboard.js, views.js).
   S.render = render;
   S.setActiveTab = function (t) { activeTab = t; };

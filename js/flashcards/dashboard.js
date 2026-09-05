@@ -318,7 +318,35 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var reviewInsightsLoading = false;
   var reviewEvents = null; // [{ vocabId, wrong, ts }]
   function emptyInsights() { return { reviewedToday: 0, wordsToReview: [], recentMistakes: [] }; }
-  function invalidateInsights() { reviewInsights = null; reviewEvents = null; reviewInsightsLoading = false; }
+  // Drops every cached derived-history view. Callers always want the weekly
+  // chart refreshed alongside the insights (sign-in, mode switch, a new
+  // review, the outbox draining), so both are cleared together.
+  function invalidateInsights() {
+    reviewInsights = null; reviewEvents = null; reviewInsightsLoading = false;
+    weeklyActivity = null; weeklyActivityLoading = false;
+  }
+
+  // Reviews still sitting in the local outbox -- signed in, done but not yet on
+  // the server -- as the same {vocabId, wrong, ts} shape fetchReviewEvents
+  // returns. Folded into every derived view so a review shows on the dashboard
+  // the moment it's rated and keeps showing while offline, instead of the
+  // panels reading as zero until the next successful sync. `syncedIds` skips
+  // any entry the server already has (the rare log-inserted-then-card-retry
+  // overlap).
+  function outboxReviewEvents(syncedIds) {
+    if (isGuestMode()) return [];
+    var cards = getCache().cards;
+    return (getCache().logsOutbox || []).reduce(function (out, e) {
+      if (syncedIds && syncedIds[e.clientReviewId]) return out;
+      var card = cards[e.cardId];
+      out.push({
+        vocabId: card ? card.vocabId : null,
+        wrong: e.logFields.rating === 1,
+        ts: Date.parse(e.logFields.review) || Date.now()
+      });
+      return out;
+    }, []);
+  }
 
   function computeInsights(events) {
     var todayStr = localDateStr(new Date());
@@ -366,15 +394,26 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         };
       });
     }
-    var client = getClient(), user = currentUser();
-    var since = new Date(); since.setDate(since.getDate() - 120);
-    var res = await client.from("review_logs").select("card_id, rating, reviewed_at").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
-    if (res.error) throw res.error;
-    var cards = getCache().cards;
-    return res.data.map(function (row) {
-      var card = cards[row.card_id];
-      return { vocabId: card ? card.vocabId : null, wrong: row.rating === 1, ts: new Date(row.reviewed_at).getTime() };
-    });
+    var events = [];
+    var synced = {};
+    try {
+      var client = getClient(), user = currentUser();
+      var since = new Date(); since.setDate(since.getDate() - 120);
+      var res = await client.from("review_logs").select("card_id, rating, reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
+      if (res.error) throw res.error;
+      var cards = getCache().cards;
+      events = res.data.map(function (row) {
+        if (row.client_review_id) synced[row.client_review_id] = true;
+        var card = cards[row.card_id];
+        return { vocabId: card ? card.vocabId : null, wrong: row.rating === 1, ts: new Date(row.reviewed_at).getTime() };
+      });
+    } catch (e) {
+      // Offline or a transient failure -- fall back to just the local outbox
+      // below, so recent reviews still show rather than the dashboard reading
+      // as empty. The bootstrap re-fetches once the outbox drains.
+      events = [];
+    }
+    return events.concat(outboxReviewEvents(synced));
   }
   async function loadReviewInsights() {
     if (!reviewEvents) reviewEvents = await fetchReviewEvents();
@@ -390,26 +429,32 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     return days;
   }
   async function loadWeeklyActivity() {
+    var counts = {};
     if (isGuestMode()) {
-      var counts = {};
       getCache().reviewLogs.forEach(function (r) { counts[r.date] = (counts[r.date] || 0) + 1; });
       weeklyActivity = last7DaysFromCounts(counts);
       return;
     }
-    return fetchWeeklyActivity();
-  }
-  async function fetchWeeklyActivity() {
-    var client = getClient(), user = currentUser();
-    var since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - 6);
-    var res = await client.from("review_logs").select("reviewed_at").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
-    if (res.error) throw res.error;
-    var counts = {};
-    res.data.forEach(function (row) {
-      var key = localDateStr(new Date(row.reviewed_at));
+    var synced = {};
+    try {
+      var client = getClient(), user = currentUser();
+      var since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - 6);
+      var res = await client.from("review_logs").select("reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
+      if (res.error) throw res.error;
+      res.data.forEach(function (row) {
+        if (row.client_review_id) synced[row.client_review_id] = true;
+        var key = localDateStr(new Date(row.reviewed_at));
+        counts[key] = (counts[key] || 0) + 1;
+      });
+    } catch (e) {
+      // Offline / transient -- show at least what's still queued locally
+      // rather than an empty week. Re-fetched when the outbox drains.
+    }
+    outboxReviewEvents(synced).forEach(function (e) {
+      var key = localDateStr(new Date(e.ts));
       counts[key] = (counts[key] || 0) + 1;
     });
-    var days = last7DaysFromCounts(counts);
-    weeklyActivity = days;
+    weeklyActivity = last7DaysFromCounts(counts);
   }
   // Labels are plain HTML, not SVG <text> -- an SVG scales *everything*
   // inside it, text included, to fill its container (that's what stretched

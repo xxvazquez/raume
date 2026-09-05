@@ -271,7 +271,10 @@ soft teal tint as the only nudge toward the zero-setup path.
   scoped per account by Row Level Security. `localStorage` is then just a
   read-through cache and an offline outbox: reviews made offline are computed
   locally and synced when you reconnect. A status chip under your identity
-  shows `Offline…` / `Syncing N reviews…` / nothing.
+  shows `Offline…` / `Syncing N reviews…` / nothing. Reviews still in that
+  outbox are folded into the dashboard's history straight away, so "Today", the
+  weekly chart and "Words to review" reflect what you've just done even before
+  it syncs; once the outbox drains the dashboard re-reads from the server.
 - **Forgot password?**, on the sign-in form, emails a reset link (Supabase's
   `resetPasswordForEmail`) instead of a second competing button — a quiet
   text link, since it's a way out of the form, not another call to action.

@@ -1117,6 +1117,18 @@ async function main() {
   check("the wrap-up counts the card just reviewed", /1 reviewed/.test(doneText) && /correct/.test(doneText));
   document.getElementById("fcBackToDashboard").click();
   check("Back to Dashboard leaves the session for the dashboard", !document.querySelector(".fc-session-done") && !!document.querySelector(".fc-stats-grid"));
+  await flush(); // the dashboard's async insight + weekly-activity loads
+  check("a review just done shows on the dashboard's Today count and today's weekly bar", (() => {
+    // Regression guard for the offline-history merge refactor: the review
+    // computation (loadReviewInsights / loadWeeklyActivity) must still count a
+    // review the moment it lands. Guest here; the signed-in outbox path adds to
+    // the same computation and needs live verification.
+    const todayText = (document.querySelector("#fcPanelDashboard .fc-today-count") || {}).textContent || "";
+    const reviewed = parseInt((todayText.match(/(\d+)\s*\//) || [])[1], 10) || 0;
+    const cols = document.querySelectorAll("#fcPanelDashboard .fc-week-col");
+    const todayCount = parseInt((cols[cols.length - 1].querySelector(".fc-week-count") || {}).textContent, 10) || 0;
+    return reviewed >= 1 && todayCount >= 1;
+  })());
 
   console.log("Flashcards: the daily new-card allowance holds across sessions, not just one queue build");
   {
