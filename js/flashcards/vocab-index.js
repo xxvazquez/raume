@@ -123,6 +123,18 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function expectedDisplayFor(entry, direction) {
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;
   }
+  // One extra field for the answer reveal, beyond the one actually tested --
+  // so a review reinforces the whole word, not just the half you typed.
+  // Whichever of Japanese/romaji/English isn't already on screen as the
+  // prompt: jp-en and jp-ro both prompt with Japanese, so they add the other
+  // of {romaji, English}; ro-en and en-ro both prompt with something already
+  // covering half the word, so they add Japanese -- never English for en-ro,
+  // since English is already the prompt there.
+  function contextDisplayFor(entry, direction) {
+    if (direction === "jp-en") return { label: "Romaji", value: entry.romajiDisplay };
+    if (direction === "jp-ro") return { label: "English", value: entry.englishDisplay };
+    return { label: "Japanese", value: entry.jpPlain }; // ro-en, en-ro
+  }
   function checkAnswer(entry, direction, input) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var norm = normalizeAnswer(input, isRomajiTarget);
@@ -144,7 +156,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   return {
     getVocabIndex: getVocabIndex, directionsForEntry: directionsForEntry,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
-    expectedDisplayFor: expectedDisplayFor, checkAnswer: checkAnswer,
+    expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow
   };

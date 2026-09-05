@@ -1832,6 +1832,15 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-review-card:has(.fc-result.fc-correct) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-result.fc-incorrect) { animation: fc-flash-wrong .9s ease-out; }
 
+/* One quiet line of extra context above the answer box -- whichever of
+   Japanese/romaji/English wasn't already the prompt, so a review reinforces
+   the whole word, not just the half you typed. No box of its own, unlike the
+   answer below: it's supporting information, not the thing being graded. */
+.fc-answer-context {
+  display: flex; align-items: baseline; gap: 10px;
+  margin: 0 0 8px; padding: 0 12px; color: var(--muted);
+}
+.fc-answer-context .fc-context-value { font-size: var(--fs-nav-sub); }
 /* The correct answer sits in its own clean, neutral area beneath the status
    line -- no colour, just a quiet surface panel. */
 .fc-answer-reveal {

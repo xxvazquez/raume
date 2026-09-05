@@ -23,6 +23,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var previewRatings = sched.previewRatings, getScheduler = sched.getScheduler, applyRating = sched.applyRating, fsrsRowFields = sched.fsrsRowFields;
   var getVocabIndex = vidx.getVocabIndex, promptFor = vidx.promptFor, askLabelFor = vidx.askLabelFor;
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
+  var contextDisplayFor = vidx.contextDisplayFor;
   var checkAnswer = vidx.checkAnswer, getRawVocabRow = vidx.getRawVocabRow;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
   var recordStudyActivity = dataOps.recordStudyActivity, syncOutbox = dataOps.syncOutbox;
@@ -514,6 +515,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var entry = getVocabIndex()[card.vocabId];
     if (!card || !card.active || !entry) { session.index++; renderReview(panel); return; }
     var prompt = promptFor(entry, card.direction);
+    var context = contextDisplayFor(entry, card.direction);
     var now = new Date();
 
     var html = '<div class="fc-review-card">' +
@@ -535,6 +537,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
         (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
         "</div>" +
+        '<div class="fc-answer-context"><span class="fc-answer-reveal-label">' + esc(context.label) + "</span>" +
+        '<span class="fc-context-value">' + esc(context.value) + "</span></div>" +
         '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">Answer</span>' +
         '<span class="fc-expected">' + esc(expectedDisplayFor(entry, card.direction)) + "</span></div>" +
         // After a wrong (or blank) answer the honest ratings are Again / Hard,
@@ -567,6 +571,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         resultEl.setAttribute("aria-label",
           (session.correct ? "Correct." : "Not quite.") +
           (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
+          " " + context.label + ": " + context.value + "." +
           " Answer: " + expectedDisplayFor(entry, card.direction) + ".");
         resultEl.focus();
       }

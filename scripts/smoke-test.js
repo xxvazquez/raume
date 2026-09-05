@@ -69,10 +69,9 @@ async function main() {
   check("every Japanese cell has one speaker button per form, keyed to the kana reading (not the kanji)", [...document.querySelectorAll("td.jp")].every(td => {
     const forms = td.querySelectorAll(".verb-form").length || 1;
     const btns = [...td.querySelectorAll(".jp-speak-btn")];
-    // The regression this guards: a few rows store a kana headword in the
-    // "kanji" field with an empty reading (no true furigana needed, e.g.
-    // v0066 パン) -- jpReadingOf has to fall back to that field too, or the
-    // button silently never renders for exactly those rows.
+    // The regression this guards: jpReadingOf must fall back to a segment's
+    // own text when it has no kanji/reading (a plain kana or katakana
+    // headword), or the speak button silently never renders for those rows.
     return btns.length === forms && btns.every(b => b.dataset.jpSpeak && !/[一-龯]/.test(b.dataset.jpSpeak));
   }));
   check("section toggle is a real <button> (native keyboard activation)", document.querySelector(".section-toggle").tagName === "BUTTON");
@@ -1073,6 +1072,17 @@ async function main() {
     const al = res && res.getAttribute("aria-label") || "";
     return !!res && res.getAttribute("tabindex") === "-1"
       && /^(Correct|Not quite)\./.test(al) && /Answer: .+\.$/.test(al);
+  })());
+  check("the reveal also shows one field of context, never the same one already on screen as the prompt", (() => {
+    const meta = document.querySelector(".fc-review-meta span").textContent;
+    const promptLang = meta.split("→")[0].trim();
+    const ctxLabel = document.querySelector(".fc-answer-context .fc-answer-reveal-label");
+    const ctxValue = document.querySelector(".fc-answer-context .fc-context-value");
+    const al = document.querySelector(".fc-result").getAttribute("aria-label") || "";
+    return !!ctxLabel && !!ctxValue && ctxValue.textContent.trim().length > 0
+      && ["Japanese", "Romaji", "English"].includes(ctxLabel.textContent)
+      && ctxLabel.textContent !== promptLang
+      && al.indexOf(ctxLabel.textContent + ": " + ctxValue.textContent) !== -1;
   })());
   check("the verdict label is bumped above body size so it reads for a beat", (() => {
     const label = document.querySelector(".fc-result-label");

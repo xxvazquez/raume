@@ -179,6 +179,12 @@ the word is added. (The star and hide-row icons share that same cluster.) The
   typed, and the correct answer — so the pass/fail signal isn't carried by the
   colour wash alone and focus never drops to the page body between cards. The
   wrap-up heading takes focus the same way.
+- The reveal below a checked answer shows one extra field of context, not
+  just the one you were tested on — whichever of Japanese/romaji/English
+  isn't already on screen as the prompt, so every review reinforces the
+  whole word. Quiet text above the emphasised answer, never repeating the
+  prompt itself (an `en-ro` card, for instance, adds Japanese, not English
+  again). Included in the same screen-reader announcement as the answer.
 - The four rating buttons are tone-coded, each its own hue rather than a
   wrong→right intensity spectrum (a stepped version shipped once and read as
   Hard barely mattering next to Again): **Again** in the wrong tone, **Hard**
