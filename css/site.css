@@ -104,7 +104,7 @@
      desaturated family as --wrong/--right so it doesn't read as a warning. */
   --fc-hard: #a48246;
   --fc-hard-soft: #f5ece0;
-  --fc-hard-strong: #866b39;
+  --fc-hard-strong: #69532d;
 
   /* Flashcards dashboard only -- a small categorical lift for a data surface
      the quiet-everywhere rule made hard to scan. Card-state ramp: one slate
@@ -1878,7 +1878,10 @@ body.starred-mode .expand-bar { display: none !important; }
    Again in --wrong, Hard in the amber --fc-hard (the one new hue this needs),
    Good in --right, Easy in --accent -- reusing the site's existing tones
    everywhere but Hard. Border + a hair of tinted surface only -- never a
-   filled panel, matching .fc-result / the stat-tile left rule. */
+   filled panel, matching .fc-result / the stat-tile left rule. Label text
+   always uses each tone's -strong variant against the tinted background --
+   Good originally used the base --right and quietly failed WCAG AA; keep
+   this consistent (and re-check contrast) if these ever change. */
 .fc-rating-btn[data-rating="again"] {
   border-color: color-mix(in srgb, var(--wrong) 55%, var(--line));
   background: color-mix(in srgb, var(--wrong-soft) 60%, var(--paper));
@@ -1897,7 +1900,7 @@ body.starred-mode .expand-bar { display: none !important; }
 }
 .fc-rating-btn[data-rating="again"] .fc-rating-name { color: var(--wrong-strong); }
 .fc-rating-btn[data-rating="hard"] .fc-rating-name { color: var(--fc-hard-strong); }
-.fc-rating-btn[data-rating="good"] .fc-rating-name { color: var(--right); }
+.fc-rating-btn[data-rating="good"] .fc-rating-name { color: var(--right-strong); }
 .fc-rating-btn[data-rating="easy"] .fc-rating-name { color: var(--accent-strong); }
 .fc-rating-btn:hover:not([disabled]) { border-color: var(--accent); background: var(--accent-soft); }
 .fc-rating-btn[disabled] { opacity: .45; cursor: not-allowed; }
