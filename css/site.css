@@ -1727,6 +1727,11 @@ body.starred-mode .expand-bar { display: none !important; }
    otherwise-identical "N / M added" counts, this is the one that should
    actually catch the eye. */
 .fc-manage-progress-done { color: var(--section-strong); font-weight: 500; }
+/* A table paused as a unit -- dormant, not gone. The header reads quieter and
+   the count is replaced by a plain "Paused" so it doesn't look like a fully
+   added table sitting at "17 / 17". */
+.fc-manage-table-dormant { color: var(--faint); font-style: italic; }
+.fc-manage-table-paused .fc-manage-table-title { color: var(--muted); }
 .fc-manage-table-actions { grid-area: actions; display: flex; gap: 6px; white-space: nowrap; }
 .fc-btn-tableaction { gap: 6px; }
 /* "Add table" is the common case down a long, mostly-untouched list --

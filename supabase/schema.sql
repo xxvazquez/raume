@@ -115,6 +115,12 @@ alter table public.flashcard_settings add column if not exists kana_prefs jsonb 
 --   "fsrs_enable_fuzz": false, "new_per_day": 15 }.
 alter table public.flashcard_settings add column if not exists kana_fsrs jsonb not null default '{}'::jsonb;
 
+-- Whole tables paused as a unit ("Pause table" in Manage). A flat list of
+-- vocabulary table ids -- an overlay, not a state on the cards: the cards keep
+-- their own active/archived flag, this just holds the table out of review and
+-- the Manage filters until it's resumed. Shape: ["1", "15", ...].
+alter table public.flashcard_settings add column if not exists paused_tables jsonb not null default '[]'::jsonb;
+
 -- Kana trainer cards + review history -- the exact parallel of flashcards /
 -- review_logs above, for the "Kana" tab's own hiragana/katakana drill.
 -- kana_id is the trainer's stable item id ("hira-gojuon:あ", ...); direction

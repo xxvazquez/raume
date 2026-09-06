@@ -1028,7 +1028,43 @@ async function main() {
     return !!untouched && !untouched.querySelector(".fc-manage-table-progress").classList.contains("fc-manage-progress-done")
       && !!untouched.querySelector('[data-table-action="add-table"]');
   })());
-  doneTable.querySelector('[data-table-action="remove-table"]').click();
+  // "Pause table" is an overlay: it marks the whole table dormant without
+  // touching any card. It should vanish from "My flashcards" and "Archived",
+  // stay under "All vocabulary" with a Resume action, and drop out of review.
+  console.log("Manage: pausing a whole table");
+  {
+    const sched = window.RaumeStudy.flashcards.scheduling;
+    const store = window.RaumeStudy.flashcards.store;
+    const before = { queue: sched.buildQueue(new Date()).length, total: sched.computeStats(new Date()).total };
+    doneTable.querySelector('[data-table-action="remove-table"]').click();
+    await flush();
+    check("the table is now in pausedTables, its cards untouched", () =>
+      store.isTablePaused(doneTableId) && sched.computeStats(new Date()).total === 0 && sched.buildQueue(new Date()).length === 0
+      && Object.keys(store.getCache().cards).length > 0);
+    const paused = () => document.querySelector('.fc-manage-table-toggle[data-table-id="' + doneTableId + '"]');
+    document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="mine"]').click(); await flush();
+    check("a paused table is gone from 'My flashcards'", !paused());
+    document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="archived"]').click(); await flush();
+    check("...and gone from 'Archived' too (only individually paused words show there)", !paused());
+    document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="all"]').click(); await flush();
+    const t = paused().closest(".fc-manage-table");
+    check("...but still under 'All vocabulary', reading 'Paused', with a Resume action and no per-word buttons", () =>
+      !!t && /Paused/.test(t.querySelector(".fc-manage-table-progress").textContent)
+      && !!t.querySelector('[data-table-action="resume-table"]') && !t.querySelector('[data-table-action="remove-table"]')
+      && !t.querySelector('.fc-manage-row .fc-actions [data-action]'));
+    t.querySelector('[data-table-action="resume-table"]').click();
+    await flush();
+    check("Resume table lifts the overlay -- queue, stats and the card all come back exactly as they were", () => {
+      const now = new Date();
+      return !store.isTablePaused(doneTableId)
+        && sched.buildQueue(now).length === before.queue && sched.computeStats(now).total === before.total;
+    });
+  }
+
+  // Put the table back to paused for the assertions the rest of this section
+  // expects (a quiet, empty-ish dashboard).
+  document.querySelector('.fc-manage-table-toggle[data-table-id="' + doneTableId + '"]')
+    .closest(".fc-manage-table").querySelector('[data-table-action="remove-table"]').click();
   await flush();
 
   firstManageTable.querySelector(".fc-manage-table-toggle").click(); // sync render -- re-query fresh, this reference is now stale

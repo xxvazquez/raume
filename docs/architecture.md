@@ -61,9 +61,9 @@ flowchart LR
 - The schema is [`supabase/schema.sql`](../supabase/schema.sql) — five tables
   (`flashcards`, `review_logs`, `flashcard_settings`, `kana_cards`,
   `kana_review_logs`), all under RLS. `flashcard_settings` also holds the FSRS
-  knobs, the streak counters, `kana_prefs` (the Kana picker) and `kana_fsrs`
-  (the Kana trainer's separate FSRS knobs). Setup guide:
-  [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
+  knobs, the streak counters, `kana_prefs` (the Kana picker), `kana_fsrs` (the
+  Kana trainer's separate FSRS knobs) and `paused_tables` (the tables paused as
+  a unit — see below). Setup guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
 - **Table customisations** (names / icons / order) follow the same pattern:
@@ -73,8 +73,17 @@ flowchart LR
   pushed up, not dropped.
 - Each vocab entry maps to up to four independently scheduled cards (jp-en,
   jp-ro, ro-en, en-ro), never Japanese-to-type. Rows whose romaji is still kana
-  get jp-en only. Pausing ("archive") keeps the FSRS state and full history
-  forever; there is no hard delete.
+  get jp-en only. Pausing a word ("archive") keeps the FSRS state and full
+  history forever; there is no hard delete.
+- **Pausing a whole table** ("Pause table" in Manage) is an *overlay*, not a
+  state on the cards: a flat list of table ids in `getCache().pausedTables`
+  (synced to the `paused_tables` column). `studyableCards()` (scheduling.js)
+  filters out any card whose table is in that list, so the queue and every stat
+  tile skip it; the Manage filters hide it from "My flashcards" / "Archived".
+  Each card's own `active` flag is untouched, so **Resume table** is a clean
+  revert — a word paused individually before the table pause is still paused
+  individually after. Sign-in unions the two lists (a device's pauses aren't
+  dropped).
 
 ### localStorage keys
 

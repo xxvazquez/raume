@@ -14,6 +14,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   var store = window.RaumeStudy.flashcards.store;
   var getCache = store.getCache, localDateStr = store.localDateStr;
   var RATING_NAMES = store.RATING_NAMES;
+  var vidx = window.RaumeStudy.flashcards.vocabIndex;
 
   function getScheduler(settings) {
     var params = window.FSRS.generatorParameters({
@@ -98,13 +99,19 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     return Object.keys(c.cards).map(function (id) { return c.cards[id]; }).filter(function (card) { return card.active; });
   }
   // Cards in a direction the user has switched off in Settings (Study
-  // Directions) are left exactly as they are -- state, history, everything
-  // -- just excluded from what gets studied or counted, the same way an
-  // archived card is. Re-enabling the direction picks them back up with
+  // Directions), or in a table paused as a unit (Manage -> "Pause table"),
+  // are left exactly as they are -- state, history, everything -- just
+  // excluded from what gets studied or counted, the same way an archived card
+  // is. Re-enabling the direction / resuming the table picks them back up with
   // nothing lost.
   function studyableCards() {
     var enabled = getCache().settings.enabled_directions;
-    return activeCards().filter(function (card) { return enabled[card.direction] !== false; });
+    var index = vidx.getVocabIndex();
+    return activeCards().filter(function (card) {
+      if (enabled[card.direction] === false) return false;
+      var entry = index[card.vocabId];
+      return !(entry && store.isTablePaused(entry.tableId));
+    });
   }
   function shuffle(arr) {
     for (var i = arr.length - 1; i > 0; i--) {

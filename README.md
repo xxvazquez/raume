@@ -128,8 +128,11 @@ page is where you review, browse, and track a daily streak.
   table (words missed more than once) that carries the same column toggles as
   the reference pages.
 - **Manage** — every table by category, filterable to All / My flashcards /
-  Archived. **Add table**, then **Pause table** once it's fully added; expand a
-  table to act on individual words.
+  Archived. **Add table**, then **Pause table** to make it dormant (an overlay —
+  the cards keep their own state; a paused table drops out of review and shows
+  only under *All vocabulary*, as *Paused* with a **Resume table** button, so it
+  never clutters *Archived*). Expand a table to act on individual words;
+  individually paused words are what *Archived* collects.
 - **Settings** — Study directions and the FSRS knobs (retention, max interval,
   fuzz, new-cards-per-day) for the vocabulary cards, then the same set for the
   Kana trainer, independently. New-cards-per-day is a real daily allowance —
@@ -161,8 +164,9 @@ them.
   button) when it needs you. Pending reviews still count on the dashboard right
   away.
 
-Pausing a card **archives** it — the FSRS state and full history are kept, and
-re-adding restores the same card. Nothing is ever hard-deleted.
+Pausing a card **archives** it; pausing a whole table just marks the table
+dormant. Either way the FSRS state and full history are kept and resuming
+restores everything as it was. Nothing is ever hard-deleted.
 
 The anon key in `js/config.js` is safe to commit (RLS protects the data, not the
 key). The service-role key must never go in the repo.

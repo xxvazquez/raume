@@ -15,7 +15,8 @@ window.RaumeStudy.flashcards.views = (function () {
   var store = fc.store, vidx = fc.vocabIndex, dataOps = fc.dataOps, dashboard = fc.dashboard;
   var esc = window.RaumeStudy.shared.escapeHtml;
 
-  var getCache = store.getCache, hasActiveSession = store.hasActiveSession;
+  var getCache = store.getCache, hasActiveSession = store.hasActiveSession, isTablePaused = store.isTablePaused;
+  var setTablePaused = dataOps.setTablePaused;
   var DIRECTIONS = store.DIRECTIONS, DIRECTION_LABEL = store.DIRECTION_LABEL;
   var getVocabIndex = vidx.getVocabIndex;
   var addVocab = dataOps.addVocab, archiveVocab = dataOps.archiveVocab;
@@ -50,12 +51,17 @@ window.RaumeStudy.flashcards.views = (function () {
     },
     "remove-table": {
       label: "Pause table",
-      title: "Pauses every word in this table — keeps all progress, add the table back anytime to resume",
+      title: "Pause the whole table — its cards keep every bit of their progress and drop out of review until you resume it",
       icon: SVG_OPEN + '<path d="M6 4v10M12 4v10"/></svg>'
+    },
+    "resume-table": {
+      label: "Resume table",
+      title: "Resume this table — every card picks up its own progress exactly where it left off",
+      icon: SVG_OPEN + '<path d="M3 9a6 6 0 1 1 1.8 4.3M3 13V9h4"/></svg>'
     },
     "restore-table": {
       label: "Restore table",
-      title: "Resumes reviewing every paused word in this table with its previous progress intact",
+      title: "Un-pause every individually paused word in this table, progress intact",
       icon: SVG_OPEN + '<path d="M3 9a6 6 0 1 1 1.8 4.3M3 13V9h4"/></svg>'
     }
   };
@@ -72,8 +78,9 @@ window.RaumeStudy.flashcards.views = (function () {
       '<div class="fc-settings-section"><h3>Adding &amp; pausing vocabulary</h3>' +
       '<ul class="fc-help-list">' +
       '<li><span class="fc-legend-term">Add</span> starts studying a word — or a whole table at once, from the Manage tab or the vocabulary page.</li>' +
-      '<li><span class="fc-legend-term">Pause</span> stops reviewing a word but keeps every bit of its progress. Add it back any time and it resumes exactly where you left off.</li>' +
-      '<li>Nothing is ever permanently deleted. A paused word keeps its full FSRS scheduling state and complete review history for good.</li>' +
+      '<li><span class="fc-legend-term">Pause</span> stops reviewing a word but keeps every bit of its progress. Add it back any time and it resumes exactly where you left off. Paused words collect under the <span class="fc-legend-term">Archived</span> filter.</li>' +
+      '<li><span class="fc-legend-term">Pause table</span> makes a whole table dormant in one step — it drops out of review and the stat tiles and only shows under <span class="fc-legend-term">All vocabulary</span> (as <em>Paused</em>, with a <span class="fc-legend-term">Resume table</span> button). Its cards aren\'t archived one by one, so a paused table never clutters the Archived list. Resume brings every card back exactly as it was.</li>' +
+      '<li>Nothing is ever permanently deleted. A paused word or table keeps its full FSRS scheduling state and complete review history for good.</li>' +
       '</ul></div>' +
       '<div class="fc-settings-section"><h3>Status icons in Manage</h3>' +
       '<ul class="fc-help-list fc-help-status">' +
@@ -141,8 +148,12 @@ window.RaumeStudy.flashcards.views = (function () {
     due: { glyph: "◷", label: "Due for review" },
     archived: { glyph: "◌", label: "Paused" }
   };
-  function statusIndicatorHtml(vocabId) {
+  function statusIndicatorHtml(vocabId, tablePaused) {
     var s = vocabStatus(vocabId);
+    // A word that's in your deck but its whole table is paused reads as
+    // dormant, not "in flashcards" -- but a word never added still reads as
+    // "not added" (○), so you can tell progress from a clean slate.
+    if (tablePaused && s !== "none") s = "archived";
     var m = STATUS_META[s] || STATUS_META.none;
     return '<span class="fc-status fc-status-' + s + '" title="' + esc(m.label) + '" aria-label="' + esc(m.label) + '">' + m.glyph + '</span>';
   }
@@ -163,6 +174,10 @@ window.RaumeStudy.flashcards.views = (function () {
     var index = getVocabIndex();
     var ids = Object.keys(index);
     var filtered = ids.filter(function (id) {
+      // A table paused as a unit is dormant -- it only appears under "All
+      // vocabulary" (with a Resume table action), never in "My flashcards" or
+      // "Archived". Individually paused words still show under "Archived".
+      if (isTablePaused(index[id].tableId)) return manageFilter === "all";
       var state = vocabState(id);
       if (manageFilter === "mine") return state === "active";
       if (manageFilter === "archived") return state === "archived";
@@ -198,6 +213,7 @@ window.RaumeStudy.flashcards.views = (function () {
         // still has words left to add.
         if (manageFilter === "all") {
           var partialTables = tableIds.filter(function (k) {
+            if (isTablePaused(k)) return false; // resume it before bulk-adding
             var t = byCategory[cat][k];
             return t.ids.filter(function (id) { return vocabState(id) === "active"; }).length < t.ids.length;
           });
@@ -208,6 +224,7 @@ window.RaumeStudy.flashcards.views = (function () {
         }
         tableIds.forEach(function (tableId) {
           var table = byCategory[cat][tableId];
+          var tablePaused = isTablePaused(tableId);
           var addedCount = table.ids.filter(function (id) { return vocabState(id) === "active"; }).length;
           // Collapsed by default -- with 14 tables and a few hundred words,
           // showing every row of every table at once makes this an
@@ -226,17 +243,23 @@ window.RaumeStudy.flashcards.views = (function () {
           // a glance -- flagged so the count can pick up the section accent
           // instead of reading identically to an untouched table's "0 / N".
           var tableDone = table.ids.length > 0 && addedCount === table.ids.length;
-          html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + '">' +
+          var progressHtml = tablePaused
+            ? '<span class="fc-manage-table-progress fc-manage-table-dormant">Paused</span>'
+            : '<span class="fc-manage-table-progress' + (tableDone ? " fc-manage-progress-done" : "") + '">' + addedCount + " / " + table.ids.length + " added</span>";
+          html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + (tablePaused ? " fc-manage-table-paused" : "") + '">' +
             '<div class="fc-manage-table-head">' +
             '<button type="button" class="fc-manage-table-toggle" data-table-id="' + tableId + '" aria-expanded="' + expanded + '" aria-label="' + (expanded ? "Collapse" : "Expand") + " " + esc(displayTitle) + '">' + CHEVRON_ICON + "</button>" +
             '<span class="fc-manage-table-label">' + iconHtml + '<span class="fc-manage-table-title">' + esc(displayTitle) + '</span>' +
-            '<span class="fc-manage-table-progress' + (tableDone ? " fc-manage-progress-done" : "") + '">' + addedCount + " / " + table.ids.length + " added</span></span>";
-          // Table-level actions per filter. "all" shows only the actions that
-          // actually apply -- "Add table" until it's fully added, "Pause table"
-          // once something is -- so a fresh deck isn't 23 rows each with a
-          // dead, disabled button. "My flashcards" gets Pause table (the whole
-          // point of that view); "Archived" gets Restore table.
-          if (manageFilter === "all") {
+            progressHtml + "</span>";
+          // Table-level actions per filter. A paused table (only ever shown
+          // under "all") gets just Resume. Otherwise "all" shows only what
+          // applies -- Add table until it's full, Pause table once something's
+          // in -- so a fresh deck isn't 23 rows of dead buttons; "My flashcards"
+          // gets Pause table; "Archived" gets Restore table (un-pause the words
+          // paused one at a time).
+          if (tablePaused) {
+            html += '<div class="fc-manage-table-actions">' + tableActionBtn("resume-table", tableId) + "</div>";
+          } else if (manageFilter === "all") {
             var actions = "";
             if (addedCount < table.ids.length) actions += tableActionBtn("add-table", tableId);
             if (addedCount) actions += tableActionBtn("remove-table", tableId);
@@ -255,14 +278,15 @@ window.RaumeStudy.flashcards.views = (function () {
             // different height so the status dots and buttons never lined up.
             // The reading is still one column over (romaji, desktop).
             html += '<div class="fc-manage-row">' +
-              statusIndicatorHtml(id) +
+              statusIndicatorHtml(id, tablePaused) +
               '<span class="fc-manage-word">' +
               '<span class="fc-jp" lang="ja">' + esc(entry.jpPlain) + "</span>" +
               '<span class="fc-ro">' + esc(entry.romajiDisplay) + "</span>" +
               '<span class="fc-en">' + esc(entry.englishDisplay) + "</span>" +
               (entry.romajiUsable ? "" : '<span class="fc-tag">EN only</span>') +
               "</span>" +
-              '<span class="fc-actions">' + manageActionsFor(id, state) + "</span></div>";
+              // No per-word action while the whole table is paused -- resume it first.
+              '<span class="fc-actions">' + (tablePaused ? "" : manageActionsFor(id, state)) + "</span></div>";
           });
           html += "</div></div>";
         });
@@ -340,26 +364,31 @@ window.RaumeStudy.flashcards.views = (function () {
       window.alert("Couldn't update flashcards — " + (e.message || "check your connection and try again."));
     }
   }
-  // Table-level bulk add/remove -- the default way to build a deck, per
-  // table, rather than one word at a time. Add skips rows already hidden on
-  // the vocabulary page (its own eye icon); Remove archives every
-  // currently-active card from that table (never hard-deletes anything).
+  // Table-level actions -- the default way to manage a deck, per table:
+  //  - Add table    : add every (non-hidden) word to flashcards
+  //  - Pause table   : mark the whole table dormant -- an overlay, the cards
+  //                    keep their own state (js/flashcards/data-ops setTablePaused)
+  //  - Resume table  : lift that overlay
+  //  - Restore table : un-archive the words paused one at a time (Archived view)
+  // Nothing here ever hard-deletes.
+  var TABLE_ACTION_PENDING = { "add-table": "Adding…", "remove-table": "Pausing…", "resume-table": "Resuming…", "restore-table": "Restoring…" };
   async function runTableAction(action, tableId, btn) {
     var index = getVocabIndex();
     var allIds = Object.keys(index).filter(function (id) { return String(index[id].tableId) === String(tableId); });
     var originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = action === "remove-table" ? "Pausing…" : action === "restore-table" ? "Restoring…" : "Adding…";
+    btn.textContent = TABLE_ACTION_PENDING[action] || "Working…";
     try {
       if (action === "add-table") {
         var visible = visibleVocabIdsForTable(tableId);
         var targetIds = visible.length ? visible.filter(function (id) { return allIds.indexOf(id) !== -1; }) : allIds;
         await addVocabs(targetIds);
+      } else if (action === "remove-table") {
+        await setTablePaused(tableId, true);
+      } else if (action === "resume-table") {
+        await setTablePaused(tableId, false);
       } else if (action === "restore-table") {
         await addVocabs(allIds.filter(function (id) { return vocabState(id) === "archived"; }));
-      } else {
-        var activeIds = allIds.filter(function (id) { return vocabState(id) === "active"; });
-        await archiveVocabs(activeIds);
       }
       await refreshData();
       invalidateInsights();

@@ -132,9 +132,21 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         "ro-en": settingsRow.enabled_ro_en !== false, "en-ro": settingsRow.enabled_en_ro !== false
       }
     };
+    // Paused tables: union the account's list with whatever this device had
+    // (guest tables paused before signing in aren't dropped); push the merge
+    // back up if this device contributed anything new. `paused_tables` is
+    // absent on a project that hasn't re-run schema.sql -- treat that as [].
+    var remotePaused = Array.isArray(settingsRow.paused_tables) ? settingsRow.paused_tables.map(String) : [];
+    var mergedPaused = {};
+    (c.pausedTables || []).forEach(function (t) { mergedPaused[t] = true; });
+    remotePaused.forEach(function (t) { mergedPaused[t] = true; });
+    c.pausedTables = Object.keys(mergedPaused);
     c.userId = user.id;
     c.lastSyncedAt = new Date().toISOString();
     saveCache();
+    if (c.pausedTables.some(function (t) { return remotePaused.indexOf(t) === -1; })) {
+      savePausedTablesRemote(c.pausedTables).catch(function () {});
+    }
     // The vocabulary page's per-table icons live in this same row -- hand
     // them to their own store so a header icon set on another device shows up.
     if (window.RaumeStudy.tableCustom) {
@@ -179,6 +191,18 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   async function saveTableCustomRemote(obj) {
     if (!getClient() || !currentUser()) return;
     return saveFsrsSettingsRemote({ table_custom: obj || {} });
+  }
+  async function savePausedTablesRemote(arr) {
+    if (!getClient() || !currentUser()) return;
+    return saveFsrsSettingsRemote({ paused_tables: arr || [] });
+  }
+  // Pause / resume a whole table. An overlay -- the cards themselves are left
+  // exactly as they are (see store.setTablePausedLocal), so resuming is a
+  // clean revert. Local first, then the account; a paused table drops out of
+  // review, the stat tiles and every Manage filter except "All vocabulary".
+  async function setTablePaused(tableId, paused) {
+    var list = store.setTablePausedLocal(tableId, paused);
+    if (!isGuestMode()) await savePausedTablesRemote(list);
   }
 
   // -----------------------------------------------------------------------
@@ -575,7 +599,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     onAuthChange: onAuthChange, authState: authState,
     fetchAllFromServer: fetchAllFromServer,
     addVocab: addVocab, addVocabs: addVocabs, addVocabsRemote: addVocabsRemote,
-    archiveVocab: archiveVocab, archiveVocabs: archiveVocabs,
+    archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote,

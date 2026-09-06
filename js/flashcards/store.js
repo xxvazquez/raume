@@ -79,7 +79,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -112,6 +112,11 @@ window.RaumeStudy.flashcards.store = (function () {
       // allowance -- a pre-existing limitation this shares with Kana, not a
       // new one.
       day: raw.day && typeof raw.day.date === "string" ? { date: raw.day.date, count: raw.day.count | 0 } : null,
+      // Whole tables paused as a unit -- an overlay of table ids, not a state
+      // on the cards. Their cards keep their own active/archived flag; this
+      // list just holds them out of review, the stat tiles and the Manage
+      // filters until the table is resumed. Synced via flashcard_settings.
+      pausedTables: Array.isArray(raw.pausedTables) ? raw.pausedTables.filter(function (t) { return typeof t === "string"; }) : [],
       lastSyncedAt: raw.lastSyncedAt || null
     };
   }
@@ -169,6 +174,19 @@ window.RaumeStudy.flashcards.store = (function () {
     // to read/write the wrong one.
     if (!cache || cacheLoadedKey !== cacheKey()) return loadCache();
     return cache;
+  }
+  // Paused-tables overlay (see validateCache). Table ids are compared as
+  // strings -- vocabulary.js has both numeric and string ids.
+  function pausedTables() { return (getCache().pausedTables || []).slice(); }
+  function isTablePaused(tableId) { return (getCache().pausedTables || []).indexOf(String(tableId)) !== -1; }
+  function setTablePausedLocal(tableId, paused) {
+    var c = getCache();
+    var id = String(tableId);
+    var list = (c.pausedTables || []).filter(function (t) { return t !== id; });
+    if (paused) list.push(id);
+    c.pausedTables = list;
+    saveCache();
+    return list;
   }
   function resetCacheForUser(userId) {
     cache = emptyCache(userId);
@@ -260,6 +278,7 @@ window.RaumeStudy.flashcards.store = (function () {
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,
     uuid: uuid, localDateStr: localDateStr,
     loadCache: loadCache, saveCache: saveCache, getCache: getCache, resetCacheForUser: resetCacheForUser,
+    isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,
     resetKanaCacheForUser: resetKanaCacheForUser,
     defaultKanaFsrs: defaultKanaFsrs, sanitizeKanaFsrs: sanitizeKanaFsrs
