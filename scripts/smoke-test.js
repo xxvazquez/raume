@@ -966,22 +966,32 @@ async function main() {
   check("choosing it goes straight to the Dashboard tab, no session needed", !!document.querySelector("#fcPanelDashboard"));
   check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("Using this device only"));
 
-  // Offline / pending-sync chip: quiet while online and clean, surfaced as a
+  // Offline / pending-sync chip: hidden while online and clean, surfaced as a
   // live status when the connection drops (which is meaningful even in guest
   // mode, where nothing is queued), cleared again on reconnect.
-  check("the sync chip is present and quiet while online", (() => {
+  check("the sync chip is present and hidden while online, its text an aria-live region", (() => {
     const chip = document.getElementById("fcSyncChip");
-    return chip && chip.hidden === true && chip.getAttribute("aria-live") === "polite";
+    const live = chip && chip.querySelector(".fc-sync-chip-text");
+    return chip && chip.hidden === true && !!live && live.getAttribute("aria-live") === "polite";
   })());
   Object.defineProperty(window.navigator, "onLine", { configurable: true, value: false });
   window.dispatchEvent(new window.Event("offline"));
-  check("going offline surfaces the chip as a live status", (() => {
+  check("going offline surfaces the chip as a live status, in the attention tone", (() => {
     const chip = document.getElementById("fcSyncChip");
-    return chip && chip.hidden === false && /offline/i.test(chip.textContent);
+    return chip && chip.hidden === false && /offline/i.test(chip.textContent)
+      && chip.classList.contains("fc-sync-chip-offline");
+  })());
+  check("the chip is styled to actually register -- a filled pill, not a hairline ghost", (() => {
+    const rule = allCssRules.find(r => r.selectorText === ".fc-sync-chip-offline");
+    return !!rule && /var\(--fc-hard/.test(rule.style.background || rule.style.cssText || "");
   })());
   Object.defineProperty(window.navigator, "onLine", { configurable: true, value: true });
   window.dispatchEvent(new window.Event("online"));
   check("coming back online hides it again", document.getElementById("fcSyncChip").hidden === true);
+  check("the manual retry path is wired -- syncNow is exported and the button class is styled", (() => {
+    const btnRule = allCssRules.find(r => r.selectorText === ".fc-sync-now");
+    return typeof window.RaumeStudy.flashcards.dataOps.syncNow === "function" && !!btnRule;
+  })());
   if (storageUsable) check("guest mode is remembered in localStorage", readLocalStorage("raume-flashcards-mode") === "guest");
   check("with nothing added yet, the Dashboard shows an empty state (not a grid of zeroes)",
     !document.querySelector(".fc-stats-grid") && /No flashcards yet/.test(document.querySelector("#fcPanelDashboard").textContent));

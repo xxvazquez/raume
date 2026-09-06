@@ -155,9 +155,11 @@ them.
 - **Signed in** — a **Supabase** project you create yourself (see
   [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)) is the authoritative store, scoped
   per account by Row Level Security. `localStorage` becomes a read-through cache
-  and an offline outbox: reviews made offline sync on reconnect, and a status
-  chip shows `Offline…` / `Syncing N reviews…` while that's pending. Pending
-  reviews still count on the dashboard right away.
+  and an offline outbox: reviews made offline sync on reconnect. A status chip
+  under your identity shows the state — a calm *Syncing N reviews…* while it
+  works, an amber *Offline…* or *N reviews couldn't sync* (with a **Sync now**
+  button) when it needs you. Pending reviews still count on the dashboard right
+  away.
 
 Pausing a card **archives** it — the FSRS state and full history are kept, and
 re-adding restores the same card. Nothing is ever hard-deleted.

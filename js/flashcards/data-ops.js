@@ -315,11 +315,32 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // is still meaningful there). Fired on connectivity changes and every time
   // the outbox depth moves.
   var syncStateListeners = [];
+  // Set when a sync attempt breaks with entries still queued (network error, or
+  // an entry whose card isn't on the server yet); cleared once both outboxes
+  // drain. Drives the chip's "couldn't sync" state + its manual retry button.
+  var syncErrored = false;
   function onSyncStateChange(fn) { syncStateListeners.push(fn); }
+  function totalPending() {
+    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount());
+  }
   function getSyncState() {
     var online = typeof navigator === "undefined" || navigator.onLine !== false;
-    var pending = isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount());
-    return { online: online, pending: pending };
+    var pending = totalPending();
+    var busy = syncing || kanaSyncing;
+    return {
+      online: online, pending: pending, syncing: busy,
+      // Queued reviews, online, not mid-attempt, and the last try failed --
+      // offer a manual retry rather than waiting on the next trigger.
+      stalled: pending > 0 && online && !busy && syncErrored
+    };
+  }
+  // Kick both outboxes now -- the chip's "Sync now" button, for a queue that
+  // stopped draining on its own.
+  function syncNow() {
+    syncErrored = false;
+    notifySyncStateChange();
+    syncOutbox();
+    syncKanaOutbox();
   }
   function notifySyncStateChange() {
     var st = getSyncState();
@@ -336,7 +357,11 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         try {
           outcome = await syncOne(entry);
         } catch (e) {
-          break; // network/other error -- stop, retry on next trigger, leave entry queued
+          // network/other error -- stop, leave the entry queued, flag it so the
+          // chip offers a manual retry instead of just sitting on "Syncing…".
+          syncErrored = true;
+          console.warn("Flashcards: review sync failed, will retry", e);
+          break;
         }
         if (outcome === "retry") break;
         c.logsOutbox.shift();
@@ -345,6 +370,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       }
     } finally {
       syncing = false;
+      if (totalPending() === 0) syncErrored = false;
       notifySyncStateChange();
     }
   }
@@ -518,7 +544,11 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       while (kc.logsOutbox.length) {
         var entry = kc.logsOutbox[0], outcome;
         try { outcome = await syncKanaOne(entry); }
-        catch (e) { break; } // network/other error -- stop, retry on next trigger
+        catch (e) { // network/other error -- stop, flag for the chip's retry
+          syncErrored = true;
+          console.warn("Flashcards: kana review sync failed, will retry", e);
+          break;
+        }
         if (!outcome.done) break;
         var key = entry.kanaId + "|" + entry.direction;
         // Reconcile the local card with what actually landed (the replay path
@@ -530,6 +560,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       }
     } finally {
       kanaSyncing = false;
+      if (totalPending() === 0) syncErrored = false;
       notifySyncStateChange();
     }
   }
@@ -548,7 +579,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote,
-    recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox,
+    recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow,
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,
     getKanaFsrs: getKanaFsrs, saveKanaFsrs: saveKanaFsrs,

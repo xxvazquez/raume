@@ -36,6 +36,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var clearPasswordRecovery = dataOps.clearPasswordRecovery;
   var initAuth = dataOps.initAuth, onAuthChange = dataOps.onAuthChange;
   var fetchAllFromServer = dataOps.fetchAllFromServer, syncOutbox = dataOps.syncOutbox;
+  var syncNow = dataOps.syncNow;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
   var renderDashboard = dashboard.renderDashboard, invalidateInsights = dashboard.invalidateInsights;
   var renderManage = views.renderManage, renderSettings = views.renderSettings, renderHelp = views.renderHelp;
@@ -222,7 +223,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     el.innerHTML =
       "<h2>Flashcards</h2>" +
       identityHtml +
-      '<div class="fc-sync-chip" id="fcSyncChip" role="status" aria-live="polite" hidden></div>' +
+      '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<div class="fc-tabs" role="tablist">' +
       [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["settings", "Settings"], ["help", "Help"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
@@ -260,21 +261,49 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     updateSyncChip();
   }
 
-  // Offline / pending-sync chip -- sits under the identity line, announced
-  // via aria-live. Offline reads first (it applies in guest mode too, where
-  // there's nothing queued); otherwise it counts reviews still in the outbox
-  // and stays hidden once everything's synced.
-  function syncChipText(st) {
-    if (!st.online) return "Offline — reviews are saved on this device";
-    if (st.pending > 0) return "Syncing " + st.pending + (st.pending === 1 ? " review…" : " reviews…");
-    return "";
-  }
+  // Offline / pending-sync chip -- sits under the identity line, its text
+  // announced via aria-live. Offline reads first (it applies in guest mode too,
+  // where there's nothing queued); otherwise it counts reviews still in the
+  // outbox and stays hidden once everything's synced. When a sync has stopped
+  // draining on its own, it turns amber and grows a "Sync now" button.
+  function reviewCount(n) { return n + (n === 1 ? " review" : " reviews"); }
   function updateSyncChip() {
     var chip = document.getElementById("fcSyncChip");
     if (!chip) return;
-    var text = syncChipText(getSyncState());
-    chip.textContent = text;
+    var st = getSyncState();
+    var text = "", cls = "", showBtn = false;
+    if (!st.online) {
+      text = "Offline — reviews are saved on this device";
+      cls = " fc-sync-chip-offline";
+    } else if (st.pending > 0) {
+      if (st.syncing) {
+        text = "Syncing " + reviewCount(st.pending) + "…";
+        cls = " fc-sync-chip-syncing";
+      } else if (st.stalled) {
+        text = reviewCount(st.pending) + " couldn't sync";
+        cls = " fc-sync-chip-offline";
+        showBtn = true;
+      } else {
+        text = reviewCount(st.pending) + " to sync";
+        cls = " fc-sync-chip-syncing";
+        showBtn = true;
+      }
+    }
+    chip.className = "fc-sync-chip" + cls;
     chip.hidden = !text;
+    var span = chip.querySelector(".fc-sync-chip-text");
+    if (span) span.textContent = text;
+    var btn = chip.querySelector(".fc-sync-now");
+    if (showBtn && !btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "fc-sync-now";
+      btn.textContent = "Sync now";
+      btn.addEventListener("click", function () { syncNow(); });
+      chip.appendChild(btn);
+    } else if (!showBtn && btn) {
+      btn.remove();
+    }
   }
   onSyncStateChange(updateSyncChip);
 

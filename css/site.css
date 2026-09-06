@@ -2061,12 +2061,31 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-auth-switch button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
 .fc-signed-in-as { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--muted); font-size: var(--fs-small); }
 .fc-signed-in-as button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
+/* Offline / pending-sync status. The only signal that reviews aren't on the
+   account yet, so it has to actually register -- a filled pill with an edge,
+   not the hairline ghost it used to be. Still quiet by the site's standards:
+   the amber "heads up" tone (same as the Hard rating / the retention tile),
+   never rose -- being offline or mid-sync isn't an error. */
 .fc-sync-chip {
-  display: inline-block; margin: -6px 0 18px; padding: 3px 10px;
-  border: 1px solid var(--line); border-radius: 999px;
-  color: var(--muted); font-size: var(--fs-small);
+  display: inline-flex; align-items: center; gap: 9px;
+  margin: -4px 0 18px; padding: 5px 6px 5px 12px;
+  border: 1px solid; border-radius: 999px;
+  font: 500 var(--fs-small)/1 var(--font-ui);
 }
 .fc-sync-chip[hidden] { display: none; }
+.fc-sync-chip:not(:has(.fc-sync-now)) { padding-right: 12px; }
+.fc-sync-chip-offline {
+  background: var(--fc-hard-soft); border-color: var(--fc-hard); color: var(--fc-hard-strong);
+}
+.fc-sync-chip-syncing {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark);
+}
+.fc-sync-now {
+  appearance: none; border: 1px solid currentColor; background: transparent;
+  color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
+  padding: 4px 9px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+}
+.fc-sync-now:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
 
 /* Settings */
 .fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; padding: 16px 18px; margin-bottom: 16px; }
