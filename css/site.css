@@ -1999,6 +1999,31 @@ body.starred-mode .expand-bar { display: none !important; }
   .fc-rating-btn .fc-rating-name { font-size: var(--fs-micro); margin: 1px 0; }
   .fc-rating-btn .fc-rating-interval { font-size: 10px; }
 }
+/* Desktop: the shared --fs-* scale is tuned for the reference tables, and on a
+   roomy window the study card's reading text (the answer you type, the revealed
+   answer, the verdict, the rating labels) sat too small to study from
+   comfortably. Bump the whole review card up a step past 700px -- the prompt is
+   already the anchor, this brings everything you actually read while rating it
+   up to match. Phone keeps the tighter scale above. */
+@media (min-width: 700px) {
+  .fc-review-card { padding: 28px 26px; }
+  .fc-prompt-label { font-size: var(--fs-small); }
+  .fc-review-card .fc-prompt { font-size: 30px; }
+  .fc-review-card .fc-prompt-kana { font-size: 38px; }
+  .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
+  .fc-review-card .fc-prompt-romaji { font-size: 24px; }
+  .fc-answer-form input { height: 40px; font-size: 16px; }
+  .fc-answer-form input[lang="ja"] { font-size: 18px; }
+  .fc-answer-context .fc-context-value { font-size: var(--fs-body); }
+  .fc-answer-reveal .fc-expected { font-size: 16px; }
+  .fc-answer-reveal .fc-expected-kana { font-size: 28px; }
+  .fc-answer-reveal .fc-expected-kana.fc-prompt-kana-word { font-size: 22px; }
+  .fc-result { font-size: var(--fs-body); }
+  .fc-result-label { font-size: 17px; }
+  .fc-rating-btn .fc-rating-key { font-size: var(--fs-small); }
+  .fc-rating-btn .fc-rating-name { font-size: var(--fs-body); }
+  .fc-rating-btn .fc-rating-interval { font-size: var(--fs-small); }
+}
 /* flex-start, not the default stretch: "Directions" has two rows against the
    scripts' five, and stretching it to match left a tall box mostly empty.
    Top-aligned, it's just a smaller box -- which is what it is. */

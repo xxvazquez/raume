@@ -20,7 +20,11 @@ note records the rules so they stay consistent.
 - On the review card the prompt is the anchor — 26px, well clear of everything
   around it, with the direction label (`.fc-prompt-label`) faint and tucked
   right above it. On a phone the chrome (meta line, padding, rating row) tightens
-  but the prompt keeps its full size and air.
+  but the prompt keeps its full size and air. Past 700px the whole card steps up
+  a size — prompt to 30px, and the reading text you rate from (typed answer,
+  revealed answer, verdict, rating labels) off the shared `--fs-*` scale and onto
+  a larger set, since that scale is tuned for the reference tables and read too
+  small to study from on a desktop window.
 
 ## Colour
 
