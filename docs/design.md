@@ -17,6 +17,10 @@ note records the rules so they stay consistent.
 - The one exception: the review card's pass/fail verdict ("Correct" / "Not
   quite") gets a beat of real weight, because it's the single most important
   word in the review loop.
+- On the review card the prompt is the anchor — 26px, well clear of everything
+  around it, with the direction label (`.fc-prompt-label`) faint and tucked
+  right above it. On a phone the chrome (meta line, padding, rating row) tightens
+  but the prompt keeps its full size and air.
 
 ## Colour
 
