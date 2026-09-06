@@ -992,6 +992,15 @@ async function main() {
     const btnRule = allCssRules.find(r => r.selectorText === ".fc-sync-now");
     return typeof window.RaumeStudy.flashcards.dataOps.syncNow === "function" && !!btnRule;
   })());
+  const timeoutOk = await (async () => {
+    const withTimeout = window.RaumeStudy.flashcards.dataOps.withTimeout;
+    if (typeof withTimeout !== "function") return false;
+    const fast = await withTimeout(Promise.resolve(7), "fast", 50);
+    let timedOut = false;
+    try { await withTimeout(new Promise(() => {}), "hang", 30); } catch (e) { timedOut = /timed out/.test(e.message); }
+    return fast === 7 && timedOut;
+  })();
+  check("a hung sync request is timed out (so it can't leave the queue wedged forever)", timeoutOk);
   if (storageUsable) check("guest mode is remembered in localStorage", readLocalStorage("raume-flashcards-mode") === "guest");
   check("with nothing added yet, the Dashboard shows an empty state (not a grid of zeroes)",
     !document.querySelector(".fc-stats-grid") && /No flashcards yet/.test(document.querySelector("#fcPanelDashboard").textContent));

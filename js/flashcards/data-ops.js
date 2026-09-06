@@ -302,6 +302,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     await saveFsrsSettingsRemote({ current_streak: s.current_streak, longest_streak: s.longest_streak, last_study_date: s.last_study_date });
   }
 
+  // Returns true when the log is (now or already) on the server, false when the
+  // card it points at no longer exists there -- an orphan review that can never
+  // sync, so the caller drops it rather than wedging the whole outbox on it.
   async function pushReviewLogRemote(entry) {
     var client = getClient(), user = currentUser();
     var res = await client.from("review_logs").insert({
@@ -311,7 +314,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       scheduled_days: entry.logFields.scheduled_days, learning_steps: entry.logFields.learning_steps,
       reviewed_at: entry.logFields.review
     });
-    if (res.error && res.error.code !== "23505") throw res.error; // 23505 = already synced, fine
+    if (!res.error || res.error.code === "23505") return true;  // ok, or already synced
+    if (res.error.code === "23503") return false;               // FK: the card is gone from the server
+    throw res.error;
   }
   async function applyCardUpdateGuarded(cardId, resultCard, baseReps) {
     var client = getClient();
@@ -331,7 +336,26 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // -----------------------------------------------------------------------
   // Outbox / sync -- offline reviews computed locally, queued, then synced.
   // -----------------------------------------------------------------------
-  var syncing = false;
+  var syncing = false, syncStartedAt = 0;
+
+  // A connection in a half-open state can leave a fetch hanging forever -- and
+  // with it `syncing` stuck true, so nothing (not even the manual "Sync now")
+  // could retry. Cap every sync request; a timeout is caught like any other
+  // error, so the loop stops and the `syncing` flag is released for next time.
+  var SYNC_REQUEST_TIMEOUT_MS = 20000;
+  var SYNC_STUCK_MS = 60000; // a run older than this is presumed wedged; ignore its flag
+  function withTimeout(promise, label, ms) {
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+      var timer = setTimeout(function () {
+        if (!settled) { settled = true; reject(new Error((label || "request") + " timed out")); }
+      }, ms || SYNC_REQUEST_TIMEOUT_MS);
+      promise.then(
+        function (v) { if (!settled) { settled = true; clearTimeout(timer); resolve(v); } },
+        function (e) { if (!settled) { settled = true; clearTimeout(timer); reject(e); } }
+      );
+    });
+  }
 
   // A tiny observable for the UI's offline / pending-sync chip: current
   // connectivity plus how many reviews are still queued locally. Guest mode
@@ -371,15 +395,16 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     syncStateListeners.forEach(function (fn) { try { fn(st); } catch (e) {} });
   }
   async function syncOutbox() {
-    if (syncing || !configured() || !currentUser()) return;
+    if ((syncing && Date.now() - syncStartedAt < SYNC_STUCK_MS) || !configured() || !currentUser()) return;
     syncing = true;
+    syncStartedAt = Date.now();
     try {
       var c = getCache();
       while (c.logsOutbox.length) {
         var entry = c.logsOutbox[0];
         var outcome;
         try {
-          outcome = await syncOne(entry);
+          outcome = await withTimeout(syncOne(entry), "review sync");
         } catch (e) {
           // network/other error -- stop, leave the entry queued, flag it so the
           // chip offers a manual retry instead of just sitting on "Syncing…".
@@ -399,7 +424,11 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }
   }
   async function syncOne(entry) {
-    await pushReviewLogRemote(entry);
+    var logged = await pushReviewLogRemote(entry);
+    if (!logged) { // orphan review -- the card no longer exists on the server; drop it rather than wedge the queue
+      console.warn("Flashcards: dropping a queued review whose card is gone from the server", entry.cardId);
+      return "deleted";
+    }
     var ok = await applyCardUpdateGuarded(entry.cardId, entry.resultCard, entry.baseCard.reps);
     if (ok) return "done";
     // Conflict: another device moved this card first. Recompute the rating
@@ -559,15 +588,16 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (ok2.data && ok2.data.length) return { done: true, cardId: row.id, card: replay.card };
     return { done: false };
   }
-  var kanaSyncing = false;
+  var kanaSyncing = false, kanaSyncStartedAt = 0;
   async function syncKanaOutbox() {
-    if (kanaSyncing || isGuestMode() || !configured() || !currentUser()) return;
+    if ((kanaSyncing && Date.now() - kanaSyncStartedAt < SYNC_STUCK_MS) || isGuestMode() || !configured() || !currentUser()) return;
     kanaSyncing = true;
+    kanaSyncStartedAt = Date.now();
     try {
       var kc = store.getKanaCache();
       while (kc.logsOutbox.length) {
         var entry = kc.logsOutbox[0], outcome;
-        try { outcome = await syncKanaOne(entry); }
+        try { outcome = await withTimeout(syncKanaOne(entry), "kana review sync"); }
         catch (e) { // network/other error -- stop, flag for the chip's retry
           syncErrored = true;
           console.warn("Flashcards: kana review sync failed, will retry", e);
@@ -603,7 +633,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote,
-    recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow,
+    recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow, withTimeout: withTimeout,
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,
     getKanaFsrs: getKanaFsrs, saveKanaFsrs: saveKanaFsrs,
