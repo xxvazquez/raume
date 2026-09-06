@@ -1025,6 +1025,20 @@ async function main() {
   check("clicking the toggle expands just that table", !document.querySelector("#fcPanelManage .fc-manage-table").classList.contains("fc-manage-table-collapsed"));
   const firstAddBtn = document.querySelector('#fcPanelManage [data-action="add"]');
   check("Manage lists addable vocabulary in guest mode too", !!firstAddBtn);
+  check("per-word actions are icon + label buttons (label drops to icon-only on a phone), aria-labelled", () => {
+    const btn = document.querySelector('#fcPanelManage .fc-manage-row [data-action]');
+    return !!btn && btn.classList.contains("fc-btn-vocabaction")
+      && !!btn.querySelector(".fc-btn-ic svg") && !!btn.querySelector(".fc-btn-tx")
+      && /^(Add|Pause|Restore)$/.test(btn.getAttribute("aria-label") || "");
+  });
+  check("Manage word rows show plain kanji, not the furigana ruby (uniform row height, aligned columns)", () => {
+    const jp = document.querySelector("#fcPanelManage .fc-manage-row .fc-jp");
+    return !!jp && !jp.querySelector("ruby, rt") && jp.textContent.trim().length > 0;
+  });
+  check("Manage rows have a fixed min-height so the status glyphs line up down the list", () => {
+    const rule = allCssRules.find(r => r.selectorText === ".fc-manage-row");
+    return !!rule && /px/.test(rule.style.minHeight || "");
+  });
   firstAddBtn.click();
   await flush();
   document.querySelector('.fc-tab[data-tab="dashboard"]').click();

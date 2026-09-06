@@ -247,10 +247,14 @@ window.RaumeStudy.flashcards.views = (function () {
           table.ids.forEach(function (id) {
             var entry = index[id];
             var state = vocabState(id);
+            // Plain kanji here, not the furigana ruby the reference tables use:
+            // Manage is a deck-management checklist, and ruby made every row a
+            // different height so the status dots and buttons never lined up.
+            // The reading is still one column over (romaji, desktop).
             html += '<div class="fc-manage-row">' +
               statusIndicatorHtml(id) +
               '<span class="fc-manage-word">' +
-              '<span class="fc-jp" lang="ja">' + entry.jpHtml + "</span>" +
+              '<span class="fc-jp" lang="ja">' + esc(entry.jpPlain) + "</span>" +
               '<span class="fc-ro">' + esc(entry.romajiDisplay) + "</span>" +
               '<span class="fc-en">' + esc(entry.englishDisplay) + "</span>" +
               (entry.romajiUsable ? "" : '<span class="fc-tag">EN only</span>') +
@@ -282,13 +286,39 @@ window.RaumeStudy.flashcards.views = (function () {
       });
     });
   }
-  // Pause / Pause table only archive (active = false) -- nothing here ever
-  // deletes a card or its history. A paused word keeps its full FSRS state
-  // and review log, and Restore brings it back exactly as it was.
+  // The per-word Manage actions. Same icon + label shape as the table-level
+  // actions (TABLE_ACTIONS): CSS ghosts "Add" at rest and drops all three
+  // labels to icon-only on a narrow screen, so a long list of untouched rows
+  // stays quiet instead of a ladder of buttons. Pause / Restore only archive
+  // (active = false) -- nothing here ever deletes a card or its history.
+  var VOCAB_ACTIONS = {
+    add: {
+      label: "Add",
+      title: "Add this word to your flashcards",
+      icon: SVG_OPEN + '<path d="M9 4v10M4 9h10"/></svg>'
+    },
+    remove: {
+      label: "Pause",
+      title: "Keeps its progress — add it back anytime to pick up where you left off",
+      icon: SVG_OPEN + '<path d="M6 4v10M12 4v10"/></svg>'
+    },
+    restore: {
+      label: "Restore",
+      title: "Resumes reviewing this word with its previous progress intact",
+      icon: SVG_OPEN + '<path d="M3 9a6 6 0 1 1 1.8 4.3M3 13V9h4"/></svg>'
+    }
+  };
+  function vocabActionBtn(action, vocabId) {
+    var a = VOCAB_ACTIONS[action];
+    return '<button type="button" class="fc-btn fc-btn-vocabaction" data-action="' + action +
+      '" data-vocab-id="' + esc(vocabId) + '" title="' + esc(a.title) + '" aria-label="' + esc(a.label) + '">' +
+      '<span class="fc-btn-ic" aria-hidden="true">' + a.icon + '</span>' +
+      '<span class="fc-btn-tx">' + a.label + '</span></button>';
+  }
   function manageActionsFor(vocabId, state) {
-    if (state === "active") return '<button type="button" class="fc-btn" data-action="remove" data-vocab-id="' + esc(vocabId) + '" title="Keeps its progress — add it back anytime to pick up where you left off">Pause</button>';
-    if (state === "archived") return '<button type="button" class="fc-btn" data-action="restore" data-vocab-id="' + esc(vocabId) + '" title="Resumes reviewing this word with its previous progress intact">Restore</button>';
-    return '<button type="button" class="fc-btn fc-btn-primary" data-action="add" data-vocab-id="' + esc(vocabId) + '">Add</button>';
+    if (state === "active") return vocabActionBtn("remove", vocabId);
+    if (state === "archived") return vocabActionBtn("restore", vocabId);
+    return vocabActionBtn("add", vocabId);
   }
   function bindManageActionButtons(scope) {
     scope.querySelectorAll("[data-action]").forEach(function (btn) {

@@ -65,7 +65,10 @@ and Help.
 
 - **Help and Settings** are prose, held to a readable measure (680px).
 - **Manage** runs the full sheet — its rows are content-driven, not a
-  proportional grid.
+  proportional grid. Its word rows show the plain kanji, not the furigana ruby
+  the reference tables use: Manage is a deck-management checklist, and ruby made
+  every row a different height so the status glyphs and action buttons never
+  lined up. The reading stays one column over (romaji, hidden on a phone).
 - **The Dashboard** gets its own wider cap (900px). Uncapped, its tiles and
   cards are sized as *fractions* of the sheet, so a 2-up row ballooned into two
   ~600px panels holding a couple of words each. Capped, the top row, the four

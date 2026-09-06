@@ -1758,22 +1758,44 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-manage-cat-actions { margin: 4px 0 14px; }
 .fc-manage-cat-actions .fc-btn { font-size: var(--fs-micro); }
 .fc-manage-list { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
-/* status | word (jp / romaji / english, wraps internally) | actions -- the
-   action pills stay a single non-wrapping group pinned right and vertically
-   centred against the word, however the word text wraps. */
+/* One flat line per word: status | kanji romaji english | action. Plain kanji
+   (no ruby -- see views.js) keeps every row the same height, so the status
+   glyphs and the action buttons line up in clean columns down the list. */
 .fc-manage-row {
-  display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+  min-height: 42px; padding: 3px 14px;
+  border-top: 1px solid var(--line);
 }
 .fc-manage-row:first-child { border-top: 0; }
 .fc-manage-word {
   flex: 1 1 auto; min-width: 0;
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 11px;
 }
-.fc-manage-word .fc-jp { font-size: var(--fs-nav); }
+.fc-manage-word .fc-jp { font-size: var(--fs-nav); color: var(--ink); }
 .fc-manage-word .fc-ro { color: var(--muted); font-size: var(--fs-nav-sub); }
 .fc-manage-word .fc-en { color: var(--muted); font-size: var(--fs-nav-sub); }
 .fc-manage-word .fc-tag { color: var(--faint); font-size: var(--fs-micro); }
 .fc-manage-row .fc-actions { flex: 0 0 auto; display: flex; gap: 6px; }
+/* Per-word Add / Pause / Restore -- icon + label, mirroring the table actions.
+   Add is ghosted at rest (it's the common case down a long, mostly-untouched
+   list -- exactly like "Add table"), full treatment on hover/focus; Pause /
+   Restore keep the ordinary bordered button, being the rarer deliberate acts. */
+.fc-btn-vocabaction { gap: 6px; }
+.fc-btn-vocabaction[data-action="add"] {
+  border-color: transparent; background: transparent; color: var(--faint);
+}
+.fc-btn-vocabaction[data-action="add"]:hover,
+.fc-btn-vocabaction[data-action="add"]:focus-visible {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark);
+}
+/* Phone: drop the button labels (icon only) and the separate romaji column, so
+   each row stays one tight line -- kanji + English + a compact action. */
+@media (max-width: 560px) {
+  .fc-manage-row .fc-btn-vocabaction { padding: 5px 7px; }
+  .fc-manage-row .fc-btn-vocabaction .fc-btn-tx { display: none; }
+  .fc-manage-row .fc-btn-vocabaction .fc-btn-ic { display: block; }
+  .fc-manage-word .fc-ro { display: none; }
+}
 .fc-empty { padding: 24px 16px; color: var(--muted); text-align: center; }
 
 /* Review flow */
