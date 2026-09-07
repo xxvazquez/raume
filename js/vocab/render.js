@@ -165,13 +165,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // fixed's column-width percentages stop being respected on a cell whose own
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
-  function meaningCell(english, vocabId) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
+  // A tiny part-of-speech tag for adjective rows -- lavender for い-adjectives,
+  // sage for な-adjectives (css/site.css). Emitted only when the row carries an
+  // `adj` field ("i" / "na"); kept out of the search text (js/vocab/
+  // interactions.js reads .meaning-text, not the whole cell).
+  function adjPill(adj) {
+    if (adj !== 'i' && adj !== 'na') return '';
+    var label = adj === 'na' ? 'な-adj' : 'い-adj';
+    return '<span class="adj-pill adj-pill-' + adj + '" aria-label="' +
+      (adj === 'na' ? 'na-adjective' : 'i-adjective') + '">' + label + '</span>';
+  }
+  function meaningCell(english, vocabId, adj) {
+    return '<td><div class="meaning-cell">' + adjPill(adj) + '<span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
   }
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
     return openTag + jpCell(row) +
-      '<td>' + esc(row.romaji) + '</td>' + meaningCell(row.english, row.id) + '</tr>';
+      '<td>' + esc(row.romaji) + '</td>' + meaningCell(row.english, row.id, row.adj) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently (plain vs polite) down both

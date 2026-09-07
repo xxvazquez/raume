@@ -9,7 +9,7 @@ const tableList = (sandbox.window.RaumeStudy && sandbox.window.RaumeStudy.data.v
 const tableCount = tableList.length;
 const rowCount = tableList.reduce((total, t) => total + t.rows.length, 0);
 const expectedTables = 23;
-const expectedRows = 508;
+const expectedRows = 529;
 if (tableCount !== expectedTables || rowCount !== expectedRows) {
   console.error("Vocabulary validation failed: found " + rowCount + " rows across " + tableCount + " tables; expected " + expectedRows + " rows across " + expectedTables + " tables.");
   process.exit(1);

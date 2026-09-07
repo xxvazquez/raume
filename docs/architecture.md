@@ -127,6 +127,7 @@ js/
     kana.js              the Kana tab
     bootstrap.js         app shell + init
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
+                        (adjective rows also carry adj:"i" / adj:"na" for the type pill)
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
 supabase/schema.sql     Postgres tables + Row Level Security

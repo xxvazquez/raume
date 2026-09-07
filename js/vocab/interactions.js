@@ -382,7 +382,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (!isHidden('furigana')) fields.push({ cell: row.cells[0], text: jp.furigana });
       }
       if (!isHidden('romaji')) fields.push({ cell: row.cells[1], text: row.cells[1].textContent });
-      if (!isHidden('english')) fields.push({ cell: row.cells[2], text: row.cells[2].textContent });
+      // .meaning-text, not the whole cell: skip the row-action icons and the
+      // adjective pill ("い-adj" / "な-adj") so they never register as matches.
+      if (!isHidden('english')) fields.push({ cell: row.cells[2], text: (row.cells[2].querySelector('.meaning-text') || row.cells[2]).textContent });
       return fields;
     }
 

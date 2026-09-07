@@ -64,7 +64,33 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 23 table sections", sections.length === 23);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 508 vocabulary rows", totalRows === 508);
+  check("renders 529 vocabulary rows", totalRows === 529);
+  check("adjective rows carry an い-adj / な-adj pill before the meaning, and only those rows do", (() => {
+    const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
+    const pills = [...adjSection.querySelectorAll("tbody tr .adj-pill")];
+    if (pills.length < 30) return false;
+    const labelsOk = pills.every(p => {
+      const i = p.classList.contains("adj-pill-i") && p.textContent === "い-adj";
+      const na = p.classList.contains("adj-pill-na") && p.textContent === "な-adj";
+      return (i || na) && p.previousElementSibling === null
+        && p.nextElementSibling.classList.contains("meaning-text");
+    });
+    // No pill leaks onto a non-adjective row (e.g. the Verbs table).
+    const verbsHavePills = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector(".section-title-text").textContent === "Verbs")
+      .querySelectorAll(".adj-pill").length > 0;
+    return labelsOk && !verbsHavePills;
+  })());
+  check("the adjective pill stays out of search matches", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "い-adj";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const hits = document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return hits === 0;
+  })());
   check("every Japanese cell is marked lang=\"ja\"", [...document.querySelectorAll("td.jp")].every(td => td.getAttribute("lang") === "ja"));
   check("every Japanese cell has one speaker button per form, keyed to the kana reading (not the kanji)", [...document.querySelectorAll("td.jp")].every(td => {
     const forms = td.querySelectorAll(".verb-form").length || 1;
@@ -92,6 +118,12 @@ async function main() {
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
     return flat;
   })();
+  check("the い-adj and な-adj pills fill with two different accent tokens", (() => {
+    const iRule = allCssRules.find(r => r.selectorText === ".adj-pill-i");
+    const naRule = allCssRules.find(r => r.selectorText === ".adj-pill-na");
+    const bg = r => (r && (r.style.background || r.style.backgroundColor)) || "";
+    return /var\(--accent-soft\)/.test(bg(iRule)) && /var\(--accent-2-soft\)/.test(bg(naRule));
+  })());
   check("the four section accents are spread far enough apart in hue to read as distinct identities, light and dark", (() => {
     const hexToHue = (hex) => {
       const h = hex.trim().replace("#", "");
