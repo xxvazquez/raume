@@ -1196,6 +1196,18 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 body.show-polite .verb-form-plain { display: none; }
 body.show-polite .verb-form-polite { display: block; }
 
+/* Table rows only: the speaker button sat inline right after the word, so
+   its horizontal position drifted with word length (水 vs 電子レンジ landed
+   nowhere near each other). .jp-line wraps the word + button as a flex pair
+   -- same "pin it to a fixed edge instead of a length-dependent inline
+   position" fix as .meaning-cell already uses for the star/flashcard/hide
+   cluster, just anchored right instead of left. The review card's prompt
+   (a single word, not a row among others) has nothing to line up with, so
+   it deliberately isn't wrapped in this and keeps flowing inline. */
+.jp-line { display: flex; align-items: baseline; }
+.jp-line .jpword, .jp-line .particle { flex: 1 1 auto; min-width: 0; }
+.jp-line .jp-speak-btn { flex: 0 0 auto; margin-left: auto; }
+
 /* Speaker button: reads the word aloud via the Web Speech API
    (RaumeStudy.shared.speech, js/shared.js). Hidden until that module confirms
    the browser actually has a Japanese voice installed -- showing it

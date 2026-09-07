@@ -114,7 +114,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var inner = row.particle
       ? '<span class="particle">' + esc(row.jp[0].text) + '</span>'
       : '<span class="jpword">' + jpSegments(row.jp, true) + '</span>';
-    return '<td class="jp" lang="ja">' + inner + speakButton(jpReadingOf(row.jp)) + '</td>';
+    // .jp-line pins the speaker button to the cell's right edge regardless of
+    // word length -- see css/site.css for why (same fix as .meaning-cell's
+    // row-actions cluster, mirrored to the other side).
+    return '<td class="jp" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div></td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
   // The four main study areas. Grammar and Travel are promoted out of the
@@ -175,7 +178,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // the Japanese and Romaji columns.
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div>'; }).join('');
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('');
     var romaji = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '">' + esc(f.romaji) + '</div>'; }).join('');
     return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td><td>' + romaji + '</td>' + meaningCell(row.english, row.id) + '</tr>';
   }
