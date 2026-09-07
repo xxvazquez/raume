@@ -51,10 +51,12 @@ Four sections in the nav: **Vocabulary** (the landing page), **Grammar**,
   and search/sort stay clean.
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
-- **Adjective type** — rows in the Adjectives table carry a small **い-adj** /
-  **な-adj** pill next to the meaning (lavender / sage), so the two classes read
-  apart at a glance. It rides along in the Meaning column — not a new column —
-  and stays out of search. Driven by an `adj` field on the row.
+- **Adjective type** — adjective rows carry a small **い-adj** / **な-adj** pill
+  next to the meaning (lavender / sage), so the two classes read apart at a
+  glance. Tagged across the Adjectives table and Taste & Texture (its mimetic
+  words — *mochimochi*, *sakusaku* — are left untagged). It rides along in the
+  Meaning column — not a new column — and stays out of search. Driven by an
+  `adj` field on the row.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the
   reading aloud via the browser's Web Speech API (no audio files). It only
   appears once the browser confirms it has a Japanese voice installed.

@@ -80,7 +80,14 @@ async function main() {
     const verbsHavePills = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Verbs")
       .querySelectorAll(".adj-pill").length > 0;
-    return labelsOk && !verbsHavePills;
+    // The pill also rides along in a plain vocabulary table: Taste & Texture's
+    // い-adjectives are tagged, its mimetic descriptors (mochimochi, ...) are not.
+    const taste = [...document.querySelectorAll(".table-section")]
+      .find(s => s.querySelector(".section-title-text").textContent === "Taste & Texture");
+    const tasteTagged = taste.querySelectorAll(".adj-pill-i").length >= 10 && taste.querySelectorAll(".adj-pill-na").length === 0;
+    const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => r.cells[1].textContent === "mochimochi");
+    const mochiUntagged = mochiRow && !mochiRow.querySelector(".adj-pill");
+    return labelsOk && !verbsHavePills && tasteTagged && mochiUntagged;
   })());
   check("the adjective pill stays out of search matches", (() => {
     const input = document.getElementById("tableSearch");
