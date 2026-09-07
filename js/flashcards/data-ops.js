@@ -145,7 +145,13 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     c.lastSyncedAt = new Date().toISOString();
     saveCache();
     if (c.pausedTables.some(function (t) { return remotePaused.indexOf(t) === -1; })) {
-      savePausedTablesRemote(c.pausedTables).catch(function () {});
+      // Best-effort merge push -- if it fails, the merged list still lives in
+      // the local cache and this device behaves correctly; just leave a
+      // trace instead of a silent, un-retried drop of a device-only pause
+      // set that never makes it to the account.
+      savePausedTablesRemote(c.pausedTables).catch(function (e) {
+        console.warn("Flashcards: could not sync merged paused-tables list", e);
+      });
     }
     // The vocabulary page's per-table icons live in this same row -- hand
     // them to their own store so a header icon set on another device shows up.

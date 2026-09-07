@@ -36,7 +36,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var clearPasswordRecovery = dataOps.clearPasswordRecovery;
   var initAuth = dataOps.initAuth, onAuthChange = dataOps.onAuthChange;
   var fetchAllFromServer = dataOps.fetchAllFromServer, syncOutbox = dataOps.syncOutbox;
-  var syncNow = dataOps.syncNow;
+  var syncNow = dataOps.syncNow, withTimeout = dataOps.withTimeout;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
   var renderDashboard = dashboard.renderDashboard, invalidateInsights = dashboard.invalidateInsights;
   var renderManage = views.renderManage, renderSettings = views.renderSettings, renderHelp = views.renderHelp;
@@ -202,19 +202,40 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (configured()) bindAuthForm();
   }
 
-  var initialSyncDone = false;
-  var kanaSyncedFor = null;
+  // Both flags below are only set on a *successful* fetch -- they used to be
+  // set unconditionally right before the request, so a single transient
+  // failure (a network blip, a momentary auth hiccup) permanently stopped
+  // that data from ever loading for the rest of the browser session, with
+  // nothing but a console.error to show for it. A cooldown between attempts
+  // (not a straight retry-every-render) keeps a persistent failure from
+  // hammering Supabase on every re-render while still recovering on its own
+  // once the transient cause clears. Wrapped in the same withTimeout() the
+  // outbox sync already uses, so a hung connection can't strand this in
+  // "still loading" forever either.
+  var initialSyncDone = false, initialSyncInFlight = false, lastInitialSyncAttempt = 0;
+  var kanaSyncedFor = null, kanaSyncInFlight = false, lastKanaSyncAttempt = 0;
+  var SYNC_RETRY_COOLDOWN_MS = 30000;
   function renderShell(el) {
-    if (!isGuestMode() && !initialSyncDone) {
-      initialSyncDone = true;
-      fetchAllFromServer().then(function () { invalidateInsights(); syncOutbox(); render(); }).catch(function (e) { console.error("Flashcards: could not load from Supabase", e); render(); });
+    if (!isGuestMode() && !initialSyncDone && !initialSyncInFlight
+        && Date.now() - lastInitialSyncAttempt > SYNC_RETRY_COOLDOWN_MS) {
+      initialSyncInFlight = true;
+      lastInitialSyncAttempt = Date.now();
+      withTimeout(fetchAllFromServer(), "initial sync")
+        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); render(); })
+        .catch(function (e) { console.error("Flashcards: could not load from Supabase", e); render(); })
+        .finally(function () { initialSyncInFlight = false; });
     }
     // Kana trainer: pull its cards + picker prefs once per signed-in user
     // (re-runs after a sign-out/in), then flush any offline reviews.
     var uid = !isGuestMode() && currentUser() ? currentUser().id : null;
-    if (uid && kanaSyncedFor !== uid) {
-      kanaSyncedFor = uid;
-      fetchKanaFromServer().then(function () { syncKanaOutbox(); render(); }).catch(function (e) { console.error("Flashcards: could not load kana progress from Supabase", e); });
+    if (uid && kanaSyncedFor !== uid && !kanaSyncInFlight
+        && Date.now() - lastKanaSyncAttempt > SYNC_RETRY_COOLDOWN_MS) {
+      kanaSyncInFlight = true;
+      lastKanaSyncAttempt = Date.now();
+      withTimeout(fetchKanaFromServer(), "kana initial sync")
+        .then(function () { kanaSyncedFor = uid; syncKanaOutbox(); render(); })
+        .catch(function (e) { console.error("Flashcards: could not load kana progress from Supabase", e); })
+        .finally(function () { kanaSyncInFlight = false; });
     }
     var stats = computeStats(new Date());
     var identityHtml = isGuestMode()
@@ -333,7 +354,15 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // the account (fetchAllFromServer pulls them back the other way on sign-in).
   if (window.RaumeStudy.tableCustom) {
     window.RaumeStudy.tableCustom.setRemotePush(function (obj) {
-      if (authState.session) dataOps.saveTableCustomRemote(obj).catch(function () {});
+      if (authState.session) {
+        dataOps.saveTableCustomRemote(obj).catch(function (e) {
+          // Local pick already stuck (table-custom.js's own cache); this one
+          // push attempt to the account failed silently with nothing to show
+          // for it and no retry -- at minimum, leave a trace so a report of
+          // "my icon didn't follow me to my other device" isn't a mystery.
+          console.warn("Flashcards: could not sync table customization", e);
+        });
+      }
     });
   }
 
