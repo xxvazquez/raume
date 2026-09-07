@@ -63,13 +63,29 @@ window.RaumeStudy.shared = (function () {
         callback();
       });
     }
+    // Kept alive outside speak()'s own scope on purpose: Chrome garbage-
+    // collects a SpeechSynthesisUtterance that nothing still references,
+    // which silently kills speech partway through (sometimes before a sound
+    // is ever heard) with no error anywhere -- a long-documented Chrome bug,
+    // not a Web Speech API requirement. A module-level reference is the
+    // standard workaround.
+    var currentUtterance = null;
     function speak(text) {
       var synth = window.speechSynthesis;
       if (!synth || !text || typeof SpeechSynthesisUtterance === "undefined") return;
       var utterance = new SpeechSynthesisUtterance(text);
+      currentUtterance = utterance;
       utterance.lang = "ja-JP";
+      // A mobile Japanese voice at the default rate (1) reads noticeably
+      // faster than its desktop counterpart -- clear for a native ear, a
+      // blur for a learner sounding out an unfamiliar word.
+      utterance.rate = 0.8;
       var voice = findJapaneseVoice();
       if (voice) utterance.voice = voice;
+      // No UI for this -- just a console breadcrumb so a report of "silent,
+      // no error visible" can actually be told apart from a real engine
+      // failure (e.g. "not-allowed", "synthesis-failed") next time.
+      utterance.onerror = function (e) { console.error("Speech synthesis failed:", e.error); };
       // Interrupt a still-speaking utterance so a second click doesn't queue up
       // behind the first -- but *only* then. Calling cancel() unconditionally
       // right before speak() is what leaves the queue wedged in some Chromium

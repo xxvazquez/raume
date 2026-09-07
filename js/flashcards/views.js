@@ -93,7 +93,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="fc-help-list">' +
       '<li>Each rating is saved the moment you pick it, so <span class="fc-legend-term">End session</span> (top-right of the card) never loses anything — it just stops early and shows the wrap-up.</li>' +
       '<li>The wrap-up counts what you reviewed and how many you got right; <span class="fc-legend-term">Keep going</span> appears when more cards are ready.</li>' +
-      '<li>A Japanese prompt has a speaker icon next to it that plays its pronunciation. It only appears once your browser confirms it has a Japanese voice installed.</li>' +
+      '<li>Pronunciation plays automatically the moment an answer reveals, and a speaker icon next to any Japanese text plays it again on click. The icon only appears once your browser confirms it has a Japanese voice installed.</li>' +
       '</ul></div>' +
       '<div class="fc-settings-section"><h3>Review keyboard shortcuts</h3>' +
       '<ul class="fc-help-list">' +

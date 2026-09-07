@@ -77,6 +77,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.jpPromptHtml = row.forms.map(function (f, fi) {
             return '<div class="verb-form ' + (fi === 0 ? "verb-form-plain" : "verb-form-polite") + '"><span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp)) + "</div>";
           }).join("");
+          // The dictionary (plain) form's reading, regardless of which form
+          // show-polite currently displays -- good enough for the reveal's
+          // autoplay without tracking that toggle's state here too.
+          entry.jpReading = jpReadingFn(row.forms[0].jp);
           entry.romajiDisplay = row.forms.map(function (f) { return f.romaji; }).join(" / ");
           entry.romajiUsable = row.forms.every(function (f) { return isRomajiUsable(f.romaji); });
           entry.romajiAnswers = entry.romajiUsable
@@ -87,6 +91,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.jpInlineHtml = entry.jpHtml;
           entry.jpPlain = jpPlainOf(row.jp);
           entry.jpPromptHtml = entry.jpHtml + speakBtnFn(jpReadingFn(row.jp));
+          entry.jpReading = jpReadingFn(row.jp);
           entry.romajiDisplay = row.romaji;
           entry.romajiUsable = isRomajiUsable(row.romaji);
           entry.romajiAnswers = entry.romajiUsable ? [normalizeAnswer(row.romaji, true)] : [];

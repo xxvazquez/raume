@@ -115,7 +115,12 @@ page is where you review, browse, and track a daily streak.
   digit as a chip; after a wrong answer, Good/Easy dim so the honest rating reads
   first.
 - Checking washes the card once in the matching tone and shows the verdict a
-  size up. The reveal adds one field of context you *weren't* tested on.
+  size up. The reveal adds one field of context you *weren't* tested on, and
+  the word's pronunciation plays automatically the moment it reveals (every
+  direction gets one eventually, including the two where the Japanese only
+  appears in that reveal, not the prompt) — same speaker icon and Web Speech
+  API as the reference pages, just triggered for you rather than waiting on
+  a click.
 - Screen-reader friendly: the field is named with its prompt, and the result is
   announced from an `aria-live` region without moving focus off the field.
 - Romaji checking ignores long vowels — `kōhī`, `koohii`, `kouhii` all match.

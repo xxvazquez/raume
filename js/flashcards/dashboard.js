@@ -15,6 +15,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var fc = window.RaumeStudy.flashcards;
   var store = fc.store, sched = fc.scheduling, vidx = fc.vocabIndex, dataOps = fc.dataOps;
   var esc = window.RaumeStudy.shared.escapeHtml;
+  var speech = window.RaumeStudy.shared.speech;
 
   var getCache = store.getCache, localDateStr = store.localDateStr, isGuestMode = store.isGuestMode;
   var uuid = store.uuid, RATING_NAMES = store.RATING_NAMES, DIRECTION_LABEL = store.DIRECTION_LABEL;
@@ -529,6 +530,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.correct = checkAnswer(entry, card.direction, input.value);
     session.checked = true;
     session.preview = previewRatings(getScheduler(getCache().settings), card, new Date());
+    // Pronunciation plays automatically the moment the answer reveals --
+    // every direction gets here eventually, including the two (ro-en,
+    // en-ro) where the Japanese word itself only appears now, in the
+    // reveal's context line, not as the prompt.
+    speech.speak(entry.jpReading);
     // Update the card in place so the answer field keeps focus -- rebuilding
     // the panel here would drop focus to <body> and close a phone's on-screen
     // keyboard on every single card. Full render only if the shell is gone.
@@ -622,10 +628,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     shell.querySelector(".fc-prompt-label").textContent = askLabelFor(card.direction);
     var promptEl = shell.querySelector(".fc-prompt");
     if (prompt.lang) promptEl.setAttribute("lang", "ja"); else promptEl.removeAttribute("lang");
+    // No click listener wired here on purpose -- js/vocab/interactions.js
+    // already binds a single document-wide delegated handler for every
+    // .jp-speak-btn on the page, this card's included. A second listener
+    // here used to double-fire speak() per click (this element's own
+    // listener, then the same click bubbling to the document handler),
+    // and the second call's cancel() -- seeing the first still in flight --
+    // wedged the speech engine permanently: exactly the failure mode
+    // speak()'s own comment already warns about, just self-inflicted.
     promptEl.innerHTML = prompt.html || esc(prompt.text);
-    promptEl.querySelectorAll(".jp-speak-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () { window.RaumeStudy.shared.speech.speak(btn.dataset.jpSpeak); });
-    });
 
     var input = shell.querySelector("#fcAnswerInput");
     // Name the field with the prompt it belongs to, so a screen-reader user
