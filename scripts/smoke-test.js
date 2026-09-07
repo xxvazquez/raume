@@ -87,7 +87,11 @@ async function main() {
     const tasteTagged = taste.querySelectorAll(".adj-pill-i").length >= 10 && taste.querySelectorAll(".adj-pill-na").length === 0;
     const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => r.cells[1].textContent === "mochimochi");
     const mochiUntagged = mochiRow && !mochiRow.querySelector(".adj-pill");
-    return labelsOk && !verbsHavePills && tasteTagged && mochiUntagged;
+    // A lone adjective sitting in an otherwise-noun table still gets tagged:
+    // 危険 (na-adj) in Signs, Doors & Places.
+    const kikenRow = [...document.querySelectorAll("#vocabulary tbody tr")].find(r => r.cells[1].textContent === "kiken");
+    const kikenTagged = kikenRow && kikenRow.querySelector(".adj-pill-na");
+    return labelsOk && !verbsHavePills && tasteTagged && mochiUntagged && kikenTagged;
   })());
   check("the adjective pill stays out of search matches", (() => {
     const input = document.getElementById("tableSearch");

@@ -510,7 +510,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0381","type":"word","jp":[{"kanji":"自動","reading":"じどう"}],"romaji":"jidō","english":"automatic"},
     {"id":"v0382","type":"word","jp":[{"kanji":"手動","reading":"しゅどう"}],"romaji":"shudō","english":"manual"},
     {"id":"v0383","type":"word","jp":[{"kanji":"注意","reading":"ちゅうい"}],"romaji":"chūi","english":"caution / attention"},
-    {"id":"v0384","type":"word","jp":[{"kanji":"危険","reading":"きけん"}],"romaji":"kiken","english":"danger"},
+    {"id":"v0384","type":"word","jp":[{"kanji":"危険","reading":"きけん"}],"romaji":"kiken","english":"dangerous / danger","adj":"na"},
     {"id":"v0385","type":"word","jp":[{"kanji":"禁止","reading":"きんし"}],"romaji":"kinshi","english":"prohibited"},
     {"id":"v0386","type":"word","jp":[{"kanji":"無料","reading":"むりょう"}],"romaji":"muryō","english":"free of charge"},
     {"id":"v0387","type":"word","jp":[{"kanji":"有料","reading":"ゆうりょう"}],"romaji":"yūryō","english":"paid / fee required"},

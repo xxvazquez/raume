@@ -91,8 +91,8 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **The adjective pill** (Adjectives + Taste & Texture) is a 10px rounded tag
-  sitting before the meaning: `--accent-soft` / `--accent-strong` for **い-adj**,
+- **The adjective pill** (on every い/な adjective, wherever it sits) is a 10px
+  rounded tag before the meaning: `--accent-soft` / `--accent-strong` for **い-adj**,
   `--accent-2-soft` / `--accent-2-strong` for **な-adj** — the same lavender /
   sage split used for primary vs supporting elsewhere, so the two classes
   separate without a loud colour. It's the one tag on the quiet reference side;
