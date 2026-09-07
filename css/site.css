@@ -29,51 +29,64 @@
 
 :root {
   /* -------------------------------------------------------------------
-     raume -- a quiet, editorial Japanese reference. One restrained
-     slate-blue accent, cool grey-blue lines, blue-grey ink. No warm
-     tones, no decorative colour. Hierarchy comes from size, spacing,
-     position and rule weight -- not bold text or high contrast.
+     raume -- a calm, editorial Japanese reference. The palette is a small
+     set of muted, desaturated tones on a near-white ground: a dusty
+     lavender as the primary accent, a soft sage for progress / "done", a
+     muted coral for attention, plus one muted slate-blue and mauve to round
+     out the four section identities. Nothing bright, nothing neon. What
+     changed from the old near-monochrome version is contrast and role --
+     deeper ink, visible card edges, and colour that now signals hierarchy
+     so headings and numbers read at a glance instead of blending in.
      ------------------------------------------------------------------- */
-  /* Text: four deliberate steps down. The Japanese column sits at the
-     darkest step so the eye finds it first -- through colour, not size or
-     weight. Meaning is one step lighter, then romaji. Furigana keeps its
-     blue-grey cast but is held to the same contrast floor as romaji -- it's
-     a reading aid, so it has to stay legible; size and position (small,
-     above the kanji) are what keep it from competing. All body-text tokens
-     clear WCAG AA (>= 4.5:1) on --paper. */
-  --ink: #2f3944;            /* primary -- page/section titles, Japanese */
-  --ink-2: #3f4854;          /* meaning column -- dark, a hair below --ink */
-  --muted: #5f6b79;          /* secondary -- labels, active nav siblings */
-  --romaji: #616d7b;         /* romaji column -- soft grey, clearly third, still AA */
-  --faint: #8996a3;          /* tertiary -- counts, captions, chevrons */
-  --furigana: #64707e;       /* reading over kanji -- blue-grey, AA-legible */
+  /* Text: four deliberate steps down, pitched dark so headings, numbers and
+     the Japanese column read at a glance. The Japanese column sits at the
+     darkest step so the eye finds it first. Meaning is one step lighter,
+     then romaji. Furigana keeps its blue-grey cast but is held to the same
+     contrast floor as romaji -- it's a reading aid, so it has to stay
+     legible; size and position (small, above the kanji) are what keep it
+     from competing. All body-text tokens clear WCAG AA (>= 4.5:1) on
+     --paper; --ink clears AAA. */
+  --ink: #1f2836;            /* primary -- page/section titles, numbers, Japanese (~12:1) */
+  --ink-2: #303b49;          /* meaning column -- dark, a hair below --ink */
+  --muted: #55606f;          /* secondary -- labels, active nav siblings (AA) */
+  --romaji: #5a6675;         /* romaji column -- clearly third, still AA */
+  --faint: #78838f;          /* tertiary -- counts, captions, chevrons (AA on paper) */
+  --furigana: #5c6a79;       /* reading over kanji -- blue-grey, AA-legible */
 
-  --page-bg: #eceff3;        /* cool grey behind the sheet */
-  --paper: #ffffff;          /* the sheet, table surface */
+  --page-bg: #f6f7f9;        /* near-white ground (~#F7F8F9) -- cards lift off it on a real border + shadow */
+  --paper: #ffffff;          /* the sheet, cards, table surface */
 
-  --line: #e3e8ec;           /* hairline row rules */
-  --line-strong: #d2dae2;    /* borders, header + nav underlines, table head rule */
+  --line: #e2e5ea;           /* hairline row rules */
+  --line-strong: #c8cfd8;    /* borders, header + nav underlines, table head rule */
 
-  /* The system accent -- used where nothing section-specific applies
-     (search focus, irregular-row edge, generic links). */
-  --accent: #4f6a88;
-  --accent-strong: #3f566f;
-  --accent-soft: #e9edf3;
+  /* Primary accent -- the dusty lavender #82799B. The colour of everything
+     you act on: active tabs, progress fills, focus, key interactive edges;
+     also the generic accent where nothing section-specific applies. Primary
+     buttons use `-strong` so white text on the fill clears AA. */
+  --accent: #82799b;
+  --accent-strong: #574d73;
+  --accent-soft: #ebe9f2;
 
-  /* Per-section identity. One restrained, desaturated cool tone each. Only
-     structural / interactive elements pick it up -- the page-title ink, the
-     nav underline, category headings + their rules, active filters/tabs,
-     focus, sort + chevron accents -- never a row or a large surface.
+  /* Secondary accent -- the soft sage #78968B, doubling as the
+     progress/"done" colour below. Legend terms, grammar particles,
+     supporting highlights. */
+  --accent-2: #5f8175;
+  --accent-2-strong: #456056;
+  --accent-2-soft: #e4ece8;
+
+  /* Per-section identity. Four muted hues, spread wide enough to read as
+     genuinely different places: slate-blue, mauve, sage, lavender. Used on
+     structural / interactive elements only (page-title ink, nav underline +
+     active block, category headings + their rules, active filters/tabs,
+     focus, sort + chevron accents) -- never a row or a large surface.
      `--section*` is switched by the body[data-active-*] rules below;
-     `--section-ink` (page titles) is derived from it on `body`. Hues are
-     spread ~30° apart across the cool half of the wheel (blue-green through
-     indigo) -- tight enough together before that Vocabulary and Flashcards
-     were 5° apart and read as one colour; each variant keeps its original
-     saturation/lightness, so contrast against --paper is unaffected. */
-  --sec-vocabulary: #4a7388;   --sec-vocabulary-soft: #e4ecf2;   --sec-vocabulary-strong: #3b5f70;
-  --sec-grammar:    #6b5c88;   --sec-grammar-soft:    #ece7f2;   --sec-grammar-strong:    #54486c;
-  --sec-travel:     #47706a;   --sec-travel-soft:     #e2ede9;   --sec-travel-strong:     #385a54;
-  --sec-flashcards: #565873;   --sec-flashcards-soft: #e7e8ef;   --sec-flashcards-strong: #44475d;
+     `--section-ink` (page titles) is derived from it on `body`. `-strong`
+     variants are the ones used at body-text size and all clear AA on
+     --paper. */
+  --sec-vocabulary: #4f7389;   --sec-vocabulary-soft: #e3ebef;   --sec-vocabulary-strong: #395767;
+  --sec-grammar:    #875a78;   --sec-grammar-soft:    #f0e5ec;   --sec-grammar-strong:    #6a4460;
+  --sec-travel:     #5f8175;   --sec-travel-soft:     #e4ece8;   --sec-travel-strong:    #456056;
+  --sec-flashcards: #82799b;   --sec-flashcards-soft: #e9e7f1;   --sec-flashcards-strong: #574d73;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
   --section-strong: var(--sec-vocabulary-strong);
@@ -83,58 +96,66 @@
      .vocab tbody tr:hover) -- no fixed grey token. */
 
   /* Irregular-verb rows: a calm slate wash + edge -- a state marker, not
-     an alarm (a wrong answer is the only thing that goes red). */
-  --irregular-bg: #e9edf1;
-  --irregular-ink: #4f5b69;
+     an alarm (a wrong answer is the only thing that goes coral). */
+  --irregular-bg: #e9e7ef;
+  --irregular-ink: #4a4560;
 
-  /* Study feedback only, never decorative: a muted brick red for a wrong /
-     missed answer, a muted eucalyptus green for a right one -- the only red
-     and the only green on the site, each kept as quiet as the other. Never
-     pink, never a bright validation green. */
-  --wrong: #a8524b;
-  --wrong-soft: #f4ebea;
-  --wrong-strong: #8a413b;
-  --right: #4f7a67;
-  --right-soft: #e7efeb;
-  --right-strong: #3c6151;
+  /* Study feedback + progress. Sage = right / done / progressing; the muted
+     coral = a wrong answer, and (as --rose* / the attention tokens below)
+     anything that wants a glance -- missed words, due cards. Both stay soft;
+     neither is a true red or a bright validation green. */
+  --wrong: #c77c72;
+  --wrong-soft: #f6e5e2;
+  --wrong-strong: #9c5248;
+  --right: #5f8175;
+  --right-soft: #e3ece8;
+  --right-strong: #456056;
 
-  /* The rating row's Hard button only -- a fourth, genuinely distinct hue
-     (an intensity-spectrum take on the same four buttons read wrong: Again
-     stronger than Hard implied Hard barely mattered). Muted amber, same
-     desaturated family as --wrong/--right so it doesn't read as a warning. */
-  --fc-hard: #a48246;
-  --fc-hard-soft: #f5ece0;
-  --fc-hard-strong: #69532d;
+  /* Attention -- the muted coral again, kept as one warm family: cards due,
+     words missed, retention slipping, the sync chip. Warm enough to pull
+     the eye, desaturated enough it never reads as an alarm. */
+  --warn: #c77c72;
+  --warn-soft: #f6e5e2;
+  --warn-strong: #9c5248;
 
-  /* Flashcards dashboard only -- a small categorical lift for a data surface
-     the quiet-everywhere rule made hard to scan. Card-state ramp: one slate
-     hue, three steps validated for lightness separation and AA, since
-     New -> Learning -> Review is an ordinal progression. Scoped to
-     .page-flashcards; the reference side stays monochrome. */
-  --fc-state-new: #8fabcd;
-  --fc-state-learning: #5f84ab;
-  --fc-state-review: #3a5578;
+  /* The rating row's Hard button needs a fourth hue distinct from Again
+     (coral), Good (sage) and Easy (lavender): a muted ochre, its only use. */
+  --fc-hard: #a9884b;
+  --fc-hard-soft: #f0e9da;
+  --fc-hard-strong: #6f5628;
 
-  /* Search-match highlight -- a warm, muted terracotta so a hit reads
-     instantly against the cool greys, without the alarm of a true red. */
-  --hl: #ecc9bd;
-  --hl-ink: #6d3b30;
+  /* Card-state ramp (New -> Learning -> Review). Three muted hues, not one
+     hue at three lightnesses, so the Card-progress bar's segments separate
+     at a glance: neutral slate untouched, ochre in-progress, sage
+     graduated-to-review. The legend labels each, so colour never carries
+     identity alone. */
+  --fc-state-new: #9aa6b4;
+  --fc-state-learning: #bd9757;
+  --fc-state-review: #6f9285;
 
-  --shadow-menu: 0 8px 24px rgba(47, 57, 68, .14);
+  /* Search-match highlight -- a soft coral tint so a hit reads against the
+     cool greys without the glow of a highlighter. */
+  --hl: #f0dcd6;
+  --hl-ink: #7a4038;
+
+  --shadow-menu: 0 10px 26px rgba(30, 27, 40, .18);
+  /* Cards lift off the near-white ground with a visible border AND a real
+     two-layer shadow -- on a near-white page the shadow does the figure /
+     ground work the low tonal contrast can't. Still soft, but committed. */
+  --shadow-card: 0 1px 3px rgba(30, 27, 40, .08), 0 6px 16px rgba(30, 27, 40, .08);
 
   /* Aliases so the Flashcards stylesheet below keeps running against one
      palette and one type scale rather than its own. */
   --accent-dark: var(--accent-strong);
-  --surface: #f2f5f7;
+  --surface: #eef0f3;
   /* Text-field fill + border, and the two structural line weights that want
-     tuning per theme (see the dark block). In light these are the values the
-     inputs / cards / rows already used. */
-  --field-fill: #f2f5f7;
+     tuning per theme (see the dark block). */
+  --field-fill: #eef0f3;
   --field-line: var(--line-strong);
-  --card-line: var(--line);
+  --card-line: #dbdfe6;
   --row-line: var(--line);
   --band: var(--paper);
-  --row-alt: #f2f5f7;
+  --row-alt: #eef0f3;
   --classic-band: var(--paper);
   --classic-band-line: var(--line-strong);
   --classic-band-text: var(--faint);
@@ -143,7 +164,7 @@
   --rose-blush: var(--wrong-soft);
   --rose-dark: var(--wrong-strong);
   --irregular: var(--irregular-ink);
-  --particle: var(--accent);
+  --particle: var(--accent-2);
 
   --radius-sheet: 6px;
   --radius-panel: 8px;
@@ -173,62 +194,72 @@
 }
 
 /* -------------------------------------------------------------------
-   Dark theme. Same restraint, inverted: a deep blue-grey ground, a
-   slightly lighter panel for the "sheet", cool near-white ink, and
-   section tones lightened so they read against the dark. Only the leaf
-   colour tokens change here -- every alias, section-switch rule and
-   color-mix() above resolves against these automatically.
-   js/theme-init.js sets <html data-theme> before first paint.
+   Dark theme. The same colour system, re-pitched for a dark ground: a
+   deep blue-grey background, a lighter panel for the "sheet" and cards,
+   near-white ink, and every accent hue lightened but kept muted so it
+   carries against the dark without turning neon. Only the leaf colour
+   tokens change here -- every alias, section-switch rule and color-mix()
+   above resolves against these automatically. js/theme-init.js sets
+   <html data-theme> before first paint.
    ------------------------------------------------------------------- */
 :root[data-theme="dark"] {
-  --ink: #e6eaee;
-  --ink-2: #d3dae1;
-  --muted: #9aa6b3;
+  --ink: #eef1f5;
+  --ink-2: #dbe1e8;
+  --muted: #9ba7b4;
   --romaji: #9fabb9;
   --faint: #808c9a;
   --furigana: #8e9aa9;   /* a clear step below --romaji again -- still AA on --paper */
 
-  --page-bg: #191d23;
-  --paper: #23282f;
+  --page-bg: #16181c;
+  --paper: #232529;
 
-  --line: #313842;
-  --line-strong: #404751;
+  --line: #34363c;
+  --line-strong: #474a52;
 
-  --accent: #86a4c6;
-  --accent-strong: #a8c1db;
-  --accent-soft: #2b3542;
+  --accent: #a99fc4;
+  --accent-strong: #c3bcd8;
+  --accent-soft: #2c2a37;
 
-  --sec-vocabulary: #86b1c6;   --sec-vocabulary-soft: #29363f;   --sec-vocabulary-strong: #b0cedd;
-  --sec-grammar:    #b1a1d0;   --sec-grammar-soft:    #382f42;   --sec-grammar-strong:    #cbc0e2;
-  --sec-travel:     #82b6a9;   --sec-travel-soft:     #24352f;   --sec-travel-strong:     #a6d2c6;
-  --sec-flashcards: #9b9fbd;   --sec-flashcards-soft: #2b2d3a;   --sec-flashcards-strong: #babed6;
+  --accent-2: #86a89d;
+  --accent-2-strong: #a6c6bc;
+  --accent-2-soft: #202f2b;
+
+  --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
+  --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
+  --sec-travel:     #8bb0a4;   --sec-travel-soft:     #212f2b;   --sec-travel-strong:    #aed0c5;
+  --sec-flashcards: #a99fc4;   --sec-flashcards-soft: #2b2937;   --sec-flashcards-strong: #c6bfda;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
   --section-strong: var(--sec-vocabulary-strong);
 
-  --irregular-bg: #2c333d;
-  --irregular-ink: #bac2cc;
+  --irregular-bg: #2b2b38;
+  --irregular-ink: #c1bcd0;
 
-  --wrong: #dd9086;
-  --wrong-soft: #3a2a27;
-  --wrong-strong: #ecaaa0;
-  --right: #83b3a0;
-  --right-soft: #263530;
-  --right-strong: #a4ccbc;
+  --wrong: #d69488;
+  --wrong-soft: #362824;
+  --wrong-strong: #e6aca1;
+  --right: #82ab9d;
+  --right-soft: #1f302b;
+  --right-strong: #a8cdbf;
 
-  --fc-hard: #ddbe88;
-  --fc-hard-soft: #3a3224;
-  --fc-hard-strong: #e6cfa8;
+  --warn: #d69488;
+  --warn-soft: #362824;
+  --warn-strong: #e6aca1;
 
-  --fc-state-new: #4a6591;
-  --fc-state-learning: #7592bd;
-  --fc-state-review: #a6c1e0;
+  --fc-hard: #cbab74;
+  --fc-hard-soft: #332c1e;
+  --fc-hard-strong: #ddc498;
 
-  --hl: #7d4a3c;
-  --hl-ink: #f3dad1;
+  --fc-state-new: #6b7688;
+  --fc-state-learning: #cbab74;
+  --fc-state-review: #82ab9d;
 
-  --surface: #2a303a;
+  --hl: #4a352f;
+  --hl-ink: #f0d4cc;
 
+  --surface: #2b2d33;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 10px rgba(0, 0, 0, .35);
   --shadow-menu: 0 12px 34px rgba(0, 0, 0, .55);
 
   /* In light --surface (a recessed grey) does for inputs; in dark it lands
@@ -237,8 +268,9 @@
      border a clear step up from --line. */
   --field-fill: #131820;
   --field-line: #4b5563;
-  /* Stacked card outlines read boxy in dark; soften toward --paper. */
-  --card-line: #2b313a;
+  /* Card outlines need to stay visible against --paper so cards read as
+     raised -- paired with --shadow-card. */
+  --card-line: #39414d;
   /* Table row rules had nearly vanished; give them a hair more. */
   --row-line: #3b434e;
 }
@@ -293,6 +325,7 @@ body {
   background: var(--paper);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sheet);
+  box-shadow: var(--shadow-card);
 }
 
 /* --- Masthead: the header of a reference book, not a hero ---------- */
@@ -391,7 +424,7 @@ body {
   color: var(--section-strong);
   font-weight: 500;
   background: var(--section-soft);
-  border-bottom-color: var(--section);
+  border-bottom: 3px solid var(--section);
 }
 
 /* --- Page shell ------------------------------------------------- */
@@ -1426,7 +1459,7 @@ body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--fa
 
 /* ---------------------------------------------------------------------
    Flashcards -- additive feature, same visual language as the rest of the
-   app. It picks up the muted-slate --section tone (set by
+   app. It picks up the lavender --section tone (set by
    body[data-active-page="flashcards"]); the only extra palette is one
    "danger" pair for the single genuinely destructive action: permanently
    deleting learning history.
@@ -1476,7 +1509,10 @@ body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--fa
 .fc-toggle-btn:focus-visible,
 .fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
 .fc-toggle-btn:hover { color: var(--accent-dark) !important; }
-.fc-toggle-btn[aria-pressed="true"] { color: var(--accent) !important; }
+/* Already in your deck -- green, matching "in flashcards" everywhere else
+   (the Manage status glyph, the dashboard). Quiet enough not to speckle the
+   table, clear enough to pick out the rows you've added. */
+.fc-toggle-btn[aria-pressed="true"] { color: var(--right-strong) !important; }
 .vocab tbody tr:hover .row-hide-btn,
 .vocab tbody tr:focus-within .row-hide-btn,
 .row-hide-btn:focus-visible { opacity: 1; }
@@ -1513,18 +1549,17 @@ body.starred-mode .expand-bar { display: none !important; }
 
 .fc-lede { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.5; max-width: 60ch; }
 
-.fc-tabs { display: flex; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.fc-tabs { display: flex; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line-strong); flex-wrap: wrap; }
 .fc-tab {
   appearance: none; border: 0; background: transparent;
   padding: 7px 2px;
+  margin-bottom: -1px;
   color: var(--muted); font: 400 var(--fs-nav-sub)/1.3 var(--font-ui);
-  cursor: pointer; border-bottom: 2px solid transparent;
+  cursor: pointer; border-bottom: 3px solid transparent;
 }
 .fc-tab:hover { color: var(--ink); }
-/* Which tab is selected reads from colour + the underline, the same
-   convention .view-mode's active state uses (fill/colour, not weight) --
-   not from bold, which every tab being bold all the time made "why does
-   this look so heavy". */
+/* Which tab is selected reads from colour + a solid 3px underline in the
+   section accent -- clearly the live one against the muted rest. */
 .fc-tab.active { color: var(--section-strong); font-weight: 500; border-bottom-color: var(--section); }
 .fc-tabpanel[hidden] { display: none; }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
@@ -1540,34 +1575,36 @@ body.starred-mode .expand-bar { display: none !important; }
    two-up cards, not prose). */
 #fcPanelDashboard { max-width: 900px; }
 
-/* Dashboard stat tiles -- flat bordered cards. Four numbers of genuinely
-   different kinds used to get one identical coloured rule each, which read
-   as one undifferentiated row: no cue for which number actually means
-   something right now. The left rule now carries real weight instead of
-   uniform decoration: quiet (--line-strong) for the two plain running
-   tallies (Total cards, Reviews completed) so they recede as context; the
-   Flashcards section tone for Day streak, the one tile that's already an
-   achievement in its own right; amber (.fc-stat-attention, reusing the
-   rating row's --fc-hard) only on Estimated retention, and only once it's
-   meaningfully under the target set in Settings -- healthy retention looks
-   exactly like the quiet tiles, so colour only appears when it's actually
-   worth a glance. */
-/* 2x2 on narrow screens (four tiles, so it stays even -- no orphan on its
-   own row), one row of four once there's width for it -- on the shared 12-col
-   grid below, so the tile seams line up with the panels above and below. */
+/* Dashboard stat tiles -- flat bordered cards, lifted off the near-white
+   ground with --card-line + --shadow-card. Four numbers of genuinely
+   different kinds used to get one identical coloured rule each, reading as
+   one undifferentiated row. The 4px left rule now carries meaning (see the
+   rules just below): section lavender for Day streak, sage for Reviews
+   completed, coral for Estimated retention only when it has slipped, and
+   neutral for Total cards -- context, not a signal.
+   2x2 on narrow screens (four tiles, so it stays even -- no orphan on its
+   own row), one row of four once there's width for it -- on the shared
+   12-col grid below, so the tile seams line up with the panels above and
+   below. */
 .fc-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
 .fc-stat-tile {
   position: relative;
   background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
+  box-shadow: var(--shadow-card);
   padding: 12px 14px 12px 16px;
 }
 .fc-stat-tile::before {
-  content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px;
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 8px 0 0 8px;
   background: var(--line-strong);
 }
+/* The left rule carries meaning, not decoration: the section lavender for
+   Day streak (an achievement), sage --right for cumulative progress
+   (Reviews completed), coral --warn only when Estimated retention has
+   slipped under target. Total cards keeps the neutral default. */
 .fc-stat-streak::before { background: var(--section); }
-.fc-stat-attention::before { background: var(--fc-hard); }
-.fc-stat-attention .fc-stat-value { color: var(--fc-hard-strong); }
+.fc-stats-grid > .fc-stat-tile:nth-child(3)::before { background: var(--right); }
+.fc-stat-attention::before { background: var(--warn); }
+.fc-stat-attention .fc-stat-value { color: var(--warn-strong); }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
 .fc-stat-label { display: block; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
@@ -1586,7 +1623,7 @@ body.starred-mode .expand-bar { display: none !important; }
   align-items: start;
   margin-bottom: 20px;
 }
-.fc-viz-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; padding: 16px 18px; }
+.fc-viz-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
@@ -1594,10 +1631,10 @@ body.starred-mode .expand-bar { display: none !important; }
 
 .fc-breakdown-bar-wrap { border-radius: 8px; overflow: hidden; background: var(--surface); }
 .fc-breakdown-bar { display: block; width: 100%; height: 16px; }
-/* One slate hue, three steps validated for lightness separation (see
-   --fc-state-* in :root) -- an ordinal New -> Learning -> Review progression,
-   so a light-to-dark ramp reads as "same thing, further along"; the legend
-   labels each step so the ramp never carries identity alone. */
+/* Three distinct muted hues -- neutral slate / ochre / sage (see
+   --fc-state-* in :root) -- for the ordinal New -> Learning -> Review
+   progression, so the segments separate at a glance; the legend labels each
+   step so the ramp never carries identity alone. */
 .fc-seg-new { fill: var(--fc-state-new); background: var(--fc-state-new); }
 .fc-seg-learning { fill: var(--fc-state-learning); background: var(--fc-state-learning); }
 .fc-seg-review { fill: var(--fc-state-review); background: var(--fc-state-review); }
@@ -1612,15 +1649,17 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-week-none { margin: 0 0 10px; }
 .fc-week-chart { display: flex; align-items: flex-end; gap: 6px; height: 84px; }
 .fc-week-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; height: 100%; }
-.fc-week-count { display: block; min-height: 1.4em; font: 500 var(--fs-micro)/1.4 var(--font-ui); color: var(--ink); }
+.fc-week-count { display: block; min-height: 1.4em; font: 500 var(--fs-micro)/1.4 var(--font-ui); color: var(--muted); }
 .fc-week-barsvg { display: block; width: 100%; flex: 1 1 auto; min-height: 0; }
-/* Past days in a muted tint of the Flashcards section tone; today at full
-   strength so the current day reads first. A no-review day stays a flat
-   baseline in --line regardless. */
-.fc-week-bar { fill: color-mix(in srgb, var(--section) 52%, var(--surface)); }
-.fc-week-bar-empty { fill: var(--line); }
-.fc-week-col-today .fc-week-bar:not(.fc-week-bar-empty) { fill: var(--section); }
+/* Past days a clear mid lavender; today the full deep accent so the current
+   day reads first at a glance, its count + label carrying the same colour
+   and weight. A no-review day stays a flat baseline regardless. */
+.fc-week-bar { fill: color-mix(in srgb, var(--accent) 60%, var(--paper)); }
+.fc-week-bar-empty { fill: var(--line-strong); }
+.fc-week-col-today .fc-week-bar:not(.fc-week-bar-empty) { fill: var(--accent-strong); }
+.fc-week-col-today .fc-week-count { color: var(--accent-strong); }
 .fc-week-label { display: block; margin-top: 6px; font-size: var(--fs-micro); color: var(--faint); }
+.fc-week-col-today .fc-week-label { color: var(--accent-strong); font-weight: 500; }
 
 .fc-cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
 .fc-cta-row-spaced { margin-top: 12px; margin-bottom: 0; }
@@ -1641,8 +1680,20 @@ body.starred-mode .expand-bar { display: none !important; }
 }
 .fc-btn:hover { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
-.fc-btn-primary { background: var(--section); border-color: var(--section); color: var(--paper); }
-.fc-btn-primary:hover { background: var(--section-strong); border-color: var(--section-strong); color: var(--paper); }
+/* The primary action -- a confident deep-lavender fill (--section-strong, so
+   white text clears AA), lifted with a tinted shadow so it clearly outranks
+   the quiet ghost buttons around it. */
+.fc-btn-primary {
+  background: var(--section-strong); border-color: var(--section-strong); color: var(--paper);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(30, 27, 40, .18), 0 4px 12px color-mix(in srgb, var(--section) 45%, transparent);
+}
+.fc-btn-primary:hover {
+  background: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
+  border-color: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
+  color: var(--paper);
+}
+.fc-btn-primary[disabled] { box-shadow: none; }
 .fc-note { color: var(--muted); font-size: var(--fs-small); }
 .fc-legend-term { color: var(--accent-dark); }
 
@@ -1806,8 +1857,9 @@ body.starred-mode .expand-bar { display: none !important; }
 /* Review flow */
 .fc-review-card {
   width: 100%; max-width: 560px; margin: 0 auto;
-  background: var(--paper); border: 1px solid var(--line);
+  background: var(--paper); border: 1px solid var(--card-line);
   border-radius: 8px; padding: 24px 22px;
+  box-shadow: var(--shadow-card);
 }
 /* On a roomy window a session shows just the card (or the wrap-up) stranded at
    the top of a tall empty panel. Give the panel a min-height and centre its one
@@ -1920,9 +1972,9 @@ body.starred-mode .expand-bar { display: none !important; }
    --wrong, Hard a lighter tint) and read wrong: it made Hard look like it
    barely mattered next to Again. Four distinct hues instead, all at the same
    strength, so the choice is muscle memory, not a read-all-four every card:
-   Again in --wrong, Hard in the amber --fc-hard (the one new hue this needs),
-   Good in --right, Easy in --accent -- reusing the site's existing tones
-   everywhere but Hard. Border + a hair of tinted surface only -- never a
+   Again in the coral --wrong, Hard in the ochre --fc-hard (the one hue
+   unique to this row), Good in the sage --right, Easy in the lavender
+   --accent -- reusing the palette's tones everywhere but Hard. Border + a hair of tinted surface only -- never a
    filled panel, matching .fc-result / the stat-tile left rule. Label text
    always uses each tone's -strong variant against the tinted background --
    Good originally used the base --right and quietly failed WCAG AA; keep
@@ -2047,8 +2099,8 @@ body.starred-mode .expand-bar { display: none !important; }
 /* Entry choice: guest mode vs signed-in, side by side as two equally valid
    options -- same card language as .fc-viz-card, not one path presented as
    the "real" one and the other as a fallback. Neither button is a filled
-   primary: the teal-tinted "This device only" surface is the only nudge, so
-   two dark buttons don't compete for the eye. The cards share a top edge
+   primary: the lavender-tinted "This device only" surface is the only nudge,
+   so two dark buttons don't compete for the eye. The cards share a top edge
    (align-items:start) and each button spans its card's width, so the shorter
    guest card still reads as a finished block rather than a stub. */
 .fc-entry-grid {
@@ -2059,12 +2111,12 @@ body.starred-mode .expand-bar { display: none !important; }
   margin-top: 4px;
   max-width: 760px;
 }
-.fc-entry-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: var(--radius-panel); padding: 20px 22px; }
-/* "This device only" is the gently preferred path: a soft teal-tinted
+.fc-entry-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: var(--radius-panel); box-shadow: var(--shadow-card); padding: 20px 22px; }
+/* "This device only" is the gently preferred path: a soft accent-tinted
    surface. "Sync across devices" stays neutral white. */
 .fc-entry-grid > .fc-entry-card:first-child {
   background: var(--accent-soft);
-  border-color: var(--line-strong);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--card-line));
 }
 .fc-entry-card h3 { margin: 0 0 6px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
 .fc-entry-card .fc-note { margin: 0 0 16px; font-size: var(--fs-nav-sub); color: var(--muted); }
@@ -2110,7 +2162,7 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-sync-chip[hidden] { display: none; }
 .fc-sync-chip:not(:has(.fc-sync-now)) { padding-right: 12px; }
 .fc-sync-chip-offline {
-  background: var(--fc-hard-soft); border-color: var(--fc-hard); color: var(--fc-hard-strong);
+  background: var(--warn-soft); border-color: var(--warn); color: var(--warn-strong);
 }
 .fc-sync-chip-syncing {
   background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark);
@@ -2123,7 +2175,7 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-sync-now:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
 
 /* Settings */
-.fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; padding: 16px 18px; margin-bottom: 16px; }
+.fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px; }
 .fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-subhead); color: var(--ink); font-weight: 500; }
 .fc-settings-section p.fc-note { margin: 0 0 14px; }
 .fc-settings-field { padding: 10px 0; border-top: 1px solid var(--line); }
@@ -2234,11 +2286,12 @@ body.starred-mode .expand-bar { display: none !important; }
   line-height: 1;
 }
 /* Status colours carry meaning, not decoration: neutral for absent/paused,
-   brand teal for "in your deck", deep teal for "due now" -- a due review is an
-   actionable study state, not an error (rose is reserved for real mistakes). */
+   sage for "in your deck and on schedule", coral for "due now" -- a due
+   review wants a glance, and coral is the attention tone everywhere on the
+   dashboard too. */
 .fc-status-none { color: var(--faint); }
-.fc-status-active { color: var(--accent); }
-.fc-status-due { color: var(--accent-dark); font-weight: 500; }
+.fc-status-active { color: var(--right-strong); }
+.fc-status-due { color: var(--warn-strong); font-weight: 500; }
 .fc-status-archived { color: var(--faint); }
 
 /* Top row: Next review + Today's progress, side by side on wide screens and
@@ -2263,7 +2316,8 @@ body.starred-mode .expand-bar { display: none !important; }
 }
 
 .fc-today {
-  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
+  box-shadow: var(--shadow-card);
   padding: 13px 16px;
 }
 .fc-today-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 9px; }
@@ -2275,29 +2329,40 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-progress-track { fill: var(--surface); }
 .fc-progress-fill { fill: var(--accent); }
 
-/* Next review -- a bordered card with a coloured left edge. Having cards due is
-   an actionable study state, not an error, so it uses the teal/action colour
-   (the Study now button right below is the primary signal); an empty queue is
-   the quiet, nothing-to-do state. Rose is never used here. */
+/* Next review -- a bordered card with a coloured left edge, the dashboard's
+   "here's what needs you" line paired with the Study now button below it.
+   Cards waiting to be studied is an attention state (not an error): the
+   coral attention tone, a 5px left bar and a warm tint make it the one card
+   in the top row that jumps. An empty queue is the calm, nothing-to-do
+   state -- a quiet sage green. */
 .fc-next-review {
   display: flex; flex-direction: column; gap: 3px;
   padding: 12px 14px 12px 16px;
-  border: 1px solid var(--line);
-  border-left-width: 4px;
+  border: 1px solid var(--card-line);
+  border-left-width: 5px;
   border-radius: 8px;
+  box-shadow: var(--shadow-card);
 }
-.fc-next-review-due { border-left-color: var(--accent); background: var(--accent-soft); }
-.fc-next-review-clear { border-left-color: var(--line-strong); background: var(--surface); }
+.fc-next-review-due {
+  border-color: color-mix(in srgb, var(--warn) 30%, var(--card-line));
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+.fc-next-review-clear {
+  border-left-color: var(--right);
+  background: var(--right-soft);
+}
 .fc-next-review-title { font-weight: 500; font-size: var(--fs-nav-sub); }
-.fc-next-review-due .fc-next-review-title { color: var(--accent-dark); }
-.fc-next-review-clear .fc-next-review-title { color: var(--ink); }
+.fc-next-review-due .fc-next-review-title { color: var(--warn-strong); }
+.fc-next-review-clear .fc-next-review-title { color: var(--right-strong); }
 .fc-next-review-sub { color: var(--muted); font-size: var(--fs-small); }
+.fc-next-review-due .fc-next-review-sub { color: color-mix(in srgb, var(--warn-strong) 70%, var(--muted)); }
 
 /* "Missed today" -- a shortlist of words to revisit. Each row is one unit:
    the Japanese pair (strongest), one "romaji · english" supporting line, and
-   a small "N× today" badge. The whole row is the tap target, and a thin brick
-   left rule (matching the badge) marks the list as "needs attention" so it
-   doesn't read like every other neutral card. */
+   a small "N× today" badge. The whole row is the tap target, and a coral
+   left rule (matching the badge) marks the list as "worth a look" -- the
+   same attention tone used across the dashboard. */
 .fc-missed-list { margin: 0; padding: 0; list-style: none; }
 /* The three parts sit next to each other and hug their content (no flexible
    middle column that would open a void before the badge); a long row just
@@ -2312,7 +2377,7 @@ body.starred-mode .expand-bar { display: none !important; }
   border-top: 1px solid var(--line);
   padding: 9px 8px;
   border-radius: 6px;
-  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--wrong) 50%, var(--paper));
+  box-shadow: inset 3px 0 0 var(--warn);
   text-align: left; cursor: pointer; color: var(--ink);
 }
 .fc-missed-list li:first-child .fc-missed-row { border-top: 0; }
@@ -2333,13 +2398,13 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-missed-ro { color: var(--muted); }
 .fc-missed-sep { color: var(--faint); }
 .fc-missed-en { color: var(--ink); }
-/* The one place rose does work here -- the count, and only the count. */
+/* The miss count -- coral attention, matching the row's left rule. */
 .fc-missed-badge {
   flex: 0 0 auto;
   white-space: nowrap;
   font-size: var(--fs-micro);
-  color: var(--rose-dark);
-  background: var(--rose-soft);
+  color: var(--warn-strong);
+  background: var(--warn-soft);
   padding: 2px 8px;
   border-radius: 999px;
 }

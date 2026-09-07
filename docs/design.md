@@ -1,8 +1,11 @@
 # Design
 
-The look is a quiet paper reference: a light sheet on a cool grey ground, one
-slate-blue accent, hairline rules, no decoration that isn't doing a job. This
-note records the rules so they stay consistent.
+The look is a calm paper reference with a clear colour system: a white sheet on
+a near-white ground, cards that lift off it with a hairline edge and a soft
+shadow, and a small set of muted tones that carry hierarchy — dusty lavender for
+what you act on, soft sage for progress, muted coral for attention, deep ink for
+anything you read. Calm, not washed out. This note records the rules so they
+stay consistent.
 
 ## Type
 
@@ -28,41 +31,58 @@ note records the rules so they stay consistent.
 
 ## Colour
 
-The palette is deliberately narrow — no pink, no warm tones, no gradients, no
-shadows beyond the one under the table overflow menu. It's defined as CSS
-custom properties in `css/site.css`.
+A small set of **muted, desaturated tones** — nothing bright, nothing neon: a
+dusty lavender (`#82799B`), a soft sage (`#78968B`) and a muted coral (`#C77C72`)
+on a near-white ground (`~#F7F8F9`). What changed from the old near-monochrome
+version is contrast and role — deeper ink, a real card shadow so white cards
+lift off the near-white page, and colour that now signals hierarchy. No true red
+except the one destructive-delete `--danger`. Gradients are out; shadow is in,
+but only the card lift (`--shadow-card`) and the menu shadow. All CSS custom
+properties in `css/site.css`.
 
-| Hex | Variable | Used for |
+| Hex (light) | Variable | Used for |
 |---|---|---|
-| `#2F3944` | `--ink` | primary text — dark blue-grey, never black |
-| `#5F6B79` / `#8996A3` | `--muted` / `--faint` | secondary text (labels) / tertiary (counts, chevrons) |
-| `#616D7B` / `#64707E` | `--romaji` / `--furigana` | the romaji column / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
-| `#EEF1F4` | `--page-bg` | the cool grey behind the sheet |
-| `#FFFFFF` | `--paper` | the sheet and table surface |
-| `#E3E8EC` / `#D3DBE2` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
-| `#526D87` / `#405A73` | `--accent` / `--accent-strong` | the single accent — active nav/tabs/controls, focus, search-match wash |
+| `#1F2836` | `--ink` | primary text — dark cool ink for headings, numbers, Japanese (~12:1, clears AAA) |
+| `#55606F` / `#78838F` | `--muted` / `--faint` | secondary text (labels) / tertiary (counts, chevrons) — both AA |
+| `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji column / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
+| `#F6F7F9` | `--page-bg` | the near-white ground — white cards lift off it on `--shadow-card`, not tonal contrast |
+| `#FFFFFF` | `--paper` | the sheet, cards, table surface |
+| `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
+| `#DBDFE6` | `--card-line` | card outlines — visible, paired with `--shadow-card` |
+| `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
+| `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, grammar particles, supporting highlights (same hue as `--right`) |
 
-A few colours do a purely functional job:
+Functional roles, each one job — all muted:
 
+- **sage green** (`--right` / `-soft` / `-strong`) — right answer, and everywhere
+  "done / on schedule / progressing": the Manage "in your deck" glyph, the
+  in-flashcards row toggle, the Reviews-completed stat rule, a cleared queue;
+- **coral** (`--warn` / `-soft` / `-strong`, the same values as `--wrong`) — one
+  warm attention family: cards due, words missed, retention slipping, the sync
+  chip, **and** a wrong answer in review. Warm enough to pull the eye,
+  desaturated enough it never reads as an alarm;
+- **ochre** (`--fc-hard` / `-soft` / `-strong`) — one job only: the rating row's
+  Hard button, which needs a fourth hue distinct from Again (coral), Good (sage)
+  and Easy (lavender). Also the Learning segment of the Card-progress bar;
 - a slate wash (`--irregular-bg` / `--irregular-ink`) marks irregular-verb rows;
-- study feedback carries the only two saturated tones on the reference side — a
-  muted brick red (`--wrong`) for a wrong or missed answer, a muted eucalyptus
-  green (`--right`) for a correct one, each kept as quiet as the other.
+- the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`).
 
 ### Per-section tone
 
-Each section carries one muted cool tone, used **only** on structural and
-interactive elements (nav underline, category rules, active tabs, focus, sort
-accents) — never on rows or large surfaces. `--section` is switched by
-`body[data-active-*]`:
+Four muted hues, spread wide enough to read as genuinely different places: a
+slate-blue, a mauve, the sage, the lavender. Used **only** on structural and
+interactive elements (nav underline + active block, category headings + rules,
+active tabs/filters, focus, sort accents) — never a row or a large surface.
+`-strong` variants are the ones used at body-text size and all clear AA on
+`--paper`. `--section` is switched by `body[data-active-*]`:
 
-- `--sec-vocabulary` — blue
-- `--sec-grammar` — indigo
-- `--sec-travel` — blue-green
-- `--sec-flashcards` — slate
+- `--sec-vocabulary` — slate-blue (`#4F7389`)
+- `--sec-grammar` — mauve (`#875A78`)
+- `--sec-travel` — sage (`#5F8175`)
+- `--sec-flashcards` — lavender (`#82799B`), the same as the primary accent
 
-They sit roughly 30° apart around the cool half of the wheel, so the four read
-as distinct identities when moving between sections rather than near-duplicates.
+The four hues sit well over 20° apart (the smoke test enforces it), light and
+dark, so moving between sections reads as a change of place.
 
 ## Labels and measure
 
@@ -95,28 +115,38 @@ the rest — `appearance: none` plus a CSS tick, not the raw OS control.
 
 ## The Flashcards dashboard
 
-The one place the quiet-everywhere rule is loosened — a data surface needs to be
-scannable. Still no gradients or shadows, and the same cool character, but:
+The dashboard has to be scannable at a glance — hierarchy comes through in
+colour here more than anywhere else:
 
-- the card-progress bar uses a three-step slate ramp (`--fc-state-new` /
-  `-learning` / `-review`, an ordinal New → Learning → Review; steps validated
-  for lightness separation and AA in both themes);
-- reviews-this-week bars pick up the Flashcards section tone, with today's bar
-  at full strength;
-- the four stat tiles' left rule is quiet (`--line-strong`) by default — Total
-  cards and Reviews completed are plain running counts. **Day streak** takes the
-  section tone (it's an achievement); **Estimated retention** turns the same
-  muted amber as the rating row's Hard (`.fc-stat-attention`, reusing
-  `--fc-hard`) only once it drops meaningfully under the target set in Settings,
-  so colour there means something;
-- the "Missed today" list gets a thin `--wrong` left rule — the one warm note on
-  an otherwise cool surface.
+- **cards lift off the page** — every tile, viz card, the Today card, the
+  next-review card and the review card carry `--card-line` plus a committed
+  two-layer `--shadow-card`; on the near-white ground the shadow is what
+  separates figure from ground;
+- **"N to study"** (`.fc-next-review-due`) is the one card in the top row that
+  jumps: the coral attention tone, a warm tint and a 5px left bar. A cleared
+  queue (`-clear`) goes quiet sage instead;
+- **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
+  lavender and a tinted shadow, so it clearly outranks the ghost buttons;
+- **stat tiles** — the 5px left rule carries meaning: lavender for **Day streak**
+  (an achievement), sage for **Reviews completed** (cumulative progress), coral
+  for **Estimated retention** only once it drops under the Settings target
+  (`.fc-stat-attention`). **Total cards** stays neutral — it's context;
+- **Card progress** uses three distinct hues, not one hue at three lightnesses —
+  neutral slate `--fc-state-new`, ochre `--fc-state-learning`, sage
+  `--fc-state-review` (New → Learning → graduated-to-review). The legend labels
+  each, so colour never carries identity alone;
+- **Reviews this week** bars are a mid lavender tint; today's bar is the full
+  deep `--accent-strong` with its count and label the same colour and weight;
+- **Missed today** rows get a 3px coral left rule and a coral badge — the
+  attention tone used across the dashboard.
 
-All of it is scoped to `.page-flashcards`; the reference side stays monochrome.
+The review card's rating row needs a fourth hue: Again / Good / Easy reuse
+`--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the
+ochre `--fc-hard`.
 
-The review card's rating row is the other exception: it needs a fourth hue.
-Again / Good / Easy reuse `--wrong` / `--right` / `--accent`; Hard gets its own
-muted amber (`--fc-hard`).
+The active sub-tabs (`.fc-tab.active`) and nav links (`.site-nav-link.active`)
+carry a solid 3px underline in the section tone plus, for the nav, a soft
+tinted block — clearly the live one against the muted rest.
 
 ## Dark mode
 
@@ -126,9 +156,12 @@ light logic doesn't carry over:
 - text fields get their own fill (`--field-fill`) and border (`--field-line`) —
   a well *below* the page ground, so an input reads as something you type into
   rather than a raised panel;
-- stacked card outlines soften toward `--paper` (`--card-line`) so a column of
-  them isn't boxy, while table row rules gain a little (`--row-line`) so they
-  don't vanish;
+- `--card-line` stays a visible step above `--paper` so cards still read as
+  raised on the dark ground (with `--shadow-card`), while table row rules gain a
+  little (`--row-line`) so they don't vanish;
+- every accent hue is lightened but kept muted so it carries against the dark
+  without turning neon — the four section tones, the lavender/sage accents,
+  coral and ochre all re-pitched in the `:root[data-theme="dark"]` block;
 - `--furigana` drops a clear step below `--romaji` again (it collapses to one
   tone otherwise), still clearing AA over `--paper`.
 

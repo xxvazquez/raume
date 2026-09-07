@@ -983,7 +983,7 @@ async function main() {
   })());
   check("the chip is styled to actually register -- a filled pill, not a hairline ghost", (() => {
     const rule = allCssRules.find(r => r.selectorText === ".fc-sync-chip-offline");
-    return !!rule && /var\(--fc-hard/.test(rule.style.background || rule.style.cssText || "");
+    return !!rule && /var\(--warn/.test(rule.style.background || rule.style.cssText || "");
   })());
   Object.defineProperty(window.navigator, "onLine", { configurable: true, value: true });
   window.dispatchEvent(new window.Event("online"));
