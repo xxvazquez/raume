@@ -71,12 +71,15 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.jpPlain = row.forms.map(function (f) { return jpPlainOf(f.jp); }).join(" / ");
           // Only the review card's prompt gets a speaker button (the Manage
           // list and "Missed today" tile above reuse jpHtml/jpInlineHtml as
-          // plain display) -- each form tagged verb-form-plain/-polite so the
-          // same body.show-polite toggle that picks which form is visible
-          // also picks which button is.
-          entry.jpPromptHtml = row.forms.map(function (f, fi) {
-            return '<div class="verb-form ' + (fi === 0 ? "verb-form-plain" : "verb-form-polite") + '"><span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp)) + "</div>";
-          }).join("");
+          // plain display). Both forms always show here, one line, slash-
+          // separated like jpInlineHtml above -- deliberately NOT gated by
+          // body.show-polite (that toggle is a Vocabulary-page-only
+          // reference control): both casual and polite are accepted answers
+          // for every verb-pair card today, so the prompt should show both,
+          // regardless of what the reference page's toggle is set to.
+          entry.jpPromptHtml = row.forms.map(function (f) {
+            return '<span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp));
+          }).join('<span class="fc-jp-slash"> / </span>');
           // The dictionary (plain) form's reading, regardless of which form
           // show-polite currently displays -- good enough for the reveal's
           // autoplay without tracking that toggle's state here too.
