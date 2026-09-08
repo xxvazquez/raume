@@ -362,10 +362,11 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
       // r2k wants kana in the field -- lang is set per card in syncReviewCard so
-      // a system IME picks the right keyboard.
+      // a system IME picks the right keyboard. No visible Check button -- Enter
+      // (or a mobile keyboard's own Go/submit action) checks, same as the word
+      // card (js/flashcards/dashboard.js).
       '<form class="fc-answer-form" id="fcKanaForm">' +
       '<input id="fcKanaInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
-      '<button type="submit" class="fc-btn fc-btn-primary fc-check-btn">Check</button>' +
       '</form>' +
       '<div class="fc-review-dynamic" aria-live="polite"></div>' +
       "</div>";
@@ -412,35 +413,38 @@ window.RaumeStudy.flashcards.kana = (function () {
     input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));
     input.value = session.userAnswer || "";
 
-    var checkBtn = shell.querySelector(".fc-check-btn");
     var dyn = shell.querySelector(".fc-review-dynamic");
 
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
-      if (checkBtn) checkBtn.hidden = false;
       dyn.innerHTML = "";
       return true;
     }
 
     input.classList.add("fc-answer-locked");
-    if (checkBtn) checkBtn.hidden = true;
+    var expected = r2k ? item.kana : item.romaji;
+    // Same merged reveal as the vocabulary word card: the prompt recedes,
+    // a compact tag carries the verdict, and one "stage" panel holds either
+    // the restated answer (correct) or a plain typed-vs-correct pair (wrong
+    // -- kana/romaji typos aren't diffed letter-by-letter here the way a
+    // romaji vocabulary answer is, just shown side by side).
+    var stageHtml = session.correct
+      ? '<div class="fc-stage-expected"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</div>"
+      : '<div class="fc-stage-compare">' + esc(session.userAnswer || "(nothing)") +
+        ' <span class="fc-diff-arrow">&rarr;</span> <span' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>";
     dyn.innerHTML =
-      '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
-      '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
-      (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
-      "</div>" +
-      '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">' + (r2k ? "Kana" : "Answer") + "</span>" +
-      (r2k
-        ? '<span class="fc-expected fc-expected-kana' + wordCls + '" lang="ja">' + esc(item.kana) + "</span>"
-        : '<span class="fc-expected">' + esc(item.romaji) + "</span>") +
-      "</div>" +
-      ratingRowHtml(session.correct === false);
+      '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
+      '<div class="fc-prompt-small"' + (r2k ? "" : ' lang="ja"') + ">" + esc(r2k ? item.romaji : item.kana) + "</div>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? "Correct" : "Almost correct") + "</span>" +
+      '<div class="fc-stage">' + stageHtml + "</div>" +
+      ratingRowHtml(session.correct === false) +
+      "</div>";
 
-    var resultEl = dyn.querySelector(".fc-result");
+    var resultEl = dyn.querySelector(".fc-review-verdict");
     if (resultEl) resultEl.setAttribute("aria-label",
       (session.correct ? "Correct." : "Not quite.") +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
-      " Answer: " + (r2k ? item.kana : item.romaji) + ".");
+      " Answer: " + expected + ".");
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });

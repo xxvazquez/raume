@@ -223,11 +223,13 @@ async function main() {
   check("all four rating buttons are tone-distinct (regression: Good and Easy used to share one color, Hard had none)", (() => {
     const ratings = ["again", "hard", "good", "easy"];
     const styleFor = (sel) => { const r = allCssRules.find(x => x.selectorText === sel); return r && r.style; };
-    const nameColors = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-name')?.color);
-    const borderColors = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"]')?.borderColor);
+    // The tone now lives entirely on the key chip (background + text colour) --
+    // the row itself is neutral so it reads as one compact control.
+    const keyBg = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-key')?.background);
+    const keyColors = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-key')?.color);
     const allSet = (arr) => arr.every(Boolean);
     const allDistinct = (arr) => new Set(arr).size === arr.length;
-    return allSet(nameColors) && allDistinct(nameColors) && allSet(borderColors) && allDistinct(borderColors);
+    return allSet(keyBg) && allDistinct(keyBg) && allSet(keyColors) && allDistinct(keyColors);
   })());
 
   console.log("Speech: pronunciation playback (Web Speech API)");
@@ -1232,43 +1234,55 @@ async function main() {
     document.getElementById("fcAnswerInput") === answerInput
     && document.activeElement === answerInput
     && answerInput.classList.contains("fc-answer-locked"));
-  check("the Check button is gone once checked -- and CSS actually hides it, not just [hidden]", () => {
-    const btn = document.querySelector(".fc-answer-form .fc-check-btn");
-    return !!btn && btn.hidden === true && window.getComputedStyle(btn).display === "none";
+  check("the vocabulary card has no visible Check button -- Enter (or a mobile keyboard's Go) checks instead", () => {
+    return !document.querySelector(".fc-answer-form .fc-check-btn");
   });
   check("the result drops into an aria-live region, so it's announced without moving focus off the field", () => {
     const dyn = document.querySelector(".fc-review-dynamic");
-    return !!dyn && dyn.getAttribute("aria-live") === "polite" && dyn.contains(document.querySelector(".fc-result"));
+    return !!dyn && dyn.getAttribute("aria-live") === "polite" && dyn.contains(document.querySelector(".fc-review-verdict"));
   });
   check("the checked result is focusable and announces the outcome plus the answer", (() => {
-    const res = document.querySelector(".fc-result");
+    const res = document.querySelector(".fc-review-verdict");
     const al = res && res.getAttribute("aria-label") || "";
     return !!res && res.getAttribute("tabindex") === "-1"
       && /^(Correct|Not quite)\./.test(al) && /Answer: .+\.$/.test(al);
   })());
-  check("the reveal also shows one field of context, never the same one already on screen as the prompt", (() => {
-    const meta = document.querySelector(".fc-review-meta span").textContent;
-    const promptLang = meta.split("→")[0].trim();
-    const ctxLabel = document.querySelector(".fc-answer-context .fc-answer-reveal-label");
-    const ctxValue = document.querySelector(".fc-answer-context .fc-context-value");
-    const al = document.querySelector(".fc-result").getAttribute("aria-label") || "";
-    return !!ctxLabel && !!ctxValue && ctxValue.textContent.trim().length > 0
-      && ["Japanese", "Romaji", "English"].includes(ctxLabel.textContent)
-      && ctxLabel.textContent !== promptLang
-      && al.indexOf(ctxLabel.textContent + ": " + ctxValue.textContent) !== -1;
+  check("the reveal recedes the prompt to a small reminder, furigana included", (() => {
+    const small = document.querySelector(".fc-prompt-small");
+    return !!small && small.textContent.trim().length > 0;
   })());
-  check("the verdict label is bumped above body size so it reads for a beat", (() => {
-    const label = document.querySelector(".fc-result-label");
-    return !!label && /^(Correct|Not quite)$/.test(label.textContent)
-      && parseFloat(window.getComputedStyle(label).fontSize) >= 15;
+  check("the reveal also shows one field of context (meaning/reading), not just the answer", (() => {
+    const meaningEl = document.querySelector(".fc-stage-meaning");
+    return !!meaningEl && meaningEl.textContent.trim().length > 0;
+  })());
+  check("the verdict is a compact badge, not an oversized word -- feedback stays out of the way", (() => {
+    const tag = document.querySelector(".fc-verdict-tag");
+    // jsdom doesn't reliably resolve a var()-bearing computed style through a
+    // shorthand property, so (as elsewhere in this file) check the declared
+    // rule itself rather than getComputedStyle.
+    const rule = allCssRules.find(r => r.selectorText === ".fc-verdict-tag");
+    return !!tag && /^(Correct|Almost correct)$/.test(tag.textContent)
+      && !!rule && parseFloat(rule.style.fontSize) <= 13;
   })());
   check("every rating button carries the data-rating the tone-coding CSS keys off", (() => {
     const got = [...document.querySelectorAll('.fc-rating-btn')].map(b => b.dataset.rating);
     return JSON.stringify(got) === JSON.stringify(["again", "hard", "good", "easy"]);
   })());
-  check("the 1-4 key hint is a real chip, not near-invisible micro text", (() => {
-    const k = document.querySelector('.fc-rating-btn .fc-rating-key');
-    return parseFloat(window.getComputedStyle(k).borderTopWidth) > 0;
+  check("the 1-4 key hint is a real coloured chip, not near-invisible micro text", (() => {
+    const rule = allCssRules.find(r => r.selectorText === '.fc-rating-btn[data-rating="again"] .fc-rating-key');
+    return !!rule && /var\(--wrong-soft\)/.test(rule.style.background);
+  })());
+  check("a wrong answer marks only the letters that differ, not the whole word", (() => {
+    // "definitely-not-right" is wrong regardless of direction, so .fc-stage-compare
+    // should always be there; whether it carries <mark>s depends on whether this
+    // session's card landed on a romaji-target direction (jp-ro/en-ro) -- English
+    // targets accept multiple synonyms, so those show the two words plain, no marks.
+    const compare = document.querySelector(".fc-stage-compare");
+    if (!compare) return false;
+    const marks = compare.querySelectorAll("mark.fc-diff-you, mark.fc-diff-co");
+    if (!marks.length) return true;
+    const totalLetters = compare.textContent.replace(/[\s→]/g, "").length;
+    return marks.length < totalLetters;
   })());
   document.querySelector('.fc-rating-btn[data-rating="again"]').click();
   await flush();
@@ -1433,11 +1447,11 @@ async function main() {
   document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
   check("a correct reading is marked correct with four FSRS-timed ratings", (() => {
     const p = document.getElementById("fcPanelKana");
-    return !!p.querySelector(".fc-result.fc-correct") && p.querySelectorAll(".fc-rating-btn").length === 4
+    return !!p.querySelector(".fc-verdict-ok") && p.querySelectorAll(".fc-rating-btn").length === 4
       && [...p.querySelectorAll(".fc-rating-interval")].every(e => e.textContent.length > 0);
   })());
   check("the checked kana result is focusable and announces the outcome", (() => {
-    const res = document.querySelector("#fcPanelKana .fc-result");
+    const res = document.querySelector("#fcPanelKana .fc-review-verdict");
     return !!res && res.getAttribute("tabindex") === "-1" && /^(Correct|Not quite)\./.test(res.getAttribute("aria-label") || "");
   })());
   check("checking updates the kana card in place -- same <input> node, focus kept", () =>
@@ -1475,8 +1489,8 @@ async function main() {
   document.getElementById("fcKanaForm").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
   check("typing the right kana is marked correct with four ratings and the glyph shown", (() => {
     const p = document.getElementById("fcPanelKana");
-    return !!p.querySelector(".fc-result.fc-correct")
-      && !!p.querySelector(".fc-answer-reveal .fc-expected-kana")
+    return !!p.querySelector(".fc-verdict-ok")
+      && !!p.querySelector(".fc-stage-expected[lang=\"ja\"]")
       && p.querySelectorAll(".fc-rating-btn").length === 4;
   })());
   document.querySelector('#fcPanelKana .fc-rating-btn[data-rating="good"]').click();

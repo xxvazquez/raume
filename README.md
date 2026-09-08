@@ -117,20 +117,30 @@ page is where you review, browse, and track a daily streak.
 - The card is a **persistent shell** — the answer field is the same element from
   the first card to the last and stays focused through check → rate → next, so a
   phone's on-screen keyboard doesn't close between cards.
-- Fully keyboard-driven: type, **Enter** to check, **1–4** to rate. The four
-  rating buttons are tone-coded (Again / Hard / Good / Easy) and each carries its
-  digit as a chip; after a wrong answer, Good/Easy dim so the honest rating reads
-  first.
-- Checking washes the card once in the matching tone and shows the verdict a
-  size up. The reveal adds one field of context you *weren't* tested on, and
-  the word's pronunciation plays automatically the moment it reveals (every
-  direction gets one eventually, including the two where the Japanese only
-  appears in that reveal, not the prompt) — same speaker icon and Web Speech
-  API as the reference pages, just triggered for you rather than waiting on
-  a click.
+- Answering is deliberately quiet: just the Japanese prompt and a plain
+  underline field, no visible Check button — **Enter** (or a mobile keyboard's
+  own Go/submit action) checks, **1–4** rates. Once checked, the prompt recedes
+  to a small reminder and the card washes once in the matching tone.
+- The result is a compact tag (Correct / Almost correct), not a full-width
+  banner, and everything you actually study from — the comparison, the field
+  of context you *weren't* tested on — sits together in one quiet panel instead
+  of stacked sections.
+- A wrong romaji answer (Japanese→Romaji, English→Romaji) shows exactly which
+  letters were off — `kaeramasu → kaerimasu`, only the mismatched letters
+  marked — compared against whichever accepted spelling is the closest match.
+  Other directions just show what you typed against the correct answer, plain.
+- The rating row is one compact strip — Again / Hard / Good / Easy, each a
+  tone-coloured digit chip rather than four separate tiles — and after a wrong
+  answer Good/Easy dim so the honest rating reads first.
+- The word's pronunciation plays automatically the moment the answer reveals
+  (every direction gets one eventually, including the two where the Japanese
+  only appears in that reveal, not the prompt) — same speaker icon and Web
+  Speech API as the reference pages, just triggered for you rather than
+  waiting on a click.
 - Screen-reader friendly: the field is named with its prompt, and the result is
   announced from an `aria-live` region without moving focus off the field.
 - Romaji checking ignores long vowels — `kōhī`, `koohii`, `kouhii` all match.
+- The **Kana** trainer's own review card shares this exact design.
 
 **The tabs**
 

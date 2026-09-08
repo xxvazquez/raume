@@ -17,17 +17,18 @@ stay consistent.
   or high contrast. Default weight is 400; 500 marks a genuinely active or
   labelled state. One type scale (`--fs-*` tokens) is shared by the reference
   and Flashcards sides.
-- The one exception: the review card's pass/fail verdict ("Correct" / "Not
-  quite") gets a beat of real weight, because it's the single most important
-  word in the review loop.
-- On the review card the prompt is the anchor — 26px, well clear of everything
-  around it, with the direction label (`.fc-prompt-label`) faint and tucked
-  right above it. On a phone the chrome (meta line, padding, rating row) tightens
+- On the review card the prompt is the anchor — 30px, the largest text on the
+  card by a wide margin, with the direction label (`.fc-prompt-label`) faint
+  and tucked right above it. Once checked, the prompt recedes to a small,
+  muted `.fc-prompt-small` reminder — still legible, no longer the focus — and
+  the verdict ("Correct" / "Almost correct") is a small tone-coloured tag, not
+  a sized-up word: the comparison underneath it is the thing to read. On a
+  phone the chrome (meta line, padding, rating row, the "stage" panel) tightens
   but the prompt keeps its full size and air. Past 700px the whole card steps up
-  a size — prompt to 30px, and the reading text you rate from (typed answer,
-  revealed answer, verdict, rating labels) off the shared `--fs-*` scale and onto
-  a larger set, since that scale is tuned for the reference tables and read too
-  small to study from on a desktop window.
+  a size — prompt to 34px, and the reading text you rate from (the stage panel,
+  rating labels) off the shared `--fs-*` scale and onto a larger set, since that
+  scale is tuned for the reference tables and read too small to study from on a
+  desktop window.
 
 ## Colour
 

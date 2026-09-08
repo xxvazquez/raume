@@ -2,9 +2,10 @@
 //
 // Turns RaumeStudy.data.vocabularyTables into a lookup keyed by each row's
 // permanent id: display markup, the study directions it supports, and the
-// normalized accepted answers for checking. Pure -- reads the dataset live,
-// never copies content anywhere. This is what scripts/smoke-test.js exercises
-// through the flashcards test hooks.
+// normalized accepted answers for checking, plus the letter-level diff used
+// to mark a wrong romaji answer against the closest accepted spelling. Pure
+// -- reads the dataset live, never copies content anywhere. This is what
+// scripts/smoke-test.js exercises through the flashcards test hooks.
 window.RaumeStudy = window.RaumeStudy || {};
 window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 window.RaumeStudy.flashcards.vocabIndex = (function () {
@@ -89,6 +90,12 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiAnswers = entry.romajiUsable
             ? row.forms.map(function (f) { return normalizeAnswer(f.romaji, true); })
             : [];
+          // Un-normalized romaji, same order/length as romajiAnswers -- lets
+          // the wrong-answer diff show "kaerimasu", not the folded form used
+          // for matching.
+          entry.romajiAnswerDisplays = entry.romajiUsable
+            ? row.forms.map(function (f) { return f.romaji; })
+            : [];
         } else {
           entry.jpHtml = '<span class="jpword">' + jpHtmlFn(row.jp) + "</span>";
           entry.jpInlineHtml = entry.jpHtml;
@@ -98,6 +105,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiDisplay = row.romaji;
           entry.romajiUsable = isRomajiUsable(row.romaji);
           entry.romajiAnswers = entry.romajiUsable ? [normalizeAnswer(row.romaji, true)] : [];
+          entry.romajiAnswerDisplays = entry.romajiUsable ? [row.romaji] : [];
         }
         entry.englishDisplay = row.english;
         entry.englishAnswers = splitAlternatives(row.english).map(function (a) { return normalizeAnswer(a, false); });
@@ -150,6 +158,83 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return answers.indexOf(norm) !== -1;
   }
 
+  var esc = window.RaumeStudy.shared.escapeHtml;
+
+  // Character-level alignment (Levenshtein) between what was typed and a
+  // target string -- returns one array of {you, co, bad} pairs, always the
+  // same length as the longer side (a null on one side renders as nothing,
+  // not a gap character), so a wrong-answer reveal can mark just the letters
+  // that differ instead of re-showing the whole word as an error.
+  function alignChars(target, typed) {
+    var a = typed, b = target, n = a.length, m = b.length;
+    var dp = [], i, j;
+    for (i = 0; i <= n; i++) { dp.push(new Array(m + 1).fill(0)); dp[i][0] = i; }
+    for (j = 0; j <= m; j++) dp[0][j] = j;
+    for (i = 1; i <= n; i++) {
+      for (j = 1; j <= m; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+    i = n; j = m;
+    var pairs = [];
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) { pairs.unshift({ you: a[i - 1], co: b[j - 1], bad: false }); i--; j--; }
+      else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) { pairs.unshift({ you: a[i - 1], co: b[j - 1], bad: true }); i--; j--; }
+      else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) { pairs.unshift({ you: a[i - 1], co: null, bad: true }); i--; }
+      else { pairs.unshift({ you: null, co: b[j - 1], bad: true }); j--; }
+    }
+    return { pairs: pairs, distance: dp[n][m] };
+  }
+  function wordDiffHtml(pairs, side) {
+    return pairs.map(function (p) {
+      var ch = p[side];
+      if (ch == null) return "";
+      if (!p.bad) return esc(ch);
+      return '<mark class="fc-diff-' + (side === "you" ? "you" : "co") + '">' + esc(ch) + "</mark>";
+    }).join("");
+  }
+  // Verb-pairs accept two independent romaji forms -- diff against whichever
+  // one the typed answer is actually closest to, so a near-miss on the
+  // polite form doesn't get compared against the casual one.
+  function closestRomajiDisplay(entry, typedNormalized) {
+    var displays = entry.romajiAnswerDisplays || [];
+    if (displays.length < 2) return displays[0] || entry.romajiDisplay;
+    var best = 0, bestDist = Infinity;
+    displays.forEach(function (disp, idx) {
+      var norm = entry.romajiAnswers[idx] || normalizeAnswer(disp, true);
+      var dist = alignChars(norm, typedNormalized).distance;
+      if (dist < bestDist) { bestDist = dist; best = idx; }
+    });
+    return displays[best];
+  }
+  // Builds the wrong-answer "you wrote / correct" comparison for the review
+  // card's reveal. Romaji targets get a real letter-level diff (a fair,
+  // single-spelling comparison); English targets accept several synonyms, so
+  // diffing characters against just one of them isn't fair -- those show the
+  // two words plain, no marks.
+  function answerCompareHtml(entry, direction, typedRaw) {
+    var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
+    var typed = String(typedRaw == null ? "" : typedRaw).trim();
+    if (!isRomajiTarget) {
+      return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "" };
+    }
+    var correctDisplay = closestRomajiDisplay(entry, normalizeAnswer(typed, true));
+    var aligned = alignChars(String(correctDisplay || "").toLowerCase(), typed.toLowerCase());
+    var pairs = aligned.pairs;
+    var bad = pairs.filter(function (p) { return p.bad; });
+    var note = "";
+    if (bad.length === 1 && bad[0].you != null && bad[0].co != null) {
+      note = "1 letter off &middot; <b>" + esc(bad[0].you) + "</b> should be <b>" + esc(bad[0].co) + "</b>";
+    } else if (bad.length) {
+      note = bad.length + " letters off";
+    }
+    return {
+      youHtml: typed ? wordDiffHtml(pairs, "you") : "(nothing)",
+      correctHtml: wordDiffHtml(pairs, "co"),
+      note: note
+    };
+  }
+
   var rawRowById = null;
   function getRawVocabRow(vocabId) {
     if (!rawRowById) {
@@ -165,6 +250,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     getVocabIndex: getVocabIndex, directionsForEntry: directionsForEntry,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
+    answerCompareHtml: answerCompareHtml,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow
   };

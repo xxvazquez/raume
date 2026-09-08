@@ -27,6 +27,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
   var contextDisplayFor = vidx.contextDisplayFor;
   var checkAnswer = vidx.checkAnswer, getRawVocabRow = vidx.getRawVocabRow;
+  var answerCompareHtml = vidx.answerCompareHtml;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
   var recordStudyActivity = dataOps.recordStudyActivity, syncOutbox = dataOps.syncOutbox;
 
@@ -594,9 +595,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<button type="button" class="fc-session-exit" id="fcEndSession">End session</button></div>' +
       '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
+      // No visible Check button -- Enter (or a mobile keyboard's own Go/
+      // submit action) checks, same as the keyboard shortcut comment below
+      // documents. One quiet input is the whole "answering" screen.
       '<form class="fc-answer-form" id="fcAnswerForm">' +
       '<input id="fcAnswerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
-      '<button type="submit" class="fc-btn fc-btn-primary fc-check-btn">Check</button>' +
       '</form>' +
       // aria-live so the result is announced when it drops in, without moving
       // focus off the answer field (that focus move was the mobile-keyboard bug).
@@ -644,12 +647,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     input.setAttribute("aria-label", askLabelFor(card.direction) + ": " + (prompt.text || entry.jpPlain));
     input.placeholder = answerPlaceholderFor(card.direction);
     input.value = session.userAnswer || "";
-    var checkBtn = shell.querySelector(".fc-check-btn");
     var dyn = shell.querySelector(".fc-review-dynamic");
 
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
-      if (checkBtn) checkBtn.hidden = false;
       dyn.innerHTML = "";
       return true;
     }
@@ -658,30 +659,39 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // in the DOM and styled-quiet rather than disabled, so it holds focus and
     // the keyboard stays put for the next card.
     input.classList.add("fc-answer-locked");
-    if (checkBtn) checkBtn.hidden = true;
+    var expected = expectedDisplayFor(entry, card.direction);
+    // Wrong answers get a real letter-level comparison (romaji targets) or a
+    // plain typed-vs-correct pair (English targets, which accept several
+    // synonyms -- diffing characters against just one of them isn't fair).
+    // Correct answers need none of that -- just the answer, once, restated.
+    var stageHtml = session.correct
+      ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
+      : (function () {
+          var cmp = answerCompareHtml(entry, card.direction, session.userAnswer);
+          return '<div class="fc-stage-compare">' + cmp.youHtml + ' <span class="fc-diff-arrow">&rarr;</span> ' + cmp.correctHtml + "</div>" +
+            (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "");
+        })();
     dyn.innerHTML =
-      '<div class="fc-result ' + (session.correct ? "fc-correct" : "fc-incorrect") + '" tabindex="-1">' +
-      '<span class="fc-result-label">' + (session.correct ? "Correct" : "Not quite") + "</span>" +
-      (session.correct ? "" : '<span class="fc-your-answer">You typed: ' + esc(session.userAnswer || "(nothing)") + "</span>") +
-      "</div>" +
-      '<div class="fc-answer-context"><span class="fc-answer-reveal-label">' + esc(context.label) + "</span>" +
-      '<span class="fc-context-value">' + esc(context.value) + "</span></div>" +
-      '<div class="fc-answer-reveal"><span class="fc-answer-reveal-label">Answer</span>' +
-      '<span class="fc-expected">' + esc(expectedDisplayFor(entry, card.direction)) + "</span></div>" +
+      '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
+      // The prompt recedes once it's been answered -- still there for
+      // reference, no longer the thing to look at.
+      '<div class="fc-prompt-small"' + (prompt.lang ? ' lang="ja"' : "") + ">" + (prompt.html || esc(prompt.text)) + "</div>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? "Correct" : "Almost correct") + "</span>" +
+      '<div class="fc-stage">' + stageHtml + '<div class="fc-stage-meaning">' + esc(context.value) + "</div></div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy are dimmed -- still one click away (typos happen), just
       // not the default read.
       '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name, i) {
         var p = session.preview[name];
         return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-key">' + (i + 1) + '</span><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
-      }).join("") + "</div>";
+      }).join("") + "</div></div>";
 
-    var resultEl = dyn.querySelector(".fc-result");
+    var resultEl = dyn.querySelector(".fc-review-verdict");
     if (resultEl) resultEl.setAttribute("aria-label",
       (session.correct ? "Correct." : "Not quite.") +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
       " " + context.label + ": " + context.value + "." +
-      " Answer: " + expectedDisplayFor(entry, card.direction) + ".");
+      " Answer: " + expected + ".");
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });
