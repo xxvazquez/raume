@@ -2055,13 +2055,13 @@ mark.fc-diff-co {
 /* Desktop: the shared --fs-* scale is tuned for the reference tables, and on a
    roomy window the study card's reading text (the answer you type, the revealed
    answer, the verdict, the rating labels) sat too small to study from
-   comfortably. Bump the whole review card up a step past 700px -- the prompt is
-   already the anchor, this brings everything you actually read while rating it
-   up to match. Phone keeps the tighter scale above. */
+   comfortably. Bump those up a step past 700px -- but not the word prompt
+   itself, which stays 26px at every width now: a roomier window doesn't need
+   a bigger prompt, and it read as oversized when it scaled up too. Phone
+   keeps the tighter scale above. */
 @media (min-width: 700px) {
   .fc-review-card { padding: 28px 26px; }
   .fc-prompt-label { font-size: var(--fs-small); }
-  .fc-review-card .fc-prompt { font-size: 30px; }
   .fc-review-card .fc-prompt-kana { font-size: 38px; }
   .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
   .fc-review-card .fc-prompt-romaji { font-size: 24px; }

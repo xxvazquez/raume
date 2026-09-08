@@ -25,9 +25,10 @@ stay consistent.
   correct") is a small tone-coloured tag, not a sized-up word: the comparison
   underneath it is the thing to read. On a phone the chrome (meta line,
   padding, rating row, the "stage" panel) tightens but the prompt keeps its
-  full size and air. Past 700px the whole card steps up a size — prompt to
-  30px, and the reading text you rate from (the stage panel,
-  rating labels) off the shared `--fs-*` scale and onto a larger set, since that
+  full size and air. Past 700px the reading text you rate from (the stage
+  panel, rating labels) steps up a size off the shared `--fs-*` scale — but
+  not the prompt, which stays 26px at every width; a roomier window doesn't
+  need a bigger word, and it read as oversized when it scaled up too. That
   scale is tuned for the reference tables and read too small to study from on a
   desktop window.
 
