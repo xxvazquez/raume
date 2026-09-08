@@ -1976,14 +1976,15 @@ mark.fc-diff-co {
 .fc-diff-note { font-size: var(--fs-small); color: var(--muted); margin: 0 0 18px; }
 .fc-diff-note b { color: var(--ink); font-weight: 600; }
 
-/* Rating row: one continuous ghost strip, shared by the vocabulary word card
-   and kana.js's review card (which reuses every .fc-review-* / .fc-rating-*
-   class here -- see the note further down). A tone-coloured key chip carries
-   all the colour; the row itself stays neutral so it reads as one compact
-   control, not four separate cards. */
-.fc-rating-row { align-self: stretch; display: flex; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+/* Rating row: no outer box at all -- just the four buttons, transparent,
+   with a thin divider between them, floating directly on the card the way
+   the approved design shows it. Shared by the vocabulary word card and
+   kana.js's review card (which reuses every .fc-review-* / .fc-rating-*
+   class here -- see the note further down). A tone-coloured key chip
+   carries all the colour; nothing else on the row does. */
+.fc-rating-row { align-self: stretch; display: flex; }
 .fc-rating-btn {
-  flex: 1 1 0; appearance: none; border: 0; background: var(--paper);
+  flex: 1 1 0; appearance: none; border: 0; background: transparent;
   padding: 9px 4px; display: flex; align-items: center; justify-content: center; gap: 6px;
   text-align: center; cursor: pointer; color: var(--ink);
   transition: background .12s ease;
