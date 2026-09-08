@@ -438,7 +438,9 @@ window.RaumeStudy.flashcards.kana = (function () {
         ' <span class="fc-diff-arrow">&rarr;</span> <span' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>";
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
-      '<div class="fc-prompt-small"' + (r2k ? "" : ' lang="ja"') + ">" + esc(r2k ? item.romaji : item.kana) + "</div>" +
+      // No repeated prompt here -- the original above (.fc-prompt) never
+      // goes anywhere once checked, so echoing it again just below was
+      // showing the same word twice on screen at once.
       '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
       '<div class="fc-stage">' + stageHtml + "</div>" +
       ratingRowHtml(session.correct === false) +

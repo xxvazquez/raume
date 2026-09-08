@@ -678,9 +678,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         })();
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
-      // The prompt recedes once it's been answered -- still there for
-      // reference, no longer the thing to look at.
-      '<div class="fc-prompt-small"' + (prompt.lang ? ' lang="ja"' : "") + ">" + (prompt.html || esc(prompt.text)) + "</div>" +
+      // No repeated prompt here -- the original above (.fc-prompt) never
+      // goes anywhere once checked, so echoing it again just below was
+      // showing the same word twice on screen at once.
       '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
       '<div class="fc-stage">' + stageHtml + '<div class="fc-stage-meaning">' + esc(context.value) + "</div></div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,

@@ -222,11 +222,12 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var aligned = alignChars(String(correctDisplay || "").toLowerCase(), typed.toLowerCase());
     var pairs = aligned.pairs;
     var bad = pairs.filter(function (p) { return p.bad; });
+    // Only the clean single-substitution case gets a note spelling it out --
+    // "N letters off" for anything messier wasn't telling you anything the
+    // marked letters above it don't already show, so it's left blank instead.
     var note = "";
     if (bad.length === 1 && bad[0].you != null && bad[0].co != null) {
       note = "1 letter off &middot; <b>" + esc(bad[0].you) + "</b> should be <b>" + esc(bad[0].co) + "</b>";
-    } else if (bad.length) {
-      note = bad.length + " letters off";
     }
     return {
       youHtml: typed ? wordDiffHtml(pairs, "you") : "(nothing)",

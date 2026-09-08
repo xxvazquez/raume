@@ -1890,6 +1890,7 @@ body.starred-mode .expand-bar { display: none !important; }
   background: var(--paper); border: 1px solid var(--card-line);
   border-radius: 8px; padding: 24px 22px;
   box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 /* On a roomy window a session shows just the card (or the wrap-up) stranded at
    the top of a tall empty panel. Give the panel a min-height and centre its one
@@ -1903,7 +1904,7 @@ body.starred-mode .expand-bar { display: none !important; }
     min-height: 60vh;
   }
 }
-.fc-review-meta { display: flex; justify-content: space-between; align-items: baseline; color: var(--faint); font-size: var(--fs-micro); margin-bottom: 16px; }
+.fc-review-meta { align-self: stretch; display: flex; justify-content: space-between; align-items: baseline; color: var(--faint); font-size: var(--fs-micro); margin-bottom: 16px; }
 .fc-session-exit { appearance: none; border: 0; background: transparent; padding: 0; font: inherit; color: var(--faint); cursor: pointer; }
 .fc-session-exit:hover { color: var(--wrong); text-decoration: underline; }
 /* A quiet reminder of the direction, hugging the prompt it introduces -- the
@@ -1911,13 +1912,16 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-prompt-label { color: var(--faint); font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
-.fc-answer-form { display: flex; gap: 8px; margin-bottom: 22px; }
+.fc-answer-form { display: flex; gap: 8px; width: 78%; max-width: 380px; margin: 0 0 22px; }
 /* A bare underline, not a boxed/filled field -- the approved design's whole
    point is that answering shows nothing but the prompt and this one quiet
-   line; a filled grey box read as its own competing surface. */
+   line; a filled grey box read as its own competing surface. Narrower than
+   the card and centred (via the form above), but the text inside it stays
+   left-aligned -- centering the field itself is the point, not its type. */
 .fc-answer-form input {
   flex: 1 1 auto; min-width: 0; height: 34px; border: 0; border-bottom: 1.5px solid var(--field-line);
   border-radius: 0; padding: 0 2px 9px; font-size: var(--fs-body); color: var(--ink); background: transparent;
+  text-align: left;
 }
 .fc-answer-form input:focus-visible { outline: none; border-color: var(--section); }
 /* Locked answer field -- checked, waiting for a rating. Kept in the DOM and
@@ -1939,12 +1943,14 @@ body.starred-mode .expand-bar { display: none !important; }
 }
 
 /* Answer feedback -- shared by the vocabulary word card and kana.js's review
-   card: a receded prompt (still there for reference, no longer the thing to
-   look at), a compact verdict tag, and one merged "stage" panel instead of
-   the separate context/answer sections this used to be split across. */
-.fc-prompt-small { font-size: 17px; font-weight: 500; color: var(--muted); margin-bottom: 14px; display: flex; align-items: baseline; gap: 3px; }
-.fc-prompt-small .furigana { font-size: max(9px, .56em); }
-.fc-review-verdict { margin-bottom: 4px; }
+   card: a compact verdict tag and one merged "stage" panel instead of the
+   separate context/answer sections this used to be split across. No repeated
+   prompt here -- the original .fc-prompt above stays on screen once checked,
+   so echoing it again below just showed the same word twice at once. */
+/* Full card width, but a centred column internally, same as the card itself
+   -- the tag and stage panel need the full width to centre their own content
+   in, the way the approved design shows them. */
+.fc-review-verdict { align-self: stretch; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
 .fc-verdict-tag {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: var(--font-ui); font-size: 12px; font-weight: 600;
@@ -1954,7 +1960,7 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-verdict-bad .fc-verdict-tag { background: var(--wrong-soft); color: var(--wrong-strong); }
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
-.fc-stage { padding: 16px 16px; border-radius: 12px; margin-bottom: 10px; background: var(--surface); }
+.fc-stage { align-self: stretch; padding: 16px 16px; border-radius: 12px; margin-bottom: 10px; background: var(--surface); }
 .fc-stage-compare { font: 600 24px/1.35 var(--font-ui); color: var(--ink); margin-bottom: 6px; }
 .fc-stage-expected { font: 600 24px var(--font-ui); color: var(--right-strong); margin-bottom: 6px; }
 .fc-stage-meaning { font-size: var(--fs-small); color: var(--muted); }
@@ -1975,7 +1981,7 @@ mark.fc-diff-co {
    class here -- see the note further down). A tone-coloured key chip carries
    all the colour; the row itself stays neutral so it reads as one compact
    control, not four separate cards. */
-.fc-rating-row { display: flex; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+.fc-rating-row { align-self: stretch; display: flex; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
 .fc-rating-btn {
   flex: 1 1 0; appearance: none; border: 0; background: var(--paper);
   padding: 9px 4px; display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -2020,12 +2026,12 @@ mark.fc-diff-co {
 
 /* The prompt is the single thing you're being tested on, alone on the card --
    real presence (up from the 19px the size pass lower in this file leaves the
-   generic .fc-prompt at), and the largest text on the whole card now that the
-   post-check reveal recedes to .fc-prompt-small -- but 26px, not sized up
-   further, since the contrast that makes it read as "the anchor" now comes
-   from everything else on the card being smaller, not from this being huge.
-   Placed before the kana -kana / -romaji rules so those, at equal
-   specificity, still win for the Kana drill (their own sizes -- unaffected). */
+   generic .fc-prompt at), and it stays on screen unchanged through the
+   checked/rating state too (nothing echoes it again below) -- 26px, not
+   sized up further, since a roomier window doesn't need a bigger word and it
+   read as oversized when it scaled up. Placed before the kana -kana / -romaji
+   rules so those, at equal specificity, still win for the Kana drill (their
+   own sizes -- unaffected). */
 .fc-review-card .fc-prompt { font-size: 26px; line-height: 1.28; margin-bottom: 22px; }
 
 /* Kana tab. The review card reuses every .fc-review-* / .fc-rating-* rule
@@ -2070,7 +2076,6 @@ mark.fc-diff-co {
   .fc-review-card .fc-prompt-romaji { font-size: 24px; }
   .fc-answer-form input { height: 40px; font-size: 16px; }
   .fc-answer-form input[lang="ja"] { font-size: 18px; }
-  .fc-prompt-small { font-size: 19px; }
   .fc-stage-compare, .fc-stage-expected { font-size: 28px; }
   .fc-stage-meaning { font-size: var(--fs-body); }
   .fc-rating-btn .fc-rating-key { font-size: var(--fs-small); }

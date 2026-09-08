@@ -1252,9 +1252,9 @@ async function main() {
     return !!res && res.getAttribute("tabindex") === "-1"
       && /^(Correct|Not quite)\./.test(al) && /Answer: .+\.$/.test(al);
   })());
-  check("the reveal recedes the prompt to a small reminder, furigana included", (() => {
-    const small = document.querySelector(".fc-prompt-small");
-    return !!small && small.textContent.trim().length > 0;
+  check("the reveal doesn't repeat the prompt -- the original above is still there", (() => {
+    return document.querySelectorAll(".fc-review-card .fc-prompt-small").length === 0
+      && document.querySelectorAll(".fc-review-card .fc-prompt").length === 1;
   })());
   check("the reveal also shows one field of context (meaning/reading), not just the answer", (() => {
     const meaningEl = document.querySelector(".fc-stage-meaning");
