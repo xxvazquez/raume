@@ -172,6 +172,10 @@ window.RaumeStudy.flashcards.kana = (function () {
   function rerender() { S.render(); }
   function clearSession() { session = null; }
 
+  // Same verdict-tag icons as the vocabulary word card (js/flashcards/dashboard.js).
+  var VERDICT_OK_ICON = '<svg width="10" height="10" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  var VERDICT_BAD_ICON = '<svg width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
+
   function startSession() {
     var queue = buildQueue(new Date());
     session = { queue: queue, index: 0, checked: false, correct: null, userAnswer: "", preview: null, reviewedCount: 0, correctCount: 0, seen: {}, done: false };
@@ -435,7 +439,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       '<div class="fc-prompt-small"' + (r2k ? "" : ' lang="ja"') + ">" + esc(r2k ? item.romaji : item.kana) + "</div>" +
-      '<span class="fc-verdict-tag">' + (session.correct ? "Correct" : "Almost correct") + "</span>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
       '<div class="fc-stage">' + stageHtml + "</div>" +
       ratingRowHtml(session.correct === false) +
       "</div>";

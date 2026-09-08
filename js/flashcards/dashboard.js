@@ -39,6 +39,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   function getSession() { return session; }
   function setSession(v) { session = v; }
 
+  // The verdict tag's icon -- same line-icon idiom as the speaker button
+  // (js/vocab/render.js), just two glyphs, kept local since nothing else uses them.
+  var VERDICT_OK_ICON = '<svg width="10" height="10" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  var VERDICT_BAD_ICON = '<svg width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
+
   // The Dashboard is a snapshot -- if you sit on it while a learning step's
   // due time passes, "Study now" should light up on its own rather than
   // staying dead until you navigate. A slow poll re-renders only when the
@@ -676,7 +681,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // The prompt recedes once it's been answered -- still there for
       // reference, no longer the thing to look at.
       '<div class="fc-prompt-small"' + (prompt.lang ? ' lang="ja"' : "") + ">" + (prompt.html || esc(prompt.text)) + "</div>" +
-      '<span class="fc-verdict-tag">' + (session.correct ? "Correct" : "Almost correct") + "</span>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
       '<div class="fc-stage">' + stageHtml + '<div class="fc-stage-meaning">' + esc(context.value) + "</div></div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy are dimmed -- still one click away (typos happen), just

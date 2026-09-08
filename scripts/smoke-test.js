@@ -214,11 +214,16 @@ async function main() {
     const darkBlock = allCssRules.find(r => r.selectorText === ':root[data-theme="dark"]'
       && r.style.getPropertyValue("--field-fill").trim() !== ""
       && r.style.getPropertyValue("--card-line").trim() !== "");
-    const usesToken = sel => {
+    const usesToken = (sel, varName) => {
       const r = allCssRules.find(x => x.selectorText === sel);
-      return r && /var\(--field-fill\)/.test(r.style.background || r.style.cssText);
+      return r && new RegExp("var\\(--" + varName + "\\)").test(r.style.cssText);
     };
-    return !!darkBlock && usesToken(".search-box") && usesToken(".fc-answer-form input") && usesToken(".fc-auth-field input");
+    // .fc-answer-form input is a bare underline now (the approved design),
+    // no fill -- it still has to repaint for dark mode, just via the border
+    // token instead of the background one.
+    return !!darkBlock && usesToken(".search-box", "field-fill")
+      && usesToken(".fc-answer-form input", "field-line")
+      && usesToken(".fc-auth-field input", "field-fill");
   })());
   check("all four rating buttons are tone-distinct (regression: Good and Easy used to share one color, Hard had none)", (() => {
     const ratings = ["again", "hard", "good", "easy"];

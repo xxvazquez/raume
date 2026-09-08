@@ -1911,16 +1911,19 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-prompt-label { color: var(--faint); font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
-.fc-answer-form { display: flex; gap: 8px; margin-bottom: 14px; }
+.fc-answer-form { display: flex; gap: 8px; margin-bottom: 22px; }
+/* A bare underline, not a boxed/filled field -- the approved design's whole
+   point is that answering shows nothing but the prompt and this one quiet
+   line; a filled grey box read as its own competing surface. */
 .fc-answer-form input {
-  flex: 1 1 auto; min-width: 0; height: 36px; border: 1px solid var(--field-line); border-radius: 7px;
-  padding: 0 11px; font-size: var(--fs-body); color: var(--ink); background: var(--field-fill);
+  flex: 1 1 auto; min-width: 0; height: 34px; border: 0; border-bottom: 1.5px solid var(--field-line);
+  border-radius: 0; padding: 0 2px 9px; font-size: var(--fs-body); color: var(--ink); background: transparent;
 }
-.fc-answer-form input:focus-visible { border-color: var(--section); }
+.fc-answer-form input:focus-visible { outline: none; border-color: var(--section); }
 /* Locked answer field -- checked, waiting for a rating. Kept in the DOM and
    focused (so a phone's on-screen keyboard doesn't drop between cards) but
    quietened: the rating row below is the live control now. */
-.fc-answer-form input.fc-answer-locked { color: var(--muted); background: var(--field-fill); }
+.fc-answer-form input.fc-answer-locked { color: var(--muted); }
 /* One-shot wash of the whole card in the study-feedback tone when a check
    lands -- held for a beat, then faded out; gone by the time you rate.
    (--right-soft / --wrong-soft are too near paper in light mode to register,
@@ -1952,8 +1955,8 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
 .fc-stage { padding: 16px 16px; border-radius: 12px; margin-bottom: 10px; background: var(--surface); }
-.fc-stage-compare { font: 600 21px/1.35 var(--font-ui); color: var(--ink); margin-bottom: 6px; }
-.fc-stage-expected { font: 600 21px var(--font-ui); color: var(--right-strong); margin-bottom: 6px; }
+.fc-stage-compare { font: 600 24px/1.35 var(--font-ui); color: var(--ink); margin-bottom: 6px; }
+.fc-stage-expected { font: 600 24px var(--font-ui); color: var(--right-strong); margin-bottom: 6px; }
 .fc-stage-meaning { font-size: var(--fs-small); color: var(--muted); }
 .fc-diff-arrow { color: var(--faint); padding: 0 2px; }
 mark.fc-diff-you {
@@ -2047,7 +2050,7 @@ mark.fc-diff-co {
   .fc-review-card .fc-prompt { margin-bottom: 22px; }
   .fc-review-card .fc-prompt-kana { font-size: 29px; margin-bottom: 22px; }
   .fc-stage { padding: 13px 13px; }
-  .fc-stage-compare, .fc-stage-expected { font-size: 19px; }
+  .fc-stage-compare, .fc-stage-expected { font-size: 21px; }
   .fc-rating-btn { padding: 7px 2px; }
   .fc-rating-btn .fc-rating-name { font-size: var(--fs-micro); margin: 1px 0; }
   .fc-rating-btn .fc-rating-interval { font-size: 10px; }
@@ -2068,7 +2071,7 @@ mark.fc-diff-co {
   .fc-answer-form input { height: 40px; font-size: 16px; }
   .fc-answer-form input[lang="ja"] { font-size: 18px; }
   .fc-prompt-small { font-size: 19px; }
-  .fc-stage-compare, .fc-stage-expected { font-size: 25px; }
+  .fc-stage-compare, .fc-stage-expected { font-size: 28px; }
   .fc-stage-meaning { font-size: var(--fs-body); }
   .fc-rating-btn .fc-rating-key { font-size: var(--fs-small); }
   .fc-rating-btn .fc-rating-name { font-size: var(--fs-body); }
