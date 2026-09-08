@@ -2016,12 +2016,14 @@ mark.fc-diff-co {
 .fc-session-done .fc-cta-row { justify-content: center; margin-top: 18px; }
 
 /* The prompt is the single thing you're being tested on, alone on the card --
-   give it real presence (up from the 19px the size pass lower in this file
-   leaves the generic .fc-prompt at), and the largest text on the whole card
-   now that the post-check reveal recedes to .fc-prompt-small. Placed before
-   the kana -kana / -romaji rules so those, at equal specificity, still win
-   for the Kana drill (they carry their own, separate sizes -- unaffected). */
-.fc-review-card .fc-prompt { font-size: 30px; line-height: 1.25; margin-bottom: 24px; }
+   real presence (up from the 19px the size pass lower in this file leaves the
+   generic .fc-prompt at), and the largest text on the whole card now that the
+   post-check reveal recedes to .fc-prompt-small -- but 26px, not sized up
+   further, since the contrast that makes it read as "the anchor" now comes
+   from everything else on the card being smaller, not from this being huge.
+   Placed before the kana -kana / -romaji rules so those, at equal
+   specificity, still win for the Kana drill (their own sizes -- unaffected). */
+.fc-review-card .fc-prompt { font-size: 26px; line-height: 1.28; margin-bottom: 22px; }
 
 /* Kana tab. The review card reuses every .fc-review-* / .fc-rating-* rule
    above; only the prompt glyph and the group picker need their own styling.
@@ -2059,7 +2061,7 @@ mark.fc-diff-co {
 @media (min-width: 700px) {
   .fc-review-card { padding: 28px 26px; }
   .fc-prompt-label { font-size: var(--fs-small); }
-  .fc-review-card .fc-prompt { font-size: 34px; }
+  .fc-review-card .fc-prompt { font-size: 30px; }
   .fc-review-card .fc-prompt-kana { font-size: 38px; }
   .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
   .fc-review-card .fc-prompt-romaji { font-size: 24px; }
