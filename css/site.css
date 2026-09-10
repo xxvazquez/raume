@@ -1916,12 +1916,12 @@ body.starred-mode .expand-bar { display: none !important; }
 /* A bare underline, not a boxed/filled field -- the approved design's whole
    point is that answering shows nothing but the prompt and this one quiet
    line; a filled grey box read as its own competing surface. Narrower than
-   the card and centred (via the form above), but the text inside it stays
-   left-aligned -- centering the field itself is the point, not its type. */
+   the card, centred, and its text centred inside it too (the approved
+   mockup's .input-line sets text-align:center). */
 .fc-answer-form input {
   flex: 1 1 auto; min-width: 0; height: 34px; border: 0; border-bottom: 1.5px solid var(--field-line);
-  border-radius: 0; padding: 0 2px 9px; font-size: var(--fs-body); color: var(--ink); background: transparent;
-  text-align: left;
+  border-radius: 0; padding: 0 2px 9px; font-size: 16px; color: var(--ink); background: transparent;
+  text-align: center;
 }
 .fc-answer-form input:focus-visible { outline: none; border-color: var(--section); }
 /* Locked answer field -- checked, waiting for a rating. Kept in the DOM and
@@ -1953,7 +1953,7 @@ body.starred-mode .expand-bar { display: none !important; }
 .fc-review-verdict { align-self: stretch; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
 .fc-verdict-tag {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  font-family: var(--font-ui); font-size: 11px; font-weight: 600;
   padding: 4px 10px; border-radius: 6px; margin-bottom: 14px;
 }
 .fc-verdict-ok .fc-verdict-tag { background: var(--right-soft); color: var(--right-strong); }
@@ -1993,13 +1993,13 @@ mark.fc-diff-co {
 /* The 1-4 keyboard digit as a small tone-coloured chip -- it's the one
    genuinely useful hint on the card, and now the row's only colour. */
 .fc-rating-btn .fc-rating-key {
-  display: inline-flex; align-items: center; justify-content: center; min-width: 15px; padding: 1px 5px;
+  display: inline-flex; align-items: center; justify-content: center; min-width: 13px; padding: 1px 5px;
   border-radius: 4px;
-  font-family: var(--font-ui); font-size: var(--fs-micro); font-weight: 600; line-height: 1.5;
+  font-family: var(--font-ui); font-size: 10.5px; font-weight: 600; line-height: 1.5;
   font-variant-numeric: tabular-nums;
 }
-.fc-rating-btn .fc-rating-name { display: block; font: 500 var(--fs-small)/1.3 var(--font-ui); color: var(--ink); }
-.fc-rating-btn .fc-rating-interval { display: block; font-size: var(--fs-micro); color: var(--faint); }
+.fc-rating-btn .fc-rating-name { display: block; font: 500 12.5px/1.3 var(--font-ui); color: var(--ink); }
+.fc-rating-btn .fc-rating-interval { display: block; font-size: 11px; color: var(--faint); }
 /* All four ratings tone-coded, each its own hue rather than a wrong-to-right
    intensity spectrum -- a stepped spectrum shipped once (Again at full
    --wrong, Hard a lighter tint) and read wrong: it made Hard look like it
@@ -2069,19 +2069,18 @@ mark.fc-diff-co {
    itself, which stays 26px at every width now: a roomier window doesn't need
    a bigger prompt, and it read as oversized when it scaled up too. Phone
    keeps the tighter scale above. */
+/* Desktop: only the two kana-drill prompt glyphs get bigger on a roomy
+   window -- the word card's own sizes (prompt, stage text, rating labels)
+   hold at the approved design's values at every width, since bumping them
+   here made the card read bigger than the design it's meant to match. */
 @media (min-width: 700px) {
   .fc-review-card { padding: 28px 26px; }
   .fc-prompt-label { font-size: var(--fs-small); }
   .fc-review-card .fc-prompt-kana { font-size: 38px; }
   .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
   .fc-review-card .fc-prompt-romaji { font-size: 24px; }
-  .fc-answer-form input { height: 40px; font-size: 16px; }
+  .fc-answer-form input { height: 40px; }
   .fc-answer-form input[lang="ja"] { font-size: 18px; }
-  .fc-stage-compare, .fc-stage-expected { font-size: 28px; }
-  .fc-stage-meaning { font-size: var(--fs-body); }
-  .fc-rating-btn .fc-rating-key { font-size: var(--fs-small); }
-  .fc-rating-btn .fc-rating-name { font-size: var(--fs-body); }
-  .fc-rating-btn .fc-rating-interval { font-size: var(--fs-small); }
 }
 /* flex-start, not the default stretch: "Directions" has two rows against the
    scripts' five, and stretching it to match left a tall box mostly empty.
