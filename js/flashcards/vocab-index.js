@@ -118,6 +118,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     if (!vocabIndex) vocabIndex = buildVocabIndex();
     return vocabIndex;
   }
+  // Drop the cached index + raw-row map so the next read rebuilds from the
+  // live dataset -- called after custom vocab is added or synced in
+  // (js/vocab/custom-vocab.js merges its rows straight into
+  // RaumeStudy.data.vocabularyTables, which this index is built from).
+  function resetIndex() { vocabIndex = null; rawRowById = null; }
   function directionsForEntry(entry) {
     return entry.romajiUsable ? DIRECTIONS.slice() : ["jp-en"];
   }
@@ -248,7 +253,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
 
   return {
-    getVocabIndex: getVocabIndex, directionsForEntry: directionsForEntry,
+    getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
     answerCompareHtml: answerCompareHtml,

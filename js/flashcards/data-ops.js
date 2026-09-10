@@ -158,6 +158,57 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (window.RaumeStudy.tableCustom) {
       window.RaumeStudy.tableCustom.applyRemote(settingsRow.table_custom || {});
     }
+    // The reader's own vocabulary rows/tables (js/vocab/custom-vocab.js) --
+    // their own Supabase tables, not this settings row.
+    if (window.RaumeStudy.customVocab) {
+      var ctRes = await client.from("custom_tables").select("*").eq("user_id", user.id);
+      if (ctRes.error) throw ctRes.error;
+      var crRes = await client.from("custom_rows").select("*").eq("user_id", user.id);
+      if (crRes.error) throw crRes.error;
+      window.RaumeStudy.customVocab.applyRemote({
+        tables: (ctRes.data || []).map(function (r) {
+          return { id: r.id, title: r.title, category: r.category, sort: r.sort_index };
+        }),
+        rows: (crRes.data || []).map(function (r) {
+          return { id: r.id, tableId: r.target_table, jp: r.jp, romaji: r.romaji, english: r.english, sort: r.sort_index };
+        })
+      });
+    }
+  }
+
+  // Custom vocabulary writes -- thin inserts/deletes against the reader's own
+  // custom_tables / custom_rows. Best-effort, mirroring addVocabsRemote: the
+  // local cache already has the change, so a failed push just leaves a trace.
+  async function customVocabAddRows(rows) {
+    var client = getClient(), user = currentUser();
+    if (!client || !user || !rows || !rows.length) return;
+    var payload = rows.map(function (r) {
+      return { id: r.id, user_id: user.id, target_table: String(r.tableId), jp: r.jp, romaji: r.romaji, english: r.english, sort_index: Math.round(r.sort || 0) };
+    });
+    var res = await client.from("custom_rows").upsert(payload, { onConflict: "id" });
+    if (res.error) throw res.error;
+  }
+  async function customVocabDeleteRows(ids) {
+    var client = getClient(), user = currentUser();
+    if (!client || !user || !ids || !ids.length) return;
+    var res = await client.from("custom_rows").delete().eq("user_id", user.id).in("id", ids);
+    if (res.error) throw res.error;
+  }
+  async function customVocabAddTable(t) {
+    var client = getClient(), user = currentUser();
+    if (!client || !user) return;
+    var res = await client.from("custom_tables").upsert(
+      { id: t.id, user_id: user.id, title: t.title, category: t.category, sort_index: Math.round(t.sort || 0) },
+      { onConflict: "id" }
+    );
+    if (res.error) throw res.error;
+  }
+  async function customVocabDeleteTable(id, rowIds) {
+    var client = getClient(), user = currentUser();
+    if (!client || !user) return;
+    if (rowIds && rowIds.length) await customVocabDeleteRows(rowIds);
+    var res = await client.from("custom_tables").delete().eq("user_id", user.id).eq("id", id);
+    if (res.error) throw res.error;
   }
 
   async function addVocabsRemote(vocabIds) {
@@ -639,6 +690,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote,
+    customVocabAddRows: customVocabAddRows, customVocabDeleteRows: customVocabDeleteRows,
+    customVocabAddTable: customVocabAddTable, customVocabDeleteTable: customVocabDeleteTable,
     recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow, withTimeout: withTimeout,
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,

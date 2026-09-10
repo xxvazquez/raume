@@ -167,11 +167,48 @@ create table if not exists public.kana_review_logs (
 
 create index if not exists kana_review_logs_card_idx on public.kana_review_logs (card_id, reviewed_at);
 
+-- Custom vocabulary -- the reader's own words and tables (Customize page,
+-- js/vocab/custom-vocab.js). This IS vocabulary content, unlike everything
+-- above, because the reader authored it -- Git only holds the built-in
+-- dataset. A custom row's permanent id is "cv-" + this row's id and is what
+-- the flashcards table references, exactly like a built-in "v0001". A custom
+-- table's id is "ct-" + its id. ids are client-generated (offline-safe) so
+-- they are plain text, not uuid. target_table is a built-in table id as text
+-- ("3") or a custom_tables.id. Guests can add rows (local only, no account);
+-- custom tables need an account. Deleting a row/table is a real delete here --
+-- there is no review history on the content itself to preserve.
+create table if not exists public.custom_tables (
+  id text primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title text not null,
+  category text not null default 'My vocabulary',
+  sort_index bigint not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.custom_rows (
+  id text primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  target_table text not null,
+  jp jsonb not null,
+  romaji text not null,
+  english text not null,
+  sort_index bigint not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists custom_tables_user_idx on public.custom_tables (user_id);
+create index if not exists custom_rows_user_idx on public.custom_rows (user_id);
+
 alter table public.flashcards enable row level security;
 alter table public.review_logs enable row level security;
 alter table public.flashcard_settings enable row level security;
 alter table public.kana_cards enable row level security;
 alter table public.kana_review_logs enable row level security;
+alter table public.custom_tables enable row level security;
+alter table public.custom_rows enable row level security;
 
 -- drop-then-create (rather than a bare `create policy`) so this file can be
 -- re-run after a change like the one above without erroring on policies
@@ -194,4 +231,12 @@ create policy "kana_cards: owner full access" on public.kana_cards
 
 drop policy if exists "kana_review_logs: owner full access" on public.kana_review_logs;
 create policy "kana_review_logs: owner full access" on public.kana_review_logs
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "custom_tables: owner full access" on public.custom_tables;
+create policy "custom_tables: owner full access" on public.custom_tables
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "custom_rows: owner full access" on public.custom_rows;
+create policy "custom_rows: owner full access" on public.custom_rows
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

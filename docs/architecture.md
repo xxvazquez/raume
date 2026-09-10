@@ -29,20 +29,23 @@ Update **all** of these or `npm test` fails:
 
 ## Data and storage model
 
-Vocabulary content lives only in Git. Both storage modes hold nothing but a
-reference to it (`vocab_id`) plus the user's own learning data — never a copy of
-row content.
+Built-in vocabulary content lives only in Git. Both storage modes hold nothing
+but a reference to it (`vocab_id`) plus the user's own learning data — never a
+copy of row content. The **one exception is custom vocabulary** (words and
+tables the reader authors on the Customize page): that content has no home in
+Git, so it is stored — in `localStorage` for a guest, in Supabase for a signed-in
+account. See "Custom vocabulary" below.
 
 ```mermaid
 flowchart LR
     subgraph git["Git — data/vocabulary.js"]
-        V["Vocabulary entries<br/>permanent id, e.g. v0001"]
+        V["Built-in vocabulary entries<br/>permanent id, e.g. v0001"]
     end
     subgraph guest["Guest mode"]
-        LS[("localStorage<br/>raume-flashcards-guest-v1<br/>raume-kana-v1")]
+        LS[("localStorage<br/>raume-flashcards-guest-v1 / raume-kana-v1<br/>raume-custom-vocab-guest-v1")]
     end
     subgraph account["Signed-in mode"]
-        SB[("Supabase Postgres<br/>flashcards / review_logs / flashcard_settings<br/>kana_cards / kana_review_logs")]
+        SB[("Supabase Postgres<br/>flashcards / review_logs / flashcard_settings<br/>kana_cards / kana_review_logs<br/>custom_tables / custom_rows")]
         Cache[("localStorage<br/>read-through cache + offline outbox")]
     end
 
@@ -62,12 +65,13 @@ flowchart LR
   flag stuck and block every future retry; a review whose card no longer exists
   on the server (FK violation) is dropped rather than wedging the queue. The two
   modes never mix.
-- The schema is [`supabase/schema.sql`](../supabase/schema.sql) — five tables
+- The schema is [`supabase/schema.sql`](../supabase/schema.sql) — seven tables
   (`flashcards`, `review_logs`, `flashcard_settings`, `kana_cards`,
-  `kana_review_logs`), all under RLS. `flashcard_settings` also holds the FSRS
-  knobs, the streak counters, `kana_prefs` (the Kana picker), `kana_fsrs` (the
-  Kana trainer's separate FSRS knobs) and `paused_tables` (the tables paused as
-  a unit — see below). Setup guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
+  `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
+  `flashcard_settings` also holds the FSRS knobs, the streak counters,
+  `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
+  knobs) and `paused_tables` (the tables paused as a unit — see below). Setup
+  guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
 - **Table customisations** (names / icons / order) follow the same pattern:
@@ -75,6 +79,23 @@ flowchart LR
   a `table_custom` column on `flashcard_settings`. Sign-in merges per table —
   account wins for tables it has; guest customisations for other tables are
   pushed up, not dropped.
+- **Custom vocabulary** (`js/vocab/custom-vocab.js`, `RaumeStudy.customVocab`) —
+  the reader's own rows and tables. Two `localStorage` keys, mirroring the
+  flashcards cache split: `raume-custom-vocab-guest-v1` (guest = authoritative)
+  and `raume-custom-vocab-cache-v1` (signed-in = read-through cache of the
+  `custom_tables` / `custom_rows` tables). A custom row's permanent id is
+  `cv-<uuid>` and is what `flashcards.vocab_id` references, exactly like a
+  built-in `v0001`; a custom table's id is `ct-<uuid>`. ids are
+  client-generated (offline-safe), so both Supabase tables key on `text`, not
+  `uuid`. `custom_rows.target_table` is a built-in table id as text (`"3"`) or a
+  `custom_tables.id`. `applyToDataset()` merges every custom table/row straight
+  into `RaumeStudy.data.vocabularyTables` (marked `__custom`) before the
+  reference page renders and again whenever custom vocab changes or syncs, so
+  every downstream feature — search, print, furigana, speech, the flashcards
+  index — treats a custom word as just another row. Guests can add rows only
+  (no custom tables); guest rows migrate up on first sign-in, like guest
+  flashcard progress. Deleting a custom row/table is a real delete (no learning
+  history on the content itself to keep).
 - Each vocab entry maps to up to four independently scheduled cards (jp-en,
   jp-ro, ro-en, en-ro), never Japanese-to-type. Rows whose romaji is still kana
   get jp-en only. Pausing a word ("archive") keeps the FSRS state and full
@@ -92,7 +113,8 @@ flowchart LR
 ### localStorage keys
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
-`raume-table-custom`, `raume-flashcards-*`, `raume-kana-*`). Installs from
+`raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
+`raume-kana-*`). Installs from
 before the `sakura` → `raume` rename are migrated once by
 [`js/storage-migration.js`](../js/storage-migration.js), the first `<head>`
 script — it moves each key across and drops the old name.
@@ -113,6 +135,7 @@ js/
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
     table-custom.js      per-table names / icons / starred rows
+    custom-vocab.js      the reader's own rows / tables, merged into the dataset
     customize.js         the Customize page
     render.js            tables, nav, sorting
     interactions.js      routing, search, view modes, print, theme

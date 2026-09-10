@@ -456,14 +456,48 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var navHost = document.getElementById('siteNav');
   var indexHost = document.getElementById('tableIndex');
   var vocabularyTables = window.RaumeStudy.data.vocabularyTables;
+
+  // Merge the reader's own rows/tables into the dataset before the first
+  // render (js/vocab/custom-vocab.js, loaded just above this file). Guest
+  // custom vocab is in localStorage and available synchronously; signed-in
+  // custom vocab arrives later from Supabase and triggers renderAllTables()
+  // below once it syncs.
+  function mergeCustomVocab() {
+    var cv = window.RaumeStudy.customVocab;
+    if (cv && cv.applyToDataset) cv.applyToDataset();
+  }
+  function tagOriginalIndex() {
+    document.querySelectorAll('.vocab tbody').forEach(function (tbody) {
+      [...tbody.querySelectorAll('tr')].forEach(function (row, i) { row.dataset.originalIndex = i; });
+    });
+  }
+  // A full re-paint of #vocabulary from the current dataset -- used when
+  // signed-in custom vocab lands after the initial synchronous render. It
+  // rebuilds every section, so expand/collapse and per-column sort reset to
+  // their defaults; acceptable because it fires once, right after sign-in
+  // sync, and tables start collapsed anyway.
+  function renderAllTables() {
+    if (!host || !vocabularyTables) return;
+    mergeCustomVocab();
+    host.innerHTML = renderAll(vocabularyTables);
+    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables);
+    tagOriginalIndex();
+    // Every freshly rendered section starts .page-hidden. If the reader is
+    // currently on a vocabulary section, re-run routing to reveal it again;
+    // if they're on Flashcards / Customize / Help, leave the rebuilt DOM
+    // hidden -- normal routing reveals it when they navigate back.
+    var active = document.body.dataset.activeSection;
+    if (active && vocab.showSection) vocab.showSection(active, { fromRoute: true });
+  }
+  vocab.renderAllTables = renderAllTables;
+
   if (host && vocabularyTables) {
+    mergeCustomVocab();
     host.innerHTML = renderAll(vocabularyTables);
     if (navHost) navHost.innerHTML = renderNav();
     if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables);
   }
-  document.querySelectorAll('.vocab tbody').forEach(function (tbody) {
-    [...tbody.querySelectorAll('tr')].forEach(function (row, i) { row.dataset.originalIndex = i; });
-  });
+  tagOriginalIndex();
 
   // Re-sequence the already-rendered #vocabulary headings/sections and rebuild
   // the table directory to match the current custom order (Customize page).

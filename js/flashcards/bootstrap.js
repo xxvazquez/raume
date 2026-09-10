@@ -348,7 +348,30 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   S.setActiveTab = function (t) { activeTab = t; };
   S.getActiveTab = function () { return activeTab; };
 
-  onAuthChange(function () { invalidateInsights(); render(); refreshRowToggleButtons(); });
+  // The reader's own vocabulary (js/vocab/custom-vocab.js): while signed in,
+  // Supabase is authoritative and local edits are pushed straight to the
+  // custom_tables / custom_rows tables; as a guest the store stays local and
+  // setRemote(null) leaves it that way. fetchAllFromServer pulls the account's
+  // copy back the other way on sign-in. Re-wired on every auth change so a
+  // sign-out drops back to the guest (local-only) store.
+  function wireCustomVocabRemote() {
+    var cv = window.RaumeStudy.customVocab;
+    if (!cv) return;
+    if (authState.session) {
+      var warn = function (e) { console.warn("Flashcards: could not sync custom vocabulary", e); };
+      cv.setRemote({
+        addRows: function (rows) { dataOps.customVocabAddRows(rows).catch(warn); },
+        deleteRows: function (ids) { dataOps.customVocabDeleteRows(ids).catch(warn); },
+        addTable: function (t) { dataOps.customVocabAddTable(t).catch(warn); },
+        deleteTable: function (id, rowIds) { dataOps.customVocabDeleteTable(id, rowIds).catch(warn); }
+      });
+    } else {
+      cv.setRemote(null);
+    }
+  }
+  wireCustomVocabRemote();
+
+  onAuthChange(function () { wireCustomVocabRemote(); invalidateInsights(); render(); refreshRowToggleButtons(); });
 
   // Vocabulary-page table icons: while signed in, a local pick is pushed to
   // the account (fetchAllFromServer pulls them back the other way on sign-in).

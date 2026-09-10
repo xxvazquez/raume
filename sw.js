@@ -41,6 +41,7 @@ const VERSIONED = [
   'js/vocab/icons.js',
   'js/vocab/table-custom.js',
   'js/vocab/icon-picker.js',
+  'js/vocab/custom-vocab.js',
   'js/vocab/render.js',
   'js/vocab/interactions.js',
   'js/vocab/customize.js',

@@ -886,6 +886,70 @@ async function main() {
     return secs[0] === "Cooking Ingredients" && secs[1] === "Drinks";
   })());
 
+  console.log("Custom vocabulary (your own rows / tables)");
+  const cvNs = window.RaumeStudy.customVocab;
+  check("RaumeStudy.customVocab is published", !!cvNs && typeof cvNs.parseFurigana === "function");
+  {
+    const seg = s => { const r = cvNs.parseFurigana(s); return r.error ? "ERR" : r.segments; };
+    const kaeru = seg("帰(かえ)る");
+    check("parseFurigana splits a kanji run + its kana tail", Array.isArray(kaeru) && kaeru.length === 2
+      && kaeru[0].kanji === "帰" && kaeru[0].reading === "かえ" && kaeru[1].text === "る");
+    const ocha = seg("お茶(ちゃ)");
+    check("...leading kana becomes its own text segment", Array.isArray(ocha) && ocha.length === 2
+      && ocha[0].text === "お" && ocha[1].kanji === "茶");
+    const goma = seg("ごま油(あぶら)");
+    check("...only the kanji before the ( ) carries the reading", Array.isArray(goma)
+      && goma[0].text === "ごま" && goma[1].kanji === "油" && goma[1].reading === "あぶら");
+    check("...a multi-kanji run with one reading stays one segment", (() => {
+      const r = seg("醤油(しょうゆ)"); return Array.isArray(r) && r.length === 1 && r[0].kanji === "醤油";
+    })());
+    check("...a kana-only word needs no parentheses", (() => {
+      const r = seg("ビール"); return Array.isArray(r) && r.length === 1 && r[0].text === "ビール";
+    })());
+    check("...a kanji with no reading is rejected", cvNs.parseFurigana("帰る").error != null);
+    check("...text with no Japanese is rejected", cvNs.parseFurigana("hello").error != null);
+  }
+  {
+    const res = cvNs.parseImport([
+      "japanese,romaji,english",
+      "人参(にんじん),ninjin,carrot",
+      "broken row",
+      "大根,daikon,radish",
+      'すし,sushi,"sushi, the rice dish"'
+    ].join("\n"));
+    check("parseImport keeps the good rows and skips the bad", res.rows.length === 2 && res.skipped.length === 2);
+    check("...the header line is dropped silently", !res.skipped.some(s => /japanese/i.test(s.raw)));
+    check("...each skip carries a line number and a reason", res.skipped.every(s => s.line > 0 && s.reason));
+    check("...an English value with a comma survives intact", res.rows.some(r => r.english === "sushi, the rice dish"));
+  }
+  {
+    const vegTable = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Vegetables");
+    const before = vegTable.rows.length;
+    const parsed = cvNs.parseImport("茄子(なす),nasu,eggplant").rows[0];
+    const made = cvNs.addRow(String(vegTable.id), parsed);
+    check("addRow merges a custom row into the built-in table", vegTable.rows.length === before + 1
+      && /^cv-/.test(made.id) && vegTable.rows.some(r => r.id === made.id && r.__custom));
+    const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
+    const entry = idx[made.id];
+    check("...the flashcards index picks it up with all four directions", !!entry
+      && window.RaumeStudy.flashcards.vocabIndex.directionsForEntry(entry).length === 4);
+    check("...answer checking accepts the romaji and the English", !!entry
+      && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-ro", "nasu")
+      && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-en", "eggplant"));
+    check("...it renders on the vocabulary page with real furigana", (() => {
+      const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
+      return !!tr && !!tr.querySelector("ruby rt") && /eggplant/.test(tr.textContent);
+    })());
+    cvNs.deleteRow(made.id);
+    check("deleteRow removes it again, restoring the dataset", vegTable.rows.length === before
+      && !window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[made.id]);
+  }
+  check("the Customize page has a Your vocabulary block", !!document.querySelector("#customizePage .cv-section"));
+  check("...a guest sees no New table card (accounts only)", (() => {
+    const heads = [...document.querySelectorAll("#customizePage .cv-card h3")].map(h => h.textContent);
+    return heads.includes("Add a word") && heads.includes("Import a list") && !heads.includes("New table");
+  })());
+
   gear.click();
   check("clicking the gear again returns to the vocabulary view", document.getElementById("vocabPage").hidden === false && document.getElementById("customizePage").hidden === true);
 

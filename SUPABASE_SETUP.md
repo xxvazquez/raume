@@ -11,9 +11,9 @@ The Flashcards section stores your learning data (which vocab entries you've add
 
 1. In your project, open **SQL Editor** → **New query**.
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
-3. This creates `flashcards`, `review_logs`, `flashcard_settings`, and the Kana trainer's `kana_cards` / `kana_review_logs`, all with Row Level Security enabled so each signed-in user only ever sees their own rows.
+3. This creates `flashcards`, `review_logs`, `flashcard_settings`, the Kana trainer's `kana_cards` / `kana_review_logs`, and `custom_tables` / `custom_rows` (words and tables you add yourself), all with Row Level Security enabled so each signed-in user only ever sees their own rows.
 
-`schema.sql` is written so the **whole file is safe to paste and re-run any time it changes** (new columns are added with `add column if not exists`, nothing is dropped) — so if you set up Supabase before a feature that needs a schema change (e.g. the vocabulary-page table icons, which sync through `flashcard_settings.table_custom`), just re-run the file.
+`schema.sql` is written so the **whole file is safe to paste and re-run any time it changes** (new tables use `create table if not exists`, new columns `add column if not exists`, nothing is dropped) — so if you set up Supabase before a feature that needs a schema change (e.g. the vocabulary-page table icons, which sync through `flashcard_settings.table_custom`, or custom vocabulary in `custom_tables` / `custom_rows`), just re-run the file.
 
 ## 3. Enable email/password sign-in
 
@@ -63,4 +63,5 @@ The smoke tests can't reach a real Supabase project, so anything sync-related is
 
 - **Kana trainer sync:** open the **Kana** tab, do a few reviews (both directions), then reload — progress is still there. In your project's **Table Editor**, `kana_cards` has a row per reviewed item×direction with advancing `reps`, and `kana_review_logs` has one row per review. Toggle a group or direction and check `flashcard_settings.kana_prefs` updates; change a Kana scheduling knob in **Settings** and check `flashcard_settings.kana_fsrs` updates (and that the vocabulary knobs in the same row are untouched). On a second device / browser, sign in and confirm the same progress, picker state and scheduling knobs load. Go offline, review, come back online — the queued reviews sync (the "Syncing… reviews" chip clears).
 - **First sign-in seeding:** with kana progress built up as a guest, then signing in on an account that has no kana rows yet, copies that progress up once (it never overwrites an account that already has kana rows).
+- **Custom vocabulary sync:** on the **Customize** page → **Your vocabulary**, create a table and add a word or two (and try an import). In the **Table Editor**, `custom_tables` / `custom_rows` get the rows; on a second device signed in, the custom table and its words load and are studiable. Delete a row on one device and confirm it's gone on the other after a sync. As a guest, adding a row then signing in migrates it into `custom_rows` under the account.
 - **Password recovery:** on the sign-in form, click **Forgot password?**, enter your email, and confirm the "check your email" note appears. Open the email, click the reset link — it lands back on the site showing **Set a new password**, not the ordinary sign-in screen. Set one and confirm you land signed in (Flashcards shows "Signed in as…"). **Cancel** on that screen should sign the recovery session back out instead of leaving it live.

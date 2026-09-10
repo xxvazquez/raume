@@ -101,6 +101,12 @@ and Help.
   separate without a loud colour. It's the one tag on the quiet reference side;
   it earns its place by carrying grammar the columns don't.
 - **Help and Settings** are prose, held to a readable measure (680px).
+- **The Customize page** stacks the table list, then a *Your vocabulary* block:
+  each task (add a word, new table, import, the list of what you've added) is a
+  hairline-edged `--paper` card (`.cv-card`) with an uppercase-micro title, the
+  same panel language as Settings. Forms are label-over-field; the parsed-ruby
+  preview and the import result sit on `--surface`, an error on `--wrong-soft`.
+  No new tokens.
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made

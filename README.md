@@ -80,6 +80,24 @@ Four sections in the nav: **Vocabulary** (the landing page), **Grammar**,
   including Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
 
+**Your own vocabulary** — the Customize page also has a **Your vocabulary**
+block for words the built-in dataset doesn't have:
+
+- **Add a word** to any table — built-in or one of your own.
+- **Import a list** — paste or pick a `.csv` / `.txt` file, one word per line,
+  three columns: `japanese(furigana),romaji,english`. Write each kanji run's
+  reading in parentheses right after it — `帰(かえ)る`, `お茶(ちゃ)` →
+  `お` + `茶(ちゃ)`, `醤油(しょうゆ)`; kana-only words need none. The English
+  column may contain commas. A first line of `japanese,romaji,english` is
+  treated as a header. Rows that don't parse are **skipped and listed** with a
+  reason — fix them and re-import just those.
+- **New table** — signed in only. Guests can add rows (stored in this browser);
+  building a table of your own needs an account.
+- A custom word behaves like any other everywhere: furigana, search, print,
+  pronunciation, and all four flashcard directions. Signed in, Supabase is the
+  authoritative store (`custom_tables` / `custom_rows`); guest rows migrate up
+  the first time you sign in.
+
 **Printing** — A4-friendly at three scopes: the printer icon on a table prints
 that table; **Print…** prints the whole section or the whole reference.
 Collapsed tables still print their rows.
@@ -188,7 +206,10 @@ them.
 
 Pausing a card **archives** it; pausing a whole table just marks the table
 dormant. Either way the FSRS state and full history are kept and resuming
-restores everything as it was. Nothing is ever hard-deleted.
+restores everything as it was. Nothing is ever hard-deleted — the one
+exception is **custom vocabulary** (words and tables you authored yourself),
+where deleting a row or table really removes it, since there's no learning
+history on the content itself to keep.
 
 The anon key in `js/config.js` is safe to commit (RLS protects the data, not the
 key). The service-role key must never go in the repo.
