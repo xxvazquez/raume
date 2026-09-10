@@ -62,9 +62,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 23 table sections", sections.length === 23);
+  check("renders 24 table sections", sections.length === 24);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 529 vocabulary rows", totalRows === 529);
+  check("renders 550 vocabulary rows", totalRows === 550);
   check("adjective rows carry an い-adj / な-adj pill before the meaning, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
@@ -111,6 +111,25 @@ async function main() {
     // headword), or the speak button silently never renders for those rows.
     return btns.length === forms && btns.every(b => b.dataset.jpSpeak && !/[一-龯]/.test(b.dataset.jpSpeak));
   }));
+  console.log("Particles (blue + bold, everywhere)");
+  const particleCells = (() => {
+    const t = [...document.querySelectorAll(".table-section")]
+      .find(s => s.querySelector(".section-title-text").textContent === "Particles");
+    return [...t.querySelectorAll("td.jp")];
+  })();
+  check("every Particles row renders a .particle span", particleCells.length >= 10
+    && particleCells.every(td => td.querySelector("span.particle") && td.querySelector("span.particle").textContent.trim()));
+  check("a particle never renders as ruby or a kana-romaji target", particleCells.every(td => !td.querySelector("ruby") && !td.querySelector(".kr")));
+  check("a particle still speaks (jpReadingOf falls through to seg.p)", particleCells.every(td => {
+    const b = td.querySelector(".jp-speak-btn");
+    return b && b.dataset.jpSpeak && b.dataset.jpSpeak.trim();
+  }));
+  check("each particle carries its reading for the hover layer (は -> wa, not ha)", (() => {
+    const wa = particleCells.map(td => td.querySelector(".particle")).find(p => p && p.textContent === "は");
+    const e = particleCells.map(td => td.querySelector(".particle")).find(p => p && p.textContent === "へ");
+    return wa && wa.dataset.r === "wa" && e && e.dataset.r === "e";
+  })());
+
   check("section toggle is a real <button> (native keyboard activation)", document.querySelector(".section-toggle").tagName === "BUTTON");
   check("controls are siblings of the toggle, not nested inside it", !document.querySelector(".section-toggle .print-one"));
   check("every table section carries its category", [...sections].every(s => s.dataset.category));
@@ -135,6 +154,22 @@ async function main() {
     const bg = r => (r && (r.style.background || r.style.backgroundColor)) || "";
     return /var\(--accent-soft\)/.test(bg(iRule)) && /var\(--accent-2-soft\)/.test(bg(naRule));
   })());
+  check("the .particle rule is blue (var(--particle)) and bold", (() => {
+    const r = allCssRules.find(x => x.selectorText === ".particle");
+    return !!r && /var\(--particle\)/.test(r.style.color) && String(r.style.fontWeight) === "700";
+  })());
+  check("--particle is a real colour in both themes, not left as an alias", (() => {
+    const light = allCssRules.find(r => r.selectorText === ":root");
+    const dark = allCssRules.find(r => r.selectorText === ':root[data-theme="dark"]');
+    return /^\s*#[0-9a-f]{3,8}\s*$/i.test(light.style.getPropertyValue("--particle"))
+      && /^\s*#[0-9a-f]{3,8}\s*$/i.test(dark.style.getPropertyValue("--particle"));
+  })());
+  check("the particle reading tooltip is wired (::after hidden by default, shown on hover/tap)", (() => {
+    // jsdom's CSSOM drops `content: attr(data-r)`, so assert on the opacity flip.
+    const base = allCssRules.find(r => r.selectorText === ".particle[data-r]::after");
+    const on = allCssRules.find(r => r.selectorText && /\.particle\[data-r\](:hover|\.particle-on)::after/.test(r.selectorText));
+    return !!base && base.style.opacity === "0" && !!on && on.style.opacity === "1";
+  })());
   check("the four section accents are spread far enough apart in hue to read as distinct identities, light and dark", (() => {
     const hexToHue = (hex) => {
       const h = hex.trim().replace("#", "");
@@ -144,7 +179,7 @@ async function main() {
       let hue = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
       return (hue * 60 + 360) % 360;
     };
-    const sections = ["vocabulary", "grammar", "travel", "flashcards"];
+    const sections = ["vocabulary", "grammar", "phrases", "travel", "flashcards"];
     // The regression this guards: Vocabulary and Flashcards once sat 5° apart.
     const wellSpread = (rule) => {
       if (!rule) return false;
@@ -421,7 +456,8 @@ async function main() {
   check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
   check("Grammar tables belong to the grammar section", [...document.querySelectorAll('.table-section[data-category="Grammar"]')].every(s => s.dataset.section === "grammar"));
   check("Travel tables belong to the travel section", [...document.querySelectorAll('.table-section[data-category="Travel"]')].every(s => s.dataset.section === "travel"));
-  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "Travel"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
+  check("Phrases tables belong to the phrases section", [...document.querySelectorAll('.table-section[data-category="Phrases"]')].every(s => s.dataset.section === "phrases"));
+  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "Phrases", "Travel"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
 
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
@@ -467,11 +503,11 @@ async function main() {
     return tables.length > 1 && tables.every(s => s.classList.contains("collapsed"));
   })());
 
-  console.log("Four-item top navigation");
+  console.log("Top navigation");
   const navLinks = [...document.querySelectorAll("#siteNav .site-nav-link")];
-  check("nav is Vocabulary / Grammar / Travel / Flashcards", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Travel Flashcards");
-  check("the three vocabulary sections carry data-section", navLinks.slice(0, 3).map(l => l.dataset.section).join(",") === "vocabulary,grammar,travel");
-  check("last nav item is Flashcards", navLinks[3].dataset.page === "flashcards");
+  check("nav is Vocabulary / Grammar / Phrases / Travel / Flashcards", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Phrases Travel Flashcards");
+  check("the four reference sections carry data-section", navLinks.slice(0, 4).map(l => l.dataset.section).join(",") === "vocabulary,grammar,phrases,travel");
+  check("last nav item is Flashcards", navLinks[navLinks.length - 1].dataset.page === "flashcards");
   check("no category is a top-level nav item", !navLinks.some(l => l.dataset.category));
 
   console.log("Sections behave like separate pages");
@@ -485,6 +521,66 @@ async function main() {
   check("the Grammar nav link is active", grammarNav.classList.contains("active"));
   check("the Vocabulary nav link is no longer active", !document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("Grammar has no in-flow category sub-heading (single category)", ![...document.querySelectorAll('#vocabulary .cat-heading:not(.page-hidden)')].length);
+
+  console.log("Phrases section (Self-introduction)");
+  window.location.hash = "#phrases";
+  window.dispatchEvent(new window.Event("popstate"));
+  check("#phrases routes to its own section", document.body.dataset.activeSection === "phrases");
+  check("its nav link is the active one", document.querySelector('#siteNav .site-nav-link[data-section="phrases"]').classList.contains("active")
+    && !document.querySelector('#siteNav .site-nav-link[data-section="grammar"]').classList.contains("active"));
+  check("only Phrases tables show", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "phrases")));
+  check("the Phrases accent is its own well-spread hue", (() => {
+    const light = allCssRules.find(r => r.selectorText === ":root");
+    return /^#[0-9a-f]{6}$/i.test((light.style.getPropertyValue("--sec-phrases") || "").trim());
+  })());
+  const selfIntro = [...document.querySelectorAll('.table-section[data-section="phrases"]')]
+    .find(s => s.querySelector('.section-title-text').textContent === "Self-introduction");
+  check("Self-introduction renders its rows with furigana and blue/bold particles", (() => {
+    if (!selfIntro) return false;
+    const rows = [...selfIntro.querySelectorAll('tbody tr')];
+    const nameRow = rows.find(r => /name/i.test(r.textContent));
+    return rows.length >= 20
+      && nameRow && nameRow.querySelector('ruby rt') && nameRow.querySelector('.particle')
+      && [...selfIntro.querySelectorAll('.particle')].some(p => p.textContent === "は");
+  })());
+  check("a sentence table is two columns (Japanese + Romaji, no English column)", (() => {
+    const heads = [...selfIntro.querySelectorAll('thead th')].map(th => th.textContent.replace(/[↕↓↑]/g, "").trim());
+    const firstRow = selfIntro.querySelector('tbody tr');
+    return heads.join(",") === "Japanese,Romaji" && firstRow.cells.length === 2;
+  })());
+  check("the English sits behind a translate control on the romaji cell, still in the DOM", (() => {
+    const row = selfIntro.querySelector('tbody tr');
+    const btn = row.cells[1].querySelector('.phrase-en-btn');
+    const en = row.cells[1].querySelector('.phrase-en');
+    return btn && btn.getAttribute('aria-expanded') === "false" && en && en.textContent.trim().length > 0;
+  })());
+  check(".phrase-en is hidden until revealed (display:none by default)", (() => {
+    const r = allCssRules.find(x => x.selectorText === ".phrase-en");
+    return !!r && r.style.display === "none";
+  })());
+  check("clicking the translate control opens it (touch path) and toggles aria-expanded", (() => {
+    const wrap = selfIntro.querySelector('.phrase-en-wrap');
+    const btn = wrap.querySelector('.phrase-en-btn');
+    btn.click();
+    const opened = wrap.classList.contains('phrase-en-on') && btn.getAttribute('aria-expanded') === "true";
+    btn.click();
+    return opened && !wrap.classList.contains('phrase-en-on');
+  })());
+  check("the authored question/answer order is kept (not re-sorted A-Z)", (() => {
+    const firstEn = selfIntro.querySelector('tbody tr .phrase-en').textContent.trim();
+    return firstEn === "What is your name?"; // v0530, first row of the table
+  })());
+  window.location.hash = "";
+  check("search still finds a phrase by its English, though the column is gone", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "Warsaw";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const hit = [...document.querySelectorAll('#vocabulary .table-section[data-section="phrases"] tbody tr:not(.search-hidden)')]
+      .some(r => /sunde imasu/i.test(r.textContent));
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return hit;
+  })());
 
   console.log("\"Show polite\" only appears where verb rows are actually visible");
   check("hidden on Vocabulary (no verb tables)", (() => {
@@ -827,7 +923,7 @@ async function main() {
   check("...and hides the vocabulary view", document.getElementById("vocabPage").hidden === true);
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 23 tables", czRows.length === 23);
+  check("it lists every one of the 24 tables", czRows.length === 24);
   check("each row has a name field and a reset control", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
@@ -1717,6 +1813,17 @@ async function main() {
     && fc.normalizeAnswer("satou", true) === fc.normalizeAnswer("satō", true)
     && fc.normalizeAnswer("gakkou", true) === fc.normalizeAnswer("gakkō", true));
   check("normalizeAnswer strips a leading ~ for romaji (counters)", fc.normalizeAnswer("~ko", true) === "ko");
+  check("normalizeAnswer drops sentence punctuation so a phrase answer is typeable", (() => {
+    return fc.normalizeAnswer("Onamae wa?", true) === fc.normalizeAnswer("onamae wa", true)
+      && fc.normalizeAnswer("What is your name?", false) === fc.normalizeAnswer("what is your name", false);
+  })());
+  check("a Phrases card studies in all four directions and accepts the plain-typed answer", (() => {
+    const entry = Object.values(fc.getVocabIndex()).find(e => e.englishDisplay === "I live in Warsaw.");
+    if (!entry) return false;
+    return fc.directionsForEntry(entry).length === 4
+      && fc.checkAnswer(entry, "jp-en", "i live in warsaw")
+      && fc.checkAnswer(entry, "jp-ro", "watashi wa warushawa ni sunde imasu");
+  })());
   const vocabIndex = fc.getVocabIndex();
   const beerEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "beer");
   check("vocab index resolves a known entry by content", !!beerEntry);
@@ -1733,6 +1840,9 @@ async function main() {
     const prompt = fc.promptFor(beerEntry, "jp-en");
     return prompt.lang === "ja" && /class="jp-speak-btn" data-jp-speak="[^"]+"/.test(prompt.html);
   })());
+  const particleEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "topic / contrast");
+  check("a particle entry's flashcard prompt carries the blue/bold .particle span", () =>
+    !!particleEntry && /<span class="particle">は<\/span>/.test(fc.promptFor(particleEntry, "jp-en").html));
   const verbPairEntry = Object.values(vocabIndex).find(e => (e.romajiDisplay || "").includes(" / "));
   check("a verb-pair entry's prompt carries one speaker button per form (plain and polite)", (() => {
     if (!verbPairEntry) return false;

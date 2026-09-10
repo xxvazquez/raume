@@ -1,8 +1,8 @@
 // Vocabulary page -- interaction half of RaumeStudy.vocab.
 //
-// Section routing (Vocabulary / Grammar / Travel / Flashcards), the per-table
-// accordion and overflow menus, print, cross-section search, the view-mode
-// column filter, the four-item top navigation and the casual/polite toggle.
+// Section routing (Vocabulary / Grammar / Phrases / Travel / Flashcards), the
+// per-table accordion and overflow menus, print, cross-section search, the
+// view-mode column filter, the top navigation and the casual/polite toggle.
 // Augments the RaumeStudy.vocab object that js/vocab/render.js creates. Loaded
 // after render.js; keeps the exact DOMContentLoaded lifecycle the old
 // js/app.js had.
@@ -154,9 +154,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
-  // #travel / #flashcards / #table-N) so a section or a specific table can be
-  // bookmarked, shared and survive a reload. `fromRoute` = we're already
-  // responding to a hash, so don't push it again.
+  // #phrases / #travel / #flashcards / #table-N) so a section or a specific
+  // table can be bookmarked, shared and survive a reload. `fromRoute` = we're
+  // already responding to a hash, so don't push it again.
   function setHash(h, fromRoute) {
     if (fromRoute) return;
     if (('#' + h) === location.hash) return;
@@ -312,7 +312,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (h === 'customize') { vocab.showCustomizePage({ fromRoute: true }); return; }
     if (h === 'help') { vocab.showHelpPage({ fromRoute: true }); return; }
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }
-    if (h === 'grammar' || h === 'travel') { showSection(h, { fromRoute: true }); return; }
+    if (h === 'grammar' || h === 'phrases' || h === 'travel') { showSection(h, { fromRoute: true }); return; }
     showSection('vocabulary', { fromRoute: true });
   }
   vocab.routeFromHash = routeFromHash;
@@ -381,10 +381,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         fields.push({ cell: row.cells[0], text: jp.kanji });
         if (!isHidden('furigana')) fields.push({ cell: row.cells[0], text: jp.furigana });
       }
-      if (!isHidden('romaji')) fields.push({ cell: row.cells[1], text: row.cells[1].textContent });
-      // .meaning-text, not the whole cell: skip the row-action icons and the
-      // adjective pill ("い-adj" / "な-adj") so they never register as matches.
-      if (!isHidden('english')) fields.push({ cell: row.cells[2], text: (row.cells[2].querySelector('.meaning-text') || row.cells[2]).textContent });
+      // .romaji-text where a sentence row has one, so the hidden English box
+      // and the translate button's label don't get folded into the romaji.
+      if (!isHidden('romaji')) fields.push({ cell: row.cells[1], text: (row.cells[1].querySelector('.romaji-text') || row.cells[1]).textContent });
+      // English: a word row keeps it in cells[2] (.meaning-text, so the
+      // row-action icons and the adj pill never register); a sentence row keeps
+      // it in the .phrase-en box tucked into the romaji cell.
+      if (!isHidden('english')) {
+        const enEl = row.cells[2] ? row.cells[2].querySelector('.meaning-text') || row.cells[2]
+          : row.cells[1] && row.cells[1].querySelector('.phrase-en');
+        if (enEl) fields.push({ cell: row.cells[1] && row.cells[1].querySelector('.phrase-en') ? row.cells[1] : row.cells[2], text: enEl.textContent });
+      }
       return fields;
     }
 
@@ -825,6 +832,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const kr = event.target.closest && event.target.closest('.kr');
       document.querySelectorAll('.kr.kr-on').forEach(function (el) { if (el !== kr) el.classList.remove('kr-on'); });
       if (kr) kr.classList.toggle('kr-on');
+
+      // Same touch-pin behaviour for a particle's reading (は -> "wa").
+      const pt = event.target.closest && event.target.closest('.particle[data-r]');
+      document.querySelectorAll('.particle.particle-on').forEach(function (el) { if (el !== pt) el.classList.remove('particle-on'); });
+      if (pt) pt.classList.toggle('particle-on');
+
+      // Sentence rows (Phrases): the translate control opens the English box.
+      // Same touch-friendly toggle -- a tap pins it, a tap elsewhere closes it;
+      // desktop :hover still opens it without a click.
+      const trBtn = event.target.closest && event.target.closest('.phrase-en-btn');
+      const trWrap = trBtn && trBtn.closest('.phrase-en-wrap');
+      document.querySelectorAll('.phrase-en-wrap.phrase-en-on').forEach(function (el) {
+        if (el !== trWrap) { el.classList.remove('phrase-en-on'); const b = el.querySelector('.phrase-en-btn'); if (b) b.setAttribute('aria-expanded', 'false'); }
+      });
+      if (trWrap) {
+        const open = trWrap.classList.toggle('phrase-en-on');
+        trBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
     });
 
     // Table personalisation: a chosen icon or custom name (from the section

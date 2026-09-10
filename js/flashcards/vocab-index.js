@@ -35,6 +35,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
 
   function normalizeAnswer(s, romaji) {
     var v = String(s == null ? "" : s).trim().replace(/\s+/g, " ").toLowerCase();
+    // Sentence punctuation isn't meaningful for matching -- a phrase card whose
+    // answer is "Onamae wa?" / "What is your name?" has to accept the same
+    // words typed without the mark. Kept for the expected-answer *display*
+    // (that reads the raw field), stripped only here for the comparison.
+    v = v.replace(/[?!.,;:。、！？「」『』（）()]/g, "").replace(/\s+/g, " ").trim();
     if (romaji) {
       v = foldMacrons(v);
       v = foldLongVowels(v);
@@ -48,7 +53,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
 
   function jpPlainOf(segments) {
-    return segments.map(function (seg) { return seg.kanji ? seg.kanji : seg.text; }).join("");
+    return segments.map(function (seg) { return seg.kanji ? seg.kanji : (seg.text || seg.p || ""); }).join("");
   }
 
   var vocabIndex = null;

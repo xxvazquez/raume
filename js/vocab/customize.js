@@ -44,10 +44,10 @@ window.RaumeStudy.customize = (function () {
   // then A-Z) > table (custom order, then A-Z) -- the exact sequence the
   // vocabulary page and the table directory now lay out in.
   function grouped() {
-    var bySec = { vocabulary: [], grammar: [], travel: [] };
+    var bySec = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     tables().forEach(function (t) { bySec[V().sectionOf(t.category)].push(t); });
     var out = [];
-    ["vocabulary", "grammar", "travel"].forEach(function (sec) {
+    ["vocabulary", "grammar", "phrases", "travel"].forEach(function (sec) {
       var byCat = {};
       bySec[sec].forEach(function (t) {
         var c = t.category || "Tables";

@@ -73,7 +73,7 @@
 <section id="customizePage" class="page page-customize" hidden></section>
 <section id="helpPage" class="page page-help" hidden>
   <h2>How this works</h2>
-  <p class="help-lede">The Vocabulary, Grammar, and Travel pages are one big reference you can read, search, and quiz yourself against. Flashcards is a separate spaced-repetition trainer built on the same words, with its own Help tab.</p>
+  <p class="help-lede">The Vocabulary, Grammar, Phrases, and Travel pages are one big reference you can read, search, and quiz yourself against. Flashcards is a separate spaced-repetition trainer built on the same words, with its own Help tab.</p>
 
   <h3>Finding words</h3>
   <ul>
@@ -91,6 +91,8 @@
     <li><strong>Show polite</strong>, on verb tables, swaps the dictionary form for the 〜ます form.</li>
     <li>Where a word is an い- or な-adjective, a small <strong>い-adj</strong> or <strong>な-adj</strong> tag next to its meaning marks how it conjugates.</li>
     <li>The small speaker icon next to a word plays its pronunciation. It only appears once your browser confirms it has a Japanese voice installed.</li>
+    <li>Grammatical <strong>particles</strong> (は, を, から …) show in blue and bold wherever Japanese text appears, including flashcards. Hover or tap one to see how it's read (は as "wa", へ as "e").</li>
+    <li><strong>Phrases</strong> tables are two columns — Japanese and romaji — laid out as question/answer pairs. The English is behind the <strong>translate icon</strong> on the romaji cell: hover it (or tap on a touch screen) to see it.</li>
   </ul>
 
   <h3>Getting around a section</h3>
@@ -131,7 +133,7 @@
   4. js/vocab/kana-romaji.js  -> RaumeStudy.kanaRomaji (kana->romaji for the hover/tap reading layer)
      js/vocab/icons.js / table-custom.js / icon-picker.js -> per-table icon & name personalisation
      js/vocab/custom-vocab.js -> RaumeStudy.customVocab (reader's own rows/tables, merged into the dataset)
-  5. js/vocab/render.js       -> RaumeStudy.vocab  (tables + four-item nav rendering, sorting)
+  5. js/vocab/render.js       -> RaumeStudy.vocab  (tables + top-nav rendering, sorting)
   6. js/vocab/interactions.js -> RaumeStudy.vocab  (routing, search, view modes, menus, print, polite)
      js/vocab/customize.js    -> RaumeStudy.customize (the #customize page: rename / re-icon any table)
   7. vendor/ts-fsrs.js    -> window.FSRS           (vendored FSRS-6 scheduler)

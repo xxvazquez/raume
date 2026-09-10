@@ -8,8 +8,8 @@ vm.runInNewContext(source, sandbox);
 const tableList = (sandbox.window.RaumeStudy && sandbox.window.RaumeStudy.data.vocabularyTables) || [];
 const tableCount = tableList.length;
 const rowCount = tableList.reduce((total, t) => total + t.rows.length, 0);
-const expectedTables = 23;
-const expectedRows = 529;
+const expectedTables = 24;
+const expectedRows = 550;
 if (tableCount !== expectedTables || rowCount !== expectedRows) {
   console.error("Vocabulary validation failed: found " + rowCount + " rows across " + tableCount + " tables; expected " + expectedRows + " rows across " + expectedTables + " tables.");
   process.exit(1);
@@ -40,7 +40,7 @@ for (const table of tableList) {
 console.log("Vocabulary id validation passed: " + seenIds.size + " unique permanent ids.");
 
 function jpText(segments) {
-  return segments.map(seg => seg.kanji ? seg.kanji + seg.reading : seg.text).join("");
+  return segments.map(seg => seg.kanji ? seg.kanji + seg.reading : (seg.text || seg.p || "")).join("");
 }
 
 for (const table of tableList) {

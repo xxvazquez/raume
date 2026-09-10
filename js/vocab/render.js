@@ -1,7 +1,7 @@
 // Vocabulary page -- rendering half of RaumeStudy.vocab.
 //
 // Builds every vocabulary table (grouped section -> category -> table) and the
-// four-item top navigation from RaumeStudy.data, and owns per-table sorting.
+// top navigation from RaumeStudy.data, and owns per-table sorting.
 // Runs its render
 // synchronously at load (same lifecycle as the old js/app.js). The interaction
 // half -- navigation, search, event wiring -- lives in js/vocab/interactions.js
@@ -23,7 +23,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
     '一月':0,'二月':1,'三月':2,'四月':3,'五月':4,'六月':5,'七月':6,'八月':7,'九月':8,'十月':9,'十一月':10,'十二月':11
   };
-  function val(cell){ return (cell?.textContent || '').trim(); }
+  function val(cell){
+    // Prefer the cell's own text span where it has one (.romaji-text on a
+    // sentence row, .meaning-text on a word row) so a sort key never picks up
+    // an adjacent icon's label, the adj pill, or a hidden translation.
+    var t = cell && (cell.querySelector('.romaji-text') || cell.querySelector('.meaning-text'));
+    return ((t || cell)?.textContent || '').trim();
+  }
   function key(v){
     v=v.toLowerCase().replace(/\s+/g,' ').trim();
     // Leading number, allowing thousands separators ("1,000", "300,000") so
@@ -86,17 +92,33 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // reads kanji unreliably (an ambiguous character can be mis-read), so the
   // spoken form always uses the reading instead.
   function jpReadingOf(segments) {
-    return segments.map(function (seg) { return seg.reading || seg.kanji || seg.text; }).join('');
+    return segments.map(function (seg) { return seg.reading || seg.kanji || seg.text || seg.p; }).join('');
   }
   vocab.jpReadingOf = jpReadingOf;
   // decorateKana: wrap katakana in hover/tap romaji targets (see
   // js/vocab/kana-romaji.js). On for the vocabulary tables; off for flashcard
   // prompts (passed straight through), where it would spoil a romaji answer.
+  // How each grammatical particle is actually read -- は as "wa", へ as "e",
+  // を as "o" -- which a plain kana->romaji pass gets wrong (it'd give "ha").
+  // Shown on hover/tap via the .particle[data-r] layer (css/site.css).
+  var PARTICLE_ROMAJI = {
+    'は': 'wa', 'が': 'ga', 'を': 'o', 'に': 'ni', 'へ': 'e', 'で': 'de',
+    'と': 'to', 'から': 'kara', 'まで': 'made', 'の': 'no', 'も': 'mo',
+    'か': 'ka', 'ね': 'ne', 'よ': 'yo', 'や': 'ya', 'わ': 'wa', 'ぞ': 'zo', 'な': 'na'
+  };
+  // A { p: "は" } segment is a grammatical particle -- rendered as its own
+  // highlighted span (css/site.css .particle), never kana-decorated: it's a
+  // grammar cue, not a reading aid. Particles are marked explicitly in
+  // data/vocabulary.js, so the highlight is always accurate.
   function jpSegments(segments, decorateKana) {
     var plain = decorateKana && window.RaumeStudy.kanaRomaji
       ? function (t) { return window.RaumeStudy.kanaRomaji.decorate(t); }
       : esc;
     return segments.map(function (seg) {
+      if (seg.p) {
+        var pr = seg.r || PARTICLE_ROMAJI[seg.p] || '';
+        return '<span class="particle"' + (pr ? ' data-r="' + esc(pr) + '"' : '') + '>' + esc(seg.p) + '</span>';
+      }
       return seg.kanji
         ? '<ruby><rb class="jpmain">' + esc(seg.kanji) + '</rb><rt class="furigana">' + esc(seg.reading) + '</rt></ruby>'
         : plain(seg.text);
@@ -111,24 +133,25 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.speakButtonHtml = speakButton;
   function jpCell(row) {
-    var inner = row.particle
-      ? '<span class="particle">' + esc(row.jp[0].text) + '</span>'
-      : '<span class="jpword">' + jpSegments(row.jp, true) + '</span>';
+    // Particles carry their own { p: … } segment now (jpSegments emits the
+    // .particle span), so a standalone-particle row needs no special case.
+    var inner = '<span class="jpword">' + jpSegments(row.jp, true) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
     return '<td class="jp" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div></td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
-  // The four main study areas. Grammar and Travel are promoted out of the
+  // The main study areas. Grammar, Phrases and Travel are promoted out of the
   // general vocabulary list into their own top-level sections; everything
   // else lives under Vocabulary, still grouped by its content category.
   function sectionOf(category) {
     if (category === 'Grammar') return 'grammar';
+    if (category === 'Phrases') return 'phrases';
     if (category === 'Travel') return 'travel';
     return 'vocabulary';
   }
-  var SECTION_ORDER = ['vocabulary', 'grammar', 'travel'];
+  var SECTION_ORDER = ['vocabulary', 'grammar', 'phrases', 'travel'];
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row" title="Hide this row">' + EYE_ICON + '</button>';
@@ -183,6 +206,25 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return openTag + jpCell(row) +
       '<td>' + esc(row.romaji) + '</td>' + meaningCell(row.english, row.id, row.adj) + '</tr>';
   }
+  // Lucide "languages" -- the translate control on a sentence row's romaji cell.
+  var TRANSLATE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
+  // A whole-sentence row (Phrases tables, tableClass "vocab-sentences"): two
+  // columns only -- Japanese and Romaji -- with the English tucked behind a
+  // translate control on the romaji cell (hover on desktop, tap on touch) so a
+  // full sentence isn't fighting a third column for width. The English stays in
+  // the DOM for search, screen readers and print.
+  function sentenceRow(row) {
+    return '<tr data-vocab-id="' + esc(row.id || '') + '">' + jpCell(row) +
+      '<td class="romaji-sentence-cell"><div class="romaji-line">' +
+        '<span class="romaji-text">' + esc(row.romaji) + '</span>' +
+        '<span class="phrase-tail">' +
+          '<span class="phrase-en-wrap">' +
+            '<button type="button" class="phrase-en-btn" aria-expanded="false" aria-label="Show the English translation" title="Show the English translation">' + TRANSLATE_ICON + '</button>' +
+            '<span class="phrase-en" role="tooltip">' + esc(row.english) + '</span>' +
+          '</span>' + rowActions(row.id) +
+        '</span>' +
+      '</div></td></tr>';
+  }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently (plain vs polite) down both
   // the Japanese and Romaji columns.
@@ -204,8 +246,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function byEnglish(a, b) {
     return vocab.compareCellText(String(a.english || ''), String(b.english || ''), 'asc');
   }
-  function rowsHtmlFor(rows) {
-    return rows.map(function (row) { return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row); }).join('\n    ');
+  function rowsHtmlFor(rows, sentences) {
+    return rows.map(function (row) {
+      if (sentences) return sentenceRow(row);
+      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row);
+    }).join('\n    ');
   }
   // Column-visibility toggles, identical to the reference toolbar's set
   // (index.html). The click handler is delegated on document (js/vocab/
@@ -259,17 +304,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // aria-labelledby the visible title so a screen reader announces the table
       // by name ("Cooking Ingredients, table") instead of a bare "table".
       '<table class="vocab' + (o.tableClass ? ' ' + o.tableClass : '') + '" id="vocab-' + o.id + '" aria-labelledby="secttl-' + o.id + '"><thead><tr>' +
-      '<th>Japanese</th>' +
-      sortHeader('Romaji', 1, false) + sortHeader('English', 2, defaultSort) + '</tr></thead><tbody>\n    ' +
+      '<th>Japanese</th>' + sortHeader('Romaji', 1, false) +
+      (o.sentences ? '' : sortHeader('English', 2, defaultSort)) +
+      '</tr></thead><tbody>\n    ' +
       o.rowsHtml + '\n  </tbody></table></section>';
   }
   function renderTable(t) {
-    var sortedRows = t.rows.slice().sort(byEnglish);
+    // Sentence tables (Phrases) keep their authored order -- the rows are laid
+    // out as question/answer pairs, which an A-Z-by-English sort would scatter.
+    var sentences = t.tableClass === 'vocab-sentences';
+    var rows = sentences ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
-      rowsHtml: rowsHtmlFor(sortedRows),
+      rowsHtml: rowsHtmlFor(rows, sentences), sentences: sentences,
       controls: { addTable: true, print: true },
-      sectionClass: 'page-hidden', collapsed: true, defaultSort: true
+      sectionClass: 'page-hidden', collapsed: true, defaultSort: !sentences
     });
   }
   // Build a standard vocabulary table section from an arbitrary set of rows
@@ -385,6 +434,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function renderNav() {
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
+      '<a class="site-nav-link" href="#phrases" data-section="phrases">Phrases</a>' +
       '<a class="site-nav-link" href="#travel" data-section="travel">Travel</a>' +
       '<a class="site-nav-link" href="#flashcards" data-page="flashcards">Flashcards</a>';
   }
@@ -396,7 +446,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Panels with more than a handful of tables are marked --wide so CSS flows
   // them into two columns.
   function renderTableIndex(tables) {
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var panels = SECTION_ORDER.map(function (sec) {
       var groups = groupByCategory(bySection[sec], sec);
@@ -437,7 +487,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // page-hidden; routing (interactions.js -> showSection) reveals one section
   // at a time.
   function renderAll(tables) {
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var html = '';
     SECTION_ORDER.forEach(function (sec) {
@@ -506,7 +556,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // on section navigation.
   function reflowLayout() {
     if (!host || !vocabularyTables) return;
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var ordered = [];
     SECTION_ORDER.forEach(function (sec) {

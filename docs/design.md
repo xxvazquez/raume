@@ -16,7 +16,9 @@ stay consistent.
 - Hierarchy comes from size, spacing, position, and colour — **not** bold weight
   or high contrast. Default weight is 400; 500 marks a genuinely active or
   labelled state. One type scale (`--fs-*` tokens) is shared by the reference
-  and Flashcards sides.
+  and Flashcards sides. The sole exception is a **particle** (`.particle`,
+  700 + `--particle` blue): a grammar signal that needs to jump out of a
+  sentence at a glance, and colour alone wasn't enough against Japanese text.
 - On the review card the prompt is the anchor — 26px, the largest text on the
   card, with the direction label (`.fc-prompt-label`) faint and tucked right
   above it. It reads as the anchor from contrast, not sheer size: once
@@ -53,7 +55,8 @@ properties in `css/site.css`.
 | `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
 | `#DBDFE6` | `--card-line` | card outlines — visible, paired with `--shadow-card` |
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
-| `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, grammar particles, supporting highlights (same hue as `--right`) |
+| `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
+| `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
 
 Functional roles, each one job — all muted:
 
@@ -72,19 +75,21 @@ Functional roles, each one job — all muted:
 
 ### Per-section tone
 
-Four muted hues, spread wide enough to read as genuinely different places: a
-slate-blue, a mauve, the sage, the lavender. Used **only** on structural and
-interactive elements (nav underline + active block, category headings + rules,
-active tabs/filters, focus, sort accents) — never a row or a large surface.
-`-strong` variants are the ones used at body-text size and all clear AA on
-`--paper`. `--section` is switched by `body[data-active-*]`:
+Five hues, spread wide enough to read as genuinely different places: a
+slate-blue, a mauve, an ochre, the sage, the lavender. Used **only** on
+structural and interactive elements (nav underline + active block, category
+headings + rules, active tabs/filters, focus, sort accents) — never a row or a
+large surface. `-strong` variants are the ones used at body-text size and all
+clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
 
 - `--sec-vocabulary` — slate-blue (`#4F7389`)
 - `--sec-grammar` — mauve (`#875A78`)
+- `--sec-phrases` — ochre (`#A5843F`) — the one warm hue; it's the only spot
+  left in the wheel ≥20° from the other four
 - `--sec-travel` — sage (`#5F8175`)
 - `--sec-flashcards` — lavender (`#82799B`), the same as the primary accent
 
-The four hues sit well over 20° apart (the smoke test enforces it), light and
+The five hues sit well over 20° apart (the smoke test enforces it), light and
 dark, so moving between sections reads as a change of place.
 
 ## Labels and measure
@@ -100,6 +105,14 @@ and Help.
   sage split used for primary vs supporting elsewhere, so the two classes
   separate without a loud colour. It's the one tag on the quiet reference side;
   it earns its place by carrying grammar the columns don't.
+- **Phrases tables** (`.vocab-sentences`) hold whole sentences, so they drop to
+  two columns — Japanese (wraps, `line-height: 2` for the furigana) and romaji —
+  and keep their authored question/answer order instead of sorting A-Z. The
+  English moves onto a translate control (`.phrase-en-btn`, Lucide *languages*)
+  pinned right of the romaji, opening a small `--shadow-menu` popover on hover
+  (desktop) or tap (`.phrase-en-on`, same pattern as the katakana `.kr` reading
+  layer). It stays in the DOM for search, screen readers, and print (where it
+  prints inline under the romaji).
 - **Help and Settings** are prose, held to a readable measure (680px).
 - **The Customize page** stacks the table list, then a *Your vocabulary* block:
   each task (add a word, new table, import, the list of what you've added) is a
@@ -175,8 +188,9 @@ light logic doesn't carry over:
   raised on the dark ground (with `--shadow-card`), while table row rules gain a
   little (`--row-line`) so they don't vanish;
 - every accent hue is lightened but kept muted so it carries against the dark
-  without turning neon — the four section tones, the lavender/sage accents,
-  coral and ochre all re-pitched in the `:root[data-theme="dark"]` block;
+  without turning neon — the five section tones, the lavender/sage accents,
+  the particle blue, coral and ochre all re-pitched in the
+  `:root[data-theme="dark"]` block;
 - `--furigana` drops a clear step below `--romaji` again (it collapses to one
   tone otherwise), still clearing AA over `--paper`.
 

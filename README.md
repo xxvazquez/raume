@@ -21,9 +21,15 @@ python3 -m http.server
 
 ## The reference
 
-Four sections in the nav: **Vocabulary** (the landing page), **Grammar**,
-**Travel**, and **Flashcards**. Vocabulary tables are grouped by category — Food
-& Ingredients, Kitchen & Dining, Numbers & Counting.
+Five sections in the nav: **Vocabulary** (the landing page), **Grammar**,
+**Phrases**, **Travel**, and **Flashcards**. Vocabulary tables are grouped by
+category — Food & Ingredients, Kitchen & Dining, Numbers & Counting. **Phrases**
+is a conversational Q&A set (Self-introduction: name, job, country, age, family,
+where you live), laid out as question/answer pairs. Its tables are two columns —
+Japanese and romaji — with the English tucked behind a translate control on the
+romaji cell (hover on desktop, tap on touch), so a full sentence isn't fighting a
+third column for width. Grammatical **particles are highlighted in blue and
+bold** throughout the app so they're easy to spot in a sentence.
 
 **Finding things**
 
