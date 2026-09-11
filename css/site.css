@@ -1263,7 +1263,7 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
      upper hairline while the bottom stays tight for density. */
   padding: 9px 14px 6px 0;
   border-bottom: 1px solid var(--row-line);
-  vertical-align: middle;
+  vertical-align: bottom;
   font-size: var(--fs-english);
   line-height: 1.4;
   color: var(--ink-2);
@@ -1300,7 +1300,14 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   font-weight: 400;
   line-height: 1.5;
   color: var(--ink);
-  white-space: nowrap;
+  /* Normal, not nowrap: a headword fits on one line and stays there almost
+     always (this only wraps when it genuinely doesn't fit -- that's what
+     "normal" means), but nowrap was letting the longest katakana entries
+     (6 kana + the speaker and romaji-reveal icons, e.g. チャーシュー) overflow
+     their flex-shrunk box and paint straight through the icons instead of
+     wrapping under them. */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .jpword { vertical-align: middle; }
 .jpword ruby { ruby-position: over; ruby-align: start; }
@@ -1707,17 +1714,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .adj-pill-i { background: var(--accent-soft); color: var(--accent-strong); }
 .adj-pill-na { background: var(--accent-2-soft); color: var(--accent-2-strong); }
 .row-actions { flex: 0 0 auto; display: flex; align-items: center; white-space: nowrap; }
-/* At the mobile breakpoint (css/site.css:1568) the row-action icons were
-   eating most of the Meaning column's already-tight space, leaving the text
-   so little room it broke mid-word or even mid-character on anything longer
-   than a couple of letters. Wrapping them onto their own line (right-
-   aligned, under the text) gives the meaning the full column width to wrap
-   normally instead. Placed after the base .row-actions rule above (not in
-   the earlier mobile block) so its flex-basis actually wins the cascade. */
-@media (max-width: 640px) {
-  .meaning-cell { flex-wrap: wrap; }
-  .row-actions { flex-basis: 100%; justify-content: flex-end; margin-top: 2px; }
-}
 .fc-toggle-btn,
 .star-btn,
 .row-hide-btn {

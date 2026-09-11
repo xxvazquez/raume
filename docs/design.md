@@ -107,7 +107,9 @@ and Help.
   it earns its place by carrying grammar the columns don't.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, a small control next to the
-  speaker button (`.jp-romaji-btn`, Lucide *languages*) opens a
+  speaker button (`.jp-romaji-btn`, a small "Aa" monogram drawn from vector
+  strokes — not the *languages*/translate glyph, since romaji is a
+  transliteration, not a translation) opens a
   `--shadow-menu` popover with the reading, on hover (desktop) or tap
   (`.jp-romaji-on`, same pattern as the katakana `.kr` reading layer). It
   stays in the DOM for search and screen readers, and prints inline next to

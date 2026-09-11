@@ -137,12 +137,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // pattern the old Phrases translate-icon used. Kept always in the DOM
   // (not display:none-by-default via JS) so search can still match it --
   // see js/vocab/interactions.js fieldsForRow.
-  // Lucide "languages" -- a vector glyph, not an SVG <text> label: a literal
-  // "Aa" would leak Latin characters into the jp cell's plain textContent
-  // (search/sort read that cell expecting kana/kanji only -- see
+  // A small "Aa" monogram -- romaji is a transliteration, not a translation,
+  // so a "languages" (globe/translate) icon would misrepresent what this
+  // does. Drawn as vector strokes, not an SVG <text> label: a literal text
+  // node here would leak Latin characters into the jp cell's plain
+  // textContent (search/sort read that cell expecting kana/kanji only -- see
   // js/vocab/interactions.js jpFields, which strips this whole control back
   // out for that reason, but the raw DOM text should stay clean regardless).
-  var ROMAJI_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
+  var ROMAJI_ICON = '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12.5 4 4 6.5 12.5M2.5 9.5h4"/><circle cx="11" cy="9.5" r="2.1"/><path d="M13.1 7.4v5.1"/></svg>';
   function romajiButton(romaji) {
     if (!romaji) return '';
     return '<span class="jp-romaji-wrap">' +
