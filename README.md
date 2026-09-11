@@ -25,11 +25,9 @@ Five sections in the nav: **Vocabulary** (the landing page), **Grammar**,
 **Phrases**, **Travel**, and **Flashcards**. Vocabulary tables are grouped by
 category — Food & Ingredients, Kitchen & Dining, Numbers & Counting. **Phrases**
 is a conversational Q&A set (Self-introduction: name, job, country, age, family,
-where you live), laid out as question/answer pairs. Its tables are two columns —
-Japanese and romaji — with the English tucked behind a translate control on the
-romaji cell (hover on desktop, tap on touch), so a full sentence isn't fighting a
-third column for width. Grammatical **particles are highlighted in blue and
-bold** throughout the app so they're easy to spot in a sentence.
+where you live), laid out as question/answer pairs rather than sorted A–Z.
+Grammatical **particles are highlighted in blue and bold** throughout the app
+so they're easy to spot in a sentence.
 
 **Finding things**
 
@@ -37,16 +35,21 @@ bold** throughout the app so they're easy to spot in a sentence.
   expanded, it lays out every category and table in the section with entry
   counts. Keyboard-navigable, hidden during search, never printed.
 - **Search** ranks by match quality (exact → starts-with → ends-with →
-  contains), highlights the match, and pulls from every section — but only from
-  columns that are currently visible.
+  contains), highlights the match, and pulls from every section — from
+  whichever of Japanese/Furigana/English are currently visible, plus romaji
+  always (it has no visibility toggle of its own).
 - **URL hash** reflects the current view (`#grammar`, `#table-15`,
   `#flashcards`), so any view can be bookmarked and survives a reload.
 - The search field and column filters stay pinned below the nav as you scroll.
 
 **Reading the tables**
 
-- **Column toggles** — hide **Japanese / Furigana / Romaji / English** from the
-  toolbar (Furigana hides just the readings). You can't hide all three text
+- Every table is two columns — **Japanese** (with furigana) and **English** —
+  in every section, Phrases included. **Romaji** isn't a column: a small
+  control next to the speaker icon reveals it on hover or tap, for any word or
+  sentence. It's still fully searchable even though it's not shown by default.
+- **Column toggles** — hide **Japanese / Furigana / English** from the
+  toolbar (Furigana hides just the readings). You can't hide both text
   columns at once. A hidden column keeps its width; the text just goes
   transparent, so nothing reflows.
 - **Furigana** sits over the exact kanji it belongs to, always shown, with an
@@ -54,7 +57,8 @@ bold** throughout the app so they're easy to spot in a sentence.
 - **Reading layer** — hover (or tap, then tap away) any kana to see its romaji
   above it. `js/vocab/kana-romaji.js` handles yōon, foreign-sound combos, the
   長音 mark ー, and the sokuon っ/ッ. Drawn with CSS, so it never enters the DOM
-  and search/sort stay clean.
+  and search/sort stay clean. (This is the per-character hover on individual
+  katakana/hiragana units, separate from the whole-word romaji reveal above.)
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
 - **Adjective type** — every い- / な-adjective in the dataset carries a small

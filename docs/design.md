@@ -49,7 +49,7 @@ properties in `css/site.css`.
 |---|---|---|
 | `#1F2836` | `--ink` | primary text — dark cool ink for headings, numbers, Japanese (~12:1, clears AAA) |
 | `#55606F` / `#78838F` | `--muted` / `--faint` | secondary text (labels) / tertiary (counts, chevrons) — both AA |
-| `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji column / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
+| `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji reveal popover / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
 | `#F6F7F9` | `--page-bg` | the near-white ground — white cards lift off it on `--shadow-card`, not tonal contrast |
 | `#FFFFFF` | `--paper` | the sheet, cards, table surface |
 | `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
@@ -105,14 +105,19 @@ and Help.
   sage split used for primary vs supporting elsewhere, so the two classes
   separate without a loud colour. It's the one tag on the quiet reference side;
   it earns its place by carrying grammar the columns don't.
-- **Phrases tables** (`.vocab-sentences`) hold whole sentences, so they drop to
-  two columns — Japanese (wraps, `line-height: 2` for the furigana) and romaji —
-  and keep their authored question/answer order instead of sorting A-Z. The
-  English moves onto a translate control (`.phrase-en-btn`, Lucide *languages*)
-  pinned right of the romaji, opening a small `--shadow-menu` popover on hover
-  (desktop) or tap (`.phrase-en-on`, same pattern as the katakana `.kr` reading
-  layer). It stays in the DOM for search, screen readers, and print (where it
-  prints inline under the romaji).
+- **Every vocab table is two columns, Japanese and English** — romaji isn't a
+  column anywhere, including Phrases. Instead, a small control next to the
+  speaker button (`.jp-romaji-btn`, Lucide *languages*) opens a
+  `--shadow-menu` popover with the reading, on hover (desktop) or tap
+  (`.jp-romaji-on`, same pattern as the katakana `.kr` reading layer). It
+  stays in the DOM for search and screen readers, and prints inline next to
+  the word (there's no hover on paper).
+- **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
+  Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
+  size; they keep their authored question/answer order instead of sorting
+  A-Z. Otherwise they're the same Japanese+English shape as every other
+  table now — Phrases used to show romaji plainly and hide English behind a
+  translate icon; that's inverted, for consistency.
 - **Help and Settings** are prose, held to a readable measure (680px).
 - **The Customize page** stacks the table list, then a *Your vocabulary* block:
   each task (add a word, new table, import, the list of what you've added) is a

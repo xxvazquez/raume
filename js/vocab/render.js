@@ -24,10 +24,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     '一月':0,'二月':1,'三月':2,'四月':3,'五月':4,'六月':5,'七月':6,'八月':7,'九月':8,'十月':9,'十一月':10,'十二月':11
   };
   function val(cell){
-    // Prefer the cell's own text span where it has one (.romaji-text on a
-    // sentence row, .meaning-text on a word row) so a sort key never picks up
-    // an adjacent icon's label, the adj pill, or a hidden translation.
-    var t = cell && (cell.querySelector('.romaji-text') || cell.querySelector('.meaning-text'));
+    // Prefer the cell's own .meaning-text span so a sort key never picks up
+    // an adjacent icon's label or the adj pill.
+    var t = cell && cell.querySelector('.meaning-text');
     return ((t || cell)?.textContent || '').trim();
   }
   function key(v){
@@ -132,14 +131,37 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<button type="button" class="jp-speak-btn" data-jp-speak="' + esc(reading) + '" aria-label="Play pronunciation" title="Play pronunciation">' + SPEAKER_ICON + '</button>';
   }
   vocab.speakButtonHtml = speakButton;
-  function jpCell(row) {
+  // Romaji lives here now instead of its own column (see docs/architecture.md
+  // -- the reference table is Japanese+English, two columns): a small control
+  // next to the speaker button reveals it on hover/tap, same interaction
+  // pattern the old Phrases translate-icon used. Kept always in the DOM
+  // (not display:none-by-default via JS) so search can still match it --
+  // see js/vocab/interactions.js fieldsForRow.
+  // Lucide "languages" -- a vector glyph, not an SVG <text> label: a literal
+  // "Aa" would leak Latin characters into the jp cell's plain textContent
+  // (search/sort read that cell expecting kana/kanji only -- see
+  // js/vocab/interactions.js jpFields, which strips this whole control back
+  // out for that reason, but the raw DOM text should stay clean regardless).
+  var ROMAJI_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
+  function romajiButton(romaji) {
+    if (!romaji) return '';
+    return '<span class="jp-romaji-wrap">' +
+      '<button type="button" class="jp-romaji-btn" aria-expanded="false" aria-label="Show romaji" title="Show romaji">' + ROMAJI_ICON + '</button>' +
+      '<span class="jp-romaji-pop" role="tooltip">' + esc(romaji) + '</span>' +
+      '</span>';
+  }
+  vocab.romajiButtonHtml = romajiButton;
+  // romaji is optional: sentence and word rows alike now pass their romaji
+  // through here so the reveal control always sits next to the speaker
+  // button, in the same cell, regardless of table type.
+  function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
     var inner = '<span class="jpword">' + jpSegments(row.jp, true) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div></td>';
+    return '<td class="jp" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div></td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
   // The main study areas. Grammar, Phrases and Travel are promoted out of the
@@ -201,38 +223,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function meaningCell(english, vocabId, adj) {
     return '<td><div class="meaning-cell">' + adjPill(adj) + '<span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
   }
+  // Word rows and Phrases sentence rows share this now -- both render as
+  // Japanese (with a romaji reveal next to the speaker button) + English, two
+  // columns, no separate Romaji column. row.irregular/row.adj are simply
+  // absent on a sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row) +
-      '<td>' + esc(row.romaji) + '</td>' + meaningCell(row.english, row.id, row.adj) + '</tr>';
-  }
-  // Lucide "languages" -- the translate control on a sentence row's romaji cell.
-  var TRANSLATE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>';
-  // A whole-sentence row (Phrases tables, tableClass "vocab-sentences"): two
-  // columns only -- Japanese and Romaji -- with the English tucked behind a
-  // translate control on the romaji cell (hover on desktop, tap on touch) so a
-  // full sentence isn't fighting a third column for width. The English stays in
-  // the DOM for search, screen readers and print.
-  function sentenceRow(row) {
-    return '<tr data-vocab-id="' + esc(row.id || '') + '">' + jpCell(row) +
-      '<td class="romaji-sentence-cell"><div class="romaji-line">' +
-        '<span class="romaji-text">' + esc(row.romaji) + '</span>' +
-        '<span class="phrase-tail">' +
-          '<span class="phrase-en-wrap">' +
-            '<button type="button" class="phrase-en-btn" aria-expanded="false" aria-label="Show the English translation" title="Show the English translation">' + TRANSLATE_ICON + '</button>' +
-            '<span class="phrase-en" role="tooltip">' + esc(row.english) + '</span>' +
-          '</span>' + rowActions(row.id) +
-        '</span>' +
-      '</div></td></tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, row.adj) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
-  // tag each so CSS can tint the two consistently (plain vs polite) down both
-  // the Japanese and Romaji columns.
+  // tag each so CSS can tint the two consistently down the Japanese column
+  // (each form carries its own speaker + romaji reveal).
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('');
-    var romaji = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '">' + esc(f.romaji) + '</div>'; }).join('');
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td><td>' + romaji + '</td>' + meaningCell(row.english, row.id) + '</tr>';
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + romajiButton(f.romaji) + '</div></div>'; }).join('');
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and showing ↓ (A-Z); the others start neutral (↕).
@@ -246,9 +251,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function byEnglish(a, b) {
     return vocab.compareCellText(String(a.english || ''), String(b.english || ''), 'asc');
   }
-  function rowsHtmlFor(rows, sentences) {
+  function rowsHtmlFor(rows) {
     return rows.map(function (row) {
-      if (sentences) return sentenceRow(row);
       return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row);
     }).join('\n    ');
   }
@@ -256,12 +260,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (index.html). The click handler is delegated on document (js/vocab/
   // interactions.js), so this works wherever the markup lands; it drives the
   // global `body.hide-*` state, so a column hidden here stays hidden on the
-  // reference pages too.
+  // reference pages too. No Romaji button -- there's no Romaji column left to
+  // hide (js/vocab/render.js's romajiButtonHtml puts it on-demand next to the
+  // speaker button instead).
   var VIEW_MODE_CONTROL =
     '<div class="view-mode" aria-label="Column visibility">' +
     '<button type="button" data-col="japanese" aria-pressed="false" title="Hide the Japanese column">Japanese</button>' +
     '<button type="button" data-col="furigana" aria-pressed="false" title="Hide the furigana readings">Furigana</button>' +
-    '<button type="button" data-col="romaji" aria-pressed="false" title="Hide the Romaji column">Romaji</button>' +
     '<button type="button" data-col="english" aria-pressed="false" title="Hide the English column">English</button>' +
     '</div>';
   // Shared table-section markup -- every vocabulary table on the page goes
@@ -304,8 +309,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // aria-labelledby the visible title so a screen reader announces the table
       // by name ("Cooking Ingredients, table") instead of a bare "table".
       '<table class="vocab' + (o.tableClass ? ' ' + o.tableClass : '') + '" id="vocab-' + o.id + '" aria-labelledby="secttl-' + o.id + '"><thead><tr>' +
-      '<th>Japanese</th>' + sortHeader('Romaji', 1, false) +
-      (o.sentences ? '' : sortHeader('English', 2, defaultSort)) +
+      '<th>Japanese</th>' + sortHeader('English', 1, defaultSort) +
       '</tr></thead><tbody>\n    ' +
       o.rowsHtml + '\n  </tbody></table></section>';
   }
@@ -316,7 +320,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var rows = sentences ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
-      rowsHtml: rowsHtmlFor(rows, sentences), sentences: sentences,
+      rowsHtml: rowsHtmlFor(rows),
       controls: { addTable: true, print: true },
       sectionClass: 'page-hidden', collapsed: true, defaultSort: !sentences
     });

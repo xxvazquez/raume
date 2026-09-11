@@ -1280,14 +1280,14 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 /* Hover: a very subtle wash of the live section tone -- no edge, no fill. */
 .vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 8%, var(--paper)); }
 
-/* Weighted by what each column actually carries: Japanese runs 1-6 glyphs
-   plus furigana, romaji is one or two words, and Meaning holds full phrases
-   that wrap -- so Meaning gets the most room and Japanese does not dominate.
-   Japanese ~30% / Romaji ~26% / Meaning ~44%, in normal and search views
-   alike (table-layout is fixed, and the view-mode filter only recolours). */
-.vocab th:nth-child(1), .vocab td:nth-child(1) { width: 30%; }
-.vocab th:nth-child(2), .vocab td:nth-child(2) { width: 26%; }
-.vocab th:nth-child(3), .vocab td:nth-child(3) { width: 44%; }
+/* Two columns: Japanese runs 1-6 glyphs plus furigana and never wraps (see
+   .vocab td.jp below), so it doesn't need much; Meaning holds full phrases
+   that wrap, so it gets the rest. Romaji lives inside the Japanese cell now
+   (a reveal next to the speaker button, see .jp-romaji-wrap), not its own
+   column -- table-layout is fixed, so this holds in normal and search views
+   alike, and the view-mode filter only recolours. */
+.vocab th:nth-child(1), .vocab td:nth-child(1) { width: 36%; }
+.vocab th:nth-child(2), .vocab td:nth-child(2) { width: 64%; }
 
 [lang="ja"] { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
@@ -1306,44 +1306,45 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 .jpword ruby { ruby-position: over; ruby-align: start; }
 .jpmain { line-height: 1.05; }
 
-/* Sentence tables (Phrases) -- two columns, not three. The Japanese cell holds
-   a whole sentence, so it wraps within its column instead of running across the
-   row and eases down a size; the English lives behind a translate control on
-   the romaji cell (see .phrase-en* below). */
-.vocab.vocab-sentences th:nth-child(1), .vocab.vocab-sentences td:nth-child(1) { width: 52%; }
-.vocab.vocab-sentences th:nth-child(2), .vocab.vocab-sentences td:nth-child(2) { width: 48%; }
+/* Sentence tables (Phrases) -- same Japanese+English shape as every other
+   table now, just weighted for a whole sentence: the Japanese cell wraps
+   within its column instead of running across the row, and eases down a
+   size. Romaji and English both work exactly as they do everywhere else
+   (romaji behind the reveal next to the speaker button, English plainly in
+   the Meaning column) -- Phrases used to hide English behind a translate
+   icon and show Romaji plainly; that's inverted now for consistency with
+   every other table. */
+.vocab.vocab-sentences th:nth-child(1), .vocab.vocab-sentences td:nth-child(1) { width: 50%; }
+.vocab.vocab-sentences th:nth-child(2), .vocab.vocab-sentences td:nth-child(2) { width: 50%; }
 .vocab.vocab-sentences td.jp { white-space: normal; overflow-wrap: anywhere; font-size: 16px; line-height: 2; }
-/* Keep the speaker button on the first line's text baseline -- flex-start
-   pinned it up level with the furigana instead. */
+/* Keep the speaker/romaji controls on the first line's text baseline --
+   flex-start pinned them up level with the furigana instead. */
 .vocab.vocab-sentences .jp-line { align-items: first baseline; }
 
-/* Romaji cell on a sentence row: the reading, then a right-pinned cluster --
-   the translate control + the usual star / flashcard / hide actions. */
-.romaji-sentence-cell { color: var(--romaji); font-size: var(--fs-romaji); }
-.romaji-line { display: flex; align-items: flex-start; gap: 6px; overflow-wrap: anywhere; }
-.romaji-line .romaji-text { flex: 1 1 auto; min-width: 0; }
-.phrase-tail { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; }
-.phrase-en-wrap { position: relative; display: inline-flex; }
-.phrase-en-btn {
-  appearance: none; border: 0; background: transparent; padding: 2px; cursor: pointer;
+/* Romaji reveal: sits next to the speaker button in every Japanese cell
+   (word and sentence rows alike), hover on desktop / tap on touch -- same
+   interaction the old Phrases translate icon used, just relocated. Always
+   in the DOM (not hidden by view-mode) so search can still match it. */
+.jp-romaji-wrap { position: relative; display: inline-flex; }
+.jp-romaji-btn {
+  appearance: none; border: 0; background: transparent; padding: 2px; margin-left: 2px; cursor: pointer;
   color: var(--faint); opacity: .55; transition: opacity .12s ease, color .12s ease;
-  display: inline-flex;
+  display: inline-flex; vertical-align: middle;
 }
-.vocab tbody tr:hover .phrase-en-btn,
-.vocab tbody tr:focus-within .phrase-en-btn { opacity: 1; }
-.phrase-en-btn:hover, .phrase-en-btn[aria-expanded="true"] { color: var(--section); opacity: 1; }
-.phrase-en {
-  display: none; position: absolute; right: 0; top: calc(100% + 4px); z-index: 6;
-  min-width: max(160px, 100%); max-width: 260px;
-  padding: 7px 10px; border-radius: 6px;
+.vocab tbody tr:hover .jp-romaji-btn,
+.vocab tbody tr:focus-within .jp-romaji-btn { opacity: 1; }
+.jp-romaji-btn:hover, .jp-romaji-btn[aria-expanded="true"] { color: var(--section); opacity: 1; }
+.jp-romaji-pop {
+  display: none; position: absolute; left: 0; top: calc(100% + 4px); z-index: 6;
+  min-width: max(56px, 100%); max-width: 220px;
+  padding: 4px 8px; border-radius: 6px;
   background: var(--paper); border: 1px solid var(--card-line); box-shadow: var(--shadow-menu);
-  font-family: var(--font-ui); font-size: var(--fs-small); line-height: 1.4; color: var(--ink);
-  text-align: left; white-space: normal;
+  font-family: var(--font-ui); font-size: var(--fs-small); line-height: 1.4; color: var(--romaji);
+  text-align: left; white-space: nowrap;
 }
-.phrase-en-wrap:hover .phrase-en,
-.phrase-en-wrap.phrase-en-on .phrase-en { display: block; }
-@media (hover: none) { .phrase-en-wrap:hover .phrase-en { display: none; } }
-.phrase-en-wrap.phrase-en-on .phrase-en { display: block; }
+.jp-romaji-wrap:hover .jp-romaji-pop,
+.jp-romaji-wrap.jp-romaji-on .jp-romaji-pop { display: block; }
+@media (hover: none) { .jp-romaji-wrap:hover .jp-romaji-pop { display: none; } }
 
 .verb-form { display: block; }
 .verb-form-polite { display: none; }
@@ -1434,10 +1435,8 @@ body.ja-voice-ready .jp-speak-btn {
 .kr.kr-on::after { opacity: 1; }
 @media (hover: none) { .kr:hover::after { opacity: 0; } }
 
-/* Romaji: the softest column -- a light grey gloss, clearly third. */
-.vocab td:nth-child(2) { color: var(--romaji); font-size: var(--fs-romaji); }
 /* Meaning: dark, but a step below the Japanese so the Japanese still leads. */
-.vocab td:nth-child(3) { color: var(--ink-2); position: relative; }
+.vocab td:nth-child(2) { color: var(--ink-2); position: relative; }
 
 /* Particles ({ p: … } segments) -- blue and bold everywhere they appear: the
    Particles reference table, any sentence, and flashcard prompts. A deliberate
@@ -1522,10 +1521,8 @@ mark.search-hit {
    grid, rules and widths stay exactly as they were, no reflow. */
 body.hide-japanese .vocab :is(th, td):nth-child(1),
 body.hide-japanese .vocab :is(th, td):nth-child(1) *,
-body.hide-romaji .vocab :is(th, td):nth-child(2),
-body.hide-romaji .vocab :is(th, td):nth-child(2) *,
-body.hide-english .vocab :is(th, td):nth-child(3),
-body.hide-english .vocab :is(th, td):nth-child(3) *,
+body.hide-english .vocab :is(th, td):nth-child(2),
+body.hide-english .vocab :is(th, td):nth-child(2) *,
 body.hide-furigana .vocab .furigana {
   color: transparent !important;
 }
@@ -1548,13 +1545,13 @@ body.hide-english .vocab td:last-child .fc-toggle-btn { color: var(--faint) !imp
    the row action icons are untouched, so there's no reflow. Works
    alongside the column toggles: if English is already hidden there, this
    simply has nothing to do. */
-body.selftest-mode .vocab tbody td:nth-child(3) { color: transparent !important; cursor: pointer; }
-body.selftest-mode .vocab tbody td:nth-child(3) mark.search-hit { color: transparent !important; background: transparent !important; }
-body.selftest-mode .vocab tbody tr.revealed td:nth-child(3) { color: var(--ink-2) !important; }
-body.selftest-mode .vocab tbody tr.revealed td:nth-child(3) mark.search-hit { color: var(--hl-ink) !important; background: var(--hl) !important; }
+body.selftest-mode .vocab tbody td:nth-child(2) { color: transparent !important; cursor: pointer; }
+body.selftest-mode .vocab tbody td:nth-child(2) mark.search-hit { color: transparent !important; background: transparent !important; }
+body.selftest-mode .vocab tbody tr.revealed td:nth-child(2) { color: var(--ink-2) !important; }
+body.selftest-mode .vocab tbody tr.revealed td:nth-child(2) mark.search-hit { color: var(--hl-ink) !important; background: var(--hl) !important; }
 /* Keep the row action icons readable while the English text is blanked. */
-body.selftest-mode .vocab tbody td:nth-child(3) .row-hide-btn,
-body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--faint) !important; }
+body.selftest-mode .vocab tbody td:nth-child(2) .row-hide-btn,
+body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--faint) !important; }
 
 /* --- Focus + selection ------------------------------------------- */
 :focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
@@ -1580,13 +1577,11 @@ body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--fa
   #vocabulary .table-section { padding-left: 10px; }
   /* Narrower screen: Japanese type steps down just enough that its longest
      entry (6-kana katakana like チャーシュー, ~96px) always holds ONE line
-     in this column; romaji keeps room for its longest readings without
-     stranding letters; Meaning steps down too (English phrases wrap). */
-  .vocab th:nth-child(1), .vocab td:nth-child(1) { width: 36%; }
-  .vocab th:nth-child(2), .vocab td:nth-child(2) { width: 26%; }
-  .vocab th:nth-child(3), .vocab td:nth-child(3) { width: 38%; }
+     in the column's 36% share; Meaning steps down too (English phrases
+     wrap). The base 36/64 split already gives Meaning enough room now that
+     romaji isn't a column fighting it for width. */
   .vocab td.jp { font-size: 16px; }
-  .vocab td:nth-child(3) { font-size: 12.5px; }
+  .vocab td:nth-child(2) { font-size: 12.5px; }
 }
 
 /* --- Print: a clean A4 reference sheet ------------------------- */
@@ -1628,16 +1623,15 @@ body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--fa
   .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn, .star-btn:not(.starred) { display: none !important; }
   .star-btn.starred { opacity: 1; }
   .view-mode { display: none !important; }
-  /* Sentence tables: no screen hover on paper, so drop the translate button
-     and print the English inline under the romaji instead. */
-  .phrase-en-btn { display: none !important; }
-  .phrase-en {
-    display: block !important; position: static !important; margin-top: 2px;
+  /* No screen hover on paper, so drop the reveal control and print the
+     romaji inline instead -- otherwise it'd be permanently unreachable. */
+  .jp-romaji-btn { display: none !important; }
+  .jp-romaji-pop {
+    display: inline !important; position: static !important; margin-left: 6px;
     border: 0 !important; box-shadow: none !important; padding: 0 !important;
     max-width: none !important; min-width: 0 !important; color: var(--ink-2) !important;
-    font-size: 11.5px !important;
+    font-size: 11.5px !important; white-space: normal;
   }
-  .romaji-line { display: block !important; }
 
   body.print-only .table-section:not(.print-target) { display: none !important; }
   /* One or many targets (a table, a whole section, the whole reference): let
@@ -1713,6 +1707,17 @@ body.selftest-mode .vocab tbody td:nth-child(3) .fc-toggle-btn { color: var(--fa
 .adj-pill-i { background: var(--accent-soft); color: var(--accent-strong); }
 .adj-pill-na { background: var(--accent-2-soft); color: var(--accent-2-strong); }
 .row-actions { flex: 0 0 auto; display: flex; align-items: center; white-space: nowrap; }
+/* At the mobile breakpoint (css/site.css:1568) the row-action icons were
+   eating most of the Meaning column's already-tight space, leaving the text
+   so little room it broke mid-word or even mid-character on anything longer
+   than a couple of letters. Wrapping them onto their own line (right-
+   aligned, under the text) gives the meaning the full column width to wrap
+   normally instead. Placed after the base .row-actions rule above (not in
+   the earlier mobile block) so its flex-basis actually wins the cascade. */
+@media (max-width: 640px) {
+  .meaning-cell { flex-wrap: wrap; }
+  .row-actions { flex-basis: 100%; justify-content: flex-end; margin-top: 2px; }
+}
 .fc-toggle-btn,
 .star-btn,
 .row-hide-btn {
@@ -1763,14 +1768,6 @@ body.starred-mode #vocabulary,
 body.starred-mode #tableIndex,
 body.starred-mode .expand-bar { display: none !important; }
 .starred-empty { color: var(--muted); font-size: var(--fs-nav-sub); padding: 4px 0 0; }
-
-/* Three action icons sit on the English column now, always -- on narrow
-   screens give that column a bit more room (borrowed from romaji) so its
-   text never gets crushed into a sliver behind them. */
-@media (max-width: 700px) {
-  .vocab th:nth-child(2), .vocab td:nth-child(2) { width: 19%; }
-  .vocab th:nth-child(3), .vocab td:nth-child(3) { width: 39%; }
-}
 
 .fc-lede { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.5; max-width: 60ch; }
 

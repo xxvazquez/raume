@@ -106,7 +106,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="fc-legend-term">Today</span> — cards reviewed today against your daily target (New cards per day, under Settings → Daily session).</li>' +
       '<li><span class="fc-legend-term">Next review</span> — when the next scheduled card is due, taken straight from the FSRS schedule.</li>' +
       '<li><span class="fc-legend-term">Missed today</span> — words you missed in today\'s reviews, most-missed first. Click one to practice it right away.</li>' +
-      '<li><span class="fc-legend-term">Words to Review</span> — words you get wrong repeatedly over time, shown as a normal vocabulary table you can sort, print, and hide columns on (the same Japanese / Furigana / Romaji / English toggles as the reference pages) to quiz yourself.</li>' +
+      '<li><span class="fc-legend-term">Words to Review</span> — words you get wrong repeatedly over time, shown as a normal vocabulary table you can sort, print, and hide columns on (the same Japanese / Furigana / English toggles as the reference pages) to quiz yourself.</li>' +
       '</ul></div>' +
       '<div class="fc-settings-section"><h3>Casual &amp; polite forms</h3>' +
       '<p class="fc-note">On the vocabulary tables, the <span class="fc-legend-term">Show polite</span> toggle switches verb columns between the plain / dictionary form and the polite <span lang="ja">〜ます</span> form. One form is shown at a time. Words with no distinct polite form are left unchanged.</p>' +

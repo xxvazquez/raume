@@ -345,22 +345,28 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     };
 
     // Column visibility: each toolbar button hides its own thing (the
-    // Japanese / Romaji / English columns, or just the furigana readings),
-    // any combination -- never all three columns at once. Search then only
-    // looks at what's still on screen.
-    const COL_INDEX = { japanese: 1, romaji: 2, english: 3 };
+    // Japanese / English columns, or just the furigana readings), any
+    // combination -- never both columns at once. Search then only looks at
+    // what's still on screen. Romaji isn't a column any more (see
+    // js/vocab/render.js's romajiButtonHtml) -- it's always searchable, so it
+    // has no toggle and no entry here.
+    const COL_INDEX = { japanese: 1, english: 2 };
     function isHidden(key) { return document.body.classList.contains('hide-' + key); }
     function visibleColKeys() {
       return Object.keys(COL_INDEX).filter(k => !isHidden(k));
     }
 
-    // The jp cell mixes kanji/kana with <rt class="furigana"> readings; split them
-    // so "Japanese" search covers both without garbling them into one string.
+    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and the
+    // romaji reveal (button + tooltip); strip both out so "Japanese" search
+    // covers just the kanji/kana without garbling in a reading or a romaji
+    // string that belongs to its own fields below.
     function jpFields(td) {
       const clone = td.cloneNode(true);
       const furiganaEls = [...clone.querySelectorAll('.furigana')];
       const furigana = furiganaEls.map(el => el.textContent).join('');
       furiganaEls.forEach(el => el.remove());
+      const romajiWrap = clone.querySelector('.jp-romaji-wrap');
+      if (romajiWrap) romajiWrap.remove();
       return { kanji: clone.textContent, furigana };
     }
 
@@ -381,16 +387,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         fields.push({ cell: row.cells[0], text: jp.kanji });
         if (!isHidden('furigana')) fields.push({ cell: row.cells[0], text: jp.furigana });
       }
-      // .romaji-text where a sentence row has one, so the hidden English box
-      // and the translate button's label don't get folded into the romaji.
-      if (!isHidden('romaji')) fields.push({ cell: row.cells[1], text: (row.cells[1].querySelector('.romaji-text') || row.cells[1]).textContent });
-      // English: a word row keeps it in cells[2] (.meaning-text, so the
-      // row-action icons and the adj pill never register); a sentence row keeps
-      // it in the .phrase-en box tucked into the romaji cell.
+      // Romaji is never hidden by a toggle any more -- it's an always-
+      // searchable on-demand reveal living in the jp cell (row.cells[0]),
+      // not its own column, so it's unconditional here.
+      const romajiEl = row.cells[0].querySelector('.jp-romaji-pop');
+      if (romajiEl) fields.push({ cell: row.cells[0], text: romajiEl.textContent });
+      // English: every row now keeps it in cells[1] (.meaning-text, so the
+      // row-action icons and the adj pill never register) -- word and
+      // (since the Phrases redesign) sentence rows alike.
       if (!isHidden('english')) {
-        const enEl = row.cells[2] ? row.cells[2].querySelector('.meaning-text') || row.cells[2]
-          : row.cells[1] && row.cells[1].querySelector('.phrase-en');
-        if (enEl) fields.push({ cell: row.cells[1] && row.cells[1].querySelector('.phrase-en') ? row.cells[1] : row.cells[2], text: enEl.textContent });
+        const enEl = row.cells[1] && row.cells[1].querySelector('.meaning-text');
+        if (enEl) fields.push({ cell: row.cells[1], text: enEl.textContent });
       }
       return fields;
     }
@@ -838,17 +845,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelectorAll('.particle.particle-on').forEach(function (el) { if (el !== pt) el.classList.remove('particle-on'); });
       if (pt) pt.classList.toggle('particle-on');
 
-      // Sentence rows (Phrases): the translate control opens the English box.
-      // Same touch-friendly toggle -- a tap pins it, a tap elsewhere closes it;
-      // desktop :hover still opens it without a click.
-      const trBtn = event.target.closest && event.target.closest('.phrase-en-btn');
-      const trWrap = trBtn && trBtn.closest('.phrase-en-wrap');
-      document.querySelectorAll('.phrase-en-wrap.phrase-en-on').forEach(function (el) {
-        if (el !== trWrap) { el.classList.remove('phrase-en-on'); const b = el.querySelector('.phrase-en-btn'); if (b) b.setAttribute('aria-expanded', 'false'); }
+      // Romaji reveal (next to the speaker button, every row): the same
+      // touch-friendly toggle as above -- a tap pins it, a tap elsewhere
+      // closes it; desktop :hover still opens it without a click.
+      const roBtn = event.target.closest && event.target.closest('.jp-romaji-btn');
+      const roWrap = roBtn && roBtn.closest('.jp-romaji-wrap');
+      document.querySelectorAll('.jp-romaji-wrap.jp-romaji-on').forEach(function (el) {
+        if (el !== roWrap) { el.classList.remove('jp-romaji-on'); const b = el.querySelector('.jp-romaji-btn'); if (b) b.setAttribute('aria-expanded', 'false'); }
       });
-      if (trWrap) {
-        const open = trWrap.classList.toggle('phrase-en-on');
-        trBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (roWrap) {
+        const open = roWrap.classList.toggle('jp-romaji-on');
+        roBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
     });
 

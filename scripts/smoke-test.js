@@ -85,11 +85,12 @@ async function main() {
     const taste = [...document.querySelectorAll(".table-section")]
       .find(s => s.querySelector(".section-title-text").textContent === "Taste & Texture");
     const tasteTagged = taste.querySelectorAll(".adj-pill-i").length >= 10 && taste.querySelectorAll(".adj-pill-na").length === 0;
-    const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => r.cells[1].textContent === "mochimochi");
+    const romajiOf = r => { const p = r.querySelector(".jp-romaji-pop"); return p ? p.textContent : ""; };
+    const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => romajiOf(r) === "mochimochi");
     const mochiUntagged = mochiRow && !mochiRow.querySelector(".adj-pill");
     // A lone adjective sitting in an otherwise-noun table still gets tagged:
     // 危険 (na-adj) in Signs, Doors & Places.
-    const kikenRow = [...document.querySelectorAll("#vocabulary tbody tr")].find(r => r.cells[1].textContent === "kiken");
+    const kikenRow = [...document.querySelectorAll("#vocabulary tbody tr")].find(r => romajiOf(r) === "kiken");
     const kikenTagged = kikenRow && kikenRow.querySelector(".adj-pill-na");
     return labelsOk && !verbsHavePills && tasteTagged && mochiUntagged && kikenTagged;
   })());
@@ -389,15 +390,20 @@ async function main() {
     "がっこう": "gakkou",       // hiragana sokuon っ
   };
   Object.keys(cases).forEach(k => check(`${k} -> ${cases[k]}`, kr.toRomaji(k) === cases[k]));
-  // Decoration: kana in a table cell becomes hover targets, and the romaji is
-  // NOT in the DOM text (so search/sort see only the kana).
-  const findCell = re => [...document.querySelectorAll("#vocabulary td.jp")].find(td => td.querySelector(".kr") && re.test(td.textContent));
+  // Decoration: kana in a table cell becomes hover targets, and the per-unit
+  // romaji is NOT in the DOM text (so search/sort see only the kana). The
+  // whole-word romaji reveal (js/vocab/render.js's romajiButtonHtml) is a
+  // separate, deliberate exception -- it lives in its own .jp-romaji-wrap, so
+  // strip that out first to see what the cell would search/sort by.
+  const plainJpText = td => { const c = td.cloneNode(true); const w = c.querySelector(".jp-romaji-wrap"); if (w) w.remove(); return c.textContent; };
+  const findCell = re => [...document.querySelectorAll("#vocabulary td.jp")].find(td => td.querySelector(".kr") && re.test(plainJpText(td)));
   const kataCell = findCell(/[ァ-ヺ]/);
   const hiraCell = findCell(/^[ぁ-ゖ]+$/); // a pure-hiragana headword
   check("katakana words render .kr hover targets", !!kataCell);
   check("hiragana words render .kr hover targets too", !!hiraCell);
   check("each .kr carries its romaji in data-r", [...kataCell.querySelectorAll(".kr")].every(s => /^[a-zāīūēō]+$/.test(s.dataset.r || "")));
-  check("the romaji stays out of the cell's textContent", !/[a-z]/i.test(kataCell.textContent) && !/[a-z]/i.test(hiraCell.textContent));
+  check("the per-unit kana romaji stays out of the cell's searchable text", !/[a-z]/i.test(plainJpText(kataCell)) && !/[a-z]/i.test(plainJpText(hiraCell)));
+  check("the whole-word romaji reveal is still in the DOM, just set apart from the kana", !!kataCell.querySelector(".jp-romaji-pop") && !!hiraCell.querySelector(".jp-romaji-pop"));
   check("furigana readings are left plain (not decorated)", !document.querySelector('#vocabulary td.jp ruby .kr'));
 
   console.log("Table icons");
@@ -543,37 +549,41 @@ async function main() {
       && nameRow && nameRow.querySelector('ruby rt') && nameRow.querySelector('.particle')
       && [...selfIntro.querySelectorAll('.particle')].some(p => p.textContent === "は");
   })());
-  check("a sentence table is two columns (Japanese + Romaji, no English column)", (() => {
+  check("a sentence table is two columns (Japanese + English), same as every other table", (() => {
     const heads = [...selfIntro.querySelectorAll('thead th')].map(th => th.textContent.replace(/[↕↓↑]/g, "").trim());
     const firstRow = selfIntro.querySelector('tbody tr');
-    return heads.join(",") === "Japanese,Romaji" && firstRow.cells.length === 2;
+    return heads.join(",") === "Japanese,English" && firstRow.cells.length === 2;
   })());
-  check("the English sits behind a translate control on the romaji cell, still in the DOM", (() => {
+  check("English is plainly visible now (no translate icon -- that's inverted for consistency)", (() => {
     const row = selfIntro.querySelector('tbody tr');
-    const btn = row.cells[1].querySelector('.phrase-en-btn');
-    const en = row.cells[1].querySelector('.phrase-en');
-    return btn && btn.getAttribute('aria-expanded') === "false" && en && en.textContent.trim().length > 0;
+    return !row.querySelector('.phrase-en-btn') && !!row.cells[1].querySelector('.meaning-text').textContent.trim();
   })());
-  check(".phrase-en is hidden until revealed (display:none by default)", (() => {
-    const r = allCssRules.find(x => x.selectorText === ".phrase-en");
+  check("romaji instead sits behind the same reveal control every table uses", (() => {
+    const row = selfIntro.querySelector('tbody tr');
+    const btn = row.cells[0].querySelector('.jp-romaji-btn');
+    const pop = row.cells[0].querySelector('.jp-romaji-pop');
+    return btn && btn.getAttribute('aria-expanded') === "false" && pop && pop.textContent.trim().length > 0;
+  })());
+  check(".jp-romaji-pop is hidden until revealed (display:none by default)", (() => {
+    const r = allCssRules.find(x => x.selectorText === ".jp-romaji-pop");
     return !!r && r.style.display === "none";
   })());
-  check("clicking the translate control opens it (touch path) and toggles aria-expanded", (() => {
-    const wrap = selfIntro.querySelector('.phrase-en-wrap');
-    const btn = wrap.querySelector('.phrase-en-btn');
+  check("clicking the romaji control opens it (touch path) and toggles aria-expanded", (() => {
+    const wrap = selfIntro.querySelector('.jp-romaji-wrap');
+    const btn = wrap.querySelector('.jp-romaji-btn');
     btn.click();
-    const opened = wrap.classList.contains('phrase-en-on') && btn.getAttribute('aria-expanded') === "true";
+    const opened = wrap.classList.contains('jp-romaji-on') && btn.getAttribute('aria-expanded') === "true";
     btn.click();
-    return opened && !wrap.classList.contains('phrase-en-on');
+    return opened && !wrap.classList.contains('jp-romaji-on');
   })());
   check("the authored question/answer order is kept (not re-sorted A-Z)", (() => {
-    const firstEn = selfIntro.querySelector('tbody tr .phrase-en').textContent.trim();
+    const firstEn = selfIntro.querySelector('tbody tr .meaning-text').textContent.trim();
     return firstEn === "What is your name?"; // v0530, first row of the table
   })());
   window.location.hash = "";
-  check("search still finds a phrase by its English, though the column is gone", (() => {
+  check("search still finds a phrase by its romaji, though the column is gone", (() => {
     const input = document.getElementById("tableSearch");
-    input.value = "Warsaw";
+    input.value = "sunde imasu";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const hit = [...document.querySelectorAll('#vocabulary .table-section[data-section="phrases"] tbody tr:not(.search-hidden)')]
       .some(r => /sunde imasu/i.test(r.textContent));
@@ -673,7 +683,7 @@ async function main() {
   input.value = "ケチャップ";
   input.dispatchEvent(new window.Event("input", { bubbles: true }));
   const kataRow = [...document.querySelectorAll(".table-section:not(.search-hidden) tbody tr:not(.search-hidden)")]
-    .find(r => r.querySelector("td.jp")?.textContent === "ケチャップ");
+    .find(r => { const td = r.querySelector("td.jp"); return td && plainJpText(td) === "ケチャップ"; });
   check("a katakana search surfaces its row", !!kataRow);
   check("...with the katakana units highlighted", kataRow && kataRow.querySelectorAll("td.jp .kr.search-hit").length >= 2);
   input.value = "";
@@ -690,17 +700,15 @@ async function main() {
 
   console.log("Column visibility toggles (each button hides its own thing)");
   const colBtn = k => document.querySelector('.view-mode button[data-col="' + k + '"]');
+  check("there's no Romaji toggle any more -- it's not a column", !colBtn("romaji"));
   colBtn("english").click();
   check("clicking a column button hides that column — pressed means hidden", colBtn("english").getAttribute("aria-pressed") === "true" && colBtn("english").classList.contains("col-hidden"));
-  check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(3)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(3) .sort-button").disabled === true);
-  check("the other columns are untouched", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
-  colBtn("romaji").click();
-  check("a second column can be hidden independently", colBtn("romaji").classList.contains("col-hidden") && colBtn("english").classList.contains("col-hidden"));
+  check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(2) .sort-button").disabled === true);
+  check("the other column is untouched", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("japanese").click();
   check("the last visible column can't be hidden", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("english").click();
-  colBtn("romaji").click();
-  check("clicking again shows a column back", !colBtn("english").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(3)").getAttribute("aria-hidden") === null);
+  check("clicking again shows the column back", !colBtn("english").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === null);
   colBtn("furigana").click();
   check("the Furigana toggle hides just the readings, not the Japanese column", colBtn("furigana").classList.contains("col-hidden") && document.querySelector(".vocab .furigana").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("furigana").click();
@@ -766,9 +774,9 @@ async function main() {
   check("clicking it turns on the mode and lights the button", document.body.classList.contains("selftest-mode") && selftestBtn.getAttribute("aria-pressed") === "true" && selftestBtn.classList.contains("active"));
   check("...and the hint line appears", window.getComputedStyle(selftestHint).display !== "none" && /tap a row/i.test(selftestHint.textContent));
   const stRow = document.querySelector('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden) tbody tr');
-  stRow.cells[2].click();
+  stRow.cells[1].click();
   check("tapping a row reveals it", stRow.classList.contains("revealed"));
-  stRow.cells[2].click();
+  stRow.cells[1].click();
   check("tapping again re-hides it", !stRow.classList.contains("revealed"));
   stRow.classList.add("revealed");
   selftestBtn.click();
@@ -844,7 +852,7 @@ async function main() {
   const countersSection = document.querySelector('.table-section[data-table="0"]');
   check("there is no row-number column — Japanese leads the table", !countersSection.querySelector("td.row-num, .row-num-th"));
   const headerLabels = [...countersSection.querySelectorAll("thead th")].map(th => th.textContent.replace(/[↕↓↑]/g, "").trim());
-  check("columns are Japanese → Romaji → English", JSON.stringify(headerLabels) === JSON.stringify(["Japanese", "Romaji", "English"]));
+  check("columns are Japanese → English (romaji lives in the Japanese cell now)", JSON.stringify(headerLabels) === JSON.stringify(["Japanese", "English"]));
 
   console.log("Hiding a row");
   const drinksSectionManage = document.querySelector('.table-section[data-table="1"]');
@@ -1780,7 +1788,7 @@ async function main() {
     const cols = [...wrap.querySelectorAll(".section-head .view-mode button")].map(b => b.dataset.col);
     return typeof window.RaumeStudy.vocab.applyColVisibility === "function"
       && !/view-mode/.test(without)
-      && ["japanese", "furigana", "romaji", "english"].every(k => cols.includes(k));
+      && ["japanese", "furigana", "english"].every(k => cols.includes(k));
   })());
 
   const goAccountBtn = document.getElementById("fcGoAccount");
