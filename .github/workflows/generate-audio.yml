@@ -21,7 +21,7 @@ on:
         options: [preview, full]
         default: preview
       speaker_id:
-        description: "VOICEVOX style id for full mode (see docs/architecture.md for the shortlist; default is Shikoku Metan / Normal)"
+        description: "VOICEVOX style id for full mode -- run preview first and read its PREVIEW_SPEAKERS.txt to pick one"
         default: "2"
 
 jobs:
@@ -33,6 +33,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Start VOICEVOX engine
         run: |
