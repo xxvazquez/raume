@@ -128,7 +128,7 @@ js/
   storage-migration.js  moves old sakura- localStorage keys to raume- (<head>)
   theme-init.js         sets the theme in <head>, before first paint
   config.js             Supabase URL + anon key
-  shared.js             cross-feature helpers (HTML escape, Web Speech)
+  shared.js             cross-feature helpers (HTML escape, pronunciation playback)
   sw-register.js        service-worker registration
   vocab/                the reference page
     kana-romaji.js       kana → romaji converter (the reading layer)
@@ -153,14 +153,62 @@ data/vocabulary.js      the vocabulary as plain data; every row has a permanent 
                         (adjective rows also carry adj:"i" / adj:"na" for the type pill)
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
+audio/                  prerendered pronunciation clips — see "Pronunciation audio" below
+                        (not committed until generated; absent means Web Speech only)
 supabase/schema.sql     Postgres tables + Row Level Security
 sw.js                   service worker (offline app shell)
 manifest.webmanifest    PWA manifest
 favicon.png             48px favicon (index.html links this, not logo.png)
 icons/                  PWA app icons — see scripts/generate-icons.py
 logo.png                master mark; source art for the favicon + icons, not served
-scripts/                vocab validator, id + icon generators, smoke + SW tests
+scripts/                vocab validator, id + icon + audio generators, smoke + SW tests
 ```
+
+## Pronunciation audio
+
+Every built-in word/phrase reading gets a prerendered clip so playback sounds
+like a native speaker instead of the robotic-ish Web Speech API; anything not
+in `data/vocabulary.js` (custom/imported vocab) has no clip and always uses
+Web Speech.
+
+- **Engine**: [VOICEVOX](https://voicevox.hiroshiba.jp/) — free, no account,
+  no API key, runs as a local HTTP server. Generation only ever happens in
+  `.github/workflows/generate-audio.yml`, triggered manually from the Actions
+  tab; it is never part of `pages.yml` or any push-triggered deploy, and
+  never runs on a contributor's machine automatically.
+- **Filenames are content-addressed**: `scripts/generate-audio.js` computes
+  `audio/<hash>.mp3` from an FNV-1a hash of `AUDIO_GEN_VERSION + "|" +
+  <reading text>`, plus `audio/manifest.json` (the sorted list of hashes that
+  exist). `js/shared.js` computes the identical hash at runtime and plays the
+  file when the manifest lists it — the two copies of the hash function and
+  `AUDIO_GEN_VERSION` **must be bumped together** if the voice or synthesis
+  params ever change, so old and new audio never collide under one hash.
+  Readings come from the same segments `jpReadingOf` already builds for the
+  Web Speech fallback (kanji read via its furigana, never guessed).
+- **Regenerating** (from the GitHub Actions tab, "Generate pronunciation
+  audio" workflow):
+  1. Run with mode `preview` — asks the engine's own `GET /speakers` for its
+     real character/style list (never hardcoded — the id-to-character
+     mapping lives in the compiled voice library, not anywhere source code
+     can see it), picks a handful of "ノーマル" (Normal) styles, and
+     synthesizes the sample words in each. Download the `audio-preview`
+     artifact: the clips plus a `PREVIEW_SPEAKERS.txt` naming which speaker
+     id is which character, straight from the engine.
+  2. Listen, then run again with mode `full` and the chosen `speaker_id`
+     input — generates every vocabulary reading in that one voice, and
+     prunes any clip whose reading no longer exists.
+  3. Download the `audio-full` artifact and unzip it over `audio/` in the
+     repo (replaces `manifest.json`, adds/removes `*.mp3`). The workflow does
+     not commit anything itself — commit `audio/` normally afterward.
+- **Licensing**: VOICEVOX's character voice libraries require a credit line
+  naming the voice wherever the audio is used. **Once a voice is chosen,
+  update the credit in `README.md`'s License section** to
+  `VOICEVOX:<character name>` for that specific voice.
+- **Caching**: `sw.js` keeps prerendered clips in their own `raume-audio-v1`
+  cache, separate from the per-deploy `raume-<sha>` cache — content-addressed
+  filenames never change, so this cache survives a normal deploy instead of
+  being wiped and re-downloaded every time. Clips are cached lazily (on first
+  play), not precached at install, keeping the initial install small.
 
 ## PWA and offline
 
@@ -205,3 +253,7 @@ npm run vendor:libs         # re-copy the vendored libs after a version bump
 Pushing `main` triggers the GitHub Pages workflow
 (`.github/workflows/pages.yml`), which swaps the cache-busting token for the
 commit SHA and deploys. Set the repo's Pages source to "GitHub Actions" once.
+
+`.github/workflows/generate-audio.yml` is separate and manual-only
+(`workflow_dispatch`, not triggered by push) — see "Pronunciation audio"
+above. It never runs as part of a deploy.

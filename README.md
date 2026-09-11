@@ -65,8 +65,10 @@ bold** throughout the app so they're easy to spot in a sentence.
   bare. The pill rides along in the Meaning column — not a new column — and
   stays out of search. Driven by an `adj` field on the row.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the
-  reading aloud via the browser's Web Speech API (no audio files). It only
-  appears once the browser confirms it has a Japanese voice installed.
+  reading aloud. Every built-in word/phrase has a prerendered native-voice
+  clip (generated offline via VOICEVOX, see `docs/architecture.md`); anything
+  without one — custom/imported vocab — falls back to the browser's Web
+  Speech API. The icon appears once either source is confirmed available.
 - **Sorting** — every column sorts; tables start A–Z by English.
 
 **Study aids**
@@ -158,9 +160,8 @@ page is where you review, browse, and track a daily streak.
   answer Good/Easy dim so the honest rating reads first.
 - The word's pronunciation plays automatically the moment the answer reveals
   (every direction gets one eventually, including the two where the Japanese
-  only appears in that reveal, not the prompt) — same speaker icon and Web
-  Speech API as the reference pages, just triggered for you rather than
-  waiting on a click.
+  only appears in that reveal, not the prompt) — same pronunciation source as
+  the reference pages, just triggered for you rather than waiting on a click.
 - Screen-reader friendly: the field is named with its prompt, and the result is
   announced from an `aria-live` region without moving focus off the field.
 - Romaji checking ignores long vowels — `kōhī`, `koohii`, `kouhii` all match.
@@ -255,3 +256,8 @@ Vendored libraries and fonts keep their own permissive licenses: `ts-fsrs` and
 `supabase-js` are MIT, the Lucide-derived icon paths are ISC
 (`vendor/*.LICENSE.txt`); Inter and Space Grotesk are under the SIL Open Font
 License (`fonts/*.LICENSE.txt`).
+
+Pronunciation audio (`audio/*.mp3`) is generated offline with
+[VOICEVOX](https://voicevox.hiroshiba.jp/), whose character voice libraries
+require a credit line naming the voice used — see `docs/architecture.md` for
+the exact credit once a voice is chosen (`scripts/generate-audio.js`).

@@ -1,0 +1,59 @@
+name: Generate pronunciation audio
+
+# Manual only -- deliberately NOT on push. This pulls a ~2GB Japanese TTS
+# engine image and synthesizes every vocab reading; it has nothing to do with
+# the normal deploy in pages.yml and must never slow that down or block it.
+#
+# Run it from the Actions tab when data/vocabulary.js gains new/changed
+# readings, or to audition a different voice:
+#   1. Run once with mode=preview to hear a few sample voices.
+#   2. Download the "audio-preview" artifact, listen, pick a speaker id.
+#   3. Run again with mode=full and that speaker id.
+#   4. Download the "audio-full" artifact and unzip it over audio/ in the
+#      repo (it replaces manifest.json and adds/removes *.mp3 files).
+#   5. Commit audio/ normally -- this workflow does not commit for you.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "preview (a handful of sample words in several voices) or full (every vocab reading, one voice)"
+        type: choice
+        options: [preview, full]
+        default: preview
+      speaker_id:
+        description: "VOICEVOX style id for full mode (see docs/architecture.md for the shortlist; default is Shikoku Metan / Normal)"
+        default: "2"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Start VOICEVOX engine
+        run: |
+          docker run -d --rm -p 127.0.0.1:50021:50021 --name voicevox voicevox/voicevox_engine:cpu-latest
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:50021/version && break
+            sleep 2
+          done
+
+      - name: Generate audio
+        env:
+          VOICEVOX_SPEAKER: ${{ inputs.speaker_id }}
+        run: |
+          if [ "${{ inputs.mode }}" = "preview" ]; then
+            node scripts/generate-audio.js --preview
+          else
+            node scripts/generate-audio.js
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audio-${{ inputs.mode }}
+          path: audio/
+          retention-days: 14

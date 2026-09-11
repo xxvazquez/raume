@@ -14,11 +14,44 @@ window.RaumeStudy.shared = (function () {
       .replace(/>/g, "&gt;");
   }
 
-  // Spoken pronunciation via the browser's own Web Speech API -- no audio
-  // files, no server, nothing to precache. Read live off window.speechSynthesis
-  // on every call rather than caching it once, so a page that gains the API
-  // later (or a test that stubs it in) is picked up without a reload.
+  // Spoken pronunciation. Prefers a prerendered native-voice clip (see
+  // scripts/generate-audio.js -- VOICEVOX, generated offline, never at
+  // runtime) and falls back to the browser's own Web Speech API for anything
+  // without one: custom/imported vocab, or before the manifest has loaded.
   var speech = (function () {
+    // Must match AUDIO_GEN_VERSION in scripts/generate-audio.js -- bump both
+    // together if the voice or synthesis params ever change, so old and new
+    // audio never collide under the same hash.
+    var AUDIO_GEN_VERSION = "v1";
+    function hash(str) {
+      var input = AUDIO_GEN_VERSION + "|" + str;
+      var h = 0x811c9dc5;
+      for (var i = 0; i < input.length; i++) {
+        h ^= input.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return (h >>> 0).toString(36);
+    }
+    // null until the fetch resolves (a lookup misses harmlessly during that
+    // window and falls back to Web Speech); empty Set if the manifest is
+    // missing or unreachable (e.g. previewing from file://).
+    var audioManifest = null;
+    function loadAudioManifest() {
+      // Guarded rather than assumed: this runs from file:// during local
+      // preview and inside jsdom in scripts/smoke-test.js, where fetch of a
+      // relative path can be missing or throw synchronously instead of
+      // rejecting -- either way it's just "no prerendered audio available".
+      if (typeof fetch !== "function") { audioManifest = new Set(); return Promise.resolve(false); }
+      try {
+        return fetch("audio/manifest.json")
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(function (list) { audioManifest = new Set(list); return audioManifest.size > 0; })
+          .catch(function () { audioManifest = new Set(); return false; });
+      } catch (e) {
+        audioManifest = new Set();
+        return Promise.resolve(false);
+      }
+    }
     function getVoices() {
       return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     }
@@ -63,14 +96,14 @@ window.RaumeStudy.shared = (function () {
         callback();
       });
     }
-    // Kept alive outside speak()'s own scope on purpose: Chrome garbage-
-    // collects a SpeechSynthesisUtterance that nothing still references,
-    // which silently kills speech partway through (sometimes before a sound
-    // is ever heard) with no error anywhere -- a long-documented Chrome bug,
-    // not a Web Speech API requirement. A module-level reference is the
-    // standard workaround.
+    // Kept alive outside speakWebSpeech()'s own scope on purpose: Chrome
+    // garbage-collects a SpeechSynthesisUtterance that nothing still
+    // references, which silently kills speech partway through (sometimes
+    // before a sound is ever heard) with no error anywhere -- a long-
+    // documented Chrome bug, not a Web Speech API requirement. A module-level
+    // reference is the standard workaround.
     var currentUtterance = null;
-    function speak(text) {
+    function speakWebSpeech(text) {
       var synth = window.speechSynthesis;
       if (!synth || !text || typeof SpeechSynthesisUtterance === "undefined") return;
       var utterance = new SpeechSynthesisUtterance(text);
@@ -86,25 +119,55 @@ window.RaumeStudy.shared = (function () {
       // no error visible" can actually be told apart from a real engine
       // failure (e.g. "not-allowed", "synthesis-failed") next time.
       utterance.onerror = function (e) { console.error("Speech synthesis failed:", e.error); };
-      // Interrupt a still-speaking utterance so a second click doesn't queue up
-      // behind the first -- but *only* then. Calling cancel() unconditionally
-      // right before speak() is what leaves the queue wedged in some Chromium
-      // builds, so the new utterance never starts and nothing plays.
-      if (synth.speaking || synth.pending) synth.cancel();
       synth.speak(utterance);
       // Chrome can strand the engine in a paused state after an earlier
       // cancel(); a resume() when it isn't paused is a harmless no-op.
       if (synth.paused) synth.resume();
     }
-    return { hasJapaneseVoice: hasJapaneseVoice, onJapaneseVoiceReady: onJapaneseVoiceReady, speak: speak };
+    // Kept alive the same way as currentUtterance, and for the same reason:
+    // an <audio> element with nothing still referencing it can be GC'd and
+    // stop mid-playback on some engines.
+    var currentAudio = null;
+    function playPrerendered(text) {
+      if (!audioManifest) return false;
+      var h = hash(text);
+      if (!audioManifest.has(h)) return false;
+      var audio = new Audio("audio/" + h + ".mp3");
+      currentAudio = audio;
+      // Falls back to Web Speech rather than staying silent if the file is
+      // somehow missing/corrupt despite being listed in the manifest.
+      audio.play().catch(function () { speakWebSpeech(text); });
+      return true;
+    }
+    // Interrupts whatever's still playing so a second click doesn't queue up
+    // behind the first -- covers both paths since a click can land on either
+    // one depending on whether this word has a prerendered clip.
+    function stopAll() {
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      var synth = window.speechSynthesis;
+      if (synth && (synth.speaking || synth.pending)) synth.cancel();
+    }
+    function speak(text) {
+      if (!text) return;
+      stopAll();
+      if (!playPrerendered(text)) speakWebSpeech(text);
+    }
+    return {
+      hasJapaneseVoice: hasJapaneseVoice,
+      onJapaneseVoiceReady: onJapaneseVoiceReady,
+      loadAudioManifest: loadAudioManifest,
+      speak: speak
+    };
   })();
-  // Runs once at load: as soon as a Japanese voice is confirmed available,
-  // mark it on the document so css/site.css can reveal every speaker button
-  // at once -- one check governs the whole app instead of each button
-  // re-deriving the same answer.
-  speech.onJapaneseVoiceReady(function () {
-    document.body.classList.add("ja-voice-ready");
-  });
+  // Runs once at load: as soon as pronunciation is confirmed available from
+  // *either* source, mark it on the document so css/site.css can reveal
+  // every speaker button at once -- one check governs the whole app instead
+  // of each button re-deriving the same answer. Prerendered audio doesn't
+  // depend on the device having any Japanese voice installed, so it's
+  // checked independently rather than gating on Web Speech alone.
+  function markSpeechReady() { document.body.classList.add("ja-voice-ready"); }
+  speech.onJapaneseVoiceReady(markSpeechReady);
+  speech.loadAudioManifest().then(function (hasAny) { if (hasAny) markSpeechReady(); });
 
   return { escapeHtml: escapeHtml, speech: speech };
 })();

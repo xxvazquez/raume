@@ -10,6 +10,11 @@
 // unbounded growth, and no reliance on ignoreSearch.
 const VERSION = '__CACHEBUST__';
 const CACHE = 'raume-' + VERSION;
+// Prerendered pronunciation clips (js/shared.js, scripts/generate-audio.js).
+// Content-addressed by a hash of the text, so a given URL's bytes never
+// change -- this cache is deliberately NOT tied to VERSION and survives a
+// normal deploy instead of being dropped and re-downloaded every time.
+const AUDIO_CACHE = 'raume-audio-v1';
 
 // Requested by the browser WITHOUT a version query (navigation targets, the
 // manifest, icons). Cached under their bare URLs.
@@ -72,7 +77,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== AUDIO_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -103,6 +108,18 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => caches.match('index.html'))
+    );
+    return;
+  }
+
+  if (url.pathname.indexOf('/audio/') !== -1 && url.pathname.endsWith('.mp3')) {
+    // Cache-first with no revalidation: the hash in the filename guarantees
+    // these bytes never change, so a cache hit never needs a network check.
+    event.respondWith(
+      caches.open(AUDIO_CACHE).then((cache) => cache.match(req).then((cached) => cached || fetch(req).then((res) => {
+        cache.put(req, res.clone());
+        return res;
+      })))
     );
     return;
   }
