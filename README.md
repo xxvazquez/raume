@@ -107,6 +107,11 @@ block for words the built-in dataset doesn't have:
   reason — fix them and re-import just those.
 - **New table** — signed in only. Guests can add rows (stored in this browser);
   building a table of your own needs an account.
+- Under **Words you've added**, edit a word's Japanese / romaji / English in
+  place (same `japanese(furigana),romaji,english` line you'd type to add it),
+  or delete it. A table you created can be deleted entirely, dropping every
+  word in it — the dropdowns above (Add a word / Import a list) pick up a
+  rename immediately.
 - A custom word behaves like any other everywhere: furigana, search, print,
   pronunciation, and all four flashcard directions. Signed in, Supabase is the
   authoritative store (`custom_tables` / `custom_rows`); guest rows migrate up

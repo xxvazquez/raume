@@ -277,6 +277,21 @@ window.RaumeStudy.customVocab = (function () {
     return t;
   }
 
+  // parsed: {segments, romaji, english} from parseFurigana / parseImport --
+  // same shape addRow takes, replacing the row's content in place (its id,
+  // table, and sort position are untouched).
+  function updateRow(id, parsed) {
+    var row = load().rows.filter(function (r) { return r.id === id; })[0];
+    if (!row) throw new Error("That word no longer exists.");
+    row.jp = cleanSegments(parsed.segments);
+    row.romaji = String(parsed.romaji || "").trim();
+    row.english = String(parsed.english || "").trim();
+    persist();
+    refreshApp();
+    if (remote) { try { remote.addRows([row]); } catch (e) { console.warn("custom vocab: row sync failed", e); } }
+    return row;
+  }
+
   function deleteRows(ids) {
     var set = {};
     (ids || []).forEach(function (id) { set[id] = true; });
@@ -338,7 +353,7 @@ window.RaumeStudy.customVocab = (function () {
   return {
     parseFurigana: parseFurigana, parseImport: parseImport,
     applyToDataset: applyToDataset,
-    addRow: addRow, addRows: addRows,
+    addRow: addRow, addRows: addRows, updateRow: updateRow,
     createTable: createTable,
     deleteRow: deleteRow, deleteRows: deleteRows, deleteTable: deleteTable,
     setRemote: setRemote, applyRemote: applyRemote, onChange: onChange,

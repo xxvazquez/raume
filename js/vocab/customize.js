@@ -31,6 +31,11 @@ window.RaumeStudy.customize = (function () {
   // Set around a customize-originated custom-vocab mutation so its onChange
   // doesn't double-render mid-action (the action re-renders itself).
   var cvSelfMutating = false;
+  // id of the custom-vocab row currently open for editing, if any -- unlike
+  // cvFlash this isn't one-shot, it stays open across renders until saved or
+  // cancelled.
+  var cvEditingId = null;
+  var cvEditError = null;
 
   function tc() { return window.RaumeStudy.tableCustom; }
   function cv() { return window.RaumeStudy.customVocab; }
@@ -101,6 +106,14 @@ window.RaumeStudy.customize = (function () {
   // ---- custom vocabulary (the reader's own rows/tables) -----------------
 
   var TRASH_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h10M7.5 5V3.5h3V5M6 5l.6 9h4.8L12 5"/></svg>';
+  var EDIT_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.3 3.7 14.3 5.7 6 14H4v-2z"/></svg>';
+
+  // The reverse of parseFurigana -- segments back to the single-line
+  // "japanese(furigana),romaji,english" form the add-word / import forms use,
+  // so editing a row starts from text in the same format you'd type to add it.
+  function segmentsToText(jp) {
+    return (jp || []).map(function (s) { return s.kanji ? s.kanji + "(" + s.reading + ")" : (s.text || ""); }).join("");
+  }
 
   // <select> of every table a custom row can be attached to: built-in tables
   // grouped by category, then the reader's own custom tables.
@@ -121,10 +134,24 @@ window.RaumeStudy.customize = (function () {
     var mine = cv() ? cv().customTables() : [];
     if (mine.length) {
       opts += '<optgroup label="Your tables">';
-      mine.forEach(function (t) { opts += opt(t.id, t.title); });
+      mine.forEach(function (t) { opts += opt(t.id, V().tableTitle ? V().tableTitle(t.id, t.title) : t.title); });
       opts += "</optgroup>";
     }
     return '<select class="' + cls + '">' + opts + "</select>";
+  }
+
+  // In-place edit form for one custom-vocab row, same single-line format as
+  // "Add a word": japanese(furigana), romaji, english.
+  function editRowHtml(r) {
+    var text = segmentsToText(r.jp) + ", " + r.romaji + ", " + r.english;
+    return '<li class="cv-owned-row cv-owned-row-edit">' +
+      '<input type="text" class="cv-edit-input" data-row="' + esc(r.id) + '" autocomplete="off" spellcheck="false" value="' + esc(text) + '">' +
+      '<span class="cv-owned-actions">' +
+      '<button type="button" class="cv-btn cv-edit-save" data-row="' + esc(r.id) + '">Save</button>' +
+      '<button type="button" class="cv-edit-cancel">Cancel</button>' +
+      "</span>" +
+      (cvEditError ? '<div class="cv-preview cv-preview-bad cv-edit-error">' + esc(cvEditError) + "</div>" : "") +
+      "</li>";
   }
 
   // The reader's rows, grouped by the table they sit in (built-in or custom).
@@ -144,11 +171,15 @@ window.RaumeStudy.customize = (function () {
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</div>";
       var rows = grp.rows.length
         ? grp.rows.map(function (r) {
+            if (r.id === cvEditingId) return editRowHtml(r);
             return '<li class="cv-owned-row">' +
               '<span class="cv-owned-jp" lang="ja">' + V().jpSegmentsHtml(r.jp, false) + "</span>" +
               '<span class="cv-owned-ro">' + esc(r.romaji) + "</span>" +
               '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
-              '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word" title="Delete this word">' + TRASH_ICON + "</button></li>";
+              '<span class="cv-owned-actions">' +
+              '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word" title="Edit this word">' + EDIT_ICON + "</button>" +
+              '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word" title="Delete this word">' + TRASH_ICON + "</button>" +
+              "</span></li>";
           }).join("")
         : '<li class="cv-owned-row cv-owned-row-empty">No words in this table yet.</li>';
       return '<div class="cv-owned-group">' + head + '<ul class="cv-owned-list">' + rows + "</ul></div>";
@@ -295,6 +326,11 @@ window.RaumeStudy.customize = (function () {
         if (window.confirm("Delete this table and every word in it? This can’t be undone.")) cv().deleteTable(delTable.dataset.table);
         return;
       }
+      var editRow = e.target.closest && e.target.closest(".cv-edit-row");
+      if (editRow) { cvEditingId = editRow.dataset.row; cvEditError = null; pendingFocus = ".cv-edit-input"; render(host); return; }
+      if (e.target.closest && e.target.closest(".cv-edit-cancel")) { cvEditingId = null; cvEditError = null; render(host); return; }
+      var editSave = e.target.closest && e.target.closest(".cv-edit-save");
+      if (editSave) { saveEdit(host, editSave.dataset.row); return; }
       // .section-icon-btn is handled by the delegated picker hook in
       // interactions.js.
     });
@@ -308,6 +344,10 @@ window.RaumeStudy.customize = (function () {
     });
     host.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && e.target.classList.contains("cv-add-input")) { e.preventDefault(); addWord(host); }
+      if (e.target.classList.contains("cv-edit-input")) {
+        if (e.key === "Enter") { e.preventDefault(); saveEdit(host, e.target.dataset.row); }
+        else if (e.key === "Escape") { cvEditingId = null; cvEditError = null; render(host); }
+      }
     });
     if (tc()) tc().onChange(function () { if (hostEl) render(hostEl); });
     if (cv()) cv().onChange(function () {
@@ -358,6 +398,20 @@ window.RaumeStudy.customize = (function () {
         pendingFocus = ".cv-add-input";
       } catch (err) {
         cvFlash = { scope: "add", ok: false, text: err.message || "Couldn’t add that word." };
+      }
+    });
+  }
+  function saveEdit(host, id) {
+    var input = host.querySelector('.cv-edit-input[data-row="' + id + '"]');
+    if (!input) return;
+    var p = firstParsed(input.value.trim());
+    if (p.error) { cvEditError = p.error; render(host); return; }
+    cvMutate(host, function () {
+      try {
+        cv().updateRow(id, p.row);
+        cvEditingId = null; cvEditError = null;
+      } catch (err) {
+        cvEditError = err.message || "Couldn’t save that word.";
       }
     });
   }

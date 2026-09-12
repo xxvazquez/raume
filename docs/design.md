@@ -132,7 +132,9 @@ and Help.
   hairline-edged `--paper` card (`.cv-card`) with an uppercase-micro title, the
   same panel language as Settings. Forms are label-over-field; the parsed-ruby
   preview and the import result sit on `--surface`, an error on `--wrong-soft`.
-  No new tokens.
+  No new tokens. Editing a word in **Words you've added** swaps its row for a
+  single text field (same line format as adding one) with Save/Cancel, reusing
+  the trash icon's stroke style for a matching pencil icon.
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made

@@ -1120,11 +1120,26 @@ body.icon-picker-open { overflow: hidden; }
 .cv-owned-jp ruby rt { font-size: .62em; color: var(--furigana); }
 .cv-owned-ro { flex: 0 0 24%; color: var(--muted); }
 .cv-owned-en { flex: 1 1 auto; color: var(--muted); }
-.cv-del-row {
+.cv-owned-actions { flex: 0 0 auto; display: flex; gap: 6px; }
+.cv-edit-row, .cv-del-row {
   flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
   color: var(--faint); padding: 2px; line-height: 0;
 }
+.cv-edit-row:hover { color: var(--ink); }
 .cv-del-row:hover { color: var(--wrong-strong); }
+.cv-owned-row-edit { flex-wrap: wrap; align-items: center; }
+.cv-edit-input {
+  flex: 1 1 260px; border: 1px solid var(--line-strong); border-radius: 6px;
+  background: var(--paper); font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--ink);
+  padding: 5px 8px;
+}
+.cv-edit-input:focus { outline: none; border-color: var(--accent-strong); }
+.cv-edit-cancel {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--muted); padding: 5px 4px;
+}
+.cv-edit-cancel:hover { color: var(--ink); }
+.cv-edit-error { flex: 1 1 100%; margin-top: 4px; }
 @media (max-width: 560px) {
   .cv-owned-row { flex-wrap: wrap; }
   .cv-owned-jp, .cv-owned-ro, .cv-owned-en { flex-basis: auto; }
