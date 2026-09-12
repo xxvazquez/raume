@@ -426,26 +426,28 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   var syncErrored = false;
   function onSyncStateChange(fn) { syncStateListeners.push(fn); }
   function totalPending() {
-    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount());
+    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount() + cvOutboxPending() + (tcDirty() ? 1 : 0));
   }
   function getSyncState() {
     var online = typeof navigator === "undefined" || navigator.onLine !== false;
     var pending = totalPending();
-    var busy = syncing || kanaSyncing;
+    var busy = syncing || kanaSyncing || cvSyncing;
     return {
       online: online, pending: pending, syncing: busy,
-      // Queued reviews, online, not mid-attempt, and the last try failed --
+      // Queued changes, online, not mid-attempt, and the last try failed --
       // offer a manual retry rather than waiting on the next trigger.
       stalled: pending > 0 && online && !busy && syncErrored
     };
   }
-  // Kick both outboxes now -- the chip's "Sync now" button, for a queue that
+  // Kick every outbox now -- the chip's "Sync now" button, for a queue that
   // stopped draining on its own.
   function syncNow() {
     syncErrored = false;
     notifySyncStateChange();
     syncOutbox();
     syncKanaOutbox();
+    syncCvOutbox();
+    syncTableCustomIfDirty();
   }
   function notifySyncStateChange() {
     var st = getSyncState();
@@ -502,7 +504,131 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     entry.resultCard = replayed.card;
     return "done";
   }
-  window.addEventListener("online", function () { notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); });
+  // -----------------------------------------------------------------------
+  // Custom vocabulary + table customisations: the account writes above
+  // (customVocabAddRows etc., saveTableCustomRemote) used to be fire-and-
+  // forget -- a failed push (offline, or any other error) just left a
+  // console.warn and nothing else, so a rename or a word added while offline
+  // could quietly never reach the account. These give the same retried,
+  // visible treatment the review outbox above already has: a failure queues
+  // (or flags) the change, folds into getSyncState()'s pending count -- so
+  // the existing sync chip covers it too -- and is retried on reconnect or
+  // "Sync now", surviving a reload since the queue/flag is persisted, not
+  // just held in memory.
+  var CV_OUTBOX_KEY = "raume-custom-vocab-outbox-v1";
+  function loadCvOutbox() {
+    try {
+      var arr = JSON.parse(window.localStorage.getItem(CV_OUTBOX_KEY) || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function saveCvOutbox(arr) {
+    try { window.localStorage.setItem(CV_OUTBOX_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+  function queueCvOp(op, payload) {
+    var q = loadCvOutbox();
+    q.push({ op: op, payload: payload });
+    saveCvOutbox(q);
+    notifySyncStateChange();
+  }
+  function cvOutboxPending() { return isGuestMode() ? 0 : loadCvOutbox().length; }
+  // Every queued op replays through the exact same function a live edit
+  // calls (customVocabAddRows etc. above), so a retried change can't drift
+  // from what a same-session one does.
+  function runCvOp(entry) {
+    if (entry.op === "addRows") return customVocabAddRows(entry.payload);
+    if (entry.op === "deleteRows") return customVocabDeleteRows(entry.payload);
+    if (entry.op === "addTable") return customVocabAddTable(entry.payload);
+    if (entry.op === "deleteTable") return customVocabDeleteTable(entry.payload.id, entry.payload.rowIds);
+    return Promise.resolve();
+  }
+  var cvSyncing = false;
+  async function syncCvOutbox() {
+    if (cvSyncing || !configured() || !currentUser()) return;
+    cvSyncing = true;
+    try {
+      var q = loadCvOutbox();
+      while (q.length) {
+        try {
+          await withTimeout(runCvOp(q[0]), "custom vocab sync");
+        } catch (e) {
+          syncErrored = true;
+          console.warn("Flashcards: custom vocab sync failed, will retry", e);
+          break;
+        }
+        q.shift();
+        saveCvOutbox(q);
+        notifySyncStateChange();
+      }
+    } finally {
+      cvSyncing = false;
+      if (totalPending() === 0) syncErrored = false;
+      notifySyncStateChange();
+    }
+  }
+  // What js/flashcards/bootstrap.js's customVocab.setRemote() ops actually
+  // call: try once immediately (so a same-session change syncs with no
+  // visible delay), and only fall back to the persisted outbox -- retried
+  // later -- if that attempt fails, instead of dropping the change.
+  function customVocabAddRowsQueued(rows) {
+    return customVocabAddRows(rows).catch(function (e) {
+      console.warn("Flashcards: could not sync new words, will retry", e);
+      queueCvOp("addRows", rows);
+    });
+  }
+  function customVocabDeleteRowsQueued(ids) {
+    return customVocabDeleteRows(ids).catch(function (e) {
+      console.warn("Flashcards: could not sync a deleted word, will retry", e);
+      queueCvOp("deleteRows", ids);
+    });
+  }
+  function customVocabAddTableQueued(t) {
+    return customVocabAddTable(t).catch(function (e) {
+      console.warn("Flashcards: could not sync a new table, will retry", e);
+      queueCvOp("addTable", t);
+    });
+  }
+  function customVocabDeleteTableQueued(id, rowIds) {
+    return customVocabDeleteTable(id, rowIds).catch(function (e) {
+      console.warn("Flashcards: could not sync a deleted table, will retry", e);
+      queueCvOp("deleteTable", { id: id, rowIds: rowIds });
+    });
+  }
+
+  // Table customisations push the whole current object every time (last-
+  // edit-wins, idempotent), so there's no op log to replay -- just a dirty
+  // flag that clears on a successful push and is set again on failure.
+  // Persisted so "this hasn't synced yet" survives a reload, not only an
+  // in-page retry.
+  var TC_DIRTY_KEY = "raume-table-custom-dirty-v1";
+  function tcDirty() {
+    try { return window.localStorage.getItem(TC_DIRTY_KEY) === "1"; } catch (e) { return false; }
+  }
+  function setTcDirty(v) {
+    try {
+      if (v) window.localStorage.setItem(TC_DIRTY_KEY, "1");
+      else window.localStorage.removeItem(TC_DIRTY_KEY);
+    } catch (e) {}
+  }
+  async function saveTableCustomRemoteQueued(obj) {
+    try {
+      await withTimeout(saveTableCustomRemote(obj), "table customization sync");
+      setTcDirty(false);
+    } catch (e) {
+      console.warn("Flashcards: could not sync a table customization, will retry", e);
+      setTcDirty(true);
+    }
+    notifySyncStateChange();
+  }
+  function syncTableCustomIfDirty() {
+    if (!tcDirty() || !configured() || !currentUser()) return;
+    var tc = window.RaumeStudy.tableCustom;
+    if (tc) saveTableCustomRemoteQueued(tc.getAll());
+  }
+
+  window.addEventListener("online", function () {
+    notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); syncCvOutbox(); syncTableCustomIfDirty();
+  });
   window.addEventListener("offline", function () { notifySyncStateChange(); });
 
   // -----------------------------------------------------------------------
@@ -689,9 +815,13 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
-    saveTableCustomRemote: saveTableCustomRemote,
+    saveTableCustomRemote: saveTableCustomRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
+    syncTableCustomIfDirty: syncTableCustomIfDirty,
     customVocabAddRows: customVocabAddRows, customVocabDeleteRows: customVocabDeleteRows,
     customVocabAddTable: customVocabAddTable, customVocabDeleteTable: customVocabDeleteTable,
+    customVocabAddRowsQueued: customVocabAddRowsQueued, customVocabDeleteRowsQueued: customVocabDeleteRowsQueued,
+    customVocabAddTableQueued: customVocabAddTableQueued, customVocabDeleteTableQueued: customVocabDeleteTableQueued,
+    syncCvOutbox: syncCvOutbox,
     recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow, withTimeout: withTimeout,
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,

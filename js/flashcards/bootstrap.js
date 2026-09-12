@@ -36,6 +36,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var clearPasswordRecovery = dataOps.clearPasswordRecovery;
   var initAuth = dataOps.initAuth, onAuthChange = dataOps.onAuthChange;
   var fetchAllFromServer = dataOps.fetchAllFromServer, syncOutbox = dataOps.syncOutbox;
+  var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty;
   var syncNow = dataOps.syncNow, withTimeout = dataOps.withTimeout;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
   var renderDashboard = dashboard.renderDashboard, invalidateInsights = dashboard.invalidateInsights;
@@ -221,7 +222,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       initialSyncInFlight = true;
       lastInitialSyncAttempt = Date.now();
       withTimeout(fetchAllFromServer(), "initial sync")
-        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); render(); })
+        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); render(); })
         .catch(function (e) { console.error("Flashcards: could not load from Supabase", e); render(); })
         .finally(function () { initialSyncInFlight = false; });
     }
@@ -284,32 +285,35 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   // Offline / pending-sync chip -- sits under the identity line, its text
   // announced via aria-live. Offline reads first (it applies in guest mode too,
-  // where there's nothing queued); otherwise it counts reviews still in the
-  // outbox. When a sync has stopped draining on its own, it turns amber and
-  // grows a "Sync now" button. Signed in with nothing queued, it settles on
-  // a quiet "Synced" state instead of disappearing -- there was previously no
-  // way to positively confirm the account *is* up to date, only signals that
-  // something was wrong. Guest mode has nothing to sync to, so it stays
-  // hidden there once the offline case doesn't apply.
-  function reviewCount(n) { return n + (n === 1 ? " review" : " reviews"); }
+  // where there's nothing queued); otherwise it counts everything still
+  // waiting to reach the account -- reviews, custom vocabulary, and table
+  // customisations all fold into the same pending count (see
+  // data-ops.js getSyncState()). When a sync has stopped draining on its
+  // own, it turns amber and grows a "Sync now" button. Signed in with
+  // nothing queued, it settles on a quiet "Synced" state instead of
+  // disappearing -- there was previously no way to positively confirm the
+  // account *is* up to date, only signals that something was wrong. Guest
+  // mode has nothing to sync to, so it stays hidden there once the offline
+  // case doesn't apply.
+  function changeCount(n) { return n + (n === 1 ? " change" : " changes"); }
   function updateSyncChip() {
     var chip = document.getElementById("fcSyncChip");
     if (!chip) return;
     var st = getSyncState();
     var text = "", cls = "", showBtn = false;
     if (!st.online) {
-      text = "Offline — reviews are saved on this device";
+      text = "Offline — changes are saved on this device";
       cls = " fc-sync-chip-offline";
     } else if (st.pending > 0) {
       if (st.syncing) {
-        text = "Syncing " + reviewCount(st.pending) + "…";
+        text = "Syncing " + changeCount(st.pending) + "…";
         cls = " fc-sync-chip-syncing";
       } else if (st.stalled) {
-        text = reviewCount(st.pending) + " couldn't sync";
+        text = changeCount(st.pending) + " couldn't sync";
         cls = " fc-sync-chip-offline";
         showBtn = true;
       } else {
-        text = reviewCount(st.pending) + " to sync";
+        text = changeCount(st.pending) + " to sync";
         cls = " fc-sync-chip-syncing";
         showBtn = true;
       }
@@ -365,12 +369,16 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     var cv = window.RaumeStudy.customVocab;
     if (!cv) return;
     if (authState.session) {
-      var warn = function (e) { console.warn("Flashcards: could not sync custom vocabulary", e); };
+      // The *Queued variants try once immediately, same as before, but a
+      // failure (offline, or anything else) queues the change instead of
+      // just leaving a console.warn -- retried on reconnect / "Sync now",
+      // and counted in getSyncState() so the sync chip reflects it too. See
+      // data-ops.js's "Custom vocabulary + table customisations" section.
       cv.setRemote({
-        addRows: function (rows) { dataOps.customVocabAddRows(rows).catch(warn); },
-        deleteRows: function (ids) { dataOps.customVocabDeleteRows(ids).catch(warn); },
-        addTable: function (t) { dataOps.customVocabAddTable(t).catch(warn); },
-        deleteTable: function (id, rowIds) { dataOps.customVocabDeleteTable(id, rowIds).catch(warn); }
+        addRows: function (rows) { dataOps.customVocabAddRowsQueued(rows); },
+        deleteRows: function (ids) { dataOps.customVocabDeleteRowsQueued(ids); },
+        addTable: function (t) { dataOps.customVocabAddTableQueued(t); },
+        deleteTable: function (id, rowIds) { dataOps.customVocabDeleteTableQueued(id, rowIds); }
       });
     } else {
       cv.setRemote(null);
@@ -378,21 +386,32 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   }
   wireCustomVocabRemote();
 
-  // The masthead's account icon (index.html) is the only sign-in indicator
-  // outside this page -- otherwise there's no way to tell you're signed in
-  // without opening Flashcards. interactions.js wires its click before this
-  // file loads; this is just the state (color + label), since only this
-  // module knows auth state.
+  // The masthead's account icon (index.html) is the only sign-in AND sync
+  // indicator outside this page -- table renames and custom vocabulary sync
+  // from the reference/Customize pages, nowhere near the Flashcards sync
+  // chip, so this is the only place a reader editing there would ever see
+  // "that hasn't reached your account yet". interactions.js wires its click
+  // before this file loads; this is just the state (colour + label), since
+  // only this module knows auth/sync state. Green dot = signed in, nothing
+  // pending; amber = signed in but offline or something still queued
+  // (same getSyncState() the Flashcards chip reads); no dot = guest.
   function updateAccountIndicator() {
     var btn = document.getElementById("accountToggle");
     if (!btn) return;
     var signedIn = !!authState.session;
-    btn.classList.toggle("masthead-account-signed-in", signedIn);
-    var label = signedIn ? "Signed in as " + currentUser().email : "Guest — not signed in";
+    var st = signedIn ? getSyncState() : null;
+    var pending = !!(st && (st.pending > 0 || !st.online));
+    btn.classList.toggle("masthead-account-signed-in", signedIn && !pending);
+    btn.classList.toggle("masthead-account-pending", signedIn && pending);
+    var label = !signedIn ? "Guest — not signed in"
+      : !st.online ? "Signed in as " + currentUser().email + " — offline, changes are saved on this device"
+      : pending ? "Signed in as " + currentUser().email + " — " + st.pending + (st.pending === 1 ? " change" : " changes") + " not yet synced"
+      : "Signed in as " + currentUser().email + " — synced";
     btn.setAttribute("aria-label", label);
     btn.title = label;
   }
   updateAccountIndicator();
+  onSyncStateChange(updateAccountIndicator);
 
   onAuthChange(function () { wireCustomVocabRemote(); invalidateInsights(); render(); refreshRowToggleButtons(); updateAccountIndicator(); });
 
@@ -400,15 +419,11 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // the account (fetchAllFromServer pulls them back the other way on sign-in).
   if (window.RaumeStudy.tableCustom) {
     window.RaumeStudy.tableCustom.setRemotePush(function (obj) {
-      if (authState.session) {
-        dataOps.saveTableCustomRemote(obj).catch(function (e) {
-          // Local pick already stuck (table-custom.js's own cache); this one
-          // push attempt to the account failed silently with nothing to show
-          // for it and no retry -- at minimum, leave a trace so a report of
-          // "my icon didn't follow me to my other device" isn't a mystery.
-          console.warn("Flashcards: could not sync table customization", e);
-        });
-      }
+      // Local pick already stuck (table-custom.js's own cache) either way.
+      // *Queued flags a failed push as dirty and retries it (whole current
+      // state, last-edit-wins) on reconnect / "Sync now", and counts toward
+      // getSyncState()'s pending total -- see data-ops.js.
+      if (authState.session) dataOps.saveTableCustomRemoteQueued(obj);
     });
   }
 

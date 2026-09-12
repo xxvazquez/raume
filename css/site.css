@@ -408,6 +408,11 @@ body {
   background: var(--right-strong); border: 2px solid var(--paper);
 }
 .masthead-account-signed-in .masthead-account-dot { display: block; }
+/* Offline, or something still queued (a table rename, a custom word) --
+   same amber the Flashcards sync chip uses for "not synced yet", so the two
+   read as the same signal wherever a reader happens to see it. */
+.masthead-account-pending, .masthead-account-pending:hover { color: var(--warn-strong); border-color: var(--warn); }
+.masthead-account-pending .masthead-account-dot { display: block; background: var(--warn-strong); }
 /* Show the icon for the mode the button is CURRENTLY in (system / light /
    dark); clicking cycles to the next. Default (no/other choice) = system. */
 .theme-toggle svg { display: none; }

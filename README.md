@@ -145,9 +145,20 @@ first paint. **Help** is the masthead **?** (Flashcards has its own Help tab).
 
 **Sign-in status** — the person icon in the masthead carries a small solid dot
 once you're signed in (absent as a guest) — the icon also tints to match, but
-the dot is the actual at-a-glance signal. Hover it for the account email, so
-you don't have to open Flashcards to check. Clicking it goes to Flashcards,
-where sign-in itself happens.
+the dot is the actual at-a-glance signal. Green means signed in with
+everything synced; **amber means offline or something hasn't reached your
+account yet** (same signal the Flashcards sync chip shows, just visible from
+every page, since a table rename or a custom word can happen anywhere).
+Hover it for specifics — the account email, or how many changes are still
+pending. Clicking it goes to Flashcards, where sign-in itself happens.
+
+**Sync reliability** — reviews, table customisations, and custom vocabulary
+are all local-first (the change applies immediately, offline or on) and all
+retried automatically once you're back online, or via the Flashcards page's
+"Sync now" if a retry stalls. Nothing is silently dropped: a push that fails
+is queued (`localStorage`, survives a reload) rather than just logged and
+forgotten, so a rename or a word added while offline reaches your account
+the next time you're connected, even if that's a different session.
 
 ---
 

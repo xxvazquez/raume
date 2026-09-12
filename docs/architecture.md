@@ -121,6 +121,40 @@ before the `sakura` → `raume` rename are migrated once by
 [`js/storage-migration.js`](../js/storage-migration.js), the first `<head>`
 script — it moves each key across and drops the old name.
 
+Two more, both retry state for the account sync (see "Retrying a failed
+account push" below), browser-local, never synced themselves:
+`raume-custom-vocab-outbox-v1` (an ordered queue of custom-vocab writes that
+failed to reach Supabase) and `raume-table-custom-dirty-v1` (a flag: the
+account's copy of table customisations is stale).
+
+### Retrying a failed account push
+
+Reviews, table customisations, and custom vocabulary are all local-first --
+the change applies immediately regardless of connectivity -- and all retried
+automatically on reconnect (or the Flashcards page's "Sync now"), not just
+attempted once and logged. `js/flashcards/data-ops.js`:
+
+- **Reviews** (`logsOutbox` / kana's own outbox, in the flashcards cache) --
+  the original pattern here; a queue of individual entries, replayed FIFO by
+  `syncOutbox()`/`syncKanaOutbox()`, one entry shifted off on success, the
+  whole run stopping (not dropping) on failure.
+- **Custom vocabulary** (`raume-custom-vocab-outbox-v1`) -- the same shape,
+  applied to `js/vocab/custom-vocab.js`'s four remote writes: `*Queued`
+  wrappers (`customVocabAddRowsQueued` etc.) try once immediately, and only
+  queue the operation (`{op, payload}`) if that fails. `syncCvOutbox()`
+  replays it the same FIFO way.
+- **Table customisations** (`raume-table-custom-dirty-v1`) -- simpler, since
+  `js/vocab/table-custom.js` always pushes its *whole* current state
+  (idempotent, last-edit-wins), so there's no op log to replay -- just a
+  dirty flag set on failure and cleared on success. `syncTableCustomIfDirty()`
+  retries by pushing whatever the current state is *now*, not a stale
+  snapshot of what failed.
+
+All three fold into one `getSyncState()` (`pending`, `online`, `syncing`,
+`stalled`), so the Flashcards sync chip and the masthead account icon (green
+= synced, amber = offline or something pending) both reflect every source,
+not just reviews.
+
 ## Project layout
 
 ```
