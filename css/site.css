@@ -1038,14 +1038,23 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
    collapsible now (Vocabulary's categories all hide together when it's
    closed), so it picks up cursor/caret via .disclosure-caret too. */
 .cz-section-label {
+  position: relative;
   display: flex; align-items: center; gap: 8px;
-  margin: 0 0 10px; padding: 8px 0;
+  margin: 0 0 10px; padding: 8px 0 8px 12px;
   font-size: var(--fs-subhead); font-weight: 600; letter-spacing: .005em;
 }
+.cz-section-label::before {
+  content: ""; position: absolute; left: 0; top: 4px; bottom: 4px;
+  width: 3px; border-radius: 1px;
+}
 .cz-section-label[data-section="vocabulary"] { color: var(--sec-vocabulary); border-bottom: 1px solid color-mix(in srgb, var(--sec-vocabulary) 34%, var(--line)); }
+.cz-section-label[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
 .cz-section-label[data-section="grammar"] { color: var(--sec-grammar); border-bottom: 1px solid color-mix(in srgb, var(--sec-grammar) 34%, var(--line)); }
+.cz-section-label[data-section="grammar"]::before { background: var(--sec-grammar); }
 .cz-section-label[data-section="phrases"] { color: var(--sec-phrases); border-bottom: 1px solid color-mix(in srgb, var(--sec-phrases) 34%, var(--line)); }
+.cz-section-label[data-section="phrases"]::before { background: var(--sec-phrases); }
 .cz-section-label[data-section="travel"] { color: var(--sec-travel); border-bottom: 1px solid color-mix(in srgb, var(--sec-travel) 34%, var(--line)); }
+.cz-section-label[data-section="travel"]::before { background: var(--sec-travel); }
 .cz-group { margin-top: 10px; }
 .cz-section-block > .cz-group:first-of-type,
 .cz-section-body > .cz-group:first-of-type { margin-top: 0; }
