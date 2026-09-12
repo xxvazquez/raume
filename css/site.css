@@ -170,6 +170,14 @@
      grammar cue, not decoration. Paired with bold in `.particle`. */
   --particle: #2f6fb0;
 
+  /* い/な-adjective text tint -- deliberately as saturated as --particle
+     above, not as muted as --accent-strong/--accent-2-strong (those are
+     tuned for buttons and large fills; a dark-on-white table row needs more
+     contrast from plain --ink to actually read as "coloured" rather than
+     "black" at a glance). Purple/green, same split as the accent pair. */
+  --adj-i-ink: #6b4fa0;
+  --adj-na-ink: #2e7d52;
+
   --radius-sheet: 6px;
   --radius-panel: 8px;
   --radius-control: 5px;
@@ -229,6 +237,8 @@
   --accent-2-soft: #202f2b;
 
   --particle: #7db4e6;
+  --adj-i-ink: #b39ddb;
+  --adj-na-ink: #7fc79a;
 
   --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
   --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
@@ -705,8 +715,8 @@ body {
    are carried by a visually-hidden note in the cell itself, not by this. */
 .adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
 .adj-legend-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 10px; }
-.adj-legend-i { background: var(--accent-strong); }
-.adj-legend-na { background: var(--accent-2-strong); }
+.adj-legend-i { background: var(--adj-i-ink); }
+.adj-legend-na { background: var(--adj-na-ink); }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
@@ -1428,19 +1438,31 @@ body.ja-voice-ready .jp-speak-btn {
 /* Interactive reading layer: hover (desktop) or tap (touch -> .kr-on) a
    katakana unit to see its romaji, small and directly above it. The romaji
    lives in ::after content(attr) so it never enters the DOM's textContent
-   (search / sort stay clean); it's position:absolute so nothing reflows, and
-   it sits in the cell's existing top padding so it doesn't get clipped. */
+   (search / sort stay clean); it's position:absolute so nothing reflows.
+   A visible edge matters here, not just an opaque background: the page
+   behind is the same --paper white, so a plain filled box is invisible
+   against it and still reads as merged text. A hairline border + shadow (the
+   same treatment .jp-romaji-pop uses) makes it read as a floating label --
+   needed because a long furigana reading can overhang past its own kanji
+   into the space directly above the next character (kanji is narrower than
+   a 2-3 kana reading), landing right where this tooltip appears. */
 .kr { position: relative; cursor: help; }
 .kr::after {
   content: attr(data-r);
   position: absolute;
   left: 50%;
   bottom: 100%;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
   transform: translateX(-50%);
+  z-index: 3;
+  background: var(--paper);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--shadow-menu);
+  border-radius: 3px;
+  padding: 0 3px;
   font-family: var(--font-ui);
   font-size: 10px;
-  line-height: 1;
+  line-height: 1.3;
   letter-spacing: 0;
   color: var(--romaji);
   white-space: nowrap;
@@ -1704,14 +1726,17 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
 /* い/な-adjective rows: the Japanese text itself carries the distinction --
-   lavender い-adj, sage な-adj, the same two accent tokens a pill used to
-   use -- instead of a separate tag riding along in the Meaning cell. Reading
-   the colour meaning is explained once by the legend near the toolbar
-   (index.html .adj-legend), not repeated on every row, so this costs no
-   extra width or row height. Furigana and particles keep their own explicit
-   colours (set elsewhere), so this only recolours the plain kanji/kana. */
-.vocab td.jp.adj-i .jpword { color: var(--accent-strong); }
-.vocab td.jp.adj-na .jpword { color: var(--accent-2-strong); }
+   purple い-adj, green な-adj (--adj-i-ink / --adj-na-ink -- deliberately
+   more saturated than the --accent-strong/--accent-2-strong pair used
+   elsewhere for buttons; against dense --ink table text, the muted pair
+   read as "black" at a glance instead of "coloured") -- instead of a
+   separate tag riding along in the Meaning cell. Reading the colour meaning
+   is explained once by the legend near the toolbar (index.html
+   .adj-legend), not repeated on every row, so this costs no extra width or
+   row height. Furigana and particles keep their own explicit colours (set
+   elsewhere), so this only recolours the plain kanji/kana. */
+.vocab td.jp.adj-i .jpword { color: var(--adj-i-ink); }
+.vocab td.jp.adj-na .jpword { color: var(--adj-na-ink); }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

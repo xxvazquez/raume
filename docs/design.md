@@ -57,6 +57,7 @@ properties in `css/site.css`.
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
 | `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
+| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective text** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured, not black, at table-row size). `#B39DDB` / `#7FC79A` in dark |
 
 Functional roles, each one job — all muted:
 
@@ -100,9 +101,12 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 and Help.
 
 - **い/な-adjective rows** tint the Japanese text itself instead of carrying a
-  tag: `--accent-strong` for **い-adj**, `--accent-2-strong` for **な-adj** —
-  the same lavender / sage split used for primary vs supporting elsewhere.
-  A small legend (`.adj-legend`, two colour swatches) next to the toolbar
+  tag: `--adj-i-ink` (purple) for **い-adj**, `--adj-na-ink` (green) for
+  **な-adj** — dedicated tokens, deliberately as saturated as `--particle`
+  rather than as muted as `--accent-strong`/`--accent-2-strong` (those are
+  tuned for buttons; against dense body-text `--ink`, that muted a pair
+  reads as plain black at table-row size). A small legend (`.adj-legend`,
+  two colour swatches) next to the toolbar
   explains the two colours once, `aria-hidden` since a visually-hidden note
   on the cell itself carries the real distinction to screen readers. No
   separate tag riding along in the Meaning cell — it costs no row height or
