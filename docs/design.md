@@ -127,20 +127,36 @@ and Help.
   table now — Phrases used to show romaji plainly and hide English behind a
   translate icon; that's inverted, for consistency.
 - **Help and Settings** are prose, held to a readable measure (680px).
-- **The Customize page** stacks the table list, then a *Your vocabulary* block:
-  each task (add a word, new table, import, the list of what you've added) is a
-  hairline-edged `--paper` card (`.cv-card`) with an uppercase-micro title, the
-  same panel language as Settings. Forms are label-over-field; the parsed-ruby
-  preview and the import result sit on `--surface`, an error on `--wrong-soft`.
-  No new tokens. Editing a word in **Words you've added** swaps its row for a
-  single text field (same line format as adding one) with Save/Cancel, reusing
-  the trash icon's stroke style for a matching pencil icon. Each category is a
-  native `<details>`/`<summary>` (`.cz-group`), collapsed by default, same
-  disclosure caret Flashcards › Manage already uses. A heading's explanatory
-  text (the page intro, the Your vocabulary intro, the import format) lives in
-  an `.info-panel` toggled by an adjacent `.info-btn` — a small circular "i",
-  the only new icon shape this page introduces (everything else reuses an
-  existing stroke style) — instead of sitting on the page unconditionally.
+- **The Customize page** stacks the table list, then a *Your vocabulary* block.
+  Everything collapsible on it shares one disclosure mechanic — a native
+  `<details>`/`<summary>` with a shared `.disclosure-caret` mixin (hidden
+  native marker, one small triangle that flips on `[open]`), the same caret
+  language Flashcards › Manage already uses:
+  - **The table list** reads Section → category → table. A section with more
+    than one category (Vocabulary's three) gets an uppercase-micro eyebrow
+    (`.cz-section-label`) above them; a section that's just one category
+    sharing the section's own name (Grammar, Phrases, Travel) skips the
+    redundant eyebrow and renders as a single merged heading instead
+    (`.cz-group-title-solo`, sized up to read as its own heading). Every
+    eyebrow and category heading is tinted its actual section colour
+    (`--sec-vocabulary` etc., picked via `data-section` on the element) rather
+    than the page-global `--section` var, which can't tell sections apart when
+    a page shows all of them at once. Categories are collapsed by default.
+  - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, an
+    uppercase-micro `<summary>`) — Add a word starts open since it's the one
+    you'll reach for most, New table and Import a list start closed. Forms are
+    label-over-field; the parsed-ruby preview and the import result sit on
+    `--surface`, an error on `--wrong-soft`. No new tokens.
+  - **Words you've added** is one non-collapsible card holding one `<details>`
+    per table (`.cv-owned-group`) — collapsed by default with a word count in
+    its summary, so a reader with words spread across many tables gets a list
+    of tables to open, not one long scroll. Editing a word swaps its row for a
+    single text field (same line format as adding one) with Save/Cancel,
+    reusing the trash icon's stroke style for a matching pencil icon.
+  - A heading's explanatory text (the page intro, the Your vocabulary intro,
+    the import format) lives in an `.info-panel` toggled by an adjacent
+    `.info-btn` — a small circular "i", the only new icon shape this page
+    introduces — instead of sitting on the page unconditionally.
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made

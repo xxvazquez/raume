@@ -394,10 +394,20 @@ body {
 }
 .theme-toggle:hover, .masthead-gear:hover { color: var(--ink); border-color: var(--muted); }
 .masthead-gear.active { color: var(--ink); border-color: var(--muted); background: var(--surface); }
-/* Guest = same quiet outline as the other masthead icons; signed in picks up
-   the app's one positive-state colour (also used for "Synced" in Flashcards)
-   so the difference reads at a glance, without needing to open the page. */
+/* Guest = same quiet outline as the other masthead icons. Signed in adds a
+   small solid dot (the app's one positive-state colour, also used for
+   "Synced" in Flashcards) -- presence/absence of the dot is the actual
+   at-a-glance signal (an icon-colour change alone was too subtle to
+   register without looking closely); the icon itself also tints to match,
+   reinforcing it for anyone who does look closely. */
+.masthead-account { position: relative; }
 .masthead-account-signed-in, .masthead-account-signed-in:hover { color: var(--right-strong); border-color: var(--right); }
+.masthead-account-dot {
+  display: none; position: absolute; top: -2px; right: -2px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--right-strong); border: 2px solid var(--paper);
+}
+.masthead-account-signed-in .masthead-account-dot { display: block; }
 /* Show the icon for the mode the button is CURRENTLY in (system / light /
    dark); clicking cycles to the next. Default (no/other choice) = system. */
 .theme-toggle svg { display: none; }
@@ -985,33 +995,82 @@ body.icon-picker-open { overflow: hidden; }
 .info-panel { margin: 0 0 16px; padding: 10px 12px; border-radius: 8px; background: var(--surface); }
 .info-panel[hidden] { display: none; }
 .info-panel > :last-child { margin-bottom: 0; }
-.cz-group { margin-top: 26px; }
-/* Category label -- one treatment everywhere it appears (vocab headings, the
-   Jump-to-a-table list, Manage): Title Case in the section tone, not an
-   ALL-CAPS eyebrow here and a heading there. A native <details> disclosure,
-   collapsed by default (see customize.js render()) -- the caret is the only
-   addition a plain <h3> didn't need. */
-.cz-group-title {
-  display: flex; align-items: center; gap: 8px;
-  margin: 0 0 8px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--line);
-  font-size: var(--fs-small); font-weight: 500;
-  letter-spacing: .01em; color: var(--section);
-  cursor: pointer; list-style: none;
-}
-.cz-group-title::-webkit-details-marker { display: none; }
-.cz-group-title::marker { content: ""; }
-.cz-group-title::after {
+/* Shared by every collapsible <summary> on this page (category groups, the
+   Your vocabulary action cards, one per custom table in Words you've added):
+   hides the native marker and draws one small caret instead, flipped when
+   its <details> is open. Each context keeps its own type/colour rules --
+   this is only the disclosure mechanics. */
+.disclosure-caret { cursor: pointer; list-style: none; }
+.disclosure-caret::-webkit-details-marker { display: none; }
+.disclosure-caret::marker { content: ""; }
+.disclosure-caret::after {
   content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; margin-left: auto;
   border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--faint);
   transition: transform .15s ease;
 }
-.cz-group[open] > .cz-group-title::after { transform: rotate(180deg); }
+details[open] > .disclosure-caret::after { transform: rotate(180deg); }
+
+/* Section > category > table, drawn with the exact chapter/subsection
+   language the vocabulary page itself uses (.cat-heading's tinted hairline,
+   .section-head's coloured marker bar) -- not a new invented treatment.
+   Per-actual-section colour via data-section, since this page shows every
+   section's tables at once and the page-global --section (set by whichever
+   page/section is "active") can't tell them apart the way it does elsewhere.
+
+   Section eyebrow sits above a run of categories that belong to it
+   (Vocabulary's three today), styled exactly like .cat-heading: name in the
+   section colour over a hairline tinted the same. A section with a single
+   category sharing its own name (Grammar, Phrases, Travel) skips the eyebrow
+   and renders as one merged heading instead (customize.js sectionRuns()) --
+   showing "GRAMMAR" then a "Grammar" row right under it said the same thing
+   twice; the merged heading keeps the identical hairline+marker treatment,
+   just sized up a step since it's carrying both jobs. */
+.cz-section-block { margin-top: 30px; }
+.cz-section-block:first-child { margin-top: 0; }
+.cz-section-label {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 0 0 10px; padding: 0 0 5px;
+  font-size: 13px; font-weight: 500; letter-spacing: .01em;
+}
+.cz-section-label[data-section="vocabulary"] { color: var(--sec-vocabulary); border-bottom: 1px solid color-mix(in srgb, var(--sec-vocabulary) 34%, var(--line)); }
+.cz-section-label[data-section="grammar"] { color: var(--sec-grammar); border-bottom: 1px solid color-mix(in srgb, var(--sec-grammar) 34%, var(--line)); }
+.cz-section-label[data-section="phrases"] { color: var(--sec-phrases); border-bottom: 1px solid color-mix(in srgb, var(--sec-phrases) 34%, var(--line)); }
+.cz-section-label[data-section="travel"] { color: var(--sec-travel); border-bottom: 1px solid color-mix(in srgb, var(--sec-travel) 34%, var(--line)); }
+.cz-group { margin-top: 10px; }
+.cz-section-block > .cz-group:first-of-type { margin-top: 0; }
+/* Category row -- the same short coloured marker + hairline every open
+   table on the vocabulary page announces itself with (.section-head), so a
+   category reads as a distinct block here too, not a line of coloured text
+   with nothing framing it. */
+.cz-group-title {
+  position: relative;
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 8px; padding: 6px 0 6px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-small); font-weight: 500; letter-spacing: .01em;
+  color: var(--ink);
+}
+.cz-group-title::before {
+  content: ""; position: absolute; left: 0; top: 4px; bottom: 4px;
+  width: 3px; border-radius: 1px;
+}
+.cz-group-title[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
+.cz-group-title[data-section="grammar"]::before { background: var(--sec-grammar); }
+.cz-group-title[data-section="phrases"]::before { background: var(--sec-phrases); }
+.cz-group-title[data-section="travel"]::before { background: var(--sec-travel); }
+/* The merged solo case carries the section's own job, so its name (not just
+   its marker) picks up the section colour too -- matching the eyebrow it's
+   standing in for -- and sits a size up. */
+.cz-group-title-solo { padding-top: 8px; padding-bottom: 8px; font-size: var(--fs-subhead); font-weight: 600; letter-spacing: .005em; }
+.cz-group-title-solo[data-section="vocabulary"] { color: var(--sec-vocabulary); }
+.cz-group-title-solo[data-section="grammar"] { color: var(--sec-grammar); }
+.cz-group-title-solo[data-section="phrases"] { color: var(--sec-phrases); }
+.cz-group-title-solo[data-section="travel"] { color: var(--sec-travel); }
 .cz-group-count { font-weight: 400; color: var(--faint); }
 .cz-reset-order {
+  display: inline-block; margin: 0 0 14px;
   appearance: none; border: 0; background: transparent; padding: 0;
-  font: inherit; color: var(--accent-dark); cursor: pointer; text-transform: none;
-  letter-spacing: 0;
+  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--accent-dark); cursor: pointer;
 }
 .cz-reset-order:hover { text-decoration: underline; }
 .cz-list { list-style: none; margin: 0; padding: 0; }
@@ -1065,11 +1124,16 @@ body.icon-picker-open { overflow: hidden; }
   border: 1px solid var(--card-line); border-radius: var(--radius-panel);
   background: var(--paper); padding: 16px 16px 18px; margin-bottom: 14px;
 }
-.cv-card h3 {
+.cv-card h3, .cv-card-summary {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 12px; font-size: var(--fs-small); font-weight: 600;
   text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
 }
+/* The three action cards (Add a word / New table / Import a list) are
+   <details>, collapsed by default except Add a word -- occasional actions
+   stay out of the way, the common one doesn't need an extra click. */
+.cv-card-summary:hover { color: var(--ink); }
+details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .cv-hint { margin: 0; color: var(--faint); font-size: var(--fs-micro); line-height: 1.6; }
 .cv-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .cv-field > span { font-size: var(--fs-micro); color: var(--muted); }
@@ -1123,18 +1187,24 @@ body.icon-picker-open { overflow: hidden; }
 .cv-skip-reason { color: var(--wrong-strong); }
 .cv-skip-raw { color: var(--faint); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .cv-empty { margin: 0; color: var(--faint); font-size: var(--fs-small); }
-.cv-owned-group + .cv-owned-group { margin-top: 16px; }
+/* One collapsed-by-default <details> per table -- see customListHtml() in
+   customize.js for why (hundreds of words across many tables would
+   otherwise be one long unbroken scroll). */
+.cv-owned-group + .cv-owned-group { margin-top: 10px; }
 .cv-owned-head {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line);
 }
-.cv-owned-title { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+.cv-owned-head:hover .cv-owned-title { color: var(--ink); }
+details.cv-owned-group:not([open]) .cv-owned-head { border-bottom-color: transparent; margin-bottom: 0; }
+.cv-owned-title { flex: 1 1 auto; min-width: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+.cv-owned-count { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--faint); }
 .cv-owned-tag {
   font-weight: 400; font-size: var(--fs-micro); color: var(--accent-strong);
   background: var(--accent-soft); border-radius: 4px; padding: 1px 6px; margin-left: 4px;
 }
 .cv-del-table {
-  appearance: none; border: 0; background: none; cursor: pointer;
+  flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
   font: 400 var(--fs-micro)/1 var(--font-ui); color: var(--muted); padding: 2px 4px;
 }
 .cv-del-table:hover { color: var(--wrong-strong); }

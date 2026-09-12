@@ -93,11 +93,14 @@ so they're easy to spot in a sentence.
   (masthead sliders icon). Customisations show everywhere the table appears,
   including Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
-- On the Customize page, each category (Food & Ingredients, Kitchen & Dining…)
-  is a collapsible section, collapsed by default — click its row to open it.
-  Explanatory text (what the page does, the "Your vocabulary" intro, the
-  import format) sits behind a small **ⓘ** button next to its heading instead
-  of staying on the page permanently.
+- The Customize page groups tables the same way the nav does: a **Vocabulary**
+  eyebrow over its three categories (Food & Ingredients, Kitchen & Dining,
+  Numbers & Counting), then Grammar / Phrases / Travel each as their own
+  heading — every category a collapsible section, collapsed by default, each
+  tinted its section's colour so what's a section and what's a category never
+  reads as the same thing. Explanatory text (what the page does, the "Your
+  vocabulary" intro, the import format) sits behind a small **ⓘ** button next
+  to its heading instead of staying on the page permanently.
 
 **Your own vocabulary** — the Customize page also has a **Your vocabulary**
 block for words the built-in dataset doesn't have:
@@ -112,11 +115,15 @@ block for words the built-in dataset doesn't have:
   reason — fix them and re-import just those.
 - **New table** — signed in only. Guests can add rows (stored in this browser);
   building a table of your own needs an account.
-- Under **Words you've added**, edit a word's Japanese / romaji / English in
-  place (same `japanese(furigana),romaji,english` line you'd type to add it),
-  or delete it. A table you created can be deleted entirely, dropping every
-  word in it — the dropdowns above (Add a word / Import a list) pick up a
-  rename immediately.
+- **Add a word** / **New table** / **Import a list** are each a collapsible
+  card too — Add a word opens by default since it's the one you'll reach for
+  most, the other two start closed.
+- Under **Words you've added**, each table you've touched is its own
+  collapsed-by-default row with a word count — open one to edit a word's
+  Japanese / romaji / English in place (same `japanese(furigana),romaji,english`
+  line you'd type to add it), or delete it. A table you created can be deleted
+  entirely, dropping every word in it — the dropdowns above (Add a word /
+  Import a list) pick up a rename immediately.
 - A custom word behaves like any other everywhere: furigana, search, print,
   pronunciation, and all four flashcard directions. Signed in, Supabase is the
   authoritative store (`custom_tables` / `custom_rows`); guest rows migrate up
@@ -129,10 +136,11 @@ Collapsed tables still print their rows.
 **Theme** — a header control cycles **System → Light → Dark**, applied before
 first paint. **Help** is the masthead **?** (Flashcards has its own Help tab).
 
-**Sign-in status** — the person icon in the masthead is muted for a guest and
-picks up the app's positive-state colour once you're signed in (hover it for
-the account email), so you don't have to open Flashcards to check. Clicking it
-goes to Flashcards, where sign-in itself happens.
+**Sign-in status** — the person icon in the masthead carries a small solid dot
+once you're signed in (absent as a guest) — the icon also tints to match, but
+the dot is the actual at-a-glance signal. Hover it for the account email, so
+you don't have to open Flashcards to check. Clicking it goes to Flashcards,
+where sign-in itself happens.
 
 ---
 

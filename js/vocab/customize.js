@@ -42,12 +42,20 @@ window.RaumeStudy.customize = (function () {
   var czInfoMainOpen = false;
   var cvInfoVocabOpen = false;
   var cvInfoImportOpen = false;
-  // Which category groups are open, keyed by "section|name" -- read back off
-  // the live DOM at the top of every render() (see there), so a native
-  // <summary> click a user made survives an unrelated re-render (renaming a
-  // table, say) without any extra event wiring. Empty = everything starts
-  // collapsed, which is also the default for a group never seen before.
-  var czGroupOpen = {};
+  // Every collapsible <details> on this page -- category groups, the Your
+  // vocabulary action cards, one per custom table in Words you've added --
+  // shares one open/close mechanism: each carries a data-open-key, and
+  // render() (see there) reads the live DOM's open states into this map
+  // right before throwing it away, then reapplies them after rebuilding, so
+  // a native <summary> click survives an unrelated re-render (renaming a
+  // table, say) without any per-element event wiring. A key with no entry
+  // yet falls back to DETAILS_DEFAULT_OPEN, so what a reader has never
+  // touched still opens (or stays closed) the way the page intends by
+  // default -- everything collapsed except the one primary action.
+  var czDetailsOpen = {};
+  var DETAILS_DEFAULT_OPEN = { add: true };
+
+  var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", phrases: "Phrases", travel: "Travel" };
 
   function tc() { return window.RaumeStudy.tableCustom; }
   function cv() { return window.RaumeStudy.customVocab; }
@@ -179,7 +187,10 @@ window.RaumeStudy.customize = (function () {
       "</li>";
   }
 
-  // The reader's rows, grouped by the table they sit in (built-in or custom).
+  // The reader's rows, grouped by the table they sit in (built-in or
+  // custom) -- one collapsed-by-default <details> per table, so a long list
+  // (hundreds of words across many tables) stays a list of tables to open,
+  // not one scroll through every word at once.
   function customListHtml() {
     var byTable = [];
     tables().forEach(function (t) {
@@ -191,9 +202,11 @@ window.RaumeStudy.customize = (function () {
     return byTable.map(function (grp) {
       var t = grp.table;
       var title = esc(V().tableTitle ? V().tableTitle(t.id, t.title) : t.title);
-      var head = '<div class="cv-owned-head"><span class="cv-owned-title">' + title +
+      var count = grp.rows.length + (grp.rows.length === 1 ? " word" : " words");
+      var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + title +
         (t.__custom ? ' <span class="cv-owned-tag">your table</span>' : "") + "</span>" +
-        (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</div>";
+        '<span class="cv-owned-count">' + count + "</span>" +
+        (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
       var rows = grp.rows.length
         ? grp.rows.map(function (r) {
             if (r.id === cvEditingId) return editRowHtml(r);
@@ -207,7 +220,7 @@ window.RaumeStudy.customize = (function () {
               "</span></li>";
           }).join("")
         : '<li class="cv-owned-row cv-owned-row-empty">No words in this table yet.</li>';
-      return '<div class="cv-owned-group">' + head + '<ul class="cv-owned-list">' + rows + "</ul></div>";
+      return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + '<ul class="cv-owned-list">' + rows + "</ul></details>";
     }).join("");
   }
 
@@ -219,25 +232,26 @@ window.RaumeStudy.customize = (function () {
         '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
         (signedIn ? " Saved to your account and synced to your other devices." : " Saved in this browser. Sign in on the Flashcards page to sync them and to create your own tables.") + "</p>") +
 
-      '<div class="cv-card">' +
-      '<h3>Add a word</h3>' +
+      '<details class="cv-card" data-open-key="add">' +
+      '<summary class="cv-card-summary disclosure-caret">Add a word</summary>' +
       '<label class="cv-field"><span>Table</span>' + targetSelect("cv-add-target", cvTarget.add) + "</label>" +
       '<label class="cv-field"><span>Word</span>' +
       '<input type="text" class="cv-add-input" autocomplete="off" spellcheck="false" placeholder="帰(かえ)る, kaeru, to return"></label>' +
       '<div class="cv-preview" hidden></div>' +
       '<div class="cv-add-actions"><button type="button" class="cv-btn cv-add-btn">Add word</button>' +
       '<span role="status" aria-live="polite">' + flashHtml("add") + "</span></div>" +
-      "</div>" +
+      "</details>" +
 
       (signedIn
-        ? '<div class="cv-card"><h3>New table</h3>' +
+        ? '<details class="cv-card" data-open-key="new">' +
+          '<summary class="cv-card-summary disclosure-caret">New table</summary>' +
           '<label class="cv-field"><span>Name</span><input type="text" class="cv-new-title" maxlength="60" autocomplete="off" placeholder="e.g. Restaurant phrases"></label>' +
           '<label class="cv-field"><span>Category</span><input type="text" class="cv-new-cat" maxlength="60" autocomplete="off" placeholder="My vocabulary"></label>' +
-          '<div class="cv-add-actions"><button type="button" class="cv-btn cv-new-btn">Create table</button></div></div>'
+          '<div class="cv-add-actions"><button type="button" class="cv-btn cv-new-btn">Create table</button></div></details>'
         : "") +
 
-      '<div class="cv-card">' +
-      '<h3>Import a list' + infoButtonHtml("import", cvInfoImportOpen, "Import format") + "</h3>" +
+      '<details class="cv-card" data-open-key="import">' +
+      '<summary class="cv-card-summary disclosure-caret">Import a list' + infoButtonHtml("import", cvInfoImportOpen, "Import format") + "</summary>" +
       infoPanelHtml("import", cvInfoImportOpen,
         '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code> (same furigana format as above). The English column may contain commas. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>') +
       '<label class="cv-field"><span>Into table</span>' + targetSelect("cv-import-target", cvTarget.import) + "</label>" +
@@ -246,33 +260,58 @@ window.RaumeStudy.customize = (function () {
       '<label class="cv-file-btn">Choose a .csv / .txt file…<input type="file" class="cv-import-file" accept=".csv,.txt,text/csv,text/plain"></label>' +
       '<button type="button" class="cv-btn cv-import-btn">Import</button></div>' +
       flashHtml("import") +
-      "</div>" +
+      "</details>" +
 
       '<div class="cv-card cv-owned"><h3>Words you’ve added</h3>' + customListHtml() + "</div>" +
       "</section>";
   }
 
-  // A category is a native <details> -- collapsed unless render() finds it
-  // was already open on the DOM it's about to replace (see there). No JS
-  // needed for the disclosure itself, just the move buttons inside <summary>
-  // need e.preventDefault() so an arrow click doesn't also toggle it (wired
-  // in the click handler below).
+  // grouped() is flat (section, then category, in order) -- bucket it back
+  // into runs of consecutive same-section entries so each section can carry
+  // its own eyebrow label and colour. A section with exactly one category
+  // sharing the section's own name (Grammar, Phrases, Travel today -- each
+  // ships as a single category literally called "Grammar" etc.) skips the
+  // redundant eyebrow-then-identical-row and renders as one merged heading
+  // instead; Vocabulary's three real subcategories keep both levels, since
+  // there they're each telling you something the eyebrow doesn't.
+  function sectionRuns() {
+    var runs = [];
+    grouped().forEach(function (g) {
+      var last = runs[runs.length - 1];
+      if (!last || last.section !== g.section) { last = { section: g.section, items: [] }; runs.push(last); }
+      last.items.push(g);
+    });
+    return runs;
+  }
+
+  // A category (or a merged solo section) is a native <details> -- collapsed
+  // unless render() finds it was already open on the DOM it's about to
+  // replace (see there). No JS needed for the disclosure itself, just the
+  // move buttons inside <summary> need e.preventDefault() so an arrow click
+  // doesn't also toggle it (wired in the click handler below).
   function html() {
-    var groups = grouped().map(function (g) {
-      var rows = g.tables.map(function (t, i) {
-        return rowHtml(t, i > 0, i < g.tables.length - 1);
+    var groups = sectionRuns().map(function (run) {
+      var label = SECTION_LABEL[run.section] || run.section;
+      var solo = run.items.length === 1 && run.items[0].name === label;
+      var eyebrow = solo ? "" : '<h3 class="cz-section-label" data-section="' + run.section + '">' + esc(label) + "</h3>";
+      var body = run.items.map(function (g) {
+        var rows = g.tables.map(function (t, i) {
+          return rowHtml(t, i > 0, i < g.tables.length - 1);
+        }).join("");
+        var displayName = solo ? label : g.name;
+        var summary = '<summary class="cz-group-title disclosure-caret' + (solo ? " cz-group-title-solo" : "") + '" data-section="' + run.section + '">' +
+          (g.canMoveUp || g.canMoveDown ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
+          '<span class="cz-group-name">' + esc(displayName) + "</span>" +
+          '<span class="cz-group-count">' + g.tables.length + "</span></summary>";
+        return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '">' +
+          summary + '<ul class="cz-list">' + rows + "</ul></details>";
       }).join("");
-      var summary = '<summary class="cz-group-title">' +
-        (g.canMoveUp || g.canMoveDown ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
-        '<span class="cz-group-name">' + esc(g.name) + "</span>" +
-        '<span class="cz-group-count">' + g.tables.length + "</span></summary>";
-      return '<details class="cz-group" data-group-key="' + esc(g.section + "|" + g.name) + '">' +
-        summary + '<ul class="cz-list">' + rows + "</ul></details>";
+      return '<section class="cz-section-block">' + eyebrow + body + "</section>";
     }).join("");
     var canResetOrder = tc() && tc().hasCustomOrder();
     return '<div class="cz-intro">' +
-      "<h2>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") +
-      (canResetOrder ? ' <button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") + "</h2>" +
+      "<h2>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") + "</h2>" +
+      (canResetOrder ? '<button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") +
       infoPanelHtml("main", czInfoMainOpen,
         '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +
         "<ul class=\"cz-tips\">" +
@@ -353,6 +392,7 @@ window.RaumeStudy.customize = (function () {
       }
       var info = e.target.closest && e.target.closest(".info-btn");
       if (info) {
+        e.preventDefault(); // the Import card's info button sits inside its <summary>
         var infoKey = info.dataset.info;
         if (infoKey === "main") czInfoMainOpen = !czInfoMainOpen;
         else if (infoKey === "vocab") cvInfoVocabOpen = !cvInfoVocabOpen;
@@ -371,6 +411,7 @@ window.RaumeStudy.customize = (function () {
       if (delRow && cv()) { cv().deleteRow(delRow.dataset.row); return; }
       var delTable = e.target.closest && e.target.closest(".cv-del-table");
       if (delTable && cv()) {
+        e.preventDefault(); // sits inside its table's <summary> -- don't also toggle it
         if (window.confirm("Delete this table and every word in it? This can’t be undone.")) cv().deleteTable(delTable.dataset.table);
         return;
       }
@@ -522,12 +563,16 @@ window.RaumeStudy.customize = (function () {
     host = host || hostEl;
     if (!host) return;
     hostEl = host;
-    // Snapshot which category <details> are open before html() throws the
-    // DOM away and rebuilds it collapsed -- a native <summary> click never
-    // goes through this module's state, so this is the only record of it.
-    host.querySelectorAll(".cz-group").forEach(function (d) { czGroupOpen[d.dataset.groupKey] = d.open; });
+    // Snapshot which <details> are open before html() throws the DOM away
+    // and rebuilds it (always collapsed, see the "no open attribute" note
+    // in html()) -- a native <summary> click never goes through this
+    // module's state, so this is the only record of it.
+    host.querySelectorAll("details[data-open-key]").forEach(function (d) { czDetailsOpen[d.dataset.openKey] = d.open; });
     host.innerHTML = html();
-    host.querySelectorAll(".cz-group").forEach(function (d) { if (czGroupOpen[d.dataset.groupKey]) d.open = true; });
+    host.querySelectorAll("details[data-open-key]").forEach(function (d) {
+      var key = d.dataset.openKey;
+      d.open = (key in czDetailsOpen) ? czDetailsOpen[key] : !!DETAILS_DEFAULT_OPEN[key];
+    });
     cvFlash = null; cvImportLeftover = null; // one-shot -- consumed by the html() just built
     if (!wired) { wire(host); wired = true; }
     if (pendingFocus) {

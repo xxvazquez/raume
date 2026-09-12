@@ -1054,7 +1054,8 @@ async function main() {
   }
   check("the Customize page has a Your vocabulary block", !!document.querySelector("#customizePage .cv-section"));
   check("...a guest sees no New table card (accounts only)", (() => {
-    const heads = [...document.querySelectorAll("#customizePage .cv-card h3")].map(h => h.textContent);
+    const heads = [...document.querySelectorAll("#customizePage .cv-card h3, #customizePage .cv-card-summary")]
+      .map(h => h.firstChild ? h.firstChild.textContent : h.textContent);
     return heads.includes("Add a word") && heads.includes("Import a list") && !heads.includes("New table");
   })());
 
