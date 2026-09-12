@@ -36,6 +36,18 @@ window.RaumeStudy.customize = (function () {
   // cancelled.
   var cvEditingId = null;
   var cvEditError = null;
+  // Whether each info popover is open -- like the group open/close state
+  // below, these survive a re-render (they're plain module vars, not rebuilt
+  // from scratch each time) but default closed on first render.
+  var czInfoMainOpen = false;
+  var cvInfoVocabOpen = false;
+  var cvInfoImportOpen = false;
+  // Which category groups are open, keyed by "section|name" -- read back off
+  // the live DOM at the top of every render() (see there), so a native
+  // <summary> click a user made survives an unrelated re-render (renaming a
+  // table, say) without any extra event wiring. Empty = everything starts
+  // collapsed, which is also the default for a group never seen before.
+  var czGroupOpen = {};
 
   function tc() { return window.RaumeStudy.tableCustom; }
   function cv() { return window.RaumeStudy.customVocab; }
@@ -107,6 +119,19 @@ window.RaumeStudy.customize = (function () {
 
   var TRASH_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h10M7.5 5V3.5h3V5M6 5l.6 9h4.8L12 5"/></svg>';
   var EDIT_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.3 3.7 14.3 5.7 6 14H4v-2z"/></svg>';
+  var INFO_ICON = '<svg viewBox="0 0 18 18" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.4v4"/><circle cx="9" cy="5.6" r="1" fill="currentColor" stroke="none"/></svg>';
+
+  // A small "i" button that shows/hides a block of explanatory text next to
+  // it, so the text doesn't sit on the page permanently. `open` is this
+  // instance's current state; `key` matches a data-info value the click
+  // handler below switches on.
+  function infoButtonHtml(key, open, label) {
+    return '<button type="button" class="info-btn" data-info="' + key + '" aria-expanded="' +
+      (open ? "true" : "false") + '" aria-controls="info-' + key + '" aria-label="' + esc(label) + '">' + INFO_ICON + "</button>";
+  }
+  function infoPanelHtml(key, open, innerHtml) {
+    return '<div class="info-panel" id="info-' + key + '"' + (open ? "" : " hidden") + ">" + innerHtml + "</div>";
+  }
 
   // The reverse of parseFurigana -- segments back to the single-line
   // "japanese(furigana),romaji,english" form the add-word / import forms use,
@@ -189,9 +214,10 @@ window.RaumeStudy.customize = (function () {
   function customVocabSection() {
     var signedIn = !!(cv() && cv().isSignedIn());
     return '<section class="cv-section">' +
-      '<h2>Your vocabulary</h2>' +
-      '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
-      (signedIn ? " Saved to your account and synced to your other devices." : " Saved in this browser. Sign in on the Flashcards page to sync them and to create your own tables.") + "</p>" +
+      '<h2>Your vocabulary' + infoButtonHtml("vocab", cvInfoVocabOpen, "About your vocabulary") + "</h2>" +
+      infoPanelHtml("vocab", cvInfoVocabOpen,
+        '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
+        (signedIn ? " Saved to your account and synced to your other devices." : " Saved in this browser. Sign in on the Flashcards page to sync them and to create your own tables.") + "</p>") +
 
       '<div class="cv-card">' +
       '<h3>Add a word</h3>' +
@@ -211,8 +237,9 @@ window.RaumeStudy.customize = (function () {
         : "") +
 
       '<div class="cv-card">' +
-      '<h3>Import a list</h3>' +
-      '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code>. The English column may contain commas. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>' +
+      '<h3>Import a list' + infoButtonHtml("import", cvInfoImportOpen, "Import format") + "</h3>" +
+      infoPanelHtml("import", cvInfoImportOpen,
+        '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code> (same furigana format as above). The English column may contain commas. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>') +
       '<label class="cv-field"><span>Into table</span>' + targetSelect("cv-import-target", cvTarget.import) + "</label>" +
       '<textarea class="cv-import-text" rows="5" spellcheck="false" placeholder="茄子(なす),nasu,eggplant&#10;人参(にんじん),ninjin,carrot">' + esc(cvImportLeftover || "") + "</textarea>" +
       '<div class="cv-add-actions">' +
@@ -225,29 +252,37 @@ window.RaumeStudy.customize = (function () {
       "</section>";
   }
 
+  // A category is a native <details> -- collapsed unless render() finds it
+  // was already open on the DOM it's about to replace (see there). No JS
+  // needed for the disclosure itself, just the move buttons inside <summary>
+  // need e.preventDefault() so an arrow click doesn't also toggle it (wired
+  // in the click handler below).
   function html() {
     var groups = grouped().map(function (g) {
       var rows = g.tables.map(function (t, i) {
         return rowHtml(t, i > 0, i < g.tables.length - 1);
       }).join("");
-      var head = '<h3 class="cz-group-title">' +
+      var summary = '<summary class="cz-group-title">' +
         (g.canMoveUp || g.canMoveDown ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
         '<span class="cz-group-name">' + esc(g.name) + "</span>" +
-        '<span class="cz-group-count">' + g.tables.length + "</span></h3>";
-      return '<section class="cz-group">' + head + '<ul class="cz-list">' + rows + "</ul></section>";
+        '<span class="cz-group-count">' + g.tables.length + "</span></summary>";
+      return '<details class="cz-group" data-group-key="' + esc(g.section + "|" + g.name) + '">' +
+        summary + '<ul class="cz-list">' + rows + "</ul></details>";
     }).join("");
     var canResetOrder = tc() && tc().hasCustomOrder();
     return '<div class="cz-intro">' +
-      "<h2>Customize tables</h2>" +
-      '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +
-      "<ul class=\"cz-tips\">" +
-        "<li><strong>Icon</strong> — click the icon on a row to open the picker (~165 line icons, plus “Upload image…” for your own).</li>" +
-        "<li><strong>Name</strong> — type in the field. Leave it empty to keep the original (shown in grey).</li>" +
-        "<li><strong>Order</strong> — the ▲▼ buttons move a table within its category, or a category within its section." +
-          (canResetOrder ? ' <button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") + "</li>" +
-        "<li><strong>Reset</strong> puts a single table’s name and icon back to how it shipped.</li>" +
-        "<li>Signed in on the Flashcards page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
-      "</ul></div>" + groups + (cv() ? customVocabSection() : "");
+      "<h2>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") +
+      (canResetOrder ? ' <button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") + "</h2>" +
+      infoPanelHtml("main", czInfoMainOpen,
+        '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +
+        "<ul class=\"cz-tips\">" +
+          "<li><strong>Icon</strong> — click the icon on a row to open the picker (~165 line icons, plus “Upload image…” for your own).</li>" +
+          "<li><strong>Name</strong> — type in the field. Leave it empty to keep the original (shown in grey).</li>" +
+          "<li><strong>Order</strong> — the ▲▼ buttons move a table within its category, or a category within its section.</li>" +
+          "<li><strong>Reset</strong> puts a single table’s name and icon back to how it shipped.</li>" +
+          "<li>Signed in on the Flashcards page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
+        "</ul>") +
+      "</div>" + groups + (cv() ? customVocabSection() : "");
   }
 
   // ---- moves --------------------------------------------------------------
@@ -308,9 +343,22 @@ window.RaumeStudy.customize = (function () {
     host.addEventListener("click", function (e) {
       var move = e.target.closest && e.target.closest(".cz-move-btn");
       if (move && !move.disabled) {
+        // A category's move buttons sit inside its <summary> -- without this
+        // the click would also toggle the <details> open/closed as a side effect.
+        e.preventDefault();
         var dir = Number(move.dataset.dir);
         if (move.dataset.move === "table") moveTable(move.dataset.key, dir);
         else moveCategory(move.dataset.key, dir);
+        return;
+      }
+      var info = e.target.closest && e.target.closest(".info-btn");
+      if (info) {
+        var infoKey = info.dataset.info;
+        if (infoKey === "main") czInfoMainOpen = !czInfoMainOpen;
+        else if (infoKey === "vocab") cvInfoVocabOpen = !cvInfoVocabOpen;
+        else if (infoKey === "import") cvInfoImportOpen = !cvInfoImportOpen;
+        pendingFocus = '.info-btn[data-info="' + infoKey + '"]';
+        render(host);
         return;
       }
       var reset = e.target.closest && e.target.closest(".cz-row-reset");
@@ -474,7 +522,12 @@ window.RaumeStudy.customize = (function () {
     host = host || hostEl;
     if (!host) return;
     hostEl = host;
+    // Snapshot which category <details> are open before html() throws the
+    // DOM away and rebuilds it collapsed -- a native <summary> click never
+    // goes through this module's state, so this is the only record of it.
+    host.querySelectorAll(".cz-group").forEach(function (d) { czGroupOpen[d.dataset.groupKey] = d.open; });
     host.innerHTML = html();
+    host.querySelectorAll(".cz-group").forEach(function (d) { if (czGroupOpen[d.dataset.groupKey]) d.open = true; });
     cvFlash = null; cvImportLeftover = null; // one-shot -- consumed by the html() just built
     if (!wired) { wire(host); wired = true; }
     if (pendingFocus) {

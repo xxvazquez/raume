@@ -723,6 +723,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         else vocab.showHelpPage();
       });
     }
+    // Sign-in status lives in the masthead so it's visible everywhere, not
+    // just on the Flashcards page where the actual sign-in form is; its
+    // signed-in/guest state is set by js/flashcards/bootstrap.js once auth
+    // resolves (this file loads before flashcards, so it can only wire the
+    // click, not know the state yet).
+    const accountToggle = document.getElementById('accountToggle');
+    if (accountToggle) {
+      accountToggle.addEventListener('click', function () {
+        if (vocab.showFlashcardsPage) vocab.showFlashcardsPage();
+      });
+    }
 
     // Table-index dropdown -- rendered once. The trigger opens/closes the
     // menu; picking a table jumps to it and closes; outside-click / Esc

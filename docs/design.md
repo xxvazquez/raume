@@ -134,7 +134,13 @@ and Help.
   preview and the import result sit on `--surface`, an error on `--wrong-soft`.
   No new tokens. Editing a word in **Words you've added** swaps its row for a
   single text field (same line format as adding one) with Save/Cancel, reusing
-  the trash icon's stroke style for a matching pencil icon.
+  the trash icon's stroke style for a matching pencil icon. Each category is a
+  native `<details>`/`<summary>` (`.cz-group`), collapsed by default, same
+  disclosure caret Flashcards › Manage already uses. A heading's explanatory
+  text (the page intro, the Your vocabulary intro, the import format) lives in
+  an `.info-panel` toggled by an adjacent `.info-btn` — a small circular "i",
+  the only new icon shape this page introduces (everything else reuses an
+  existing stroke style) — instead of sitting on the page unconditionally.
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made

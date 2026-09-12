@@ -394,6 +394,10 @@ body {
 }
 .theme-toggle:hover, .masthead-gear:hover { color: var(--ink); border-color: var(--muted); }
 .masthead-gear.active { color: var(--ink); border-color: var(--muted); background: var(--surface); }
+/* Guest = same quiet outline as the other masthead icons; signed in picks up
+   the app's one positive-state colour (also used for "Synced" in Flashcards)
+   so the difference reads at a glance, without needing to open the page. */
+.masthead-account-signed-in, .masthead-account-signed-in:hover { color: var(--right-strong); border-color: var(--right); }
 /* Show the icon for the mode the button is CURRENTLY in (system / light /
    dark); clicking cycles to the next. Default (no/other choice) = system. */
 .theme-toggle svg { display: none; }
@@ -963,22 +967,46 @@ body.icon-picker-open { overflow: hidden; }
 
 /* --- Customize page (#customize) ---------------------------------- */
 .page-customize { max-width: 720px; }
-.cz-intro h2 { font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
-.cz-intro p { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-small); line-height: 1.55; }
+.cz-intro h2 { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.info-panel p:not(.cv-hint) { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-small); line-height: 1.55; }
 .cz-tips { margin: 0 0 8px; padding-left: 18px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6; }
 .cz-tips li { margin: 2px 0; }
 .cz-tips strong { color: var(--ink); font-weight: 600; }
+/* A short explanation that would otherwise sit on the page permanently --
+   toggled by an adjacent .info-btn, collapsed by default. Reused wherever a
+   heading has one: the page intro, Your vocabulary, Import a list. */
+.info-btn {
+  appearance: none; flex: 0 0 auto; width: 18px; height: 18px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: var(--paper); color: var(--muted); cursor: pointer;
+}
+.info-btn:hover, .info-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--muted); }
+.info-panel { margin: 0 0 16px; padding: 10px 12px; border-radius: 8px; background: var(--surface); }
+.info-panel[hidden] { display: none; }
+.info-panel > :last-child { margin-bottom: 0; }
 .cz-group { margin-top: 26px; }
 /* Category label -- one treatment everywhere it appears (vocab headings, the
    Jump-to-a-table list, Manage): Title Case in the section tone, not an
-   ALL-CAPS eyebrow here and a heading there. */
+   ALL-CAPS eyebrow here and a heading there. A native <details> disclosure,
+   collapsed by default (see customize.js render()) -- the caret is the only
+   addition a plain <h3> didn't need. */
 .cz-group-title {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 8px; padding-bottom: 6px;
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-small); font-weight: 500;
   letter-spacing: .01em; color: var(--section);
+  cursor: pointer; list-style: none;
 }
+.cz-group-title::-webkit-details-marker { display: none; }
+.cz-group-title::marker { content: ""; }
+.cz-group-title::after {
+  content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; margin-left: auto;
+  border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--faint);
+  transition: transform .15s ease;
+}
+.cz-group[open] > .cz-group-title::after { transform: rotate(180deg); }
 .cz-group-count { font-weight: 400; color: var(--faint); }
 .cz-reset-order {
   appearance: none; border: 0; background: transparent; padding: 0;
@@ -1028,8 +1056,7 @@ body.icon-picker-open { overflow: hidden; }
 
 /* --- Customize: your own vocabulary ----------------------------- */
 .cv-section { margin-top: 40px; padding-top: 26px; border-top: 1px solid var(--line); }
-.cv-section h2 { font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
-.cv-section > p { margin: 0 0 16px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6; }
+.cv-section h2 { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
 .cv-section code {
   font: 500 var(--fs-micro)/1.4 var(--font-ui);
   background: var(--surface); border-radius: 4px; padding: 1px 5px; color: var(--ink);
@@ -1039,10 +1066,11 @@ body.icon-picker-open { overflow: hidden; }
   background: var(--paper); padding: 16px 16px 18px; margin-bottom: 14px;
 }
 .cv-card h3 {
+  display: flex; align-items: center; gap: 8px;
   margin: 0 0 12px; font-size: var(--fs-small); font-weight: 600;
   text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
 }
-.cv-hint { margin: -4px 0 12px; color: var(--faint); font-size: var(--fs-micro); line-height: 1.6; }
+.cv-hint { margin: 0; color: var(--faint); font-size: var(--fs-micro); line-height: 1.6; }
 .cv-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .cv-field > span { font-size: var(--fs-micro); color: var(--muted); }
 .cv-field input, .cv-field select, .cv-import-text {

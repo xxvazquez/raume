@@ -93,6 +93,11 @@ so they're easy to spot in a sentence.
   (masthead sliders icon). Customisations show everywhere the table appears,
   including Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
+- On the Customize page, each category (Food & Ingredients, Kitchen & Dining…)
+  is a collapsible section, collapsed by default — click its row to open it.
+  Explanatory text (what the page does, the "Your vocabulary" intro, the
+  import format) sits behind a small **ⓘ** button next to its heading instead
+  of staying on the page permanently.
 
 **Your own vocabulary** — the Customize page also has a **Your vocabulary**
 block for words the built-in dataset doesn't have:
@@ -123,6 +128,11 @@ Collapsed tables still print their rows.
 
 **Theme** — a header control cycles **System → Light → Dark**, applied before
 first paint. **Help** is the masthead **?** (Flashcards has its own Help tab).
+
+**Sign-in status** — the person icon in the masthead is muted for a guest and
+picks up the app's positive-state colour once you're signed in (hover it for
+the account email), so you don't have to open Flashcards to check. Clicking it
+goes to Flashcards, where sign-in itself happens.
 
 ---
 

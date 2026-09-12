@@ -378,7 +378,23 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   }
   wireCustomVocabRemote();
 
-  onAuthChange(function () { wireCustomVocabRemote(); invalidateInsights(); render(); refreshRowToggleButtons(); });
+  // The masthead's account icon (index.html) is the only sign-in indicator
+  // outside this page -- otherwise there's no way to tell you're signed in
+  // without opening Flashcards. interactions.js wires its click before this
+  // file loads; this is just the state (color + label), since only this
+  // module knows auth state.
+  function updateAccountIndicator() {
+    var btn = document.getElementById("accountToggle");
+    if (!btn) return;
+    var signedIn = !!authState.session;
+    btn.classList.toggle("masthead-account-signed-in", signedIn);
+    var label = signedIn ? "Signed in as " + currentUser().email : "Guest — not signed in";
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
+  }
+  updateAccountIndicator();
+
+  onAuthChange(function () { wireCustomVocabRemote(); invalidateInsights(); render(); refreshRowToggleButtons(); updateAccountIndicator(); });
 
   // Vocabulary-page table icons: while signed in, a local pick is pushed to
   // the account (fetchAllFromServer pulls them back the other way on sign-in).
