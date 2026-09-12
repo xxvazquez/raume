@@ -188,6 +188,23 @@ window.RaumeStudy.customVocab = (function () {
     return inData || load().tables.some(function (t) { return t.id === tableId; });
   }
 
+  // A table of your own has no way to say up front "this is going to be
+  // whole sentences, not headwords" (unlike the built-in Phrases table,
+  // which is simply authored with tableClass: "vocab-sentences"). Guess it
+  // instead from what actually ended up in it -- a real sentence runs well
+  // past the longest built-in headword (9 kana/kanji, e.g. トイレットペーパー)
+  // and/or carries 。/、, neither of which any built-in word ever does. Wrong
+  // in either direction is harmless: a word table that happens to guess
+  // "sentence" just gets a little extra row height and a 50/50 split instead
+  // of 46/54, not broken -- what actually breaks (the furigana overlapping
+  // a wrapped second line, see the render.js/site.css sentence CSS) is a true
+  // sentence rendered as a headword, which this exists to avoid.
+  var SENTENCE_PUNCTUATION = /[。、]/;
+  function looksLikeSentence(jp) {
+    var text = (jp || []).map(function (s) { return s.kanji || s.text || ""; }).join("");
+    return text.length > 10 || SENTENCE_PUNCTUATION.test(text);
+  }
+
   // Merge every custom table + row into RaumeStudy.data.vocabularyTables in
   // place. Idempotent -- strips whatever it injected last time first (marked
   // __custom), so it's safe to call on every change and after every sync.
@@ -218,6 +235,10 @@ window.RaumeStudy.customVocab = (function () {
       if (!target) return; // stale target table -- drop quietly
       target.rows.push({ id: r.id, type: "word", jp: r.jp, romaji: r.romaji, english: r.english, __custom: true });
       if (!target.__custom) target.__hasCustomRows = true;
+    });
+    Object.keys(customById).forEach(function (id) {
+      var t = customById[id];
+      if (t.rows.some(function (r) { return looksLikeSentence(r.jp); })) t.tableClass = "vocab-sentences";
     });
   }
 
