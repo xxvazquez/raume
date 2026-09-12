@@ -65,38 +65,42 @@ async function main() {
   check("renders 24 table sections", sections.length === 24);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 550 vocabulary rows", totalRows === 550);
-  check("adjective rows carry an い-adj / な-adj pill before the meaning, and only those rows do", (() => {
+  check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
-    const pills = [...adjSection.querySelectorAll("tbody tr .adj-pill")];
-    if (pills.length < 30) return false;
-    const labelsOk = pills.every(p => {
-      const i = p.classList.contains("adj-pill-i") && p.textContent === "い-adj";
-      const na = p.classList.contains("adj-pill-na") && p.textContent === "な-adj";
-      return (i || na) && p.previousElementSibling === null
-        && p.nextElementSibling.classList.contains("meaning-text");
+    const tagged = [...adjSection.querySelectorAll("tbody tr td.jp.adj-i, tbody tr td.jp.adj-na")];
+    if (tagged.length < 30) return false;
+    const labelsOk = tagged.every(td => {
+      const note = td.querySelector(".visually-hidden");
+      const i = td.classList.contains("adj-i") && note && note.textContent === "(い-adjective)";
+      const na = td.classList.contains("adj-na") && note && note.textContent === "(な-adjective)";
+      return i || na;
     });
-    // No pill leaks onto a non-adjective row (e.g. the Verbs table).
-    const verbsHavePills = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+    // No tag leaks onto a non-adjective row (e.g. the Verbs table).
+    const verbsTagged = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Verbs")
-      .querySelectorAll(".adj-pill").length > 0;
-    // The pill also rides along in a plain vocabulary table: Taste & Texture's
+      .querySelectorAll("td.jp.adj-i, td.jp.adj-na").length > 0;
+    // The tag also rides along in a plain vocabulary table: Taste & Texture's
     // い-adjectives are tagged, its mimetic descriptors (mochimochi, ...) are not.
     const taste = [...document.querySelectorAll(".table-section")]
       .find(s => s.querySelector(".section-title-text").textContent === "Taste & Texture");
-    const tasteTagged = taste.querySelectorAll(".adj-pill-i").length >= 10 && taste.querySelectorAll(".adj-pill-na").length === 0;
+    const tasteTagged = taste.querySelectorAll("td.jp.adj-i").length >= 10 && taste.querySelectorAll("td.jp.adj-na").length === 0;
     const romajiOf = r => { const p = r.querySelector(".jp-romaji-pop"); return p ? p.textContent : ""; };
     const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => romajiOf(r) === "mochimochi");
-    const mochiUntagged = mochiRow && !mochiRow.querySelector(".adj-pill");
+    const mochiUntagged = mochiRow && !mochiRow.cells[0].classList.contains("adj-i") && !mochiRow.cells[0].classList.contains("adj-na");
     // A lone adjective sitting in an otherwise-noun table still gets tagged:
     // 危険 (na-adj) in Signs, Doors & Places.
     const kikenRow = [...document.querySelectorAll("#vocabulary tbody tr")].find(r => romajiOf(r) === "kiken");
-    const kikenTagged = kikenRow && kikenRow.querySelector(".adj-pill-na");
-    return labelsOk && !verbsHavePills && tasteTagged && mochiUntagged && kikenTagged;
+    const kikenTagged = kikenRow && kikenRow.cells[0].classList.contains("adj-na");
+    return labelsOk && !verbsTagged && tasteTagged && mochiUntagged && kikenTagged;
   })());
-  check("the adjective pill stays out of search matches", (() => {
+  check("the legend explaining the two colours is aria-hidden (real semantics live in the per-row note, not this)", (() => {
+    const legend = document.querySelector(".adj-legend");
+    return !!legend && legend.getAttribute("aria-hidden") === "true" && legend.querySelectorAll(".adj-legend-swatch").length === 2;
+  })());
+  check("the adjective note stays out of search matches (visually-hidden text isn't in .meaning-text)", (() => {
     const input = document.getElementById("tableSearch");
-    input.value = "い-adj";
+    input.value = "adjective";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const hits = document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
     input.value = "";
@@ -149,11 +153,11 @@ async function main() {
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
     return flat;
   })();
-  check("the い-adj and な-adj pills fill with two different accent tokens", (() => {
-    const iRule = allCssRules.find(r => r.selectorText === ".adj-pill-i");
-    const naRule = allCssRules.find(r => r.selectorText === ".adj-pill-na");
-    const bg = r => (r && (r.style.background || r.style.backgroundColor)) || "";
-    return /var\(--accent-soft\)/.test(bg(iRule)) && /var\(--accent-2-soft\)/.test(bg(naRule));
+  check("い-adj and な-adj tint the Japanese text with two different accent tokens", (() => {
+    const iRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i .jpword");
+    const naRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-na .jpword");
+    return !!iRule && /var\(--accent-strong\)/.test(iRule.style.color)
+      && !!naRule && /var\(--accent-2-strong\)/.test(naRule.style.color);
   })());
   check("the .particle rule is blue (var(--particle)) and bold", (() => {
     const r = allCssRules.find(x => x.selectorText === ".particle");
@@ -395,7 +399,7 @@ async function main() {
   // whole-word romaji reveal (js/vocab/render.js's romajiButtonHtml) is a
   // separate, deliberate exception -- it lives in its own .jp-romaji-wrap, so
   // strip that out first to see what the cell would search/sort by.
-  const plainJpText = td => { const c = td.cloneNode(true); const w = c.querySelector(".jp-romaji-wrap"); if (w) w.remove(); return c.textContent; };
+  const plainJpText = td => { const c = td.cloneNode(true); const w = c.querySelector(".jp-romaji-wrap"); if (w) w.remove(); const n = c.querySelector(".visually-hidden"); if (n) n.remove(); return c.textContent; };
   const findCell = re => [...document.querySelectorAll("#vocabulary td.jp")].find(td => td.querySelector(".kr") && re.test(plainJpText(td)));
   const kataCell = findCell(/[ァ-ヺ]/);
   const hiraCell = findCell(/^[ぁ-ゖ]+$/); // a pure-hiragana headword
@@ -1095,49 +1099,19 @@ async function main() {
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
   check("Vocabulary still returns to the reference (unaffected by the Flashcards page)", document.getElementById("vocabPage").hidden === false);
 
-  console.log("Flashcards: per-row add toggle");
+  console.log("Flashcards: no per-row add toggle on the reference tables");
   const drinksSectionFc = document.querySelector('.table-section[data-table="2"]');
   const firstRowFc = drinksSectionFc.querySelector("tbody tr");
   check("every rendered row carries its permanent vocab id", /^v\d{4,}$/.test(firstRowFc.dataset.vocabId));
-  const fcBtn = firstRowFc.querySelector(".fc-toggle-btn");
-  check("the flashcard toggle exists on every row", !!fcBtn);
-  // Unlike the old gated eye icon this was never display:none -- it's laid
-  // out on every row (so touch and keyboard users can reach it) and kept
-  // faintly visible at rest so the feature is discoverable, lifting to full
-  // strength on hover/focus so the reading table still stays quiet.
-  check("the toggle is present in layout, not display:none", window.getComputedStyle(fcBtn).display !== "none");
-  check("it's ghosted at rest (discoverable, not loud) and lifts on hover/focus", (() => {
-    const o = parseFloat(window.getComputedStyle(fcBtn).opacity);
-    return o > 0 && o < 1;
+  // Removed as redundant with Flashcards' own Manage page (which is where
+  // words actually get added/removed) -- it just took up space on every row.
+  check("no per-row flashcard toggle is rendered (Manage owns add/remove)", !firstRowFc.querySelector(".fc-toggle-btn"));
+  check("the row-action cluster is star + hide only, in that order", (() => {
+    const cluster = firstRowFc.querySelector(".row-actions");
+    return !!cluster && cluster.children.length === 2
+      && cluster.children[0].classList.contains("star-btn")
+      && cluster.children[1].classList.contains("row-hide-btn");
   })());
-  check("star, add-to-flashcards and hide sit together in one action cluster, in that order",
-    (() => {
-      const cluster = fcBtn.closest(".row-actions");
-      return !!cluster && cluster.parentElement.classList.contains("meaning-cell")
-        && fcBtn.previousElementSibling.classList.contains("star-btn")
-        && fcBtn.nextElementSibling.classList.contains("row-hide-btn");
-    })());
-  check("that cluster is pinned to the wrapper's right edge, not flowing after the text " +
-    "(the flex row lives on a <div> inside the <td>, not the <td> itself -- table-layout:fixed " +
-    "stops honouring a cell's own column-width once its display is overridden to flex)",
-    (() => {
-      const cell = firstRowFc.querySelector("td:last-child");
-      const wrap = cell.querySelector(".meaning-cell");
-      const cellCs = window.getComputedStyle(cell);
-      const wrapCs = window.getComputedStyle(wrap);
-      const clusterCs = window.getComputedStyle(cell.querySelector(".row-actions"));
-      return cellCs.display === "table-cell" && wrap.parentElement === cell
-        && wrapCs.display === "flex" && clusterCs.flexShrink === "0";
-    })());
-  check("hover/focus within the row is styled to lift the toggle to full opacity", (() => {
-    // jsdom doesn't recompute style for a live :focus-within/:hover change, so
-    // check the rule itself rather than a getComputedStyle probe after .focus().
-    const rule = allCssRules.find(r => r.selectorText
-      && r.selectorText.includes(".vocab tbody tr:focus-within .fc-toggle-btn")
-      && r.selectorText.includes(".vocab tbody tr:hover .fc-toggle-btn"));
-    return !!rule && rule.style.opacity === "1";
-  })());
-  check("its data-vocab-id matches the row's", fcBtn.dataset.vocabId === firstRowFc.dataset.vocabId);
 
   console.log("Flashcards: add a whole table at once");
   const fcMenuBtn = drinksSectionFc.querySelector(".section-menu-btn");

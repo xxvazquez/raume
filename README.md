@@ -61,13 +61,15 @@ so they're easy to spot in a sentence.
   katakana/hiragana units, separate from the whole-word romaji reveal above.)
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
-- **Adjective type** — every い- / な-adjective in the dataset carries a small
-  **い-adj** / **な-adj** pill next to the meaning (lavender / sage), so the two
-  classes read apart at a glance: the Adjectives table, the Taste & Texture
-  adjectives, and the stray adjective in an otherwise-noun table (危険). Mimetic
-  words (*mochimochi*, *sakusaku*) are 擬態語, not い/な adjectives, so they stay
-  bare. The pill rides along in the Meaning column — not a new column — and
-  stays out of search. Driven by an `adj` field on the row.
+- **Adjective type** — every い- / な-adjective in the dataset has its Japanese
+  text tinted lavender / sage, so the two classes read apart at a glance
+  without a label taking up room on the row: the Adjectives table, the Taste
+  & Texture adjectives, and the stray adjective in an otherwise-noun table
+  (危険). A small legend next to the toolbar explains the two colours once.
+  Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not い/な adjectives, so
+  they stay untinted. Driven by an `adj` field on the row; a visually-hidden
+  note on the cell carries the distinction to screen readers, and it stays
+  out of search.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the
   reading aloud. Every built-in word/phrase has a prerendered native-voice
   clip (generated offline via VOICEVOX, see `docs/architecture.md`); anything
@@ -122,9 +124,11 @@ first paint. **Help** is the masthead **?** (Flashcards has its own Help tab).
 ## Flashcards
 
 Flashcards sit on top of the vocabulary without changing or copying it. Add a
-whole table with **Add to flashcards** (skips hidden rows), or use the per-row
-toggle in the icon cluster at the end of every meaning. The **Flashcards** nav
-page is where you review, browse, and track a daily streak.
+whole table with **Add to flashcards** (skips hidden rows), or add/remove
+individual words from Flashcards' own **Manage** tab — there's no per-row
+toggle on the reference tables themselves, to keep them focused on browsing.
+The **Flashcards** nav page is where you review, browse, and track a daily
+streak.
 
 **How cards work**
 

@@ -699,6 +699,14 @@ body {
   font-weight: 500;
 }
 .search-count { margin-left: auto; color: var(--faint); font-size: 11.5px; white-space: nowrap; }
+/* Explains the い-adj/な-adj colour coding once, here, instead of repeating a
+   label on every adjective row (see .vocab td.jp.adj-i/.adj-na). Purely a
+   sighted quick-reference -- aria-hidden, since the real per-row semantics
+   are carried by a visually-hidden note in the cell itself, not by this. */
+.adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.adj-legend-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 10px; }
+.adj-legend-i { background: var(--accent-strong); }
+.adj-legend-na { background: var(--accent-2-strong); }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
@@ -1280,14 +1288,16 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 /* Hover: a very subtle wash of the live section tone -- no edge, no fill. */
 .vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 8%, var(--paper)); }
 
-/* Two columns: Japanese runs 1-6 glyphs plus furigana and never wraps (see
-   .vocab td.jp below), so it doesn't need much; Meaning holds full phrases
-   that wrap, so it gets the rest. Romaji lives inside the Japanese cell now
-   (a reveal next to the speaker button, see .jp-romaji-wrap), not its own
-   column -- table-layout is fixed, so this holds in normal and search views
-   alike, and the view-mode filter only recolours. */
-.vocab th:nth-child(1), .vocab td:nth-child(1) { width: 36%; }
-.vocab th:nth-child(2), .vocab td:nth-child(2) { width: 64%; }
+/* Two columns. Japanese gets 46%, not a sliver -- it carries the speaker
+   AND romaji-reveal icons alongside the word (see .jp-line), and the
+   longest katakana headwords (5-6 kana, e.g. ケチャップ、チャーシュー) need
+   real room to clear both without wrapping (a rare few still do -- see the
+   wrap fallback on .vocab td.jp below -- but 46% covers the common case).
+   Meaning gets the rest for full English phrases to wrap in -- table-layout
+   is fixed, so this holds in normal and search views alike, and the
+   view-mode filter only recolours. */
+.vocab th:nth-child(1), .vocab td:nth-child(1) { width: 46%; }
+.vocab th:nth-child(2), .vocab td:nth-child(2) { width: 54%; }
 
 [lang="ja"] { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
@@ -1678,41 +1688,37 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   --danger-soft: #fbe9e7;
 }
 
-/* Row-action icons (star, add-to-flashcards, hide) sit in their own cluster
-   pinned to the Meaning cell's right edge -- not flowing inline after the
-   text, so a short definition doesn't put them anywhere different from a
-   long one. The flex row lives on .meaning-cell, a <div> wrapper -- NOT the
-   <td> itself, which needs to stay display:table-cell or table-layout:fixed
+/* Row-action icons (star, hide) sit in their own cluster pinned to the
+   Meaning cell's right edge -- not flowing inline after the text, so a
+   short definition doesn't put them anywhere different from a long one.
+   The flex row lives on .meaning-cell, a <div> wrapper -- NOT the <td>
+   itself, which needs to stay display:table-cell or table-layout:fixed
    stops honouring its column-width percentage. table-layout is fixed, so
    the cell's own width never changes row to row, and the cluster lands in
    the same spot every time.
-   - add-to-flashcards: the flashcards feature's main per-word entry point,
-     so it's kept faintly visible at rest, full strength on hover / focus,
-     and lit in the section accent once the word is added.
    - star: hidden until you hover a row or star the word -- at rest you only
      ever see stars on words you picked.
-   - hide: a quiet housekeeping action, ghosted at rest like add-to-flashcards. */
+   - hide: a quiet housekeeping action, ghosted at rest. */
 .vocab tbody td:last-child { padding-right: 10px; }
-.meaning-cell { display: flex; align-items: flex-start; gap: 4px; }
+.meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
-/* Adjective part-of-speech tag: sits before the meaning, one per adjective
-   row. Two quiet fills off the accent tokens -- lavender い-adj, sage な-adj --
-   so the two classes read apart at a glance without shouting. Not a column;
-   it just rides along in the Meaning cell (kept out of search -- see
-   js/vocab/interactions.js). */
-.adj-pill {
-  flex: 0 0 auto;
-  margin-top: 1px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 10px;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+/* い/な-adjective rows: the Japanese text itself carries the distinction --
+   lavender い-adj, sage な-adj, the same two accent tokens a pill used to
+   use -- instead of a separate tag riding along in the Meaning cell. Reading
+   the colour meaning is explained once by the legend near the toolbar
+   (index.html .adj-legend), not repeated on every row, so this costs no
+   extra width or row height. Furigana and particles keep their own explicit
+   colours (set elsewhere), so this only recolours the plain kanji/kana. */
+.vocab td.jp.adj-i .jpword { color: var(--accent-strong); }
+.vocab td.jp.adj-na .jpword { color: var(--accent-2-strong); }
+
+/* Visually hidden but still announced by assistive tech -- colour alone is
+   never the only signal (used for the adjective-type note above). */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-.adj-pill-i { background: var(--accent-soft); color: var(--accent-strong); }
-.adj-pill-na { background: var(--accent-2-soft); color: var(--accent-2-strong); }
 .row-actions { flex: 0 0 auto; display: flex; align-items: center; white-space: nowrap; }
 .fc-toggle-btn,
 .star-btn,
@@ -1727,7 +1733,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   cursor: pointer;
   transition: opacity .12s ease;
 }
-.star-btn { margin-left: 8px; color: var(--faint); opacity: 0; }
+.star-btn { margin-left: 4px; color: var(--faint); opacity: 0; }
 .fc-toggle-btn,
 .row-hide-btn { color: var(--faint) !important; opacity: .3; }
 .vocab tbody tr:hover .fc-toggle-btn,

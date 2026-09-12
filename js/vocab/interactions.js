@@ -356,10 +356,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return Object.keys(COL_INDEX).filter(k => !isHidden(k));
     }
 
-    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and the
-    // romaji reveal (button + tooltip); strip both out so "Japanese" search
-    // covers just the kanji/kana without garbling in a reading or a romaji
-    // string that belongs to its own fields below.
+    // The jp cell mixes kanji/kana with <rt class="furigana"> readings, the
+    // romaji reveal (button + tooltip), and -- on an adjective row -- a
+    // visually-hidden "(い-adjective)" note for assistive tech; strip all of
+    // it out so "Japanese" search covers just the kanji/kana without
+    // garbling in a reading, a romaji string, or the adjective note.
     function jpFields(td) {
       const clone = td.cloneNode(true);
       const furiganaEls = [...clone.querySelectorAll('.furigana')];
@@ -367,6 +368,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       furiganaEls.forEach(el => el.remove());
       const romajiWrap = clone.querySelector('.jp-romaji-wrap');
       if (romajiWrap) romajiWrap.remove();
+      const adjNote = clone.querySelector('.visually-hidden');
+      if (adjNote) adjNote.remove();
       return { kanji: clone.textContent, furigana };
     }
 
@@ -380,6 +383,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return 3;
     }
 
+    // Long vowels in romaji are stored with a macron (ōkii) but can't be
+    // typed on a normal keyboard -- a search for "ookii" has to find it too.
+    // Expands a macron to its doubled-letter spelling (ō -> oo) rather than
+    // flashcards' answer-checking fold (which shrinks doubled letters down
+    // to one, e.g. "ou"/"oo" -> "o") -- that shrinking is safe for grading a
+    // single expected answer, but applied to a free-text query it also
+    // shrinks ordinary English words ("beer" -> "ber"), spuriously matching
+    // any romaji that happens to contain "ber" (taberu, kibera, ...). Only
+    // expanding never shrinks the query, so it can't create a collision like
+    // that -- it just makes "ookii" (typed) and "ōkii" (stored) compare
+    // equal, both ways.
+    function expandMacronsForSearch(s) {
+      return String(s || "")
+        .replace(/[āâ]/g, "aa").replace(/[īî]/g, "ii").replace(/[ūû]/g, "uu")
+        .replace(/[ēê]/g, "ee").replace(/[ōô]/g, "oo");
+    }
+
     function fieldsForRow(row) {
       const fields = [];
       if (!isHidden('japanese')) {
@@ -391,10 +411,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // searchable on-demand reveal living in the jp cell (row.cells[0]),
       // not its own column, so it's unconditional here.
       const romajiEl = row.cells[0].querySelector('.jp-romaji-pop');
-      if (romajiEl) fields.push({ cell: row.cells[0], text: romajiEl.textContent });
+      if (romajiEl) fields.push({ cell: row.cells[0], text: romajiEl.textContent, romaji: true });
       // English: every row now keeps it in cells[1] (.meaning-text, so the
-      // row-action icons and the adj pill never register) -- word and
-      // (since the Phrases redesign) sentence rows alike.
+      // row-action icons never register) -- word and (since the Phrases
+      // redesign) sentence rows alike.
       if (!isHidden('english')) {
         const enEl = row.cells[1] && row.cells[1].querySelector('.meaning-text');
         if (enEl) fields.push({ cell: row.cells[1], text: enEl.textContent });
@@ -458,10 +478,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function evaluateRow(row, q) {
       clearHighlights(row);
       if (!q) return { match: true, rank: null };
+      const qExpanded = expandMacronsForSearch(q);
       let best = null;
       const matchedCells = new Set();
       fieldsForRow(row).forEach(f => {
-        const r = rankOf(f.text, q);
+        // Expanding is only meaningful for the romaji field (kanji/English
+        // never carry a macron) -- everything else compares as-is.
+        const r = f.romaji ? rankOf(expandMacronsForSearch(f.text), qExpanded) : rankOf(f.text, q);
         if (r !== null) {
           if (best === null || r < best) best = r;
           matchedCells.add(f.cell);

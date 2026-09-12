@@ -156,6 +156,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // romaji is optional: sentence and word rows alike now pass their romaji
   // through here so the reveal control always sits next to the speaker
   // button, in the same cell, regardless of table type.
+  // い/な-adjective rows tint the Japanese text itself (see css/site.css)
+  // instead of carrying a separate label -- a legend near the toolbar
+  // (index.html) explains the two colours once instead of repeating a tag
+  // on every row. The distinction still reaches assistive tech via this
+  // visually-hidden note (color alone is never the only signal).
+  function adjClass(adj) {
+    return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
+  }
+  function adjNote(adj) {
+    if (adj !== 'i' && adj !== 'na') return '';
+    return '<span class="visually-hidden">(' + (adj === 'na' ? 'な-adjective' : 'い-adjective') + ')</span>';
+  }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
@@ -163,7 +175,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div></td>';
+    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div>' + adjNote(row.adj) + '</td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
   // The main study areas. Grammar, Phrases and Travel are promoted out of the
@@ -179,15 +191,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row" title="Hide this row">' + EYE_ICON + '</button>';
-  }
-  // Only emits the button + the row's permanent vocab id -- js/flashcards/
-  // views.js (loaded after this file) owns all of its behavior and
-  // active/removed styling, so this file's own footprint for the whole
-  // flashcards feature stays this one small, self-contained button.
-  var FLASHCARD_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="11" height="8" rx="1.4"/><rect x="4.5" y="6" width="11" height="8" rx="1.4"/></svg>';
-  function flashcardToggleButton(vocabId) {
-    if (!vocabId) return '';
-    return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-label="Add to flashcards" aria-pressed="false" title="Add to flashcards">' + FLASHCARD_ICON + '</button>';
   }
   // Star / favourite -- a lightweight "keep an eye on this" list held in
   // RaumeStudy.tableCustom (see js/vocab/interactions.js for the toolbar
@@ -206,32 +209,25 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // pinned to the Meaning cell's right edge (see css/site.css), instead of
   // flowing inline after the text at a position that drifts with its length.
   function rowActions(vocabId) {
-    return '<span class="row-actions">' + starToggleButton(vocabId) + flashcardToggleButton(vocabId) + rowHideButton() + '</span>';
+    // No "add to flashcards" icon here -- Flashcards' own Manage page is
+    // where words get added/removed; a second control on every reference
+    // row was redundant and just took up space.
+    return '<span class="row-actions">' + starToggleButton(vocabId) + rowHideButton() + '</span>';
   }
   // The flex row lives on a <div> wrapper, not the <td> itself -- table-layout:
   // fixed's column-width percentages stop being respected on a cell whose own
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
-  // A tiny part-of-speech tag for adjective rows -- lavender for い-adjectives,
-  // sage for な-adjectives (css/site.css). Emitted only when the row carries an
-  // `adj` field ("i" / "na"); kept out of the search text (js/vocab/
-  // interactions.js reads .meaning-text, not the whole cell).
-  function adjPill(adj) {
-    if (adj !== 'i' && adj !== 'na') return '';
-    var label = adj === 'na' ? 'な-adj' : 'い-adj';
-    return '<span class="adj-pill adj-pill-' + adj + '" aria-label="' +
-      (adj === 'na' ? 'na-adjective' : 'i-adjective') + '">' + label + '</span>';
-  }
-  function meaningCell(english, vocabId, adj) {
-    return '<td><div class="meaning-cell">' + adjPill(adj) + '<span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
+  function meaningCell(english, vocabId) {
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
   }
   // Word rows and Phrases sentence rows share this now -- both render as
   // Japanese (with a romaji reveal next to the speaker button) + English, two
-  // columns, no separate Romaji column. row.irregular/row.adj are simply
-  // absent on a sentence row, so this needs no sentences-specific branch.
+  // columns, no separate Romaji column. row.irregular is simply absent on a
+  // sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, row.adj) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column

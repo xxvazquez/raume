@@ -99,12 +99,14 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **The adjective pill** (on every い/な adjective, wherever it sits) is a 10px
-  rounded tag before the meaning: `--accent-soft` / `--accent-strong` for **い-adj**,
-  `--accent-2-soft` / `--accent-2-strong` for **な-adj** — the same lavender /
-  sage split used for primary vs supporting elsewhere, so the two classes
-  separate without a loud colour. It's the one tag on the quiet reference side;
-  it earns its place by carrying grammar the columns don't.
+- **い/な-adjective rows** tint the Japanese text itself instead of carrying a
+  tag: `--accent-strong` for **い-adj**, `--accent-2-strong` for **な-adj** —
+  the same lavender / sage split used for primary vs supporting elsewhere.
+  A small legend (`.adj-legend`, two colour swatches) next to the toolbar
+  explains the two colours once, `aria-hidden` since a visually-hidden note
+  on the cell itself carries the real distinction to screen readers. No
+  separate tag riding along in the Meaning cell — it costs no row height or
+  column width, unlike the pill this replaced.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, a small control next to the
   speaker button (`.jp-romaji-btn`, a small "Aa" monogram drawn from vector

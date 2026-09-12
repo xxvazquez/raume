@@ -1,10 +1,8 @@
-// Flashcards -- Manage / Settings / Help tabs + the vocabulary-page row toggle
-// (RaumeStudy.flashcards.views).
+// Flashcards -- Manage / Settings / Help tabs (RaumeStudy.flashcards.views).
 //
 // Manage: browse every vocab entry by category > table, add / pause / restore
 // individually or a whole table at once. Settings: Study Directions, the FSRS
-// knobs, and the daily new-card cap. Help: the reference card. Plus the
-// "add to flashcards" toggle js/vocab/render.js draws on each vocabulary row.
+// knobs, and the daily new-card cap. Help: the reference card.
 // Nothing here deletes a card or its history -- pause only archives.
 window.RaumeStudy = window.RaumeStudy || {};
 window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
@@ -548,8 +546,12 @@ window.RaumeStudy.flashcards.views = (function () {
   }
 
   // -----------------------------------------------------------------------
-  // Row-level "add to flashcards" toggle, drawn by js/vocab/render.js next to
-  // the existing eye/hide icon. This module owns all of its behavior/state.
+  // Row-level "add to flashcards" toggle. js/vocab/render.js no longer draws
+  // a .fc-toggle-btn on any reference row (removed as redundant with this
+  // module's own Manage tab, which is where words actually get added/
+  // removed now) -- kept here as a harmless no-op should that ever change,
+  // rather than unwinding every refreshRowToggleButtons() call site across
+  // bootstrap.js/dashboard.js for a currently-empty querySelectorAll.
   // -----------------------------------------------------------------------
   function refreshRowToggleButtons() {
     document.querySelectorAll(".fc-toggle-btn").forEach(function (btn) {
