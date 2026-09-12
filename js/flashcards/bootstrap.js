@@ -285,8 +285,12 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // Offline / pending-sync chip -- sits under the identity line, its text
   // announced via aria-live. Offline reads first (it applies in guest mode too,
   // where there's nothing queued); otherwise it counts reviews still in the
-  // outbox and stays hidden once everything's synced. When a sync has stopped
-  // draining on its own, it turns amber and grows a "Sync now" button.
+  // outbox. When a sync has stopped draining on its own, it turns amber and
+  // grows a "Sync now" button. Signed in with nothing queued, it settles on
+  // a quiet "Synced" state instead of disappearing -- there was previously no
+  // way to positively confirm the account *is* up to date, only signals that
+  // something was wrong. Guest mode has nothing to sync to, so it stays
+  // hidden there once the offline case doesn't apply.
   function reviewCount(n) { return n + (n === 1 ? " review" : " reviews"); }
   function updateSyncChip() {
     var chip = document.getElementById("fcSyncChip");
@@ -309,6 +313,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
         cls = " fc-sync-chip-syncing";
         showBtn = true;
       }
+    } else if (!isGuestMode()) {
+      text = "Synced";
+      cls = " fc-sync-chip-synced";
     }
     chip.className = "fc-sync-chip" + cls;
     chip.hidden = !text;

@@ -2392,6 +2392,9 @@ mark.fc-diff-co {
 .fc-sync-chip-syncing {
   background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark);
 }
+.fc-sync-chip-synced {
+  background: var(--right-soft); border-color: var(--right); color: var(--right-strong);
+}
 .fc-sync-now {
   appearance: none; border: 1px solid currentColor; background: transparent;
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);

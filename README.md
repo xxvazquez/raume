@@ -214,10 +214,10 @@ them.
   [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)) is the authoritative store, scoped
   per account by Row Level Security. `localStorage` becomes a read-through cache
   and an offline outbox: reviews made offline sync on reconnect. A status chip
-  under your identity shows the state — a calm *Syncing N reviews…* while it
-  works, an amber *Offline…* or *N reviews couldn't sync* (with a **Sync now**
-  button) when it needs you. Pending reviews still count on the dashboard right
-  away.
+  under your identity always shows where things stand — a quiet *Synced* once
+  everything's caught up, a calm *Syncing N reviews…* while it works, an amber
+  *Offline…* or *N reviews couldn't sync* (with a **Sync now** button) when it
+  needs you. Pending reviews still count on the dashboard right away.
 
 Pausing a card **archives** it; pausing a whole table just marks the table
 dormant. Either way the FSRS state and full history are kept and resuming
