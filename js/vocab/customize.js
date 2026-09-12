@@ -42,20 +42,34 @@ window.RaumeStudy.customize = (function () {
   var czInfoMainOpen = false;
   var cvInfoVocabOpen = false;
   var cvInfoImportOpen = false;
-  // Every collapsible <details> on this page -- category groups, the Your
-  // vocabulary action cards, one per custom table in Words you've added --
-  // shares one open/close mechanism: each carries a data-open-key, and
-  // render() (see there) reads the live DOM's open states into this map
-  // right before throwing it away, then reapplies them after rebuilding, so
-  // a native <summary> click survives an unrelated re-render (renaming a
-  // table, say) without any per-element event wiring. A key with no entry
-  // yet falls back to DETAILS_DEFAULT_OPEN, so what a reader has never
-  // touched still opens (or stays closed) the way the page intends by
-  // default -- everything collapsed except the one primary action.
-  var czDetailsOpen = {};
-  var DETAILS_DEFAULT_OPEN = { add: true };
+  // Every collapsible <details> on this page -- sections, category groups,
+  // the Your vocabulary action cards, one per custom table in Words you've
+  // added -- shares one open/close mechanism: each carries a data-open-key,
+  // and a toggle listener (attached in applyDetailsState(), see there) keeps
+  // this map (and localStorage under OPEN_STORAGE_KEY) in sync with every
+  // open/close as it happens, not just at the next re-render -- so state
+  // survives an actual page reload, not only an in-page re-render. A key
+  // with no entry yet falls back to DETAILS_DEFAULT_OPEN -- empty, so
+  // everything starts collapsed until a reader opens it themselves.
+  var OPEN_STORAGE_KEY = "raume-customize-open-v1";
+  var DETAILS_DEFAULT_OPEN = {};
+  function loadOpenState() {
+    try {
+      var obj = JSON.parse(window.localStorage.getItem(OPEN_STORAGE_KEY) || "{}");
+      return (obj && typeof obj === "object") ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function saveOpenState() {
+    try { window.localStorage.setItem(OPEN_STORAGE_KEY, JSON.stringify(czDetailsOpen)); } catch (e) {}
+  }
+  var czDetailsOpen = loadOpenState();
 
   var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", phrases: "Phrases", travel: "Travel" };
+
+  // Words you've added: live search + sort, kept across a re-render the same
+  // way cvTarget is (plain module vars, not one-shot).
+  var cvOwnedQuery = "";
+  var cvOwnedSort = "recent";
 
   function tc() { return window.RaumeStudy.tableCustom; }
   function cv() { return window.RaumeStudy.customVocab; }
@@ -187,40 +201,66 @@ window.RaumeStudy.customize = (function () {
       "</li>";
   }
 
+  function ownedRowsHtml(rows) {
+    return rows.length
+      ? rows.map(function (r) {
+          if (r.id === cvEditingId) return editRowHtml(r);
+          return '<li class="cv-owned-row">' +
+            '<span class="cv-owned-jp" lang="ja">' + V().jpSegmentsHtml(r.jp, false) + "</span>" +
+            '<span class="cv-owned-ro">' + esc(r.romaji) + "</span>" +
+            '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
+            '<span class="cv-owned-actions">' +
+            '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word" title="Edit this word">' + EDIT_ICON + "</button>" +
+            '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word" title="Delete this word">' + TRASH_ICON + "</button>" +
+            "</span></li>";
+        }).join("")
+      : '<li class="cv-owned-row cv-owned-row-empty">No words in this table yet.</li>';
+  }
+
   // The reader's rows, grouped by the table they sit in (built-in or
   // custom) -- one collapsed-by-default <details> per table, so a long list
   // (hundreds of words across many tables) stays a list of tables to open,
-  // not one scroll through every word at once.
+  // not one scroll through every word at once. Searching switches to a
+  // flat, always-visible list of just the matches (collapsing what you just
+  // searched for would defeat the point); sort applies either way.
   function customListHtml() {
+    var query = cvOwnedQuery.trim().toLowerCase();
+    var az = cvOwnedSort === "az";
+    var titleOf = function (t) { return V().tableTitle ? V().tableTitle(t.id, t.title) : t.title; };
     var byTable = [];
     tables().forEach(function (t) {
       var rows = (t.rows || []).filter(function (r) { return r.__custom; });
-      if (!rows.length && !t.__custom) return;
+      if (query) {
+        rows = rows.filter(function (r) {
+          return segmentsToText(r.jp).toLowerCase().indexOf(query) !== -1 ||
+            r.romaji.toLowerCase().indexOf(query) !== -1 ||
+            r.english.toLowerCase().indexOf(query) !== -1;
+        });
+        if (!rows.length) return;
+      } else if (!rows.length && !t.__custom) {
+        return;
+      }
+      if (az) rows = rows.slice().sort(function (a, b) { return segmentsToText(a.jp).localeCompare(segmentsToText(b.jp), "ja"); });
       byTable.push({ table: t, rows: rows });
     });
-    if (!byTable.length) return '<p class="cv-empty">You haven’t added any words yet.</p>';
+    if (az) byTable.sort(function (a, b) { return titleOf(a.table).localeCompare(titleOf(b.table), "ja"); });
+    if (!byTable.length) return '<p class="cv-empty">' + (query ? "No matches." : "You haven’t added any words yet.") + "</p>";
+
+    if (query) {
+      return byTable.map(function (grp) {
+        var count = grp.rows.length + (grp.rows.length === 1 ? " word" : " words");
+        var head = '<div class="cv-owned-head"><span class="cv-owned-title">' + esc(titleOf(grp.table)) + "</span>" +
+          '<span class="cv-owned-count">' + count + "</span></div>";
+        return '<div class="cv-owned-group cv-owned-group-flat">' + head + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></div>";
+      }).join("");
+    }
     return byTable.map(function (grp) {
       var t = grp.table;
-      var title = esc(V().tableTitle ? V().tableTitle(t.id, t.title) : t.title);
       var count = grp.rows.length + (grp.rows.length === 1 ? " word" : " words");
-      var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + title +
-        (t.__custom ? ' <span class="cv-owned-tag">your table</span>' : "") + "</span>" +
+      var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + esc(titleOf(t)) + "</span>" +
         '<span class="cv-owned-count">' + count + "</span>" +
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
-      var rows = grp.rows.length
-        ? grp.rows.map(function (r) {
-            if (r.id === cvEditingId) return editRowHtml(r);
-            return '<li class="cv-owned-row">' +
-              '<span class="cv-owned-jp" lang="ja">' + V().jpSegmentsHtml(r.jp, false) + "</span>" +
-              '<span class="cv-owned-ro">' + esc(r.romaji) + "</span>" +
-              '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
-              '<span class="cv-owned-actions">' +
-              '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word" title="Edit this word">' + EDIT_ICON + "</button>" +
-              '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word" title="Delete this word">' + TRASH_ICON + "</button>" +
-              "</span></li>";
-          }).join("")
-        : '<li class="cv-owned-row cv-owned-row-empty">No words in this table yet.</li>';
-      return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + '<ul class="cv-owned-list">' + rows + "</ul></details>";
+      return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
     }).join("");
   }
 
@@ -262,7 +302,16 @@ window.RaumeStudy.customize = (function () {
       flashHtml("import") +
       "</details>" +
 
-      '<div class="cv-card cv-owned"><h3>Words you’ve added</h3>' + customListHtml() + "</div>" +
+      '<div class="cv-card cv-owned"><h3>Words you’ve added</h3>' +
+      '<div class="cv-owned-controls">' +
+      '<label class="cv-owned-search-field"><span class="visually-hidden">Search your words</span>' +
+      '<input type="search" class="cv-owned-search" placeholder="Search your words…" value="' + esc(cvOwnedQuery) + '"></label>' +
+      '<label class="cv-owned-sort-field"><span class="visually-hidden">Sort</span>' +
+      '<select class="cv-owned-sort-select">' +
+      '<option value="recent"' + (cvOwnedSort === "recent" ? " selected" : "") + '>Recently added</option>' +
+      '<option value="az"' + (cvOwnedSort === "az" ? " selected" : "") + '>A–Z</option>' +
+      "</select></label></div>" +
+      '<div class="cv-owned-list-wrap">' + customListHtml() + "</div></div>" +
       "</section>";
   }
 
@@ -293,7 +342,6 @@ window.RaumeStudy.customize = (function () {
     var groups = sectionRuns().map(function (run) {
       var label = SECTION_LABEL[run.section] || run.section;
       var solo = run.items.length === 1 && run.items[0].name === label;
-      var eyebrow = solo ? "" : '<h3 class="cz-section-label" data-section="' + run.section + '">' + esc(label) + "</h3>";
       var body = run.items.map(function (g) {
         var rows = g.tables.map(function (t, i) {
           return rowHtml(t, i > 0, i < g.tables.length - 1);
@@ -306,7 +354,17 @@ window.RaumeStudy.customize = (function () {
         return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '">' +
           summary + '<ul class="cz-list">' + rows + "</ul></details>";
       }).join("");
-      return '<section class="cz-section-block">' + eyebrow + body + "</section>";
+      // A solo section (Grammar, Phrases, Travel) is already one collapsible
+      // row -- nothing to wrap. A multi-category section (Vocabulary) gets
+      // an outer collapsible too, so collapsing it hides every category at
+      // once instead of having to close each one individually.
+      if (solo) return '<section class="cz-section-block">' + body + "</section>";
+      var total = run.items.reduce(function (n, g) { return n + g.tables.length; }, 0);
+      var eyebrow = '<summary class="cz-section-label disclosure-caret" data-section="' + run.section + '">' +
+        '<span class="cz-section-name">' + esc(label) + "</span>" +
+        '<span class="cz-group-count">' + total + "</span></summary>";
+      return '<details class="cz-section-block" data-open-key="' + esc("sec:" + run.section) + '">' +
+        eyebrow + '<div class="cz-section-body">' + body + "</div></details>";
     }).join("");
     var canResetOrder = tc() && tc().hasCustomOrder();
     return '<div class="cz-intro">' +
@@ -408,7 +466,10 @@ window.RaumeStudy.customize = (function () {
       if (e.target.closest && e.target.closest(".cv-new-btn")) { createTable(host); return; }
       if (e.target.closest && e.target.closest(".cv-import-btn")) { runImport(host); return; }
       var delRow = e.target.closest && e.target.closest(".cv-del-row");
-      if (delRow && cv()) { cv().deleteRow(delRow.dataset.row); return; }
+      if (delRow && cv()) {
+        if (window.confirm("Delete this word? This can’t be undone.")) cv().deleteRow(delRow.dataset.row);
+        return;
+      }
       var delTable = e.target.closest && e.target.closest(".cv-del-table");
       if (delTable && cv()) {
         e.preventDefault(); // sits inside its table's <summary> -- don't also toggle it
@@ -425,11 +486,13 @@ window.RaumeStudy.customize = (function () {
     });
     host.addEventListener("input", function (e) {
       if (e.target.classList.contains("cv-add-input")) updatePreview(host);
+      if (e.target.classList.contains("cv-owned-search")) { cvOwnedQuery = e.target.value; updateOwnedList(host); }
     });
     host.addEventListener("change", function (e) {
       if (e.target.classList.contains("cv-import-file")) readImportFile(host, e.target);
       if (e.target.classList.contains("cv-add-target")) cvTarget.add = e.target.value;
       if (e.target.classList.contains("cv-import-target")) cvTarget.import = e.target.value;
+      if (e.target.classList.contains("cv-owned-sort-select")) { cvOwnedSort = e.target.value; updateOwnedList(host); }
     });
     host.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && e.target.classList.contains("cv-add-input")) { e.preventDefault(); addWord(host); }
@@ -471,6 +534,15 @@ window.RaumeStudy.customize = (function () {
     box.innerHTML = '<span lang="ja">' + V().jpSegmentsHtml(p.row.segments, false) + "</span>" +
       '<span class="cv-preview-sep">·</span>' + esc(p.row.romaji) +
       '<span class="cv-preview-sep">·</span>' + esc(p.row.english);
+  }
+  // Search / sort only touch the Words-you've-added list -- swap just that
+  // fragment instead of a full render(), so the search input never loses
+  // focus mid-keystroke the way rebuilding the whole page would.
+  function updateOwnedList(host) {
+    var wrap = host.querySelector(".cv-owned-list-wrap");
+    if (!wrap) return;
+    wrap.innerHTML = customListHtml();
+    applyDetailsState(wrap);
   }
   function addWord(host) {
     var input = host.querySelector(".cv-add-input");
@@ -559,20 +631,27 @@ window.RaumeStudy.customize = (function () {
     return out + "</div>";
   }
 
+  // Sets every <details data-open-key> under `container` to its remembered
+  // (or default) open state, and wires a toggle listener that keeps
+  // czDetailsOpen/localStorage in sync with every open/close from here on --
+  // a native <summary> click never goes through any other code path, so
+  // this listener is the only record of it. Safe to call on any subtree
+  // (the full page after render(), or just the Words-you've-added list
+  // after a search/sort update) since it only ever touches what's inside it.
+  function applyDetailsState(container) {
+    container.querySelectorAll("details[data-open-key]").forEach(function (d) {
+      var key = d.dataset.openKey;
+      d.open = (key in czDetailsOpen) ? czDetailsOpen[key] : !!DETAILS_DEFAULT_OPEN[key];
+      d.addEventListener("toggle", function () { czDetailsOpen[key] = d.open; saveOpenState(); });
+    });
+  }
+
   function render(host) {
     host = host || hostEl;
     if (!host) return;
     hostEl = host;
-    // Snapshot which <details> are open before html() throws the DOM away
-    // and rebuilds it (always collapsed, see the "no open attribute" note
-    // in html()) -- a native <summary> click never goes through this
-    // module's state, so this is the only record of it.
-    host.querySelectorAll("details[data-open-key]").forEach(function (d) { czDetailsOpen[d.dataset.openKey] = d.open; });
     host.innerHTML = html();
-    host.querySelectorAll("details[data-open-key]").forEach(function (d) {
-      var key = d.dataset.openKey;
-      d.open = (key in czDetailsOpen) ? czDetailsOpen[key] : !!DETAILS_DEFAULT_OPEN[key];
-    });
+    applyDetailsState(host);
     cvFlash = null; cvImportLeftover = null; // one-shot -- consumed by the html() just built
     if (!wired) { wire(host); wired = true; }
     if (pendingFocus) {

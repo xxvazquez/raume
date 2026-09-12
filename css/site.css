@@ -1027,17 +1027,23 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
    just sized up a step since it's carrying both jobs. */
 .cz-section-block { margin-top: 30px; }
 .cz-section-block:first-child { margin-top: 0; }
+/* Same size/weight as .cz-group-title-solo (below) -- both are playing the
+   same role, the top of a section, so they read as one consistent level
+   whether that section merged into a single row or kept its eyebrow. Also
+   collapsible now (Vocabulary's categories all hide together when it's
+   closed), so it picks up cursor/caret via .disclosure-caret too. */
 .cz-section-label {
-  display: flex; align-items: baseline; gap: 8px;
-  margin: 0 0 10px; padding: 0 0 5px;
-  font-size: 13px; font-weight: 500; letter-spacing: .01em;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 10px; padding: 8px 0;
+  font-size: var(--fs-subhead); font-weight: 600; letter-spacing: .005em;
 }
 .cz-section-label[data-section="vocabulary"] { color: var(--sec-vocabulary); border-bottom: 1px solid color-mix(in srgb, var(--sec-vocabulary) 34%, var(--line)); }
 .cz-section-label[data-section="grammar"] { color: var(--sec-grammar); border-bottom: 1px solid color-mix(in srgb, var(--sec-grammar) 34%, var(--line)); }
 .cz-section-label[data-section="phrases"] { color: var(--sec-phrases); border-bottom: 1px solid color-mix(in srgb, var(--sec-phrases) 34%, var(--line)); }
 .cz-section-label[data-section="travel"] { color: var(--sec-travel); border-bottom: 1px solid color-mix(in srgb, var(--sec-travel) 34%, var(--line)); }
 .cz-group { margin-top: 10px; }
-.cz-section-block > .cz-group:first-of-type { margin-top: 0; }
+.cz-section-block > .cz-group:first-of-type,
+.cz-section-body > .cz-group:first-of-type { margin-top: 0; }
 /* Category row -- the same short coloured marker + hairline every open
    table on the vocabulary page announces itself with (.section-head), so a
    category reads as a distinct block here too, not a line of coloured text
@@ -1187,22 +1193,33 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .cv-skip-reason { color: var(--wrong-strong); }
 .cv-skip-raw { color: var(--faint); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .cv-empty { margin: 0; color: var(--faint); font-size: var(--fs-small); }
+/* Search + sort for a list that can otherwise get long -- filters/reorders
+   Words you've added without touching anything else on the page (a plain
+   client-side swap, see updateOwnedList() in customize.js). */
+.cv-owned-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.cv-owned-search-field { flex: 1 1 200px; }
+.cv-owned-sort-field { flex: 0 0 auto; }
+.cv-owned-search, .cv-owned-sort-select {
+  width: 100%; border: 1px solid var(--field-line); border-radius: 6px;
+  background: var(--field-fill); color: var(--ink);
+  font: 400 var(--fs-small)/1.3 var(--font-ui); padding: 7px 9px;
+}
+.cv-owned-search:focus, .cv-owned-sort-select:focus { outline: 2px solid var(--section); outline-offset: 1px; }
+.cv-owned-search::placeholder { color: var(--faint); }
 /* One collapsed-by-default <details> per table -- see customListHtml() in
    customize.js for why (hundreds of words across many tables would
-   otherwise be one long unbroken scroll). */
-.cv-owned-group + .cv-owned-group { margin-top: 10px; }
+   otherwise be one long unbroken scroll). Each keeps its hairline even
+   closed, so consecutive tables still read as separate entries, not one
+   run-on list. Searching swaps to .cv-owned-group-flat (a plain div, always
+   open) instead -- there's no point collapsing what you just searched for. */
+.cv-owned-group + .cv-owned-group, .cv-owned-group-flat + .cv-owned-group-flat { margin-top: 10px; }
 .cv-owned-head {
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line);
 }
 .cv-owned-head:hover .cv-owned-title { color: var(--ink); }
-details.cv-owned-group:not([open]) .cv-owned-head { border-bottom-color: transparent; margin-bottom: 0; }
 .cv-owned-title { flex: 1 1 auto; min-width: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
 .cv-owned-count { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--faint); }
-.cv-owned-tag {
-  font-weight: 400; font-size: var(--fs-micro); color: var(--accent-strong);
-  background: var(--accent-soft); border-radius: 4px; padding: 1px 6px; margin-left: 4px;
-}
 .cv-del-table {
   flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
   font: 400 var(--fs-micro)/1 var(--font-ui); color: var(--muted); padding: 2px 4px;

@@ -114,7 +114,9 @@ flowchart LR
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
-`raume-kana-*`). Installs from
+`raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
+collapsible sections a reader has open, keyed per item, browser-local only
+(not part of the account sync any of the others above get)). Installs from
 before the `sakura` → `raume` rename are migrated once by
 [`js/storage-migration.js`](../js/storage-migration.js), the first `<head>`
 script — it moves each key across and drops the old name.

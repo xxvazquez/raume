@@ -94,13 +94,18 @@ so they're easy to spot in a sentence.
   including Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
 - The Customize page groups tables the same way the nav does: a **Vocabulary**
-  eyebrow over its three categories (Food & Ingredients, Kitchen & Dining,
+  heading over its three categories (Food & Ingredients, Kitchen & Dining,
   Numbers & Counting), then Grammar / Phrases / Travel each as their own
-  heading — every category a collapsible section, collapsed by default, each
-  tinted its section's colour so what's a section and what's a category never
-  reads as the same thing. Explanatory text (what the page does, the "Your
-  vocabulary" intro, the import format) sits behind a small **ⓘ** button next
-  to its heading instead of staying on the page permanently.
+  heading — every one of those a collapsible section, tinted its section's
+  colour with the same marker-and-hairline treatment the vocabulary page
+  itself uses, so what's a section and what's a category never reads as the
+  same thing. Collapsing Vocabulary hides its three categories at once;
+  opening it leaves each category individually collapsed until you open it
+  too. Everything starts collapsed, and what you leave open survives a
+  reload — it's remembered per item, not just for the session. Explanatory
+  text (what the page does, the "Your vocabulary" intro, the import format)
+  sits behind a small **ⓘ** button next to its heading instead of staying on
+  the page permanently.
 
 **Your own vocabulary** — the Customize page also has a **Your vocabulary**
 block for words the built-in dataset doesn't have:
@@ -116,12 +121,14 @@ block for words the built-in dataset doesn't have:
 - **New table** — signed in only. Guests can add rows (stored in this browser);
   building a table of your own needs an account.
 - **Add a word** / **New table** / **Import a list** are each a collapsible
-  card too — Add a word opens by default since it's the one you'll reach for
-  most, the other two start closed.
+  card too, collapsed by default like everything else on this page.
 - Under **Words you've added**, each table you've touched is its own
   collapsed-by-default row with a word count — open one to edit a word's
   Japanese / romaji / English in place (same `japanese(furigana),romaji,english`
-  line you'd type to add it), or delete it. A table you created can be deleted
+  line you'd type to add it), or delete it (asks for confirmation first, like
+  deleting a whole table does). **Search** filters across every word you've
+  added regardless of which table it's in; **Sort** switches between the
+  order you added things and A–Z. A table you created can be deleted
   entirely, dropping every word in it — the dropdowns above (Add a word /
   Import a list) pick up a rename immediately.
 - A custom word behaves like any other everywhere: furigana, search, print,

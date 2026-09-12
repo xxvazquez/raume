@@ -131,28 +131,48 @@ and Help.
   Everything collapsible on it shares one disclosure mechanic — a native
   `<details>`/`<summary>` with a shared `.disclosure-caret` mixin (hidden
   native marker, one small triangle that flips on `[open]`), the same caret
-  language Flashcards › Manage already uses:
-  - **The table list** reads Section → category → table. A section with more
-    than one category (Vocabulary's three) gets an uppercase-micro eyebrow
-    (`.cz-section-label`) above them; a section that's just one category
-    sharing the section's own name (Grammar, Phrases, Travel) skips the
-    redundant eyebrow and renders as a single merged heading instead
-    (`.cz-group-title-solo`, sized up to read as its own heading). Every
-    eyebrow and category heading is tinted its actual section colour
-    (`--sec-vocabulary` etc., picked via `data-section` on the element) rather
-    than the page-global `--section` var, which can't tell sections apart when
-    a page shows all of them at once. Categories are collapsed by default.
+  language Flashcards › Manage already uses. Every open/close is persisted
+  (`localStorage`, `raume-customize-open-v1`, keyed per item) via a `toggle`
+  listener attached to each `<details>` in `applyDetailsState()`, not just
+  held in memory — so what a reader leaves open survives an actual reload,
+  and everything starts collapsed for anyone who hasn't touched it yet:
+  - **The table list** reads Section → category → table, drawn with the exact
+    chapter/subsection language the vocabulary page itself uses rather than a
+    new invented treatment: a section-level heading (`.cz-section-label`)
+    styled like `.cat-heading` (name in the section colour over a hairline
+    tinted the same), a category heading (`.cz-group-title`) styled like
+    `.section-head` (a short coloured marker bar beside the name via
+    `::before`). Both are tinted via `data-section` reading the actual
+    per-section token (`--sec-vocabulary` etc.) rather than the page-global
+    `--section` var, which can't tell sections apart when a page shows all of
+    them at once. A section with more than one category (Vocabulary's three)
+    is itself collapsible — closing it hides all three at once — with its
+    eyebrow above them; a section that's just one category sharing the
+    section's own name (Grammar, Phrases, Travel) skips the redundant
+    eyebrow-then-identical-row and renders as a single merged heading instead
+    (`.cz-group-title-solo`), sized and weighted identically to the eyebrow
+    (`--fs-subhead`/600) since both are playing the same "top of a section"
+    role and need to read as one consistent level, not two different sizes.
   - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, an
-    uppercase-micro `<summary>`) — Add a word starts open since it's the one
-    you'll reach for most, New table and Import a list start closed. Forms are
-    label-over-field; the parsed-ruby preview and the import result sit on
-    `--surface`, an error on `--wrong-soft`. No new tokens.
-  - **Words you've added** is one non-collapsible card holding one `<details>`
-    per table (`.cv-owned-group`) — collapsed by default with a word count in
-    its summary, so a reader with words spread across many tables gets a list
-    of tables to open, not one long scroll. Editing a word swaps its row for a
-    single text field (same line format as adding one) with Save/Cancel,
-    reusing the trash icon's stroke style for a matching pencil icon.
+    uppercase-micro `<summary>`) all start closed. Forms are label-over-field;
+    the parsed-ruby preview and the import result sit on `--surface`, an
+    error on `--wrong-soft`. No new tokens.
+  - **Words you've added** is one non-collapsible card holding a search field
+    + a Recently added/A–Z sort (`.cv-owned-controls`, filters and reorders
+    via a plain DOM swap in `updateOwnedList()` — no full re-render, so the
+    search input never loses focus mid-keystroke), then one `<details>` per
+    table (`.cv-owned-group`) — collapsed by default with a word count in its
+    summary, so a reader with words spread across many tables gets a list of
+    tables to open, not one long scroll; each keeps its hairline even
+    closed, so consecutive tables still read as separate entries. No "your
+    table" tag on each row — the section is already titled "Words you've
+    added", so it said nothing a reader didn't already know. Searching swaps
+    to a flat always-open layout (`.cv-owned-group-flat`) instead, since
+    collapsing what you just searched for would defeat the point. Editing a
+    word swaps its row for a single text field (same line format as adding
+    one) with Save/Cancel, reusing the trash icon's stroke style for a
+    matching pencil icon. Deleting a word asks for confirmation first, same
+    as deleting a table.
   - A heading's explanatory text (the page intro, the Your vocabulary intro,
     the import format) lives in an `.info-panel` toggled by an adjacent
     `.info-btn` — a small circular "i", the only new icon shape this page
