@@ -156,11 +156,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // romaji is optional: sentence and word rows alike now pass their romaji
   // through here so the reveal control always sits next to the speaker
   // button, in the same cell, regardless of table type.
-  // い/な-adjective rows tint the Japanese text itself (see css/site.css)
-  // instead of carrying a separate label -- a legend near the toolbar
-  // (index.html) explains the two colours once instead of repeating a tag
-  // on every row. The distinction still reaches assistive tech via this
-  // visually-hidden note (color alone is never the only signal).
+  // い/な-adjective rows get a small coloured dot in the cell's own left
+  // gutter (see css/site.css) instead of carrying a separate label -- a
+  // legend near the toolbar (index.html) explains the two colours once
+  // instead of repeating a tag on every row. The distinction still reaches
+  // assistive tech via this visually-hidden note (color alone is never the
+  // only signal).
   function adjClass(adj) {
     return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
   }

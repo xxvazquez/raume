@@ -57,7 +57,7 @@ properties in `css/site.css`.
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
 | `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
-| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective text** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured, not black, at table-row size). `#B39DDB` / `#7FC79A` in dark |
+| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective marker dot** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured at a glance, a 7px dot). `#B39DDB` / `#7FC79A` in dark |
 
 Functional roles, each one job — all muted:
 
@@ -100,17 +100,22 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **い/な-adjective rows** tint the Japanese text itself instead of carrying a
-  tag: `--adj-i-ink` (purple) for **い-adj**, `--adj-na-ink` (green) for
-  **な-adj** — dedicated tokens, deliberately as saturated as `--particle`
-  rather than as muted as `--accent-strong`/`--accent-2-strong` (those are
-  tuned for buttons; against dense body-text `--ink`, that muted a pair
-  reads as plain black at table-row size). A small legend (`.adj-legend`,
-  two colour swatches) next to the toolbar
-  explains the two colours once, `aria-hidden` since a visually-hidden note
-  on the cell itself carries the real distinction to screen readers. No
-  separate tag riding along in the Meaning cell — it costs no row height or
-  column width, unlike the pill this replaced.
+- **い/な-adjective rows** get a small dot in the Japanese cell's own left
+  gutter instead of a tag or tinted text: `--adj-i-ink` (purple) for
+  **い-adj**, `--adj-na-ink` (green) for **な-adj** — dedicated tokens,
+  deliberately as saturated as `--particle` rather than as muted as
+  `--accent-strong`/`--accent-2-strong` (those are tuned for buttons; a dot
+  that muted wouldn't read as coloured at a glance). The dot sits in
+  `td:first-child`'s existing left padding, already reserved on every row
+  whether or not it's an adjective, so it never shifts the word and every
+  dot lines up in one column regardless of word length — the word itself
+  stays plain `--ink`, not tinted (an earlier version tinted the text; a dot
+  reads faster and doesn't fight the furigana/particle colours already
+  living in that cell). A small legend (`.adj-legend`, two colour swatches)
+  next to the toolbar explains the two colours once, `aria-hidden` since a
+  visually-hidden note on the cell itself carries the real distinction to
+  screen readers. No separate tag riding along in the Meaning cell — it
+  costs no row height or column width, unlike the pill this replaced.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, a small control next to the
   speaker button (`.jp-romaji-btn`, a small "Aa" monogram drawn from vector
