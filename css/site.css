@@ -1638,8 +1638,11 @@ body.ja-voice-ready .jp-speak-btn {
 .kr.kr-on::after { opacity: 1; }
 @media (hover: none) { .kr:hover::after { opacity: 0; } }
 
-/* Meaning: dark, but a step below the Japanese so the Japanese still leads. */
-.vocab td:nth-child(2) { color: var(--ink-2); position: relative; }
+/* Meaning: dark, but a step below the Japanese so the Japanese still leads.
+   Centred against the row's full height (not bottom-aligned like the
+   Japanese cell) so it sits level with the word itself on furigana rows,
+   which are taller than a plain English line. */
+.vocab td:nth-child(2) { color: var(--ink-2); position: relative; vertical-align: middle; }
 
 /* Particles ({ p: … } segments) -- blue and bold everywhere they appear: the
    Particles reference table, any sentence, and flashcard prompts. A deliberate
