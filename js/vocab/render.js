@@ -156,29 +156,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // romaji is optional: sentence and word rows alike now pass their romaji
   // through here so the reveal control always sits next to the speaker
   // button, in the same cell, regardless of table type.
-  // い/な-adjective rows get a small dot in the cell's own left gutter (see
-  // css/site.css) instead of tinting the word, a bar, or a tag in the
-  // Meaning cell -- a legend near the toolbar (index.html) explains the two
-  // colours once instead of repeating a label on every row. `adjClass` is
-  // just a stable hook (no visual effect of its own) for tests/CSS to find
-  // an adjective row by; the dot itself carries the actual marker.
+  // い/な-adjective rows get a coloured bar down the cell's own left edge
+  // (see css/site.css) instead of carrying a separate label -- a
+  // legend near the toolbar (index.html) explains the two colours once
+  // instead of repeating a tag on every row. The distinction still reaches
+  // assistive tech via this visually-hidden note (color alone is never the
+  // only signal).
   function adjClass(adj) {
     return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
   }
-  // Hover (desktop) or tap (touch, js/vocab/interactions.js) reveals the
-  // label -- same interaction pattern as the whole-word romaji reveal
-  // (.jp-romaji-btn) and the katakana romaji hover (.kr) already in this
-  // cell. The button's own aria-label carries the distinction to assistive
-  // tech without needing to interact first -- colour is never the only
-  // signal, and this replaces an earlier always-present visually-hidden
-  // note with the same information, just attached to the actual control.
-  function adjDot(adj) {
+  function adjNote(adj) {
     if (adj !== 'i' && adj !== 'na') return '';
-    var label = adj === 'na' ? 'な-adjective' : 'い-adjective';
-    return '<span class="adj-dot-wrap">' +
-      '<button type="button" class="adj-dot adj-dot-' + adj + '" aria-expanded="false" aria-label="' + label + '"></button>' +
-      '<span class="adj-dot-pop" role="tooltip">' + label + '</span>' +
-      '</span>';
+    return '<span class="visually-hidden">(' + (adj === 'na' ? 'な-adjective' : 'い-adjective') + ')</span>';
   }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
@@ -187,7 +176,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div>' + adjDot(row.adj) + '</td>';
+    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div>' + adjNote(row.adj) + '</td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
   // The main study areas. Grammar, Phrases and Travel are promoted out of the

@@ -1889,40 +1889,19 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
-/* い/な-adjective rows: a small dot in the Japanese cell's own left gutter
-   (td:first-child's existing 14px left padding, already reserved on every
-   row) marks the distinction -- purple い-adj, green な-adj (--adj-i-ink /
-   --adj-na-ink) -- instead of tinting the word, a bar, or a tag elsewhere.
-   Anchored to the cell's bottom, not vertically centred: centring against a
-   two-line furigana+kanji cell has no good "middle" to pick, but the bottom
-   edge holds regardless of whether furigana is present. Hover (desktop) or
-   tap (js/vocab/interactions.js) reveals the label, same idiom as
-   .jp-romaji-btn/.kr elsewhere in this cell; its aria-label carries the
-   distinction to assistive tech even without interacting. Reading the
-   colour meaning generally is explained once by the legend near the
-   toolbar (index.html .adj-legend), not repeated on every row. */
-.vocab td.jp { position: relative; }
-.adj-dot-wrap { position: absolute; left: 4px; bottom: 7px; }
-.adj-dot {
-  appearance: none; border: 0; padding: 0; cursor: help; display: block;
-  width: 8px; height: 8px; border-radius: 50%;
-}
-.adj-dot-i { background: var(--adj-i-ink); }
-.adj-dot-na { background: var(--adj-na-ink); }
-.adj-dot-pop {
-  display: none; position: absolute; left: 0; bottom: calc(100% + 4px); z-index: 3;
-  background: var(--paper); border: 1px solid var(--card-line); box-shadow: var(--shadow-menu);
-  border-radius: 3px; padding: 1px 5px; white-space: nowrap;
-  font-family: var(--font-ui); font-size: 10px; line-height: 1.3; color: var(--ink-2);
-}
-.adj-dot-wrap:hover .adj-dot-pop,
-.adj-dot-wrap.adj-dot-on .adj-dot-pop { display: block; }
-@media (hover: none) { .adj-dot-wrap:hover .adj-dot-pop { display: none; } }
+/* い/な-adjective rows: a coloured bar down the Japanese cell's left inner
+   edge marks the distinction -- purple い-adj, green な-adj (--adj-i-ink /
+   --adj-na-ink) -- instead of tinting the word itself. Same inset-shadow
+   idiom .irregular-row already uses for its own left marker (spans the
+   cell's full height automatically -- no vertical centring to get wrong
+   against a two-line furigana+kanji cell the way a small dot would). Reading
+   the colour meaning is explained once by the legend near the toolbar
+   (index.html .adj-legend), not repeated on every row. */
+.vocab td.jp.adj-i { box-shadow: inset 2px 0 0 var(--adj-i-ink); }
+.vocab td.jp.adj-na { box-shadow: inset 2px 0 0 var(--adj-na-ink); }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
-   never the only signal. Used by the search/sort field labels on the
-   Customize page (js/vocab/customize.js); the adjective dot above carries
-   its own label a different way (aria-label on the dot itself). */
+   never the only signal (used for the adjective-type note above). */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;

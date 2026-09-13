@@ -357,10 +357,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
 
     // The jp cell mixes kanji/kana with <rt class="furigana"> readings, the
-    // romaji reveal (button + tooltip), and -- on an adjective row -- the
-    // dot's own hover/tap label ("い-adjective"/"な-adjective"); strip all of
+    // romaji reveal (button + tooltip), and -- on an adjective row -- a
+    // visually-hidden "(い-adjective)" note for assistive tech; strip all of
     // it out so "Japanese" search covers just the kanji/kana without
-    // garbling in a reading, a romaji string, or the adjective label.
+    // garbling in a reading, a romaji string, or the adjective note.
     function jpFields(td) {
       const clone = td.cloneNode(true);
       const furiganaEls = [...clone.querySelectorAll('.furigana')];
@@ -368,8 +368,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       furiganaEls.forEach(el => el.remove());
       const romajiWrap = clone.querySelector('.jp-romaji-wrap');
       if (romajiWrap) romajiWrap.remove();
-      const adjDotWrap = clone.querySelector('.adj-dot-wrap');
-      if (adjDotWrap) adjDotWrap.remove();
+      const adjNote = clone.querySelector('.visually-hidden');
+      if (adjNote) adjNote.remove();
       return { kanji: clone.textContent, furigana };
     }
 
@@ -890,19 +890,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (roWrap) {
         const open = roWrap.classList.toggle('jp-romaji-on');
         roBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }
-
-      // Adjective-type dot: same touch-friendly toggle as the romaji reveal
-      // just above -- a tap pins its label open, a tap elsewhere closes it;
-      // desktop :hover already shows it without a click.
-      const adBtn = event.target.closest && event.target.closest('.adj-dot');
-      const adWrap = adBtn && adBtn.closest('.adj-dot-wrap');
-      document.querySelectorAll('.adj-dot-wrap.adj-dot-on').forEach(function (el) {
-        if (el !== adWrap) { el.classList.remove('adj-dot-on'); const b = el.querySelector('.adj-dot'); if (b) b.setAttribute('aria-expanded', 'false'); }
-      });
-      if (adWrap) {
-        const open = adWrap.classList.toggle('adj-dot-on');
-        adBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
     });
 

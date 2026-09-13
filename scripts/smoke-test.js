@@ -140,15 +140,15 @@ async function main() {
   check("renders 24 table sections", sections.length === 24);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 550 vocabulary rows", totalRows === 550);
-  check("adjective rows mark い-adj/な-adj with a dot carrying its own aria-label, and only those rows do", (() => {
+  check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
     const tagged = [...adjSection.querySelectorAll("tbody tr td.jp.adj-i, tbody tr td.jp.adj-na")];
     if (tagged.length < 30) return false;
     const labelsOk = tagged.every(td => {
-      const dot = td.querySelector(".adj-dot");
-      const i = td.classList.contains("adj-i") && dot && dot.classList.contains("adj-dot-i") && dot.getAttribute("aria-label") === "い-adjective";
-      const na = td.classList.contains("adj-na") && dot && dot.classList.contains("adj-dot-na") && dot.getAttribute("aria-label") === "な-adjective";
+      const note = td.querySelector(".visually-hidden");
+      const i = td.classList.contains("adj-i") && note && note.textContent === "(い-adjective)";
+      const na = td.classList.contains("adj-na") && note && note.textContent === "(な-adjective)";
       return i || na;
     });
     // No tag leaks onto a non-adjective row (e.g. the Verbs table).
@@ -169,22 +169,11 @@ async function main() {
     const kikenTagged = kikenRow && kikenRow.cells[0].classList.contains("adj-na");
     return labelsOk && !verbsTagged && tasteTagged && mochiUntagged && kikenTagged;
   })());
-  check("the legend explaining the two colours is aria-hidden (real semantics live on the dot's own aria-label, not this)", (() => {
+  check("the legend explaining the two colours is aria-hidden (real semantics live in the per-row note, not this)", (() => {
     const legend = document.querySelector(".adj-legend");
     return !!legend && legend.getAttribute("aria-hidden") === "true" && legend.querySelectorAll(".adj-legend-swatch").length === 2;
   })());
-  check("clicking the dot opens its label (touch path) and toggles aria-expanded", (() => {
-    const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
-      .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
-    const wrap = adjSection.querySelector(".adj-dot-wrap");
-    const btn = wrap.querySelector(".adj-dot");
-    btn.click();
-    const opened = wrap.classList.contains("adj-dot-on") && btn.getAttribute("aria-expanded") === "true"
-      && /adjective/.test(wrap.querySelector(".adj-dot-pop").textContent);
-    btn.click();
-    return opened && !wrap.classList.contains("adj-dot-on") && btn.getAttribute("aria-expanded") === "false";
-  })());
-  check("the adjective label stays out of search matches (it's only ever in a hover/tap popover, never .meaning-text)", (() => {
+  check("the adjective note stays out of search matches (visually-hidden text isn't in .meaning-text)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "adjective";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
@@ -239,15 +228,11 @@ async function main() {
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
     return flat;
   })();
-  check("い-adj and な-adj dots fill with two different, distinctly-saturated tokens (not tinted text, not a bar)", (() => {
-    const iRule = allCssRules.find(r => r.selectorText === ".adj-dot-i");
-    const naRule = allCssRules.find(r => r.selectorText === ".adj-dot-na");
-    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.background || iRule.style.backgroundColor)
-      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.background || naRule.style.backgroundColor);
-  })());
-  check("the dot's label is hidden until revealed (display:none by default)", (() => {
-    const r = allCssRules.find(x => x.selectorText === ".adj-dot-pop");
-    return !!r && r.style.display === "none";
+  check("い-adj and な-adj mark the Japanese cell with a left bar in two different, distinctly-saturated tokens (not tinted text)", (() => {
+    const iRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i");
+    const naRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-na");
+    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.boxShadow)
+      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.boxShadow);
   })());
   check("the .particle rule is blue (var(--particle)) and bold", (() => {
     const r = allCssRules.find(x => x.selectorText === ".particle");
