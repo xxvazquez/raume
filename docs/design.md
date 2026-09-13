@@ -57,7 +57,7 @@ properties in `css/site.css`.
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
 | `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
-| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective marker dot** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured at a glance, a 7px dot). `#B39DDB` / `#7FC79A` in dark |
+| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective marker bar** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured at a glance, a 2px edge). `#B39DDB` / `#7FC79A` in dark |
 
 Functional roles, each one job — all muted:
 
@@ -100,16 +100,18 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **い/な-adjective rows** get a small dot in the Japanese cell's own left
-  gutter instead of a tag or tinted text: `--adj-i-ink` (purple) for
+- **い/な-adjective rows** get a coloured bar down the Japanese cell's left
+  inner edge instead of a tag or tinted text: `--adj-i-ink` (purple) for
   **い-adj**, `--adj-na-ink` (green) for **な-adj** — dedicated tokens,
   deliberately as saturated as `--particle` rather than as muted as
-  `--accent-strong`/`--accent-2-strong` (those are tuned for buttons; a dot
-  that muted wouldn't read as coloured at a glance). The dot sits in
-  `td:first-child`'s existing left padding, already reserved on every row
-  whether or not it's an adjective, so it never shifts the word and every
-  dot lines up in one column regardless of word length — the word itself
-  stays plain `--ink`, not tinted (an earlier version tinted the text; a dot
+  `--accent-strong`/`--accent-2-strong` (those are tuned for buttons; that
+  muted a pair wouldn't read as coloured at a glance). It's `box-shadow:
+  inset 2px 0 0 <token>` on the cell itself — the same idiom `.irregular-row`
+  already uses for its own left marker — rather than a centred dot, since a
+  dot has to pick *some* vertical centre and a two-line furigana+kanji cell
+  doesn't have one that looks right; the inset shadow spans the cell's full
+  height automatically, no centring to get wrong. The word itself stays
+  plain `--ink`, not tinted (an earlier version tinted the text; a marker
   reads faster and doesn't fight the furigana/particle colours already
   living in that cell). A small legend (`.adj-legend`, two colour swatches)
   next to the toolbar explains the two colours once, `aria-hidden` since a

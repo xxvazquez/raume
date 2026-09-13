@@ -1869,22 +1869,16 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
-/* い/な-adjective rows: a small dot in the Japanese cell's own left gutter
-   marks the distinction -- purple い-adj, green な-adj (--adj-i-ink /
-   --adj-na-ink) -- instead of tinting the word itself. The gutter is
-   td:first-child's existing left padding (14px, 13px on paper), already
-   reserved on every row whether or not it's an adjective, so the dot never
-   shifts the Japanese text and every dot lines up in one column regardless
-   of word length. Reading the colour meaning is explained once by the
-   legend near the toolbar (index.html .adj-legend), not repeated on every
-   row. */
-.vocab td.jp { position: relative; }
-.vocab td.jp.adj-i::before, .vocab td.jp.adj-na::before {
-  content: ""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
-  width: 7px; height: 7px; border-radius: 50%;
-}
-.vocab td.jp.adj-i::before { background: var(--adj-i-ink); }
-.vocab td.jp.adj-na::before { background: var(--adj-na-ink); }
+/* い/な-adjective rows: a coloured bar down the Japanese cell's left inner
+   edge marks the distinction -- purple い-adj, green な-adj (--adj-i-ink /
+   --adj-na-ink) -- instead of tinting the word itself. Same inset-shadow
+   idiom .irregular-row already uses for its own left marker (spans the
+   cell's full height automatically -- no vertical centring to get wrong
+   against a two-line furigana+kanji cell the way a small dot would). Reading
+   the colour meaning is explained once by the legend near the toolbar
+   (index.html .adj-legend), not repeated on every row. */
+.vocab td.jp.adj-i { box-shadow: inset 2px 0 0 var(--adj-i-ink); }
+.vocab td.jp.adj-na { box-shadow: inset 2px 0 0 var(--adj-na-ink); }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

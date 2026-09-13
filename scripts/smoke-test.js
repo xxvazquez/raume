@@ -153,11 +153,11 @@ async function main() {
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
     return flat;
   })();
-  check("い-adj and な-adj mark the Japanese cell with a dot in two different, distinctly-saturated tokens (not tinted text)", (() => {
-    const iRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i::before");
-    const naRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-na::before");
-    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.backgroundColor || iRule.style.background)
-      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.backgroundColor || naRule.style.background);
+  check("い-adj and な-adj mark the Japanese cell with a left bar in two different, distinctly-saturated tokens (not tinted text)", (() => {
+    const iRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i");
+    const naRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-na");
+    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.boxShadow)
+      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.boxShadow);
   })());
   check("the .particle rule is blue (var(--particle)) and bold", (() => {
     const r = allCssRules.find(x => x.selectorText === ".particle");
