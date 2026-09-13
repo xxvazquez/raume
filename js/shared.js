@@ -115,10 +115,26 @@ window.RaumeStudy.shared = (function () {
       utterance.rate = 0.8;
       var voice = findJapaneseVoice();
       if (voice) utterance.voice = voice;
-      // No UI for this -- just a console breadcrumb so a report of "silent,
-      // no error visible" can actually be told apart from a real engine
-      // failure (e.g. "not-allowed", "synthesis-failed") next time.
+      // No UI for either of these -- just console breadcrumbs, so a report
+      // of "silent, no error visible" can actually be told apart from a real
+      // engine failure (e.g. "not-allowed", "synthesis-failed") next time.
       utterance.onerror = function (e) { console.error("Speech synthesis failed:", e.error); };
+      // A second, worse failure mode than an error event: on some Chrome /
+      // macOS system-voice combinations, speak() neither starts nor errors
+      // -- speechSynthesis.speaking just stays true forever, dead silent,
+      // for *every* voice (confirmed against both a local and a network
+      // voice) -- a broken speech engine, not anything this call got wrong.
+      // cancel() reliably un-wedges it for the *next* click (stopAll() above
+      // already does this before every speak), so this isn't a functional
+      // dead-end, just silent -- this is only about making that failure
+      // mode visible in the console instead of indistinguishable from
+      // "nothing happened".
+      var started = false;
+      utterance.onstart = function () { started = true; };
+      setTimeout(function () {
+        if (started || utterance !== currentUtterance) return;
+        console.warn("Speech synthesis produced no start/error event within 1.2s -- the browser's speech engine is likely wedged (a known Chrome/macOS issue with some system voices); quitting and reopening the browser usually clears it.");
+      }, 1200);
       synth.speak(utterance);
       // Chrome can strand the engine in a paused state after an earlier
       // cancel(); a resume() when it isn't paused is a harmless no-op.
