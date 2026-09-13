@@ -337,6 +337,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global pull-to-refresh bar (js/pull-refresh.js) -- fixed at the very top
+   of the viewport, normally translated off-screen. Touch-only gesture, so
+   this never shows at all on a device with no touch input. */
+.pull-refresh {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; transform: translateY(-100%);
+  background: var(--paper); border-bottom: 1px solid var(--card-line);
+  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--muted);
+  transition: transform .15s ease, background-color .15s ease, color .15s ease;
+}
+.pull-refresh-pulling, .pull-refresh-ready, .pull-refresh-busy { transform: translateY(0); }
+.pull-refresh-ready { color: var(--accent-dark); }
+.pull-refresh-spinner {
+  width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto;
+  border: 2px solid currentColor; border-top-color: transparent; opacity: .4;
+}
+.pull-refresh-busy .pull-refresh-spinner { opacity: 1; animation: pull-refresh-spin .7s linear infinite; }
+@keyframes pull-refresh-spin { to { transform: rotate(360deg); } }
+
 /* The sheet: one bordered page on a cool-grey ground. Full-bleed on small
    screens; no frame at all on paper. */
 .app-frame {

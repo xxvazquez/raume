@@ -135,15 +135,19 @@
   1. data/vocabulary.js   -> RaumeStudy.data       (vocabulary dataset, data only)
   2. js/config.js         -> RaumeStudy.config     (Supabase connection config)
   3. js/shared.js         -> RaumeStudy.shared     (cross-feature helpers)
-  4. js/vocab/kana-romaji.js  -> RaumeStudy.kanaRomaji (kana->romaji for the hover/tap reading layer)
+  4. js/pull-refresh.js   (no namespace; global touch pull-to-refresh gesture,
+                       live on every page. Only reaches into RaumeStudy.flashcards
+                       at gesture-release time, never at load time, so it can sit
+                       this early despite flashcards loading much later.)
+  5. js/vocab/kana-romaji.js  -> RaumeStudy.kanaRomaji (kana->romaji for the hover/tap reading layer)
      js/vocab/icons.js / table-custom.js / icon-picker.js -> per-table icon & name personalisation
      js/vocab/custom-vocab.js -> RaumeStudy.customVocab (reader's own rows/tables, merged into the dataset)
-  5. js/vocab/render.js       -> RaumeStudy.vocab  (tables + top-nav rendering, sorting)
-  6. js/vocab/interactions.js -> RaumeStudy.vocab  (routing, search, view modes, menus, print, polite)
+  6. js/vocab/render.js       -> RaumeStudy.vocab  (tables + top-nav rendering, sorting)
+  7. js/vocab/interactions.js -> RaumeStudy.vocab  (routing, search, view modes, menus, print, polite)
      js/vocab/customize.js    -> RaumeStudy.customize (the #customize page: rename / re-icon any table)
-  7. vendor/ts-fsrs.js    -> window.FSRS           (vendored FSRS-6 scheduler)
-  8. vendor/supabase.js   -> window.supabase       (vendored Supabase client)
-  9. js/flashcards/  -> RaumeStudy.flashcards.*  (feature split by responsibility; each file
+  8. vendor/ts-fsrs.js    -> window.FSRS           (vendored FSRS-6 scheduler)
+  9. vendor/supabase.js   -> window.supabase       (vendored Supabase client)
+  10. js/flashcards/  -> RaumeStudy.flashcards.*  (feature split by responsibility; each file
                        only reads modules above it in this list)
        store.js       .store       state & storage: local cache, guest/signed-in mode
        vocab-index.js .vocabIndex  vocab lookup + answer checking (pure)
@@ -154,11 +158,12 @@
        kana-data.js   .kanaData    built-in hiragana/katakana tables + practice groups (data only)
        kana.js        .kana        the Kana tab: group picker + FSRS-scheduled kana->romaji drill
        bootstrap.js   (root)       app shell, sign-in form, tab routing, DOMContentLoaded init
-  10. js/sw-register.js                            (service-worker registration)
+  11. js/sw-register.js                            (service-worker registration)
 -->
 <script src="data/vocabulary.js?v=__CACHEBUST__"></script>
 <script src="js/config.js?v=__CACHEBUST__"></script>
 <script src="js/shared.js?v=__CACHEBUST__"></script>
+<script src="js/pull-refresh.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/kana-romaji.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/icons.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/table-custom.js?v=__CACHEBUST__"></script>

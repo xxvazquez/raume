@@ -60,6 +60,81 @@ async function main() {
   });
   const document = window.document;
 
+  console.log("Global pull-to-refresh (touch)");
+  (() => {
+    function touch(type, y, opts) {
+      const e = new window.Event(type, Object.assign({ bubbles: true, cancelable: true }, opts));
+      e.touches = y == null ? [] : [{ clientY: y }];
+      document.dispatchEvent(e);
+      return e;
+    }
+    check("starts with no bar in the DOM -- it's created on first use, not eagerly", !document.querySelector(".pull-refresh"));
+    touch("touchstart", 0);
+    touch("touchmove", 20);
+    check("a small pull shows the bar in its neutral 'pulling' state", (() => {
+      const bar = document.querySelector(".pull-refresh");
+      return !!bar && bar.classList.contains("pull-refresh-pulling") && /pull to refresh/i.test(bar.textContent);
+    })());
+    touch("touchend", null);
+    check("releasing before the threshold just snaps back, no refresh triggered", (() => {
+      const bar = document.querySelector(".pull-refresh");
+      return bar.className === "pull-refresh" && bar.textContent === "";
+    })());
+    touch("touchstart", 0);
+    touch("touchmove", 80);
+    check("pulling past the threshold switches it to 'ready to release'", (() => {
+      const bar = document.querySelector(".pull-refresh");
+      return bar.classList.contains("pull-refresh-ready") && /release to refresh/i.test(bar.textContent);
+    })());
+    const moveEvt = touch("touchmove", 80);
+    check("once past threshold, the gesture is taken over (default prevented) so the page doesn't also scroll/bounce", moveEvt.defaultPrevented);
+    // Cancel by dragging back up rather than releasing -- releasing while
+    // "ready" would trigger the actual refresh, which the next check isn't
+    // testing for and would then be blocked by (a refresh in flight ignores
+    // new gestures, see js/pull-refresh.js onTouchStart).
+    touch("touchmove", 0);
+    touch("touchend", null);
+    check("scrolled away from the top, a fresh downward drag does nothing at all", (() => {
+      Object.defineProperty(window, "scrollY", { configurable: true, value: 50 });
+      touch("touchstart", 0);
+      touch("touchmove", 90);
+      const idle = document.querySelector(".pull-refresh").className === "pull-refresh";
+      Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+      touch("touchend", null);
+      return idle;
+    })());
+    // Releasing while "ready" schedules a real window.location.reload()
+    // after HOLD_MS (see js/pull-refresh.js runRefresh()) -- jsdom's
+    // `resources: "usable"` makes that an actual, slow reparse-the-whole-
+    // page navigation, and unlike most browser APIs jsdom's Location.reload
+    // isn't writable/configurable, so it can't be stubbed out the normal
+    // way. Swallowing window.setTimeout for just this one synchronous
+    // dispatch -- the only thing runRefresh() schedules -- stops that timer
+    // from ever being registered, without needing to touch reload() itself
+    // or leave a real 500ms-plus-navigation delay sitting in this file's
+    // way.
+    const realSetTimeout = window.setTimeout;
+    window.setTimeout = () => 0;
+    touch("touchstart", 0);
+    touch("touchmove", 80);
+    touch("touchend", null);
+    window.setTimeout = realSetTimeout;
+    check("releasing while ready starts the refresh (busy, spinning)", (() => {
+      const bar = document.querySelector(".pull-refresh");
+      return bar.classList.contains("pull-refresh-busy") && /refreshing/i.test(bar.textContent);
+    })());
+    check("a new gesture is ignored while a refresh is still in flight", (() => {
+      touch("touchstart", 0);
+      touch("touchmove", 20);
+      const bar = document.querySelector(".pull-refresh");
+      return bar.classList.contains("pull-refresh-busy"); // unchanged, not "pulling"
+    })());
+    // pull-refresh's own state stays "busy" for the rest of this process
+    // (its one timer was swallowed above, so nothing will ever move it to
+    // idle) -- harmless, since nothing else in this file simulates a touch
+    // gesture or queries .pull-refresh again.
+  })();
+
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
   check("renders 24 table sections", sections.length === 24);
