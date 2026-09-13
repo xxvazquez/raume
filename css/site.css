@@ -1826,10 +1826,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn, .star-btn:not(.starred) { display: none !important; }
   .star-btn.starred { opacity: 1; }
   .view-mode { display: none !important; }
-  /* No screen hover on paper, so drop the reveal control and print the
-     romaji inline instead -- otherwise it'd be permanently unreachable. */
+  /* No screen hover on paper, so drop the reveal control. Only print romaji
+     for rows where it's pinned open (.jp-romaji-on) -- otherwise print
+     should match what's on screen, i.e. romaji stays hidden. */
   .jp-romaji-btn { display: none !important; }
-  .jp-romaji-pop {
+  .jp-romaji-wrap.jp-romaji-on .jp-romaji-pop {
     display: inline !important; position: static !important; margin-left: 6px;
     border: 0 !important; box-shadow: none !important; padding: 0 !important;
     max-width: none !important; min-width: 0 !important; color: var(--ink-2) !important;
