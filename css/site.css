@@ -200,6 +200,17 @@
   --fs-micro: 11.5px;
   --fs-subhead: 15px; /* card / section sub-headings inside Flashcards */
 
+  /* Shared tracking for every quiet uppercase micro-label (table headers,
+     the flashcard prompt label, icon-picker group labels, Customize/Help
+     section headers) -- these used to each hand-roll their own
+     letter-spacing with no reason for the differences. Weight is still the
+     tier: 500 for the smaller in-content labels, 600 for the larger
+     section-header ones (see .vocab th / .icon-picker-group-label). The
+     masthead's brand kicker (.masthead-tag) is the one deliberate
+     exception -- wider still, since it sits beside the wordmark rather
+     than labelling content. */
+  --tracking-label: .05em;
+
   /* One sans family everywhere -- wordmark, titles, navigation, tables,
      controls. No serif. Japanese keeps its own CJK stack (td.jp / .furigana). */
   --font-ui: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Open Sans", sans-serif;
@@ -389,6 +400,9 @@ body {
   text-decoration: none;
   line-height: 1;
 }
+/* Wider tracking than any other uppercase label (--tracking-label) on
+   purpose -- a brand kicker beside the wordmark, not a label for content
+   below it, so it doesn't join that consolidation. */
 .masthead-tag {
   font-size: 10.5px;
   font-weight: 500;
@@ -945,8 +959,8 @@ svg.si { stroke-width: 1.6; }
 .icon-picker-group[hidden] { display: none; }
 .icon-picker-group-label {
   margin: 12px 0 6px; color: var(--muted);
-  font: 600 var(--fs-micro)/1 var(--font-ui);
-  text-transform: uppercase; letter-spacing: .05em;
+  font: 600 var(--fs-small)/1 var(--font-ui);
+  text-transform: uppercase; letter-spacing: var(--tracking-label);
 }
 .icon-picker-group:first-child .icon-picker-group-label { margin-top: 2px; }
 .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 2px; }
@@ -1156,7 +1170,7 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
 .cv-card h3, .cv-card-summary {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 12px; font-size: var(--fs-small); font-weight: 600;
-  text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--muted);
 }
 /* The three action cards (Add a word / New table / Import a list) are
    <details>, collapsed by default except Add a word -- occasional actions
@@ -1294,7 +1308,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   margin: 26px 0 8px; padding-bottom: 6px;
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-small); font-weight: 600;
-  text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--muted);
 }
 .page-help ul { margin: 0; padding-left: 18px; color: var(--ink); font-size: var(--fs-small); line-height: 1.65; }
 .page-help li { margin: 5px 0; }
@@ -1417,7 +1431,7 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   background: var(--paper);
   font-size: var(--fs-table-header);
   font-weight: 500;
-  letter-spacing: .07em;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   padding: 6px 14px 6px 0;
   /* No top rule -- the .section-head hairline above already separates the
@@ -2257,7 +2271,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .fc-session-exit:hover { color: var(--wrong); text-decoration: underline; }
 /* A quiet reminder of the direction, hugging the prompt it introduces -- the
    prompt is the thing to read, not this. */
-.fc-prompt-label { color: var(--faint); font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px; }
+.fc-prompt-label { color: var(--faint); font-size: var(--fs-table-header); font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-label); margin-bottom: 6px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
 .fc-answer-form { display: flex; gap: 8px; width: 78%; max-width: 380px; margin: 0 0 22px; }
