@@ -688,6 +688,13 @@ body {
   border: 1px solid var(--field-line);
   border-radius: 6px;
 }
+/* Search is one of the app's strongest features and should read as its own
+   tool, not just another toolbar control at the same weight as the column
+   toggles beside it -- a quiet magnifying-glass mark does that without
+   growing the box or drawing more attention than the row it sits in. Faint
+   at rest, tinted on focus along with the field's own border. */
+.search-icon { flex: 0 0 auto; margin-right: 8px; color: var(--faint); }
+.search-box:focus-within .search-icon { color: var(--section); }
 /* Same focus ring as every other control (the global :focus-visible rule) --
    was a box-shadow here, the one control that differed. */
 .search-box:focus-within {
