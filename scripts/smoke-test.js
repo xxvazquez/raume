@@ -70,6 +70,10 @@ async function main() {
     }
     check("starts with no bar in the DOM -- it's created on first use, not eagerly", !document.querySelector(".pull-refresh"));
     touch("touchstart", 0);
+    const tapDrift = touch("touchmove", 5); // a plain tap's incidental jitter, well under TAP_TOLERANCE
+    check("a few px of drift (an ordinary tap) doesn't claim the gesture -- no bar, default not prevented, so the tap's own click still fires", !document.querySelector(".pull-refresh") && !tapDrift.defaultPrevented);
+    touch("touchend", null);
+    touch("touchstart", 0);
     touch("touchmove", 20);
     check("a small pull shows the bar in its neutral 'pulling' state", (() => {
       const bar = document.querySelector(".pull-refresh");

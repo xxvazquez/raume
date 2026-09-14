@@ -22,6 +22,16 @@ window.RaumeStudy = window.RaumeStudy || {};
 
   var THRESHOLD = 64; // px of pull before release triggers a refresh
   var HOLD_MS = 500;  // minimum "Refreshing…" time before reload, so it never just flashes
+  // A plain tap always carries a few px of incidental finger drift -- below
+  // this, don't claim the gesture yet (no preventDefault, no state change).
+  // Once any touchmove calls preventDefault(), most browsers drop the
+  // synthetic click that would otherwise fire on touchend, so claiming the
+  // gesture on the very first fractional-pixel move was silently swallowing
+  // taps on anything near the top of the page (the romaji reveal button,
+  // row-hide icon, etc. -- any control, not just one) while scrolled to the
+  // very top, exactly where a reader is likeliest to tap right after a page
+  // loads.
+  var TAP_TOLERANCE = 10;
 
   var startY = null;
   var state = "idle"; // idle | pulling | ready | busy
@@ -64,6 +74,7 @@ window.RaumeStudy = window.RaumeStudy || {};
       if (state === "pulling" || state === "ready") setState("idle");
       return;
     }
+    if (dy < TAP_TOLERANCE && state === "idle") return; // could still just be a tap
     // Only now is this clearly a downward pull at the top -- safe to take
     // over from the browser's own scroll/bounce for this gesture.
     e.preventDefault();
