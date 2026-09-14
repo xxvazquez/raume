@@ -1255,7 +1255,6 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 }
 .cv-owned-row-empty { color: var(--faint); }
 .cv-owned-jp { flex: 0 0 34%; color: var(--ink); }
-.cv-owned-jp ruby rt { font-size: .62em; color: var(--furigana); }
 .cv-owned-ro { flex: 0 0 24%; color: var(--muted); }
 .cv-owned-en { flex: 1 1 auto; color: var(--muted); }
 .cv-owned-actions { flex: 0 0 auto; display: flex; gap: 6px; }
@@ -1519,7 +1518,7 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   min-width: max(56px, 100%); max-width: 220px;
   padding: 4px 8px; border-radius: 6px;
   background: var(--paper); border: 1px solid var(--card-line); box-shadow: var(--shadow-menu);
-  font-family: var(--font-ui); font-size: var(--fs-small); line-height: 1.4; color: var(--romaji);
+  font-family: var(--font-ui); font-size: var(--fs-romaji); line-height: 1.4; color: var(--romaji);
   text-align: left; white-space: nowrap;
 }
 .jp-romaji-wrap:hover .jp-romaji-pop,
@@ -2749,7 +2748,6 @@ mark.fc-diff-co {
   font-size: var(--fs-nav);
   color: var(--ink);
 }
-.fc-missed-jp .furigana { font-size: max(10px, .62em); }
 .fc-jp-slash { color: var(--faint); padding: 0 2px; }
 /* One supporting line: romaji (muted italic) · English (legible ink). */
 .fc-missed-gloss { flex: 0 1 auto; min-width: 0; font-size: var(--fs-small); line-height: 1.4; }
