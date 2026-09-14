@@ -193,34 +193,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row" title="Hide this row">' + EYE_ICON + '</button>';
   }
-  // Star / favourite -- a lightweight "keep an eye on this" list held in
-  // RaumeStudy.tableCustom (see js/vocab/interactions.js for the toolbar
-  // "Starred" view and js/vocab/table-custom.js for storage + sync). Rendered
-  // faint on every row, lit when starred; initial pressed state comes straight
-  // from the store so a reload / the collected view draws it right first paint.
-  var STAR_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5l1.9 3.9 4.3.6-3.1 3 .7 4.3L9 12.8 5.3 14.3l.7-4.3-3.1-3 4.3-.6Z"/></svg>';
-  function starToggleButton(vocabId) {
-    if (!vocabId) return '';
-    var tc = window.RaumeStudy.tableCustom;
-    var on = !!(tc && tc.isStarred && tc.isStarred(vocabId));
-    return '<button type="button" class="star-btn' + (on ? ' starred' : '') + '" data-vocab-id="' + esc(vocabId) +
-      '" aria-pressed="' + (on ? 'true' : 'false') + '" aria-label="' + (on ? 'Unstar' : 'Star') + ' this word" title="Star this word">' + STAR_ICON + '</button>';
-  }
   // Wrapped in its own cluster so it can sit as a fixed-width flex item
   // pinned to the Meaning cell's right edge (see css/site.css), instead of
   // flowing inline after the text at a position that drifts with its length.
-  function rowActions(vocabId) {
+  function rowActions() {
     // No "add to flashcards" icon here -- Flashcards' own Manage page is
     // where words get added/removed; a second control on every reference
     // row was redundant and just took up space.
-    return '<span class="row-actions">' + starToggleButton(vocabId) + rowHideButton() + '</span>';
+    return '<span class="row-actions">' + rowHideButton() + '</span>';
   }
   // The flex row lives on a <div> wrapper, not the <td> itself -- table-layout:
   // fixed's column-width percentages stop being respected on a cell whose own
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
-  function meaningCell(english, vocabId) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
+  function meaningCell(english) {
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + rowActions() + '</div></td>';
   }
   // Word rows and Phrases sentence rows share this now -- both render as
   // Japanese (with a romaji reveal next to the speaker button) + English, two
@@ -228,7 +215,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
@@ -236,7 +223,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + romajiButton(f.romaji) + '</div></div>'; }).join('');
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and showing ↓ (A-Z); the others start neutral (↕).

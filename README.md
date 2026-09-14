@@ -81,8 +81,6 @@ so they're easy to spot in a sentence.
 
 - **Cover answers** blanks the English column; tap a row to reveal that one
   answer. A cover-and-check aid, not a quiz — no score, resets on reload.
-- **Star** any row for a lightweight watch list — the **Starred** toolbar button
-  then swaps the list for a synthetic table of just those words.
 - **Hide a row** (the eye icon) is a quiet per-table "I know this", with a
   one-click "Show all".
 

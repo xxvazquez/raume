@@ -170,7 +170,7 @@ js/
     kana-romaji.js       kana → romaji converter (the reading layer)
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
-    table-custom.js      per-table names / icons / starred rows
+    table-custom.js      per-table names / icons / order
     custom-vocab.js      the reader's own rows / tables, merged into the dataset
     customize.js         the Customize page
     render.js            tables, nav, sorting

@@ -108,33 +108,6 @@ window.RaumeStudy.tableCustom = (function () {
     mutate(function () { delete cache[ORDER_KEY]; });
   }
 
-  // ---- Starred rows ------------------------------------------------------
-  // A second reserved record, "__starred", holds a flat list of vocab ids
-  // the reader has starred on the vocabulary page -- a lightweight "keep an
-  // eye on this" list that sits between hiding a row (I know this) and
-  // adding it to flashcards (I'll drill this). Vocab ids look like "v0007",
-  // never "__starred", so this can't collide with a table's record.
-  var STARRED_KEY = "__starred";
-  function starredArray() {
-    var s = load()[STARRED_KEY];
-    return Array.isArray(s) ? s.map(String) : [];
-  }
-  function starredList() { return starredArray(); }
-  function isStarred(vocabId) { return starredArray().indexOf(String(vocabId)) !== -1; }
-  function writeStarred(list) {
-    if (list.length) cache[STARRED_KEY] = list;
-    else delete cache[STARRED_KEY];
-  }
-  function toggleStar(vocabId) {
-    var id = String(vocabId);
-    mutate(function () {
-      var list = starredArray();
-      var i = list.indexOf(id);
-      if (i === -1) list.push(id); else list.splice(i, 1);
-      writeStarred(list);
-    });
-  }
-
   // Reconcile with the account's copy on sign-in. Per table: the account wins
   // for any table it already has (it's the shared source of truth across
   // devices), but a table customised locally that the account doesn't know
@@ -146,16 +119,6 @@ window.RaumeStudy.tableCustom = (function () {
     var merged = {};
     Object.keys(cache).forEach(function (k) { merged[k] = cache[k]; });
     Object.keys(remote).forEach(function (k) { merged[k] = remote[k]; });
-    // Stars are a collection, not a per-table setting: union the two lists
-    // rather than letting the account's copy replace what was starred here as
-    // a guest. (Order and per-table icon/name still go account-wins.)
-    var localStars = Array.isArray(cache[STARRED_KEY]) ? cache[STARRED_KEY].map(String) : [];
-    var remoteStars = Array.isArray(remote[STARRED_KEY]) ? remote[STARRED_KEY].map(String) : [];
-    if (localStars.length || remoteStars.length) {
-      var union = remoteStars.slice();
-      localStars.forEach(function (id) { if (union.indexOf(id) === -1) union.push(id); });
-      merged[STARRED_KEY] = union;
-    }
     var mergedJson = JSON.stringify(merged);
     var changedLocally = mergedJson !== JSON.stringify(cache);
     var addsToRemote = mergedJson !== JSON.stringify(remote);
@@ -177,7 +140,6 @@ window.RaumeStudy.tableCustom = (function () {
     tableOrder: tableOrder, categoryOrder: categoryOrder,
     setTableOrder: setTableOrder, setCategoryOrder: setCategoryOrder,
     hasCustomOrder: hasCustomOrder, resetOrder: resetOrder,
-    starredList: starredList, isStarred: isStarred, toggleStar: toggleStar,
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush
   };
 })();

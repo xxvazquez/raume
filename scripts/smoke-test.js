@@ -861,52 +861,6 @@ async function main() {
   selftestBtn.click();
   check("leaving the mode clears it, the hint, and every revealed row", !document.body.classList.contains("selftest-mode") && selftestBtn.getAttribute("aria-pressed") === "false" && window.getComputedStyle(selftestHint).display === "none" && !document.querySelector("#vocabulary .vocab tbody tr.revealed"));
 
-  console.log("Star / favourite rows");
-  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
-  const tc = window.RaumeStudy.tableCustom;
-  const starToggle = document.getElementById("starredToggle");
-  check("every vocab row carries a star button with its vocab id", [...document.querySelectorAll("#vocabulary .vocab tbody tr")].every(r => {
-    const b = r.querySelector(".star-btn");
-    return b && b.dataset.vocabId === r.dataset.vocabId;
-  }));
-  check("the Starred toolbar button is hidden until something is starred", !!starToggle && starToggle.hidden === true && tc.starredList().length === 0);
-  const starRow = document.querySelector('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden) tbody tr');
-  const starVid = starRow.dataset.vocabId;
-  starRow.querySelector(".star-btn").click();
-  check("clicking a row's star records it in the store and lights the button", tc.isStarred(starVid) &&
-    starRow.querySelector(".star-btn").classList.contains("starred") &&
-    starRow.querySelector(".star-btn").getAttribute("aria-pressed") === "true");
-  check("...and the Starred toolbar button appears with a count", starToggle.hidden === false && starToggle.querySelector(".starred-count").textContent === "1");
-  starToggle.click();
-  check("opening the Starred view switches on starred-mode and hides the normal list", document.body.classList.contains("starred-mode") &&
-    window.getComputedStyle(document.getElementById("vocabulary")).display === "none" &&
-    document.getElementById("starredView").hidden === false);
-  const collected = document.querySelector('#starredView .table-section[data-table="starred"]');
-  check("the view is one real table built from the starred rows", !!collected &&
-    !!collected.querySelector('tbody tr[data-vocab-id="' + starVid + '"]') &&
-    collected.querySelectorAll("tbody tr").length === 1 &&
-    !!collected.querySelector(".sort-button"));
-  collected.querySelector('tbody tr[data-vocab-id="' + starVid + '"] .star-btn').click();
-  check("un-starring the last row from inside the view empties it", !tc.isStarred(starVid) &&
-    !!document.querySelector("#starredView .starred-empty") &&
-    starToggle.querySelector(".starred-count").textContent === "0");
-  check("the row's star in the main list is back to un-starred", !starRow.querySelector(".star-btn").classList.contains("starred"));
-  starToggle.click();
-  check("closing the view leaves starred-mode", !document.body.classList.contains("starred-mode") && document.getElementById("starredView").hidden === true);
-  starRow.querySelector(".star-btn").click();
-  starToggle.click();
-  document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]').click();
-  check("leaving the reference for another page drops the starred view", !document.body.classList.contains("starred-mode") && document.getElementById("starredView").hidden === true);
-  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
-  starToggle.click();
-  document.querySelector('#siteNav .site-nav-link[data-section="grammar"]').click();
-  check("switching sections drops the starred view", !document.body.classList.contains("starred-mode"));
-  // account sync: signing in unions the account's stars with local ones
-  tc.applyRemote({ __starred: ["v0001", "v0002"] });
-  check("applyRemote unions remote stars with what was starred locally", tc.isStarred(starVid) && tc.isStarred("v0001") && tc.isStarred("v0002"));
-  tc.toggleStar(starVid); tc.toggleStar("v0001"); tc.toggleStar("v0002"); // reset for later checks
-  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
-
   console.log("Table directory: every table visible at once, click to jump");
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
   document.querySelector(".tindex-trigger").click();
@@ -1182,11 +1136,10 @@ async function main() {
   // Removed as redundant with Flashcards' own Manage page (which is where
   // words actually get added/removed) -- it just took up space on every row.
   check("no per-row flashcard toggle is rendered (Manage owns add/remove)", !firstRowFc.querySelector(".fc-toggle-btn"));
-  check("the row-action cluster is star + hide only, in that order", (() => {
+  check("the row-action cluster is hide only", (() => {
     const cluster = firstRowFc.querySelector(".row-actions");
-    return !!cluster && cluster.children.length === 2
-      && cluster.children[0].classList.contains("star-btn")
-      && cluster.children[1].classList.contains("row-hide-btn");
+    return !!cluster && cluster.children.length === 1
+      && cluster.children[0].classList.contains("row-hide-btn");
   })());
 
   console.log("Flashcards: add a whole table at once");

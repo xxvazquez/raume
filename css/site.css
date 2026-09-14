@@ -710,11 +710,9 @@ body {
 .vocab-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 /* Compact, rectangular controls -- a reference-book control, not a pill. */
 .view-mode { display: inline-flex; gap: 4px; }
-.polite-toggle[hidden],
-.starred-toggle[hidden] { display: none; }
+.polite-toggle[hidden] { display: none; }
 .view-mode button,
 .selftest-toggle,
-.starred-toggle,
 .polite-toggle {
   appearance: none;
   border: 1px solid var(--line-strong);
@@ -728,20 +726,12 @@ body {
 }
 .view-mode button:hover,
 .selftest-toggle:hover,
-.starred-toggle:hover,
 .polite-toggle:hover { color: var(--ink); border-color: var(--muted); }
-.starred-toggle .starred-count {
-  margin-left: 4px;
-  color: var(--faint);
-  font-variant-numeric: tabular-nums;
-}
-.starred-toggle.active .starred-count { color: var(--section-strong); }
 /* Active control: a section-toned fill + section-toned text and edge --
    deep enough to read as "on" at a glance, still a bordered rectangle, not
    a pill. (View-mode buttons use .col-hidden instead -- see below.) */
 .polite-toggle.active,
-.selftest-toggle.active,
-.starred-toggle.active {
+.selftest-toggle.active {
   background: color-mix(in srgb, var(--section) 18%, var(--paper));
   color: var(--section-strong);
   border-color: var(--section);
@@ -805,7 +795,6 @@ body.selftest-mode .selftest-hint { display: block; }
 .page-vocab { --reading-w: 900px; }
 #vocabulary .table-section,
 #vocabulary .cat-heading,
-#starredView .table-section,
 .page-vocab .expand-bar { max-width: var(--reading-w); }
 .table-section:first-of-type { break-before: auto; page-break-before: auto; }
 .page-hidden { display: none !important; }
@@ -1546,7 +1535,7 @@ body.show-polite .verb-form-polite { display: block; }
    its horizontal position drifted with word length (水 vs 電子レンジ landed
    nowhere near each other). .jp-line wraps the word + button as a flex pair
    -- same "pin it to a fixed edge instead of a length-dependent inline
-   position" fix as .meaning-cell already uses for the star/flashcard/hide
+   position" fix as .meaning-cell already uses for the flashcard/hide
    cluster, just anchored right instead of left. The review card's prompt
    (a single word, not a row among others) has nothing to line up with, so
    it deliberately isn't wrapped in this and keeps flowing inline. */
@@ -1734,8 +1723,6 @@ body.hide-furigana .vocab .furigana {
 }
 /* Keep the row action icons usable even when their column's text is hidden. */
 body.hide-english .vocab td:last-child .row-hide-btn,
-body.hide-english .vocab td:last-child .star-btn,
-body.hide-english .vocab td:last-child .star-btn svg,
 body.hide-english .vocab td:last-child .fc-toggle-btn { color: var(--faint) !important; }
 /* The pressed (= hidden) toggle reads as switched-off: struck through, muted. */
 .view-mode button.col-hidden {
@@ -1824,10 +1811,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      the Japanese cell's furigana (css/site.css:1116), so the reading crowds
      the row's top border. Give just that cell its breathing room back. */
   .vocab td.jp { padding-top: 9px !important; }
-  /* Drop the row actions in print -- but keep a set star, marking the row
-     it belongs to. */
-  .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn, .star-btn:not(.starred) { display: none !important; }
-  .star-btn.starred { opacity: 1; }
+  /* Drop the row actions in print. */
+  .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   .view-mode { display: none !important; }
   /* No screen hover on paper, so drop the reveal control. Only print romaji
      for rows where it's pinned open (.jp-romaji-on) -- otherwise print
@@ -1878,7 +1863,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   --danger-soft: #fbe9e7;
 }
 
-/* Row-action icons (star, hide) sit in their own cluster pinned to the
+/* Row-action icons (hide) sit in their own cluster pinned to the
    Meaning cell's right edge -- not flowing inline after the text, so a
    short definition doesn't put them anywhere different from a long one.
    The flex row lives on .meaning-cell, a <div> wrapper -- NOT the <td>
@@ -1886,8 +1871,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    stops honouring its column-width percentage. table-layout is fixed, so
    the cell's own width never changes row to row, and the cluster lands in
    the same spot every time.
-   - star: hidden until you hover a row or star the word -- at rest you only
-     ever see stars on words you picked.
    - hide: a quiet housekeeping action, ghosted at rest. */
 .vocab tbody td:last-child { padding-right: 10px; }
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
@@ -1912,7 +1895,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 }
 .row-actions { flex: 0 0 auto; display: flex; align-items: center; white-space: nowrap; }
 .fc-toggle-btn,
-.star-btn,
 .row-hide-btn {
   display: inline-flex;
   vertical-align: middle;
@@ -1924,7 +1906,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   cursor: pointer;
   transition: opacity .12s ease;
 }
-.star-btn { margin-left: 4px; color: var(--faint); opacity: 0; }
 .fc-toggle-btn,
 .row-hide-btn { color: var(--faint) !important; opacity: .3; }
 .vocab tbody tr:hover .fc-toggle-btn,
@@ -1939,28 +1920,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .vocab tbody tr:hover .row-hide-btn,
 .vocab tbody tr:focus-within .row-hide-btn,
 .row-hide-btn:focus-visible { opacity: 1; }
-.vocab tbody tr:hover .star-btn,
-.vocab tbody tr:focus-within .star-btn,
-.star-btn:focus-visible,
-.star-btn.starred { opacity: 1; }
-.star-btn:hover { color: var(--accent-dark); }
-.star-btn.starred { color: var(--accent); }
-.star-btn.starred svg { fill: currentColor; stroke: currentColor; }
 @media (hover: none) {
   .fc-toggle-btn,
   .row-hide-btn { opacity: .5; }               /* ghosted -- present, not loud */
   .fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
-  .star-btn { opacity: .5; }
-  .star-btn.starred { opacity: 1; }
 }
-
-/* The collected "Starred" view: the toolbar toggle swaps the vocabulary
-   list (and its directory / expand bar) for one synthetic table built the
-   same way as every other, rendered into #starredView. */
-body.starred-mode #vocabulary,
-body.starred-mode #tableIndex,
-body.starred-mode .expand-bar { display: none !important; }
-.starred-empty { color: var(--muted); font-size: var(--fs-nav-sub); padding: 4px 0 0; }
 
 .fc-lede { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.5; max-width: 60ch; }
 

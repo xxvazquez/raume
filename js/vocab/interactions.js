@@ -221,7 +221,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     opts = opts || {};
     const section = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');
     if (!section) return;
-    if (vocab.exitStarred) vocab.exitStarred();
     if (document.body.dataset.activeSection !== section.dataset.section) showSection(section.dataset.section, { fromRoute: true });
     expandSection(section);
     collapseSiblingSections(section);
@@ -239,10 +238,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // utility screens. Exactly one is visible; `which` is 'vocab' | 'flashcards'
   // | 'customize' | 'help'.
   function showStandalonePage(which) {
-    // Leaving the reference (or switching sections within it) always drops the
-    // collected "Starred" view -- it's a filter on the vocabulary list, not a
-    // place you navigate to.
-    if (vocab.exitStarred) vocab.exitStarred();
     var ids = { vocab: 'vocabPage', flashcards: 'flashcardsPage', customize: 'customizePage', help: 'helpPage' };
     Object.keys(ids).forEach(function (k) {
       var el = document.getElementById(ids[k]);
@@ -571,12 +566,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       input.focus();
     };
 
-    input.addEventListener('input', function () {
-      // Searching leaves the collected "Starred" view -- results span the
-      // whole reference, so it wouldn't make sense confined to that list.
-      if (input.value.trim() && vocab.exitStarred) vocab.exitStarred();
-      runSearch();
-    });
+    input.addEventListener('input', runSearch);
     document.getElementById('clearSearch').addEventListener('click', function () {
       input.value = ''; runSearch(); input.focus();
     });
@@ -811,7 +801,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     };
     window.addEventListener('scroll', function () {
       if (document.getElementById('vocabPage').hidden) return;
-      if (document.body.classList.contains('starred-mode')) return;
       if (document.getElementById('tableSearch').value.trim()) return;
       vocab.syncTableIndexActive();
     }, { passive: true });
@@ -996,96 +985,5 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (row) row.classList.toggle('revealed');
     });
 
-    // Star / favourite rows. A per-row star toggle (drawn by js/vocab/render.js)
-    // writes a flat vocab-id list into RaumeStudy.tableCustom ("__starred"),
-    // synced through the account like table names/icons. Once anything is
-    // starred, the toolbar "Starred" button collects those rows into one
-    // synthetic table -- built with the same buildVocabSection() every table
-    // uses, so it sorts and prints identically -- and hides the normal list
-    // while it's on. Not a nav page: it's a filtered view of the reference,
-    // dropped on any section switch or search.
-    const starredToggle = document.getElementById('starredToggle');
-    const starredView = document.getElementById('starredView');
-    function starredIdSet() {
-      const tc = window.RaumeStudy.tableCustom;
-      const set = Object.create(null);
-      (tc && tc.starredList ? tc.starredList() : []).forEach(function (id) { set[String(id)] = true; });
-      return set;
-    }
-    function collectStarredRows() {
-      const set = starredIdSet();
-      const out = [];
-      (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
-        (t.rows || []).forEach(function (r) { if (set[String(r.id)]) out.push(r); });
-      });
-      return out;
-    }
-    function renderStarredView() {
-      if (!starredView) return;
-      const rows = collectStarredRows();
-      if (!rows.length || !vocab.buildVocabSection) {
-        starredView.innerHTML = '<p class="starred-empty">No starred words yet — tap the star at the end of any row to start a list.</p>';
-      } else {
-        starredView.innerHTML = vocab.buildVocabSection({
-          id: 'starred', title: 'Starred', rows: rows, controls: { print: true }
-        });
-        const fc = window.RaumeStudy.flashcards;
-        if (fc && fc.refreshRowToggleButtons) fc.refreshRowToggleButtons();
-      }
-      syncStarButtons();
-    }
-    // Reflect the store on every star button on the page (both lists) and on
-    // the toolbar toggle's count / visibility.
-    function syncStarButtons() {
-      const set = starredIdSet();
-      document.querySelectorAll('.star-btn').forEach(function (btn) {
-        const on = !!set[String(btn.dataset.vocabId)];
-        btn.classList.toggle('starred', on);
-        btn.setAttribute('aria-pressed', String(on));
-        btn.setAttribute('aria-label', (on ? 'Unstar' : 'Star') + ' this word');
-      });
-      if (starredToggle) {
-        const count = Object.keys(set).length;
-        const countEl = starredToggle.querySelector('.starred-count');
-        if (countEl) countEl.textContent = String(count);
-        starredToggle.hidden = count === 0 && !document.body.classList.contains('starred-mode');
-      }
-    }
-    function applyStarredMode(on) {
-      if (on && vocab.clearSearchQuery) vocab.clearSearchQuery();
-      document.body.classList.toggle('starred-mode', on);
-      if (starredView) starredView.hidden = !on;
-      if (on) renderStarredView();
-      if (starredToggle) {
-        starredToggle.classList.toggle('active', on);
-        starredToggle.setAttribute('aria-pressed', String(on));
-      }
-      syncStarButtons();
-    }
-    vocab.exitStarred = function () {
-      if (document.body.classList.contains('starred-mode')) applyStarredMode(false);
-    };
-    if (starredToggle) {
-      starredToggle.addEventListener('click', function () {
-        const on = !document.body.classList.contains('starred-mode');
-        applyStarredMode(on);
-        window.scrollTo({ top: 0 });
-      });
-    }
-    // A star click in either list: toggle the store; onChange redraws.
-    document.addEventListener('click', function (event) {
-      const btn = event.target.closest && event.target.closest('.star-btn');
-      if (!btn) return;
-      event.stopPropagation();
-      const tc = window.RaumeStudy.tableCustom;
-      if (tc && tc.toggleStar) tc.toggleStar(btn.dataset.vocabId);
-    });
-    if (window.RaumeStudy.tableCustom) {
-      window.RaumeStudy.tableCustom.onChange(function () {
-        if (document.body.classList.contains('starred-mode')) renderStarredView();
-        else syncStarButtons();
-      });
-    }
-    syncStarButtons();
   });
 })();
