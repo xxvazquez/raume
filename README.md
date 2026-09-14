@@ -88,8 +88,9 @@ so they're easy to spot in a sentence.
 
 - Give any table header an **icon** (a picker with ~165 curated line icons, or
   upload your own) and a custom **name / order** on the **Customize** page
-  (masthead sliders icon). Customisations show everywhere the table appears,
-  including Flashcards › Manage.
+  (masthead sliders icon), or via **Choose icon…** in that table's own ⋯ menu
+  while browsing. Customisations show everywhere the table appears, including
+  Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
 - The Customize page groups tables the same way the nav does: a **Vocabulary**
   heading over its three categories (Food & Ingredients, Kitchen & Dining,

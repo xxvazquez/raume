@@ -269,6 +269,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // menu there too (the .print-menu-item copy, CSS-toggled by width) and the
     // standalone icon is hidden.
     var menuItems = [];
+    // Choose icon lives in the menu, not as its own always-visible button on
+    // the header, so normal browsing stays clean -- only a table you can
+    // actually customise (controls.addTable, i.e. a real table, never a
+    // synthetic one like Flashcards' Words to review) gets it. Reuses
+    // .section-icon-btn so the existing delegated click handler
+    // (interactions.js) needs no logic change to open the picker from here.
+    if (controls.addTable) menuItems.push('<button type="button" class="section-icon-btn" role="menuitem" data-icon-for="' + o.id + '">Choose icon…</button>');
     if (controls.addTable) menuItems.push('<button type="button" class="fc-add-table-btn" role="menuitem" data-table="' + o.id + '" title="Add every row in this table to your flashcards">Add to flashcards</button>');
     // Only fold print into the menu when the menu already exists for other
     // reasons -- a table whose only control is print keeps just the icon.
@@ -286,7 +293,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       (o.section ? ' data-section="' + esc(o.section) + '"' : '') +
       ' id="table-' + o.id + '">' +
       '<div class="section-head">' +
-      '<button type="button" class="section-icon-btn" data-icon-for="' + o.id + '" title="Choose an icon" aria-label="Choose an icon for ' + esc(title) + '">' + tableIconSlot(o.id) + '</button>' +
+      // Decorative only -- not a control. Changing it lives in the table's
+      // "Table options" menu (the Choose icon… item above) instead of an
+      // always-visible button here, so it doesn't leak an editing action
+      // into normal browsing. Only rendered for a real table (same
+      // controls.addTable gate as the menu item) -- a synthetic table like
+      // Flashcards' Words to review has nothing to persist an icon against.
+      (controls.addTable ? tableIconSlot(o.id) : '') +
       '<h2 class="section-title"><button type="button" class="section-toggle" aria-expanded="' + (o.collapsed ? 'false' : 'true') + '" aria-controls="vocab-' + o.id + '">' +
       '<span class="section-toggle-icon">' + CHEVRON_ICON + '</span>' +
       '<span class="section-title-text" id="secttl-' + o.id + '">' + esc(title) + '</span>' +

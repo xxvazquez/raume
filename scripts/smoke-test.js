@@ -493,9 +493,14 @@ async function main() {
   check("render() emits an <img> for an uploaded data URL", /^<img /.test(ic.render("data:image/png;base64,AAAA")));
   check("render() degrades to nothing for an unknown value", ic.render("definitely-not-an-icon") === "");
   check("the icon picker module is available", !!(window.RaumeStudy.iconPicker && window.RaumeStudy.iconPicker.open));
-  check("every table header has an icon button", [...document.querySelectorAll("#vocabulary .table-section")].every(s => !!s.querySelector(".section-head > .section-icon-btn[data-icon-for]")));
+  // Choosing an icon lives in the table's "Table options" menu now (Choose
+  // icon…, not an always-visible header button) -- see render.js
+  // sectionMarkup + interactions.js. The header glyph itself is decorative,
+  // reusing the same .section-icon slot markup either way.
+  check("every table header shows a decorative icon slot", [...document.querySelectorAll("#vocabulary .table-section")].every(s => !!s.querySelector(".section-head > .section-icon")));
+  check("every table's menu offers a Choose icon item wired to the picker hook", [...document.querySelectorAll("#vocabulary .table-section")].every(s => !!s.querySelector(".section-menu-list .section-icon-btn[data-icon-for]")));
   check("an untouched table shows the empty '+' slot, not a chosen icon", (() => {
-    const slot = document.querySelector(".section-icon-btn .section-icon");
+    const slot = document.querySelector(".section-head > .section-icon");
     // The empty slot is a plain "+" (two strokes), never a box -- a square
     // outline here read as an unchecked checkbox.
     return slot.classList.contains("section-icon-empty")
@@ -504,10 +509,10 @@ async function main() {
       && !slot.querySelector("[stroke-dasharray]");
   })());
   check("choosing an icon updates the header and directory in place", (() => {
-    const btn = document.querySelector('.section-icon-btn[data-icon-for]');
+    const btn = document.querySelector('.section-menu-list .section-icon-btn[data-icon-for]');
     const id = btn.dataset.iconFor;
     window.RaumeStudy.tableCustom.setIcon(id, "coffee");
-    const slot = btn.querySelector(".section-icon");
+    const slot = btn.closest(".table-section").querySelector(".section-icon");
     const dir = document.querySelector('#tindexMenu a[data-target="' + id + '"] .tindex-icon');
     const ok = !slot.classList.contains("section-icon-empty")
       && /viewBox="0 0 24 24"/.test(slot.innerHTML) && !slot.querySelector("[stroke-dasharray]")
@@ -517,8 +522,8 @@ async function main() {
   })());
   check("sign-in merges local customisations with the account (account wins per table, local-only kept + pushed up)", (() => {
     const tc = window.RaumeStudy.tableCustom;
-    const secs = [...document.querySelectorAll(".section-icon-btn[data-icon-for]")];
-    const a = secs[0].dataset.iconFor, b = secs[1].dataset.iconFor;
+    const secs = [...document.querySelectorAll("#vocabulary .table-section[data-table]")];
+    const a = secs[0].dataset.table, b = secs[1].dataset.table;
     tc.setIcon(a, "coffee");        // local + on the account -> account should win
     tc.setIcon(b, "leaf");          // local only -> should survive sign-in
     let pushed = null;
@@ -1770,12 +1775,9 @@ async function main() {
     return items.length === 4 && items.some(t => t.includes("Not added")) && items.some(t => t.includes("In flashcards"))
       && items.some(t => t.includes("Due for review")) && items.some(t => t.includes("Paused"));
   })());
-  check("Words to Review's icon-choosing button is hidden -- it's a synthetic table, nothing to persist an icon against", (() => {
-    // Regression: this used to target a class (.section-title-icon) that never
-    // existed anywhere in the rendered markup, so the rule was a silent no-op
-    // and the button rendered live. Check the fixed selector is what's there.
-    const rule = allCssRules.find(r => r.selectorText === "#fcWordsToReview .section-icon-btn");
-    return !!rule && rule.style.display === "none";
+  check("Words to Review renders no icon-choosing UI -- it's a synthetic table, nothing to persist an icon against", (() => {
+    const host = document.getElementById("fcWordsToReview");
+    return !host || (!host.querySelector(".section-icon") && !host.querySelector(".section-icon-btn"));
   })());
   check("Words to Review opts into the column-visibility toggles so you can quiz off it", (() => {
     const sampleRow = window.RaumeStudy.data.vocabularyTables[0].rows.find(r => r.id);

@@ -674,7 +674,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       } else if ((el = t.closest('.sort-button'))) {
         event.stopPropagation();
         vocab.sortTableFromButton(el);
-      } else if (t.closest('.fc-add-table-btn')) {
+      } else if (t.closest('.fc-add-table-btn') || t.closest('.section-menu-list .section-icon-btn')) {
         closeSectionMenus();
       }
     });
@@ -921,9 +921,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const btn = event.target.closest && event.target.closest('.section-icon-btn');
       if (!btn || !window.RaumeStudy.iconPicker) return;
       const id = btn.dataset.iconFor;
+      // From the table header's "Table options" menu, btn itself is about to
+      // be hidden (the menu closes on this same click -- see the delegated
+      // handler above), so it can't take focus back when the picker closes.
+      // Hand that back to the menu trigger instead, which stays visible.
+      const menuBtn = btn.closest('.section-menu');
+      const focusTarget = menuBtn ? menuBtn.querySelector('.section-menu-btn') : btn;
       window.RaumeStudy.iconPicker.open(window.RaumeStudy.tableCustom.iconOf(id), function (value) {
         window.RaumeStudy.tableCustom.setIcon(id, value); // fires onChange -> redraw
-      }, btn);
+      }, focusTarget || btn);
     });
     // Redraw on any change -- a local pick, or icons arriving from another
     // device on sign-in (Supabase sync).

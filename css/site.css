@@ -924,7 +924,7 @@ body.selftest-mode .selftest-hint { display: block; }
   .section-head { align-items: flex-start; }
   .section-title-text { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; }
   .section-toggle-icon { margin-top: 3px; }
-  .section-icon-btn { margin-top: 1px; }
+  .section-head > .section-icon { margin-top: 1px; }
 }
 
 /* --- Table icons ------------------------------------------------- */
@@ -944,13 +944,25 @@ svg.si { stroke-width: 1.6; }
 }
 .section-icon { display: block; width: 100%; height: 100%; }
 .section-icon-btn:hover { color: var(--section-strong); }
-/* The empty slot is a quiet "+" -- present but barely there until the header
-   (or the slot) is hovered/focused. (Not a dashed square: that read as an
-   unchecked checkbox, especially stacked down the Customize page.) */
-.section-icon-btn .section-icon-empty { color: var(--line-strong); }
-.section-head:hover .section-icon-btn .section-icon-empty,
+/* The empty slot is a quiet "+" -- barely there at rest. (Not a dashed
+   square: that read as an unchecked checkbox, especially stacked down the
+   Customize page.) Still reveals a touch more on hover/focus where it sits
+   inside an actual button (the Customize row); the header instance below
+   is decorative now, not a control, so it has no hover state to reveal. */
+.section-icon-empty { color: var(--line-strong); }
+.section-icon-btn:hover .section-icon-empty,
 .section-icon-btn:focus-visible .section-icon-empty { color: var(--faint); }
-.table-section.collapsed .section-icon-btn { width: 16px; height: 16px; }
+/* The header glyph (see render.js sectionMarkup) sits directly in
+   .section-head now, not wrapped in a button -- changing it lives in the
+   table's "Table options" menu instead, so this is decoration only and
+   needs its own box size rather than inheriting one from a button parent. */
+.section-head > .section-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+.table-section.collapsed .section-head > .section-icon { width: 16px; height: 16px; }
 
 .tindex-icon { flex: 0 0 auto; width: 15px; height: 15px; color: var(--muted); }
 
@@ -1397,6 +1409,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 }
 .section-menu-list[hidden] { display: none; }
 .table-section.menu-open { overflow: visible; }
+.section-menu-list .section-icon-btn,
 .section-menu-list .fc-add-table-btn,
 .section-menu-list .print-menu-item,
 .section-menu-list .print-scope {
@@ -1413,6 +1426,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   cursor: pointer;
   white-space: nowrap;
 }
+.section-menu-list .section-icon-btn:hover,
 .section-menu-list .fc-add-table-btn:hover,
 .section-menu-list .print-menu-item:hover,
 .section-menu-list .print-scope:hover { background: var(--accent-soft); color: var(--accent-strong); }
@@ -2832,12 +2846,6 @@ mark.fc-diff-co {
   border-bottom: 1px solid var(--line);
 }
 #fcWordsToReview .section-head::before { display: none; }
-/* Was targeting a class that's never existed (.section-title-icon), so the
-   icon-choosing button -- meant to be stripped along with the header strip
-   and category chip, per the comment above -- was rendering live: a
-   "Choose an icon" control on a synthetic table with nothing to persist it
-   against. */
-#fcWordsToReview .section-icon-btn { display: none; }
 #fcWordsToReview .section-title-text { font-size: var(--fs-subhead); font-weight: 500; }
 #fcWordsToReview .section-toggle-icon { width: 20px; height: 20px; }
 /* The column-visibility toggles are a wide control for a section head -- let
