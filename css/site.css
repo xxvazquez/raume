@@ -723,9 +723,31 @@ body {
 
 .vocab-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 /* Compact, rectangular controls -- a reference-book control, not a pill. */
-.view-mode { display: inline-flex; gap: 4px; }
+/* The three column toggles are one tool with three positions (Japanese /
+   Furigana / English), not three independent buttons -- grouped into a
+   single segmented control (one shared border, dividers between segments)
+   instead of three separate bordered pills. Fewer separately-bordered boxes
+   in the row means less visual competition with the standalone toggles
+   beside it, without moving or removing anything. */
+.view-mode {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.view-mode button {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--muted);
+  font: 400 var(--fs-small)/1 var(--font-ui);
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.view-mode button:last-child { border-right: 0; }
 .polite-toggle[hidden] { display: none; }
-.view-mode button,
 .selftest-toggle,
 .polite-toggle {
   appearance: none;
@@ -2813,9 +2835,22 @@ mark.fc-diff-co {
 #fcWordsToReview .section-toggle-icon { width: 20px; height: 20px; }
 /* The column-visibility toggles are a wide control for a section head -- let
    them fall onto their own line under the title rather than crushing it when
-   the card is narrow. */
+   the card is narrow. The segmented grouping (shared border, dividers
+   between segments) assumes one line -- a wrapped segment would carry a
+   dangling divider into empty space -- so this one narrow spot falls back
+   to individual bordered buttons instead. */
 #fcWordsToReview .section-head { flex-wrap: wrap; row-gap: 10px; }
-#fcWordsToReview .section-head .view-mode { flex-wrap: wrap; }
+#fcWordsToReview .section-head .view-mode {
+  flex-wrap: wrap;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+#fcWordsToReview .section-head .view-mode button {
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+}
 
 /* Printing the Words to Review table from the Dashboard: strip the Flashcards
    chrome so only that one table (title + grid) reaches the page, matching how
