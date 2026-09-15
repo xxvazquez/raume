@@ -1647,50 +1647,68 @@ body.ja-voice-ready .jp-speak-btn {
 }
 
 /* Interactive reading layer: hover (desktop) or tap (touch -> .kr-on) a
-   katakana unit to see its romaji, small and directly above it. The romaji
-   lives in ::after content(attr) so it never enters the DOM's textContent
-   (search / sort stay clean); it's position:absolute so nothing reflows.
-   A visible edge matters here, not just an opaque background: the page
-   behind is the same --paper white, so a plain filled box is invisible
-   against it and still reads as merged text. A hairline border + shadow
-   makes it read as a floating label -- needed because a long furigana
-   reading can overhang past its own kanji
-   into the space directly above the next character (kanji is narrower than
-   a 2-3 kana reading), landing right where this tooltip appears. */
+   katakana unit to see its romaji, small and directly above it in a dark,
+   rounded callout bubble with a small caret pointing back at the kana --
+   the native iOS tooltip idiom, not a bordered box sitting on the page. A
+   fixed dark fill (not a theme variable) reads as an overlay regardless of
+   light/dark mode, the same way an iOS system callout never changes with
+   the app around it. The romaji lives in ::after content(attr) so it never
+   enters the DOM's textContent (search / sort stay clean); the bubble and
+   caret are both position:absolute so nothing reflows. */
 .kr { position: relative; cursor: help; }
 .kr::after {
   content: attr(data-r);
   position: absolute;
   left: 50%;
   bottom: 100%;
-  margin-bottom: 2px;
-  transform: translateX(-50%);
+  margin-bottom: 5px;
+  transform: translateX(-50%) scale(.85);
+  transform-origin: bottom center;
   z-index: 3;
-  background: var(--paper);
-  border: 1px solid var(--card-line);
-  box-shadow: var(--shadow-menu);
-  border-radius: 3px;
-  padding: 0 3px;
+  background: rgba(28, 28, 30, .92);
+  border-radius: 6px;
+  padding: 2px 7px;
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 10.5px;
   font-style: italic;
-  line-height: 1.3;
+  line-height: 1.4;
   letter-spacing: 0;
-  color: var(--romaji);
+  color: #fff;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .1s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .22);
+  transition: opacity .12s ease, transform .12s ease;
 }
-.kr:hover::after { opacity: 1; }
-@media (hover: none) { .kr:hover::after { opacity: 0; } }
+/* The caret: a 4px CSS triangle sitting in the gap between the bubble and
+   the kana, tip down. Its own fade mirrors the bubble's exactly. */
+.kr::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  z-index: 3;
+  border: 4px solid transparent;
+  border-top-color: rgba(28, 28, 30, .92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease;
+}
+.kr:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
+.kr:hover::before { opacity: 1; }
+@media (hover: none) {
+  .kr:hover::after { opacity: 0; transform: translateX(-50%) scale(.85); }
+  .kr:hover::before { opacity: 0; }
+}
 /* .kr-on declared after the (hover: none) suppression above, not grouped
    into the :hover rule, so a pinned-open reveal always wins that tie --
    iOS Safari can leave a just-tapped element in a stuck :hover state, and
    with equal specificity, a same-position :hover/.kr-on rule followed by a
    later hover-none rule would let the stuck :hover re-hide what the tap
    just pinned open. Same fix applied to .particle and .jpword below. */
-.kr.kr-on::after { opacity: 1; }
+.kr.kr-on::after { opacity: 1; transform: translateX(-50%) scale(1); }
+.kr.kr-on::before { opacity: 1; }
 
 /* Meaning: dark, but a step below the Japanese so the Japanese still leads.
    Centred against the row's full height (not bottom-aligned like the

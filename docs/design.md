@@ -137,7 +137,10 @@ and Help.
   can leave a just-tapped element hovered) could re-hide a reveal the tap
   just pinned open; the old whole-word icon+popover design had this same
   tie (before it dropped hover entirely), and it's the likely explanation
-  for reports of the reveal never opening on an iOS PWA.
+  for reports of the reveal never opening on an iOS PWA. The katakana `.kr`
+  layer itself renders as a dark, rounded callout with a small caret pointing
+  at the kana — the iOS system-tooltip idiom, fixed dark fill in both themes
+  — instead of a bordered box sitting on the page.
 - **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
   Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
   size; they keep their authored question/answer order instead of sorting
