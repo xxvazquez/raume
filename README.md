@@ -311,6 +311,4 @@ Vendored libraries and fonts keep their own permissive licenses: `ts-fsrs` and
 License (`fonts/*.LICENSE.txt`).
 
 Pronunciation audio (`audio/*.mp3`) is generated offline with
-[VOICEVOX](https://voicevox.hiroshiba.jp/), whose character voice libraries
-require a credit line naming the voice used — see `docs/architecture.md` for
-the exact credit once a voice is chosen (`scripts/generate-audio.js`).
+[VOICEVOX](https://voicevox.hiroshiba.jp/) — voice used: VOICEVOX:四国めたん.
