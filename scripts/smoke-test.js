@@ -63,9 +63,11 @@ async function main() {
   console.log("Global pull-to-refresh (touch)");
   (() => {
     function touch(type, y, opts) {
-      const e = new window.Event(type, Object.assign({ bubbles: true, cancelable: true }, opts));
+      opts = opts || {};
+      const target = opts.target || document;
+      const e = new window.Event(type, { bubbles: true, cancelable: true });
       e.touches = y == null ? [] : [{ clientY: y }];
-      document.dispatchEvent(e);
+      target.dispatchEvent(e);
       return e;
     }
     check("starts with no bar in the DOM -- it's created on first use, not eagerly", !document.querySelector(".pull-refresh"));
@@ -73,6 +75,13 @@ async function main() {
     const tapDrift = touch("touchmove", 5); // a plain tap's incidental jitter, well under TAP_TOLERANCE
     check("a few px of drift (an ordinary tap) doesn't claim the gesture -- no bar, default not prevented, so the tap's own click still fires", !document.querySelector(".pull-refresh") && !tapDrift.defaultPrevented);
     touch("touchend", null);
+    check("a gesture starting on a tappable control (the romaji reveal button) is never tracked at all -- even a big drift doesn't claim it, so the control's own tap always gets through", (() => {
+      const romajiBtn = document.querySelector(".jp-romaji-btn");
+      touch("touchstart", 0, { target: romajiBtn });
+      const bigDrift = touch("touchmove", 30, { target: romajiBtn });
+      touch("touchend", null, { target: romajiBtn });
+      return !!romajiBtn && !document.querySelector(".pull-refresh") && !bigDrift.defaultPrevented;
+    })());
     touch("touchstart", 0);
     touch("touchmove", 20);
     check("a small pull shows the bar in its neutral 'pulling' state", (() => {
