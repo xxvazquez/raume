@@ -132,30 +132,22 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.speakButtonHtml = speakButton;
   // Romaji lives here now instead of its own column (see docs/architecture.md
-  // -- the reference table is Japanese+English, two columns): a small control
-  // next to the speaker button reveals it on hover/tap, same interaction
-  // pattern the old Phrases translate-icon used. Kept always in the DOM
-  // (not display:none-by-default via JS) so search can still match it --
-  // see js/vocab/interactions.js fieldsForRow.
-  // A small "Aa" monogram -- romaji is a transliteration, not a translation,
-  // so a "languages" (globe/translate) icon would misrepresent what this
-  // does. Drawn as vector strokes, not an SVG <text> label: a literal text
-  // node here would leak Latin characters into the jp cell's plain
-  // textContent (search/sort read that cell expecting kana/kanji only -- see
-  // js/vocab/interactions.js jpFields, which strips this whole control back
-  // out for that reason, but the raw DOM text should stay clean regardless).
-  var ROMAJI_ICON = '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12.5 4 4 6.5 12.5M2.5 9.5h4"/><circle cx="11" cy="9.5" r="2.1"/><path d="M13.1 7.4v5.1"/></svg>';
-  function romajiButton(romaji) {
-    if (!romaji) return '';
-    return '<span class="jp-romaji-wrap">' +
-      '<button type="button" class="jp-romaji-btn" aria-expanded="false" aria-label="Show romaji" title="Show romaji">' + ROMAJI_ICON + '</button>' +
-      '<span class="jp-romaji-pop" role="tooltip">' + esc(romaji) + '</span>' +
-      '</span>';
+  // -- the reference table is Japanese+English, two columns): hover the word
+  // itself (desktop) or tap it (touch) to see its romaji as a caption line
+  // underneath, the same reveal-on-demand idiom the per-kana reading layer
+  // (js/vocab/kana-romaji.js, .kr) already uses -- no separate icon/button;
+  // every word has a reading, so there's nothing for an icon to distinguish.
+  // data-romaji feeds css/site.css's `content: attr(...)`, so the reading
+  // never enters the DOM's textContent (search/sort read the cell expecting
+  // kana/kanji only -- see js/vocab/interactions.js jpFields) while still
+  // being readable straight off the attribute for search -- see
+  // js/vocab/interactions.js fieldsForRow.
+  function romajiAttr(romaji) {
+    return romaji ? ' data-romaji="' + esc(romaji) + '"' : '';
   }
-  vocab.romajiButtonHtml = romajiButton;
   // romaji is optional: sentence and word rows alike now pass their romaji
-  // through here so the reveal control always sits next to the speaker
-  // button, in the same cell, regardless of table type.
+  // through here so the reveal lives on the word itself, in the same cell,
+  // regardless of table type.
   // い/な-adjective rows get a coloured bar down the cell's own left edge
   // (see css/site.css) instead of carrying a separate label -- a
   // legend near the toolbar (index.html) explains the two colours once
@@ -172,11 +164,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
-    var inner = '<span class="jpword">' + jpSegments(row.jp, true) + '</span>';
+    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpSegments(row.jp, true) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + romajiButton(romaji) + '</div>' + adjNote(row.adj) + '</td>';
+    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div>' + adjNote(row.adj) + '</td>';
   }
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
   // The main study areas. Grammar, Phrases and Travel are promoted out of the
@@ -222,7 +214,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (each form carries its own speaker + romaji reveal).
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword">' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + romajiButton(f.romaji) + '</div></div>'; }).join('');
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('');
     return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
@@ -247,8 +239,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // interactions.js), so this works wherever the markup lands; it drives the
   // global `body.hide-*` state, so a column hidden here stays hidden on the
   // reference pages too. No Romaji button -- there's no Romaji column left to
-  // hide (js/vocab/render.js's romajiButtonHtml puts it on-demand next to the
-  // speaker button instead).
+  // hide (it's an on-demand reveal on the word itself instead, see jpCell).
   var VIEW_MODE_CONTROL =
     '<div class="view-mode" aria-label="Column visibility">' +
     '<button type="button" data-col="japanese" aria-pressed="false" title="Hide the Japanese column">Japanese</button>' +

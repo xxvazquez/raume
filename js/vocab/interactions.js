@@ -342,27 +342,27 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Column visibility: each toolbar button hides its own thing (the
     // Japanese / English columns, or just the furigana readings), any
     // combination -- never both columns at once. Search then only looks at
-    // what's still on screen. Romaji isn't a column any more (see
-    // js/vocab/render.js's romajiButtonHtml) -- it's always searchable, so it
-    // has no toggle and no entry here.
+    // what's still on screen. Romaji isn't a column any more (see jpCell in
+    // js/vocab/render.js) -- it's always searchable, so it has no toggle and
+    // no entry here.
     const COL_INDEX = { japanese: 1, english: 2 };
     function isHidden(key) { return document.body.classList.contains('hide-' + key); }
     function visibleColKeys() {
       return Object.keys(COL_INDEX).filter(k => !isHidden(k));
     }
 
-    // The jp cell mixes kanji/kana with <rt class="furigana"> readings, the
-    // romaji reveal (button + tooltip), and -- on an adjective row -- a
-    // visually-hidden "(い-adjective)" note for assistive tech; strip all of
-    // it out so "Japanese" search covers just the kanji/kana without
-    // garbling in a reading, a romaji string, or the adjective note.
+    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and --
+    // on an adjective row -- a visually-hidden "(い-adjective)" note for
+    // assistive tech; strip both out so "Japanese" search covers just the
+    // kanji/kana without garbling in a reading or the adjective note. The
+    // romaji reveal doesn't need stripping here: it lives in a data-romaji
+    // attribute (css/site.css renders it via content: attr(...)), so it was
+    // never part of textContent to begin with.
     function jpFields(td) {
       const clone = td.cloneNode(true);
       const furiganaEls = [...clone.querySelectorAll('.furigana')];
       const furigana = furiganaEls.map(el => el.textContent).join('');
       furiganaEls.forEach(el => el.remove());
-      const romajiWrap = clone.querySelector('.jp-romaji-wrap');
-      if (romajiWrap) romajiWrap.remove();
       const adjNote = clone.querySelector('.visually-hidden');
       if (adjNote) adjNote.remove();
       return { kanji: clone.textContent, furigana };
@@ -404,9 +404,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       }
       // Romaji is never hidden by a toggle any more -- it's an always-
       // searchable on-demand reveal living in the jp cell (row.cells[0]),
-      // not its own column, so it's unconditional here.
-      const romajiEl = row.cells[0].querySelector('.jp-romaji-pop');
-      if (romajiEl) fields.push({ cell: row.cells[0], text: romajiEl.textContent, romaji: true });
+      // not its own column, so it's unconditional here. Read straight off
+      // the data-romaji attribute (see jpCell in js/vocab/render.js) rather
+      // than an element's textContent -- css/site.css renders it via
+      // content: attr(...), so there's no text node to read.
+      const jpword = row.cells[0].querySelector('.jpword[data-romaji]');
+      if (jpword) fields.push({ cell: row.cells[0], text: jpword.dataset.romaji, romaji: true });
       // English: every row now keeps it in cells[1] (.meaning-text, so the
       // row-action icons never register) -- word and (since the Phrases
       // redesign) sentence rows alike.
@@ -420,6 +423,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function clearHighlights(row) {
       row.querySelectorAll('mark.search-hit').forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent)));
       row.querySelectorAll('.kr.search-hit').forEach(el => el.classList.remove('search-hit'));
+      row.querySelectorAll('.jpword.jp-romaji-hit').forEach(el => el.classList.remove('jp-romaji-hit'));
       [...row.cells].forEach(cell => cell.normalize());
     }
 
@@ -482,7 +486,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const r = f.romaji ? rankOf(expandMacronsForSearch(f.text), qExpanded) : rankOf(f.text, q);
         if (r !== null) {
           if (best === null || r < best) best = r;
-          matchedCells.add(f.cell);
+          // The romaji reveal has no text node to wrap in <mark> (it's
+          // content: attr(...) -- see css/site.css), so a match there
+          // auto-reveals and highlights the whole reading instead of just
+          // the matched run, the same degradation .kr.search-hit already
+          // accepts for the per-kana layer.
+          if (f.romaji) row.cells[0].querySelector('.jpword[data-romaji]').classList.add('jp-romaji-hit');
+          else matchedCells.add(f.cell);
         }
       });
       matchedCells.forEach(cell => highlightCell(cell, q));
@@ -868,18 +878,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelectorAll('.particle.particle-on').forEach(function (el) { if (el !== pt) el.classList.remove('particle-on'); });
       if (pt) pt.classList.toggle('particle-on');
 
-      // Romaji reveal (next to the speaker button, every row): the same
-      // touch-friendly toggle as above -- a tap pins it, a tap elsewhere
-      // closes it; desktop :hover still opens it without a click.
-      const roBtn = event.target.closest && event.target.closest('.jp-romaji-btn');
-      const roWrap = roBtn && roBtn.closest('.jp-romaji-wrap');
-      document.querySelectorAll('.jp-romaji-wrap.jp-romaji-on').forEach(function (el) {
-        if (el !== roWrap) { el.classList.remove('jp-romaji-on'); const b = el.querySelector('.jp-romaji-btn'); if (b) b.setAttribute('aria-expanded', 'false'); }
-      });
-      if (roWrap) {
-        const open = roWrap.classList.toggle('jp-romaji-on');
-        roBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }
+      // Whole-word/sentence romaji reveal: same touch-pin behaviour as
+      // above -- a tap on the Japanese text pins its romaji open, a tap
+      // elsewhere closes it; desktop :hover still opens it without a click.
+      const jw = event.target.closest && event.target.closest('.jpword[data-romaji]');
+      document.querySelectorAll('.jpword.jp-romaji-on').forEach(function (el) { if (el !== jw) el.classList.remove('jp-romaji-on'); });
+      if (jw) jw.classList.toggle('jp-romaji-on');
     });
 
     // Table personalisation: a chosen icon or custom name (from the section

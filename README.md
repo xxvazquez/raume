@@ -45,9 +45,10 @@ so they're easy to spot in a sentence.
 **Reading the tables**
 
 - Every table is two columns — **Japanese** (with furigana) and **English** —
-  in every section, Phrases included. **Romaji** isn't a column: a small
-  control next to the speaker icon reveals it on hover or tap, for any word or
-  sentence. It's still fully searchable even though it's not shown by default.
+  in every section, Phrases included. **Romaji** isn't a column: hover the
+  word or sentence itself (or tap it, on touch) to see its romaji as a line
+  underneath — same reveal as the per-kana reading layer below, just for the
+  whole word. It's still fully searchable even though it's not shown by default.
 - **Column toggles** — hide **Japanese / Furigana / English** from the
   toolbar (Furigana hides just the readings). You can't hide both text
   columns at once. A hidden column keeps its width; the text just goes

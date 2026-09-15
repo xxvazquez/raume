@@ -49,7 +49,7 @@ properties in `css/site.css`.
 |---|---|---|
 | `#1F2836` | `--ink` | primary text — dark cool ink for headings, numbers, Japanese (~12:1, clears AAA) |
 | `#55606F` / `#78838F` | `--muted` / `--faint` | secondary text (labels) / tertiary (counts, chevrons) — both AA |
-| `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji reveal popover / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
+| `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji reveal caption / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
 | `#F6F7F9` | `--page-bg` | the near-white ground — white cards lift off it on `--shadow-card`, not tonal contrast |
 | `#FFFFFF` | `--paper` | the sheet, cards, table surface |
 | `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
@@ -119,14 +119,22 @@ and Help.
   screen readers. No separate tag riding along in the Meaning cell — it
   costs no row height or column width, unlike the pill this replaced.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
-  column anywhere, including Phrases. Instead, a small control next to the
-  speaker button (`.jp-romaji-btn`, a small "Aa" monogram drawn from vector
-  strokes — not the *languages*/translate glyph, since romaji is a
-  transliteration, not a translation) opens a
-  `--shadow-menu` popover with the reading, on hover (desktop) or tap
-  (`.jp-romaji-on`, same pattern as the katakana `.kr` reading layer). It
-  stays in the DOM for search and screen readers, and prints inline next to
-  the word (there's no hover on paper).
+  column anywhere, including Phrases. Instead, the word/sentence itself
+  (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on
+  hover (desktop) or tap (`.jp-romaji-on`) — the exact same pattern as the
+  katakana `.kr` reading layer, just scoped to the whole word instead of one
+  kana: no dedicated icon, since every word has a reading, and there's
+  nothing for an icon to distinguish. In flow, not a floating popover, so it
+  grows the row instead of sitting over the one below. It stays in the DOM
+  for search (the reading lives in the `data-romaji` attribute, read by
+  `content: attr(...)`, so it never touches textContent), and prints in place
+  for a pinned-open row (there's no hover on paper). The `.jp-romaji-on` /
+  `.kr-on` / `.particle-on` "pinned" rules are all declared after their
+  `(hover: none)` suppression and repeat enough of the base selector to tie
+  its specificity — otherwise a stuck `:hover` state (iOS can leave a
+  just-tapped element hovered) could re-hide a reveal the tap just pinned
+  open -- the old icon+popover design had this same tie, and it's the likely
+  explanation for reports of the reveal never opening on an iOS PWA.
 - **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
   Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
   size; they keep their authored question/answer order instead of sorting

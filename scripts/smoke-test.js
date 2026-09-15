@@ -75,12 +75,12 @@ async function main() {
     const tapDrift = touch("touchmove", 5); // a plain tap's incidental jitter, well under TAP_TOLERANCE
     check("a few px of drift (an ordinary tap) doesn't claim the gesture -- no bar, default not prevented, so the tap's own click still fires", !document.querySelector(".pull-refresh") && !tapDrift.defaultPrevented);
     touch("touchend", null);
-    check("a gesture starting on a tappable control (the romaji reveal button) is never tracked at all -- even a big drift doesn't claim it, so the control's own tap always gets through", (() => {
-      const romajiBtn = document.querySelector(".jp-romaji-btn");
-      touch("touchstart", 0, { target: romajiBtn });
-      const bigDrift = touch("touchmove", 30, { target: romajiBtn });
-      touch("touchend", null, { target: romajiBtn });
-      return !!romajiBtn && !document.querySelector(".pull-refresh") && !bigDrift.defaultPrevented;
+    check("a gesture starting on a tappable control (the romaji reveal word) is never tracked at all -- even a big drift doesn't claim it, so the control's own tap always gets through", (() => {
+      const jpword = document.querySelector(".jpword[data-romaji]");
+      touch("touchstart", 0, { target: jpword });
+      const bigDrift = touch("touchmove", 30, { target: jpword });
+      touch("touchend", null, { target: jpword });
+      return !!jpword && !document.querySelector(".pull-refresh") && !bigDrift.defaultPrevented;
     })());
     touch("touchstart", 0);
     touch("touchmove", 20);
@@ -173,7 +173,7 @@ async function main() {
     const taste = [...document.querySelectorAll(".table-section")]
       .find(s => s.querySelector(".section-title-text").textContent === "Taste & Texture");
     const tasteTagged = taste.querySelectorAll("td.jp.adj-i").length >= 10 && taste.querySelectorAll("td.jp.adj-na").length === 0;
-    const romajiOf = r => { const p = r.querySelector(".jp-romaji-pop"); return p ? p.textContent : ""; };
+    const romajiOf = r => { const w = r.querySelector(".jpword[data-romaji]"); return w ? w.dataset.romaji : ""; };
     const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => romajiOf(r) === "mochimochi");
     const mochiUntagged = mochiRow && !mochiRow.cells[0].classList.contains("adj-i") && !mochiRow.cells[0].classList.contains("adj-na");
     // A lone adjective sitting in an otherwise-noun table still gets tagged:
@@ -484,10 +484,10 @@ async function main() {
   Object.keys(cases).forEach(k => check(`${k} -> ${cases[k]}`, kr.toRomaji(k) === cases[k]));
   // Decoration: kana in a table cell becomes hover targets, and the per-unit
   // romaji is NOT in the DOM text (so search/sort see only the kana). The
-  // whole-word romaji reveal (js/vocab/render.js's romajiButtonHtml) is a
-  // separate, deliberate exception -- it lives in its own .jp-romaji-wrap, so
-  // strip that out first to see what the cell would search/sort by.
-  const plainJpText = td => { const c = td.cloneNode(true); const w = c.querySelector(".jp-romaji-wrap"); if (w) w.remove(); const n = c.querySelector(".visually-hidden"); if (n) n.remove(); return c.textContent; };
+  // whole-word romaji reveal (see jpCell in js/vocab/render.js) is likewise
+  // NOT in the DOM text -- it's a data-romaji attribute, not a text node --
+  // so plain textContent already reflects what the cell would search/sort by.
+  const plainJpText = td => { const c = td.cloneNode(true); const n = c.querySelector(".visually-hidden"); if (n) n.remove(); return c.textContent; };
   const findCell = re => [...document.querySelectorAll("#vocabulary td.jp")].find(td => td.querySelector(".kr") && re.test(plainJpText(td)));
   const kataCell = findCell(/[ァ-ヺ]/);
   const hiraCell = findCell(/^[ぁ-ゖ]+$/); // a pure-hiragana headword
@@ -495,7 +495,7 @@ async function main() {
   check("hiragana words render .kr hover targets too", !!hiraCell);
   check("each .kr carries its romaji in data-r", [...kataCell.querySelectorAll(".kr")].every(s => /^[a-zāīūēō]+$/.test(s.dataset.r || "")));
   check("the per-unit kana romaji stays out of the cell's searchable text", !/[a-z]/i.test(plainJpText(kataCell)) && !/[a-z]/i.test(plainJpText(hiraCell)));
-  check("the whole-word romaji reveal is still in the DOM, just set apart from the kana", !!kataCell.querySelector(".jp-romaji-pop") && !!hiraCell.querySelector(".jp-romaji-pop"));
+  check("the whole-word romaji reveal is still in the DOM, just set apart from the kana", !!kataCell.querySelector(".jpword[data-romaji]") && !!hiraCell.querySelector(".jpword[data-romaji]"));
   check("furigana readings are left plain (not decorated)", !document.querySelector('#vocabulary td.jp ruby .kr'));
 
   console.log("Table icons");
@@ -655,23 +655,32 @@ async function main() {
     const row = selfIntro.querySelector('tbody tr');
     return !row.querySelector('.phrase-en-btn') && !!row.cells[1].querySelector('.meaning-text').textContent.trim();
   })());
-  check("romaji instead sits behind the same reveal control every table uses", (() => {
+  check("romaji instead sits behind the same word-tap reveal every table uses", (() => {
     const row = selfIntro.querySelector('tbody tr');
-    const btn = row.cells[0].querySelector('.jp-romaji-btn');
-    const pop = row.cells[0].querySelector('.jp-romaji-pop');
-    return btn && btn.getAttribute('aria-expanded') === "false" && pop && pop.textContent.trim().length > 0;
+    const jpword = row.cells[0].querySelector('.jpword[data-romaji]');
+    return !!jpword && jpword.dataset.romaji.trim().length > 0 && !jpword.classList.contains('jp-romaji-on');
   })());
-  check(".jp-romaji-pop is hidden until revealed (display:none by default)", (() => {
-    const r = allCssRules.find(x => x.selectorText === ".jp-romaji-pop");
+  check(".jpword[data-romaji]::after is hidden until revealed (display:none by default)", (() => {
+    const r = allCssRules.find(x => x.selectorText === ".jpword[data-romaji]::after");
     return !!r && r.style.display === "none";
   })());
-  check("clicking the romaji control opens it (touch path) and toggles aria-expanded", (() => {
-    const wrap = selfIntro.querySelector('.jp-romaji-wrap');
-    const btn = wrap.querySelector('.jp-romaji-btn');
-    btn.click();
-    const opened = wrap.classList.contains('jp-romaji-on') && btn.getAttribute('aria-expanded') === "true";
-    btn.click();
-    return opened && !wrap.classList.contains('jp-romaji-on');
+  check("a tap-pinned reveal can't be re-hidden by a stuck :hover match (iOS can leave a tapped element in :hover) -- the pinned rule matches the hover-none suppression's specificity ([data-romaji] repeated) and is declared after it, so it wins the tie", (() => {
+    const isHoverNone = r => r.parentRule && r.parentRule.media && /hover:\s*none/.test(r.parentRule.media.mediaText);
+    const check1 = (hoverSel, onSel) => {
+      const noneIdx = allCssRules.findIndex(r => r.selectorText === hoverSel && isHoverNone(r));
+      const onIdx = allCssRules.findIndex(r => r.selectorText === onSel);
+      return noneIdx !== -1 && onIdx !== -1 && onIdx > noneIdx;
+    };
+    return check1(".jpword[data-romaji]:hover::after", ".jpword[data-romaji].jp-romaji-on::after")
+      && check1(".kr:hover::after", ".kr.kr-on::after")
+      && check1(".particle[data-r]:hover::after", ".particle[data-r].particle-on::after");
+  })());
+  check("clicking the Japanese word reveals its romaji (touch path) and toggles the pinned state", (() => {
+    const jpword = selfIntro.querySelector('tbody tr td.jp .jpword[data-romaji]');
+    jpword.click();
+    const opened = jpword.classList.contains('jp-romaji-on');
+    jpword.click();
+    return opened && !jpword.classList.contains('jp-romaji-on');
   })());
   check("the authored question/answer order is kept (not re-sorted A-Z)", (() => {
     const firstEn = selfIntro.querySelector('tbody tr .meaning-text').textContent.trim();
@@ -683,10 +692,22 @@ async function main() {
     input.value = "sunde imasu";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const hit = [...document.querySelectorAll('#vocabulary .table-section[data-section="phrases"] tbody tr:not(.search-hidden)')]
-      .some(r => /sunde imasu/i.test(r.textContent));
+      .some(r => /sunde imasu/i.test(r.cells[0].querySelector('.jpword[data-romaji]')?.dataset.romaji || ''));
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return hit;
+  })());
+  check("a romaji-only match auto-reveals and highlights the reading (can't wrap content: attr(...) in <mark>, so the whole reading is flagged instead)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "sunde imasu";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const jpword = [...document.querySelectorAll('#vocabulary .table-section[data-section="phrases"] tbody tr:not(.search-hidden)')]
+      .map(r => r.cells[0].querySelector('.jpword[data-romaji]'))
+      .find(w => w && /sunde imasu/i.test(w.dataset.romaji));
+    const hit = !!jpword && jpword.classList.contains('jp-romaji-hit');
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return hit && !jpword.classList.contains('jp-romaji-hit'); // cleared once the query is gone
   })());
 
   console.log("\"Show polite\" only appears where verb rows are actually visible");

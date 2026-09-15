@@ -60,15 +60,14 @@ window.RaumeStudy = window.RaumeStudy || {};
     // Ignore a new gesture while a refresh is already in flight (busy) --
     // the page is about to reload out from under it regardless. Also never
     // track a gesture that starts on a tappable control (a button, a link,
-    // the reading-layer's kana/particle spans) -- TAP_TOLERANCE below still
-    // isn't enough headroom for every real thumb's drift on a small control
-    // (the romaji reveal icon is ~17px), and standalone iOS PWAs -- no
-    // browser chrome to absorb the first bit of the gesture -- are worse
-    // for this than a regular Safari tab. A deliberate pull essentially
-    // never starts with a finger already on a button, so refusing to track
-    // from there costs nothing and guarantees this code can never compete
-    // with a tap for the touch.
-    var onControl = e.target.closest && e.target.closest('button, a, [role="button"], .kr, .particle[data-r]');
+    // the reading-layer's kana/particle/whole-word romaji spans) --
+    // TAP_TOLERANCE below still isn't enough headroom for every real
+    // thumb's drift, and standalone iOS PWAs -- no browser chrome to absorb
+    // the first bit of the gesture -- are worse for this than a regular
+    // Safari tab. A deliberate pull essentially never starts with a finger
+    // already on one of these, so refusing to track from there costs
+    // nothing and guarantees this code can never compete with a tap.
+    var onControl = e.target.closest && e.target.closest('button, a, [role="button"], .kr, .particle[data-r], .jpword[data-romaji]');
     if (onControl || window.scrollY > 0 || e.touches.length !== 1 || state === "busy") {
       startY = null;
       return;
