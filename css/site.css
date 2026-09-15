@@ -793,9 +793,10 @@ body {
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
 
-/* Expand all / collapse all -- a quiet text control between the toolbar and
-   the tables, for reading a whole category straight through. */
-.expand-bar { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin: -8px 0 6px; }
+/* Expand all / collapse all -- a quiet text control folded into the toolbar's
+   control row (with the column toggles, search count and adj legend) rather
+   than a row of its own, so it costs no extra vertical space. */
+.expand-bar { display: inline-flex; align-items: center; gap: 14px; }
 .expand-bar.search-hidden { display: none; }
 .expand-all-btn {
   appearance: none;
@@ -837,8 +838,7 @@ body.selftest-mode .selftest-hint { display: block; }
    narrower viewport the cap is simply never reached. */
 .page-vocab { --reading-w: 900px; }
 #vocabulary .table-section,
-#vocabulary .cat-heading,
-.page-vocab .expand-bar { max-width: var(--reading-w); }
+#vocabulary .cat-heading { max-width: var(--reading-w); }
 .table-section:first-of-type { break-before: auto; page-break-before: auto; }
 .page-hidden { display: none !important; }
 .search-hidden { display: none !important; }
@@ -1711,10 +1711,16 @@ body.ja-voice-ready .jp-speak-btn {
 .kr.kr-on::before { opacity: 1; }
 
 /* Meaning: dark, but a step below the Japanese so the Japanese still leads.
-   Centred against the row's full height (not bottom-aligned like the
-   Japanese cell) so it sits level with the word itself on furigana rows,
-   which are taller than a plain English line. */
-.vocab td:nth-child(2) { color: var(--ink-2); position: relative; vertical-align: middle; }
+   Anchored to the row's top edge (not centred) so the word/romaji reveal
+   growing the Japanese cell downward never shifts the English text -- a
+   table row's top edge never moves when a sibling cell grows taller, only
+   its bottom does, so top-anchoring is what makes this immune to that
+   growth. The two padding-top values below are measured to land in the same
+   spot the old centred layout put it (level with the word on furigana rows,
+   which are taller than a plain English line, and with the word itself
+   otherwise) -- they're a fixed match for this type scale, not a formula. */
+.vocab td:nth-child(2) { color: var(--ink-2); position: relative; vertical-align: top; padding-top: 12px; }
+.vocab tbody tr:has(ruby) td:nth-child(2) { padding-top: 15.5px; }
 
 /* Particles ({ p: … } segments) -- blue and bold everywhere they appear: the
    Particles reference table, any sentence, and flashcard prompts. A deliberate
@@ -1876,7 +1882,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     --section: #555; --section-strong: #444;
     --particle: #1b1b1b; /* on paper a particle reads by its bold weight alone */
   }
-  .masthead, .site-nav, .vocab-toolbar, .cat-heading, .table-index, .expand-bar { display: none !important; }
+  .masthead, .site-nav, .vocab-toolbar, .cat-heading, .table-index { display: none !important; }
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
   .page-title { display: none; }
@@ -1904,6 +1910,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      the Japanese cell's furigana (css/site.css:1116), so the reading crowds
      the row's top border. Give just that cell its breathing room back. */
   .vocab td.jp { padding-top: 9px !important; }
+  /* The screen rule top-anchors English so an on-screen romaji reveal can't
+     shift it (see css/site.css's .vocab td:nth-child(2) comment) -- print has
+     no such interaction to protect against, so keep its original centred
+     look instead of adopting that anchor. */
+  .vocab td:nth-child(2) { vertical-align: middle !important; }
   /* Drop the row actions in print. */
   .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   .view-mode { display: none !important; }

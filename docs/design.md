@@ -140,7 +140,12 @@ and Help.
   for reports of the reveal never opening on an iOS PWA. The katakana `.kr`
   layer itself renders as a dark, rounded callout with a small caret pointing
   at the kana — the iOS system-tooltip idiom, fixed dark fill in both themes
-  — instead of a bordered box sitting on the page.
+  — instead of a bordered box sitting on the page. The English column is
+  top-anchored to the row (not centred) for exactly this reason: a table
+  row's top edge never moves when a sibling cell grows, only its bottom
+  does, so top-anchoring is what keeps English from shifting when a reveal
+  grows the Japanese cell underneath it. Its padding-top is tuned per
+  furigana/no-furigana case to land where the old centred layout put it.
 - **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
   Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
   size; they keep their authored question/answer order instead of sorting
