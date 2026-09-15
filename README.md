@@ -51,8 +51,8 @@ so they're easy to spot in a sentence.
   fully searchable even though it's not shown by default.
 - **Column toggles** — hide **Japanese / Furigana / English** from the
   toolbar (Furigana hides just the readings). You can't hide both text
-  columns at once. A hidden column keeps its width; the text just goes
-  transparent, so nothing reflows.
+  columns at once. A hidden column keeps its width and header label; just its
+  row content goes transparent, so nothing reflows.
 - **Furigana** sits over the exact kanji it belongs to, always shown, with an
   11px floor so it stays legible when the Japanese shrinks.
 - **Reading layer** — hover (or tap, then tap away) any kana to see its romaji

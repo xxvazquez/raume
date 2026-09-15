@@ -595,10 +595,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       }
     });
 
-    // A hidden column keeps its width and rules (CSS just makes its text
-    // transparent); this keeps the accessible state in step -- aria-hidden on
-    // its cells / the furigana, its sort control disabled -- and reflects each
-    // button's pressed state (pressed = hidden).
+    // A hidden column keeps its width and rules (CSS just makes its tbody
+    // text transparent -- the header label stays put and visible, so this
+    // keeps the accessible state in step -- aria-hidden on the tbody cells
+    // / the furigana, not the header (still meaningful on its own); the
+    // sort control disables regardless, since sorting by hidden content
+    // isn't useful even though the header's still visible -- and reflects
+    // each toolbar button's pressed state (pressed = hidden).
     function applyColVisibility() {
       document.querySelectorAll('.view-mode button').forEach(b => {
         const off = isHidden(b.dataset.col);
@@ -608,11 +611,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelectorAll('.vocab').forEach(function (table) {
         Object.keys(COL_INDEX).forEach(function (key) {
           const col = COL_INDEX[key], hide = isHidden(key);
-          table.querySelectorAll('th:nth-child(' + col + '), td:nth-child(' + col + ')').forEach(function (cell) {
+          table.querySelectorAll('tbody td:nth-child(' + col + ')').forEach(function (cell) {
             if (hide) cell.setAttribute('aria-hidden', 'true'); else cell.removeAttribute('aria-hidden');
-            const sortBtn = cell.querySelector('.sort-button');
-            if (sortBtn) sortBtn.disabled = hide;
           });
+          const th = table.querySelector('thead th:nth-child(' + col + ')');
+          const sortBtn = th && th.querySelector('.sort-button');
+          if (sortBtn) sortBtn.disabled = hide;
         });
         const furiHidden = isHidden('furigana') || isHidden('japanese');
         table.querySelectorAll('.furigana').forEach(function (rt) {

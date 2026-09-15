@@ -1778,11 +1778,15 @@ mark.search-hit {
 .sort-button.active { color: var(--section-strong); }
 
 /* Column visibility toggles: hide a column's (or the furigana's) text only --
-   grid, rules and widths stay exactly as they were, no reflow. */
-body.hide-japanese .vocab :is(th, td):nth-child(1),
-body.hide-japanese .vocab :is(th, td):nth-child(1) *,
-body.hide-english .vocab :is(th, td):nth-child(2),
-body.hide-english .vocab :is(th, td):nth-child(2) *,
+   grid, rules and widths stay exactly as they were, no reflow. Scoped to
+   tbody so the column header stays put -- the label is still useful even
+   with its own column blanked, and blanking it too had no purpose (see
+   applyColVisibility in js/vocab/interactions.js, which correspondingly
+   only marks the tbody cells aria-hidden, not the header). */
+body.hide-japanese .vocab tbody td:nth-child(1),
+body.hide-japanese .vocab tbody td:nth-child(1) *,
+body.hide-english .vocab tbody td:nth-child(2),
+body.hide-english .vocab tbody td:nth-child(2) *,
 body.hide-furigana .vocab .furigana {
   color: transparent !important;
 }
@@ -1868,6 +1872,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
   .vocab { border: 1px solid var(--line-strong) !important; border-radius: 4px; }
   .vocab th { border-top: 0 !important; border-bottom: 1px solid var(--line-strong) !important; }
+  /* Vertical column separators, print only -- a page meant to be written on
+     by hand wants its columns visually divided; on screen the table stays
+     hairline-rows-only, no verticals. */
+  .vocab :is(th, td):not(:first-child) { border-left: 1px solid var(--line-strong) !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }
   .vocab td, .vocab th { padding: 6px 10px !important; }

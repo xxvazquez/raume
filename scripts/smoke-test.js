@@ -824,6 +824,11 @@ async function main() {
   colBtn("english").click();
   check("clicking a column button hides that column — pressed means hidden", colBtn("english").getAttribute("aria-pressed") === "true" && colBtn("english").classList.contains("col-hidden"));
   check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(2) .sort-button").disabled === true);
+  check("the header keeps its label -- only tbody cells go transparent (CSS), and the header itself stays out of aria-hidden (JS)", (() => {
+    const th = document.querySelector(".vocab th:nth-child(2)");
+    const scopedToTbody = allCssRules.some(r => r.selectorText && r.selectorText.includes("body.hide-english .vocab tbody td:nth-child(2)"));
+    return th.getAttribute("aria-hidden") === null && scopedToTbody;
+  })());
   check("the other column is untouched", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("japanese").click();
   check("the last visible column can't be hidden", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
@@ -957,6 +962,12 @@ async function main() {
     const uniform = printRules.find(r => r.selectorText === ".vocab td, .vocab th");
     const jp = printRules.find(r => r.selectorText === ".vocab td.jp");
     return !!uniform && !!jp && parseInt(jp.style.paddingTop, 10) > parseInt(uniform.style.padding, 10);
+  })());
+  check("print adds a vertical rule between columns (not on screen)", (() => {
+    const printMedia = allCssRules.find(r => r.media && /^print$/.test(r.media.mediaText));
+    const printRule = printMedia && [...printMedia.cssRules].find(r => r.selectorText === ".vocab :is(th, td):not(:first-child)");
+    const screenRule = allCssRules.find(r => !((r.parentRule || {}).media) && r.selectorText === ".vocab :is(th, td):not(:first-child)");
+    return !!printRule && printRule.style.borderLeft.includes("1px") && !screenRule;
   })());
 
   console.log("Print this table (icon button)");
