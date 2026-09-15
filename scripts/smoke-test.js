@@ -1222,6 +1222,19 @@ async function main() {
     const btnRule = allCssRules.find(r => r.selectorText === ".fc-sync-now");
     return typeof window.RaumeStudy.flashcards.dataOps.syncNow === "function" && !!btnRule;
   })());
+  // The "what's pending?" detail list: pendingItems() itemises the same
+  // sources getSyncState() counts (guest mode has nothing to sync, so it's
+  // always empty there -- the itemised version can't be exercised against a
+  // real account without Supabase, same limit as the rest of this file).
+  check("pendingItems is exported and empty in guest mode", (() => {
+    const pendingItems = window.RaumeStudy.flashcards.dataOps.pendingItems;
+    return typeof pendingItems === "function" && Array.isArray(pendingItems()) && pendingItems().length === 0;
+  })());
+  check("the sync detail list and its toggle are styled", (() => {
+    const listRule = allCssRules.find(r => r.selectorText === ".fc-sync-detail");
+    const toggleRule = allCssRules.find(r => r.selectorText === ".fc-sync-details-toggle");
+    return !!listRule && !!toggleRule;
+  })());
   const timeoutOk = await (async () => {
     const withTimeout = window.RaumeStudy.flashcards.dataOps.withTimeout;
     if (typeof withTimeout !== "function") return false;

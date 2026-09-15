@@ -2587,6 +2587,21 @@ mark.fc-diff-co {
   padding: 4px 9px; border-radius: 999px; cursor: pointer; white-space: nowrap;
 }
 .fc-sync-now:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+.fc-sync-details-toggle {
+  appearance: none; border: 0; background: transparent;
+  color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
+  padding: 0; text-decoration: underline; cursor: pointer; white-space: nowrap;
+}
+/* The itemised "what hasn't synced" list -- same pill tone as the offline/
+   pending chip above it (amber, since it only ever shows while something's
+   queued), plain list markers so each entry reads as its own row. */
+.fc-sync-detail {
+  list-style: none; margin: -12px 0 18px; padding: 8px 12px;
+  background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 8px;
+  color: var(--warn-strong); font-size: var(--fs-small); line-height: 1.6;
+}
+.fc-sync-detail[hidden] { display: none; }
+.fc-sync-detail li { padding: 1px 0; }
 
 /* Settings */
 .fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px; }

@@ -39,6 +39,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty;
   var syncNow = dataOps.syncNow, withTimeout = dataOps.withTimeout;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
+  var getPendingItems = dataOps.pendingItems;
   var renderDashboard = dashboard.renderDashboard, invalidateInsights = dashboard.invalidateInsights;
   var renderManage = views.renderManage, renderSettings = views.renderSettings, renderHelp = views.renderHelp;
   var refreshRowToggleButtons = views.refreshRowToggleButtons;
@@ -246,6 +247,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       "<h2>Flashcards</h2>" +
       identityHtml +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
+      '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +
       '<div class="fc-tabs" role="tablist">' +
       [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["settings", "Settings"], ["help", "Help"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
@@ -296,8 +298,39 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // mode has nothing to sync to, so it stays hidden there once the offline
   // case doesn't apply.
   function changeCount(n) { return n + (n === 1 ? " change" : " changes"); }
+
+  // Describes one queued item in plain words for the detail list below the
+  // chip -- resolves ids back to word/kana text via vocabIndex / the kanaId's
+  // embedded character, since dataOps.pendingItems() only hands back raw
+  // ids/payloads (it doesn't depend on either lookup itself).
+  var KANA_DIR_LABEL = { k2r: "Kana → romaji", r2k: "Romaji → kana" };
+  function describePendingItem(item) {
+    if (item.kind === "review") {
+      var entry = item.vocabId && vidx.getVocabIndex()[item.vocabId];
+      var word = entry ? entry.jpPlain : "A word";
+      var dir = store.DIRECTION_LABEL[item.direction] || "";
+      return word + (dir ? " — " + dir : "");
+    }
+    if (item.kind === "kana") {
+      var ch = String(item.kanaId || "").split(":").pop();
+      return (ch || "A kana card") + " — " + (KANA_DIR_LABEL[item.direction] || "");
+    }
+    if (item.kind === "cv") {
+      if (item.op === "addRows") return changeCount(item.payload.length) + " to your own words";
+      if (item.op === "deleteRows") return changeCount(item.payload.length) + " to your own words (removed)";
+      if (item.op === "addTable") return "New table “" + item.payload.title + "”";
+      if (item.op === "deleteTable") return "A table removed";
+      return "A change to your own words";
+    }
+    return "Table icon/name changes";
+  }
+
+  // Left open across re-renders (a new sync event, a tab switch) so checking
+  // "what's pending" doesn't collapse itself the moment something changes.
+  var syncDetailOpen = false;
   function updateSyncChip() {
     var chip = document.getElementById("fcSyncChip");
+    var detail = document.getElementById("fcSyncDetail");
     if (!chip) return;
     var st = getSyncState();
     var text = "", cls = "", showBtn = false;
@@ -335,6 +368,34 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       chip.appendChild(btn);
     } else if (!showBtn && btn) {
       btn.remove();
+    }
+
+    var items = getPendingItems ? getPendingItems() : [];
+    var toggle = chip.querySelector(".fc-sync-details-toggle");
+    if (items.length && text) {
+      if (!toggle) {
+        toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "fc-sync-details-toggle";
+        toggle.addEventListener("click", function () {
+          syncDetailOpen = !syncDetailOpen;
+          updateSyncChip();
+        });
+        chip.insertBefore(toggle, btn || null);
+      }
+      toggle.textContent = (syncDetailOpen ? "Hide" : "What's pending?");
+      toggle.setAttribute("aria-expanded", String(syncDetailOpen));
+    } else if (toggle) {
+      toggle.remove();
+      syncDetailOpen = false;
+    }
+    if (detail) {
+      detail.hidden = !(syncDetailOpen && items.length && text);
+      if (!detail.hidden) {
+        detail.innerHTML = items.map(function (item) {
+          return "<li>" + esc(describePendingItem(item)) + "</li>";
+        }).join("");
+      }
     }
   }
   onSyncStateChange(updateSyncChip);

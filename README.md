@@ -259,7 +259,10 @@ them.
   under your identity always shows where things stand — a quiet *Synced* once
   everything's caught up, a calm *Syncing N reviews…* while it works, an amber
   *Offline…* or *N reviews couldn't sync* (with a **Sync now** button) when it
-  needs you. Pending reviews still count on the dashboard right away.
+  needs you. Whenever something's queued, a **What's pending?** link expands a
+  plain-word list of exactly which reviews, custom words, or table changes
+  haven't reached your account yet. Pending reviews still count on the
+  dashboard right away.
 
 Pausing a card **archives** it; pausing a whole table just marks the table
 dormant. Either way the FSRS state and full history are kept and resuming

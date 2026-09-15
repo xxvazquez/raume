@@ -439,6 +439,27 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       stalled: pending > 0 && online && !busy && syncErrored
     };
   }
+  // Itemised version of getSyncState()'s pending count, for a "what hasn't
+  // synced yet" detail list. Returns raw ids/payloads only -- resolving them
+  // to word text is the caller's job (bootstrap.js), since that needs
+  // vocabIndex / kanaData, which this module doesn't otherwise depend on.
+  function pendingItems() {
+    if (isGuestMode()) return [];
+    var cache = getCache();
+    var out = [];
+    (cache.logsOutbox || []).forEach(function (e) {
+      var card = cache.cards[e.cardId];
+      out.push({ kind: "review", vocabId: card && card.vocabId, direction: card && card.direction });
+    });
+    (store.getKanaCache().logsOutbox || []).forEach(function (e) {
+      out.push({ kind: "kana", kanaId: e.kanaId, direction: e.direction });
+    });
+    loadCvOutbox().forEach(function (e) {
+      out.push({ kind: "cv", op: e.op, payload: e.payload });
+    });
+    if (tcDirty()) out.push({ kind: "table" });
+    return out;
+  }
   // Kick every outbox now -- the chip's "Sync now" button, for a queue that
   // stopped draining on its own.
   function syncNow() {
@@ -823,7 +844,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     customVocabAddTableQueued: customVocabAddTableQueued, customVocabDeleteTableQueued: customVocabDeleteTableQueued,
     syncCvOutbox: syncCvOutbox,
     recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow, withTimeout: withTimeout,
-    onSyncStateChange: onSyncStateChange, getSyncState: getSyncState,
+    onSyncStateChange: onSyncStateChange, getSyncState: getSyncState, pendingItems: pendingItems,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,
     getKanaFsrs: getKanaFsrs, saveKanaFsrs: saveKanaFsrs,
     syncKanaOutbox: syncKanaOutbox, kanaPendingCount: kanaPendingCount

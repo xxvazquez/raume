@@ -153,7 +153,10 @@ attempted once and logged. `js/flashcards/data-ops.js`:
 All three fold into one `getSyncState()` (`pending`, `online`, `syncing`,
 `stalled`), so the Flashcards sync chip and the masthead account icon (green
 = synced, amber = offline or something pending) both reflect every source,
-not just reviews.
+not just reviews. `pendingItems()` gives the itemised version of the same
+three sources (raw ids/payloads, not display text) -- the chip's **What's
+pending?** toggle resolves each one back to a word/kana character via
+`vocabIndex`/the kana id's embedded character for its detail list.
 
 ## Project layout
 
