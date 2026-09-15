@@ -54,19 +54,19 @@
       <button type="button" class="selftest-toggle" id="selftestToggle" aria-pressed="false" title="Cover the English column — tap a row to reveal its answer">Cover answers</button>
       <button type="button" class="polite-toggle" id="politeToggle" aria-pressed="false" title="Switch verb tables between the plain form and the polite 〜ます form">Show polite</button>
       <span id="searchCount" class="search-count" role="status" aria-live="polite" aria-atomic="true"></span>
-      <span class="adj-legend" aria-hidden="true"><span class="adj-legend-swatch adj-legend-i"></span>い-adj<span class="adj-legend-swatch adj-legend-na"></span>な-adj</span>
+      <span class="adj-legend" aria-hidden="true" hidden><span class="adj-legend-swatch adj-legend-i"></span>い-adj<span class="adj-legend-swatch adj-legend-na"></span>な-adj</span>
+      <span class="expand-bar">
+        <div class="section-menu print-menu">
+          <button type="button" class="expand-all-btn print-menu-btn" aria-haspopup="true" aria-expanded="false" title="Print more than one table">Print…</button>
+          <div class="section-menu-list" role="menu" hidden>
+            <button type="button" class="print-scope" role="menuitem" data-scope="section">This section</button>
+            <button type="button" class="print-scope" role="menuitem" data-scope="all">Whole reference</button>
+          </div>
+        </div>
+        <button type="button" id="expandAllBtn" class="expand-all-btn" aria-pressed="false">Expand all</button>
+      </span>
     </div>
     <p id="selftestHint" class="selftest-hint" role="status">Tap a row to reveal its answer; tap again to re-hide.</p>
-  </div>
-  <div class="expand-bar">
-    <div class="section-menu print-menu">
-      <button type="button" class="expand-all-btn print-menu-btn" aria-haspopup="true" aria-expanded="false" title="Print more than one table">Print…</button>
-      <div class="section-menu-list" role="menu" hidden>
-        <button type="button" class="print-scope" role="menuitem" data-scope="section">This section</button>
-        <button type="button" class="print-scope" role="menuitem" data-scope="all">Whole reference</button>
-      </div>
-    </div>
-    <button type="button" id="expandAllBtn" class="expand-all-btn" aria-pressed="false">Expand all</button>
   </div>
   <div id="vocabulary"></div>
 </section>
@@ -92,7 +92,7 @@
     <li>The <strong>Japanese / Furigana / English</strong> buttons hide those columns (or just the readings) in any combination — cover one side and test yourself.</li>
     <li><strong>Cover answers</strong> blanks the English column and shows a reminder to tap a row to reveal that one answer (tap again to re-hide). It resets when you reload.</li>
     <li><strong>Show polite</strong>, on verb tables, swaps the dictionary form for the 〜ます form.</li>
-    <li>Where a word is an い- or な-adjective, its Japanese text is tinted (see the legend next to the toolbar) to mark how it conjugates.</li>
+    <li>Where a word is an い- or な-adjective, its Japanese text is tinted to mark how it conjugates; a legend in the toolbar explains the two colours whenever the table on screen actually has one.</li>
     <li>The small speaker icon next to a word plays its pronunciation, using a natural native-voice recording where one exists.</li>
     <li>Grammatical <strong>particles</strong> (は, を, から …) show in blue and bold wherever Japanese text appears, including flashcards. Hover or tap one to see how it's read (は as "wa", へ as "e").</li>
     <li><strong>Phrases</strong> tables are laid out as question/answer pairs, in their own order rather than A-Z.</li>

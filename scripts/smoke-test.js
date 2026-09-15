@@ -186,6 +186,24 @@ async function main() {
     const legend = document.querySelector(".adj-legend");
     return !!legend && legend.getAttribute("aria-hidden") === "true" && legend.querySelectorAll(".adj-legend-swatch").length === 2;
   })());
+  check("the legend stays hidden for the current table when it has no tinted rows, and shows once it does", (() => {
+    // Exercises updateAdjLegend(current) directly (same call syncTableIndexActive
+    // makes for whichever table is under the sticky toolbar) instead of routing
+    // there, which would also touch that section's remembered accordion layout.
+    const legend = document.querySelector(".adj-legend");
+    const counters = document.querySelector('.table-section[data-table="0"]'); // no adjectives
+    window.RaumeStudy.vocab.updateAdjLegend(counters);
+    // Both the IDL property and the computed style -- the `hidden` attribute
+    // alone does nothing if a class rule sets its own `display` (as .adj-legend
+    // does), which silently wins over the browser default [hidden] { display: none }.
+    const hiddenOnCounters = legend.hidden === true && window.getComputedStyle(legend).display === "none";
+    const adjTable = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector('.section-title-text').textContent === "Adjectives");
+    window.RaumeStudy.vocab.updateAdjLegend(adjTable);
+    const shownOnAdjectives = legend.hidden === false && window.getComputedStyle(legend).display !== "none";
+    window.RaumeStudy.vocab.updateAdjLegend(counters); // leave it back the way we found it
+    return hiddenOnCounters && shownOnAdjectives;
+  })());
   check("the adjective note stays out of search matches (visually-hidden text isn't in .meaning-text)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "adjective";
@@ -566,12 +584,14 @@ async function main() {
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
   check("a sub-heading per Vocabulary category (Food & Ingredients / Kitchen & Dining / Numbers & Counting)", catHeads.length === 3);
   check("sub-headings are visible on the Vocabulary page", catHeads.every(h => !h.classList.contains("page-hidden")));
-  check("the reading column, its category rules and the expand bar share one width cap", (() => {
+  check("the reading column and its category rules share one width cap", (() => {
     const mw = el => window.getComputedStyle(el).maxWidth;
     const table = mw(document.querySelector("#vocabulary .table-section"));
-    return table && table !== "none"
-      && mw(catHeads[0]) === table
-      && mw(document.querySelector(".page-vocab .expand-bar")) === table;
+    return table && table !== "none" && mw(catHeads[0]) === table;
+  })());
+  check("Print… / Expand all live in the toolbar's control row, not a row of their own", (() => {
+    const bar = document.querySelector(".expand-bar");
+    return !!bar && bar.closest(".vocab-controls") && window.getComputedStyle(bar).display.includes("flex");
   })());
   const tindexMenu = document.getElementById("tindexMenu");
   check("the table-index dropdown menu starts closed", tindexMenu.hidden === true);

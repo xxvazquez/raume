@@ -298,6 +298,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.updatePoliteVisibility = updatePoliteVisibility;
 
+  // The い-adj/な-adj legend only means something on a table that actually has
+  // tinted rows (Adjectives, Taste & Texture, a stray row elsewhere) -- most
+  // tables have none, so it stays hidden there instead of explaining a colour
+  // code that's nowhere on screen. `current` is the one table under the
+  // sticky toolbar right now (syncTableIndexActive's scroll-spy); with no
+  // argument (search spans tables with no single "current") it shows if any
+  // still-matching row anywhere on screen is tinted.
+  function updateAdjLegend(current) {
+    const legend = document.querySelector('.adj-legend');
+    if (!legend) return;
+    const hasAdj = current
+      ? !!current.querySelector('.jp.adj-i, .jp.adj-na')
+      : [...document.querySelectorAll('#vocabulary .table-section:not(.page-hidden):not(.search-hidden)')]
+        .some(s => s.querySelector('tbody tr:not(.search-hidden) .jp.adj-i, tbody tr:not(.search-hidden) .jp.adj-na'));
+    legend.hidden = !hasAdj;
+  }
+  vocab.updateAdjLegend = updateAdjLegend;
+
   // Route the current URL hash to a view. `fromRoute` everywhere so nothing
   // pushes a new history entry in response to one.
   function routeFromHash() {
@@ -556,6 +574,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
       count.textContent = q ? totalRows + ' matching row' + (totalRows === 1 ? '' : 's') + ' · ' + totalTables + ' table' + (totalTables === 1 ? '' : 's') : '';
       if (vocab.updatePoliteVisibility) vocab.updatePoliteVisibility();
+      if (q) { if (vocab.updateAdjLegend) vocab.updateAdjLegend(); }
+      else if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
 
       // The best match overall should be first on the page; ties keep table order.
       if (q) {
@@ -812,6 +832,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         a.classList.toggle('current', !!current && a.dataset.target === current.dataset.table);
       });
       if (label) label.textContent = current ? (current.querySelector('.section-title-text')?.textContent || 'Jump to a table') : 'Jump to a table';
+      if (vocab.updateAdjLegend) vocab.updateAdjLegend(current);
     };
     window.addEventListener('scroll', function () {
       if (document.getElementById('vocabPage').hidden) return;

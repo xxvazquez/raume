@@ -114,10 +114,14 @@ and Help.
   plain `--ink`, not tinted (an earlier version tinted the text; a marker
   reads faster and doesn't fight the furigana/particle colours already
   living in that cell). A small legend (`.adj-legend`, two colour swatches)
-  next to the toolbar explains the two colours once, `aria-hidden` since a
+  in the toolbar explains the two colours once, `aria-hidden` since a
   visually-hidden note on the cell itself carries the real distinction to
-  screen readers. No separate tag riding along in the Meaning cell — it
-  costs no row height or column width, unlike the pill this replaced.
+  screen readers. `js/vocab/interactions.js` (`updateAdjLegend`) shows it
+  only while the table currently under the sticky toolbar (or, while
+  searching, any still-visible match) actually has a tinted row, so it isn't
+  sitting there explaining a colour code on tables with nothing to explain.
+  No separate tag riding along in the Meaning cell — it costs no row height
+  or column width, unlike the pill this replaced.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on

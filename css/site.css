@@ -784,8 +784,13 @@ body {
 /* Explains the い-adj/な-adj colour coding once, here, instead of repeating a
    label on every adjective row (see .vocab td.jp.adj-i/.adj-na). Purely a
    sighted quick-reference -- aria-hidden, since the real per-row semantics
-   are carried by a visually-hidden note in the cell itself, not by this. */
+   are carried by a visually-hidden note in the cell itself, not by this.
+   JS (interactions.js updateAdjLegend) toggles the `hidden` attribute so it
+   only shows on a table that actually has tinted rows -- the explicit
+   `display` below would otherwise win over the browser's default
+   `[hidden] { display: none }`, so it needs its own [hidden] override. */
 .adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.adj-legend[hidden] { display: none; }
 .adj-legend-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 10px; }
 .adj-legend-i { background: var(--adj-i-ink); }
 .adj-legend-na { background: var(--adj-na-ink); }

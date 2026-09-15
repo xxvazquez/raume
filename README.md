@@ -66,8 +66,10 @@ so they're easy to spot in a sentence.
   text tinted lavender / sage, so the two classes read apart at a glance
   without a label taking up room on the row: the Adjectives table, the Taste
   & Texture adjectives, and the stray adjective in an otherwise-noun table
-  (危険). A small legend next to the toolbar explains the two colours once.
-  Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not い/な adjectives, so
+  (危険). A small legend in the toolbar explains the two colours once, but
+  only while the table currently on screen actually has tinted rows — it's
+  absent on every other table instead of explaining a code that's nowhere
+  in view. Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not い/な adjectives, so
   they stay untinted. Driven by an `adj` field on the row; a visually-hidden
   note on the cell carries the distinction to screen readers, and it stays
   out of search.
