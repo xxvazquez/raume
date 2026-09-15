@@ -664,15 +664,17 @@ async function main() {
     const r = allCssRules.find(x => x.selectorText === ".jpword[data-romaji]::after");
     return !!r && r.style.display === "none";
   })());
-  check("a tap-pinned reveal can't be re-hidden by a stuck :hover match (iOS can leave a tapped element in :hover) -- the pinned rule matches the hover-none suppression's specificity ([data-romaji] repeated) and is declared after it, so it wins the tie", (() => {
+  check("the whole-word reveal has no :hover trigger -- click/tap only, unlike .kr/.particle below", (() => {
+    return !allCssRules.some(r => r.selectorText === ".jpword[data-romaji]:hover::after" || r.selectorText === ".jpword:hover::after");
+  })());
+  check("the .kr/.particle reading layers: a tap-pinned reveal can't be re-hidden by a stuck :hover match (iOS can leave a tapped element in :hover) -- the pinned rule matches the hover-none suppression's specificity and is declared after it, so it wins the tie", (() => {
     const isHoverNone = r => r.parentRule && r.parentRule.media && /hover:\s*none/.test(r.parentRule.media.mediaText);
     const check1 = (hoverSel, onSel) => {
       const noneIdx = allCssRules.findIndex(r => r.selectorText === hoverSel && isHoverNone(r));
       const onIdx = allCssRules.findIndex(r => r.selectorText === onSel);
       return noneIdx !== -1 && onIdx !== -1 && onIdx > noneIdx;
     };
-    return check1(".jpword[data-romaji]:hover::after", ".jpword[data-romaji].jp-romaji-on::after")
-      && check1(".kr:hover::after", ".kr.kr-on::after")
+    return check1(".kr:hover::after", ".kr.kr-on::after")
       && check1(".particle[data-r]:hover::after", ".particle[data-r].particle-on::after");
   })());
   check("clicking the Japanese word reveals its romaji (touch path) and toggles the pinned state", (() => {

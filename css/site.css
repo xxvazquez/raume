@@ -1556,41 +1556,31 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
    flex-start pinned them up level with the furigana instead. */
 .vocab.vocab-sentences .jp-line { align-items: first baseline; }
 
-/* Romaji reveal: hover the Japanese word/sentence itself (desktop) or tap it
-   (touch) to see its romaji as a quiet caption line underneath -- same
-   reveal-on-demand idiom as the per-kana reading layer below (.kr), just
-   scoped to the whole word instead of one kana at a time, and for the same
-   reason: every word has a reading, so a dedicated icon/button had nothing
-   to distinguish and just added a small, fiddly tap target (and, on an iOS
-   PWA especially, a floating popover that read as an off-the-shelf web
-   tooltip rather than anything native). content: attr(...) keeps the
-   reading out of the DOM's textContent (search/sort stay clean -- see
-   js/vocab/interactions.js fieldsForRow, which reads it straight off
-   data-romaji instead) and, unlike the old floating popover, an in-flow
-   block grows the row instead of sitting over whatever's below it. Always
-   in the DOM (not hidden by view-mode) so search can still match it. */
-.jpword[data-romaji] { cursor: help; }
+/* Romaji reveal: click (or tap) the Japanese word/sentence itself -- not
+   hover, unlike the per-kana reading layer below (.kr) -- to see its romaji
+   as a quiet caption line underneath. Every word has a reading, so a
+   dedicated icon/button had nothing to distinguish and just added a small,
+   fiddly tap target (and, on an iOS PWA especially, a floating popover that
+   read as an off-the-shelf web tooltip rather than anything native).
+   content: attr(...) keeps the reading out of the DOM's textContent
+   (search/sort stay clean -- see js/vocab/interactions.js fieldsForRow,
+   which reads it straight off data-romaji instead) and, unlike the old
+   floating popover, an in-flow block grows the row instead of sitting over
+   whatever's below it. Always in the DOM (not hidden by view-mode) so
+   search can still match it. */
+.jpword[data-romaji] { cursor: pointer; }
 .jpword[data-romaji]::after {
   content: attr(data-romaji);
   display: none;
   margin-top: 2px;
   font-family: var(--font-ui); font-size: var(--fs-romaji); line-height: 1.3; color: var(--romaji);
 }
-.jpword[data-romaji]:hover::after { display: block; }
-@media (hover: none) { .jpword[data-romaji]:hover::after { display: none; } }
-/* [data-romaji] repeated here to match the hover-none rule's specificity
-   (it also carries [data-romaji]) -- .jp-romaji-on alone would be a lower-
-   specificity selector that the hover-none rule always beats regardless of
-   source order. With specificity tied, declaring this after the hover-none
-   suppression (see .kr-on further down for the same pattern) lets a
-   tap-pinned reveal always win, even if iOS leaves the tapped word in a
-   stuck :hover state. */
-.jpword[data-romaji].jp-romaji-on::after { display: block; }
+.jpword.jp-romaji-on::after { display: block; }
 /* A search match found only in the romaji (not the kanji/kana) auto-reveals
    and highlights it -- same idea as .kr.search-hit below, needed for the
    same reason: content(attr) can't be split with a <mark>, so the whole
    reading takes the highlight treatment instead of just the matched run. */
-.jpword[data-romaji].jp-romaji-hit::after {
+.jpword.jp-romaji-hit::after {
   display: block; color: inherit; background: var(--hl); border-bottom: 2px solid var(--hl-ink);
 }
 
@@ -1891,8 +1881,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .view-mode { display: none !important; }
   /* No override needed for the romaji reveal: it's already an in-flow
      caption line, not a floating popover, so a row pinned open
-     (.jp-romaji-on) just prints in place as-is; there's no screen hover on
-     paper, so an un-pinned row's romaji correctly stays hidden. */
+     (.jp-romaji-on) just prints in place as-is, and an un-clicked row's
+     romaji correctly stays hidden. */
 
   body.print-only .table-section:not(.print-target) { display: none !important; }
   /* One or many targets (a table, a whole section, the whole reference): let

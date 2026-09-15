@@ -878,9 +878,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelectorAll('.particle.particle-on').forEach(function (el) { if (el !== pt) el.classList.remove('particle-on'); });
       if (pt) pt.classList.toggle('particle-on');
 
-      // Whole-word/sentence romaji reveal: same touch-pin behaviour as
-      // above -- a tap on the Japanese text pins its romaji open, a tap
-      // elsewhere closes it; desktop :hover still opens it without a click.
+      // Whole-word/sentence romaji reveal: click/tap the Japanese text to
+      // open its romaji, click/tap elsewhere to close it -- no hover trigger
+      // here (unlike .kr/.particle above), so this is the only way it opens.
       const jw = event.target.closest && event.target.closest('.jpword[data-romaji]');
       document.querySelectorAll('.jpword.jp-romaji-on').forEach(function (el) { if (el !== jw) el.classList.remove('jp-romaji-on'); });
       if (jw) jw.classList.toggle('jp-romaji-on');
