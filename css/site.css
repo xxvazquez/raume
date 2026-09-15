@@ -194,7 +194,7 @@
   --fs-nav-sub: 13px;
   --fs-table-header: 11px;
   --fs-jp: 18.5px;
-  --fs-romaji: 13px;
+  --fs-romaji: 11.5px;
   --fs-english: 13.5px;
   --fs-small: 13px;
   --fs-micro: 11.5px;
@@ -1573,7 +1573,7 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   content: attr(data-romaji);
   display: none;
   margin-top: 2px;
-  font-family: var(--font-ui); font-size: var(--fs-romaji); line-height: 1.3; color: var(--romaji);
+  font-family: var(--font-ui); font-size: var(--fs-romaji); font-style: italic; line-height: 1.3; color: var(--romaji);
 }
 .jpword.jp-romaji-on::after { display: block; }
 /* A search match found only in the romaji (not the kanji/kana) auto-reveals
@@ -1673,6 +1673,7 @@ body.ja-voice-ready .jp-speak-btn {
   padding: 0 3px;
   font-family: var(--font-ui);
   font-size: 10px;
+  font-style: italic;
   line-height: 1.3;
   letter-spacing: 0;
   color: var(--romaji);
@@ -1717,6 +1718,7 @@ body.ja-voice-ready .jp-speak-btn {
   font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 400;
+  font-style: italic;
   line-height: 1;
   letter-spacing: 0;
   color: var(--particle);
@@ -2834,7 +2836,7 @@ mark.fc-diff-co {
 .fc-jp-slash { color: var(--faint); padding: 0 2px; }
 /* One supporting line: romaji (muted italic) · English (legible ink). */
 .fc-missed-gloss { flex: 0 1 auto; min-width: 0; font-size: var(--fs-small); line-height: 1.4; }
-.fc-missed-ro { color: var(--muted); }
+.fc-missed-ro { color: var(--muted); font-style: italic; }
 .fc-missed-sep { color: var(--faint); }
 .fc-missed-en { color: var(--ink); }
 /* The miss count -- coral attention, matching the row's left rule. */

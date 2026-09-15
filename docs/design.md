@@ -121,7 +121,8 @@ and Help.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on
-  click/tap (`.jp-romaji-on`) — deliberately no hover trigger, unlike the
+  click/tap (`.jp-romaji-on`), set in italic a step down in size from the
+  English column so the two don't compete — deliberately no hover trigger, unlike the
   katakana `.kr` reading layer it otherwise mirrors, since a whole word is a
   much bigger, more deliberate target than one kana and a stray hover
   opening it reads as noisy rather than helpful. No dedicated icon either:
