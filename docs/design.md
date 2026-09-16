@@ -243,16 +243,21 @@ picker list.
 The dashboard has to be scannable at a glance — hierarchy comes through in
 colour here more than anywhere else:
 
-- **cards lift off the page** — every tile, viz card, the Today card, the
-  next-review card and the review card carry `--card-line` plus a committed
-  two-layer `--shadow-card`; on the near-white ground the shadow is what
-  separates figure from ground;
-- **"N to study"** (`.fc-next-review-due`) is the one card in the top row that
-  jumps: the coral attention tone, a warm tint and a 5px left bar. A cleared
+- **3 cards, not ~9** — next review, today's progress, Study now, the 4 stat
+  tiles and the 3 charts used to each carry their own `--card-line` +
+  `--shadow-card` border, reading as a stack of independent widgets rather
+  than one screen. They're grouped into `.fc-dash-now` ("right now": next
+  review + today + Study now), `.fc-dash-stats` (the 4 tiles) and
+  `.fc-dash-progress` (the 3 charts) instead — each card lifts off the page
+  with `--card-line` + `--shadow-card`, but the items inside share that one
+  boundary and keep only their own colour/accent, not an individual box;
+- **"N to study"** (`.fc-next-review-due`) is still the one thing in the top
+  row that jumps, now via a left bar + warm tint alone (no border/shadow of
+  its own, sitting inside `.fc-dash-now`): the coral attention tone. A cleared
   queue (`-clear`) goes quiet sage instead;
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender and a tinted shadow, so it clearly outranks the ghost buttons;
-- **stat tiles** — the 5px left rule carries meaning: lavender for **Day streak**
+- **stat tiles** — the 3px left rule carries meaning: lavender for **Day streak**
   (an achievement), sage for **Reviews completed** (cumulative progress), coral
   for **Estimated retention** only once it drops under the Settings target
   (`.fc-stat-attention`). **Total cards** stays neutral — it's context;

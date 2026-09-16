@@ -124,9 +124,17 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // Order matches the way you actually use this page: read the due / next-review
     // summary, act on it (Study now), then the slower-moving context below --
     // stat tiles, charts, and finally the Words to Review table.
+    // The dashboard's ~9 pieces used to each carry their own border+shadow,
+    // reading as a stack of independent widgets. They're grouped into 3
+    // cards instead -- "right now" (next review / today / Study now),
+    // "your stats" (the 4 tiles) and "your progress" (the charts) -- each
+    // item keeping its own colour/accent but losing its individual box.
     panel.innerHTML =
+      '<div class="fc-dash-now">' +
       '<div class="fc-top-row">' + nextReviewHtml(now, ready, newInSession) + todayProgressHtml() + "</div>" +
       '<div class="fc-cta-row fc-cta-row-primary"><button type="button" class="fc-btn fc-btn-primary" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
+      "</div>" +
+      '<div class="fc-dash-stats">' +
       '<div class="fc-stats-grid">' +
       statTile(streak, "Day streak", "streak") +
       statTile(stats.total, "Total cards") +
@@ -135,12 +143,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "</div>" +
       (settings.longest_streak > streak ? '<p class="fc-note fc-longest-streak">Longest streak: ' + settings.longest_streak + " day" + (settings.longest_streak === 1 ? "" : "s") + ".</p>" : "") +
       (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note">"Estimated retention" is FSRS’s forecasted recall probability across your reviewed cards — not a directly measured pass rate.</p>') +
+      "</div>" +
+      '<div class="fc-dash-progress">' +
       '<div class="fc-viz-grid">' +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
+      "</div>" +
       "</div>" +
       (foldReview ? "" : '<div id="fcWordsToReview"></div>');
     var btn = document.getElementById("fcStudyNow");

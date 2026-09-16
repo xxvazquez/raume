@@ -2071,26 +2071,35 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    two-up cards, not prose). */
 #fcPanelDashboard { max-width: 900px; }
 
-/* Dashboard stat tiles -- flat bordered cards, lifted off the near-white
-   ground with --card-line + --shadow-card. Four numbers of genuinely
-   different kinds used to get one identical coloured rule each, reading as
-   one undifferentiated row. The 4px left rule now carries meaning (see the
-   rules just below): section lavender for Day streak, sage for Reviews
-   completed, coral for Estimated retention only when it has slipped, and
-   neutral for Total cards -- context, not a signal.
+/* The dashboard's ~9 pieces (next review, today, Study now, 4 stat tiles,
+   3 charts) used to each carry their own --card-line + --shadow-card
+   border, reading as a stack of independent widgets instead of one screen.
+   They now share 3 cards -- "right now", "your stats", "your progress" --
+   each item below keeping its own colour/accent but losing its individual
+   box; last-child's bottom margin is zeroed so it doesn't double up with
+   the card's own bottom padding. */
+.fc-dash-now, .fc-dash-stats, .fc-dash-progress {
+  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
+  box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px;
+}
+.fc-dash-now > *:last-child, .fc-dash-stats > *:last-child, .fc-dash-progress > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Dashboard stat tiles -- four numbers of genuinely different kinds used to
+   get one identical coloured rule each, reading as one undifferentiated
+   row. The 4px left rule now carries meaning (see the rules just below):
+   section lavender for Day streak, sage for Reviews completed, coral for
+   Estimated retention only when it has slipped, and neutral for Total
+   cards -- context, not a signal.
    2x2 on narrow screens (four tiles, so it stays even -- no orphan on its
    own row), one row of four once there's width for it -- on the shared
    12-col grid below, so the tile seams line up with the panels above and
    below. */
-.fc-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-.fc-stat-tile {
-  position: relative;
-  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
-  box-shadow: var(--shadow-card);
-  padding: 12px 14px 12px 16px;
-}
+.fc-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; margin-bottom: 18px; }
+.fc-stat-tile { position: relative; padding: 0 0 0 12px; }
 .fc-stat-tile::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 8px 0 0 8px;
+  content: ""; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px; border-radius: 1px;
   background: var(--line-strong);
 }
 /* The left rule carries meaning, not decoration: the section lavender for
@@ -2107,19 +2116,23 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
 .fc-longest-streak { margin-top: -10px; margin-bottom: 16px; }
 
-/* Dashboard visualizations -- kept flat/bordered like everything else on the
-   page (no shadows/gradients), colors reused from the existing palette.
-   The two compact charts share the top row; the mistakes list, which grows,
+/* Dashboard visualizations -- colors reused from the existing palette. The
+   two compact charts share the top row; the mistakes list, which grows,
    spans the full width below so cards size to their content instead of the
-   short ones stretching to leave dead white space. */
+   short ones stretching to leave dead white space.
+   .fc-viz-card is also used standalone (renderWordsToReview's own fallback,
+   outside any grid) so it keeps its own card chrome by default; inside
+   .fc-viz-grid it's flattened, since the shared .fc-dash-progress card
+   above already supplies the one border and the grid gap + each chart's
+   own title are separation enough without individual boxes too. */
 .fc-viz-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 20px;
   align-items: start;
-  margin-bottom: 20px;
 }
 .fc-viz-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; }
+.fc-viz-grid .fc-viz-card { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
@@ -2869,11 +2882,6 @@ mark.fc-diff-co {
   .fc-viz-card { grid-column: span 6; }
 }
 
-.fc-today {
-  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
-  box-shadow: var(--shadow-card);
-  padding: 13px 16px;
-}
 .fc-today-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 9px; }
 .fc-today-label { color: var(--ink); font-weight: 500; font-size: var(--fs-nav-sub); }
 .fc-today-count { color: var(--muted); font-size: var(--fs-small); }
@@ -2883,22 +2891,20 @@ mark.fc-diff-co {
 .fc-progress-track { fill: var(--surface); }
 .fc-progress-fill { fill: var(--accent); }
 
-/* Next review -- a bordered card with a coloured left edge, the dashboard's
-   "here's what needs you" line paired with the Study now button below it.
-   Cards waiting to be studied is an attention state (not an error): the
-   coral attention tone, a 5px left bar and a warm tint make it the one card
-   in the top row that jumps. An empty queue is the calm, nothing-to-do
-   state -- a quiet sage green. */
+/* Next review -- a coloured left edge + tint, the dashboard's "here's what
+   needs you" line paired with the Study now button below it. Sits inside
+   the shared .fc-dash-now card now (no border/shadow of its own), so the
+   left bar + background tint carry the whole signal. Cards waiting to be
+   studied is an attention state (not an error): the coral attention tone
+   and a warm tint make it the one thing in the top row that jumps. An
+   empty queue is the calm, nothing-to-do state -- a quiet sage green. */
 .fc-next-review {
   display: flex; flex-direction: column; gap: 3px;
-  padding: 12px 14px 12px 16px;
-  border: 1px solid var(--card-line);
-  border-left-width: 5px;
-  border-radius: 8px;
-  box-shadow: var(--shadow-card);
+  padding: 10px 14px 10px 13px;
+  border-left: 4px solid var(--line-strong);
+  border-radius: 4px;
 }
 .fc-next-review-due {
-  border-color: color-mix(in srgb, var(--warn) 30%, var(--card-line));
   border-left-color: var(--warn);
   background: var(--warn-soft);
 }
