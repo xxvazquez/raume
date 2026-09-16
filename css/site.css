@@ -1099,8 +1099,22 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
    showing "GRAMMAR" then a "Grammar" row right under it said the same thing
    twice; the merged heading keeps the identical hairline+marker treatment,
    just sized up a step since it's carrying both jobs. */
-.cz-section-block { margin-top: 30px; }
-.cz-section-block:first-child { margin-top: 0; }
+/* The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) used to each
+   carry a 30px top margin plus their own full-width divider -- enough
+   chrome that every row read as its own floating panel instead of one
+   list. .cz-groups is the single card that now holds all 4 (iOS Settings
+   grouped-list style); each row's own bottom hairline (on .cz-section-label
+   or .cz-group-title-solo below) is the only separator between rows, so
+   the margin here is gone and the last row's hairline is stripped since
+   nothing follows it inside the card. */
+.cz-groups {
+  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
+  box-shadow: var(--shadow-card); padding: 6px 14px; margin: 0 0 16px;
+}
+.cz-section-block:last-child > .cz-section-label,
+.cz-section-block:last-child > .cz-group > .cz-group-title-solo {
+  border-bottom: 0;
+}
 /* Same size/weight as .cz-group-title-solo (below) -- both are playing the
    same role, the top of a section, so they read as one consistent level
    whether that section merged into a single row or kept its eyebrow. Also

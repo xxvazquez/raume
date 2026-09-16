@@ -183,6 +183,11 @@ and Help.
     (`.cz-group-title-solo`), sized and weighted identically to the eyebrow
     (`--fs-subhead`/600) since both are playing the same "top of a section"
     role and need to read as one consistent level, not two different sizes.
+    The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) sit inside one
+    shared card (`.cz-groups`), iOS Settings grouped-list style — each row's
+    own bottom hairline is the only separator between rows (no per-row margin,
+    no divider after the last row), instead of each row carrying its own big
+    top margin and reading as a separate floating panel.
   - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, an
     uppercase-micro `<summary>`) all start closed. Forms are label-over-field;
     the parsed-ruby preview and the import result sit on `--surface`, an

@@ -379,7 +379,7 @@ window.RaumeStudy.customize = (function () {
           "<li><strong>Reset</strong> puts a single table’s name and icon back to how it shipped.</li>" +
           "<li>Signed in on the Flashcards page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
         "</ul>") +
-      "</div>" + groups + (cv() ? customVocabSection() : "");
+      "</div>" + '<div class="cz-groups">' + groups + "</div>" + (cv() ? customVocabSection() : "");
   }
 
   // ---- moves --------------------------------------------------------------
