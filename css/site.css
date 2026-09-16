@@ -2337,6 +2337,24 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .fc-empty { padding: 24px 16px; color: var(--muted); text-align: center; }
 
 /* Review flow */
+
+/* The whole point of Flashcards' top-level chrome -- the masthead, the main
+   nav, and the page's own title/sync-status/tab row -- is choosing where to
+   go next. None of that applies mid-session: it's a phone-height's worth of
+   controls sitting above a small card that's the one thing actually in use.
+   Hide it all for as long as a review card (or its wrap-up) is on screen.
+   `:has()` picks this up for both js/flashcards/dashboard.js's session and
+   kana.js's -- they render the same markup into their own tabpanel -- with
+   no JS flag to keep in sync. Gated on #flashcardsPage itself being visible
+   so a session left running by navigating away via the *main* nav (which
+   hides the page but doesn't tear its content down) doesn't strand the
+   chrome hidden app-wide. */
+body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
+  :is(.masthead, .site-nav, #flashcardsPage > h2, #flashcardsPage > .fc-signed-in-as,
+      #flashcardsPage > .fc-sync-chip, #flashcardsPage > .fc-sync-detail, #flashcardsPage > .fc-tabs) {
+  display: none;
+}
+
 .fc-review-card {
   width: 100%; max-width: 560px; margin: 0 auto;
   background: var(--paper); border: 1px solid var(--card-line);
@@ -2344,16 +2362,25 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   box-shadow: var(--shadow-card);
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-/* On a roomy window a session shows just the card (or the wrap-up) stranded at
-   the top of a tall empty panel. Give the panel a min-height and centre its one
-   child. Desktop only -- on a phone the card already fills the screen, and the
-   min-height only engages when the content is shorter than it anyway (a tall
-   checked card just grows the panel as usual). */
+/* With the chrome above hidden, a session shows just the card (or the
+   wrap-up) stranded at the top of a tall empty panel -- give the panel a
+   min-height and centre its one child instead. Two tiers because how much
+   height the chrome-hiding above actually freed differs: the app-frame
+   sheet + page padding it takes back is bigger on a wide window than on a
+   full-bleed phone. min-height only engages when the content is shorter
+   than it anyway, so a tall checked card just grows the panel as usual. */
 @media (min-width: 700px) {
   .fc-tabpanel:not([hidden]):has(> .fc-review-card),
   .fc-tabpanel:not([hidden]):has(> .fc-session-done) {
     display: flex; flex-direction: column; justify-content: center;
     min-height: 60vh;
+  }
+}
+@media (max-width: 699px) {
+  .fc-tabpanel:not([hidden]):has(> .fc-review-card),
+  .fc-tabpanel:not([hidden]):has(> .fc-session-done) {
+    display: flex; flex-direction: column; justify-content: center;
+    min-height: calc(100svh - 60px);
   }
 }
 .fc-review-meta { align-self: stretch; display: flex; justify-content: space-between; align-items: baseline; color: var(--faint); font-size: var(--fs-micro); margin-bottom: 16px; }

@@ -220,6 +220,11 @@ streak.
   announced from an `aria-live` region without moving focus off the field.
 - Romaji checking ignores long vowels — `kōhī`, `koohii`, `kouhii` all match.
 - The **Kana** trainer's own review card shares this exact design.
+- While a session (vocabulary or Kana) is on screen, the masthead, the main
+  nav, and Flashcards' own title/sync-status/tab row all hide, and the card
+  centres in the space that frees up — nothing to navigate mid-review, and
+  the card gets the screen instead of a strip of it. **End session** (or
+  finishing the queue) brings the chrome straight back.
 
 **The tabs**
 

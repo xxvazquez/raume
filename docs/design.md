@@ -259,6 +259,15 @@ The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the
 ochre `--fc-hard`.
 
+A session is the one screen where the masthead, the main nav, and
+Flashcards' own title/sync-status/tab row step aside: `body:has(#flashcardsPage
+… .fc-review-card, .fc-session-done)` hides them (`css/site.css`, "Review
+flow") for as long as either is on screen, and the tabpanel gets a
+viewport-relative `min-height` so the card centres in what that frees up
+instead of sitting pinned under a stack of chrome it doesn't need. One CSS
+rule covers both the vocabulary and Kana review cards, since they share the
+same markup — no session-state flag to keep in sync in JS.
+
 The active sub-tabs (`.fc-tab.active`) and nav links (`.site-nav-link.active`)
 carry a solid 3px underline in the section tone plus, for the nav, a soft
 tinted block — clearly the live one against the muted rest.
