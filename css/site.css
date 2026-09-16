@@ -2698,15 +2698,11 @@ mark.fc-diff-co {
   color: var(--ink); background: var(--field-fill);
 }
 :root[data-theme="dark"] .fc-settings-field input[type="number"] { color-scheme: dark; }
-.fc-settings-help { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-micro); line-height: 1.5; max-width: 56ch; }
-.fc-direction-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px 16px; }
-.fc-direction-check { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: var(--fs-small); cursor: pointer; }
-/* Checkboxes restyled to sit with the rest of the controls -- a bare
-   accent-color left them looking like a raw OS form. appearance:none + a
-   bordered box + a CSS tick (no inline SVG, so it stays within the
-   style-src 'self' CSP); the global :focus-visible outline covers focus. */
-.fc-kana-group input[type="checkbox"],
-.fc-direction-check input[type="checkbox"],
+/* Standalone Fuzz toggle -- a single checkbox, not a picker list, so it
+   keeps the plain restyled-checkbox look rather than the checkmark-row
+   treatment below. appearance:none + a bordered box + a CSS tick (no inline
+   SVG, so it stays within the style-src 'self' CSP); the global
+   :focus-visible outline covers focus. */
 .fc-settings-field input[type="checkbox"] {
   appearance: none;
   flex: 0 0 auto;
@@ -2719,14 +2715,10 @@ mark.fc-diff-co {
   position: relative;
   transition: background .12s ease, border-color .12s ease;
 }
-.fc-kana-group input[type="checkbox"]:checked,
-.fc-direction-check input[type="checkbox"]:checked,
 .fc-settings-field input[type="checkbox"]:checked {
   background: var(--section);
   border-color: var(--section);
 }
-.fc-kana-group input[type="checkbox"]:checked::after,
-.fc-direction-check input[type="checkbox"]:checked::after,
 .fc-settings-field input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
@@ -2735,6 +2727,51 @@ mark.fc-diff-co {
   border: solid var(--paper);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+.fc-settings-help { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-micro); line-height: 1.5; max-width: 56ch; }
+.fc-direction-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2px 16px; }
+/* iOS Settings-style checkmark row, not a checkbox square: the whole row is
+   the tap target, the native checkbox is kept (for a11y) but visually
+   hidden, and a CSS tick fades in at the trailing edge on :checked (no
+   inline SVG, so it stays within the style-src 'self' CSP). :has() picks up
+   the row's own :focus-visible/:checked state from the hidden input. */
+.fc-kana-group,
+.fc-direction-check {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--ink); font-size: var(--fs-small); cursor: pointer;
+  padding: 8px 6px; border-radius: 6px;
+  transition: background .12s ease;
+}
+.fc-kana-group { font-size: var(--fs-nav-sub); }
+.fc-kana-group:hover,
+.fc-direction-check:hover {
+  background: color-mix(in srgb, var(--section) 7%, transparent);
+}
+.fc-kana-group input[type="checkbox"],
+.fc-direction-check input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.fc-kana-group::after,
+.fc-direction-check::after {
+  content: "";
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: 5px; height: 10px;
+  border: solid var(--section);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.fc-kana-group:has(input:checked)::after,
+.fc-direction-check:has(input:checked)::after {
+  opacity: 1;
+}
+.fc-kana-group:has(input:focus-visible),
+.fc-direction-check:has(input:focus-visible) {
+  outline: 2px solid var(--section); outline-offset: 2px;
 }
 /* One Save for the whole tab, with an inline acknowledgement. */
 .fc-settings-save { align-items: center; }

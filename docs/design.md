@@ -225,8 +225,13 @@ card wash on a checked answer. A single `@media (prefers-reduced-motion: reduce)
 block near-instants all of it.
 
 Every control takes the same focus ring: a 2px `--section` outline at a 2px
-offset (the search box included). The flashcard checkboxes are drawn to match
-the rest — `appearance: none` plus a CSS tick, not the raw OS control.
+offset (the search box included). The Kana group picker and the Settings
+study-directions block render as iOS Settings-style checkmark rows — the
+whole row is the tap target, the native checkbox is visually hidden (kept
+for accessibility), and a CSS tick fades in at the trailing edge on
+`:checked`. The lone standalone Fuzz toggle keeps the older restyled-square
+look instead (`appearance: none` plus a CSS tick) since it isn't part of a
+picker list.
 
 ## The Flashcards dashboard
 

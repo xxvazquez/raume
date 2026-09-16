@@ -315,11 +315,18 @@ async function main() {
     const rule = allCssRules.find(r => r.selectorText === ".search-box:focus-within");
     return !!rule && rule.style.outline.includes("2px") && rule.style.boxShadow === "";
   })());
-  check("flashcard checkboxes are restyled (appearance:none), not left as a raw OS control", (() => {
-    const rule = allCssRules.find(r => r.selectorText
+  check("the kana group picker and study-directions block render as iOS-style checkmark rows, not checkbox squares", (() => {
+    const hidden = allCssRules.find(r => r.selectorText
       && /\.fc-kana-group input\[type="checkbox"\]/.test(r.selectorText)
+      && r.style.position === "absolute" && r.style.opacity === "0");
+    const tick = allCssRules.find(r => r.selectorText && /\.fc-kana-group:has\(input:checked\)::after/.test(r.selectorText));
+    return !!hidden && !!tick;
+  })());
+  check("the standalone Fuzz checkbox keeps the restyled (appearance:none) square, not a checkmark row", (() => {
+    const rule = allCssRules.find(r => r.selectorText
+      && /\.fc-settings-field input\[type="checkbox"\]/.test(r.selectorText)
       && r.style.appearance === "none");
-    const tick = allCssRules.find(r => r.selectorText && /input\[type="checkbox"\]:checked::after/.test(r.selectorText));
+    const tick = allCssRules.find(r => r.selectorText === '.fc-settings-field input[type="checkbox"]:checked::after');
     return !!rule && !!tick;
   })());
   check("the review prompt is sized up from the generic .fc-prompt", (() => {
