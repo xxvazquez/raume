@@ -508,9 +508,9 @@ async function main() {
   const plainJpText = td => { const c = td.cloneNode(true); const n = c.querySelector(".visually-hidden"); if (n) n.remove(); return c.textContent; };
   const findCell = re => [...document.querySelectorAll("#vocabulary td.jp")].find(td => td.querySelector(".kr") && re.test(plainJpText(td)));
   const kataCell = findCell(/[ァ-ヺ]/);
-  const hiraCell = findCell(/^[ぁ-ゖ]+$/); // a pure-hiragana headword
+  const hiraCell = [...document.querySelectorAll("#vocabulary td.jp")].find(td => /^[ぁ-ゖ]+$/.test(plainJpText(td))); // a pure-hiragana headword
   check("katakana words render .kr hover targets", !!kataCell);
-  check("hiragana words render .kr hover targets too", !!hiraCell);
+  check("hiragana words do not render .kr hover targets", !!hiraCell && !hiraCell.querySelector(".kr"));
   check("each .kr carries its romaji in data-r", [...kataCell.querySelectorAll(".kr")].every(s => /^[a-zāīūēō]+$/.test(s.dataset.r || "")));
   check("the per-unit kana romaji stays out of the cell's searchable text", !/[a-z]/i.test(plainJpText(kataCell)) && !/[a-z]/i.test(plainJpText(hiraCell)));
   check("the whole-word romaji reveal is still in the DOM, just set apart from the kana", !!kataCell.querySelector(".jpword[data-romaji]") && !!hiraCell.querySelector(".jpword[data-romaji]"));

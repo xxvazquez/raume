@@ -116,17 +116,18 @@ window.RaumeStudy.kanaRomaji = (function () {
     return tokenize(str).map(function (u) { return u.romaji; }).join("");
   }
 
-  // Take raw (unescaped) text; return HTML where each kana unit is a hover/tap
-  // target carrying its romaji in data-r (shown by CSS ::after, so it never
-  // lands in the DOM's textContent -- search and sort stay clean). Everything
-  // else is passed through, HTML-escaped.
+  // Take raw (unescaped) text; return HTML where each katakana unit is a
+  // hover/tap target carrying its romaji in data-r (shown by CSS ::after, so
+  // it never lands in the DOM's textContent -- search and sort stay clean).
+  // Hiragana is passed through plain -- the per-kana reveal isn't needed
+  // there. Everything else is passed through, HTML-escaped.
   function decorate(raw) {
     var esc = window.RaumeStudy.shared.escapeHtml;
     var out = "", run = "";
     function flush() {
       if (!run) return;
       tokenize(run).forEach(function (u) {
-        out += u.romaji
+        out += (u.romaji && isKatakana(u.kana.charAt(0)))
           ? '<span class="kr" data-r="' + esc(u.romaji) + '">' + esc(u.kana) + "</span>"
           : esc(u.kana);
       });

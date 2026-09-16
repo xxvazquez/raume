@@ -55,11 +55,12 @@ so they're easy to spot in a sentence.
   row content goes transparent, so nothing reflows.
 - **Furigana** sits over the exact kanji it belongs to, always shown, with an
   11px floor so it stays legible when the Japanese shrinks.
-- **Reading layer** — hover (or tap, then tap away) any kana to see its romaji
-  above it. `js/vocab/kana-romaji.js` handles yōon, foreign-sound combos, the
-  長音 mark ー, and the sokuon っ/ッ. Drawn with CSS, so it never enters the DOM
-  and search/sort stay clean. (This is the per-character hover on individual
-  katakana/hiragana units, separate from the whole-word romaji reveal above.)
+- **Reading layer** — hover (or tap, then tap away) any katakana to see its
+  romaji above it. `js/vocab/kana-romaji.js` handles yōon, foreign-sound
+  combos, the 長音 mark ー, and the sokuon ッ. Drawn with CSS, so it never
+  enters the DOM and search/sort stay clean. Hiragana doesn't get this
+  per-character reveal. (This is separate from the whole-word romaji reveal
+  above.)
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
 - **Adjective type** — every い- / な-adjective in the dataset has its Japanese
