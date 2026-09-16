@@ -1266,6 +1266,29 @@ async function main() {
   check("choosing it goes straight to the Dashboard tab, no session needed", !!document.querySelector("#fcPanelDashboard"));
   check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("Using this device only"));
 
+  // The vocabulary page's own "Add to flashcards" (table-options kebab) used
+  // to call addVocabsRemote/fetchAllFromServer unconditionally, so it threw
+  // "Cannot read properties of null (reading 'id')" for every guest -- the
+  // one mode that button is reachable from without ever signing in. Manage's
+  // "Add table" (tested below) took the correct addVocabs/refreshData path
+  // all along, which is why this regressed unnoticed.
+  console.log("Flashcards: the vocabulary page's own \"Add to flashcards\" works in guest mode too");
+  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
+  const kebabTable = document.querySelector('.table-section[data-table="2"]');
+  kebabTable.querySelector(".section-menu-btn").click();
+  kebabTable.querySelector(".fc-add-table-btn").click();
+  await flush();
+  const cacheAfterKebabAdd = window.RaumeStudy.flashcards.store.getCache();
+  const kebabAddedIds = Object.keys(cacheAfterKebabAdd.cards);
+  check("it adds cards with no thrown error, not just from Manage's \"Add table\"", kebabAddedIds.length > 0);
+  // Wipe those cards back out directly -- archiveVocabs would leave an
+  // "archived" record behind, a different state from "never added" that the
+  // Manage-page checks just below rely on staying pristine.
+  kebabAddedIds.forEach((id) => { delete cacheAfterKebabAdd.cards[id]; });
+  window.RaumeStudy.flashcards.store.saveCache();
+  window.RaumeStudy.flashcards.render(); // the add's own rerender left the (hidden) dashboard populated
+  document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]').click();
+
   // Offline / pending-sync chip: hidden while online and clean, surfaced as a
   // live status when the connection drops (which is meaningful even in guest
   // mode, where nothing is queued), cleared again on reconnect.

@@ -18,8 +18,8 @@ window.RaumeStudy.flashcards.views = (function () {
   var DIRECTIONS = store.DIRECTIONS, DIRECTION_LABEL = store.DIRECTION_LABEL;
   var getVocabIndex = vidx.getVocabIndex;
   var addVocab = dataOps.addVocab, archiveVocab = dataOps.archiveVocab;
-  var addVocabs = dataOps.addVocabs, archiveVocabs = dataOps.archiveVocabs, addVocabsRemote = dataOps.addVocabsRemote;
-  var fetchAllFromServer = dataOps.fetchAllFromServer, refreshData = dataOps.refreshData;
+  var addVocabs = dataOps.addVocabs, archiveVocabs = dataOps.archiveVocabs;
+  var refreshData = dataOps.refreshData;
   var saveFsrsSettings = dataOps.saveFsrsSettings, saveQueueSettings = dataOps.saveQueueSettings, saveDirectionSettings = dataOps.saveDirectionSettings;
   var getKanaFsrs = dataOps.getKanaFsrs, saveKanaFsrs = dataOps.saveKanaFsrs;
   var invalidateInsights = dashboard.invalidateInsights;
@@ -594,8 +594,8 @@ window.RaumeStudy.flashcards.views = (function () {
     btn.disabled = true;
     btn.textContent = "Adding…";
     try {
-      await addVocabsRemote(vocabIds);
-      await fetchAllFromServer();
+      await addVocabs(vocabIds);
+      await refreshData();
       invalidateInsights();
       refreshRowToggleButtons();
       var activeTab = window.RaumeStudy.flashcards.getActiveTab();
