@@ -2335,13 +2335,16 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .fc-btn-tableaction { gap: 6px; }
 .fc-btn-ic { display: none; }
 .fc-btn-ic svg { display: block; }
-/* The actions live in their own grid column and never wrap. When the row is
-   narrow AND a table shows two of them, drop the labels so both fit as icon
-   buttons on the name's line rather than stacking beneath it. */
+/* The actions live in their own grid column and never wrap; on a narrow row
+   they also drop to icon-only, whether one button or two -- a static
+   "Pause table" label was claiming ~98px regardless of what the title
+   next to it needed, truncating longer titles ("Kitchen Tools &
+   Appliances", "Washing Machine & Dryer") well before the row ran out of
+   real room. Icon-only frees that back for the name instead. */
 @media (max-width: 560px) {
-  .fc-manage-table-actions:has(.fc-btn:nth-of-type(2)) .fc-btn-tableaction { padding: 5px 8px; }
-  .fc-manage-table-actions:has(.fc-btn:nth-of-type(2)) .fc-btn-tx { display: none; }
-  .fc-manage-table-actions:has(.fc-btn:nth-of-type(2)) .fc-btn-ic { display: block; }
+  .fc-manage-table-actions .fc-btn-tableaction { padding: 5px 8px; }
+  .fc-manage-table-actions .fc-btn-tx { display: none; }
+  .fc-manage-table-actions .fc-btn-ic { display: block; }
 }
 /* Category-wide "Add all", sitting just under the category summary. */
 .fc-manage-cat-actions { margin: 4px 0 14px; }
