@@ -507,6 +507,25 @@ body {
 .page { padding: 16px 28px 48px; }
 .page[hidden] { display: none; }
 
+/* A short list (Phrases' one table, Grammar's three) otherwise ends a third
+   of the way down the screen with bare background filling the rest, reading
+   as unfinished rather than deliberate. min-height is a floor: a longer list
+   already exceeds it, so centering has no visible effect there -- content
+   just fills top-to-bottom as before. Scoped to non-Vocabulary sections only:
+   Vocabulary's category headings rely on adjoining-margin collapsing with
+   the table above them, which a flex container would break (each item's
+   margin would count in full instead of collapsing to the larger one),
+   widening every category gap whenever a table is expanded. Grammar/Phrases/
+   Travel have no such headings, so collapsing was never a factor there. */
+body[data-active-section="grammar"] #vocabulary,
+body[data-active-section="phrases"] #vocabulary,
+body[data-active-section="travel"] #vocabulary {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 50vh;
+}
+
 /* --- Internal table index: a visual directory of every table ---------- */
 /* Stands in for a page heading. Closed: one small control naming the table
    you're on -- very little vertical weight. Open: the whole active section
@@ -1906,6 +1925,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
   .page-title { display: none; }
+  /* Undo the on-screen short-section centering above -- a printed page has
+     no viewport to center within, and it would just push content down the
+     sheet with blank space above it. */
+  #vocabulary { display: block; min-height: 0; }
 
   .table-section { margin: 0 0 12px; max-width: none; }
   #vocabulary .table-section { padding-left: 0; }
