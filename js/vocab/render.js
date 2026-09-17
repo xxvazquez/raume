@@ -170,7 +170,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // row-actions cluster, mirrored to the other side).
     return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div>' + adjNote(row.adj) + '</td>';
   }
-  var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/></svg>';
+  // A slashed eye -- the button's action is "hide this row," and a plain
+  // open eye reads as "reveal" (the opposite) far more often than not.
+  var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
   // The main study areas. Grammar, Phrases and Travel are promoted out of the
   // general vocabulary list into their own top-level sections; everything
   // else lives under Vocabulary, still grouped by its content category.
