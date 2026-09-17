@@ -2731,7 +2731,11 @@ mark.fc-diff-co {
 /* Settings */
 .fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px; }
 .fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-subhead); color: var(--ink); font-weight: 500; }
-.fc-settings-section p.fc-note { margin: 0 0 14px; }
+/* Explanatory prose under a heading/control shouldn't compete with it -- a
+   true caption size + the tertiary (--faint) tone, not the --muted/--fs-small
+   pairing .fc-note uses elsewhere (dashboard status lines, auth notices),
+   which still want their normal secondary weight. */
+.fc-settings-section p.fc-note { margin: 0 0 14px; font-size: var(--fs-micro); color: var(--faint); }
 .fc-settings-field { padding: 10px 0; border-top: 1px solid var(--line); }
 .fc-settings-field:first-of-type { border-top: 0; }
 /* Label and control sit together, not flung to opposite edges of the row --
@@ -2834,13 +2838,15 @@ mark.fc-diff-co {
    reuse the existing card, list and palette language.
    --------------------------------------------------------------------- */
 
-/* Help & Documentation -- reuses the Settings card + list styling. */
+/* Help & Documentation -- reuses the Settings card + list styling. A true
+   caption size + tone (matching the .fc-note treatment above and the kbd
+   glyphs below, already --fs-micro) rather than near-body-text weight. */
 .fc-help-list {
   margin: 8px 0 0;
   padding: 0;
   list-style: none;
-  color: var(--muted);
-  font-size: var(--fs-small);
+  color: var(--faint);
+  font-size: var(--fs-micro);
   line-height: 1.55;
 }
 .fc-help-list li { position: relative; padding-left: 16px; margin: 5px 0; }
