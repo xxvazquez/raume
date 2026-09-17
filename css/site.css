@@ -1431,6 +1431,9 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   background: var(--accent-soft);
 }
 .section-menu { position: relative; flex: 0 0 auto; }
+/* A native context-menu proportion (~14px, matching the mobile table-index
+   sheet's own radius below) instead of the small 5px controls use elsewhere
+   -- this floats free of the page rather than sitting inline with them. */
 .section-menu-list {
   position: absolute;
   right: 0;
@@ -1440,10 +1443,10 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 4px;
+  padding: 6px;
   background: var(--paper);
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
+  border-radius: 14px;
   box-shadow: var(--shadow-menu);
 }
 .section-menu-list[hidden] { display: none; }
@@ -1457,23 +1460,31 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   background: transparent;
   width: 100%;
   height: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   text-align: left;
-  padding: 7px 9px;
-  border-radius: 4px;
+  padding: 7px 10px;
+  border-radius: 8px;
   color: var(--ink);
   font: 400 13px/1.3 var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
 }
+.section-menu-list .menu-item-ic { flex: 0 0 auto; display: flex; color: var(--muted); }
+.section-menu-list .menu-item-ic svg { display: block; }
 .section-menu-list .section-icon-btn:hover,
 .section-menu-list .fc-add-table-btn:hover,
 .section-menu-list .print-menu-item:hover,
 .section-menu-list .print-scope:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.section-menu-list .section-icon-btn:hover .menu-item-ic,
+.section-menu-list .fc-add-table-btn:hover .menu-item-ic,
+.section-menu-list .print-menu-item:hover .menu-item-ic { color: var(--accent-strong); }
 .section-menu-list .fc-add-table-btn[disabled] { opacity: .5; cursor: default; }
 .section-menu-list .print-menu-item { display: none; }
 @media (max-width: 700px) {
   .controls .section-menu ~ .print-icon-btn { display: none; }
-  .section-menu-list .print-menu-item { display: block; }
+  .section-menu-list .print-menu-item { display: flex; }
 }
 
 .rows-hidden-status {

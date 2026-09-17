@@ -226,6 +226,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   var PRINT_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6V2.5h8V6"/><rect x="2.5" y="6" width="13" height="7" rx="1.2"/><path d="M5 11.5h8V15.5H5Z"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
+  var CHOOSE_ICON_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/><circle cx="6.5" cy="7" r="1.2"/><path d="M15 11.5 11.5 8 5 14"/></svg>';
+  var ADD_TO_FC_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
+  function menuItemHtml(icon, label) {
+    return '<span class="menu-item-ic" aria-hidden="true">' + icon + '</span><span class="menu-item-tx">' + label + '</span>';
+  }
   function byEnglish(a, b) {
     return vocab.compareCellText(String(a.english || ''), String(b.english || ''), 'asc');
   }
@@ -266,11 +271,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // synthetic one like Flashcards' Words to review) gets it. Reuses
     // .section-icon-btn so the existing delegated click handler
     // (interactions.js) needs no logic change to open the picker from here.
-    if (controls.addTable) menuItems.push('<button type="button" class="section-icon-btn" role="menuitem" data-icon-for="' + o.id + '">Choose icon…</button>');
-    if (controls.addTable) menuItems.push('<button type="button" class="fc-add-table-btn" role="menuitem" data-table="' + o.id + '" title="Add every row in this table to your flashcards">Add to flashcards</button>');
+    if (controls.addTable) menuItems.push('<button type="button" class="section-icon-btn" role="menuitem" data-icon-for="' + o.id + '">' + menuItemHtml(CHOOSE_ICON_ICON, 'Choose icon…') + '</button>');
+    if (controls.addTable) menuItems.push('<button type="button" class="fc-add-table-btn" role="menuitem" data-table="' + o.id + '" title="Add every row in this table to your flashcards">' + menuItemHtml(ADD_TO_FC_ICON, 'Add to flashcards') + '</button>');
     // Only fold print into the menu when the menu already exists for other
     // reasons -- a table whose only control is print keeps just the icon.
-    if (controls.print && menuItems.length) menuItems.push('<button type="button" class="print-one print-menu-item" role="menuitem" aria-label="Print this table">Print</button>');
+    if (controls.print && menuItems.length) menuItems.push('<button type="button" class="print-one print-menu-item" role="menuitem" aria-label="Print this table">' + menuItemHtml(PRINT_ICON, 'Print') + '</button>');
     if (menuItems.length) {
       ctrlParts.push('<div class="section-menu">' +
         '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Table options" title="Table options">' + MENU_ICON + '</button>' +
