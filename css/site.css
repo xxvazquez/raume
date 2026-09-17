@@ -2317,22 +2317,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .fc-manage-table-dormant { color: var(--faint); font-style: italic; }
 .fc-manage-table-paused .fc-manage-table-title { color: var(--muted); }
 .fc-manage-table-actions { grid-area: actions; display: flex; gap: 6px; white-space: nowrap; }
+/* Add / Pause / Resume / Restore all read as the same ordinary bordered
+   .fc-btn -- a table row shouldn't look tappable in one state and inert in
+   another just because "Add" happens to be the common case down a long,
+   mostly-untouched list. */
 .fc-btn-tableaction { gap: 6px; }
-/* "Add table" is the common case down a long, mostly-untouched list --
-   ghosted at rest (icon + text, no box) so that ladder recedes and the
-   accented added-count above carries the scan weight instead; Pause /
-   Restore keep the ordinary bordered .fc-btn, being the rarer, more
-   deliberate actions. Full treatment returns on hover/focus. */
-.fc-btn-tableaction[data-table-action="add-table"] {
-  border-color: transparent;
-  background: transparent;
-  color: var(--faint);
-}
-.fc-btn-tableaction[data-table-action="add-table"]:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-dark);
-}
 .fc-btn-ic { display: none; }
 .fc-btn-ic svg { display: block; }
 /* The actions live in their own grid column and never wrap. When the row is
