@@ -455,8 +455,9 @@ body {
 :root[data-theme-choice="dark"] .theme-toggle .theme-icon-dark { display: block; }
 
 /* --- Horizontal navigation --------------------------------------- */
-/* Four short items -- they fit on one line at every real width, so this is a
-   simple sticky bar. overflow-x is only a safety net for an extreme zoom. */
+/* Five short items -- padding/font tighten at <=640px (below) so they still
+   fit on one line down to a 360px-wide phone. overflow-x is a safety net
+   below that, for narrower devices or extreme zoom. */
 .site-nav {
   position: sticky;
   top: 0;
@@ -1876,8 +1877,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   /* Make room for the help / customize / theme controls on a narrow bar. */
   .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
-  .site-nav { padding: 0 12px; gap: 2px; }
-  .site-nav-link { padding: 9px 10px; }
+  .site-nav { padding: 0 6px; gap: 1px; }
+  .site-nav-link { padding: 9px 5px; font-size: 13px; }
   .page { padding: 14px 16px 40px; }
   .cat-heading { margin-top: 22px; }
   .table-section { scroll-margin-top: 172px; }
