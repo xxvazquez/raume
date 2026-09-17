@@ -571,6 +571,7 @@ body[data-active-section="travel"] #vocabulary {
   box-shadow: var(--shadow-menu);
 }
 .tindex-menu[hidden] { display: none; }
+.tindex-grab { display: none; }
 .tindex-panel[hidden], .tindex-panel.page-hidden { display: none; }
 /* Wide panels (Vocabulary, Travel) flow their tables into two columns so a
    long section stays compact; a short one (Grammar) keeps a single column.
@@ -639,6 +640,16 @@ body[data-active-section="travel"] #vocabulary {
     max-height: 72vh;
     border-radius: 14px 14px 0 0;
     padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  /* A real bottom sheet needs something to grab -- a small centred bar,
+     same convention as an iOS action sheet. */
+  .tindex-grab {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line-strong);
+    margin: 0 auto 10px;
   }
   .tindex-panel--wide { width: auto; column-count: 1; }
   .tindex-scrim {

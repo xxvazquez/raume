@@ -478,7 +478,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }).join('');
     return '<button type="button" class="tindex-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
       '<span class="tindex-trigger-label">Jump to a table</span>' + CHEVRON_ICON + '</button>' +
-      '<div class="tindex-menu" id="tindexMenu" hidden>' + panels + '</div>' +
+      '<div class="tindex-menu" id="tindexMenu" hidden>' +
+      // Decorative only -- a native bottom-sheet grab handle, shown by CSS
+      // only in the mobile bottom-sheet layout (desktop's dropdown has
+      // nothing to grab).
+      '<div class="tindex-grab" aria-hidden="true"></div>' + panels + '</div>' +
       '<div class="tindex-scrim"></div>';
   }
   // Assemble #vocabulary: every table, grouped section -> category -> table
