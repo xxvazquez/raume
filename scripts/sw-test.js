@@ -153,7 +153,7 @@ const REFERENCE_SHELL = [
   "vendor/ts-fsrs.js",
   "vendor/supabase.js",
 ];
-const FLASHCARDS_SHELL = ["js/flashcards/store.js", "js/flashcards/vocab-index.js", "js/flashcards/scheduling.js", "js/flashcards/data-ops.js", "js/flashcards/dashboard.js", "js/flashcards/views.js", "js/flashcards/kana-data.js", "js/flashcards/kana.js", "js/flashcards/bootstrap.js"];
+const FLASHCARDS_SHELL = ["js/flashcards/store.js", "js/flashcards/vocab-index.js", "js/flashcards/scheduling.js", "js/flashcards/data-ops.js", "js/flashcards/backup.js", "js/flashcards/dashboard.js", "js/flashcards/views.js", "js/flashcards/kana-data.js", "js/flashcards/kana.js", "js/flashcards/bootstrap.js"];
 
 async function main() {
   const V1 = "sha-one-0000000000000000000000000000000000";

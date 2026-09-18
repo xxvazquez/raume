@@ -242,7 +242,13 @@ streak.
 - **Settings** — Study directions and the FSRS knobs (retention, max interval,
   fuzz, new-cards-per-day) for the vocabulary cards, then the same set for the
   Kana trainer, independently. New-cards-per-day is a real daily allowance —
-  it holds across every session you run that day.
+  it holds across every session you run that day. As a guest, Settings also
+  ends with **Back up & restore**: *Download backup* saves one JSON file with
+  your flashcards, Kana progress, table names/icons/order and your own words;
+  *Restore from a file…* replaces what's on this device with the file's contents
+  (after a confirmation showing what's in it) and reloads. It exists because the
+  guest copy is the only one — clearing site data would otherwise lose it.
+  Signed in, that section just says the account already holds it.
 - **Help** — pausing, the Manage status icons, the keyboard shortcuts.
 - **Kana** — see below.
 
@@ -260,7 +266,7 @@ Two modes that never mix; the Flashcards page opens on a plain choice between
 them.
 
 - **Guest** — everything stays in this browser's `localStorage`. No account, no
-  network.
+  network. (Settings › Back up & restore exports it to a file and restores it.)
 - **Signed in** — a **Supabase** project you create yourself (see
   [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)) is the authoritative store, scoped
   per account by Row Level Security. `localStorage` becomes a read-through cache

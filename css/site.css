@@ -2750,6 +2750,7 @@ mark.fc-diff-co {
    pairing .fc-note uses elsewhere (dashboard status lines, auth notices),
    which still want their normal secondary weight. */
 .fc-settings-section p.fc-note { margin: 0 0 14px; font-size: var(--fs-micro); color: var(--faint); }
+.fc-settings-save + .fc-backup-section { margin-top: 24px; }
 .fc-settings-field { padding: 10px 0; border-top: 1px solid var(--line); }
 .fc-settings-field:first-of-type { border-top: 0; }
 /* Label and control sit together, not flung to opposite edges of the row --

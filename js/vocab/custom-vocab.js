@@ -380,6 +380,7 @@ window.RaumeStudy.customVocab = (function () {
     setRemote: setRemote, applyRemote: applyRemote, onChange: onChange,
     isSignedIn: isSignedIn, tableExists: tableExists,
     customTables: customTables, customRows: customRows, hasAny: hasAny,
-    DEFAULT_CATEGORY: DEFAULT_CATEGORY
+    DEFAULT_CATEGORY: DEFAULT_CATEGORY,
+    sanitize: sanitize, GUEST_KEY: GUEST_KEY
   };
 })();

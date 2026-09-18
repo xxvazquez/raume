@@ -1437,6 +1437,58 @@ async function main() {
   check("adding a word in guest mode updates the count with zero network calls", totalTileAfter === "4");
   if (storageUsable) check("its data actually lives in localStorage (not just in-memory)", /"active":true/.test(readLocalStorage("raume-flashcards-guest-v1") || ""));
 
+  console.log("Flashcards: guest-mode backup & restore");
+  const backupApi = window.RaumeStudy.flashcards.backup;
+  check("backup is offered in guest mode", !!backupApi && backupApi.available() === true);
+  const liveCardCount = Object.keys(window.RaumeStudy.flashcards.store.getCache().cards).length;
+  const builtBackup = backupApi.buildBackup();
+  check("a backup carries its format + version and the guest flashcards, with no account or sync queue", builtBackup.format === "raume-backup" && builtBackup.version === 1
+    && Object.keys(builtBackup.data.flashcards.cards).length === liveCardCount && builtBackup.data.flashcards.userId === null && builtBackup.data.flashcards.logsOutbox.length === 0);
+  check("it names the file by date", /^raume-backup-\d{4}-\d{2}-\d{2}\.json$/.test(backupApi.fileName()));
+  const parsedBackup = backupApi.parseBackup(JSON.stringify(builtBackup));
+  check("a backup round-trips through parse, with a summary a confirm can show", parsedBackup.ok && parsedBackup.summary.cards === liveCardCount && parsedBackup.summary.words >= 1);
+  const badFile = (obj) => backupApi.parseBackup(typeof obj === "string" ? obj : JSON.stringify(obj));
+  check("a file that isn't JSON is refused", badFile("not json {").ok === false);
+  check("JSON that isn't a raume backup is refused", badFile({ hello: "world" }).ok === false && badFile([1, 2]).ok === false);
+  check("a backup from a newer version is refused with a hint to reload", (() => { const r = badFile(Object.assign({}, builtBackup, { version: 99 })); return r.ok === false && /newer version/.test(r.error); })());
+  check("a damaged flashcards section is refused rather than half-restored", badFile(Object.assign({}, builtBackup, { data: Object.assign({}, builtBackup.data, { flashcards: { nope: 1 } }) })).ok === false);
+  check("invalid card records inside a section are dropped, valid ones kept", (() => {
+    const tampered = JSON.parse(JSON.stringify(builtBackup));
+    const firstId = Object.keys(tampered.data.flashcards.cards)[0];
+    tampered.data.flashcards.cards[firstId] = { id: 5 };
+    const r = backupApi.parseBackup(JSON.stringify(tampered));
+    return r.ok && r.summary.cards === liveCardCount - 1;
+  })());
+  // Applying writes localStorage, which file:// jsdom won't allow -- swap in a
+  // tiny in-memory Storage for just this block, then put the real one back.
+  const realStorage = Object.getOwnPropertyDescriptor(window, "localStorage");
+  const fakeMem = {};
+  let failOnWriteNo = 0, writes = 0;
+  const fakeStorage = {
+    getItem: (k) => (k in fakeMem ? fakeMem[k] : null),
+    setItem: (k, v) => { writes++; if (failOnWriteNo && writes === failOnWriteNo) throw new Error("quota"); fakeMem[k] = String(v); },
+    removeItem: (k) => { delete fakeMem[k]; }
+  };
+  Object.defineProperty(window, "localStorage", { value: fakeStorage, configurable: true });
+  try {
+    fakeMem["raume-table-custom"] = JSON.stringify({ "1": { name: "Old" } });
+    fakeMem["raume-flashcards-guest-v1"] = "OLD-FLASHCARDS";
+    const applied = backupApi.applyBackup(parsedBackup.backup);
+    check("applying a backup writes the guest flashcards + kana caches", applied.ok && Object.keys(JSON.parse(fakeMem["raume-flashcards-guest-v1"]).cards).length === liveCardCount && !!fakeMem["raume-kana-v1"]);
+    check("...and clears a section the backup didn't have (restore replaces, it doesn't merge)", fakeMem["raume-table-custom"] === undefined);
+    fakeMem["raume-table-custom"] = JSON.stringify({ "1": { name: "Old" } });
+    fakeMem["raume-flashcards-guest-v1"] = "OLD-FLASHCARDS";
+    writes = 0; failOnWriteNo = 2; // fail on the second write (the kana cache)
+    const failed = backupApi.applyBackup(parsedBackup.backup);
+    check("a write that fails part-way rolls every section back and says nothing was changed", failed.ok === false && /Nothing was changed/.test(failed.error)
+      && fakeMem["raume-flashcards-guest-v1"] === "OLD-FLASHCARDS" && fakeMem["raume-table-custom"] === JSON.stringify({ "1": { name: "Old" } }));
+  } finally {
+    if (realStorage) Object.defineProperty(window, "localStorage", realStorage); else delete window.localStorage;
+  }
+  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  check("Settings offers Download backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  document.querySelector('.fc-tab[data-tab="dashboard"]').click();
+
   await flush(); // let the async weekly-activity load resolve and re-render
   check("the card-progress breakdown labels all three states", (() => {
     const legend = document.querySelector("#fcPanelDashboard .fc-breakdown-legend");

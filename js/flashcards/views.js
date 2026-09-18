@@ -79,6 +79,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="fc-legend-term">Pause</span> stops reviewing a word but keeps every bit of its progress. Add it back any time and it resumes exactly where you left off. Paused words collect under the <span class="fc-legend-term">Archived</span> filter.</li>' +
       '<li><span class="fc-legend-term">Pause table</span> makes a whole table dormant in one step — it drops out of review and the stat tiles and only shows under <span class="fc-legend-term">All vocabulary</span> (as <em>Paused</em>, with a <span class="fc-legend-term">Resume table</span> button). Its cards aren\'t archived one by one, so a paused table never clutters the Archived list. Resume brings every card back exactly as it was.</li>' +
       '<li>Nothing is ever permanently deleted. A paused word or table keeps its full FSRS scheduling state and complete review history for good.</li>' +
+      '<li>Using it without an account? Your progress lives only in this browser — <span class="fc-legend-term">Settings → Back up &amp; restore</span> saves it to a file and restores it from one, so clearing site data doesn\'t lose it.</li>' +
       '<li>Studying a word the built-in tables don\'t have? Add it under <span class="fc-legend-term">Your vocabulary</span> on the Customize page (the sliders icon) — one at a time or a paste / CSV import — then it\'s a normal word you can add here. Signed in, you can build whole tables of your own; editing or deleting a word or table you made there is a real change (there\'s no review history on the word itself to keep).</li>' +
       '</ul></div>' +
       '<div class="fc-settings-section"><h3>Status icons in Manage</h3>' +
@@ -462,7 +463,9 @@ window.RaumeStudy.flashcards.views = (function () {
       '<div class="fc-cta-row fc-cta-row-spaced fc-settings-save">' +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcSaveSettings">Save settings</button>' +
       '<span class="fc-settings-saved" id="fcSettingsSaved" role="status"' +
-      (Date.now() - settingsSavedAt < SAVED_FLASH_MS ? "" : " hidden") + ">Saved ✓</span></div>";
+      (Date.now() - settingsSavedAt < SAVED_FLASH_MS ? "" : " hidden") + ">Saved ✓</span></div>" +
+      backupSectionHtml();
+    wireBackup();
 
     // Every setting is written to the local cache before the remote call even
     // goes out (see saveFsrsSettings/saveDirectionSettings), so a failed sync
@@ -539,6 +542,58 @@ window.RaumeStudy.flashcards.views = (function () {
     // Any edit clears a lingering "Saved ✓" so it always reflects the current form.
     panel.addEventListener("input", clearSavedNote);
     panel.addEventListener("change", clearSavedNote);
+  }
+  // --- Back up & restore (guest mode) ---
+  // Guest data lives only in this browser, so this is the one place a reader can
+  // get it out (and back in). Signed-in progress is already in the account.
+  function backupSectionHtml() {
+    var backup = window.RaumeStudy.flashcards.backup;
+    if (!backup) return "";
+    if (!backup.available()) {
+      return '<div class="fc-settings-section fc-backup-section"><h3>Back up &amp; restore</h3>' +
+        '<p class="fc-note">Your progress is saved to your account, so there is nothing to back up here.</p></div>';
+    }
+    return '<div class="fc-settings-section fc-backup-section"><h3>Back up &amp; restore</h3>' +
+      '<p class="fc-note">This device is the only copy of your flashcards, Kana progress, table names and icons, and any words you added — clearing this browser\'s site data loses them. Save a backup file now and then; restoring one replaces what is on this device with what was in the file.</p>' +
+      '<div class="fc-cta-row">' +
+      '<button type="button" class="fc-btn" id="fcBackupExport">Download backup</button>' +
+      '<button type="button" class="fc-btn" id="fcBackupImport">Restore from a file…</button>' +
+      '<input type="file" id="fcBackupFile" accept="application/json,.json" hidden></div>' +
+      '<div class="fc-auth-error" id="fcBackupError" role="alert" hidden></div></div>';
+  }
+  function wireBackup() {
+    var backup = window.RaumeStudy.flashcards.backup;
+    var exportBtn = document.getElementById("fcBackupExport");
+    if (!backup || !exportBtn) return;
+    var importBtn = document.getElementById("fcBackupImport");
+    var fileInput = document.getElementById("fcBackupFile");
+    var errorBox = document.getElementById("fcBackupError");
+    function showError(msg) { errorBox.textContent = msg; errorBox.hidden = !msg; }
+    exportBtn.addEventListener("click", function () {
+      showError("");
+      try { backup.downloadBackup(); } catch (e) { showError("Couldn't create the backup file — " + (e.message || "try again.")); }
+    });
+    importBtn.addEventListener("click", function () { showError(""); fileInput.click(); });
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      if (!file) return;
+      showError("");
+      file.text().then(function (text) {
+        var parsed = backup.parseBackup(text);
+        if (!parsed.ok) { showError(parsed.error); return; }
+        var sm = parsed.summary;
+        var when = sm.exportedAt && !isNaN(Date.parse(sm.exportedAt)) ? " from " + new Date(sm.exportedAt).toLocaleDateString() : "";
+        var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + sm.cards + " cards)"];
+        if (sm.kanaCards) parts.push(sm.kanaCards + " Kana cards");
+        if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
+        if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
+        if (!window.confirm("Restore the backup" + when + "?\n\nIt holds " + parts.join(", ") + ".\n\nThis replaces everything Flashcards currently has on this device. Anything you've done since the backup was made will be lost.")) return;
+        var applied = backup.applyBackup(parsed.backup);
+        if (!applied.ok) { showError(applied.error); return; }
+        window.location.reload();
+      }, function () { showError("Couldn't read that file."); });
+    });
   }
   function settingsField(label, controlHtml, help) {
     return '<div class="fc-settings-field"><div class="fc-settings-field-row"><label>' + esc(label) + "</label>" + controlHtml + "</div>" +

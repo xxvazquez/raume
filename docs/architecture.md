@@ -110,6 +110,26 @@ flowchart LR
   individually after. Sign-in unions the two lists (a device's pauses aren't
   dropped).
 
+### Guest backup
+
+`js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) is guest-only —
+signed-in data already lives in the account. `buildBackup()` snapshots four
+things into `{format: "raume-backup", version: 1, exportedAt, data}`: the guest
+flashcard cache (`raume-flashcards-guest-v1`), the guest Kana cache
+(`raume-kana-v1`), table customisations (`raume-table-custom`) and the guest
+custom vocabulary (`raume-custom-vocab-guest-v1`). Built-in vocabulary is never
+included (cards reference it by `vocab_id`). `parseBackup()` re-runs every
+section through the same validator the live app loads it with
+(`store.validateCache` / `validateKanaCache`, `customVocab.sanitize`), so a bad
+file drops invalid records but can't produce an unreadable shape, and refuses
+files from a newer `version`. `applyBackup()` **replaces** those keys (a section
+the backup lacked is cleared, not merged) and rolls every key back if any write
+fails; the Settings tab then reloads the page so every module re-reads storage.
+The keys come from constants those modules export
+(`store.GUEST_CACHE_KEY` / `KANA_GUEST_KEY`, `tableCustom.STORAGE_KEY`,
+`customVocab.GUEST_KEY`) rather than being repeated, so a renamed key carries
+the backup along.
+
 ### localStorage keys
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
@@ -183,6 +203,7 @@ js/
     vocab-index.js       lookup + answer checking
     scheduling.js        FSRS-6 + the session queue
     data-ops.js          auth, Supabase sync, guest store, streak
+    backup.js            guest-mode export / import of the on-device data (JSON file)
     dashboard.js         the Dashboard tab + the review session
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups

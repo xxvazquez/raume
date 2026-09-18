@@ -281,6 +281,8 @@ window.RaumeStudy.flashcards.store = (function () {
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,
     resetKanaCacheForUser: resetKanaCacheForUser,
-    defaultKanaFsrs: defaultKanaFsrs, sanitizeKanaFsrs: sanitizeKanaFsrs
+    defaultKanaFsrs: defaultKanaFsrs, sanitizeKanaFsrs: sanitizeKanaFsrs,
+    validateCache: validateCache, validateKanaCache: validateKanaCache,
+    GUEST_CACHE_KEY: GUEST_CACHE_KEY, KANA_GUEST_KEY: KANA_GUEST_KEY
   };
 })();
