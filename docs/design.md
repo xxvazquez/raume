@@ -100,6 +100,16 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
+- **An open table is an iOS-style inset-grouped list.** Collapsed tables are
+  plain hairline list rows; opening one lifts it into a rounded tinted panel
+  (`--group-ground`) with the title on the tint and the column headers + rows in
+  their own white rounded card (`--paper`, 10px radius) below it. That is what
+  answers "where does the title end and the table start" — on flat white the
+  title, header rule and rows blended together, worst in search results where
+  every table is open at once. Scoped to `#vocabulary` (Flashcards' *Words to
+  review* already sits in a card) and flattened for print. In dark the ground
+  is *darker* than the card (`--page-bg` under `--paper`), as on iOS, rather than
+  the light theme's darker-tint-under-white.
 - **い/な-adjective rows** get a coloured bar down the Japanese cell's left
   inner edge instead of a tag or tinted text: `--adj-i-ink` (purple) for
   **い-adj**, `--adj-na-ink` (green) for **な-adj** — dedicated tokens,

@@ -149,6 +149,8 @@
      palette and one type scale rather than its own. */
   --accent-dark: var(--accent-strong);
   --surface: #eef0f3;
+  /* The ground an open table's white card sits on (iOS "grouped" background). */
+  --group-ground: var(--surface);
   /* Text-field fill + border, and the two structural line weights that want
      tuning per theme (see the dark block). */
   --field-fill: #eef0f3;
@@ -286,6 +288,8 @@
   --hl-ink: #f0d4cc;
 
   --surface: #2b2d33;
+  /* Dark grouped ground is darker than the card, as on iOS. */
+  --group-ground: var(--page-bg);
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 10px rgba(0, 0, 0, .35);
   --shadow-menu: 0 12px 34px rgba(0, 0, 0, .55);
@@ -915,6 +919,35 @@ body.selftest-mode .selftest-hint { display: block; }
 /* A collapsed table is a quiet list row, not a section heading. */
 .table-section.collapsed .section-title-text { font-size: 17px; font-weight: 400; }
 .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 12px; }
+
+/* An open table reads as an iOS "inset grouped" list: the title sits on a
+   tinted ground and the rows sit in their own white, rounded card beneath it,
+   so it's obvious where the title ends and the table begins (on plain white
+   the title, header rule and rows all blended together, worst in search
+   results where every table is open at once). Collapsed tables stay plain
+   list rows. Scoped to #vocabulary -- Flashcards' own "Words to review"
+   table already sits inside a card. */
+#vocabulary .table-section:not(.collapsed) {
+  background: var(--group-ground);
+  border-radius: 14px;
+  padding: 2px 10px 10px;
+}
+#vocabulary .table-section:not(.collapsed) .section-head {
+  padding: 12px 6px 10px;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+#vocabulary .table-section:not(.collapsed) .vocab {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+/* Cells paint their own backgrounds, which would square off the card's
+   corners -- round the four outer cells to match. */
+#vocabulary .table-section:not(.collapsed) .vocab thead th:first-child { border-top-left-radius: 9px; }
+#vocabulary .table-section:not(.collapsed) .vocab thead th:last-child { border-top-right-radius: 9px; }
+#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 9px; }
+#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 9px; }
 .section-title { margin: 0; flex: 0 1 auto; min-width: 0; }
 .section-toggle {
   appearance: none;
@@ -1954,6 +1987,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
   .table-section { margin: 0 0 12px; max-width: none; }
   #vocabulary .table-section { padding-left: 0; }
+  #vocabulary .table-section:not(.collapsed) { background: none; border-radius: 0; padding: 0; }
+  #vocabulary .table-section:not(.collapsed) .vocab { border-radius: 4px; }
   .table-section .controls { display: none !important; }
   .section-head { display: block !important; padding: 0 0 8px !important; margin: 0 !important; border: 0 !important; }
   .section-head::before { display: none !important; }
