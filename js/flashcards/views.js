@@ -75,7 +75,7 @@ window.RaumeStudy.flashcards.views = (function () {
     panel.innerHTML =
       '<div class="fc-settings-section"><h3>Adding &amp; pausing vocabulary</h3>' +
       '<ul class="fc-help-list">' +
-      '<li><span class="fc-legend-term">Add</span> starts studying a word — or a whole table at once, from the Manage tab or the vocabulary page.</li>' +
+      '<li><span class="fc-legend-term">Add</span> starts studying a word — or a whole table at once, from the Manage tab, or from a vocabulary search result (the small <span class="fc-legend-term">+</span> beside it).</li>' +
       '<li><span class="fc-legend-term">Pause</span> stops reviewing a word but keeps every bit of its progress. Add it back any time and it resumes exactly where you left off. Paused words collect under the <span class="fc-legend-term">Archived</span> filter.</li>' +
       '<li><span class="fc-legend-term">Pause table</span> makes a whole table dormant in one step — it drops out of review and the stat tiles and only shows under <span class="fc-legend-term">All vocabulary</span> (as <em>Paused</em>, with a <span class="fc-legend-term">Resume table</span> button). Its cards aren\'t archived one by one, so a paused table never clutters the Archived list. Resume brings every card back exactly as it was.</li>' +
       '<li>Nothing is ever permanently deleted. A paused word or table keeps its full FSRS scheduling state and complete review history for good.</li>' +
@@ -601,12 +601,11 @@ window.RaumeStudy.flashcards.views = (function () {
   }
 
   // -----------------------------------------------------------------------
-  // Row-level "add to flashcards" toggle. js/vocab/render.js no longer draws
-  // a .fc-toggle-btn on any reference row (removed as redundant with this
-  // module's own Manage tab, which is where words actually get added/
-  // removed now) -- kept here as a harmless no-op should that ever change,
-  // rather than unwinding every refreshRowToggleButtons() call site across
-  // bootstrap.js/dashboard.js for a currently-empty querySelectorAll.
+  // Row-level "add to flashcards" toggle. js/vocab/render.js draws a
+  // .fc-toggle-btn on each reference row but CSS shows it only while a search
+  // is running (body.is-searching) -- a permanent per-row icon was redundant
+  // with this module's Manage tab and just took up space. Its + / check state
+  // is refreshed here when a search starts and after every add/pause.
   // -----------------------------------------------------------------------
   function refreshRowToggleButtons() {
     document.querySelectorAll(".fc-toggle-btn").forEach(function (btn) {

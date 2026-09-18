@@ -525,6 +525,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function runSearch() {
       const q = input.value.trim().toLocaleLowerCase();
       box.classList.toggle('has-value', Boolean(q));
+      // Shows each row's add-to-flashcards toggle (css/site.css) only while
+      // searching; its plus/check state is refreshed as the search starts,
+      // since nothing else keeps hidden rows' toggles current.
+      const wasSearching = document.body.classList.contains('is-searching');
+      document.body.classList.toggle('is-searching', Boolean(q));
+      if (q && !wasSearching) {
+        const fcNs = window.RaumeStudy.flashcards;
+        if (fcNs && fcNs.refreshRowToggleButtons) fcNs.refreshRowToggleButtons();
+      }
       const activeSection = document.body.dataset.activeSection || 'vocabulary';
       let totalRows = 0, totalTables = 0;
       const sectionOrder = [];

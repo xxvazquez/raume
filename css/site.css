@@ -2075,6 +2075,12 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .vocab tbody tr:focus-within .fc-toggle-btn,
 .fc-toggle-btn:focus-visible,
 .fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
+/* Only while searching (body.is-searching) -- see js/vocab/render.js. */
+.vocab .fc-toggle-btn { display: none; }
+body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
+.fc-toggle-btn .fc-ic-added,
+.fc-toggle-btn[aria-pressed="true"] .fc-ic-add { display: none; }
+.fc-toggle-btn[aria-pressed="true"] .fc-ic-added { display: block; }
 .fc-toggle-btn:hover { color: var(--accent-dark) !important; }
 /* Already in your deck -- green, matching "in flashcards" everywhere else
    (the Manage status glyph, the dashboard). Quiet enough not to speckle the

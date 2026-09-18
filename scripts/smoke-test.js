@@ -1208,18 +1208,24 @@ async function main() {
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
   check("Vocabulary still returns to the reference (unaffected by the Flashcards page)", document.getElementById("vocabPage").hidden === false);
 
-  console.log("Flashcards: no per-row add toggle on the reference tables");
+  console.log("Flashcards: per-row add toggle appears only while searching");
   const drinksSectionFc = document.querySelector('.table-section[data-table="2"]');
   const firstRowFc = drinksSectionFc.querySelector("tbody tr");
   check("every rendered row carries its permanent vocab id", /^v\d{4,}$/.test(firstRowFc.dataset.vocabId));
-  // Removed as redundant with Flashcards' own Manage page (which is where
-  // words actually get added/removed) -- it just took up space on every row.
-  check("no per-row flashcard toggle is rendered (Manage owns add/remove)", !firstRowFc.querySelector(".fc-toggle-btn"));
-  check("the row-action cluster is hide only", (() => {
-    const cluster = firstRowFc.querySelector(".row-actions");
-    return !!cluster && cluster.children.length === 1
-      && cluster.children[0].classList.contains("row-hide-btn");
-  })());
+  // The permanent per-row icon was removed as clutter (Manage owns bulk
+  // add/remove); it's back only as a search-result affordance, hidden at rest.
+  const rowToggle = firstRowFc.querySelector(".fc-toggle-btn");
+  check("each row has an add toggle keyed to its vocab id, in the row-action cluster before the hide button", !!rowToggle && rowToggle.dataset.vocabId === firstRowFc.dataset.vocabId
+    && [...firstRowFc.querySelector(".row-actions").children].map(c => c.className.split(" ")[0]).join(",") === "fc-toggle-btn,row-hide-btn");
+  check("...hidden while nothing is being searched", window.getComputedStyle(rowToggle).display === "none");
+  const searchBox = document.getElementById("tableSearch");
+  searchBox.value = "cooking oil";
+  searchBox.dispatchEvent(new window.Event("input", { bubbles: true }));
+  const shownToggle = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) .fc-toggle-btn')][0];
+  check("...and shown on the rows a search matches", !!shownToggle && document.body.classList.contains("is-searching") && window.getComputedStyle(shownToggle).display !== "none");
+  searchBox.value = "";
+  searchBox.dispatchEvent(new window.Event("input", { bubbles: true }));
+  check("...hidden again once the search is cleared", !document.body.classList.contains("is-searching") && window.getComputedStyle(rowToggle).display === "none");
 
   console.log("Flashcards: add a whole table at once");
   const fcMenuBtn = drinksSectionFc.querySelector(".section-menu-btn");

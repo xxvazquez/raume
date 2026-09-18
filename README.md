@@ -37,7 +37,9 @@ so they're easy to spot in a sentence.
 - **Search** ranks by match quality (exact → starts-with → ends-with →
   contains), highlights the match, and pulls from every section — from
   whichever of Japanese/Furigana/English are currently visible, plus romaji
-  always (it has no visibility toggle of its own).
+  always (it has no visibility toggle of its own). While a search is running,
+  each matching row also shows a small **+ / ✓** toggle (before the hide icon)
+  to add that word to flashcards or pause it — find a word, tap once.
 - **URL hash** reflects the current view (`#grammar`, `#table-15`,
   `#flashcards`), so any view can be bookmarked and survives a reload.
 - The search field and column filters stay pinned below the nav as you scroll.
@@ -171,8 +173,9 @@ the next time you're connected, even if that's a different session.
 
 Flashcards sit on top of the vocabulary without changing or copying it. Add a
 whole table with **Add to flashcards** (skips hidden rows), or add/remove
-individual words from Flashcards' own **Manage** tab — there's no per-row
-toggle on the reference tables themselves, to keep them focused on browsing.
+individual words from Flashcards' own **Manage** tab. The reference rows carry
+no permanent per-row toggle, to keep them focused on browsing — it only appears
+on search results.
 The **Flashcards** nav page is where you review, browse, and track a daily
 streak.
 
