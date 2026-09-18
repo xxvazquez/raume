@@ -150,7 +150,7 @@
   --accent-dark: var(--accent-strong);
   --surface: #eef0f3;
   /* The ground an open table's white card sits on (iOS "grouped" background). */
-  --group-ground: var(--surface);
+  --group-ground: #f2f3f7;
   /* Text-field fill + border, and the two structural line weights that want
      tuning per theme (see the dark block). */
   --field-fill: #eef0f3;
@@ -920,34 +920,59 @@ body.selftest-mode .selftest-hint { display: block; }
 .table-section.collapsed .section-title-text { font-size: 17px; font-weight: 400; }
 .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 12px; }
 
-/* An open table reads as an iOS "inset grouped" list: the title sits on a
-   tinted ground and the rows sit in their own white, rounded card beneath it,
-   so it's obvious where the title ends and the table begins (on plain white
-   the title, header rule and rows all blended together, worst in search
-   results where every table is open at once). Collapsed tables stay plain
-   list rows. Scoped to #vocabulary -- Flashcards' own "Words to review"
-   table already sits inside a card. */
-#vocabulary .table-section:not(.collapsed) {
+/* iOS "inset grouped" list. One grey ground behind the reference page, white
+   rounded cards sitting directly on it, and nothing else: no borders, no
+   coloured bars, no rules under headings, no box inside a box. A run of
+   collapsed tables is ONE card of list cells (inset hairline between them,
+   disclosure chevron on the right); an open table is its own card, its title
+   a bold section title on the ground above it. That separation is what makes
+   it obvious where a title ends and a table starts -- on flat white they
+   blended together, worst in search results where every table is open.
+   Scoped to #vocabulary / .page-vocab; Flashcards' "Words to review" already
+   sits in a card. */
+.page-vocab {
   background: var(--group-ground);
-  border-radius: 14px;
-  padding: 2px 10px 10px;
+  border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
 }
-#vocabulary .table-section:not(.collapsed) .section-head {
-  padding: 12px 6px 10px;
-  margin-bottom: 0;
-  border-bottom: 0;
+/* Toolbar on the ground: iOS search is a slightly darker fill, no border. */
+.page-vocab .search-box {
+  background: color-mix(in srgb, var(--ink) 7%, var(--group-ground));
+  border-color: transparent;
 }
-#vocabulary .table-section:not(.collapsed) .vocab {
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-/* Cells paint their own backgrounds, which would square off the card's
-   corners -- round the four outer cells to match. */
-#vocabulary .table-section:not(.collapsed) .vocab thead th:first-child { border-top-left-radius: 9px; }
-#vocabulary .table-section:not(.collapsed) .vocab thead th:last-child { border-top-right-radius: 9px; }
-#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 9px; }
-#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 9px; }
+/* Category name is just a quiet label above its card -- no underline. */
+.page-vocab .cat-heading { border-bottom: 0; padding-bottom: 0; margin-bottom: 8px; }
+.page-vocab .vocab-toolbar { border-bottom: 0; background: var(--group-ground); }
+
+/* Decorative empty-icon "+" placeholder reads as an add button; drop it. */
+#vocabulary .section-head > .section-icon-empty { display: none; }
+/* Disclosure chevron on the right of the title, as in an iOS list. */
+#vocabulary .section-title { flex: 1 1 auto; }
+#vocabulary .section-toggle { width: 100%; flex-direction: row-reverse; justify-content: space-between; }
+#vocabulary .section-head::before { display: none; }
+
+/* Collapsed: cells of one grouped card. The per-table menu / print stay
+   reachable on the cell (nothing is hidden behind an extra step) -- just as
+   bare glyphs, without their boxes, so the cell stays quiet. */
+#vocabulary .table-section.collapsed { background: var(--paper); padding: 0 16px; }
+#vocabulary .table-section.collapsed .section-head { padding: 12px 0; border-bottom: 1px solid var(--row-line); }
+#vocabulary .table-section.collapsed .section-menu-btn,
+#vocabulary .table-section.collapsed .print-one { border-color: transparent; background: none; }
+#vocabulary .table-section.collapsed:not(.table-section.collapsed + .table-section.collapsed) { border-radius: 12px 12px 0 0; }
+#vocabulary .table-section.collapsed:not(:has(+ .table-section.collapsed)) { border-radius: 0 0 12px 12px; }
+#vocabulary .table-section.collapsed:not(.table-section.collapsed + .table-section.collapsed):not(:has(+ .table-section.collapsed)) { border-radius: 12px; }
+#vocabulary .table-section.collapsed:not(:has(+ .table-section.collapsed)) .section-head { border-bottom: 0; }
+
+/* Open: bold title on the ground, then the white card. */
+#vocabulary .table-section:not(.collapsed) { padding: 0; margin: 24px 0; }
+#vocabulary .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 24px; }
+#vocabulary .table-section:not(.collapsed) .section-head { padding: 0 4px 8px; margin-bottom: 0; border-bottom: 0; }
+#vocabulary .table-section:not(.collapsed) .section-title-text { font-size: 20px; font-weight: 600; }
+#vocabulary .table-section:not(.collapsed) .vocab { background: var(--paper); border-radius: 12px; }
+#vocabulary .table-section:not(.collapsed) .vocab thead th { border-bottom: 1px solid var(--row-line); }
+#vocabulary .table-section:not(.collapsed) .vocab thead th:first-child { border-top-left-radius: 12px; }
+#vocabulary .table-section:not(.collapsed) .vocab thead th:last-child { border-top-right-radius: 12px; }
+#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+#vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 12px; }
 .section-title { margin: 0; flex: 0 1 auto; min-width: 0; }
 .section-toggle {
   appearance: none;
@@ -1987,7 +2012,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
   .table-section { margin: 0 0 12px; max-width: none; }
   #vocabulary .table-section { padding-left: 0; }
-  #vocabulary .table-section:not(.collapsed) { background: none; border-radius: 0; padding: 0; }
+  .page-vocab { background: none; }
+  #vocabulary .table-section.collapsed { background: none; padding: 0; border-radius: 0; }
   #vocabulary .table-section:not(.collapsed) .vocab { border-radius: 4px; }
   .table-section .controls { display: none !important; }
   .section-head { display: block !important; padding: 0 0 8px !important; margin: 0 !important; border: 0 !important; }
