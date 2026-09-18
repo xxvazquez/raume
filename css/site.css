@@ -2207,20 +2207,22 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    (predictable at any viewport) with only the bar itself as a tiny per-bar
    SVG shape (proportional height, no inline style="" needed for the CSP,
    and nothing inside it to be mis-scaled since it holds no text). */
-.fc-week-none { margin: 0 0 10px; }
-.fc-week-chart { display: flex; align-items: flex-end; gap: 6px; height: 84px; }
-.fc-week-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; height: 100%; }
-.fc-week-count { display: block; min-height: 1.4em; font: 500 var(--fs-micro)/1.4 var(--font-ui); color: var(--muted); }
-.fc-week-barsvg { display: block; width: 100%; flex: 1 1 auto; min-height: 0; }
+.fc-week-none, .fc-due-none { margin: 0 0 10px; }
+.fc-due-later { margin: 10px 0 0; }
+.fc-week-chart, .fc-due-chart { display: flex; align-items: flex-end; gap: 6px; height: 84px; }
+.fc-week-col, .fc-due-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.fc-week-count, .fc-due-count { display: block; min-height: 1.4em; font: 500 var(--fs-micro)/1.4 var(--font-ui); color: var(--muted); }
+.fc-week-barsvg, .fc-due-barsvg { display: block; width: 100%; flex: 1 1 auto; min-height: 0; }
 /* Past days a clear mid lavender; today the full deep accent so the current
    day reads first at a glance, its count + label carrying the same colour
    and weight. A no-review day stays a flat baseline regardless. */
-.fc-week-bar { fill: color-mix(in srgb, var(--accent) 60%, var(--paper)); }
-.fc-week-bar-empty { fill: var(--line-strong); }
-.fc-week-col-today .fc-week-bar:not(.fc-week-bar-empty) { fill: var(--accent-strong); }
-.fc-week-col-today .fc-week-count { color: var(--accent-strong); }
-.fc-week-label { display: block; margin-top: 6px; font-size: var(--fs-micro); color: var(--faint); }
-.fc-week-col-today .fc-week-label { color: var(--accent-strong); font-weight: 500; }
+.fc-week-bar, .fc-due-bar { fill: color-mix(in srgb, var(--accent) 60%, var(--paper)); }
+.fc-week-bar-empty, .fc-due-bar-empty { fill: var(--line-strong); }
+.fc-week-col-today .fc-week-bar:not(.fc-week-bar-empty),
+.fc-due-col-today .fc-due-bar:not(.fc-due-bar-empty) { fill: var(--accent-strong); }
+.fc-week-col-today .fc-week-count, .fc-due-col-today .fc-due-count { color: var(--accent-strong); }
+.fc-week-label, .fc-due-label { display: block; margin-top: 6px; font-size: var(--fs-micro); color: var(--faint); }
+.fc-week-col-today .fc-week-label, .fc-due-col-today .fc-due-label { color: var(--accent-strong); font-weight: 500; }
 
 .fc-cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
 .fc-cta-row-spaced { margin-top: 12px; margin-bottom: 0; }

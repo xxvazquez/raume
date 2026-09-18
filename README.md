@@ -233,7 +233,9 @@ streak.
 
 - **Dashboard** — today's progress, a next-review status line, four stat tiles
   (streak, total, reviews done, estimated retention), a New → Learning → Review
-  bar, a reviews-this-week chart, "Missed today", and a **Words to review**
+  bar, a reviews-this-week chart beside a **Due next 7 days** forecast (how many
+  cards come due each day, overdue folded into Today, with a "N more after that"
+  note; direction- and table-pause-aware like the queue), "Missed today", and a **Words to review**
   table (words missed more than once) that carries the same column toggles as
   the reference pages.
 - **Manage** — every table by category, filterable to All / My flashcards /

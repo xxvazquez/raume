@@ -104,6 +104,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="fc-help-list">' +
       '<li><span class="fc-legend-term">Today</span> — cards reviewed today against your daily target (New cards per day, under Settings → Daily session).</li>' +
       '<li><span class="fc-legend-term">Next review</span> — when the next scheduled card is due, taken straight from the FSRS schedule.</li>' +
+      '<li><span class="fc-legend-term">Due next 7 days</span> — how many cards come due on each of the coming days, from the same FSRS schedule. Anything overdue is counted under Today; cards further out are summarised as "N more after that". Paused words and tables, and directions you\'ve turned off, aren\'t counted.</li>' +
       '<li><span class="fc-legend-term">Missed today</span> — words you missed in today\'s reviews, most-missed first. Click one to practice it right away.</li>' +
       '<li><span class="fc-legend-term">Words to Review</span> — words you get wrong repeatedly over time, shown as a normal vocabulary table you can sort, print, and hide columns on (the same Japanese / Furigana / English toggles as the reference pages) to quiz yourself.</li>' +
       '</ul></div>' +

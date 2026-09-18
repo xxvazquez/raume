@@ -267,6 +267,10 @@ colour here more than anywhere else:
   each, so colour never carries identity alone;
 - **Reviews this week** bars are a mid lavender tint; today's bar is the full
   deep `--accent-strong` with its count and label the same colour and weight;
+- **Due next 7 days** reuses the Reviews-this-week bar language (same
+  lavender tint, deep `--accent-strong` for the first column) with its own
+  `.fc-due-*` classes, and pairs beside it; Card progress spans the full width
+  above the pair. Nothing due → a single line instead of seven flat baselines;
 - **Missed today** rows get a 3px coral left rule and a coral badge — the
   attention tone used across the dashboard.
 

@@ -1506,6 +1506,31 @@ async function main() {
     return cols[6].classList.contains("fc-week-col-today")
       && [...cols].slice(0, 6).every(c => !c.classList.contains("fc-week-col-today"));
   })());
+  check("the dashboard has a Due next 7 days card; with only new cards it says nothing is scheduled instead of drawing a flat chart", (() => {
+    const card = [...document.querySelectorAll("#fcPanelDashboard .fc-viz-card")].find(c => /Due next 7 days/.test(c.textContent));
+    return !!card && !!card.querySelector(".fc-due-none") && !card.querySelector(".fc-due-chart");
+  })());
+  check("due forecast buckets cards by day: overdue folds into Today, later days and beyond 7 days are counted apart", (() => {
+    const dash = window.RaumeStudy.flashcards.dashboard;
+    const cards = window.RaumeStudy.flashcards.scheduling.studyableCards().slice(0, 4);
+    if (cards.length < 4) return false;
+    const saved = cards.map(c => ({ state: c.state, due: c.due }));
+    const at = (daysAhead) => { const d = new Date(); d.setDate(d.getDate() + daysAhead); d.setHours(12, 0, 0, 0); return d.toISOString(); };
+    try {
+      cards[0].state = 2; cards[0].due = at(-3);  // overdue -> Today
+      cards[1].state = 2; cards[1].due = at(0);   // due today
+      cards[2].state = 2; cards[2].due = at(2);   // two days out
+      cards[3].state = 2; cards[3].due = at(30);  // beyond the window
+      const f = dash.dueForecast(new Date());
+      const chartHtml = (() => { window.RaumeStudy.flashcards.render(); return document.querySelector("#fcPanelDashboard .fc-due-chart"); })();
+      return f.days.length === 7 && f.days[0].label === "Today" && f.days[0].count === 2 && f.days[2].count === 1 && f.total === 3 && f.later === 1
+        && !!chartHtml && chartHtml.querySelectorAll(".fc-due-col").length === 7 && chartHtml.querySelector(".fc-due-col-today") === chartHtml.querySelector(".fc-due-col")
+        && /1 more is due after that/.test(chartHtml.parentElement.textContent);
+    } finally {
+      cards.forEach((c, i) => { c.state = saved[i].state; c.due = saved[i].due; });
+      window.RaumeStudy.flashcards.render();
+    }
+  })());
 
   console.log("Flashcards: Dashboard with cards but no review history");
   {

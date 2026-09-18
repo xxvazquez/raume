@@ -2,7 +2,7 @@
 // (RaumeStudy.flashcards.dashboard).
 //
 // Renders the Dashboard (next-review summary, stat tiles, card-progress and
-// weekly-activity charts, "Missed today", "Words to Review"), derives the
+// weekly-activity and due-forecast charts, "Missed today", "Words to Review"), derives the
 // review-history insights those cards need, and runs the review session flow
 // (queue -> prompt -> check -> rate) that "Study now" and "Missed today" start.
 // Session state, the insight caches and the two are one cluster because they
@@ -146,8 +146,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "</div>" +
       '<div class="fc-dash-progress">' +
       '<div class="fc-viz-grid">' +
-      '<div class="fc-viz-card"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
+      '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
+      '<div class="fc-viz-card"><h3 class="fc-viz-title">Due next 7 days</h3>' + dueForecastHtml(dueForecast(now)) + "</div>" +
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
@@ -506,6 +507,55 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-week-chart" role="img" aria-label="Reviews per day over the last 7 days">' + cols + "</div>";
   }
 
+  // --- Dashboard: due forecast ---
+  // How many cards come due on each of the next 7 days, straight off each
+  // card's real FSRS `due` -- no extra state, and it already includes reviews
+  // still queued offline (they're applied to the local cache immediately).
+  // Goes through studyableCards(), so switched-off directions and paused
+  // tables are left out, exactly as they are from the queue and the stat
+  // tiles. New cards (state 0) have no schedule yet and aren't counted.
+  // Overdue cards fold into "Today" -- that's when they're next asked for.
+  function dueForecast(now) {
+    var start = new Date(now); start.setHours(0, 0, 0, 0);
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(start); d.setDate(d.getDate() + i);
+      days.push({ label: i === 0 ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 2), count: 0 });
+    }
+    var later = 0, total = 0;
+    studyableCards().forEach(function (card) {
+      if (card.state === 0) return;
+      var due = new Date(card.due);
+      if (isNaN(due.getTime())) return;
+      due.setHours(0, 0, 0, 0);
+      var diff = Math.round((due.getTime() - start.getTime()) / 86400000);
+      if (diff < 7) { days[Math.max(0, diff)].count++; total++; }
+      else later++;
+    });
+    return { days: days, later: later, total: total };
+  }
+  function dueForecastHtml(f) {
+    var laterNote = f.later ? '<p class="fc-note fc-due-later">' + f.later + " more " + (f.later === 1 ? "is" : "are") + " due after that.</p>" : "";
+    // Nothing in the window: one line, not a chart of seven flat baselines.
+    if (!f.total) {
+      return '<p class="fc-note fc-due-none">' + (f.later
+        ? "Nothing due in the next 7 days."
+        : "Nothing scheduled yet — once you've reviewed some cards, their next due dates show up here.") + "</p>" + laterNote;
+    }
+    var max = Math.max.apply(null, f.days.map(function (d) { return d.count; }));
+    var cols = f.days.map(function (d, i) {
+      var barH = d.count ? Math.max(8, Math.round((d.count / max) * 100)) : 2;
+      var barCls = d.count ? "fc-due-bar" : "fc-due-bar fc-due-bar-empty";
+      return '<div class="' + (i === 0 ? "fc-due-col fc-due-col-today" : "fc-due-col") + '">' +
+        '<span class="fc-due-count">' + (d.count || "") + "</span>" +
+        '<svg viewBox="0 0 10 100" preserveAspectRatio="none" class="fc-due-barsvg" aria-hidden="true">' +
+        '<rect class="' + barCls + '" x="0" y="' + (100 - barH) + '" width="10" height="' + barH + '"></rect></svg>' +
+        '<span class="fc-due-label">' + esc(d.label) + "</span></div>";
+    }).join("");
+    var summary = f.days.map(function (d) { return d.count + " " + (d.label === "Today" ? "today (including overdue)" : "on " + d.label); }).join(", ");
+    return '<div class="fc-due-chart" role="img" aria-label="Cards due per day over the next 7 days: ' + esc(summary) + '">' + cols + "</div>" + laterNote;
+  }
+
   // -----------------------------------------------------------------------
   // Review session flow
   // -----------------------------------------------------------------------
@@ -821,7 +871,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
   return {
     renderDashboard: renderDashboard,
-    invalidateInsights: invalidateInsights,
+    invalidateInsights: invalidateInsights, dueForecast: dueForecast,
     getSession: getSession, setSession: setSession
   };
 })();
