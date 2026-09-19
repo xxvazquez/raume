@@ -2003,6 +2003,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .vocab td:nth-child(2) { font-size: 12.5px; }
 }
 
+/* The reference pages' screen title -- phone only (see the tab-bar block below);
+   the desktop's top nav already names the section. */
+.screen-title { display: none; }
+
 /* --- Phone: the main nav becomes an iOS tab bar ------------------------
    At phone width the same #siteNav (nothing added, nothing removed -- same
    links, same taps) is pinned to the bottom edge as five icon-over-label
@@ -2047,7 +2051,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
   /* Large screen titles: the screens that have a title carry it big. */
-  body .page-flashcards h2, body .cz-intro h2, body .page-help h2 {
+  .screen-title { display: block; }
+  body.is-searching .screen-title { display: none; }
+  body .screen-title, body .page-flashcards h2, body .cz-intro h2, body .page-help h2 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
   }

@@ -579,7 +579,11 @@ async function main() {
   console.log("Default landing page is Vocabulary");
   check("vocabulary page is visible on load", document.getElementById("vocabPage").hidden === false);
   check("flashcards page starts hidden", document.getElementById("flashcardsPage").hidden === true);
-  check("no redundant page heading -- the nav is the only place the section is named", !document.getElementById("vocabPageTitle") && !document.querySelector("#vocabPage .page-title"));
+  check("the reference pages carry a screen title that names the active section (shown on phones only, hidden on desktop)", (() => {
+    const t = document.getElementById("screenTitle");
+    const base = allCssRules.find(r => r.selectorText === ".screen-title");
+    return !!t && t.tagName === "H2" && t.textContent === "Vocabulary" && !!base && base.style.display === "none";
+  })());
   check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
     const base = allCssRules.find(r => r.selectorText === ".site-nav");
     const phone = allCssRules.find(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)

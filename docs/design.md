@@ -169,9 +169,13 @@ and Help.
   chrome. The table-index sheet (`z-index` 60) and its scrim (59) cover the bar.
 - **Large screen titles** — on a phone the screens that already have a title
   (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (30px,
-  weight 600) instead of `--fs-page-title`. The reference pages still carry **no
-  page title** by design (the selected tab names the section); adding one is a
-  separate decision.
+  weight 600) instead of `--fs-page-title`. The reference pages get one too: a
+  real `<h2 class="screen-title" id="screenTitle">` that `showSection()` keeps in
+  step with the active section (Vocabulary / Grammar / Phrases / Travel), as an
+  iOS large title names each tab's screen. Phone only — `display: none` from 641px
+  up, where the top nav already names the section — and hidden while a search is
+  running, since results span every section. It scrolls away with the page (the
+  masthead isn't sticky), leaving the sticky toolbar at the top.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label

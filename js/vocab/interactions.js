@@ -179,6 +179,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     applyTableOrder();
     document.body.dataset.activeSection = name;
     document.body.dataset.activePage = name;
+    // The phone's large screen title names the section (hidden on desktop,
+    // where the top nav does).
+    const screenTitle = document.getElementById('screenTitle');
+    const navLink = document.querySelector('#siteNav .site-nav-link[data-section="' + name + '"]');
+    if (screenTitle && navLink) screenTitle.textContent = navLink.textContent;
     showStandalonePage('vocab');
     // Reset the "jump to a table" dropdown to this section (closed).
     const tableIndex = document.getElementById('tableIndex');
