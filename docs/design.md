@@ -297,27 +297,28 @@ library" below).
 
 ## The Flashcards dashboard
 
-The dashboard has to be scannable at a glance — hierarchy comes through in
-colour here more than anywhere else:
+The whole Flashcards page follows the iOS rules the reference pages do: it sits
+on the grey ground (`.page-flashcards` → `--group-ground`, the same as
+`.page-vocab`), every group is a **white 12px card straight on the ground — no
+border, no shadow, no coloured edge bar**, and rows inside a card are separated
+by inset hairlines (`--row-line`). The five sub-tabs are the shared segmented
+control (see "Controls library"), full width on a phone. The dashboard has to
+be scannable at a glance:
 
-- **3 cards, not ~9** — next review, today's progress, Study now, the 4 stat
-  tiles and the 3 charts used to each carry their own `--card-line` +
-  `--shadow-card` border, reading as a stack of independent widgets rather
-  than one screen. They're grouped into `.fc-dash-now` ("right now": next
-  review + today + Study now), `.fc-dash-stats` (the 4 tiles) and
-  `.fc-dash-progress` (the 3 charts) instead — each card lifts off the page
-  with `--card-line` + `--shadow-card`, but the items inside share that one
-  boundary and keep only their own colour/accent, not an individual box;
-- **"N to study"** (`.fc-next-review-due`) is still the one thing in the top
-  row that jumps, now via a left bar + warm tint alone (no border/shadow of
-  its own, sitting inside `.fc-dash-now`): the coral attention tone. A cleared
-  queue (`-clear`) goes quiet sage instead;
+- **One card per group** — `.fc-dash-now` ("right now": next review + today +
+  Study now), `.fc-dash-stats` (the 4 tiles) and then one `.fc-viz-card` each for
+  Card progress, Reviews this week, Due next 7 days, Missed today, Leeches
+  (only when there are any) and Words to review. The two small charts still pair
+  side by side on a wide window;
+- **"N to study"** (`.fc-next-review`) is a plain title and sub-line inside the
+  "right now" card — no bar, no tinted box; the signal is the title's colour
+  alone: coral when cards are waiting (an attention state, not an error), quiet
+  sage (`-clear`) when the queue is empty;
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender — no shadow, it outranks the tinted buttons by fill alone;
-- **stat tiles** — the 3px left rule carries meaning: lavender for **Day streak**
-  (an achievement), sage for **Reviews completed** (cumulative progress), coral
-  for **Estimated retention** only once it drops under the Settings target
-  (`.fc-stat-attention`). **Total cards** stays neutral — it's context;
+- **stat tiles** — a plain figure over a caption, no edge rule. The one signal
+  is **Estimated retention**'s figure turning coral once it drops under the
+  Settings target (`.fc-stat-attention`);
 - **Card progress** uses three distinct hues, not one hue at three lightnesses —
   neutral slate `--fc-state-new`, ochre `--fc-state-learning`, sage
   `--fc-state-review` (New → Learning → graduated-to-review). The legend labels
@@ -328,13 +329,25 @@ colour here more than anywhere else:
   lavender tint, deep `--accent-strong` for the first column) with its own
   `.fc-due-*` classes, and pairs beside it; Card progress spans the full width
   above the pair. Nothing due → a single line instead of seven flat baselines;
-- **Missed today** rows get a 3px coral left rule and a coral badge — the
-  attention tone used across the dashboard.
+- **Missed today** rows are hairline-separated with a coral "N× today" badge —
+  the badge alone carries the attention tone.
 - **Leeches** (`.fc-leech-card`, only when there is one) is a full-width card of
-  plain hairline-separated rows — word, gloss and a muted "Forgotten N× ·
-  direction" line on the left, ghost **Pause** / **Keep** buttons on the right
-  (under the word on a phone). No edge bar: it follows the iOS list rules, not
-  Missed today's coral rule. Manage's matching *Leech* tag uses `--warn-strong`.
+  hairline-separated rows — word, gloss and a muted "Forgotten N× · direction"
+  line on the left, tinted **Pause** / **Keep** buttons on the right (under the
+  word on a phone). Manage's matching *Leech* tag uses `--warn-strong`.
+- **Words to review** is the standard vocabulary table in its own card
+  (`#fcWordsToReview:has(> .table-section)`), with the segmented column toggle in
+  its header.
+
+**Manage**: the category name is a quiet label on the ground above its cards
+(section tone, no rule beneath, disclosure caret at the end); each table is one
+white card — a header row (chevron, name, "N / M added", table actions) over its
+words as hairline rows. **Kana**'s group pickers and **Settings**' / **Help**'s
+sections are the same white cards; a picker's rows are checkmark rows with inset
+hairlines (the `legend` is floated into flow so a browser doesn't paint the
+card's background from the legend's midline). The sync chip is a tinted capsule
+with no outline, and the sign-in / entry cards are borderless (the tinted "This
+device only" card gives its button a white fill so it still reads as a button).
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the
@@ -349,10 +362,14 @@ instead of sitting pinned under a stack of chrome it doesn't need. One CSS
 rule covers both the vocabulary and Kana review cards, since they share the
 same markup — no session-state flag to keep in sync in JS.
 
-The active sub-tabs (`.fc-tab.active`) carry a solid 3px underline in the
-section tone (they become a segmented control in the iOS rollout); the active
-nav link (`.site-nav-link.active`) is a soft capsule in the section tone —
-clearly the live one against the muted rest.
+The active sub-tab (`.fc-tab.active`) is the raised segment of a segmented
+control; the active nav link (`.site-nav-link.active`) is a soft capsule in the
+section tone — clearly the live one against the muted rest.
+
+The review card itself is a plain white card (no border or shadow); the answer
+panel under it is unboxed — the large answer text does the work — and the
+rating row stays four flat buttons with hairline dividers and coloured key
+chips.
 
 ## Dark mode
 
@@ -362,8 +379,8 @@ light logic doesn't carry over:
 - text fields get their own fill (`--field-fill`) and border (`--field-line`) —
   a well *below* the page ground, so an input reads as something you type into
   rather than a raised panel;
-- `--card-line` stays a visible step above `--paper` so cards still read as
-  raised on the dark ground (with `--shadow-card`), while table row rules gain a
+- the grouped ground is *darker* than the cards (`--page-bg` under `--paper`), so
+  cards read as raised without borders or shadows, while table row rules gain a
   little (`--row-line`) so they don't vanish;
 - every accent hue is lightened but kept muted so it carries against the dark
   without turning neon — the five section tones, the lavender/sage accents,

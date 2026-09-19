@@ -974,7 +974,8 @@ body.selftest-mode .selftest-hint { display: block; }
    blended together, worst in search results where every table is open.
    Scoped to #vocabulary / .page-vocab; Flashcards' "Words to review" already
    sits in a card. */
-.page-vocab {
+.page-vocab,
+.page-flashcards {
   background: var(--group-ground);
   border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
 }
@@ -2210,18 +2211,23 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 .fc-lede { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.5; max-width: 60ch; }
 
-.fc-tabs { display: flex; gap: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line-strong); flex-wrap: wrap; }
+/* The Flashcards sub-tabs are the shared segmented control (see .view-mode):
+   a grey track, the selected tab raised on a thumb. Full width on a phone,
+   sized to its content on a wide window. */
+.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 9px; }
 .fc-tab {
+  flex: 1 1 auto;
   appearance: none; border: 0; background: transparent;
-  padding: 7px 2px;
-  margin-bottom: -1px;
-  color: var(--muted); font: 400 var(--fs-nav-sub)/1.3 var(--font-ui);
-  cursor: pointer; border-bottom: 3px solid transparent;
+  padding: 7px 8px; border-radius: 7px; text-align: center; white-space: nowrap;
+  color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
+  cursor: pointer;
 }
 .fc-tab:hover { color: var(--ink); }
-/* Which tab is selected reads from colour + a solid 3px underline in the
-   section accent -- clearly the live one against the muted rest. */
-.fc-tab.active { color: var(--section-strong); font-weight: 500; border-bottom-color: var(--section); }
+.fc-tab.active { background: var(--seg-thumb); color: var(--ink); }
+@media (min-width: 700px) {
+  .fc-tabs { display: inline-flex; }
+  .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
+}
 .fc-tabpanel[hidden] { display: none; }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across
@@ -2243,37 +2249,27 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    each item below keeping its own colour/accent but losing its individual
    box; last-child's bottom margin is zeroed so it doesn't double up with
    the card's own bottom padding. */
-.fc-dash-now, .fc-dash-stats, .fc-dash-progress {
-  background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px;
-  box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px;
+/* iOS: white 12px cards straight on the grey ground -- no border, no shadow.
+   "Right now" and "your stats" are one card each; "your progress" is a stack
+   of cards, one per chart / list (see .fc-viz-grid below). */
+.fc-dash-now, .fc-dash-stats {
+  background: var(--paper); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
 }
+.fc-dash-progress { margin-bottom: 16px; }
 .fc-dash-now > *:last-child, .fc-dash-stats > *:last-child, .fc-dash-progress > *:last-child {
   margin-bottom: 0;
 }
 
-/* Dashboard stat tiles -- four numbers of genuinely different kinds used to
-   get one identical coloured rule each, reading as one undifferentiated
-   row. The 4px left rule now carries meaning (see the rules just below):
-   section lavender for Day streak, sage for Reviews completed, coral for
-   Estimated retention only when it has slipped, and neutral for Total
-   cards -- context, not a signal.
+/* Dashboard stat tiles.
    2x2 on narrow screens (four tiles, so it stays even -- no orphan on its
    own row), one row of four once there's width for it -- on the shared
    12-col grid below, so the tile seams line up with the panels above and
    below. */
 .fc-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; margin-bottom: 18px; }
-.fc-stat-tile { position: relative; padding: 0 0 0 12px; }
-.fc-stat-tile::before {
-  content: ""; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px; border-radius: 1px;
-  background: var(--line-strong);
-}
-/* The left rule carries meaning, not decoration: the section lavender for
-   Day streak (an achievement), sage --right for cumulative progress
-   (Reviews completed), coral --warn only when Estimated retention has
-   slipped under target. Total cards keeps the neutral default. */
-.fc-stat-streak::before { background: var(--section); }
-.fc-stats-grid > .fc-stat-tile:nth-child(3)::before { background: var(--right); }
-.fc-stat-attention::before { background: var(--warn); }
+/* No coloured edge bars (iOS): the four numbers are plain figure + caption.
+   The one signal left is Estimated retention's figure turning coral once it
+   has slipped under the Settings target. */
+.fc-stat-tile { position: relative; padding: 0; }
 .fc-stat-attention .fc-stat-value { color: var(--warn-strong); }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
 .fc-stat-label { display: block; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
@@ -2285,19 +2281,15 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    two compact charts share the top row; the mistakes list, which grows,
    spans the full width below so cards size to their content instead of the
    short ones stretching to leave dead white space.
-   .fc-viz-card is also used standalone (renderWordsToReview's own fallback,
-   outside any grid) so it keeps its own card chrome by default; inside
-   .fc-viz-grid it's flattened, since the shared .fc-dash-progress card
-   above already supplies the one border and the grid gap + each chart's
-   own title are separation enough without individual boxes too. */
+   Every .fc-viz-card is its own white card on the ground (in the grid or
+   standalone, as renderWordsToReview's fallback is). */
 .fc-viz-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 16px;
   align-items: start;
 }
-.fc-viz-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; }
-.fc-viz-grid .fc-viz-card { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+.fc-viz-card { background: var(--paper); border-radius: 12px; padding: 16px 18px; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
@@ -2378,9 +2370,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Manage: reuses the overview list-row pattern. The filter is the shared
    segmented control (see .view-mode above), one segment raised at a time. */
 .fc-manage-filters { margin-bottom: 14px; }
-/* Category group -- a chapter line, not a card. Matches the vocabulary
-   pages' .cat-heading: the name in the section colour over a thin rule the
-   same colour, count aligned right, a small disclosure caret at the end. */
+/* Category group -- a quiet label on the ground above its cards, like the
+   reference pages' .cat-heading: name in the section tone, count beside it, a
+   small disclosure caret at the end. No rule under it. */
 .fc-manage-group {
   background: transparent; border: 0; border-radius: 0;
   padding: 0; margin-bottom: 22px;
@@ -2389,11 +2381,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   cursor: pointer; list-style: none;
   display: flex; align-items: baseline; gap: 12px;
   background: transparent; width: auto;
-  margin: 0 0 12px; padding: 0 0 6px;
-  border-bottom: 1px solid color-mix(in srgb, var(--section) 55%, var(--line-strong));
+  margin: 0 0 8px; padding: 0;
 }
 .fc-manage-group-title::-webkit-details-marker { display: none; }
-.fc-manage-group-title .cat-name { font-size: var(--fs-subhead); font-weight: 500; color: var(--section); letter-spacing: .005em; }
+.fc-manage-group-title .cat-name { font-size: var(--fs-small); font-weight: 400; color: var(--section-strong); letter-spacing: .005em; }
 /* name · count · caret read as one cluster on the left, not name on one edge
    and count+caret flung to the other. */
 .fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: 11.5px; font-weight: 400; }
@@ -2405,7 +2396,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-manage-group[open] > .fc-manage-group-title::after { transform: rotate(180deg); }
 
-.fc-manage-table { margin-bottom: 16px; }
+/* One table = one white card: its header row on top (chevron, name, progress,
+   actions), the words beneath as hairline-separated rows. */
+.fc-manage-table { margin-bottom: 12px; background: var(--paper); border-radius: 12px; overflow: hidden; }
 .fc-manage-table:last-child { margin-bottom: 0; }
 /* Deliberate columns: [chevron] [ name + progress ] [ Add table · Pause table ].
    A grid, not flex -- the middle column is the only one that flexes (and its
@@ -2418,7 +2411,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   grid-template-areas: "toggle label actions";
   align-items: center;
   column-gap: 12px;
-  margin-bottom: 8px;
+  padding: 8px 12px 8px 14px;
 }
 .fc-manage-table-toggle {
   grid-area: toggle;
@@ -2473,14 +2466,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Category-wide "Add all", sitting just under the category summary. */
 .fc-manage-cat-actions { margin: 4px 0 14px; }
 .fc-manage-cat-actions .fc-btn { font-size: var(--fs-micro); }
-.fc-manage-list { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.fc-manage-list { border-top: 1px solid var(--row-line); }
 /* One flat line per word: status | kanji romaji english | action. Plain kanji
    (no ruby -- see views.js) keeps every row the same height, so the status
    glyphs and the action buttons line up in clean columns down the list. */
 .fc-manage-row {
   display: flex; align-items: center; gap: 10px;
   min-height: 42px; padding: 3px 14px;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--row-line);
 }
 .fc-manage-row:first-child { border-top: 0; }
 .fc-manage-word {
@@ -2536,9 +2529,8 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 
 .fc-review-card {
   width: 100%; max-width: 560px; margin: 0 auto;
-  background: var(--paper); border: 1px solid var(--card-line);
-  border-radius: 8px; padding: 24px 22px;
-  box-shadow: var(--shadow-card);
+  background: var(--paper);
+  border-radius: 12px; padding: 24px 22px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 /* With the chrome above hidden, a session shows just the card (or the
@@ -2618,7 +2610,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-verdict-bad .fc-verdict-tag { background: var(--wrong-soft); color: var(--wrong-strong); }
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
-.fc-stage { align-self: stretch; padding: 16px 16px; border-radius: 12px; margin-bottom: 10px; background: var(--surface); }
+.fc-stage { align-self: stretch; padding: 8px 0 12px; margin-bottom: 4px; }
 .fc-stage-compare { font: 600 24px/1.35 var(--font-ui); color: var(--ink); margin-bottom: 6px; }
 .fc-stage-expected { font: 600 24px var(--font-ui); color: var(--right-strong); margin-bottom: 6px; }
 .fc-stage-meaning { font-size: var(--fs-small); color: var(--muted); }
@@ -2744,11 +2736,24 @@ mark.fc-diff-co {
    scripts' five, and stretching it to match left a tall box mostly empty.
    Top-aligned, it's just a smaller box -- which is what it is. */
 .fc-kana-groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; margin: 16px 0 4px; }
+/* One white card per picker, its rows separated by inset hairlines. The legend
+   is floated into normal flow: left as a real legend, a browser paints the
+   fieldset background from the legend's midline, so the label would straddle
+   the card's top edge. */
 .fc-kana-fieldset {
-  border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px 12px;
-  display: flex; flex-direction: column; gap: 8px; min-width: 180px;
+  display: block; border: 0; border-radius: 12px; background: var(--paper);
+  padding: 12px 14px 4px; min-width: 180px; margin: 0;
 }
-.fc-kana-fieldset legend { padding: 0 4px; font: 500 var(--fs-small)/1 var(--font-ui); color: var(--muted); }
+.fc-kana-fieldset legend {
+  float: left; width: 100%; padding: 0; margin: 0 0 2px;
+  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--muted);
+}
+.fc-kana-fieldset legend + * { clear: both; }
+.fc-kana-fieldset .fc-kana-group { border-radius: 0; padding: 11px 0; }
+.fc-kana-fieldset .fc-kana-group + .fc-kana-group { border-top: 1px solid var(--row-line); }
+@media (max-width: 560px) {
+  .fc-kana-fieldset { flex: 1 1 100%; }
+}
 .fc-kana-group { display: flex; align-items: center; gap: 8px; font-size: var(--fs-nav-sub); color: var(--ink); cursor: pointer; }
 .fc-kana-group-n { color: var(--faint); font-variant-numeric: tabular-nums; font-size: var(--fs-micro); }
 .fc-kana-summary { margin: 12px 0 16px; font-size: var(--fs-small); color: var(--muted); }
@@ -2775,13 +2780,12 @@ mark.fc-diff-co {
   margin-top: 4px;
   max-width: 760px;
 }
-.fc-entry-card { background: var(--paper); border: 1px solid var(--card-line); border-radius: var(--radius-panel); box-shadow: var(--shadow-card); padding: 20px 22px; }
+.fc-entry-card { background: var(--paper); border-radius: 12px; padding: 20px 22px; }
 /* "This device only" is the gently preferred path: a soft accent-tinted
    surface. "Sync across devices" stays neutral white. */
-.fc-entry-grid > .fc-entry-card:first-child {
-  background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent) 30%, var(--card-line));
-}
+.fc-entry-grid > .fc-entry-card:first-child { background: var(--accent-soft); }
+/* A tinted button on a tinted card would vanish -- it takes the white fill. */
+.fc-entry-grid > .fc-entry-card:first-child .fc-btn { background: var(--paper); }
 .fc-entry-card h3 { margin: 0 0 6px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
 .fc-entry-card .fc-note { margin: 0 0 16px; font-size: var(--fs-nav-sub); color: var(--muted); }
 .fc-entry-card .fc-btn { width: 100%; min-height: 34px; padding: 7px 18px; font-size: var(--fs-small); }
@@ -2820,26 +2824,20 @@ mark.fc-diff-co {
 .fc-sync-chip {
   display: inline-flex; align-items: center; gap: 9px;
   margin: -4px 0 18px; padding: 5px 6px 5px 12px;
-  border: 1px solid; border-radius: 999px;
+  border: 0; border-radius: 999px;
   font: 500 var(--fs-small)/1 var(--font-ui);
 }
 .fc-sync-chip[hidden] { display: none; }
 .fc-sync-chip:not(:has(.fc-sync-now)) { padding-right: 12px; }
-.fc-sync-chip-offline {
-  background: var(--warn-soft); border-color: var(--warn); color: var(--warn-strong);
-}
-.fc-sync-chip-syncing {
-  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark);
-}
-.fc-sync-chip-synced {
-  background: var(--right-soft); border-color: var(--right); color: var(--right-strong);
-}
+.fc-sync-chip-offline { background: var(--warn-soft); color: var(--warn-strong); }
+.fc-sync-chip-syncing { background: var(--accent-soft); color: var(--accent-dark); }
+.fc-sync-chip-synced { background: var(--right-soft); color: var(--right-strong); }
 .fc-sync-now {
-  appearance: none; border: 1px solid currentColor; background: transparent;
+  appearance: none; border: 0; background: color-mix(in srgb, currentColor 14%, transparent);
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
-  padding: 4px 9px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  padding: 5px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap;
 }
-.fc-sync-now:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+.fc-sync-now:hover { background: color-mix(in srgb, currentColor 24%, transparent); }
 .fc-sync-details-toggle {
   appearance: none; border: 0; background: transparent;
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
@@ -2850,14 +2848,14 @@ mark.fc-diff-co {
    queued), plain list markers so each entry reads as its own row. */
 .fc-sync-detail {
   list-style: none; margin: -12px 0 18px; padding: 8px 12px;
-  background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 8px;
+  background: var(--warn-soft); border: 0; border-radius: 10px;
   color: var(--warn-strong); font-size: var(--fs-small); line-height: 1.6;
 }
 .fc-sync-detail[hidden] { display: none; }
 .fc-sync-detail li { padding: 1px 0; }
 
 /* Settings */
-.fc-settings-section { background: var(--paper); border: 1px solid var(--card-line); border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 16px; }
+.fc-settings-section { background: var(--paper); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
 .fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-subhead); color: var(--ink); font-weight: 500; }
 /* Explanatory prose under a heading/control shouldn't compete with it -- a
    true caption size + the tertiary (--faint) tone, not the --muted/--fs-small
@@ -2865,7 +2863,7 @@ mark.fc-diff-co {
    which still want their normal secondary weight. */
 .fc-settings-section p.fc-note { margin: 0 0 14px; font-size: var(--fs-micro); color: var(--faint); }
 .fc-settings-save + .fc-backup-section { margin-top: 24px; }
-.fc-settings-field { padding: 10px 0; border-top: 1px solid var(--line); }
+.fc-settings-field { padding: 10px 0; border-top: 1px solid var(--row-line); }
 .fc-settings-field:first-of-type { border-top: 0; }
 /* Label and control sit together, not flung to opposite edges of the row --
    the label names the control right next to it, and the helper paragraph
@@ -2912,6 +2910,12 @@ mark.fc-diff-co {
 .fc-settings-field input[type="checkbox"]:checked::after { transform: translateX(16px); }
 .fc-settings-help { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-micro); line-height: 1.5; max-width: 56ch; }
 .fc-direction-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2px 16px; }
+/* One column on a phone, so the rows read as a list with inset hairlines. */
+@media (max-width: 560px) {
+  .fc-direction-checks { grid-template-columns: 1fr; gap: 0; }
+  .fc-direction-check { border-radius: 0; padding: 11px 6px; }
+  .fc-direction-check + .fc-direction-check { border-top: 1px solid var(--row-line); }
+}
 /* iOS Settings-style checkmark row, not a checkbox square: the whole row is
    the tap target, the native checkbox is kept (for a11y) but visually
    hidden, and a CSS tick fades in at the trailing edge on :checked (no
@@ -3048,26 +3052,14 @@ mark.fc-diff-co {
 .fc-progress-track { fill: var(--surface); }
 .fc-progress-fill { fill: var(--accent); }
 
-/* Next review -- a coloured left edge + tint, the dashboard's "here's what
-   needs you" line paired with the Study now button below it. Sits inside
-   the shared .fc-dash-now card now (no border/shadow of its own), so the
-   left bar + background tint carry the whole signal. Cards waiting to be
-   studied is an attention state (not an error): the coral attention tone
-   and a warm tint make it the one thing in the top row that jumps. An
+/* Next review -- the dashboard's "here's what needs you" line paired with the
+   Study now button below it. Just a title and a sub-line inside the .fc-dash-now
+   card; the signal is the title's colour alone (no edge bar, no tinted box).
+   Cards waiting to be studied is an attention state (not an error): coral. An
    empty queue is the calm, nothing-to-do state -- a quiet sage green. */
 .fc-next-review {
   display: flex; flex-direction: column; gap: 3px;
-  padding: 10px 14px 10px 13px;
-  border-left: 4px solid var(--line-strong);
-  border-radius: 4px;
-}
-.fc-next-review-due {
-  border-left-color: var(--warn);
-  background: var(--warn-soft);
-}
-.fc-next-review-clear {
-  border-left-color: var(--right);
-  background: var(--right-soft);
+  padding: 0;
 }
 .fc-next-review-title { font-weight: 500; font-size: var(--fs-nav-sub); }
 .fc-next-review-due .fc-next-review-title { color: var(--warn-strong); }
@@ -3077,9 +3069,8 @@ mark.fc-diff-co {
 
 /* "Missed today" -- a shortlist of words to revisit. Each row is one unit:
    the Japanese pair (strongest), one "romaji · english" supporting line, and
-   a small "N× today" badge. The whole row is the tap target, and a coral
-   left rule (matching the badge) marks the list as "worth a look" -- the
-   same attention tone used across the dashboard. */
+   a small "N× today" badge. The whole row is the tap target; the coral
+   badge alone marks it as "worth a look". */
 .fc-missed-list { margin: 0; padding: 0; list-style: none; }
 /* The three parts sit next to each other and hug their content (no flexible
    middle column that would open a void before the badge); a long row just
@@ -3091,10 +3082,9 @@ mark.fc-diff-co {
   align-items: baseline;
   gap: 3px 14px;
   appearance: none; border: 0; background: transparent;
-  border-top: 1px solid var(--line);
-  padding: 9px 8px;
-  border-radius: 6px;
-  box-shadow: inset 3px 0 0 var(--warn);
+  border-top: 1px solid var(--row-line);
+  padding: 10px 0;
+  border-radius: 0;
   text-align: left; cursor: pointer; color: var(--ink);
 }
 .fc-missed-list li:first-child .fc-missed-row { border-top: 0; }
@@ -3114,7 +3104,7 @@ mark.fc-diff-co {
 .fc-missed-ro { color: var(--muted); font-style: italic; }
 .fc-missed-sep { color: var(--faint); }
 .fc-missed-en { color: var(--ink); }
-/* The miss count -- coral attention, matching the row's left rule. */
+/* The miss count -- the coral attention tone. */
 .fc-missed-badge {
   flex: 0 0 auto;
   white-space: nowrap;
@@ -3151,7 +3141,8 @@ mark.fc-diff-co {
    dashboard it should read as one more quiet card, not a full vocabulary-page
    section. Strip the filled header strip, the category chip and the heavy
    accent rule; the title matches the other dashboard card headings. */
-#fcWordsToReview { margin-top: 20px; }
+#fcWordsToReview { margin-top: 16px; }
+#fcWordsToReview:has(> .table-section) { background: var(--paper); border-radius: 12px; overflow: hidden; }
 #fcWordsToReview .fc-note { padding: 4px 0; }
 #fcWordsToReview .section-head {
   padding: 14px 16px;
