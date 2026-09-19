@@ -26,7 +26,7 @@ Five sections in the nav: **Vocabulary** (the landing page), **Grammar**,
 category — Food & Ingredients, Kitchen & Dining, Numbers & Counting, Time &
 Calendar (days of the week, months, days of the month, today / tomorrow /
 next week and the like, time of day, and clock hours and minutes — the
-irregular readings such as ついたち or よじ are tinted). **Phrases**
+alternate readings such as よじ / しちじ / くじ are tinted). **Phrases**
 is a conversational Q&A set (Self-introduction: name, job, country, age, family,
 where you live), laid out as question/answer pairs rather than sorted A–Z.
 Grammatical **particles are highlighted in blue and bold** throughout the app
