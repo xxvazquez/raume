@@ -69,7 +69,7 @@ so they're easy to spot in a sentence.
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
 - **Adjective type** — every い- / な-adjective in the dataset carries a small
-  capsule badge before its meaning, a lavender **い** or a sage **な**, like a
+  capsule badge beside its meaning, a lavender **い** or a sage **な**, like a
   dictionary's part-of-speech tag: the Adjectives table, the Taste & Texture
   adjectives, and the stray adjective in an otherwise-noun table (危険). The
   odd ones are **outlined** instead of filled, with a one-line note under the
@@ -83,11 +83,14 @@ so they're easy to spot in a sentence.
   visually-hidden note on the cell carries the distinction to screen readers,
   and the badge is drawn by CSS so it stays out of search.
 - **Particles a word takes** — each verb, and the adjectives 好き / 嫌い / 上手 /
-  下手, shows the particle(s) it takes as small blue chips before its meaning
+  下手, shows the particle(s) it takes as small blue chips beside the row icons
   (**を** eat, **に/へ** go, **が** like) — the same blue as particles in
-  sentences. A plain object を is the chip alone; anything else (に *who you ask*,
-  と *who you meet with*, が *what you like*) also gets a one-line caption under the
-  meaning, and verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる) show none. Only core
+  sentences, in a trailing cluster so the meanings keep one left edge. One particle
+  is the chip alone (its role is implied by the meaning); a word with two or more
+  (聞く: **を** *what you listen to* · **に** *who you ask*) also gets a one-line
+  caption tying each to its role, and verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる)
+  show none. する is **を** (do) and **に** (choose); 話す is **と** (talk with) and
+  **を** (speak). Only core
   arguments are listed — not the place-で or time-に that any verb can take. A toolbar
   legend explains the chip whenever the table on screen has them. Driven by a
   `particles: [{ p, role }]` field, which `npm run validate` requires on every verb.

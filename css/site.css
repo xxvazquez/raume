@@ -2170,7 +2170,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
-/* い/な-adjective badge: a small capsule before the meaning -- a tint of
+/* い/な-adjective badge: a small capsule in the trailing cluster beside the row
+   icons (so the meaning text keeps one left edge on every row) -- a tint of
    purple (い-adj) or green (な-adj) with the glyph in the full ink (--adj-i-ink /
    --adj-na-ink), drawn from data-badge so it never enters the cell's text. An
    irregular adjective's badge is *outlined* instead of filled, and its reason
@@ -2178,7 +2179,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    legend near the toolbar (index.html .adj-legend). */
 .adj-badge, .particle-chip {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  min-width: 20px; height: 20px; padding: 0 5px; margin: 0 8px 0 0; align-self: flex-start;
+  min-width: 20px; height: 20px; padding: 0 5px; margin: 0 0 0 6px; align-self: flex-start;
   border-radius: 10px;
   font: 400 var(--fs-micro)/1 var(--font-ui);
 }
@@ -2193,6 +2194,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 /* Footnotes under the meaning inherit the cell's colour (dimmed by opacity, not
    a colour of their own) so Cover answers / hidden English blank them with the
    meaning -- a note like "what you eat" would otherwise leak the answer. */
+/* A row with a caption is taller than its Japanese word, which would leave the
+   word at the bottom beside the caption and the meaning at the top. Align both
+   cells on their first-line baseline instead, so the word sits level with the
+   meaning and the caption hangs below it. */
+.vocab tbody tr:has(.adj-note, .particle-note) > td { vertical-align: baseline; }
 .adj-note, .particle-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is

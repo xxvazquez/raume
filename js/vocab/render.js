@@ -146,8 +146,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // romaji is optional: sentence and word rows alike now pass their romaji
   // through here so the reveal lives on the word itself, in the same cell,
   // regardless of table type.
-  // い/な-adjective rows carry a small capsule badge before the meaning -- like
-  // a dictionary's part-of-speech tag, and out of the narrow Japanese column --
+  // い/な-adjective rows carry a small capsule badge in the trailing cluster
+  // beside the row icons -- like a dictionary's part-of-speech tag, and out of
+  // the narrow Japanese column --
   // a tinted い or な (the glyph is drawn by CSS from data-badge, so it never
   // lands in the cell's text, search or speech) -- and a legend near the
   // toolbar (index.html) explains the two colours once. An irregular one (a
@@ -215,19 +216,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // fixed's column-width percentages stop being respected on a cell whose own
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
-  // badges: small capsules before the meaning (an adjective's い/な, the
-  // particles a word takes); notes: optional one-line footnotes under it, like
-  // an iOS cell subtitle. Both are built by the helpers below and sit outside
+  // badges: small capsules in a trailing cluster beside the row icons (an
+  // adjective's い/な, the particles a word takes) -- trailing, not leading, so
+  // the meaning text and any caption share one left edge on every row;
+  // notes: optional one-line footnotes under the meaning, like an iOS cell
+  // subtitle. Both are built by the helpers below and sit outside
   // .meaning-text, so they stay out of sorting and search.
   function meaningCell(english, vocabId, notes, badges) {
-    return '<td><div class="meaning-cell">' + (badges || '') + '<span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div>' + (notes || '') + '</td>';
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + (badges || '') + rowActions(vocabId) + '</div>' + (notes || '') + '</td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
   // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's
-  // particle blue, bold) before the meaning, drawn from data-badge like the
-  // adjective badge. A plain object を needs no explanation ("eat" already
-  // implies what you eat), so it gets the chip alone; anything else -- に who
-  // you ask, が what you like -- also gets a caption line under the meaning.
+  // particle blue, bold) beside the row icons, drawn from data-badge like the
+  // adjective badge. One particle is the chip alone -- its role is implied by
+  // the meaning ("eat" -> を what you eat, "like" -> が what you like), so a
+  // caption would only repeat it. Two or more get a caption line under the
+  // meaning that ties each glyph to its role (を what you listen to · に who
+  // you ask); the role is always in the chip's tooltip and the hidden note.
   function tight(p) { return String(p).replace(/\s+/g, ''); }   // "に / へ" -> "に/へ" on the chip
   function particleChips(row) {
     return (row.particles || []).map(function (q) {
@@ -238,11 +243,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var ps = row.particles || [];
     if (!ps.length) return '';
     var hidden = '<span class="visually-hidden">(takes ' + ps.map(function (q) { return esc(q.p + ' — ' + q.role); }).join('; ') + ')</span>';
-    if (ps.length === 1 && ps[0].p === 'を') return hidden;
-    // One particle: the chip already shows it, so the caption is just the role.
-    // Several: each caption part leads with its particle to tie it to its chip.
+    if (ps.length === 1) return hidden;
     return '<div class="particle-note" lang="ja">' + ps.map(function (q) {
-      return (ps.length > 1 ? '<span class="particle">' + esc(tight(q.p)) + '</span> ' : '') + esc(q.role);
+      return '<span class="particle">' + esc(tight(q.p)) + '</span> ' + esc(q.role);
     }).join(' · ') + '</div>' + hidden;
   }
   function adjFootnote(row) {

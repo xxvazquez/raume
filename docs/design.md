@@ -187,8 +187,8 @@ and Help.
   padded out with negative margins so it stays generous without growing the row.
 - **い/な-adjectives** carry a small **capsule badge** (`.adj-badge`) — 20px tall,
   a 14% tint of `--adj-i-ink` (purple) or `--adj-na-ink` (green) behind the glyph
-  **い** / **な** in the full ink, 11.5px — placed *before the meaning* in the
-  English cell, like a dictionary's part-of-speech tag. (An earlier version put
+  **い** / **な** in the full ink, 11.5px — in the English cell's trailing cluster
+  beside the row icons, like a dictionary's part-of-speech tag. (An earlier version put
   a coloured bar down the Japanese cell's edge; iOS has no edge bars, and a
   badge beside the word stole width from the narrow Japanese column, wrapping
   words like つまらない.) The glyph is drawn by CSS from `data-badge`, so it never
@@ -207,15 +207,19 @@ and Help.
   screen readers.
 - **Particles a word takes** (`.particle-chip`) are the same capsule as the
   adjective badge, in the app's particle blue and bold (the one deliberate use of
-  bold — `.particle`), before the meaning: `を`, `に/へ`, `が`. A word can have two
-  (`を` `に`). To keep 38 rows from each growing a subtitle, the caption
-  (`.particle-note`, under the meaning like an iOS cell subtitle) appears only when it
-  adds something: a lone object を is the chip alone ("eat" already says what you
-  eat); a lone other particle shows just its role ("where you live"); several list
-  each particle with its role ("を what you listen to · に who you ask"). Captions
-  inherit the cell's colour (dimmed by opacity) so Cover answers blanks them with the
-  meaning instead of leaking it. The toolbar legend (`.particle-legend`) shows only
-  while the table on screen has chips, independently of the adjective legend.
+  bold — `.particle`): `を`, `に/へ`, `が`. Like the い/な badge they sit in a
+  **trailing cluster beside the row icons**, after the meaning — leading chips gave
+  every row a different left edge for its meaning. A word can have two (`を` `に`). A
+  caption (`.particle-note`, under the meaning like an iOS cell subtitle) appears
+  **only for two or more particles**, to tie each glyph to its role ("を what you
+  listen to · に who you ask"); a lone particle is the chip alone, because its role is
+  implied by the meaning and a caption ("what you're bad at" under "not good at")
+  would only repeat it. The role is always in the chip's tooltip and a
+  visually-hidden note. Captions inherit the cell's colour (dimmed by opacity) so
+  Cover answers blanks them with the meaning instead of leaking it, and a row with a
+  caption aligns its cells on the first-line baseline so the Japanese word sits level
+  with the meaning. The toolbar legend (`.particle-legend`) shows only while the
+  table on screen has chips, independently of the adjective legend.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on
