@@ -114,6 +114,28 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
+- **Controls library** — one set of components everywhere, tokens `--seg-track`,
+  `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
+  - **Segmented control** (`.view-mode` column toggles, `.fc-manage-filters`): a
+    grey track with 2px padding, the selected segments raised on a thumb. The
+    column toggles are multi-select — a column that is showing is raised, one
+    that is hidden lies flat, faint and struck through (`.col-hidden`); Manage's
+    filter raises one at a time. Same component in the dashboard's Words to review.
+  - **Switch** (Cover answers `.selftest-toggle`, Show polite `.polite-toggle`,
+    Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
+    track filling with the section tone (`--switch-on` — the deep tone in light, the
+    mid tone in dark, where the deep one is a pale tint that would wash out the
+    thumb). The two toolbar switches are still `<button aria-pressed>` with their
+    label; the track and thumb are `::before` / `::after`, so no markup changed.
+  - **Buttons**: *filled* (`.fc-btn-primary`, deep section tone, no shadow),
+    *tinted* (`.fc-btn`, soft accent fill, accent text, 10px radius, no border) and
+    *plain* (per-row actions `.fc-btn-vocabaction`, toolbar **Print…** / **Expand
+    all**: tint text, no box, dim on hover/press instead of an underline).
+  - **Menus** (the table ⋯ menu, the Print… menu): a 14px popover, no border, one
+    shadow, items 15px in 12px×14px rows separated by hairlines, label first and its
+    glyph trailing. The ⋯ trigger itself is a bare glyph.
+  - **Checkmark rows** (kana groups, study directions) are unchanged: the row is the
+    tap target and a tick appears at the trailing edge.
 - **Masthead and nav are one bar** on `--paper`, closed by a single row hairline
   (no rule above the nav). The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
@@ -269,9 +291,9 @@ offset (the search box included). The Kana group picker and the Settings
 study-directions block render as iOS Settings-style checkmark rows — the
 whole row is the tap target, the native checkbox is visually hidden (kept
 for accessibility), and a CSS tick fades in at the trailing edge on
-`:checked`. The lone standalone Fuzz toggle keeps the older restyled-square
-look instead (`appearance: none` plus a CSS tick) since it isn't part of a
-picker list.
+`:checked`. The lone standalone Fuzz setting is an on/off switch, not a
+picker row: `appearance: none` plus a CSS track and thumb (see "Controls
+library" below).
 
 ## The Flashcards dashboard
 
@@ -291,7 +313,7 @@ colour here more than anywhere else:
   its own, sitting inside `.fc-dash-now`): the coral attention tone. A cleared
   queue (`-clear`) goes quiet sage instead;
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
-  lavender and a tinted shadow, so it clearly outranks the ghost buttons;
+  lavender — no shadow, it outranks the tinted buttons by fill alone;
 - **stat tiles** — the 3px left rule carries meaning: lavender for **Day streak**
   (an achievement), sage for **Reviews completed** (cumulative progress), coral
   for **Estimated retention** only once it drops under the Settings target

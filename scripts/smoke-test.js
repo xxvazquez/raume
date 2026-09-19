@@ -322,7 +322,7 @@ async function main() {
     const tick = allCssRules.find(r => r.selectorText && /\.fc-kana-group:has\(input:checked\)::after/.test(r.selectorText));
     return !!hidden && !!tick;
   })());
-  check("the standalone Fuzz checkbox keeps the restyled (appearance:none) square, not a checkmark row", (() => {
+  check("the standalone Fuzz checkbox is a restyled (appearance:none) switch, not a checkmark row", (() => {
     const rule = allCssRules.find(r => r.selectorText
       && /\.fc-settings-field input\[type="checkbox"\]/.test(r.selectorText)
       && r.style.appearance === "none");

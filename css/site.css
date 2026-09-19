@@ -156,6 +156,15 @@
   --field-fill: #eef0f3;
   --field-line: var(--line-strong);
   --card-line: #dbdfe6;
+  /* Controls library (iOS): a segmented control is a grey track with a raised
+     thumb on the selected segment; a switch is a grey track that fills with
+     the section tone (--switch-on, set on body below -- the section tones are
+     only defined there). */
+  --seg-track: color-mix(in srgb, var(--ink) 11%, var(--group-ground));
+  --seg-thumb: var(--paper);
+  --switch-off: color-mix(in srgb, var(--ink) 18%, var(--paper));
+  --switch-thumb: #fff;
+  --radius-button: 10px;
   --row-line: var(--line);
   --band: var(--paper);
   --row-alt: #eef0f3;
@@ -301,6 +310,7 @@
      border a clear step up from --line. */
   --field-fill: #131820;
   --field-line: #4b5563;
+  --seg-thumb: #3d424b;
   /* Card outlines need to stay visible against --paper so cards read as
      raised -- paired with --shadow-card. */
   --card-line: #39414d;
@@ -771,57 +781,83 @@ body[data-active-section="travel"] #vocabulary {
 .search-box.has-value .clear-search { display: block; }
 
 .vocab-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-/* Compact, rectangular controls -- a reference-book control, not a pill. */
-/* The three column toggles are one tool with three positions (Japanese /
-   Furigana / English), not three independent buttons -- grouped into a
-   single segmented control (one shared border, dividers between segments)
-   instead of three separate bordered pills. Fewer separately-bordered boxes
-   in the row means less visual competition with the standalone toggles
-   beside it, without moving or removing anything. */
-.view-mode {
+/* A switch is "on" in the deep section tone in light, and the mid tone in dark
+   (the deep one is a pale tint there, which would wash out the white thumb). */
+body { --switch-on: var(--section-strong); }
+:root[data-theme="dark"] body { --switch-on: var(--section); }
+/* Segmented control (iOS): a grey track holding the segments, the selected
+   ones raised on a thumb. The three column toggles are one tool with three
+   positions (Japanese / Furigana / English) -- a column that is showing is
+   raised, one that is hidden lies flat and struck through (.col-hidden,
+   below). Manage's filter (.fc-manage-filters) is the same component with
+   one segment raised at a time. */
+.view-mode,
+.fc-manage-filters {
   display: inline-flex;
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
-  overflow: hidden;
+  align-items: stretch;
+  gap: 2px;
+  padding: 2px;
+  background: var(--seg-track);
+  border-radius: 9px;
 }
-.view-mode button {
+.view-mode button,
+.fc-manage-filters button {
   appearance: none;
   border: 0;
-  border-right: 1px solid var(--line-strong);
-  background: var(--paper);
+  border-radius: 7px;
+  background: transparent;
   color: var(--muted);
   font: 400 var(--fs-small)/1 var(--font-ui);
   padding: 6px 10px;
   cursor: pointer;
   white-space: nowrap;
 }
-.view-mode button:last-child { border-right: 0; }
+.view-mode button:not(.col-hidden),
+.fc-manage-filters button.active {
+  background: var(--seg-thumb);
+  color: var(--ink);
+}
+.view-mode button:hover,
+.fc-manage-filters button:hover { color: var(--ink); }
 .polite-toggle[hidden] { display: none; }
+/* Cover answers / Show polite: iOS switches. The button keeps its label and
+   its aria-pressed state; the track and thumb are drawn with ::before / ::after
+   at the trailing edge, and the on state fills with the section tone. */
 .selftest-toggle,
 .polite-toggle {
   appearance: none;
-  border: 1px solid var(--line-strong);
-  background: var(--paper);
-  color: var(--muted);
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
   font: 400 var(--fs-small)/1 var(--font-ui);
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 8px 40px 8px 4px;
   cursor: pointer;
   white-space: nowrap;
 }
-.view-mode button:hover,
-.selftest-toggle:hover,
-.polite-toggle:hover { color: var(--ink); border-color: var(--muted); }
-/* Active control: a section-toned fill + section-toned text and edge --
-   deep enough to read as "on" at a glance, still a bordered rectangle, not
-   a pill. (View-mode buttons use .col-hidden instead -- see below.) */
-.polite-toggle.active,
-.selftest-toggle.active {
-  background: color-mix(in srgb, var(--section) 18%, var(--paper));
-  color: var(--section-strong);
-  border-color: var(--section);
-  font-weight: 500;
+.selftest-toggle::before,
+.polite-toggle::before {
+  content: "";
+  position: absolute; right: 2px; top: 50%;
+  width: 34px; height: 20px; margin-top: -10px;
+  border-radius: 10px;
+  background: var(--switch-off);
+  transition: background .15s ease;
 }
+.selftest-toggle::after,
+.polite-toggle::after {
+  content: "";
+  position: absolute; right: 18px; top: 50%;
+  width: 16px; height: 16px; margin-top: -8px;
+  border-radius: 50%;
+  background: var(--switch-thumb);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  transition: right .15s ease;
+}
+.selftest-toggle.active::before,
+.polite-toggle.active::before { background: var(--switch-on); }
+.selftest-toggle.active::after,
+.polite-toggle.active::after { right: 4px; }
 .search-count { margin-left: auto; color: var(--faint); font-size: 11.5px; white-space: nowrap; }
 /* Explains the い-adj/な-adj colour coding once, here, instead of repeating a
    label on every adjective row (see .vocab td.jp.adj-i/.adj-na). Purely a
@@ -845,18 +881,19 @@ body.selftest-mode .selftest-hint { display: block; }
    than a row of its own, so it costs no extra vertical space. */
 .expand-bar { display: inline-flex; align-items: center; gap: 14px; }
 .expand-bar.search-hidden { display: none; }
+/* iOS plain buttons: tint-coloured text, no box, no underline -- pressed state
+   is a dim, not a colour change. */
 .expand-all-btn {
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--muted);
-  font: 400 12px/1 var(--font-ui);
-  padding: 4px 2px;
+  color: var(--section-strong);
+  font: 400 var(--fs-small)/1 var(--font-ui);
+  padding: 8px 2px;
   cursor: pointer;
 }
-.expand-all-btn:hover { color: var(--section-strong); text-decoration: underline; text-underline-offset: 3px; }
-.expand-all-btn[aria-pressed="true"],
-.print-menu-btn[aria-expanded="true"] { color: var(--section-strong); }
+.expand-all-btn:hover { opacity: .7; }
+.expand-all-btn:active { opacity: .5; }
 /* The "Print…" menu sits in the expand bar; its trigger is a quiet text
    control like Expand all, its dropdown reuses the table overflow menu. */
 .print-menu { position: relative; }
@@ -1486,22 +1523,21 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .print-one,
 .section-menu-btn {
   appearance: none;
-  border: 1px solid var(--line-strong);
-  background: var(--paper);
+  border: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-control);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   color: var(--muted);
   cursor: pointer;
   flex: 0 0 auto;
 }
 .print-one:hover,
-.section-menu-btn:hover,
+.section-menu-btn:hover { color: var(--ink); }
 .section-menu-btn[aria-expanded="true"] {
-  border-color: var(--accent);
   color: var(--accent-strong);
   background: var(--accent-soft);
 }
@@ -1517,10 +1553,11 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   min-width: 176px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  padding: 6px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
   background: var(--paper);
-  border: 1px solid var(--line-strong);
+  border: 0;
   border-radius: 14px;
   box-shadow: var(--shadow-menu);
 }
@@ -1536,16 +1573,20 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   width: 100%;
   height: auto;
   display: flex;
+  flex-direction: row-reverse;   /* label first, glyph trailing -- the iOS menu layout */
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 16px;
   text-align: left;
-  padding: 7px 10px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 0;
   color: var(--ink);
-  font: 400 13px/1.3 var(--font-ui);
+  font: 400 15px/1.3 var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
 }
+/* Hairline between items, inset from the edges like a list. */
+.section-menu-list > * + * { border-top: 1px solid var(--row-line); }
 .section-menu-list .menu-item-ic { flex: 0 0 auto; display: flex; color: var(--muted); }
 .section-menu-list .menu-item-ic svg { display: block; }
 .section-menu-list .section-icon-btn:hover,
@@ -1950,10 +1991,9 @@ body.hide-furigana .vocab .furigana {
 /* Keep the row action icons usable even when their column's text is hidden. */
 body.hide-english .vocab td:last-child .row-hide-btn,
 body.hide-english .vocab td:last-child .fc-toggle-btn { color: var(--faint) !important; }
-/* The pressed (= hidden) toggle reads as switched-off: struck through, muted. */
+/* The pressed (= hidden) segment lies flat on the track: struck through, faint. */
 .view-mode button.col-hidden {
   color: var(--faint);
-  border-color: var(--line);
   text-decoration: line-through;
 }
 .view-mode button.col-hidden:hover { color: var(--muted); }
@@ -2308,44 +2348,36 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    into a narrow block. (Genuine explanatory prose still gets a reading-width
    cap; a short note like this does not.) */
 .fc-retention-note { margin: 2px 0 16px; max-width: none; }
+/* Buttons (iOS): tinted secondary by default -- soft accent fill, accent text,
+   no border. .fc-btn-primary is the one filled button; per-row actions
+   (.fc-btn-vocabaction) drop to plain text so a long list isn't a wall of
+   tinted pills. */
 .fc-btn {
-  appearance: none; border: 1px solid var(--line); background: var(--paper); color: var(--muted);
+  appearance: none; border: 0; background: var(--accent-soft); color: var(--accent-strong);
   font: 400 var(--fs-small)/1 var(--font-ui);
   display: inline-flex; align-items: center; justify-content: center;
-  min-height: 28px; padding: 5px 12px; border-radius: var(--radius-control); cursor: pointer; white-space: nowrap;
+  min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
 }
-.fc-btn:hover { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
+.fc-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
+.fc-btn:active { opacity: .7; }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
-/* The primary action -- a confident deep-lavender fill (--section-strong, so
-   white text clears AA), lifted with a tinted shadow so it clearly outranks
-   the quiet ghost buttons around it. */
+/* The primary action -- a filled button in the deep section tone
+   (--section-strong, so white text clears AA). No shadow: it outranks the
+   tinted buttons around it by fill alone. */
 .fc-btn-primary {
-  background: var(--section-strong); border-color: var(--section-strong); color: var(--paper);
+  background: var(--section-strong); color: var(--paper);
   font-weight: 500;
-  box-shadow: 0 1px 2px rgba(30, 27, 40, .18), 0 4px 12px color-mix(in srgb, var(--section) 45%, transparent);
 }
 .fc-btn-primary:hover {
   background: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
-  border-color: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
   color: var(--paper);
 }
-.fc-btn-primary[disabled] { box-shadow: none; }
 .fc-note { color: var(--muted); font-size: var(--fs-small); }
 .fc-legend-term { color: var(--accent-dark); }
 
-/* Manage: reuses the overview list-row pattern. Filter pills match the
-   header's All/Japanese/Romaji/English segmented control exactly (same
-   radii, same soft-tint active state) rather than inventing a new shape. */
-.fc-manage-filters {
-  display: inline-flex; align-items: center; gap: 1px; padding: 2px;
-  background: var(--paper); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 14px;
-}
-.fc-manage-filters button {
-  appearance: none; border: 0; background: transparent; color: var(--muted);
-  font: 400 var(--fs-small)/1 var(--font-ui); padding: 5px 10px; border-radius: 6px; cursor: pointer;
-}
-.fc-manage-filters button:hover { color: var(--accent-dark); }
-.fc-manage-filters button.active { background: var(--section-soft); color: var(--section-strong); font-weight: 500; }
+/* Manage: reuses the overview list-row pattern. The filter is the shared
+   segmented control (see .view-mode above), one segment raised at a time. */
+.fc-manage-filters { margin-bottom: 14px; }
 /* Category group -- a chapter line, not a card. Matches the vocabulary
    pages' .cat-heading: the name in the section colour over a thin rule the
    same colour, count aligned right, a small disclosure caret at the end. */
@@ -2462,16 +2494,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-word .fc-tag-leech { color: var(--warn-strong); }
 .fc-manage-row .fc-actions { flex: 0 0 auto; display: flex; gap: 6px; }
 /* Per-word Add / Pause / Restore -- icon + label, mirroring the table actions.
-   Add is ghosted at rest (it's the common case down a long, mostly-untouched
-   list -- exactly like "Add table"), full treatment on hover/focus; Pause /
-   Restore keep the ordinary bordered button, being the rarer deliberate acts. */
-.fc-btn-vocabaction { gap: 6px; }
-.fc-btn-vocabaction[data-action="add"] {
-  border-color: transparent; background: transparent; color: var(--faint);
-}
+   Plain text buttons (accent text, no fill) so a long list of rows isn't a
+   column of tinted pills; Add is quieter still at rest (it's the common case
+   down a long, mostly-untouched list -- exactly like "Add table") and takes
+   the tinted fill on hover / focus. */
+.fc-btn-vocabaction { gap: 6px; background: transparent; }
+.fc-btn-vocabaction:hover { background: var(--accent-soft); }
+.fc-btn-vocabaction[data-action="add"] { color: var(--faint); }
 .fc-btn-vocabaction[data-action="add"]:hover,
 .fc-btn-vocabaction[data-action="add"]:focus-visible {
-  border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark);
+  background: var(--accent-soft); color: var(--accent-dark);
 }
 /* Phone: drop the button labels (icon only) and the separate romaji column, so
    each row stays one tight line -- kanji + English + a compact action. */
@@ -2850,36 +2882,34 @@ mark.fc-diff-co {
   color: var(--ink); background: var(--field-fill);
 }
 :root[data-theme="dark"] .fc-settings-field input[type="number"] { color-scheme: dark; }
-/* Standalone Fuzz toggle -- a single checkbox, not a picker list, so it
-   keeps the plain restyled-checkbox look rather than the checkmark-row
-   treatment below. appearance:none + a bordered box + a CSS tick (no inline
-   SVG, so it stays within the style-src 'self' CSP); the global
-   :focus-visible outline covers focus. */
+/* Standalone Fuzz toggle -- a single on/off setting, not a picker list, so it
+   is an iOS switch rather than the checkmark-row treatment below.
+   appearance:none + a CSS track and thumb (no inline SVG, so it stays within
+   the style-src 'self' CSP); the global :focus-visible outline covers focus. */
 .fc-settings-field input[type="checkbox"] {
   appearance: none;
   flex: 0 0 auto;
-  width: 16px; height: 16px;
+  width: 38px; height: 22px;
   margin: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
-  background: var(--paper);
+  border: 0;
+  border-radius: 11px;
+  background: var(--switch-off);
   cursor: pointer;
   position: relative;
-  transition: background .12s ease, border-color .12s ease;
+  transition: background .15s ease;
 }
-.fc-settings-field input[type="checkbox"]:checked {
-  background: var(--section);
-  border-color: var(--section);
-}
-.fc-settings-field input[type="checkbox"]:checked::after {
+.fc-settings-field input[type="checkbox"]::after {
   content: "";
   position: absolute;
-  left: 5px; top: 2px;
-  width: 4px; height: 8px;
-  border: solid var(--paper);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  left: 2px; top: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--switch-thumb);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  transition: transform .15s ease;
 }
+.fc-settings-field input[type="checkbox"]:checked { background: var(--switch-on); }
+.fc-settings-field input[type="checkbox"]:checked::after { transform: translateX(16px); }
 .fc-settings-help { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-micro); line-height: 1.5; max-width: 56ch; }
 .fc-direction-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2px 16px; }
 /* iOS Settings-style checkmark row, not a checkbox square: the whole row is
@@ -3136,22 +3166,10 @@ mark.fc-diff-co {
 #fcWordsToReview .section-toggle-icon { width: 20px; height: 20px; }
 /* The column-visibility toggles are a wide control for a section head -- let
    them fall onto their own line under the title rather than crushing it when
-   the card is narrow. The segmented grouping (shared border, dividers
-   between segments) assumes one line -- a wrapped segment would carry a
-   dangling divider into empty space -- so this one narrow spot falls back
-   to individual bordered buttons instead. */
+   the card is narrow; if even that is too narrow the segments wrap inside
+   their track. */
 #fcWordsToReview .section-head { flex-wrap: wrap; row-gap: 10px; }
-#fcWordsToReview .section-head .view-mode {
-  flex-wrap: wrap;
-  gap: 4px;
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-}
-#fcWordsToReview .section-head .view-mode button {
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
-}
+#fcWordsToReview .section-head .view-mode { flex-wrap: wrap; }
 
 /* Printing the Words to Review table from the Dashboard: strip the Flashcards
    chrome so only that one table (title + grid) reaches the page, matching how
