@@ -143,7 +143,6 @@
   /* Cards lift off the near-white ground with a visible border AND a real
      two-layer shadow -- on a near-white page the shadow does the figure /
      ground work the low tonal contrast can't. Still soft, but committed. */
-  --shadow-card: 0 1px 3px rgba(30, 27, 40, .08), 0 6px 16px rgba(30, 27, 40, .08);
 
   /* Aliases so the Flashcards stylesheet below keeps running against one
      palette and one type scale rather than its own. */
@@ -203,25 +202,12 @@
   --fs-section-title: 19px;
   --fs-nav: 14px;
   --fs-nav-sub: 13px;
-  --fs-table-header: 11px;
   --fs-jp: 18.5px;
   --fs-romaji: 11.5px;
   --fs-english: 13.5px;
   --fs-small: 13px;
   --fs-micro: 11.5px;
   --fs-subhead: 15px; /* card / section sub-headings inside Flashcards */
-
-  /* Shared tracking for every quiet uppercase micro-label (the flashcard
-     prompt label, icon-picker group labels, Customize/Help section
-     headers) -- these used to each hand-roll their own letter-spacing with
-     no reason for the differences. Weight is still the tier: 500 for the
-     smaller in-content labels, 600 for the larger section-header ones (see
-     .fc-prompt-label / .icon-picker-group-label). Table column headers are
-     not one of these any more -- see .vocab th. The
-     masthead's brand kicker (.masthead-tag) is the one deliberate
-     exception -- wider still, since it sits beside the wordmark rather
-     than labelling content. */
-  --tracking-label: .05em;
 
   /* One sans family everywhere -- wordmark, titles, navigation, tables,
      controls. No serif. Japanese keeps its own CJK stack (td.jp / .furigana). */
@@ -301,7 +287,6 @@
   /* Dark grouped ground is darker than the card, as on iOS. */
   --group-ground: var(--page-bg);
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 10px rgba(0, 0, 0, .35);
   --shadow-menu: 0 12px 34px rgba(0, 0, 0, .55);
 
   /* In light --surface (a recessed grey) does for inputs; in dark it lands
@@ -311,8 +296,7 @@
   --field-fill: #131820;
   --field-line: #4b5563;
   --seg-thumb: #3d424b;
-  /* Card outlines need to stay visible against --paper so cards read as
-     raised -- paired with --shadow-card. */
+  /* Hairline under the pull-to-refresh bar; cards themselves have no outline. */
   --card-line: #39414d;
   /* Table row rules had nearly vanished; give them a hair more. */
   --row-line: #3b434e;
@@ -391,7 +375,6 @@ body {
   background: var(--paper);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sheet);
-  box-shadow: var(--shadow-card);
 }
 
 /* --- Masthead: the header of a reference book, not a hero ---------- */
@@ -418,9 +401,8 @@ body {
   text-decoration: none;
   line-height: 1;
 }
-/* Wider tracking than any other uppercase label (--tracking-label) on
-   purpose -- a brand kicker beside the wordmark, not a label for content
-   below it, so it doesn't join that consolidation. */
+/* The one uppercase label left in the app, tracked wide on purpose -- a brand
+   kicker beside the wordmark, not a label for content. */
 .masthead-tag {
   font-size: 10.5px;
   font-weight: 500;
@@ -568,7 +550,7 @@ body[data-active-section="travel"] #vocabulary {
   color: var(--section-strong);
   /* line-height 1.4, not 1: the label sets overflow:hidden for its ellipsis,
      so a tight line box would clip the descenders on g / p / y. */
-  font: 400 13px/1.4 var(--font-ui);
+  font: 400 var(--fs-small)/1.4 var(--font-ui);
   cursor: pointer;
 }
 .tindex-trigger:hover { border-color: var(--section); }
@@ -623,7 +605,7 @@ body[data-active-section="travel"] #vocabulary {
   padding: 5px 8px;
   border-radius: var(--radius-icon);
   text-decoration: none;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--ink);
 }
 .tindex-count {
@@ -631,7 +613,7 @@ body[data-active-section="travel"] #vocabulary {
   width: 1.9em;
   text-align: right;
   color: var(--faint);
-  font-size: 11.5px;
+  font-size: var(--fs-micro);
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
@@ -692,7 +674,7 @@ body[data-active-section="travel"] #vocabulary {
   gap: 12px;
   margin: 30px 0 10px;
   padding: 0 0 5px;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: 500;
   letter-spacing: .01em;
   color: var(--section);
@@ -704,14 +686,14 @@ body[data-active-section="travel"] #vocabulary {
 .cat-heading-count {
   align-self: center;
   font-weight: 400;
-  font-size: 11.5px;
+  font-size: var(--fs-micro);
   color: var(--faint);
   font-variant-numeric: tabular-nums;
 }
 /* Kept: the Flashcards Manage tab renders category headers with .cat-name /
    .cat-count via the shared window.categoryHeaderHtml helper. */
-.cat-name { font-size: 14px; font-weight: 500; color: var(--ink); letter-spacing: -.005em; }
-.cat-count { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+.cat-name { font-size: var(--fs-nav); font-weight: 500; color: var(--ink); letter-spacing: -.005em; }
+.cat-count { color: var(--faint); font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
 
 /* --- Vocabulary toolbar: search + column controls -------------- */
 /* Sticky under the nav so search and the column controls stay reachable
@@ -760,7 +742,7 @@ body[data-active-section="travel"] #vocabulary {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font: 400 13.5px/1 var(--font-ui);
+  font: 400 var(--fs-english)/1 var(--font-ui);
 }
 .search-box input::placeholder { color: var(--faint); }
 /* .clear-search is the only clear affordance -- suppress the browser's native
@@ -771,7 +753,7 @@ body[data-active-section="travel"] #vocabulary {
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 15px;
+  font-size: var(--fs-subhead);
   line-height: 1;
   cursor: pointer;
   padding: 2px 2px 2px 8px;
@@ -857,7 +839,7 @@ body { --switch-on: var(--section-strong); }
 .polite-toggle.active::before { background: var(--switch-on); }
 .selftest-toggle.active::after,
 .polite-toggle.active::after { right: 4px; }
-.search-count { margin-left: auto; color: var(--faint); font-size: 11.5px; white-space: nowrap; }
+.search-count { margin-left: auto; color: var(--faint); font-size: var(--fs-micro); white-space: nowrap; }
 /* Explains the い-adj/な-adj colour coding once, here, instead of repeating a
    label on every adjective row (see .vocab td.jp.adj-i/.adj-na). Purely a
    sighted quick-reference -- aria-hidden, since the real per-row semantics
@@ -866,7 +848,7 @@ body { --switch-on: var(--section-strong); }
    only shows on a table that actually has tinted rows -- the explicit
    `display` below would otherwise win over the browser's default
    `[hidden] { display: none }`, so it needs its own [hidden] override. */
-.adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
 .adj-legend[hidden] { display: none; }
 .adj-legend-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 10px; }
 .adj-legend-i { background: var(--adj-i-ink); }
@@ -1371,7 +1353,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   background: var(--surface); font-size: var(--fs-small); color: var(--ink);
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
 }
-.cv-preview[lang], .cv-preview span[lang="ja"] { font-size: 15px; }
+.cv-preview[lang], .cv-preview span[lang="ja"] { font-size: var(--fs-subhead); }
 .cv-preview-sep { color: var(--faint); }
 .cv-preview-bad { background: var(--wrong-soft); color: var(--wrong-strong); display: block; }
 .cv-add-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
@@ -1563,7 +1545,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   padding: 12px 14px;
   border-radius: 0;
   color: var(--ink);
-  font: 400 15px/1.3 var(--font-ui);
+  font: 400 var(--fs-subhead)/1.3 var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -1590,7 +1572,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   align-items: center;
   gap: 5px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-micro);
   white-space: nowrap;
 }
 .rows-hidden-status[hidden] { display: none; }
@@ -1825,7 +1807,6 @@ body.ja-voice-ready .jp-speak-btn {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .22);
   transition: opacity .12s ease, transform .12s ease;
 }
 /* The caret: a 4px CSS triangle sitting in the gap between the bubble and
@@ -2011,7 +1992,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
   .site-nav { padding: 6px 4px; gap: 0; }
-  .site-nav-link { padding: 6px 6px; font-size: 13px; }
+  .site-nav-link { padding: 6px 6px; font-size: var(--fs-small); }
   .page { padding: 14px 16px 40px; }
   .cat-heading { margin-top: 22px; }
   .table-section { scroll-margin-top: 172px; }
@@ -2054,7 +2035,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .section-head::before { display: none !important; }
   .section-toggle { display: block !important; cursor: auto; }
   .section-toggle-icon { display: none !important; }
-  .section-title-text { font-size: 13px; font-weight: 500; white-space: normal; }
+  .section-title-text { font-size: var(--fs-small); font-weight: 500; white-space: normal; }
 
   .vocab { border: 1px solid var(--line-strong) !important; border-radius: 4px; }
   .vocab th { border-top: 0 !important; border-bottom: 1px solid var(--line-strong) !important; }
@@ -2224,8 +2205,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 #fcPanelDashboard { max-width: 900px; }
 
 /* The dashboard's ~9 pieces (next review, today, Study now, 4 stat tiles,
-   3 charts) used to each carry their own --card-line + --shadow-card
-   border, reading as a stack of independent widgets instead of one screen.
+   3 charts) used to each carry their own border and shadow, reading as a stack of independent widgets instead of one screen.
    They now share 3 cards -- "right now", "your stats", "your progress" --
    each item below keeping its own colour/accent but losing its individual
    box; last-child's bottom margin is zeroed so it doesn't double up with
@@ -2368,7 +2348,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-group-title .cat-name { font-size: var(--fs-small); font-weight: 400; color: var(--section-strong); letter-spacing: .005em; }
 /* name · count · caret read as one cluster on the left, not name on one edge
    and count+caret flung to the other. */
-.fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: 11.5px; font-weight: 400; }
+.fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: var(--fs-micro); font-weight: 400; }
 .fc-manage-group-title:hover .cat-name { color: var(--section-strong); }
 .fc-manage-group-title::after {
   content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; align-self: center; margin-left: 2px;
@@ -2540,7 +2520,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-session-exit:hover { color: var(--wrong); text-decoration: underline; }
 /* A quiet reminder of the direction, hugging the prompt it introduces -- the
    prompt is the thing to read, not this. */
-.fc-prompt-label { color: var(--faint); font-size: var(--fs-table-header); font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-label); margin-bottom: 6px; }
+.fc-prompt-label { color: var(--muted); font-size: var(--fs-small); margin-bottom: 6px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
 .fc-answer-form { display: flex; gap: 8px; width: 78%; max-width: 380px; margin: 0 0 22px; }
@@ -2706,7 +2686,6 @@ mark.fc-diff-co {
    here made the card read bigger than the design it's meant to match. */
 @media (min-width: 700px) {
   .fc-review-card { padding: 28px 26px; }
-  .fc-prompt-label { font-size: var(--fs-small); }
   .fc-review-card .fc-prompt-kana { font-size: 38px; }
   .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
   .fc-review-card .fc-prompt-romaji { font-size: 24px; }

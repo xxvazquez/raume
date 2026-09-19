@@ -1,11 +1,12 @@
 # Design
 
-The look is a calm paper reference with a clear colour system: a white sheet on
-a near-white ground, cards that lift off it with a hairline edge and a soft
-shadow, and a small set of muted tones that carry hierarchy — dusty lavender for
-what you act on, soft sage for progress, muted coral for attention, deep ink for
-anything you read. Calm, not washed out. This note records the rules so they
-stay consistent.
+The look is one iOS-style system across the whole app: a grey grouped ground,
+white borderless 12px cards sitting directly on it, inset hairlines between
+rows, segmented controls and switches, and a small set of muted tones that carry
+hierarchy — dusty lavender for what you act on, soft sage for progress, muted
+coral for attention, deep ink for anything you read. Calm, not washed out. This
+note records the rules so they stay consistent; it is the single source for the
+system, and the sections below cover each part of it.
 
 ## Type
 
@@ -15,8 +16,16 @@ stay consistent.
   external font runtime.
 - Hierarchy comes from size, spacing, position, and colour — **not** bold weight
   or high contrast. Default weight is 400; 500 marks a genuinely active or
-  labelled state. One type scale (`--fs-*` tokens) is shared by the reference
-  and Flashcards sides. The sole exception is a **particle** (`.particle`,
+  labelled state. One type scale (`--fs-*` tokens: `--fs-micro` 11.5 · `--fs-small`
+  13 · `--fs-english` 13.5 · `--fs-nav` 14 · `--fs-subhead` 15 · `--fs-section-title`
+  19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji` for the Japanese text
+  itself) is shared by the reference and Flashcards sides — a size that
+  duplicates a token is written as the token. Labels are **sentence case**;
+  the one ALL-CAPS label left is the masthead's `JAPANESE REFERENCE` kicker
+  (tracked wide, a brand mark rather than a label). Deliberate literal sizes
+  remain only where a token would be wrong: the prompt and kana glyphs on the
+  review card, the verdict tag (a test reads its declared size) and tiny
+  chips. The sole exception is a **particle** (`.particle`,
   700 + `--particle` blue): a grammar signal that needs to jump out of a
   sentence at a glance, and colour alone wasn't enough against Japanese text.
 - On the review card the prompt is the anchor — 26px, the largest text on the
@@ -38,22 +47,22 @@ stay consistent.
 
 A small set of **muted, desaturated tones** — nothing bright, nothing neon: a
 dusty lavender (`#82799B`), a soft sage (`#78968B`) and a muted coral (`#C77C72`)
-on a near-white ground (`~#F7F8F9`). What changed from the old near-monochrome
-version is contrast and role — deeper ink, a real card shadow so white cards
-lift off the near-white page, and colour that now signals hierarchy. No true red
-except the one destructive-delete `--danger`. Gradients are out; shadow is in,
-but only the card lift (`--shadow-card`) and the menu shadow. All CSS custom
-properties in `css/site.css`.
+on a grey grouped ground. Deeper ink and colour that signals hierarchy rather
+than decorating. No true red except the one destructive-delete `--danger`.
+Gradients are out; **shadows are out too, except the one under a floating menu
+or sheet** (`--shadow-menu`) and the switch thumb — cards lift off the ground by
+fill alone (white on grey; in dark the ground is *darker* than the card). All CSS
+custom properties in `css/site.css`.
 
 | Hex (light) | Variable | Used for |
 |---|---|---|
 | `#1F2836` | `--ink` | primary text — dark cool ink for headings, numbers, Japanese (~12:1, clears AAA) |
 | `#55606F` / `#78838F` | `--muted` / `--faint` | secondary text (labels) / tertiary (counts, chevrons) — both AA |
 | `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji reveal caption / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
-| `#F6F7F9` | `--page-bg` | the near-white ground — white cards lift off it on `--shadow-card`, not tonal contrast |
+| `#F2F3F7` | `--group-ground` | the grouped ground (`--page-bg` in dark) — white cards sit directly on it, no border or shadow |
 | `#FFFFFF` | `--paper` | the sheet, cards, table surface |
 | `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / masthead and nav rules (table headers use the row hairline too) |
-| `#DBDFE6` | `--card-line` | card outlines — visible, paired with `--shadow-card` |
+| `#DBDFE6` | `--card-line` | only the hairline under the pull-to-refresh bar — cards themselves have no outline |
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
 | `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
