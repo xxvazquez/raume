@@ -209,16 +209,16 @@ and Help.
   adjective badge, in the app's particle blue and bold (the one deliberate use of
   bold — `.particle`): `を`, `に/へ`, `が`. Like the い/な badge they sit in a
   **trailing cluster beside the row icons**, after the meaning — leading chips gave
-  every row a different left edge for its meaning. A word can have two (`を` `に`). A
-  caption (`.particle-note`, under the meaning like an iOS cell subtitle) appears
-  **only for two or more particles**, to tie each glyph to its role ("を what you
-  listen to · に who you ask"); a lone particle is the chip alone, because its role is
-  implied by the meaning and a caption ("what you're bad at" under "not good at")
-  would only repeat it. The role is always in the chip's tooltip and a
-  visually-hidden note. Captions inherit the cell's colour (dimmed by opacity) so
-  Cover answers blanks them with the meaning instead of leaking it, and a row with a
-  caption aligns its cells on the first-line baseline so the Japanese word sits level
-  with the meaning. The toolbar legend (`.particle-legend`) shows only while the
+  every row a different left edge for its meaning. A word can have two (`を` `に`).
+  Each chip is a real `<button>` whose accessible name is its role ("Particle に:
+  who you ask"); **tap, click or (with a mouse) hover** opens a small iOS-style
+  popover (`.role-pop`: a 12px `--paper` bubble, the one menu shadow, an arrow at its
+  chip via `--arrow-x`) listing the word's particles with the tapped one emphasized —
+  the roles live there rather than in a caption under every row ("what you're bad at"
+  under "not good at" only repeated the meaning). It closes on an outside tap,
+  Escape, scroll or resize, and is suppressed while the English is hidden or covered
+  (a role like "what you eat" would give the answer away). The chip's hit area is
+  padded past the 20px capsule with an invisible `::before`. The toolbar legend (`.particle-legend`) shows only while the
   table on screen has chips, independently of the adjective legend.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself

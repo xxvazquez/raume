@@ -2188,18 +2188,38 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    (the one deliberate use of bold -- see .particle), so a chip reads as
    "particle" wherever it appears. */
 .particle-chip { color: var(--particle); background: color-mix(in srgb, var(--particle) 12%, var(--paper)); font-weight: 700; }
+/* On a word row the chip is a button: tap / click / hover opens the role popover
+   (.role-pop). Its hit area is padded out past the 20px capsule with an invisible
+   ::before, since it's a small target on a phone. */
+button.particle-chip { appearance: none; border: 0; position: relative; cursor: pointer; }
+button.particle-chip::before { content: ""; position: absolute; inset: -9px -3px; }
+button.particle-chip:hover, button.particle-chip[aria-expanded="true"] { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); }
+/* iOS-style popover: a small rounded surface with the one menu shadow and an
+   arrow pointing at its chip (--arrow-x is set by the script). */
+.role-pop {
+  position: fixed; z-index: 70; max-width: min(280px, calc(100vw - 16px));
+  padding: 9px 13px; border-radius: 12px; background: var(--paper); color: var(--ink);
+  box-shadow: var(--shadow-menu); font-size: var(--fs-small); line-height: 1.45;
+}
+.role-pop::after {
+  content: ""; position: absolute; left: var(--arrow-x, 50%); bottom: -5px; width: 10px; height: 10px;
+  margin-left: -5px; background: var(--paper); transform: rotate(45deg); border-radius: 0 0 3px 0;
+}
+.role-pop-below::after { bottom: auto; top: -5px; border-radius: 3px 0 0 0; }
+.role-pop-row + .role-pop-row { margin-top: 3px; }
+.role-pop-row:not(.role-pop-current) { opacity: .6; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
 .adj-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
 /* Footnotes under the meaning inherit the cell's colour (dimmed by opacity, not
    a colour of their own) so Cover answers / hidden English blank them with the
    meaning -- a note like "what you eat" would otherwise leak the answer. */
-/* A row with a caption is taller than its Japanese word, which would leave the
+/* A row with a footnote is taller than its Japanese word, which would leave the
    word at the bottom beside the caption and the meaning at the top. Align both
    cells on their first-line baseline instead, so the word sits level with the
    meaning and the caption hangs below it. */
-.vocab tbody tr:has(.adj-note, .particle-note) > td { vertical-align: baseline; }
-.adj-note, .particle-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
+.vocab tbody tr:has(.adj-note) > td { vertical-align: baseline; }
+.adj-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

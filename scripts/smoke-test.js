@@ -280,26 +280,42 @@ async function main() {
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
       && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
   })());
-  check("verbs and が-taking adjectives show the particles they take as trailing chips; only two or more get a caption (one would just repeat the meaning), and none is left blank", (() => {
+  check("verbs and が-taking adjectives show the particles they take as trailing chip buttons with no caption line, and none is left blank", (() => {
     const section = (name) => [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector(".section-title-text").textContent === name);
     const row = (sec, romaji) => [...sec.querySelectorAll("tbody tr")].find(r => r.querySelector(".jpword").dataset.romaji === romaji);
-    const chips = (r) => [...r.cells[1].querySelectorAll(".particle-chip")].map(c => c.dataset.badge).join(",");
+    const chips = (r) => [...r.cells[1].querySelectorAll("button.particle-chip")].map(c => c.dataset.badge).join(",");
     const verbs = section("Verbs"), adjs = section("Adjectives");
     const eat = row(verbs, "taberu"), listen = row(verbs, "kiku"), go = row(verbs, "iku"), sleep = row(verbs, "neru"), suki = row(adjs, "suki");
     const talk = row(verbs, "hanasu"), doIt = row(verbs, "suru");
-    const meaningLeft = (r) => Math.round(r.cells[1].querySelector(".meaning-text").offsetLeft);
-    return chips(eat) === "を" && !eat.cells[1].querySelector(".particle-note")
-      && chips(listen) === "を,に" && /who you ask/.test(listen.cells[1].querySelector(".particle-note").textContent)
-      && chips(go) === "に/へ" && !go.cells[1].querySelector(".particle-note")
-      && chips(sleep) === "" && !sleep.cells[1].querySelector(".particle-note")
-      && chips(suki) === "が" && !!suki.cells[1].querySelector(".adj-badge-na") && !suki.cells[1].querySelector(".particle-note")
-      && chips(talk) === "と,を" && chips(doIt) === "を,に" && /に what you choose/.test(doIt.cells[1].querySelector(".particle-note").textContent)
+    const labelOf = (r, i) => r.cells[1].querySelectorAll("button.particle-chip")[i].getAttribute("aria-label");
+    return chips(eat) === "を" && chips(listen) === "を,に" && chips(go) === "に/へ" && chips(sleep) === ""
+      && chips(suki) === "が" && !!suki.cells[1].querySelector(".adj-badge-na")
+      && chips(talk) === "と,を" && chips(doIt) === "を,に"
+      && labelOf(listen, 1) === "Particle に: who you ask" && labelOf(doIt, 1) === "Particle に: what you choose"
+      && document.querySelectorAll(".particle-note").length === 0
       && [...verbs.querySelectorAll("tbody tr")].every(r => !r.cells[0].querySelector(".particle-chip"))
       // chips trail the meaning (after it in the cell), so the meaning keeps one left edge
-      && [...verbs.querySelectorAll("tbody tr")].every(r => { const c = r.cells[1].querySelector(".meaning-cell"); const chip = c.querySelector(".particle-chip"); return !chip || c.firstElementChild.classList.contains("meaning-text"); });
+      && [...verbs.querySelectorAll("tbody tr")].every(r => { const c = r.cells[1].querySelector(".meaning-cell"); return !c.querySelector(".particle-chip") || c.firstElementChild.classList.contains("meaning-text"); });
   })());
-  check("particle captions inherit the cell's colour (so Cover answers blanks them with the meaning) and the chip is the app's particle blue", (() => {
-    const note = allCssRules.find(r => r.selectorText === ".adj-note, .particle-note");
+  check("tapping a particle chip opens a popover with the word's particle roles; outside tap, Escape and Cover answers behave", (() => {
+    const verbs = [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector(".section-title-text").textContent === "Verbs");
+    const listen = [...verbs.querySelectorAll("tbody tr")].find(r => r.querySelector(".jpword").dataset.romaji === "kiku");
+    const chip = listen.querySelectorAll("button.particle-chip")[1];
+    const pop = () => document.querySelector(".role-pop");
+    chip.click();
+    const opened = !!pop() && /what you listen to/.test(pop().textContent) && /who you ask/.test(pop().textContent)
+      && chip.getAttribute("aria-expanded") === "true" && pop().getAttribute("aria-hidden") === "true";
+    document.body.click();
+    const closedOutside = !pop() && chip.getAttribute("aria-expanded") === "false";
+    chip.click(); document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    const closedEsc = !pop();
+    document.body.classList.add("selftest-mode"); chip.click();
+    const blockedInCover = !pop();
+    document.body.classList.remove("selftest-mode");
+    return opened && closedOutside && closedEsc && blockedInCover;
+  })());
+  check("the note under an irregular adjective inherits the cell's colour (so Cover answers blanks it) and the particle chip is the app's particle blue", (() => {
+    const note = allCssRules.find(r => r.selectorText === ".adj-note");
     const chip = allCssRules.find(r => r.selectorText === ".particle-chip");
     return !!note && note.style.color === "inherit" && !!chip && /var\(--particle\)/.test(chip.style.color)
       && !!document.querySelector(".particle-legend");

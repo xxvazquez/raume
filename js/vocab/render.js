@@ -228,25 +228,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
   // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's
   // particle blue, bold) beside the row icons, drawn from data-badge like the
-  // adjective badge. One particle is the chip alone -- its role is implied by
-  // the meaning ("eat" -> を what you eat, "like" -> が what you like), so a
-  // caption would only repeat it. Two or more get a caption line under the
-  // meaning that ties each glyph to its role (を what you listen to · に who
-  // you ask); the role is always in the chip's tooltip and the hidden note.
+  // adjective badge. Each is a real button: tapping (or clicking, or hovering
+  // with a mouse) opens a small popover with what the particle marks
+  // (js/vocab/interactions.js), so the row stays one clean line; the role is
+  // also the button's accessible name for screen readers.
   function tight(p) { return String(p).replace(/\s+/g, ''); }   // "に / へ" -> "に/へ" on the chip
   function particleChips(row) {
     return (row.particles || []).map(function (q) {
-      return '<span class="particle-chip" data-badge="' + esc(tight(q.p)) + '" title="' + esc(q.p + ' — ' + q.role) + '" aria-hidden="true"></span>';
+      return '<button type="button" class="particle-chip" data-badge="' + esc(tight(q.p)) + '" data-role="' + esc(q.role) + '" aria-label="' + esc('Particle ' + q.p + ': ' + q.role) + '" aria-expanded="false"></button>';
     }).join('');
-  }
-  function particleNotes(row) {
-    var ps = row.particles || [];
-    if (!ps.length) return '';
-    var hidden = '<span class="visually-hidden">(takes ' + ps.map(function (q) { return esc(q.p + ' — ' + q.role); }).join('; ') + ')</span>';
-    if (ps.length === 1) return hidden;
-    return '<div class="particle-note" lang="ja">' + ps.map(function (q) {
-      return '<span class="particle">' + esc(tight(q.p)) + '</span> ' + esc(q.role);
-    }).join(' · ') + '</div>' + hidden;
   }
   function adjFootnote(row) {
     return row.adjNote ? '<div class="adj-note" lang="ja">' + esc(row.adjNote) + '</div>' : '';
@@ -257,7 +247,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjFootnote(row) + particleNotes(row), adjBadge(row) + particleChips(row)) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjFootnote(row), adjBadge(row) + particleChips(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
@@ -265,7 +255,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('');
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, particleNotes(row), particleChips(row)) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, '', particleChips(row)) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and sorted A-Z; the others start neutral.

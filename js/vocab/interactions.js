@@ -1038,5 +1038,74 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (row) row.classList.toggle('revealed');
     });
 
+    // Particle chips: tap / click (or hover, with a mouse) opens a small popover
+    // listing what each of the word's particles marks -- the roles live here, not
+    // on the row, so a row stays one line. Suppressed while the English is
+    // hidden or covered (a role like "what you eat" would give the answer away).
+    let pop = null, popOwner = null, popPinned = false;
+    function closePop() {
+      if (pop) { pop.remove(); pop = null; }
+      if (popOwner) { popOwner.setAttribute('aria-expanded', 'false'); popOwner = null; }
+      popPinned = false;
+    }
+    function popBlocked() {
+      return document.body.classList.contains('hide-english') || document.body.classList.contains('selftest-mode');
+    }
+    function openPop(chip) {
+      closePop();
+      if (popBlocked()) return;
+      const cell = chip.closest('.meaning-cell');
+      if (!cell) return;
+      pop = document.createElement('div');
+      pop.className = 'role-pop';
+      pop.setAttribute('aria-hidden', 'true');
+      pop.lang = 'ja';
+      cell.querySelectorAll('.particle-chip').forEach(function (c) {
+        const line = document.createElement('div');
+        line.className = 'role-pop-row' + (c === chip ? ' role-pop-current' : '');
+        const glyph = document.createElement('span');
+        glyph.className = 'particle';
+        glyph.textContent = c.dataset.badge;
+        line.appendChild(glyph);
+        line.appendChild(document.createTextNode(' ' + c.dataset.role));
+        pop.appendChild(line);
+      });
+      document.body.appendChild(pop);
+      const r = chip.getBoundingClientRect();
+      const w = pop.offsetWidth, h = pop.offsetHeight;
+      const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+      const above = r.top - h - 10 >= 8;
+      pop.style.left = left + 'px';
+      pop.style.top = (above ? r.top - h - 10 : r.bottom + 10) + 'px';
+      pop.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
+      pop.classList.toggle('role-pop-below', !above);
+      chip.setAttribute('aria-expanded', 'true');
+      popOwner = chip;
+    }
+    document.addEventListener('click', function (event) {
+      const chip = event.target.closest && event.target.closest('button.particle-chip');
+      if (chip) {
+        if (popOwner === chip && popPinned) closePop();
+        else { openPop(chip); popPinned = !!popOwner; }
+        return;
+      }
+      if (pop && !(event.target.closest && event.target.closest('.role-pop'))) closePop();
+    });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closePop(); });
+    window.addEventListener('scroll', closePop, { passive: true, capture: true });
+    window.addEventListener('resize', closePop);
+    window.addEventListener('hashchange', closePop);
+    if (window.matchMedia) {
+      const canHover = window.matchMedia('(hover: hover)');
+      document.addEventListener('mouseover', function (event) {
+        const chip = canHover.matches && event.target.closest && event.target.closest('button.particle-chip');
+        if (chip && chip !== popOwner && !popPinned) openPop(chip);
+      });
+      document.addEventListener('mouseout', function (event) {
+        const chip = event.target.closest && event.target.closest('button.particle-chip');
+        if (chip && chip === popOwner && !popPinned) closePop();
+      });
+    }
+
   });
 })();

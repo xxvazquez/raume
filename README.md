@@ -85,12 +85,11 @@ so they're easy to spot in a sentence.
 - **Particles a word takes** — each verb, and the adjectives 好き / 嫌い / 上手 /
   下手, shows the particle(s) it takes as small blue chips beside the row icons
   (**を** eat, **に/へ** go, **が** like) — the same blue as particles in
-  sentences, in a trailing cluster so the meanings keep one left edge. One particle
-  is the chip alone (its role is implied by the meaning); a word with two or more
-  (聞く: **を** *what you listen to* · **に** *who you ask*) also gets a one-line
-  caption tying each to its role, and verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる)
-  show none. する is **を** (do) and **に** (choose); 話す is **と** (talk with) and
-  **を** (speak). Only core
+  sentences, in a trailing cluster so the meanings keep one left edge. **Tap or click
+  a chip** (or hover it with a mouse) for a small popover saying what the particle
+  marks — 聞く: **を** *what you listen to*, **に** *who you ask* — so a row stays one
+  line; verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる) show none. する is **を**
+  (do) and **に** (choose); 話す is **と** (talk with) and **を** (speak). Only core
   arguments are listed — not the place-で or time-に that any verb can take. A toolbar
   legend explains the chip whenever the table on screen has them. Driven by a
   `particles: [{ p, role }]` field, which `npm run validate` requires on every verb.
