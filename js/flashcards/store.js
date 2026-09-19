@@ -24,7 +24,6 @@ window.RaumeStudy.flashcards.store = (function () {
   var CACHE_KEY = "raume-flashcards-cache-v1";
   var GUEST_CACHE_KEY = "raume-flashcards-guest-v1";
   var MODE_KEY = "raume-flashcards-mode";
-  var LEECH_KEPT_KEY = "raume-flashcards-leech-kept-v1";
   var CACHE_SCHEMA_VERSION = 1;
 
   // Two ways to use Flashcards: signed in (Supabase is authoritative) or
@@ -53,32 +52,63 @@ window.RaumeStudy.flashcards.store = (function () {
   function hasActiveSession() { return isGuestMode() || !!currentSession; }
 
   // Leeches the reader chose to "Keep" (see scheduling.leechWords): vocabId ->
-  // the word's lapse count at that moment. Deliberately device-local and not
-  // synced -- it is only a "stop nagging me" mark, so losing it (or seeing a
-  // kept word flagged again on another device) costs nothing and never touches
-  // a card, unlike the Supabase-backed state around it. leechKeptMemory is the
-  // same-pageview fallback for when localStorage is unavailable (private
-  // browsing), so Keep still takes effect -- it just isn't remembered next visit.
-  var leechKeptMemory = {};
+  // the word's lapse count at that moment. Part of the cache -- in guest mode
+  // the record itself (so a backup carries it), signed in mirrored to
+  // flashcard_settings.leech_kept by data-ops so a Keep follows the account.
+  // It is only a "stop flagging this" mark and never touches a card.
+  var LEGACY_LEECH_KEPT_KEY = "raume-flashcards-leech-kept-v1";
+  function cleanLeechKept(raw) {
+    var out = {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+    Object.keys(raw).forEach(function (id) {
+      var n = Number(raw[id]);
+      if (isFinite(n) && n >= 0) out[id] = Math.floor(n);
+    });
+    return out;
+  }
+  // Union of two kept-maps, the higher lapse count per word winning (the later
+  // Keep -- a word is re-flagged N lapses after the count it was kept at).
+  function mergeLeechKept(a, b) {
+    var out = Object.assign({}, cleanLeechKept(a));
+    var other = cleanLeechKept(b);
+    Object.keys(other).forEach(function (id) { if (!(id in out) || other[id] > out[id]) out[id] = other[id]; });
+    return out;
+  }
+  // The first version kept this in its own device-local localStorage key --
+  // fold whatever is there into the cache once, then drop the old key.
+  var legacyLeechChecked = false;
+  function migrateLegacyLeechKept() {
+    if (legacyLeechChecked) return;
+    legacyLeechChecked = true;
+    try {
+      var raw = localStorage.getItem(LEGACY_LEECH_KEPT_KEY);
+      if (raw === null) return;
+      var c = getCache();
+      c.leechKept = mergeLeechKept(c.leechKept, JSON.parse(raw));
+      saveCache();
+      localStorage.removeItem(LEGACY_LEECH_KEPT_KEY);
+    } catch (e) {}
+  }
   function getLeechKept() {
-    var stored = {};
-    try {
-      var raw = JSON.parse(localStorage.getItem(LEECH_KEPT_KEY) || "{}");
-      if (raw && typeof raw === "object" && !Array.isArray(raw)) stored = raw;
-    } catch (e) {}
-    return Object.assign({}, stored, leechKeptMemory);
+    migrateLegacyLeechKept();
+    return Object.assign({}, getCache().leechKept);
   }
-  function setLeechKept(vocabId, lapses) {
-    if (lapses == null) delete leechKeptMemory[vocabId]; else leechKeptMemory[vocabId] = lapses;
-    try {
-      var stored = JSON.parse(localStorage.getItem(LEECH_KEPT_KEY) || "{}");
-      if (!stored || typeof stored !== "object" || Array.isArray(stored)) stored = {};
-      if (lapses == null) delete stored[vocabId]; else stored[vocabId] = lapses;
-      localStorage.setItem(LEECH_KEPT_KEY, JSON.stringify(stored));
-    } catch (e) {}
+  function keepLeech(vocabId, lapses) {
+    var c = getCache();
+    var next = Object.assign({}, c.leechKept);
+    next[vocabId] = Math.max(0, Math.floor(Number(lapses) || 0));
+    c.leechKept = next;
+    saveCache();
+    return Object.assign({}, next);
   }
-  function keepLeech(vocabId, lapses) { setLeechKept(vocabId, lapses); }
-  function unkeepLeech(vocabId) { setLeechKept(vocabId, null); }
+  function unkeepLeech(vocabId) {
+    var c = getCache();
+    var next = Object.assign({}, c.leechKept);
+    delete next[vocabId];
+    c.leechKept = next;
+    saveCache();
+    return Object.assign({}, next);
+  }
 
   function uuid() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
@@ -108,7 +138,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -146,6 +176,9 @@ window.RaumeStudy.flashcards.store = (function () {
       // list just holds them out of review, the stat tiles and the Manage
       // filters until the table is resumed. Synced via flashcard_settings.
       pausedTables: Array.isArray(raw.pausedTables) ? raw.pausedTables.filter(function (t) { return typeof t === "string"; }) : [],
+      // Leeches marked "Keep" -- vocabId -> lapse count at the time. Synced via
+      // flashcard_settings.leech_kept (see js/flashcards/data-ops.js).
+      leechKept: cleanLeechKept(raw.leechKept),
       lastSyncedAt: raw.lastSyncedAt || null
     };
   }
@@ -307,6 +340,7 @@ window.RaumeStudy.flashcards.store = (function () {
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,
     uuid: uuid, localDateStr: localDateStr,
     getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
+    mergeLeechKept: mergeLeechKept, cleanLeechKept: cleanLeechKept,
     loadCache: loadCache, saveCache: saveCache, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,

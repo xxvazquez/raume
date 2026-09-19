@@ -70,7 +70,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs) and `paused_tables` (the tables paused as a unit — see below). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below) and `leech_kept` (leeches marked Keep — see below). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
@@ -147,15 +147,20 @@ account push" below), browser-local, never synced themselves:
 failed to reach Supabase) and `raume-table-custom-dirty-v1` (a flag: the
 account's copy of table customisations is stale).
 
-One more, purely a UI mark: `raume-flashcards-leech-kept-v1`
-(`store.getLeechKept` / `keepLeech`) — `{ vocabId: lapses }` for leeches the
-reader chose to **Keep**, browser-local and never synced (no schema column, so
-a kept word may be flagged again on another device; nothing about a card is
-ever touched by it). Like the guest-mode flag, it has an in-memory fallback
-when `localStorage` is unavailable, so Keep still works for the pageview. The detector is `scheduling.leechWords()`: per word, the
-worst studyable card's `lapses` against `LEECH_LAPSES` (8, Anki's default),
-re-flagging a kept word after `LEECH_RETRIGGER` (4) more lapses. Pausing from
-the Leeches card is the ordinary per-word `archiveVocab`.
+**Leeches.** The detector is `scheduling.leechWords()`: per word, the worst
+studyable card's `lapses` against `LEECH_LAPSES` (8, Anki's default), re-flagging a
+kept word after `LEECH_RETRIGGER` (4) more lapses. Pausing from the Leeches card is
+the ordinary per-word `archiveVocab`. **Keep** is `{ vocabId: lapses }` in
+`getCache().leechKept` (`store.getLeechKept` / `keepLeech`) — in guest mode the
+record itself, so a backup carries it; signed in it is mirrored to
+`flashcard_settings.leech_kept` (`dataOps.keepLeech`) the way `paused_tables` is:
+local first, and `fetchAllFromServer()` merges both sides (`store.mergeLeechKept`,
+the higher lapse count per word winning) and pushes back whatever the account is
+missing. The push is **best-effort** — a failure (offline, or `leech_kept` not there
+because `schema.sql` hasn't been re-run) only logs a warning, never blocks other
+sync, and heals on the next fetch. Nothing about a card is ever touched by it. The
+first version's device-local `raume-flashcards-leech-kept-v1` key is folded into the
+cache once and removed.
 
 ### Retrying a failed account push
 

@@ -245,7 +245,7 @@ streak.
   or more times after you'd learned it (FSRS lapses, by its worst direction) —
   it lists the word with **Pause** (the ordinary per-word pause: progress and
   history kept, Resume in Manage) or **Keep** (leave it studied; it's flagged
-  again only after 4 more lapses, remembered on this device). Manage tags the
+  again only after 4 more lapses; the Keep follows your account, or sits in the backup as a guest). Manage tags the
   same words with a small *Leech* label.
 - **Manage** — every table by category, filterable to All / My flashcards /
   Archived. **Add table**, then **Pause table** to make it dormant (an overlay —

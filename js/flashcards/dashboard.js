@@ -904,7 +904,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         await dataOps.refreshData();
         invalidateInsights();
       } else {
-        store.keepLeech(keep.dataset.leechKeep, Number(keep.dataset.lapses) || 0);
+        await dataOps.keepLeech(keep.dataset.leechKeep, Number(keep.dataset.lapses) || 0);
       }
       rerender();
     } catch (e) {

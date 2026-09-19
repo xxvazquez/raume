@@ -141,6 +141,12 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     (c.pausedTables || []).forEach(function (t) { mergedPaused[t] = true; });
     remotePaused.forEach(function (t) { mergedPaused[t] = true; });
     c.pausedTables = Object.keys(mergedPaused);
+    // Leeches marked "Keep": union with what this device had (the higher lapse
+    // count per word wins), and push back anything the account is missing --
+    // which also heals a Keep whose earlier push failed (offline, or a project
+    // that hasn't re-run schema.sql yet: `leech_kept` is absent, treated as {}).
+    var remoteKept = store.cleanLeechKept(settingsRow.leech_kept);
+    c.leechKept = store.mergeLeechKept(c.leechKept, remoteKept);
     c.userId = user.id;
     c.lastSyncedAt = new Date().toISOString();
     saveCache();
@@ -152,6 +158,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       savePausedTablesRemote(c.pausedTables).catch(function (e) {
         console.warn("Flashcards: could not sync merged paused-tables list", e);
       });
+    }
+    if (Object.keys(c.leechKept).some(function (id) { return !(id in remoteKept) || c.leechKept[id] > remoteKept[id]; })) {
+      saveLeechKeptRemote(c.leechKept);
     }
     // The vocabulary page's per-table icons live in this same row -- hand
     // them to their own store so a header icon set on another device shows up.
@@ -252,6 +261,21 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   async function savePausedTablesRemote(arr) {
     if (!getClient() || !currentUser()) return;
     return saveFsrsSettingsRemote({ paused_tables: arr || [] });
+  }
+  // Best-effort by design: a "Keep" is only a stop-flagging mark, so a failed
+  // push (offline, or `leech_kept` not there yet because schema.sql hasn't been
+  // re-run) must never surface as an error or hold up other sync -- the next
+  // fetchAllFromServer() pushes whatever the account is missing.
+  function saveLeechKeptRemote(obj) {
+    if (!getClient() || !currentUser()) return Promise.resolve();
+    return saveFsrsSettingsRemote({ leech_kept: obj || {} }).catch(function (e) {
+      console.warn("Flashcards: could not sync kept leeches", e);
+    });
+  }
+  // Keep a leech (see scheduling.leechWords): local first, then the account.
+  async function keepLeech(vocabId, lapses) {
+    var kept = store.keepLeech(vocabId, lapses);
+    if (!isGuestMode()) await saveLeechKeptRemote(kept);
   }
   // Pause / resume a whole table. An overlay -- the cards themselves are left
   // exactly as they are (see store.setTablePausedLocal), so resuming is a
@@ -833,7 +857,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     onAuthChange: onAuthChange, authState: authState,
     fetchAllFromServer: fetchAllFromServer,
     addVocab: addVocab, addVocabs: addVocabs, addVocabsRemote: addVocabsRemote,
-    archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused,
+    archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused, keepLeech: keepLeech,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,

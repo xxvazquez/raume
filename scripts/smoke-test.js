@@ -1588,6 +1588,18 @@ async function main() {
       document.querySelector("[data-leech-keep]").click();
       await flush();
       check("Keep clears the flag but changes nothing about the word", sched.leechWords().length === 0 && !leechCard() && word.active === true && word.lapses === sched.LEECH_LAPSES);
+      check("Keep is recorded in the cache itself (so it syncs to the account and is in a backup), at the word's lapse count", fcNs.store.getCache().leechKept[word.vocabId] === sched.LEECH_LAPSES);
+      check("merging kept-maps takes the higher lapse count per word and drops junk", (() => {
+        const m = fcNs.store.mergeLeechKept({ a: 9, b: 12, bad: "x" }, { a: 13, b: 8, c: -1, e: 10 });
+        return JSON.stringify(Object.keys(m).sort().map(k => [k, m[k]])) === JSON.stringify([["a", 13], ["b", 12], ["e", 10]]);
+      })());
+      check("a kept word survives the cache validator (a reload / restore), and junk in that field is cleaned", (() => {
+        const raw = JSON.parse(JSON.stringify(fcNs.store.getCache()));
+        const ok = fcNs.store.validateCache(raw);
+        raw.leechKept = { keep: 9, junk: "nope" };
+        const cleaned = fcNs.store.validateCache(raw);
+        return !!ok && ok.leechKept[word.vocabId] === sched.LEECH_LAPSES && !!cleaned && cleaned.leechKept.keep === 9 && !("junk" in cleaned.leechKept);
+      })());
       word.lapses = sched.LEECH_LAPSES + 3;
       check("a kept word stays quiet through a few more lapses...", sched.leechWords().length === 0);
       word.lapses = sched.LEECH_LAPSES + 4;

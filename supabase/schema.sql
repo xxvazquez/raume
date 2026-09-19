@@ -121,6 +121,12 @@ alter table public.flashcard_settings add column if not exists kana_fsrs jsonb n
 -- the Manage filters until it's resumed. Shape: ["1", "15", ...].
 alter table public.flashcard_settings add column if not exists paused_tables jsonb not null default '[]'::jsonb;
 
+-- Leeches the reader marked "Keep" on the dashboard (words forgotten many
+-- times that they chose to keep studying). A map of vocab id -> the word's lapse
+-- count when kept; it is flagged again only after a few more lapses. Purely a
+-- "stop flagging this" mark -- it never touches a card. Shape: {"v0123": 9}.
+alter table public.flashcard_settings add column if not exists leech_kept jsonb not null default '{}'::jsonb;
+
 -- Kana trainer cards + review history -- the exact parallel of flashcards /
 -- review_logs above, for the "Kana" tab's own hiragana/katakana drill.
 -- kana_id is the trainer's stable item id ("hira-gojuon:あ", ...); direction

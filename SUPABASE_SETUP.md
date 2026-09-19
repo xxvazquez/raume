@@ -13,7 +13,7 @@ The Flashcards section stores your learning data (which vocab entries you've add
 2. Paste the contents of [`supabase/schema.sql`](supabase/schema.sql) and click **Run**.
 3. This creates `flashcards`, `review_logs`, `flashcard_settings`, the Kana trainer's `kana_cards` / `kana_review_logs`, and `custom_tables` / `custom_rows` (words and tables you add yourself), all with Row Level Security enabled so each signed-in user only ever sees their own rows.
 
-`schema.sql` is written so the **whole file is safe to paste and re-run any time it changes** (new tables use `create table if not exists`, new columns `add column if not exists`, nothing is dropped) — so if you set up Supabase before a feature that needs a schema change (e.g. the vocabulary-page table icons, which sync through `flashcard_settings.table_custom`, or custom vocabulary in `custom_tables` / `custom_rows`), just re-run the file.
+`schema.sql` is written so the **whole file is safe to paste and re-run any time it changes** (new tables use `create table if not exists`, new columns `add column if not exists`, nothing is dropped) — so if you set up Supabase before a feature that needs a schema change (e.g. the vocabulary-page table icons, which sync through `flashcard_settings.table_custom`, custom vocabulary in `custom_tables` / `custom_rows`, or the leeches you mark Keep in `flashcard_settings.leech_kept`), just re-run the file.
 
 ## 3. Enable email/password sign-in
 
