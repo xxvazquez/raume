@@ -314,6 +314,13 @@ npm run generate:icons      # rebuild the favicon + PWA icons from logo.png (Pil
 npm run vendor:libs         # re-copy the vendored libs after a version bump
 ```
 
+`npm run validate` also guards the い/な-adjective tags (`adj` / `adjNote` on a vocab
+row): an `adj: "i"` reading must end in い; a `な`-adjective whose reading ends in い
+(きれい, 嫌い, 有名) and an い-adjective in the いい family (いい, かっこいい →
+よくない) must each carry an `adjNote`; `かわいい` is the one listed exception
+(`REGULAR_II_ADJECTIVES`). A mis-tagged adjective fails the check instead of
+shipping a wrong badge.
+
 - Run `validate` before committing data changes, and `test` before anything
   touching `js/vocab/` or `js/flashcards/`.
 - The smoke test (`scripts/smoke-test.js`) is DOM-coupled — expect to update its

@@ -85,3 +85,39 @@ for (const table of tableList) {
   }
 }
 console.log("Vocabulary quality validation passed: no empty fields, no missing Japanese script, no duplicate entries.");
+
+// Adjective classification guard. An い-adjective (adj: "i") must end in い; a
+// な-adjective (adj: "na") that *sounds* like it ends in い (きれい, 嫌い, 有名)
+// and an い-adjective that conjugates oddly (いい, かっこいい → よくない) are the
+// two traps, so each must carry an adjNote explaining itself (the outlined badge
+// + footnote in the UI). adjNote is meaningless without an adj.
+// い-adjectives that merely end in いい but conjugate regularly (かわいくない) --
+// everything else ending in いい is the irregular いい family (よくない).
+const REGULAR_II_ADJECTIVES = ["かわいい"];
+function readingOf(row) {
+  return row.jp.map(seg => seg.reading || seg.text || seg.p || "").join("").replace(/[\s\/].*$/, "");
+}
+for (const table of tableList) {
+  for (const row of table.rows) {
+    if (row.adj === undefined && row.adjNote === undefined) continue;
+    const label = table.title + " " + row.id;
+    if (row.adj !== "i" && row.adj !== "na") {
+      console.error("Adjective validation failed: adj must be \"i\" or \"na\" (" + label + ").");
+      process.exit(1);
+    }
+    const reading = readingOf(row);
+    if (row.adj === "i" && !reading.endsWith("い")) {
+      console.error("Adjective validation failed: an い-adjective's reading must end in い, got \"" + reading + "\" (" + label + ") -- is it really a な-adjective?");
+      process.exit(1);
+    }
+    if (row.adj === "na" && reading.endsWith("い") && !row.adjNote) {
+      console.error("Adjective validation failed: a な-adjective whose reading ends in い (" + reading + ", " + label + ") needs an adjNote saying it takes な.");
+      process.exit(1);
+    }
+    if (row.adj === "i" && reading.endsWith("いい") && !REGULAR_II_ADJECTIVES.includes(reading) && !row.adjNote) {
+      console.error("Adjective validation failed: an い-adjective ending in いい (" + reading + ", " + label + ") conjugates irregularly (よくない) and needs an adjNote.");
+      process.exit(1);
+    }
+  }
+}
+console.log("Adjective classification validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adj).length, 0) + " adjectives, " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adjNote).length, 0) + " irregular.");
