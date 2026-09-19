@@ -52,7 +52,7 @@ properties in `css/site.css`.
 | `#5A6675` / `#5C6A79` | `--romaji` / `--furigana` | the romaji reveal caption / the reading over each kanji — both WCAG AA on `--paper`; furigana also has an 11px floor |
 | `#F6F7F9` | `--page-bg` | the near-white ground — white cards lift off it on `--shadow-card`, not tonal contrast |
 | `#FFFFFF` | `--paper` | the sheet, cards, table surface |
-| `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / header and table-head rules |
+| `#E2E5EA` / `#C8CFD8` | `--line` / `--line-strong` | hairline row rules / masthead and nav rules (table headers use the row hairline too) |
 | `#DBDFE6` | `--card-line` | card outlines — visible, paired with `--shadow-card` |
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
@@ -118,7 +118,7 @@ and Help.
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label
   and Customize/Help section headers still use) in a ~44px-tall row, closed by
-  a hairline. The sort control is one up/down chevron pair (`SORT_ICON` in
+  the same hairline as the body rows (everywhere, Flashcards' Words to review included). The sort control is one up/down chevron pair (`SORT_ICON` in
   `js/vocab/render.js`) rather than a text arrow glyph: the chevron matching the
   current direction is full strength in the section tone, the other a ghost,
   and both ghosted on an unsorted column, as in iOS Files. Its tap area is

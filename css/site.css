@@ -57,7 +57,7 @@
   --paper: #ffffff;          /* the sheet, cards, table surface */
 
   --line: #e2e5ea;           /* hairline row rules */
-  --line-strong: #c8cfd8;    /* borders, header + nav underlines, table head rule */
+  --line-strong: #c8cfd8;    /* borders, header + nav underlines */
 
   /* Primary accent -- the dusty lavender #82799B. The colour of everything
      you act on: active tabs, progress fills, focus, key interactive edges;
@@ -969,7 +969,6 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section:not(.collapsed) .section-head { padding: 0 4px 8px; margin-bottom: 0; border-bottom: 0; }
 #vocabulary .table-section:not(.collapsed) .section-title-text { font-size: 20px; font-weight: 600; }
 #vocabulary .table-section:not(.collapsed) .vocab { background: var(--paper); border-radius: 12px; }
-#vocabulary .table-section:not(.collapsed) .vocab thead th { border-bottom: 1px solid var(--row-line); }
 #vocabulary .table-section:not(.collapsed) .vocab thead th:first-child { border-top-left-radius: 12px; }
 #vocabulary .table-section:not(.collapsed) .vocab thead th:last-child { border-top-right-radius: 12px; }
 #vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 12px; }
@@ -1598,11 +1597,10 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   font-size: var(--fs-small);
   font-weight: 500;
   padding: 13px 14px 11px 0;
-  /* No top rule -- the .section-head hairline above already separates the
-     title from the grid. The column-label rule below takes a hint of the
-     section colour, tying each table to its section without colouring the
-     grid itself. */
-  border-bottom: 1.5px solid color-mix(in srgb, var(--section) 40%, var(--line-strong));
+  /* A plain hairline closes the header row, the same rule as between body
+     rows -- no coloured or heavier rule under a heading, in the reference
+     pages and Flashcards' Words to review alike. */
+  border-bottom: 1px solid var(--row-line);
   white-space: nowrap;
 }
 .vocab td {
