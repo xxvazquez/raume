@@ -850,8 +850,11 @@ body { --switch-on: var(--section-strong); }
    `[hidden] { display: none }`, so it needs its own [hidden] override. */
 .adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
 .adj-legend[hidden] { display: none; }
-.adj-legend .adj-badge { margin: 0 4px 0 10px; align-self: center; }
-.adj-legend .adj-badge:first-child { margin-left: 0; }
+.adj-legend .adj-badge, .particle-legend .particle-chip { margin: 0 4px 0 10px; align-self: center; }
+.adj-legend .adj-badge:first-child, .particle-legend .particle-chip:first-child { margin-left: 0; }
+.particle-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
+.particle-legend[hidden] { display: none; }
+.adj-legend:not([hidden]) + .particle-legend:not([hidden]) { margin-left: 12px; }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
@@ -2173,17 +2176,24 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    irregular adjective's badge is *outlined* instead of filled, and its reason
    sits as a footnote under the meaning (.adj-note). Explained once by the
    legend near the toolbar (index.html .adj-legend). */
-.adj-badge {
+.adj-badge, .particle-chip {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
   min-width: 20px; height: 20px; padding: 0 5px; margin: 0 8px 0 0; align-self: flex-start;
   border-radius: 10px;
   font: 400 var(--fs-micro)/1 var(--font-ui);
 }
-.adj-badge::after { content: attr(data-badge); }
+.adj-badge::after, .particle-chip::after { content: attr(data-badge); }
+/* The particles a word takes: the same capsule in the app's particle blue, bold
+   (the one deliberate use of bold -- see .particle), so a chip reads as
+   "particle" wherever it appears. */
+.particle-chip { color: var(--particle); background: color-mix(in srgb, var(--particle) 12%, var(--paper)); font-weight: 700; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
 .adj-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
-.adj-note { margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
+/* Footnotes under the meaning inherit the cell's colour (dimmed by opacity, not
+   a colour of their own) so Cover answers / hidden English blank them with the
+   meaning -- a note like "what you eat" would otherwise leak the answer. */
+.adj-note, .particle-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

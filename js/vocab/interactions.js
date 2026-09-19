@@ -310,14 +310,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // sticky toolbar right now (syncTableIndexActive's scroll-spy); with no
   // argument (search spans tables with no single "current") it shows if any
   // still-matching row anywhere on screen is tinted.
+  // The particle legend follows the same rule for the blue particle chips
+  // (Verbs, and 好き / 嫌い / 上手 / 下手 in Adjectives).
   function updateAdjLegend(current) {
     const legend = document.querySelector('.adj-legend');
     if (!legend) return;
-    const hasAdj = current
-      ? !!current.querySelector('.jp.adj-i, .jp.adj-na')
+    const has = (sel) => current
+      ? !!current.querySelector(sel)
       : [...document.querySelectorAll('#vocabulary .table-section:not(.page-hidden):not(.search-hidden)')]
-        .some(s => s.querySelector('tbody tr:not(.search-hidden) .jp.adj-i, tbody tr:not(.search-hidden) .jp.adj-na'));
-    legend.hidden = !hasAdj;
+        .some(s => s.querySelector('tbody tr:not(.search-hidden) ' + sel));
+    legend.hidden = !has('.jp.adj-i, .jp.adj-na');
+    const particleLegend = document.querySelector('.particle-legend');
+    if (particleLegend) particleLegend.hidden = !has('.particle-chip');
   }
   vocab.updateAdjLegend = updateAdjLegend;
 

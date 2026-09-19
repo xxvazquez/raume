@@ -121,3 +121,42 @@ for (const table of tableList) {
   }
 }
 console.log("Adjective classification validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adj).length, 0) + " adjectives, " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adjNote).length, 0) + " irregular.");
+
+// Particle guard. Every verb row must say what particles it takes (an empty
+// list is a deliberate "none": 疲れる, 寝る, 泳ぐ, 起きる) so a new verb can't
+// ship unclassified; every entry is a known particle (or "に / へ" style pairs)
+// with a short role. 好き / 嫌い / 上手 / 下手 must take が.
+const PARTICLES = ["が", "を", "に", "へ", "で", "と", "から", "まで"];
+for (const table of tableList) {
+  for (const row of table.rows) {
+    const label = table.title + " " + row.id;
+    if (row.type === "verb-pair" && !Array.isArray(row.particles)) {
+      console.error("Particle validation failed: a verb needs a `particles` list (use [] for none) (" + label + ").");
+      process.exit(1);
+    }
+    if (row.particles === undefined) continue;
+    if (!Array.isArray(row.particles)) { console.error("Particle validation failed: particles must be a list (" + label + ")."); process.exit(1); }
+    for (const q of row.particles) {
+      const parts = String(q.p || "").split(/\s*\/\s*/);
+      if (!q.p || !parts.every(x => PARTICLES.includes(x)) || !q.role || typeof q.role !== "string") {
+        console.error("Particle validation failed: each entry needs a known particle and a role, got " + JSON.stringify(q) + " (" + label + ").");
+        process.exit(1);
+      }
+    }
+    if (row.type !== "verb-pair" && !row.adj) {
+      console.error("Particle validation failed: particles belong on verbs and adjectives only (" + label + ").");
+      process.exit(1);
+    }
+  }
+}
+const GA_ADJECTIVES = ["すき", "きらい", "じょうず", "へた"];
+for (const table of tableList) {
+  for (const row of table.rows) {
+    if (row.type === "verb-pair" || !row.adj) continue;
+    if (GA_ADJECTIVES.includes(readingOf(row)) && !(row.particles || []).some(q => q.p === "が")) {
+      console.error("Particle validation failed: " + readingOf(row) + " takes が (" + table.title + " " + row.id + ").");
+      process.exit(1);
+    }
+  }
+}
+console.log("Particle validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.particles && r.particles.length).length, 0) + " words take particles.");
