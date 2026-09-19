@@ -392,7 +392,10 @@ body {
   gap: 16px;
   padding: 13px 28px 11px;
 }
-.masthead-right { display: flex; align-items: center; gap: 13px; }
+/* The icon buttons carry 10px of their own padding (a 40px tap target around a
+   20px glyph), so the row is pulled out by the same amount to keep the last
+   glyph on the page's right margin. */
+.masthead-right { display: flex; align-items: center; gap: 0; margin-right: -8px; }
 /* The one place a second typeface earns its keep: Space Grotesk gives the
    wordmark a modern, distinct voice while every UI/informational element
    stays in Inter. */
@@ -416,33 +419,37 @@ body {
   color: var(--muted);
   white-space: nowrap;
 }
+/* iOS bar-button glyphs: no box, no outline -- a bare 20px icon in secondary
+   grey inside a 40px tap target. The page a glyph opens (Customize, Help)
+   shows as the tinted one, the way a selected bar item does on iOS. */
 .theme-toggle, .masthead-gear {
   appearance: none;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
-  background: var(--paper);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   color: var(--muted);
   cursor: pointer;
 }
-.theme-toggle:hover, .masthead-gear:hover { color: var(--ink); border-color: var(--muted); }
-.masthead-gear.active { color: var(--ink); border-color: var(--muted); background: var(--surface); }
-/* Guest = same quiet outline as the other masthead icons. Signed in adds a
-   small solid dot (the app's one positive-state colour, also used for
-   "Synced" in Flashcards) -- presence/absence of the dot is the actual
-   at-a-glance signal (an icon-colour change alone was too subtle to
-   register without looking closely); the icon itself also tints to match,
-   reinforcing it for anyone who does look closely. */
+.theme-toggle svg, .masthead-gear svg { width: 20px; height: 20px; }
+.theme-toggle:hover, .masthead-gear:hover { color: var(--ink); }
+.masthead-gear.active, .masthead-gear.active:hover { color: var(--accent-strong); }
+/* Guest = the same grey glyph as the others. Signed in adds a small solid dot
+   (the app's one positive-state colour, also used for "Synced" in
+   Flashcards) -- presence/absence of the dot is the actual at-a-glance
+   signal (an icon-colour change alone was too subtle to register without
+   looking closely); the glyph also tints to match, reinforcing it for
+   anyone who does look closely. */
 .masthead-account { position: relative; }
-.masthead-account-signed-in, .masthead-account-signed-in:hover { color: var(--right-strong); border-color: var(--right); }
+.masthead-account-signed-in, .masthead-account-signed-in:hover { color: var(--right-strong); }
 .masthead-account-dot {
-  display: none; position: absolute; top: -2px; right: -2px;
+  display: none; position: absolute; top: 7px; right: 7px;
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--right-strong); border: 2px solid var(--paper);
 }
@@ -450,7 +457,7 @@ body {
 /* Offline, or something still queued (a table rename, a custom word) --
    same amber the Flashcards sync chip uses for "not synced yet", so the two
    read as the same signal wherever a reader happens to see it. */
-.masthead-account-pending, .masthead-account-pending:hover { color: var(--warn-strong); border-color: var(--warn); }
+.masthead-account-pending, .masthead-account-pending:hover { color: var(--warn-strong); }
 .masthead-account-pending .masthead-account-dot { display: block; background: var(--warn-strong); }
 /* Show the icon for the mode the button is CURRENTLY in (system / light /
    dark); clicking cycles to the next. Default (no/other choice) = system. */
@@ -462,18 +469,20 @@ body {
 /* --- Horizontal navigation --------------------------------------- */
 /* Five short items -- padding/font tighten at <=640px (below) so they still
    fit on one line down to a 360px-wide phone. overflow-x is a safety net
-   below that, for narrower devices or extreme zoom. */
+   below that, for narrower devices or extreme zoom. A plain bar closed by one
+   hairline (the iOS nav-bar edge, which is what keeps the sticky bar legible
+   over scrolling content) -- no rule above it, and the selected item is a
+   capsule rather than an underline. */
 .site-nav {
   position: sticky;
   top: 0;
   z-index: 50;
   display: flex;
-  align-items: stretch;
-  gap: 4px;
-  padding: 0 20px;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 16px;
   background: var(--paper);
-  border-top: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--row-line);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -481,20 +490,18 @@ body {
 .site-nav-link {
   display: inline-flex;
   align-items: center;
-  padding: 9px 12px;
+  padding: 6px 13px;
   font-size: var(--fs-nav);
   font-weight: 400;
   letter-spacing: .01em;
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  border-radius: 4px 4px 0 0;
-  margin-bottom: -1px;
+  border-radius: 999px;
 }
-/* Each item carries its own section tone on hover / when active -- text
-   colour, a 2px underline, and a faint tinted block behind the active one
-   so colour has real surface, not just a line. */
+/* Each item carries its own section tone on hover / when active -- the
+   selected one is a soft capsule in that tone with deeper text, the one place
+   the section colour is spent on the chrome. */
 .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
 .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
 .site-nav-link[data-section="phrases"]:hover { color: var(--sec-phrases); }
@@ -504,7 +511,6 @@ body {
   color: var(--section-strong);
   font-weight: 500;
   background: var(--section-soft);
-  border-bottom: 3px solid var(--section);
 }
 
 /* --- Page shell ------------------------------------------------- */
@@ -1982,8 +1988,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   /* Make room for the help / customize / theme controls on a narrow bar. */
   .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
-  .site-nav { padding: 0 6px; gap: 1px; }
-  .site-nav-link { padding: 9px 5px; font-size: 13px; }
+  .site-nav { padding: 6px 4px; gap: 0; }
+  .site-nav-link { padding: 6px 6px; font-size: 13px; }
   .page { padding: 14px 16px 40px; }
   .cat-heading { margin-top: 22px; }
   .table-section { scroll-margin-top: 172px; }

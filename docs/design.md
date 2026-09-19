@@ -78,7 +78,7 @@ Functional roles, each one job — all muted:
 
 Five hues, spread wide enough to read as genuinely different places: a
 slate-blue, a mauve, an ochre, the sage, the lavender. Used **only** on
-structural and interactive elements (nav underline + active block, category
+structural and interactive elements (the active nav capsule, category
 headings + rules, active tabs/filters, focus, sort accents) — never a row or a
 large surface. `-strong` variants are the ones used at body-text size and all
 clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
@@ -114,6 +114,18 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
+- **Masthead and nav are one bar** on `--paper`, closed by a single row hairline
+  (no rule above the nav). The four masthead controls — account, help,
+  customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
+  targets: no box, no outline. The page a glyph opens (Customize, Help) shows
+  as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
+  the sync dot stays, sitting on the account glyph's corner (green when signed in,
+  amber when offline or something's queued, the glyph tinting to match). The
+  nav is still top tabs, but the selected one is a **capsule** — `--section-soft`
+  fill, `--section-strong` text, weight 500 — instead of a tinted block over a
+  3px underline; the rest are plain secondary text. The capsule is the one place
+  a section tone is spent on the chrome. Padding tightens on phones so all five
+  still fit at 360px with no horizontal scroll.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label
@@ -315,9 +327,10 @@ instead of sitting pinned under a stack of chrome it doesn't need. One CSS
 rule covers both the vocabulary and Kana review cards, since they share the
 same markup — no session-state flag to keep in sync in JS.
 
-The active sub-tabs (`.fc-tab.active`) and nav links (`.site-nav-link.active`)
-carry a solid 3px underline in the section tone plus, for the nav, a soft
-tinted block — clearly the live one against the muted rest.
+The active sub-tabs (`.fc-tab.active`) carry a solid 3px underline in the
+section tone (they become a segmented control in the iOS rollout); the active
+nav link (`.site-nav-link.active`) is a soft capsule in the section tone —
+clearly the live one against the muted rest.
 
 ## Dark mode
 
