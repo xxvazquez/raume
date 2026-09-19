@@ -66,7 +66,7 @@ custom properties in `css/site.css`.
 | `#82799B` / `#574D73` / `#EBE9F2` | `--accent` / `-strong` / `-soft` | **primary accent** — dusty lavender: active tabs, progress fills, focus, key interactive edges. Primary buttons fill with `-strong` so white text clears AA |
 | `#5F8175` / `#456056` / `#E4ECE8` | `--accent-2` / `-strong` / `-soft` | **secondary accent** — muted sage: legend terms, supporting highlights (same hue as `--right`) |
 | `#2F6FB0` | `--particle` | **grammatical particles** (は, を, から, …) — a saturated blue, more vivid than any section accent, so a marked particle reads as a grammar cue. Rendered **bold** — the one deliberate use of weight for hierarchy (see below). Hover/tap shows its reading (は → "wa") in a `.particle[data-r]::after` layer, same idea as the katakana `.kr` layer. `#7DB4E6` in dark; flattens to bold-black in print |
-| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective marker bar** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured at a glance, a 2px edge). `#B39DDB` / `#7FC79A` in dark |
+| `#6B4FA0` / `#2E7D52` | `--adj-i-ink` / `--adj-na-ink` | **い/な-adjective badge** — purple / green, saturated like `--particle` rather than muted like `--accent-strong` (needs to read as coloured at a glance on a small capsule). `#B39DDB` / `#7FC79A` in dark |
 
 Functional roles, each one job — all muted:
 
@@ -185,28 +185,26 @@ and Help.
   current direction is full strength in the section tone, the other a ghost,
   and both ghosted on an unsorted column, as in iOS Files. Its tap area is
   padded out with negative margins so it stays generous without growing the row.
-- **い/な-adjective rows** get a coloured bar down the Japanese cell's left
-  inner edge instead of a tag or tinted text: `--adj-i-ink` (purple) for
-  **い-adj**, `--adj-na-ink` (green) for **な-adj** — dedicated tokens,
-  deliberately as saturated as `--particle` rather than as muted as
-  `--accent-strong`/`--accent-2-strong` (those are tuned for buttons; that
-  muted a pair wouldn't read as coloured at a glance). It's `box-shadow:
-  inset 2px 0 0 <token>` on the cell itself — the same idiom `.irregular-row`
-  already uses for its own left marker — rather than a centred dot, since a
-  dot has to pick *some* vertical centre and a two-line furigana+kanji cell
-  doesn't have one that looks right; the inset shadow spans the cell's full
-  height automatically, no centring to get wrong. The word itself stays
-  plain `--ink`, not tinted (an earlier version tinted the text; a marker
-  reads faster and doesn't fight the furigana/particle colours already
-  living in that cell). A small legend (`.adj-legend`, two colour swatches)
-  in the toolbar explains the two colours once, `aria-hidden` since a
-  visually-hidden note on the cell itself carries the real distinction to
-  screen readers. `js/vocab/interactions.js` (`updateAdjLegend`) shows it
-  only while the table currently under the sticky toolbar (or, while
-  searching, any still-visible match) actually has a tinted row, so it isn't
-  sitting there explaining a colour code on tables with nothing to explain.
-  No separate tag riding along in the Meaning cell — it costs no row height
-  or column width, unlike the pill this replaced.
+- **い/な-adjectives** carry a small **capsule badge** (`.adj-badge`) — 20px tall,
+  a 14% tint of `--adj-i-ink` (purple) or `--adj-na-ink` (green) behind the glyph
+  **い** / **な** in the full ink, 11.5px — placed *before the meaning* in the
+  English cell, like a dictionary's part-of-speech tag. (An earlier version put
+  a coloured bar down the Japanese cell's edge; iOS has no edge bars, and a
+  badge beside the word stole width from the narrow Japanese column, wrapping
+  words like つまらない.) The glyph is drawn by CSS from `data-badge`, so it never
+  enters the cell's text, search or speech. The dedicated tokens are deliberately
+  as saturated as `--particle`, not as muted as the accents, so a small badge reads
+  as coloured at a glance. An **irregular** adjective — a な-adjective that ends in
+  い (きれい, 嫌い, 有名), or いい / かっこいい, which conjugate as よくない — gets an
+  **outlined** badge (`.adj-badge-irr`: no fill, a 1.5px ring) and a one-line
+  footnote under its meaning (`.adj-note`, `--fs-micro`, secondary, from the row's
+  `adjNote`) like an iOS cell subtitle, so the reason is readable on touch, not
+  hidden in a tooltip. The toolbar legend (`.adj-legend`, `aria-hidden`) shows a
+  sample of each — い, な, outlined "irregular" — and `updateAdjLegend()` in
+  `js/vocab/interactions.js` shows it only while the table under the sticky toolbar
+  (or, while searching, any still-visible match) has adjectives. A visually-hidden
+  "(い-adjective)" note on the Japanese cell carries the real distinction to
+  screen readers.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on

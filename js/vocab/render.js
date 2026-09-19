@@ -146,14 +146,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // romaji is optional: sentence and word rows alike now pass their romaji
   // through here so the reveal lives on the word itself, in the same cell,
   // regardless of table type.
-  // い/な-adjective rows get a coloured bar down the cell's own left edge
-  // (see css/site.css) instead of carrying a separate label -- a
-  // legend near the toolbar (index.html) explains the two colours once
-  // instead of repeating a tag on every row. The distinction still reaches
-  // assistive tech via this visually-hidden note (color alone is never the
-  // only signal).
+  // い/な-adjective rows carry a small capsule badge before the meaning -- like
+  // a dictionary's part-of-speech tag, and out of the narrow Japanese column --
+  // a tinted い or な (the glyph is drawn by CSS from data-badge, so it never
+  // lands in the cell's text, search or speech) -- and a legend near the
+  // toolbar (index.html) explains the two colours once. An irregular one (a
+  // な-adjective that ends in い, or いい's odd conjugation) gets an *outlined*
+  // badge and a one-line footnote under the meaning (row.adjNote). The
+  // distinction still reaches assistive tech via the visually-hidden note
+  // (colour alone is never the only signal).
   function adjClass(adj) {
     return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
+  }
+  function adjBadge(row) {
+    if (row.adj !== 'i' && row.adj !== 'na') return '';
+    var na = row.adj === 'na';
+    return '<span class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + (row.adjNote ? ' adj-badge-irr' : '') +
+      '" data-badge="' + (na ? 'な' : 'い') + '" title="' + (na ? 'な' : 'い') + '-adjective' + (row.adjNote ? ' — ' + esc(row.adjNote) : '') + '" aria-hidden="true"></span>';
   }
   function adjNote(adj) {
     if (adj !== 'i' && adj !== 'na') return '';
@@ -206,8 +215,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // fixed's column-width percentages stop being respected on a cell whose own
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
-  function meaningCell(english, vocabId) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div></td>';
+  // note: an optional one-line footnote under the meaning (an irregular
+  // adjective's reason), like an iOS cell subtitle.
+  function meaningCell(english, vocabId, note, badge) {
+    return '<td><div class="meaning-cell">' + (badge || '') + '<span class="meaning-text">' + esc(english) + '</span>' + rowActions(vocabId) + '</div>' +
+      (note ? '<div class="adj-note" lang="ja">' + esc(note) + '</div>' : '') + '</td>';
   }
   // Word rows and Phrases sentence rows share this now -- both render as
   // Japanese (with a romaji reveal next to the speaker button) + English, two
@@ -215,7 +227,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, row.adjNote, adjBadge(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column

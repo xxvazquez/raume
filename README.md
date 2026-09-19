@@ -68,17 +68,20 @@ so they're easy to spot in a sentence.
   above.)
 - **Show polite** switches the verb tables between plain form and polite 〜ます.
   Only visible while the Verbs table is expanded.
-- **Adjective type** — every い- / な-adjective in the dataset has its Japanese
-  text tinted lavender / sage, so the two classes read apart at a glance
-  without a label taking up room on the row: the Adjectives table, the Taste
-  & Texture adjectives, and the stray adjective in an otherwise-noun table
-  (危険). A small legend in the toolbar explains the two colours once, but
-  only while the table currently on screen actually has tinted rows — it's
-  absent on every other table instead of explaining a code that's nowhere
-  in view. Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not い/な adjectives, so
-  they stay untinted. Driven by an `adj` field on the row; a visually-hidden
-  note on the cell carries the distinction to screen readers, and it stays
-  out of search.
+- **Adjective type** — every い- / な-adjective in the dataset carries a small
+  capsule badge before its meaning, a lavender **い** or a sage **な**, like a
+  dictionary's part-of-speech tag: the Adjectives table, the Taste & Texture
+  adjectives, and the stray adjective in an otherwise-noun table (危険). The
+  odd ones are **outlined** instead of filled, with a one-line note under the
+  meaning — a な-adjective that ends in い (きれい, 嫌い, 有名) and the
+  irregular い-adjectives いい / かっこいい (よくない). A small legend in the
+  toolbar explains the badges once, but only while the table currently on
+  screen actually has them — it's absent on every other table instead of
+  explaining a code that's nowhere in view. Mimetic words (*mochimochi*,
+  *sakusaku*) are 擬態語, not い/な adjectives, so they get no badge. Driven by
+  `adj` (`"i"` / `"na"`) and an optional `adjNote` on the row; a
+  visually-hidden note on the cell carries the distinction to screen readers,
+  and the badge is drawn by CSS so it stays out of search.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the
   reading aloud. Every built-in word/phrase has a prerendered native-voice
   clip (generated offline via VOICEVOX, see `docs/architecture.md`); anything

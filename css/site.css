@@ -180,11 +180,11 @@
      grammar cue, not decoration. Paired with bold in `.particle`. */
   --particle: #2f6fb0;
 
-  /* い/な-adjective text tint -- deliberately as saturated as --particle
+  /* い/な-adjective badge colours -- deliberately as saturated as --particle
      above, not as muted as --accent-strong/--accent-2-strong (those are
-     tuned for buttons and large fills; a dark-on-white table row needs more
-     contrast from plain --ink to actually read as "coloured" rather than
-     "black" at a glance). Purple/green, same split as the accent pair. */
+     tuned for buttons and large fills; a small badge needs more contrast
+     from plain --ink to actually read as "coloured" rather than "black" at
+     a glance). Purple/green, same split as the accent pair. */
   --adj-i-ink: #6b4fa0;
   --adj-na-ink: #2e7d52;
 
@@ -840,19 +840,18 @@ body { --switch-on: var(--section-strong); }
 .selftest-toggle.active::after,
 .polite-toggle.active::after { right: 4px; }
 .search-count { margin-left: auto; color: var(--faint); font-size: var(--fs-micro); white-space: nowrap; }
-/* Explains the い-adj/な-adj colour coding once, here, instead of repeating a
-   label on every adjective row (see .vocab td.jp.adj-i/.adj-na). Purely a
-   sighted quick-reference -- aria-hidden, since the real per-row semantics
-   are carried by a visually-hidden note in the cell itself, not by this.
+/* Explains the い/な badges (and the outlined "irregular" one) once, here,
+   instead of repeating a label on every adjective row. Purely a sighted
+   quick-reference -- aria-hidden, since the real per-row semantics are carried
+   by a visually-hidden note in the cell itself, not by this.
    JS (interactions.js updateAdjLegend) toggles the `hidden` attribute so it
    only shows on a table that actually has tinted rows -- the explicit
    `display` below would otherwise win over the browser's default
    `[hidden] { display: none }`, so it needs its own [hidden] override. */
 .adj-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
 .adj-legend[hidden] { display: none; }
-.adj-legend-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 10px; }
-.adj-legend-i { background: var(--adj-i-ink); }
-.adj-legend-na { background: var(--adj-na-ink); }
+.adj-legend .adj-badge { margin: 0 4px 0 10px; align-self: center; }
+.adj-legend .adj-badge:first-child { margin-left: 0; }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
@@ -2168,16 +2167,23 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
 
-/* い/な-adjective rows: a coloured bar down the Japanese cell's left inner
-   edge marks the distinction -- purple い-adj, green な-adj (--adj-i-ink /
-   --adj-na-ink) -- instead of tinting the word itself. Same inset-shadow
-   idiom .irregular-row already uses for its own left marker (spans the
-   cell's full height automatically -- no vertical centring to get wrong
-   against a two-line furigana+kanji cell the way a small dot would). Reading
-   the colour meaning is explained once by the legend near the toolbar
-   (index.html .adj-legend), not repeated on every row. */
-.vocab td.jp.adj-i { box-shadow: inset 2px 0 0 var(--adj-i-ink); }
-.vocab td.jp.adj-na { box-shadow: inset 2px 0 0 var(--adj-na-ink); }
+/* い/な-adjective badge: a small capsule before the meaning -- a tint of
+   purple (い-adj) or green (な-adj) with the glyph in the full ink (--adj-i-ink /
+   --adj-na-ink), drawn from data-badge so it never enters the cell's text. An
+   irregular adjective's badge is *outlined* instead of filled, and its reason
+   sits as a footnote under the meaning (.adj-note). Explained once by the
+   legend near the toolbar (index.html .adj-legend). */
+.adj-badge {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  min-width: 20px; height: 20px; padding: 0 5px; margin: 0 8px 0 0; align-self: flex-start;
+  border-radius: 10px;
+  font: 400 var(--fs-micro)/1 var(--font-ui);
+}
+.adj-badge::after { content: attr(data-badge); }
+.adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
+.adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
+.adj-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.adj-note { margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

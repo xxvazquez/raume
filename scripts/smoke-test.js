@@ -259,11 +259,26 @@ async function main() {
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
     return flat;
   })();
-  check("い-adj and な-adj mark the Japanese cell with a left bar in two different, distinctly-saturated tokens (not tinted text)", (() => {
-    const iRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i");
-    const naRule = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-na");
-    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.boxShadow)
-      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.boxShadow);
+  check("い-adj and な-adj are capsule badges in two different, distinctly-saturated tokens (no edge bar, not tinted text)", (() => {
+    const iRule = allCssRules.find(r => r.selectorText === ".adj-badge-i");
+    const naRule = allCssRules.find(r => r.selectorText === ".adj-badge-na");
+    const bar = allCssRules.find(r => r.selectorText === ".vocab td.jp.adj-i" && r.style.boxShadow);
+    return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.color)
+      && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.color) && !bar;
+  })());
+  check("each adjective row has one badge in its English cell (not in the Japanese cell's text); irregular ones are outlined with a footnote", (() => {
+    const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
+    const rows = [...adjSection.querySelectorAll("tbody tr")];
+    const badgeOk = rows.every(r => r.cells[1].querySelectorAll(".adj-badge").length === 1 && r.cells[0].querySelectorAll(".adj-badge").length === 0
+      && r.cells[1].querySelector(".adj-badge").textContent === "");
+    const irr = rows.filter(r => r.cells[1].querySelector(".adj-badge-irr"));
+    const kirei = rows.find(r => r.cells[0].textContent.includes("きれい"));
+    const ii = rows.find(r => r.cells[0].querySelector(".jpword").textContent.replace(/\s/g, "") === "いい");
+    return badgeOk && irr.length === 5 && irr.every(r => r.cells[1].querySelector(".adj-note"))
+      && kirei.classList.contains("irregular-row") === false && kirei.cells[0].classList.contains("adj-na")
+      && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
+      && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
   })());
   check("the .particle rule is blue (var(--particle)) and bold", (() => {
     const r = allCssRules.find(x => x.selectorText === ".particle");
