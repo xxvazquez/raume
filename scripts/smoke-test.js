@@ -580,6 +580,22 @@ async function main() {
   check("vocabulary page is visible on load", document.getElementById("vocabPage").hidden === false);
   check("flashcards page starts hidden", document.getElementById("flashcardsPage").hidden === true);
   check("no redundant page heading -- the nav is the only place the section is named", !document.getElementById("vocabPageTitle") && !document.querySelector("#vocabPage .page-title"));
+  check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
+    const base = allCssRules.find(r => r.selectorText === ".site-nav");
+    const phone = allCssRules.find(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)
+      && [...r.cssRules].some(x => x.selectorText === ".site-nav" && x.style.position === "fixed" && x.style.bottom === "0px"));
+    return !!base && base.style.position === "sticky" && !!phone
+      && /viewport-fit=cover/.test(document.querySelector('meta[name="viewport"]').content);
+  })());
+  check("each tab carries an icon (a CSS mask on ::before), so the JS-built nav markup is unchanged", (() => {
+    const phone = allCssRules.find(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)
+      && [...r.cssRules].some(x => x.selectorText === ".site-nav-link::before"));
+    if (!phone) return false;
+    const rules = [...phone.cssRules].map(x => x.selectorText || "");
+    return ["vocabulary", "grammar", "phrases", "travel"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
+      && rules.some(t => t.includes('data-page="flashcards"') && t.includes("::before"))
+      && document.querySelectorAll("#siteNav .site-nav-link").length === 5;
+  })());
   check("the Vocabulary nav link starts active", document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
   check("Grammar tables belong to the grammar section", [...document.querySelectorAll('.table-section[data-category="Grammar"]')].every(s => s.dataset.section === "grammar"));

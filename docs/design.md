@@ -155,8 +155,23 @@ and Help.
   nav is still top tabs, but the selected one is a **capsule** — `--section-soft`
   fill, `--section-strong` text, weight 500 — instead of a tinted block over a
   3px underline; the rest are plain secondary text. The capsule is the one place
-  a section tone is spent on the chrome. Padding tightens on phones so all five
-  still fit at 360px with no horizontal scroll.
+  a section tone is spent on the chrome. That is the layout from 641px up.
+- **On a phone (≤640px) the same `#siteNav` becomes an iOS tab bar**, pinned to the
+  bottom edge (`position: fixed`, one hairline above it): five equal tabs, an
+  icon over an 11.5px label, unselected in `--faint`, the selected one in its
+  section tone at weight 500 — no capsule. Nothing is added or removed (same
+  five links, same taps); the icons are CSS masks on `.site-nav-link::before`
+  (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
+  is untouched. `--nav-h` drops to ~0 so the sticky reference toolbar sits at
+  the very top with nothing above it, `body` gets bottom padding for the bar plus
+  `env(safe-area-inset-*)` (the meta viewport carries `viewport-fit=cover`), and a
+  running study session hides the bar and gives the space back like the rest of the
+  chrome. The table-index sheet (`z-index` 60) and its scrim (59) cover the bar.
+- **Large screen titles** — on a phone the screens that already have a title
+  (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (30px,
+  weight 600) instead of `--fs-page-title`. The reference pages still carry **no
+  page title** by design (the selected tab names the section); adding one is a
+  separate decision.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label

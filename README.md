@@ -21,7 +21,7 @@ python3 -m http.server
 
 ## The reference
 
-Five sections in the nav: **Vocabulary** (the landing page), **Grammar**,
+Five sections in the nav (on a phone it's a tab bar pinned to the bottom edge, icon over label; on a wider window it's the top row): **Vocabulary** (the landing page), **Grammar**,
 **Phrases**, **Travel**, and **Flashcards**. Vocabulary tables are grouped by
 category — Food & Ingredients, Kitchen & Dining, Numbers & Counting, Time &
 Calendar (days of the week, months, days of the month, today / tomorrow /
