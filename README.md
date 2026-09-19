@@ -23,7 +23,10 @@ python3 -m http.server
 
 Five sections in the nav: **Vocabulary** (the landing page), **Grammar**,
 **Phrases**, **Travel**, and **Flashcards**. Vocabulary tables are grouped by
-category — Food & Ingredients, Kitchen & Dining, Numbers & Counting. **Phrases**
+category — Food & Ingredients, Kitchen & Dining, Numbers & Counting, Time &
+Calendar (days of the week, months, days of the month, today / tomorrow /
+next week and the like, time of day, and clock hours and minutes — the
+irregular readings such as ついたち or よじ are tinted). **Phrases**
 is a conversational Q&A set (Self-introduction: name, job, country, age, family,
 where you live), laid out as question/answer pairs rather than sorted A–Z.
 Grammatical **particles are highlighted in blue and bold** throughout the app
@@ -101,12 +104,12 @@ so they're easy to spot in a sentence.
   Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
 - The Customize page groups tables the same way the nav does: a **Vocabulary**
-  heading over its three categories (Food & Ingredients, Kitchen & Dining,
-  Numbers & Counting), then Grammar / Phrases / Travel each as their own
+  heading over its four categories (Food & Ingredients, Kitchen & Dining,
+  Numbers & Counting, Time & Calendar), then Grammar / Phrases / Travel each as their own
   heading — every one of those a collapsible section, tinted its section's
   colour with the same marker-and-hairline treatment the vocabulary page
   itself uses, so what's a section and what's a category never reads as the
-  same thing. Collapsing Vocabulary hides its three categories at once;
+  same thing. Collapsing Vocabulary hides its four categories at once;
   opening it leaves each category individually collapsed until you open it
   too. Everything starts collapsed, and what you leave open survives a
   reload — it's remembered per item, not just for the session. Explanatory

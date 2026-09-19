@@ -189,8 +189,8 @@ and Help.
     `::before`). Both are tinted via `data-section` reading the actual
     per-section token (`--sec-vocabulary` etc.) rather than the page-global
     `--section` var, which can't tell sections apart when a page shows all of
-    them at once. A section with more than one category (Vocabulary's three)
-    is itself collapsible — closing it hides all three at once — with its
+    them at once. A section with more than one category (Vocabulary's four)
+    is itself collapsible — closing it hides all four at once — with its
     eyebrow above them; a section that's just one category sharing the
     section's own name (Grammar, Phrases, Travel) skips the redundant
     eyebrow-then-identical-row and renders as a single merged heading instead
