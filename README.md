@@ -106,10 +106,10 @@ so they're easy to spot in a sentence.
 - The Customize page groups tables the same way the nav does: a **Vocabulary**
   heading over its four categories (Food & Ingredients, Kitchen & Dining,
   Numbers & Counting, Time & Calendar), then Grammar / Phrases / Travel each as their own
-  heading — every one of those a collapsible section, tinted its section's
-  colour with the same marker-and-hairline treatment the vocabulary page
-  itself uses, so what's a section and what's a category never reads as the
-  same thing. Collapsing Vocabulary hides its four categories at once;
+  heading — every one of those a collapsible row in one white card, its name
+  in the section's colour, separated by hairlines like the reference pages'
+  lists, so what's a section and what's a category never reads as the same
+  thing. Collapsing Vocabulary hides its four categories at once;
   opening it leaves each category individually collapsed until you open it
   too. Everything starts collapsed, and what you leave open survives a
   reload — it's remembered per item, not just for the session. Explanatory

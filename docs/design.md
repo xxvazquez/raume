@@ -223,13 +223,13 @@ and Help.
   listener attached to each `<details>` in `applyDetailsState()`, not just
   held in memory — so what a reader leaves open survives an actual reload,
   and everything starts collapsed for anyone who hasn't touched it yet:
-  - **The table list** reads Section → category → table, drawn with the exact
-    chapter/subsection language the vocabulary page itself uses rather than a
-    new invented treatment: a section-level heading (`.cz-section-label`)
-    styled like `.cat-heading` (name in the section colour over a hairline
-    tinted the same), a category heading (`.cz-group-title`) styled like
-    `.section-head` (a short coloured marker bar beside the name via
-    `::before`). Both are tinted via `data-section` reading the actual
+  - **The page is on the grey ground** (`.page-customize`, like every other
+    page); content keeps its 720px reading width via `.page-customize > *`, so the
+    ground spans the sheet. Everything below is a borderless white 12px card.
+  - **The table list** reads Section → category → table as list rows: a
+    section-level heading (`.cz-section-label`) and a category heading
+    (`.cz-group-title`), each closed by an inset hairline, no marker bars. The
+    section's name takes its own tone via `data-section`, reading the actual
     per-section token (`--sec-vocabulary` etc.) rather than the page-global
     `--section` var, which can't tell sections apart when a page shows all of
     them at once. A section with more than one category (Vocabulary's four)
@@ -238,17 +238,18 @@ and Help.
     section's own name (Grammar, Phrases, Travel) skips the redundant
     eyebrow-then-identical-row and renders as a single merged heading instead
     (`.cz-group-title-solo`), sized and weighted identically to the eyebrow
-    (`--fs-subhead`/600) since both are playing the same "top of a section"
+    (`--fs-subhead`/500) since both are playing the same "top of a section"
     role and need to read as one consistent level, not two different sizes.
     The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) sit inside one
     shared card (`.cz-groups`), iOS Settings grouped-list style — each row's
-    own bottom hairline is the only separator between rows (no per-row margin,
-    no divider after the last row), instead of each row carrying its own big
-    top margin and reading as a separate floating panel.
-  - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, an
-    uppercase-micro `<summary>`) all start closed. Forms are label-over-field;
-    the parsed-ruby preview and the import result sit on `--surface`, an
-    error on `--wrong-soft`. No new tokens.
+    own bottom hairline is the only separator between rows (no divider after
+    the last row). Name fields are filled wells (`--field-fill`, no border) with
+    a plain-text **Reset**.
+  - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, a
+    sentence-case `--fs-subhead` `<summary>`) all start closed. Forms are
+    label-over-field with filled, unbordered fields; the parsed-ruby preview and
+    the import result sit on `--surface`, an error on `--wrong-soft`; the
+    buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
   - **Words you've added** is one non-collapsible card holding a search field
     + a Recently added/A–Z sort (`.cv-owned-controls`, filters and reorders
     via a plain DOM swap in `updateOwnedList()` — no full re-render, so the
@@ -266,9 +267,17 @@ and Help.
     matching pencil icon. Deleting a word asks for confirmation first, same
     as deleting a table.
   - A heading's explanatory text (the page intro, the Your vocabulary intro,
-    the import format) lives in an `.info-panel` toggled by an adjacent
-    `.info-btn` — a small circular "i", the only new icon shape this page
-    introduces — instead of sitting on the page unconditionally.
+    the import format) lives in an `.info-panel` (an unboxed footnote) toggled
+    by an adjacent `.info-btn` — a bare "i" glyph that takes the accent tint
+    while open — instead of sitting on the page unconditionally.
+- **The masthead Help page** (`.page-help`) is a quiet section label
+  (`--fs-small`, section tone, sentence case) over a white card holding that
+  section's list — no rules, no ALL-CAPS headings.
+- **Sheets** (the table-index popover / bottom sheet, the icon picker) are
+  borderless 14px surfaces with the one menu shadow; the current table in the
+  index is a soft fill, not a bar; the picker's group labels are sentence-case
+  `--fs-small`. The flashcard study prompt label is the one deliberate
+  ALL-CAPS micro-label left (`.fc-prompt-label`).
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made
