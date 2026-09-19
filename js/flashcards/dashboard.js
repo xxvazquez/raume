@@ -152,6 +152,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
+      leechesHtml() +
       "</div>" +
       "</div>" +
       (foldReview ? "" : '<div id="fcWordsToReview"></div>');
@@ -244,6 +245,35 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     return '<div class="fc-next-review fc-next-review-' + variant + '">' +
       '<span class="fc-next-review-title">' + esc(title) + "</span>" +
       (sub ? '<span class="fc-next-review-sub">' + esc(sub) + "</span>" : "") + "</div>";
+  }
+
+  // Leeches -- words that keep lapsing (see scheduling.leechWords). Shown only
+  // when there are any, so a healthy deck never sees an empty card. Two
+  // outcomes per word: Pause (the existing per-word pause -- progress and
+  // history kept, Resume in Manage) or Keep (stop flagging it for now).
+  var LEECH_SHOWN = 5;
+  function leechesHtml() {
+    var list = sched.leechWords();
+    if (!list.length) return "";
+    var idx = getVocabIndex();
+    var rows = list.filter(function (w) { return idx[w.vocabId]; });
+    if (!rows.length) return "";
+    return '<div class="fc-viz-card fc-viz-wide fc-leech-card"><h3 class="fc-viz-title">Leeches</h3>' +
+      '<p class="fc-note">Words that keep slipping out of memory. Pausing takes one out of review — its progress is kept, and you can resume it any time in Manage. Keep leaves it studied and stops flagging it for now.</p>' +
+      '<ul class="fc-leech-list">' + rows.slice(0, LEECH_SHOWN).map(function (w) {
+        var e = idx[w.vocabId];
+        var what = e.englishDisplay;
+        return '<li class="fc-leech-row">' +
+          '<div class="fc-leech-word"><span class="fc-missed-jp" lang="ja">' + e.jpInlineHtml + "</span>" +
+          '<span class="fc-missed-gloss"><span class="fc-missed-ro">' + esc(e.romajiDisplay) + '</span><span class="fc-missed-sep"> · </span><span class="fc-missed-en">' + esc(what) + "</span></span>" +
+          '<span class="fc-leech-meta">Forgotten ' + w.lapses + "× · " + esc(DIRECTION_LABEL[w.direction] || w.direction) + "</span></div>" +
+          '<div class="fc-leech-actions">' +
+          '<button type="button" class="fc-btn" data-leech-pause="' + esc(w.vocabId) + '" aria-label="Pause ' + esc(what) + '" title="Take this word out of review — progress is kept">Pause</button>' +
+          '<button type="button" class="fc-btn" data-leech-keep="' + esc(w.vocabId) + '" data-lapses="' + w.lapses + '" aria-label="Keep ' + esc(what) + ' in review" title="Keep studying it — stop flagging it for now">Keep</button>' +
+          "</div></li>";
+      }).join("") + "</ul>" +
+      (rows.length > LEECH_SHOWN ? '<p class="fc-note">+ ' + (rows.length - LEECH_SHOWN) + " more — deal with these and the next ones appear.</p>" : "") +
+      "</div>";
   }
 
   // "Missed today" -- a calm shortlist of words to revisit. One row per word:
@@ -860,6 +890,27 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     event.preventDefault();
     var btn = document.querySelector('.fc-rating-btn[data-rating="' + RATING_NAMES[idx].toLowerCase() + '"]');
     if (btn) btn.click();
+  });
+
+  // Leeches card: Pause a word (per-word pause, nothing deleted) or Keep it.
+  document.addEventListener("click", async function (event) {
+    var pause = event.target.closest && event.target.closest("[data-leech-pause]");
+    var keep = event.target.closest && event.target.closest("[data-leech-keep]");
+    if (!pause && !keep) return;
+    try {
+      if (pause) {
+        pause.disabled = true;
+        await dataOps.archiveVocab(pause.dataset.leechPause);
+        await dataOps.refreshData();
+        invalidateInsights();
+      } else {
+        store.keepLeech(keep.dataset.leechKeep, Number(keep.dataset.lapses) || 0);
+      }
+      rerender();
+    } catch (e) {
+      if (pause) pause.disabled = false;
+      window.alert("Couldn't update flashcards — " + (e.message || "check your connection and try again."));
+    }
   });
 
   // Practice a word straight from the Dashboard's "Missed today" list.

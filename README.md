@@ -238,9 +238,15 @@ streak.
   (streak, total, reviews done, estimated retention), a New → Learning → Review
   bar, a reviews-this-week chart beside a **Due next 7 days** forecast (how many
   cards come due each day, overdue folded into Today, with a "N more after that"
-  note; direction- and table-pause-aware like the queue), "Missed today", and a **Words to review**
+  note; direction- and table-pause-aware like the queue), "Missed today", a
+  **Leeches** card, and a **Words to review**
   table (words missed more than once) that carries the same column toggles as
-  the reference pages.
+  the reference pages. **Leeches** appears only when a word has been forgotten 8
+  or more times after you'd learned it (FSRS lapses, by its worst direction) —
+  it lists the word with **Pause** (the ordinary per-word pause: progress and
+  history kept, Resume in Manage) or **Keep** (leave it studied; it's flagged
+  again only after 4 more lapses, remembered on this device). Manage tags the
+  same words with a small *Leech* label.
 - **Manage** — every table by category, filterable to All / My flashcards /
   Archived. **Add table**, then **Pause table** to make it dormant (an overlay —
   the cards keep their own state; a paused table drops out of review and shows

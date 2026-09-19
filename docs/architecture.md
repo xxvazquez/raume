@@ -147,6 +147,16 @@ account push" below), browser-local, never synced themselves:
 failed to reach Supabase) and `raume-table-custom-dirty-v1` (a flag: the
 account's copy of table customisations is stale).
 
+One more, purely a UI mark: `raume-flashcards-leech-kept-v1`
+(`store.getLeechKept` / `keepLeech`) — `{ vocabId: lapses }` for leeches the
+reader chose to **Keep**, browser-local and never synced (no schema column, so
+a kept word may be flagged again on another device; nothing about a card is
+ever touched by it). Like the guest-mode flag, it has an in-memory fallback
+when `localStorage` is unavailable, so Keep still works for the pageview. The detector is `scheduling.leechWords()`: per word, the
+worst studyable card's `lapses` against `LEECH_LAPSES` (8, Anki's default),
+re-flagging a kept word after `LEECH_RETRIGGER` (4) more lapses. Pausing from
+the Leeches card is the ordinary per-word `archiveVocab`.
+
 ### Retrying a failed account push
 
 Reviews, table customisations, and custom vocabulary are all local-first --

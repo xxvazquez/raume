@@ -296,6 +296,11 @@ colour here more than anywhere else:
   above the pair. Nothing due → a single line instead of seven flat baselines;
 - **Missed today** rows get a 3px coral left rule and a coral badge — the
   attention tone used across the dashboard.
+- **Leeches** (`.fc-leech-card`, only when there is one) is a full-width card of
+  plain hairline-separated rows — word, gloss and a muted "Forgotten N× ·
+  direction" line on the left, ghost **Pause** / **Keep** buttons on the right
+  (under the word on a phone). No edge bar: it follows the iOS list rules, not
+  Missed today's coral rule. Manage's matching *Leech* tag uses `--warn-strong`.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

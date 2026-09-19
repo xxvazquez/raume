@@ -24,6 +24,7 @@ window.RaumeStudy.flashcards.store = (function () {
   var CACHE_KEY = "raume-flashcards-cache-v1";
   var GUEST_CACHE_KEY = "raume-flashcards-guest-v1";
   var MODE_KEY = "raume-flashcards-mode";
+  var LEECH_KEPT_KEY = "raume-flashcards-leech-kept-v1";
   var CACHE_SCHEMA_VERSION = 1;
 
   // Two ways to use Flashcards: signed in (Supabase is authoritative) or
@@ -50,6 +51,34 @@ window.RaumeStudy.flashcards.store = (function () {
   }
   function isGuestMode() { return !currentSession && getStoredMode() === "guest"; }
   function hasActiveSession() { return isGuestMode() || !!currentSession; }
+
+  // Leeches the reader chose to "Keep" (see scheduling.leechWords): vocabId ->
+  // the word's lapse count at that moment. Deliberately device-local and not
+  // synced -- it is only a "stop nagging me" mark, so losing it (or seeing a
+  // kept word flagged again on another device) costs nothing and never touches
+  // a card, unlike the Supabase-backed state around it. leechKeptMemory is the
+  // same-pageview fallback for when localStorage is unavailable (private
+  // browsing), so Keep still takes effect -- it just isn't remembered next visit.
+  var leechKeptMemory = {};
+  function getLeechKept() {
+    var stored = {};
+    try {
+      var raw = JSON.parse(localStorage.getItem(LEECH_KEPT_KEY) || "{}");
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) stored = raw;
+    } catch (e) {}
+    return Object.assign({}, stored, leechKeptMemory);
+  }
+  function setLeechKept(vocabId, lapses) {
+    if (lapses == null) delete leechKeptMemory[vocabId]; else leechKeptMemory[vocabId] = lapses;
+    try {
+      var stored = JSON.parse(localStorage.getItem(LEECH_KEPT_KEY) || "{}");
+      if (!stored || typeof stored !== "object" || Array.isArray(stored)) stored = {};
+      if (lapses == null) delete stored[vocabId]; else stored[vocabId] = lapses;
+      localStorage.setItem(LEECH_KEPT_KEY, JSON.stringify(stored));
+    } catch (e) {}
+  }
+  function keepLeech(vocabId, lapses) { setLeechKept(vocabId, lapses); }
+  function unkeepLeech(vocabId) { setLeechKept(vocabId, null); }
 
   function uuid() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
@@ -277,6 +306,7 @@ window.RaumeStudy.flashcards.store = (function () {
     getStoredMode: getStoredMode, setStoredMode: setStoredMode,
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,
     uuid: uuid, localDateStr: localDateStr,
+    getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
     loadCache: loadCache, saveCache: saveCache, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,

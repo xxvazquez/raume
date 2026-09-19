@@ -10,7 +10,7 @@ window.RaumeStudy.flashcards.views = (function () {
   "use strict";
 
   var fc = window.RaumeStudy.flashcards;
-  var store = fc.store, vidx = fc.vocabIndex, dataOps = fc.dataOps, dashboard = fc.dashboard;
+  var store = fc.store, vidx = fc.vocabIndex, dataOps = fc.dataOps, dashboard = fc.dashboard, sched = fc.scheduling;
   var esc = window.RaumeStudy.shared.escapeHtml;
 
   var getCache = store.getCache, hasActiveSession = store.hasActiveSession, isTablePaused = store.isTablePaused;
@@ -106,6 +106,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="fc-legend-term">Next review</span> — when the next scheduled card is due, taken straight from the FSRS schedule.</li>' +
       '<li><span class="fc-legend-term">Due next 7 days</span> — how many cards come due on each of the coming days, from the same FSRS schedule. Anything overdue is counted under Today; cards further out are summarised as "N more after that". Paused words and tables, and directions you\'ve turned off, aren\'t counted.</li>' +
       '<li><span class="fc-legend-term">Missed today</span> — words you missed in today\'s reviews, most-missed first. Click one to practice it right away.</li>' +
+      '<li><span class="fc-legend-term">Leeches</span> — words that keep slipping out of memory (forgotten 8 or more times after you\'d learned them). <span class="fc-legend-term">Pause</span> takes one out of review with its progress kept, or <span class="fc-legend-term">Keep</span> leaves it studied and stops flagging it until it slips 4 more times. Manage marks the same words with a <span class="fc-legend-term">Leech</span> tag. The card only appears when there\'s something to show.</li>' +
       '<li><span class="fc-legend-term">Words to Review</span> — words you get wrong repeatedly over time, shown as a normal vocabulary table you can sort, print, and hide columns on (the same Japanese / Furigana / English toggles as the reference pages) to quiz yourself.</li>' +
       '</ul></div>' +
       '<div class="fc-settings-section"><h3>Casual &amp; polite forms</h3>' +
@@ -173,6 +174,8 @@ window.RaumeStudy.flashcards.views = (function () {
 
   function renderManage(panel) {
     var index = getVocabIndex();
+    var leechIds = {};
+    sched.leechWords().forEach(function (w) { leechIds[w.vocabId] = true; });
     var ids = Object.keys(index);
     var filtered = ids.filter(function (id) {
       // A table paused as a unit is dormant -- it only appears under "All
@@ -285,6 +288,7 @@ window.RaumeStudy.flashcards.views = (function () {
               '<span class="fc-ro">' + esc(entry.romajiDisplay) + "</span>" +
               '<span class="fc-en">' + esc(entry.englishDisplay) + "</span>" +
               (entry.romajiUsable ? "" : '<span class="fc-tag">EN only</span>') +
+              (leechIds[id] ? '<span class="fc-tag fc-tag-leech" title="You keep forgetting this word — consider pausing it">Leech</span>' : "") +
               "</span>" +
               // No per-word action while the whole table is paused -- resume it first.
               '<span class="fc-actions">' + (tablePaused ? "" : manageActionsFor(id, state)) + "</span></div>";

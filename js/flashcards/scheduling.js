@@ -113,6 +113,27 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       return !(entry && store.isTablePaused(entry.tableId));
     });
   }
+  // Leeches: words you keep forgetting. A card "lapses" each time a card you'd
+  // already learned is rated Again, so a high count means the word isn't
+  // sticking however often it's shown. Per word (pausing is per word), by its
+  // worst studied direction. 8 lapses is Anki's default; after the reader
+  // chooses "Keep" the word stays quiet until it lapses another
+  // LEECH_RETRIGGER times (half the threshold, as Anki does).
+  var LEECH_LAPSES = 8;
+  var LEECH_RETRIGGER = 4;
+  function leechWords() {
+    var kept = store.getLeechKept();
+    var worst = {};
+    studyableCards().forEach(function (card) {
+      var lapses = card.lapses || 0;
+      var w = worst[card.vocabId];
+      if (!w || lapses > w.lapses) worst[card.vocabId] = { vocabId: card.vocabId, direction: card.direction, lapses: lapses };
+    });
+    return Object.keys(worst).map(function (id) { return worst[id]; }).filter(function (w) {
+      if (w.lapses < LEECH_LAPSES) return false;
+      return typeof kept[w.vocabId] !== "number" || w.lapses >= kept[w.vocabId] + LEECH_RETRIGGER;
+    }).sort(function (a, b) { return b.lapses - a.lapses; });
+  }
   function shuffle(arr) {
     for (var i = arr.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -222,7 +243,8 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     getScheduler: getScheduler, previewRatings: previewRatings, applyRating: applyRating,
     retrievabilityOf: retrievabilityOf, formatInterval: formatInterval,
     fsrsRowFields: fsrsRowFields,
-    activeCards: activeCards, studyableCards: studyableCards, shuffle: shuffle,
+    activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
+    LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle,
     readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday
   };

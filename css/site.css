@@ -2453,6 +2453,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-word .fc-ro { color: var(--muted); font-size: var(--fs-nav-sub); }
 .fc-manage-word .fc-en { color: var(--muted); font-size: var(--fs-nav-sub); }
 .fc-manage-word .fc-tag { color: var(--faint); font-size: var(--fs-micro); }
+.fc-manage-word .fc-tag-leech { color: var(--warn-strong); }
 .fc-manage-row .fc-actions { flex: 0 0 auto; display: flex; gap: 6px; }
 /* Per-word Add / Pause / Restore -- icon + label, mirroring the table actions.
    Add is ghosted at rest (it's the common case down a long, mostly-untouched
@@ -3096,6 +3097,19 @@ mark.fc-diff-co {
   .fc-missed-badge { margin-left: auto; }
   .fc-missed-gloss { flex-basis: 100%; order: 1; }
 }
+
+/* Leeches: one row per word -- the word and its meta on the left, Pause / Keep
+   on the right (stacked under the word on a phone). Plain hairlines between
+   rows, no edge bar. */
+.fc-leech-list { margin: 8px 0 0; padding: 0; list-style: none; }
+.fc-leech-row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  padding: 12px 0; border-top: 1px solid var(--row-line);
+}
+.fc-leech-list li:first-child { border-top: 0; }
+.fc-leech-word { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; min-width: 0; flex: 1 1 260px; }
+.fc-leech-meta { flex-basis: 100%; color: var(--muted); font-size: var(--fs-micro); }
+.fc-leech-actions { display: flex; gap: 8px; flex: 0 0 auto; }
 
 /* Words to Review -- a real, sortable, printable vocabulary table, but on the
    dashboard it should read as one more quiet card, not a full vocabulary-page

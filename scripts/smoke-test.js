@@ -1532,6 +1532,57 @@ async function main() {
     }
   })());
 
+  console.log("Flashcards: Leeches (words that keep lapsing)");
+  {
+    const fcNs = window.RaumeStudy.flashcards;
+    const sched = fcNs.scheduling;
+    const leechCard = () => [...document.querySelectorAll("#fcPanelDashboard .fc-leech-card")][0];
+    const word = sched.studyableCards()[0];
+    const wordCards = () => Object.values(fcNs.store.getCache().cards).filter(c => c.vocabId === word.vocabId);
+    const saved = wordCards().map(c => ({ c, lapses: c.lapses, active: c.active }));
+    const restore = () => {
+      saved.forEach(s => { s.c.lapses = s.lapses; s.c.active = s.active; });
+      fcNs.store.unkeepLeech(word.vocabId);
+      fcNs.store.saveCache();
+      fcNs.render();
+    };
+    try {
+      check("no leech card while nothing has lapsed much", sched.leechWords().length === 0 && !leechCard());
+      word.lapses = sched.LEECH_LAPSES - 1;
+      check("one lapse under the threshold is not a leech", sched.leechWords().length === 0);
+      word.lapses = sched.LEECH_LAPSES;
+      fcNs.render();
+      const flagged = sched.leechWords();
+      check("a card at the threshold flags its word, with that card's count", flagged.length === 1 && flagged[0].vocabId === word.vocabId && flagged[0].lapses === sched.LEECH_LAPSES);
+      check("the Leeches card lists it with the count and offers Pause and Keep", (() => {
+        const card = leechCard();
+        return !!card && /Forgotten 8×/.test(card.textContent)
+          && !!card.querySelector('[data-leech-pause="' + word.vocabId + '"]') && !!card.querySelector('[data-leech-keep="' + word.vocabId + '"]');
+      })());
+      check("Manage marks the same word with a Leech tag", (() => {
+        document.querySelector('.fc-tab[data-tab="manage"]').click();
+        const tagged = document.querySelectorAll("#fcPanelManage .fc-tag-leech").length;
+        document.querySelector('.fc-tab[data-tab="dashboard"]').click();
+        return tagged >= 1;
+      })());
+      document.querySelector("[data-leech-keep]").click();
+      await flush();
+      check("Keep clears the flag but changes nothing about the word", sched.leechWords().length === 0 && !leechCard() && word.active === true && word.lapses === sched.LEECH_LAPSES);
+      word.lapses = sched.LEECH_LAPSES + 3;
+      check("a kept word stays quiet through a few more lapses...", sched.leechWords().length === 0);
+      word.lapses = sched.LEECH_LAPSES + 4;
+      check("...and is flagged again after another four", sched.leechWords().length === 1);
+      fcNs.render();
+      document.querySelector("[data-leech-pause]").click();
+      await flush();
+      check("Pause archives the word's cards but keeps their lapse history", wordCards().every(c => c.active === false) && word.lapses === sched.LEECH_LAPSES + 4);
+      check("a paused word is no longer a leech and the card is gone", sched.leechWords().length === 0 && !leechCard());
+    } finally {
+      restore();
+    }
+    await flush(); // Pause invalidated the cached insights -- let them reload before the next section reads the dashboard
+  }
+
   console.log("Flashcards: Dashboard with cards but no review history");
   {
     const dash = document.querySelector("#fcPanelDashboard").textContent;
