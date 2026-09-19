@@ -52,9 +52,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // same comparison as the column sort buttons -- weekdays/months/numbers and
   // all -- rather than a second, subtly different sort.
   vocab.compareCellText = cmp;
-  // Arrow convention: ↓ = currently sorted A-Z (numbers low-to-high),
-  // ↑ = currently sorted Z-A (numbers high-to-low), ↕ = not the sort column.
-  const SORT_GLYPH = { asc:'↓', desc:'↑', '':'↕' };
+  // The sort icon is one static up/down chevron pair (SORT_ICON, below); which
+  // half lights up follows data-sort-dir in css/site.css: asc = lower chevron
+  // (A-Z, numbers low-to-high), desc = upper (Z-A), neither = both dim.
   vocab.sortTableFromButton=function(button){
     const table=button.closest('table');
     const tbody=table?.querySelector('tbody');
@@ -67,11 +67,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     table.querySelectorAll('.sort-button').forEach(b=>{
       b.classList.remove('active');
       b.dataset.sortDir='';
-      b.textContent=SORT_GLYPH[''];
     });
     button.classList.add('active');
     button.dataset.sortDir=dir;
-    button.textContent=SORT_GLYPH[dir];
   };
 })();
 
@@ -228,12 +226,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
-  // starts active and showing ↓ (A-Z); the others start neutral (↕).
+  // starts active and sorted A-Z; the others start neutral.
   function sortHeader(label, col, isDefault) {
     return '<th>' + label + '<button type="button" class="sort-button' + (isDefault ? ' active' : '') +
       '" data-sort-col="' + col + '" data-sort-dir="' + (isDefault ? 'asc' : '') +
-      '" aria-label="Sort ' + esc(label) + '">' + (isDefault ? '↓' : '↕') + '</button></th>';
+      '" aria-label="Sort ' + esc(label) + '">' + SORT_ICON + '</button></th>';
   }
+  var SORT_ICON = '<svg viewBox="0 0 10 14" width="9" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="sc-up" d="M2 5.2 5 2.2l3 3"/><path class="sc-down" d="M2 8.8l3 3 3-3"/></svg>';
   var PRINT_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6V2.5h8V6"/><rect x="2.5" y="6" width="13" height="7" rx="1.2"/><path d="M5 11.5h8V15.5H5Z"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
   var CHOOSE_ICON_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/><circle cx="6.5" cy="7" r="1.2"/><path d="M15 11.5 11.5 8 5 14"/></svg>';

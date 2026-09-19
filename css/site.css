@@ -202,12 +202,13 @@
   --fs-micro: 11.5px;
   --fs-subhead: 15px; /* card / section sub-headings inside Flashcards */
 
-  /* Shared tracking for every quiet uppercase micro-label (table headers,
-     the flashcard prompt label, icon-picker group labels, Customize/Help
-     section headers) -- these used to each hand-roll their own
-     letter-spacing with no reason for the differences. Weight is still the
-     tier: 500 for the smaller in-content labels, 600 for the larger
-     section-header ones (see .vocab th / .icon-picker-group-label). The
+  /* Shared tracking for every quiet uppercase micro-label (the flashcard
+     prompt label, icon-picker group labels, Customize/Help section
+     headers) -- these used to each hand-roll their own letter-spacing with
+     no reason for the differences. Weight is still the tier: 500 for the
+     smaller in-content labels, 600 for the larger section-header ones (see
+     .fc-prompt-label / .icon-picker-group-label). Table column headers are
+     not one of these any more -- see .vocab th. The
      masthead's brand kicker (.masthead-tag) is the one deliberate
      exception -- wider still, since it sits beside the wordmark rather
      than labelling content. */
@@ -1591,11 +1592,12 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   text-align: left;
   color: var(--muted);
   background: var(--paper);
-  font-size: var(--fs-table-header);
+  /* iOS list-header voice: a 13px sentence-case secondary label in a
+     44pt-tall row -- not the 11px tracked ALL-CAPS micro-label, which read
+     as fine print. */
+  font-size: var(--fs-small);
   font-weight: 500;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  padding: 6px 14px 6px 0;
+  padding: 13px 14px 11px 0;
   /* No top rule -- the .section-head hairline above already separates the
      title from the grid. The column-label rule below takes a hint of the
      section colour, tying each table to its section without colouring the
@@ -1910,17 +1912,23 @@ mark.search-hit {
   align-items: center;
   justify-content: center;
   vertical-align: middle;
-  margin-left: 5px;
-  padding: 2px;
+  margin: -8px 0 -8px 2px;   /* generous tap area without growing the header row */
+  padding: 8px 8px;
   border: 0;
   background: transparent;
   color: var(--faint);
-  font-size: var(--fs-micro);
   line-height: 1;
   cursor: pointer;
 }
 .sort-button:hover,
 .sort-button.active { color: var(--section-strong); }
+/* One chevron pair; the half matching the current direction goes full
+   strength, the other stays a ghost (both ghosted on an unsorted column),
+   like the sort indicator in iOS Files. */
+.sort-button svg path { opacity: .4; }
+.sort-button[data-sort-dir="asc"] .sc-down,
+.sort-button[data-sort-dir="desc"] .sc-up { opacity: 1; }
+.sort-button:disabled { opacity: .5; cursor: default; }
 
 /* Column visibility toggles: hide a column's (or the furigana's) text only --
    grid, rules and widths stay exactly as they were, no reflow. Scoped to

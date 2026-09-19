@@ -84,7 +84,7 @@ so they're easy to spot in a sentence.
   clip (generated offline via VOICEVOX, see `docs/architecture.md`); anything
   without one — custom/imported vocab — falls back to the browser's Web
   Speech API. The icon appears once either source is confirmed available.
-- **Sorting** — the English column sorts (↕ in its header); tables start
+- **Sorting** — the English column sorts (up/down chevron in its header); tables start
   A–Z. Japanese isn't sortable — there's no single meaningful order for
   kana/kanji the way there is for English.
 

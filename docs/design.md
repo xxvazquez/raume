@@ -114,6 +114,15 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
+- **Table column headers** (`.vocab th`) are the list's header row in the iOS
+  voice: 13px sentence-case medium-weight secondary text ("Japanese",
+  "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label
+  and Customize/Help section headers still use) in a ~44px-tall row, closed by
+  a hairline. The sort control is one up/down chevron pair (`SORT_ICON` in
+  `js/vocab/render.js`) rather than a text arrow glyph: the chevron matching the
+  current direction is full strength in the section tone, the other a ghost,
+  and both ghosted on an unsorted column, as in iOS Files. Its tap area is
+  padded out with negative margins so it stays generous without growing the row.
 - **い/な-adjective rows** get a coloured bar down the Japanese cell's left
   inner edge instead of a tag or tinted text: `--adj-i-ink` (purple) for
   **い-adj**, `--adj-na-ink` (green) for **な-adj** — dedicated tokens,
