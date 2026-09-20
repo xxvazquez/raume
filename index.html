@@ -94,44 +94,49 @@
 <section id="customizePage" class="page page-customize" hidden></section>
 <section id="helpPage" class="page page-help" hidden>
   <h2>How this works</h2>
-  <p class="help-lede">The Vocabulary, Grammar, Phrases, and Travel pages are one big reference you can read, search, and quiz yourself against. Flashcards is a separate spaced-repetition trainer built on the same words, with its own Help tab.</p>
-
-  <h3>Finding words</h3>
-  <ul>
-    <li><strong>Search</strong> matches Japanese, kana readings, romaji, and English across every section at once, best match first. Press <kbd>/</kbd> to jump to the box. Each result also shows a small <strong>+</strong> that adds that word to Flashcards (it turns into a green ✓ once it's in; tap it again to pause the word).</li>
-    <li><strong>Jump to a table</strong>, above the search box, lists every table in the current section.</li>
-    <li>The English column sorts with the <strong>up/down chevron</strong> in its header. Tables start sorted A–Z by English.</li>
-  </ul>
-
-  <h3>Reading and self-testing</h3>
-  <ul>
-    <li><strong>Furigana</strong> sits above the kanji. Hover or tap any kana to see its romaji.</li>
-    <li>Click or tap the Japanese word or sentence itself to see its full romaji reading underneath.</li>
-    <li>The <strong>Options</strong> button beside the search box holds the reading and study controls; a small dot on it means one of them is on. In it, the <strong>Japanese / Furigana / English</strong> switches hide those columns (or just the readings) in any combination — cover one side and test yourself.</li>
-    <li>The <strong>Cover answers</strong> switch blanks the English column and shows a reminder to tap a row to reveal that one answer (tap again to re-hide). It resets when you reload.</li>
-    <li>On the Verbs table (and for 好き, 嫌い, 上手, 下手) small blue chips beside the icons show the <strong>particle</strong> each word takes — <strong>を</strong> eat, <strong>に/へ</strong> go, <strong>が</strong> like. Tap or click a chip (or hover it with a mouse) to see what it marks — for 聞く, <strong>を</strong> what you listen to and <strong>に</strong> who you ask.</li>
-    <li>The <strong>Show polite</strong> switch, on verb tables, swaps the dictionary form for the 〜ます form.</li>
-    <li>Where a word is an い- or な-adjective, a small <strong>い</strong> or <strong>な</strong> badge follows it to mark how it conjugates; a legend at the foot of Options explains them whenever the table on screen actually has one. An <strong>outlined</strong> badge marks an irregular one — a な-adjective that ends in い (きれい, 嫌い, 有名) or いい, which becomes よくない — with a short note under its meaning.</li>
-    <li>The small speaker icon next to a word plays its pronunciation, using a natural native-voice recording where one exists.</li>
-    <li>Grammatical <strong>particles</strong> (は, を, から …) show in blue and bold wherever Japanese text appears, including flashcards. Hover or tap one to see how it's read (は as "wa", へ as "e").</li>
-    <li><strong>Phrases</strong> tables are laid out as question/answer pairs, in their own order rather than A-Z.</li>
-  </ul>
-
-  <h3>Getting around a section</h3>
-  <ul>
-    <li>A section opens with every table collapsed; click a title to open it (others in that category close). <strong>Expand all</strong> (in Options) opens everything at once, <strong>Collapse all</strong> closes it back down.</li>
-    <li>A section remembers which tables you left open when you navigate away and back.</li>
-    <li>The printer icon on a table prints just that table as a clean A4 sheet. <strong>Print this section</strong> and <strong>Print whole reference</strong>, in Options, do the whole section or the whole reference at once.</li>
-  </ul>
-
-  <h3>Making it yours</h3>
-  <ul>
-    <li>The eye icon at the end of a row hides words you already know; <strong>Show all</strong> brings them back.</li>
-    <li>The <strong>sliders icon</strong> in the top bar opens <strong>Customize</strong> — rename tables, change their icons and colours, reorder tables and categories, and add your own vocabulary. Everything there is collapsed by default, including Vocabulary's whole group of categories; click a heading to open it, and what you leave open stays open even after you reload the page. Explanatory text sits behind a small <strong>ⓘ</strong> button next to a heading instead of staying on the page all the time.</li>
-    <li><strong>Your vocabulary</strong> (on the Customize page) adds words the built-in tables don't have — one at a time, or a paste / CSV file of <code>japanese(furigana),romaji,english</code> (write each kanji's reading in parentheses right after it: <code>帰(かえ)る</code>). Rows that don't parse are skipped and listed. Signed in, you can also build tables of your own. Under <strong>Words you've added</strong>, each table you've touched is its own row you open to edit or delete a word (both ask for confirmation first), or delete the whole table — search and A–Z sort cover every word you've added, whichever table it's in.</li>
-    <li>A table's <strong>⋯ menu</strong> holds <strong>Choose icon…</strong> (same picker as Customize, which also sets the tile colour; a table you create picks an icon from its name until you choose one) alongside <strong>Add to flashcards</strong>, which sends every row in that table to the Flashcards trainer; add or remove individual words from Flashcards' own Manage tab.</li>
-    <li>Sign in on the Flashcards page to sync your flashcards, table customisations, and your own vocabulary across devices. Everything works signed out too, saved in this browser. Signed out, Flashcards › Settings › <strong>Back up &amp; restore</strong> saves that browser copy to a file (and restores it), since clearing site data would otherwise lose it. The <strong>person icon</strong> in the top bar carries a small dot once you're signed in — green once everything's synced, amber if you're offline or something hasn't reached your account yet (hover it for specifics). A change made offline is never lost: it's saved on this device right away and syncs automatically the next time you're connected.</li>
-  </ul>
+  <p class="help-lede">Four reference pages to read, search and quiz yourself on, plus Flashcards — spaced-repetition review of the same words, with its own Help tab. Tap a topic below.</p>
+  <div class="help-list">
+    <details class="help-group">
+      <summary><h3>Finding words</h3><span class="help-sub">Search, jump to a table, sort</span></summary>
+      <ul>
+        <li><strong>Search</strong> looks in Japanese, kana, romaji and English across every section at once, best match first. Press <kbd>/</kbd> to jump to the box.</li>
+        <li>Each result has a small <strong>+</strong> that adds the word to Flashcards (it turns into a green ✓; tap again to pause the word).</li>
+        <li><strong>Jump to a table</strong>, above the search box, lists every table in the current section.</li>
+        <li>Sort the English column with the up/down chevron in its header. Tables start A–Z.</li>
+      </ul>
+    </details>
+    <details class="help-group">
+      <summary><h3>Reading and self-testing</h3><span class="help-sub">Furigana, Options, particles, badges</span></summary>
+      <ul>
+        <li><strong>Furigana</strong> sits above the kanji. Tap any kana to see its romaji, or tap the word itself for its full romaji line.</li>
+        <li>The <strong>Options</strong> button beside the search box has switches to hide <strong>Japanese</strong>, <strong>Furigana</strong> or <strong>English</strong>, and <strong>Cover answers</strong>, which blanks the English so you can tap a row to check it (resets on reload). A dot on the button means something is switched on.</li>
+        <li><strong>Show polite</strong> (in Options, on verb tables) swaps the dictionary form for the 〜ます form.</li>
+        <li>Blue chips beside a verb (and 好き, 嫌い, 上手, 下手) show the <strong>particle</strong> it takes — tap one to see what it marks (聞く: <strong>を</strong> what you listen to, <strong>に</strong> who you ask).</li>
+        <li>A small <strong>い</strong> or <strong>な</strong> badge marks how an adjective conjugates; an outlined one is irregular (きれい, 嫌い, 有名, or いい → よくない). The legend is at the foot of Options.</li>
+        <li>The speaker icon plays a word's pronunciation. Particles (は, を, から …) show in blue bold — tap one to see how it's read (は as "wa").</li>
+        <li>Phrases are question/answer pairs, in their own order rather than A–Z.</li>
+      </ul>
+    </details>
+    <details class="help-group">
+      <summary><h3>Getting around a section</h3><span class="help-sub">Open, expand, print</span></summary>
+      <ul>
+        <li>A section opens with every table collapsed. Tap a title to open it (others in that category close), or use <strong>Expand all</strong> / <strong>Collapse all</strong> in Options.</li>
+        <li>A section remembers which tables you left open.</li>
+        <li>The printer icon on a table prints just that table as clean A4. <strong>Print this section</strong> and <strong>Print whole reference</strong>, in Options, do more.</li>
+      </ul>
+    </details>
+    <details class="help-group">
+      <summary><h3>Making it yours</h3><span class="help-sub">Hide, customize, add words, sync</span></summary>
+      <ul>
+        <li>The eye icon at the end of a row hides a word you already know; <strong>Show all</strong> brings them back.</li>
+        <li>The <strong>sliders icon</strong> in the top bar opens <strong>Customize</strong>: rename tables, change their icons and colours, reorder tables and categories, and add your own vocabulary.</li>
+        <li><strong>Your vocabulary</strong> takes one word at a time, or a paste / CSV of <code>japanese(furigana),romaji,english</code> — write each kanji's reading in brackets right after it: <code>帰(かえ)る</code>. Signed in, you can also build whole tables of your own; each word or table can be edited or deleted (both ask first).</li>
+        <li>A table's <strong>⋯ menu</strong> has <strong>Choose icon…</strong> (icon and colour — a table you create picks an icon from its name until you choose one) and <strong>Add to flashcards</strong>.</li>
+        <li>Sign in on the Flashcards page to sync flashcards, customisations and your own words across devices. Everything also works signed out, saved in this browser — <strong>Back up &amp; restore</strong> in Flashcards › Settings saves that copy to a file.</li>
+        <li>The <strong>person icon</strong> in the top bar shows a dot once you're signed in: green when everything is synced, amber if you're offline or something hasn't reached your account yet. A change made offline is saved on this device and syncs automatically.</li>
+      </ul>
+    </details>
+  </div>
 </section>
 </main>
 </div>

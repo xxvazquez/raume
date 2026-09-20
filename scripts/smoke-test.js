@@ -1345,6 +1345,10 @@ async function main() {
   check("the Help page starts hidden", document.getElementById("helpPage").hidden === true);
   helpBtn.click();
   check("clicking it reveals the Help page and hides the reference", document.getElementById("helpPage").hidden === false && document.getElementById("vocabPage").hidden === true);
+  check("Help is a short menu of four topic rows, each closed until tapped", (() => {
+    const g = [...document.querySelectorAll("#helpPage .help-group")];
+    return g.length === 4 && g.every(d => !d.open && !!d.querySelector("summary h3") && !!d.querySelector(".help-sub") && d.querySelectorAll("li").length >= 3);
+  })());
   check("its content is a real rundown, not a stub", document.querySelectorAll("#helpPage h3").length >= 3 && /Furigana/.test(document.getElementById("helpPage").textContent));
   check("no nav link is active on the Help page", !document.querySelector('#siteNav .site-nav-link.active'));
   check("the help button reflects the active state", helpBtn.classList.contains("active"));

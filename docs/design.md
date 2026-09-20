@@ -141,7 +141,9 @@ and Help.
   beneath them — the Settings and Dashboard cards, and the dashboard's Words to
   review (a synthetic table with no table id, so no tile) — stay 15px / 500 in
   `--ink`, since they title a card rather than label a list. The masthead Help
-  page is the same shape: 12px grey headers over white cards of 14px text. On a phone the grey ground
+  page is a short menu: four topic rows (`details.help-group`) in one inset-grouped
+  card — a 15px title, a one-line grey gist under it, a chevron — each closed
+  until tapped and opening to a few 14px bullets. On a phone the grey ground
   (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
   lighter band beneath it; the masthead stays white.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
@@ -362,9 +364,9 @@ and Help.
     the import format) lives in an `.info-panel` (an unboxed footnote) toggled
     by an adjacent `.info-btn` — a bare "i" glyph that takes the accent tint
     while open — instead of sitting on the page unconditionally.
-- **The masthead Help page** (`.page-help`) is a quiet section label
-  (`--fs-small`, section tone, sentence case) over a white card holding that
-  section's list — no rules, no ALL-CAPS headings.
+- **The masthead Help page** (`.page-help`) is a short menu of four disclosure
+  rows in one white card (see the type-scale note above) — no rules between
+  bullets, no ALL-CAPS headings, nothing open until tapped.
 - **Sheets** (the table-index popover / bottom sheet, the icon picker) are
   borderless 14px surfaces with the one menu shadow; the current table in the
   index is a soft fill, not a bar; the picker's group labels are sentence-case

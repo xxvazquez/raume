@@ -1563,14 +1563,28 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .page-help .help-lede {
   margin: 0 0 4px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6;
 }
-.page-help h3 {
-  margin: 22px 0 8px; padding: 0 0 0 16px;
-  font-size: 12px; font-weight: 500; color: var(--muted);
+/* Topics are iOS-style disclosure rows in one inset-grouped card: a title with a
+   one-line gist under it and a chevron, closed until tapped, so the page is a
+   short menu rather than a wall of bullets. */
+.help-list { margin-top: 18px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+.help-group + .help-group { border-top: 1px solid var(--row-line); }
+.help-group summary {
+  position: relative; display: block; cursor: pointer; list-style: none;
+  padding: 11px 40px 11px 16px;
 }
-/* Each list is one white card under its label, as on the reference pages. */
+.help-group summary::-webkit-details-marker { display: none; }
+.help-group summary::after {
+  content: ""; position: absolute; right: 18px; top: 50%; width: 7px; height: 7px; margin-top: -6px;
+  border-right: 1.6px solid var(--faint); border-bottom: 1.6px solid var(--faint);
+  transform: rotate(-45deg); transition: transform .15s ease;
+}
+.help-group[open] summary::after { transform: rotate(45deg); }
+.help-group summary:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.page-help h3 { margin: 0; padding: 0; font-size: 15px; font-weight: 400; color: var(--ink); }
+.help-sub { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-small); }
 .page-help ul {
-  margin: 0; padding: 12px 16px 12px 34px; border-radius: 12px; background: var(--paper);
-  color: var(--ink); font-size: var(--fs-nav); line-height: 1.6;
+  margin: 0; padding: 2px 16px 12px 34px;
+  color: var(--ink); font-size: var(--fs-nav); line-height: 1.55;
 }
 .page-help li { margin: 5px 0; }
 .page-help strong { font-weight: 600; }
