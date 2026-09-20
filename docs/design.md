@@ -138,8 +138,10 @@ and Help.
   12px grey label), the Customize page (category titles 12px grey, name fields
   14px, the tile on each row) and the Kana picker (each script's name is the grey
   header above one white card of rows). Card titles that carry a description
-  beneath them — the Settings and Dashboard cards — stay 15px / 500 in `--ink`,
-  since they title a card rather than label a list. On a phone the grey ground
+  beneath them — the Settings and Dashboard cards, and the dashboard's Words to
+  review (a synthetic table with no table id, so no tile) — stay 15px / 500 in
+  `--ink`, since they title a card rather than label a list. The masthead Help
+  page is the same shape: 12px grey headers over white cards of 14px text. On a phone the grey ground
   (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
   lighter band beneath it; the masthead stays white.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
