@@ -2770,11 +2770,15 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-progress::-webkit-progress-bar { background: color-mix(in srgb, var(--ink) 9%, var(--paper)); }
 .fc-progress::-webkit-progress-value { background: var(--accent-strong); border-radius: 2px; transition: width .25s ease; }
 .fc-progress::-moz-progress-bar { background: var(--accent-strong); border-radius: 2px; }
-/* A quiet reminder of the direction, hugging the prompt it introduces -- the
-   prompt is the thing to read, not this. */
-.fc-prompt-label { color: var(--muted); font-size: var(--fs-small); margin-bottom: 6px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
+/* The Japanese word's reading, shown only once checked and only on
+   Japanese -> English cards -- the other Japanese-prompt direction
+   (Japanese -> Romaji) already tests the reading itself, so restating it
+   here would just repeat that answer. Hidden via the `hidden` attribute
+   (set in dashboard.js), not display/visibility, so it takes no layout
+   space at all when it doesn't apply. */
+.fc-prompt-reading { font-size: 13px; color: var(--muted); text-align: center; margin: -14px 0 20px; }
 .fc-answer-form { display: flex; gap: 8px; width: 78%; max-width: 380px; margin: 0 0 22px; }
 /* A bare underline, not a boxed/filled field -- the approved design's whole
    point is that answering shows nothing but the prompt and this one quiet
@@ -2791,6 +2795,12 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    focused (so a phone's on-screen keyboard doesn't drop between cards) but
    quietened: the rating row below is the live control now. */
 .fc-answer-form input.fc-answer-locked { color: var(--muted); }
+/* The field's whole row collapses once checked -- the "You wrote" line in
+   the stage below now carries what you typed, so the field itself doesn't
+   need to stay visible, just present (opacity/max-height, never
+   display/visibility, so the input stays focused and a phone's on-screen
+   keyboard doesn't close). */
+.fc-answer-form.fc-answer-form-checked { max-height: 0; margin: 0; opacity: 0; overflow: hidden; pointer-events: none; }
 /* One-shot wash of the whole card in the study-feedback tone when a check
    lands -- held for a beat, then faded out; gone by the time you rate.
    (--right-soft / --wrong-soft are too near paper in light mode to register,
@@ -2814,30 +2824,33 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    -- the tag and stage panel need the full width to centre their own content
    in, the way the approved design shows them. */
 .fc-review-verdict { align-self: stretch; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
-/* The verdict is one quiet line of text with a small mark -- no pill. The field
-   above already shows what you typed; the ANSWER below is the thing to read. */
-.fc-verdict-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--font-ui); font-size: 13px; font-weight: 500;
-  margin-bottom: 8px; color: var(--muted);
+/* The verdict is a small coloured mark alone -- no text, no pill. The
+   "You wrote" line below already says what happened; this just tells you
+   which way it went at a glance. */
+.fc-verdict-badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; margin-bottom: 8px;
 }
-.fc-verdict-ok .fc-verdict-tag { color: var(--right-strong); }
-.fc-verdict-bad .fc-verdict-tag svg { color: var(--wrong); }
+.fc-verdict-badge svg { width: 13px; height: 13px; }
+.fc-verdict-badge-ok { background: var(--right-soft); color: var(--right-strong); }
+.fc-verdict-badge-almost { background: var(--fc-hard-soft); color: var(--fc-hard-strong); }
+.fc-verdict-badge-bad { background: var(--wrong-soft); color: var(--wrong-strong); }
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
 .fc-stage { align-self: stretch; padding: 0 0 10px; margin-bottom: 2px; }
 .fc-stage-expected { font: 600 30px/1.25 var(--font-ui); letter-spacing: -.01em; color: var(--ink); margin-bottom: 4px; }
-/* Wrong answer: the ANSWER is the focus -- big, in ink, first thing the eye lands
-   on. What you typed sits under it, small and quiet (no red), so nothing competes. */
-.fc-stage-compare { display: grid; gap: 10px; margin-bottom: 6px; }
+/* Wrong answer: the ANSWER is the focus -- big, in ink, first thing the eye
+   lands on. What you typed is one quiet secondary line below it (the wrong
+   word struck through), never a competing red banner. */
+.fc-stage-compare { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 6px; }
 .fc-answer-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .fc-answer-label { font: 400 12px/1.2 var(--font-ui); color: var(--faint); }
 .fc-answer-text { font: 400 16px/1.3 var(--font-ui); }
-.fc-answer-you .fc-answer-text { color: var(--muted); }
 .fc-answer-right .fc-answer-text { font-size: clamp(22px, 7vw, 30px); overflow-wrap: anywhere; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.fc-stage-typed { font-size: 12px; color: var(--muted); opacity: .8; }
+.fc-stage-typed s { text-decoration-color: var(--wrong); opacity: .85; }
 .fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
 .fc-review-dynamic { align-self: stretch; }
-.fc-diff-arrow { color: var(--faint); padding: 0 2px; }
 mark.fc-diff-you {
   background: transparent; color: var(--wrong-strong); text-decoration: underline;
   text-decoration-color: var(--wrong); text-decoration-thickness: 1.5px; text-underline-offset: 3px; font-weight: 500;
@@ -2846,49 +2859,41 @@ mark.fc-diff-co {
   background: color-mix(in srgb, var(--right) 16%, var(--paper)); color: inherit;
   border-radius: 4px; padding: 0 1px; font-weight: inherit; box-shadow: none;
 }
-.fc-diff-note { font-size: var(--fs-small); color: var(--muted); margin: 0 0 18px; }
-.fc-diff-note b { color: var(--ink); font-weight: 600; }
+.fc-diff-note { font-size: 11px; color: var(--muted); opacity: .75; margin: 4px 0 0; }
+.fc-diff-note b { color: var(--ink); font-weight: 600; opacity: 1; }
 
-/* Rating row: no outer box at all -- just the four buttons, transparent,
-   with a thin divider between them, floating directly on the card the way
-   the approved design shows it. Shared by the vocabulary word card and
-   kana.js's review card (which reuses every .fc-review-* / .fc-rating-*
-   class here -- see the note further down). A tone-coloured key chip
-   carries all the colour; nothing else on the row does. */
-/* One iOS segmented control of four cells -- a grey track, the usual choice
-   raised on the white thumb (the same component as everywhere else). No dark or
-   coloured fills, so nothing pulls the eye off the answer above. */
+/* Rating row: no pill, no track, no borders -- four quiet text actions in a
+   row, coloured only by their own label text, a hairline divider marking
+   them off from the answer above. Reads as a native iOS text-action row,
+   not four buttons. Shared by the vocabulary word card and kana.js's review
+   card (which reuses every .fc-review-* / .fc-rating-* class here -- see
+   the note further down). */
 .fc-rating-row {
-  align-self: stretch; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
-  margin-top: 12px; padding: 2px; background: var(--seg-track); border-radius: 12px;
+  align-self: stretch; width: 100%; display: flex;
+  margin-top: 26px; padding-top: 4px; border-top: 0.5px solid var(--line);
 }
 .fc-rating-btn {
-  position: relative; appearance: none; border: 0; border-radius: 10px; min-height: 54px; padding: 8px 2px;
+  flex: 1; appearance: none; border: 0; border-radius: 10px; padding: 10px 2px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  text-align: center; cursor: pointer; color: var(--ink); background: transparent;
-  transition: background .12s ease;
+  text-align: center; cursor: pointer; background: transparent;
+  transition: background .12s ease, opacity .12s ease;
 }
-.fc-rating-btn:active { opacity: .7; }
-.fc-rating-btn .fc-rating-name { display: block; font: 500 14px/1.2 var(--font-ui); color: inherit; }
-.fc-rating-btn .fc-rating-interval { display: block; font-size: 12px; color: inherit; opacity: .65; }
-/* The 1-4 key hints are for a hardware keyboard: only where there's a hover. */
-.fc-rating-btn .fc-rating-key {
-  display: none; position: absolute; top: 6px; left: 8px; min-width: 13px; padding: 1px 5px;
-  align-items: center; justify-content: center; border-radius: 4px;
-  font-family: var(--font-ui); font-size: 10.5px; font-weight: 600; line-height: 1.5;
-  font-variant-numeric: tabular-nums;
-}
-@media (hover: hover) and (pointer: fine) { .fc-rating-btn .fc-rating-key { display: inline-flex; } }
-.fc-rating-btn[data-rating="again"] .fc-rating-key { background: var(--wrong-soft); color: var(--wrong-strong); }
-.fc-rating-btn[data-rating="hard"] .fc-rating-key { background: var(--fc-hard-soft); color: var(--fc-hard-strong); }
-.fc-rating-btn[data-rating="good"] .fc-rating-key { background: var(--right-soft); color: var(--right-strong); }
-.fc-rating-btn[data-rating="easy"] .fc-rating-key { background: var(--accent-soft); color: var(--accent-strong); }
-.fc-rating-btn:hover:not([disabled]) { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.fc-rating-btn:hover:not([disabled]) { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.fc-rating-btn:active { opacity: .6; }
+.fc-rating-btn .fc-rating-name { display: block; font: 600 12px/1.2 var(--font-ui); color: inherit; }
+.fc-rating-btn .fc-rating-interval { display: block; font-size: 10px; color: var(--muted); opacity: .75; font-weight: 400; }
+.fc-rating-btn[data-rating="again"] .fc-rating-name { color: var(--wrong-strong); }
+.fc-rating-btn[data-rating="hard"] .fc-rating-name { color: var(--fc-hard-strong); }
+.fc-rating-btn[data-rating="good"] .fc-rating-name { color: var(--right-strong); }
+.fc-rating-btn[data-rating="easy"] .fc-rating-name { color: var(--accent-strong); }
 .fc-rating-btn[disabled] { opacity: .45; cursor: not-allowed; }
-/* The usual choice (Good after a right answer, Again after a miss) is the raised
-   thumb. */
-.fc-rating-row:not(.fc-rating-row-missed) .fc-rating-btn[data-rating="good"],
-.fc-rating-row-missed .fc-rating-btn[data-rating="again"] { background: var(--seg-thumb); }
+/* The usual choice (Good after a right answer, Again after a miss) stays
+   full-strength and a touch bolder; the other three sit at reduced -- not
+   faint -- opacity, so they read as available, just not the default pick. */
+.fc-rating-row:not(.fc-rating-row-missed) .fc-rating-btn:not([data-rating="good"]),
+.fc-rating-row-missed .fc-rating-btn:not([data-rating="again"]) { opacity: .62; }
+.fc-rating-row:not(.fc-rating-row-missed) .fc-rating-btn[data-rating="good"] .fc-rating-name,
+.fc-rating-row-missed .fc-rating-btn[data-rating="again"] .fc-rating-name { font-weight: 700; }
 .fc-session-done { text-align: center; padding: 40px 16px; color: var(--muted); }
 .fc-session-done-title { margin: 0 0 8px; font-size: var(--fs-section-title); color: var(--ink); font-weight: 500; }
 .fc-session-done-stats { margin: 0 0 4px; font-size: var(--fs-nav-sub); color: var(--muted); }

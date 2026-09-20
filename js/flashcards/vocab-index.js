@@ -226,7 +226,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var typed = String(typedRaw == null ? "" : typedRaw).trim();
     if (!isRomajiTarget) {
-      return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "", near: false };
+      return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "", near: false, marked: false };
     }
     var correctDisplay = closestRomajiDisplay(entry, normalizeAnswer(typed, true));
     var aligned = alignChars(String(correctDisplay || "").toLowerCase(), typed.toLowerCase());
@@ -251,7 +251,8 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       correctHtml: marked ? wordDiffHtml(pairs, "co") : esc(String(correctDisplay || "")),
       note: note,
       // Exactly one letter wrong / missing / extra: a typo, not a different word.
-      near: !!typed && bad.length === 1
+      near: !!typed && bad.length === 1,
+      marked: marked
     };
   }
 

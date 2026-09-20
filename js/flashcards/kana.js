@@ -339,10 +339,10 @@ window.RaumeStudy.flashcards.kana = (function () {
 
   function ratingRowHtml(missed) {
     return '<div class="fc-rating-row' + (missed ? " fc-rating-row-missed" : "") + '">' +
-      RATING_NAMES.map(function (name, i) {
+      RATING_NAMES.map(function (name) {
         var pr = session.preview[name];
         return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '">' +
-          '<span class="fc-rating-key">' + (i + 1) + '</span><span class="fc-rating-name">' + name +
+          '<span class="fc-rating-name">' + name +
           '</span><span class="fc-rating-interval">' + pr.intervalLabel + "</span></button>";
       }).join("") + "</div>";
   }
@@ -367,12 +367,12 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<button type="button" class="fc-session-exit" id="fcKanaEnd">End session</button>' +
       '<span class="fc-review-progress"></span></div>' +
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
-      '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
       // r2k wants kana in the field -- lang is set per card in syncReviewCard so
       // a system IME picks the right keyboard. No visible Check button -- Enter
       // (or a mobile keyboard's own Go/submit action) checks, same as the word
-      // card (js/flashcards/dashboard.js).
+      // card (js/flashcards/dashboard.js). The placeholder alone (Kana…/
+      // Romaji…) says what to type -- no separate direction label above it.
       '<form class="fc-answer-form" id="fcKanaForm">' +
       '<input id="fcKanaInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
       '</form>' +
@@ -402,8 +402,6 @@ window.RaumeStudy.flashcards.kana = (function () {
       DIR_LABEL[unit.dir] + " · " + (session.index + 1) + " / " + session.queue.length;
     var bar = shell.querySelector(".fc-progress");
     if (bar) { bar.max = session.queue.length; bar.value = session.index; }
-    shell.querySelector(".fc-prompt-label").textContent = r2k ? "Type the kana" : "Type the romaji reading";
-
     var promptEl = shell.querySelector(".fc-prompt");
     if (r2k) {
       promptEl.className = "fc-prompt fc-prompt-romaji";
@@ -423,30 +421,37 @@ window.RaumeStudy.flashcards.kana = (function () {
     input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));
     input.value = session.userAnswer || "";
 
+    var form = shell.querySelector("#fcKanaForm");
     var dyn = shell.querySelector(".fc-review-dynamic");
 
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
+      if (form) form.classList.remove("fc-answer-form-checked");
       dyn.innerHTML = "";
       return true;
     }
 
+    // Checked: the field collapses -- the "You wrote" line below now carries
+    // what you typed -- but stays in the DOM and focused, so a phone's
+    // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
+    if (form) form.classList.add("fc-answer-form-checked");
     var expected = r2k ? item.kana : item.romaji;
-    // Same merged reveal as the vocabulary word card: the prompt recedes,
-    // a compact tag carries the verdict, and one "stage" panel holds either
-    // the restated answer (correct) or a plain typed-vs-correct pair (wrong
-    // -- kana/romaji typos aren't diffed letter-by-letter here the way a
-    // romaji vocabulary answer is, just shown side by side).
+    var typedRaw = session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "";
+    // Same merged reveal as the vocabulary word card: an icon-only verdict,
+    // the ANSWER big and first, what you typed a quiet struck-through line
+    // below it (kana/romaji typos aren't diffed letter-by-letter here the
+    // way a romaji vocabulary answer is, just shown plain).
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</div>"
-      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div></div>";
+      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>" +
+          '<div class="fc-stage-typed">You wrote <s' + (r2k ? ' lang="ja"' : "") + ">" + esc(typedRaw || "(nothing)") + "</s></div></div>";
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never
       // goes anywhere once checked, so echoing it again just below was
       // showing the same word twice on screen at once.
-      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Not quite") + "</span>" +
+      '<span class="fc-verdict-badge fc-verdict-badge-' + (session.correct ? "ok" : "bad") + '">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + "</span>" +
       '<div class="fc-stage">' + stageHtml + "</div>" +
       ratingRowHtml(session.correct === false) +
       "</div>";

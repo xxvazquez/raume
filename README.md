@@ -231,26 +231,31 @@ streak.
 - The card is a **persistent shell** — the answer field is the same element from
   the first card to the last and stays focused through check → rate → next, so a
   phone's on-screen keyboard doesn't close between cards.
-- Answering is deliberately quiet: just the Japanese prompt and a plain
-  underline field, no visible Check button — **Enter** (or a mobile keyboard's
-  own Go/submit action) checks, **1–4** rates. Once checked, the prompt recedes
-  to a small reminder and the card washes once in the matching tone.
+- Answering is deliberately quiet: the placeholder (English…/Romaji…) is the
+  only cue for what to type, no separate direction label and no visible Check
+  button — **Enter** (or a mobile keyboard's own Go/submit action) checks,
+  **1–4** rates. A kanji prompt always carries furigana; Japanese → English
+  cards also reveal the reading in small type right under the word once
+  checked, since that's the one direction where neither the prompt nor the
+  answer already shows it.
 - The study card is deliberately calm — the **answer** is the only large thing
-  on it. The verdict is one quiet line of text (Correct / Almost / Not quite) with
-  a small mark, no pill or banner; what you typed stays in the field above (muted),
-  and a near-miss marks the letter that differs with a one-line note ("1 letter
-  missing · a"); the field you *weren't* tested on sits under the answer. The four
-  ratings are one iOS segmented control (grey track, the usual choice raised on
-  the white thumb — Good after a right answer, Again after a miss), with no dark
-  or coloured buttons to pull the eye. The card stays anchored near the top so the
-  prompt never jumps when the answer appears, and a thin bar shows session progress.
+  on it. The verdict is an icon alone (a check, a caution triangle for a
+  one-letter near-miss, or an ✕), no text and no banner; the answer field
+  collapses out of the way and what you typed becomes one quiet secondary
+  line below the answer, the wrong part struck through, with a near-miss's
+  one-line note underneath it ("1 letter missing · a"); the field you
+  *weren't* tested on sits under that. The four ratings are a plain text
+  action row — Again / Hard / Good / Easy, each coloured only in its own
+  label, no pills or fills — with a hairline above marking them off from the
+  card. The card stays anchored near the top so the prompt never jumps when
+  the answer appears, and a thin bar shows session progress.
 - A wrong romaji answer (Japanese→Romaji, English→Romaji) shows exactly which
   letters were off — `kaeramasu → kaerimasu`, only the mismatched letters
   marked — compared against whichever accepted spelling is the closest match.
-  Other directions just show what you typed against the correct answer, plain.
-- The rating row is one compact strip — Again / Hard / Good / Easy, each a
-  tone-coloured digit chip rather than four separate tiles — and after a wrong
-  answer Good/Easy dim so the honest rating reads first.
+  Other directions just show what you typed against the correct answer, struck
+  through.
+- After a wrong answer, Good/Easy sit at reduced opacity and Again/Hard read
+  bold, so the honest rating reads first — still one tap away for a typo.
 - The word's pronunciation plays automatically the moment the answer reveals
   (every direction gets one eventually, including the two where the Japanese
   only appears in that reveal, not the prompt) — same pronunciation source as

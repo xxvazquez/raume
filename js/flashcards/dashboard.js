@@ -43,6 +43,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // (js/vocab/render.js), just two glyphs, kept local since nothing else uses them.
   var VERDICT_OK_ICON = '<svg width="10" height="10" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
   var VERDICT_BAD_ICON = '<svg width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
+  // A near-miss (exactly one letter off) reads as a caution, not a flat pass
+  // or fail -- same stroke style as the two icons above.
+  var VERDICT_ALMOST_ICON = '<svg width="11" height="11" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5L16 15.5H2z"/><path d="M9 7.2v3.4"/><path d="M9 13.1v.1"/></svg>';
 
   // The Dashboard is a snapshot -- if you sit on it while a learning step's
   // due time passes, "Study now" should light up on its own rather than
@@ -693,11 +696,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<button type="button" class="fc-session-exit" id="fcEndSession">End session</button>' +
       '<span class="fc-review-progress"></span></div>' +
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
-      '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
+      '<div class="fc-prompt-reading" hidden></div>' +
       // No visible Check button -- Enter (or a mobile keyboard's own Go/
       // submit action) checks, same as the keyboard shortcut comment below
-      // documents. One quiet input is the whole "answering" screen.
+      // documents. One quiet input is the whole "answering" screen. The
+      // placeholder alone (English…/Romaji…) says what to type -- no
+      // separate direction label needed above it.
       '<form class="fc-answer-form" id="fcAnswerForm">' +
       '<input id="fcAnswerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
       '</form>' +
@@ -730,7 +735,6 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       DIRECTION_LABEL[card.direction] + " · " + (session.index + 1) + " / " + session.queue.length;
     var bar = shell.querySelector(".fc-progress");
     if (bar) { bar.max = session.queue.length; bar.value = session.index; }
-    shell.querySelector(".fc-prompt-label").textContent = askLabelFor(card.direction);
     var promptEl = shell.querySelector(".fc-prompt");
     if (prompt.lang) promptEl.setAttribute("lang", "ja"); else promptEl.removeAttribute("lang");
     // No click listener wired here on purpose -- js/vocab/interactions.js
@@ -743,57 +747,73 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // speak()'s own comment already warns about, just self-inflicted.
     promptEl.innerHTML = prompt.html || esc(prompt.text);
 
+    // The reading, right under the word -- only Japanese -> English needs it
+    // (Japanese -> Romaji already tests the reading itself), and only once
+    // checked, so it can't be used to dodge the meaning question above it.
+    var readingEl = shell.querySelector(".fc-prompt-reading");
+    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en";
+    readingEl.hidden = !showReading;
+    readingEl.textContent = showReading ? entry.jpReading : "";
+
     var input = shell.querySelector("#fcAnswerInput");
     // Name the field with the prompt it belongs to, so a screen-reader user
     // dropped onto it between cards knows what they're answering.
     input.setAttribute("aria-label", askLabelFor(card.direction) + ": " + (prompt.text || entry.jpPlain));
     input.placeholder = answerPlaceholderFor(card.direction);
     input.value = session.userAnswer || "";
+    var form = shell.querySelector("#fcAnswerForm");
     var dyn = shell.querySelector(".fc-review-dynamic");
 
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
+      if (form) form.classList.remove("fc-answer-form-checked");
       dyn.innerHTML = "";
       return true;
     }
 
-    // Checked: the field is inert now (rate with the buttons or 1-4) -- keep it
-    // in the DOM and styled-quiet rather than disabled, so it holds focus and
-    // the keyboard stays put for the next card.
+    // Checked: the field collapses -- the "You wrote" line below now carries
+    // what you typed -- but stays in the DOM and focused, so a phone's
+    // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
+    if (form) form.classList.add("fc-answer-form-checked");
     var expected = expectedDisplayFor(entry, card.direction);
     // Wrong answers get a real letter-level comparison (romaji targets) or a
     // plain typed-vs-correct pair (English targets, which accept several
     // synonyms -- diffing characters against just one of them isn't fair).
     // Correct answers need none of that -- just the answer, once, restated.
     var cmp = session.correct ? null : answerCompareHtml(entry, card.direction, session.userAnswer);
-    // Two labelled lines, not "typed -> correct": what you said (quiet, red only
-    // on the text) and the answer (the big one). A single letter off reads
-    // "Almost"; anything else is honestly "Not quite".
+    // The ANSWER is the focus -- big, first thing the eye lands on. What you
+    // typed is one quiet line below it: the romaji diff already marks the
+    // bad letters (cmp.marked), so that stays plain; a fully different or
+    // English-target answer gets struck through instead, since there's
+    // nothing else marking it as wrong. A single letter off is "Almost";
+    // anything else is "Not quite" -- the icon above carries that, not text.
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
-      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div></div>" +
-          (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "");
-    var verdictText = session.correct ? "Correct" : (cmp.near ? "Almost" : "Not quite");
+      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
+          '<div class="fc-stage-typed">You wrote ' + (cmp.marked ? cmp.youHtml : "<s>" + cmp.youHtml + "</s>") + "</div>" +
+          (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
+    var verdictKind = session.correct ? "ok" : (cmp.near ? "almost" : "bad");
+    var verdictIcon = verdictKind === "ok" ? VERDICT_OK_ICON : (verdictKind === "almost" ? VERDICT_ALMOST_ICON : VERDICT_BAD_ICON);
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never
       // goes anywhere once checked, so echoing it again just below was
       // showing the same word twice on screen at once.
-      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + verdictText + "</span>" +
+      '<span class="fc-verdict-badge fc-verdict-badge-' + verdictKind + '">' + verdictIcon + "</span>" +
       '<div class="fc-stage">' + stageHtml +
-        (String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + esc(context.value) + "</div>") + "</div>" +
+        (card.direction === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + esc(context.value) + "</div>") + "</div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
-      // so Good / Easy are dimmed -- still one click away (typos happen), just
-      // not the default read.
-      '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name, i) {
+      // so Good / Easy sit at reduced opacity -- still one click away (typos
+      // happen), just not the default read.
+      '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name) {
         var p = session.preview[name];
-        return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-key">' + (i + 1) + '</span><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
+        return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
       }).join("") + "</div></div>";
 
     var resultEl = dyn.querySelector(".fc-review-verdict");
     if (resultEl) resultEl.setAttribute("aria-label",
-      (session.correct ? "Correct." : "Not quite.") +
+      (session.correct ? "Correct." : (cmp.near ? "Almost." : "Not quite.")) +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
       " " + context.label + ": " + context.value + "." +
       " Answer: " + expected + ".");

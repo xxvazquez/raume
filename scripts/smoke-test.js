@@ -436,13 +436,12 @@ async function main() {
   check("all four rating buttons are tone-distinct (regression: Good and Easy used to share one color, Hard had none)", (() => {
     const ratings = ["again", "hard", "good", "easy"];
     const styleFor = (sel) => { const r = allCssRules.find(x => x.selectorText === sel); return r && r.style; };
-    // The tone now lives entirely on the key chip (background + text colour) --
-    // the row itself is neutral so it reads as one compact control.
-    const keyBg = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-key')?.background);
-    const keyColors = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-key')?.color);
+    // The tone lives on the rating's own label text now -- no key chip, no
+    // pill, just a coloured word in an otherwise plain text-action row.
+    const nameColors = ratings.map(r => styleFor('.fc-rating-btn[data-rating="' + r + '"] .fc-rating-name')?.color);
     const allSet = (arr) => arr.every(Boolean);
     const allDistinct = (arr) => new Set(arr).size === arr.length;
-    return allSet(keyBg) && allDistinct(keyBg) && allSet(keyColors) && allDistinct(keyColors);
+    return allSet(nameColors) && allDistinct(nameColors);
   })());
 
   console.log("Speech: pronunciation playback (Web Speech API)");
@@ -1855,32 +1854,40 @@ async function main() {
     const res = document.querySelector(".fc-review-verdict");
     const al = res && res.getAttribute("aria-label") || "";
     return !!res && res.getAttribute("tabindex") === "-1"
-      && /^(Correct|Not quite)\./.test(al) && /Answer: .+\.$/.test(al);
+      && /^(Correct|Almost|Not quite)\./.test(al) && /Answer: .+\.$/.test(al);
   })());
   check("the reveal doesn't repeat the prompt -- the original above is still there", (() => {
     return document.querySelectorAll(".fc-review-card .fc-prompt-small").length === 0
       && document.querySelectorAll(".fc-review-card .fc-prompt").length === 1;
   })());
-  check("the reveal also shows one field of context (meaning/reading), not just the answer", (() => {
+  check("the reveal shows one field of context (meaning/reading), not just the answer -- the reading sits under the word for Japanese -> English, the meaning line under the answer for the other three directions", (() => {
+    const direction = (document.querySelector(".fc-review-progress") || {}).textContent || "";
+    if (direction.indexOf("Japanese → English") === 0) {
+      const readingEl = document.querySelector(".fc-prompt-reading");
+      return !!readingEl && !readingEl.hidden && readingEl.textContent.trim().length > 0;
+    }
     const meaningEl = document.querySelector(".fc-stage-meaning");
     return !!meaningEl && meaningEl.textContent.trim().length > 0;
   })());
-  check("the verdict is a compact badge, not an oversized word -- feedback stays out of the way", (() => {
-    const tag = document.querySelector(".fc-verdict-tag");
+  check("the verdict is an icon-only badge, not a text word -- feedback stays out of the way", (() => {
+    const badge = document.querySelector(".fc-verdict-badge");
     // jsdom doesn't reliably resolve a var()-bearing computed style through a
     // shorthand property, so (as elsewhere in this file) check the declared
     // rule itself rather than getComputedStyle.
-    const rule = allCssRules.find(r => r.selectorText === ".fc-verdict-tag");
-    return !!tag && /^(Correct|Almost|Not quite)$/.test(tag.textContent)
-      && !!rule && parseFloat(rule.style.fontSize) <= 13;
+    const rule = allCssRules.find(r => r.selectorText === ".fc-verdict-badge");
+    return !!badge && badge.textContent.trim() === "" && !!badge.querySelector("svg")
+      && !!rule && parseFloat(rule.style.width) <= 30;
   })());
   check("every rating button carries the data-rating the tone-coding CSS keys off", (() => {
     const got = [...document.querySelectorAll('.fc-rating-btn')].map(b => b.dataset.rating);
     return JSON.stringify(got) === JSON.stringify(["again", "hard", "good", "easy"]);
   })());
-  check("the 1-4 key hint is a real coloured chip, not near-invisible micro text", (() => {
-    const rule = allCssRules.find(r => r.selectorText === '.fc-rating-btn[data-rating="again"] .fc-rating-key');
-    return !!rule && /var\(--wrong-soft\)/.test(rule.style.background);
+  check("the rating row has no separate key-hint chip -- the label text itself carries the colour now", (() => {
+    return document.querySelectorAll(".fc-rating-key").length === 0;
+  })());
+  check("what you typed shows as a quiet secondary line, struck through, below the big answer", (() => {
+    const typedEl = document.querySelector(".fc-stage-typed");
+    return !!typedEl && /you wrote/i.test(typedEl.textContent) && !!typedEl.querySelector("s, mark.fc-diff-you");
   })());
   check("a wrong answer marks only the letters that differ, not the whole word", (() => {
     // "definitely-not-right" is wrong regardless of direction, so .fc-stage-compare

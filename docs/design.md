@@ -24,28 +24,41 @@ system, and the sections below cover each part of it.
   the one ALL-CAPS label left is the masthead's `JAPANESE REFERENCE` kicker
   (tracked wide, a brand mark rather than a label). Deliberate literal sizes
   remain only where a token would be wrong: the prompt and kana glyphs on the
-  review card, the verdict tag (a test reads its declared size) and tiny
+  review card, the verdict badge (a test reads its declared size) and tiny
   chips. The sole exception is a **particle** (`.particle`,
   700 + `--particle` blue): a grammar signal that needs to jump out of a
   sentence at a glance, and colour alone wasn't enough against Japanese text.
 - On the review card the prompt is the anchor — 26px, the largest text on the
-  card, with the direction label (`.fc-prompt-label`) faint and tucked right
-  above it. It reads as the anchor from contrast, not sheer size: once
-  checked, the prompt recedes to a small, muted `.fc-prompt-small` reminder —
-  still legible, no longer the focus — and the verdict ("Correct" / "Almost" /
-  "Not quite") is one quiet line of text with a small mark — never a pill or a
-  filled block — so the answer beneath it (30px, `--ink`) is the one thing to read.
-  A miss is never red-washed: the card flash is a 5% tint and the ✕ alone carries
-  the coral. The ratings are the standard segmented control (`--seg-track` with the
-  usual choice on `--seg-thumb`), the card is top-anchored (no re-centring when the
-  answer drops in), and a `<progress>` bar under the meta line shows the session. On a phone the chrome (meta line,
-  padding, rating row, the "stage" panel) tightens but the prompt keeps its
-  full size and air. Past 700px the reading text you rate from (the stage
-  panel, rating labels) steps up a size off the shared `--fs-*` scale — but
-  not the prompt, which stays 26px at every width; a roomier window doesn't
-  need a bigger word, and it read as oversized when it scaled up too. That
-  scale is tuned for the reference tables and read too small to study from on a
-  desktop window.
+  card, with no direction label above it at all: the answer field's own
+  placeholder (English…/Romaji…) already says what to type, so a second label
+  saying the same thing was redundant. A kanji prompt always carries
+  furigana; Japanese → English cards also reveal the reading in small type
+  right under the word once checked (the other three directions already show
+  the reading elsewhere, so repeating it there would just echo the answer).
+  The prompt itself never moves once checked — nothing echoes it again below
+  — so it reads as the anchor from contrast, not sheer size. The verdict is
+  an icon alone (a check, a caution triangle for a one-letter near-miss, or
+  an ✕) in a small tinted circle — never text, never a pill or a filled
+  block — so the answer beneath it (30px, `--ink`) is the one thing to read.
+  A miss is never red-washed: the card flash is a 5% tint and the icon alone
+  carries the coral/ochre. The answer field collapses out of the way once
+  checked (opacity + height, never display/visibility, so it stays focused
+  and a phone's on-screen keyboard doesn't close) and what you typed becomes
+  one quiet secondary line below the answer, the wrong part struck through
+  (or, for a one-letter romaji slip, the same letter-level marks as the
+  answer above it). The ratings are a plain text action row — no pills, no
+  track, no key chip — a hairline above marking them off from the card, each
+  label coloured only in its own tone; the usual choice (Good after a right
+  answer, Again after a miss) reads bold and full-strength, the other three
+  at reduced (not faint) opacity. The card is top-anchored (no re-centring
+  when the answer drops in), and a `<progress>` bar under the meta line shows
+  the session. On a phone the chrome (meta line, padding, rating row, the
+  "stage" panel) tightens but the prompt keeps its full size and air. Past
+  700px the reading text you rate from (the stage panel, rating labels) steps
+  up a size off the shared `--fs-*` scale — but not the prompt, which stays
+  26px at every width; a roomier window doesn't need a bigger word, and it
+  read as oversized when it scaled up too. That scale is tuned for the
+  reference tables and read too small to study from on a desktop window.
 
 ## Colour
 
@@ -244,8 +257,8 @@ and Help.
   masthead isn't sticky), leaving the sticky toolbar at the top.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
-  "English" — not the tracked ALL-CAPS micro-label the flashcard prompt label
-  and Customize/Help section headers still use) in a ~44px-tall row, closed by
+  "English" — not the tracked ALL-CAPS micro-label Customize/Help section
+  headers still use) in a ~44px-tall row, closed by
   the same hairline as the body rows (everywhere, Flashcards' Words to review included). The sort control is one up/down chevron pair (`SORT_ICON` in
   `js/vocab/render.js`) rather than a text arrow glyph: the chevron matching the
   current direction is full strength in the section tone, the other a ghost,
@@ -383,8 +396,7 @@ and Help.
 - **Sheets** (the table-index popover / bottom sheet, the icon picker) are
   borderless 14px surfaces with the one menu shadow; the current table in the
   index is a soft fill, not a bar; the picker's group labels are sentence-case
-  `--fs-small`. The flashcard study prompt label is the one deliberate
-  ALL-CAPS micro-label left (`.fc-prompt-label`).
+  `--fs-small`.
 - **Manage** runs the full sheet — its rows are content-driven, not a
   proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made
@@ -484,8 +496,8 @@ section tone — clearly the live one against the muted rest.
 
 The review card itself is a plain white card (no border or shadow); the answer
 panel under it is unboxed — the large answer text does the work — and the
-rating row stays four flat buttons with hairline dividers and coloured key
-chips.
+rating row is four plain text actions (no fill, no border) under one hairline
+divider, each label coloured in its own tone rather than a separate chip.
 
 ## Dark mode
 
