@@ -188,6 +188,16 @@
   --adj-i-ink: #6b4fa0;
   --adj-na-ink: #2e7d52;
 
+  /* 五段/一段 verb-group badge colours -- same job as the adjective pair
+     above (a small badge needs real saturation to read as "coloured"), kept
+     in their own hue family (teal / terracotta) so a verb badge never reads
+     as an adjective badge at a glance, even though the two never appear on
+     the same row. The 変格 (irregular: する/来る) class reuses --irregular-ink
+     -- it's the same "this one's an exception" identity the app already uses
+     for a stray irregular-reading row elsewhere (Numbers' 4/7/9). */
+  --verb-godan-ink: #3d7a76;
+  --verb-ichidan-ink: #96562f;
+
   --radius-sheet: 6px;
   --radius-panel: 8px;
   --radius-control: 5px;
@@ -248,6 +258,8 @@
   --particle: #7db4e6;
   --adj-i-ink: #b39ddb;
   --adj-na-ink: #7fc79a;
+  --verb-godan-ink: #7fc4bd;
+  --verb-ichidan-ink: #d99b6c;
 
   --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
   --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
@@ -524,17 +536,17 @@ body {
   align-items: center;
   gap: 7px;
   max-width: 100%;
-  padding: 4px 10px 4px 11px;
-  background: var(--section-soft);
-  border: 1px solid color-mix(in srgb, var(--section) 34%, var(--line));
-  border-radius: var(--radius-control);
+  padding: 4px 2px;
+  background: none;
+  border: 0;
   color: var(--section-strong);
   /* line-height 1.4, not 1: the label sets overflow:hidden for its ellipsis,
      so a tight line box would clip the descenders on g / p / y. */
   font: 400 var(--fs-small)/1.4 var(--font-ui);
   cursor: pointer;
 }
-.tindex-trigger:hover { border-color: var(--section); }
+.tindex-trigger:hover { opacity: .7; }
+.tindex-trigger:active { opacity: .5; }
 .tindex-trigger-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tindex-trigger svg { flex: 0 0 auto; color: var(--section); transition: transform .15s ease; }
 .tindex-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -907,6 +919,14 @@ body { --switch-on: var(--section-strong); }
 .adj-legend .adj-badge:first-child, .particle-legend .particle-chip:first-child { margin-left: 0; }
 .particle-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
 .particle-legend[hidden] { display: none; }
+/* Same job as .adj-legend above, for the 五段/一段/変格 verb badges -- allowed
+   to wrap (unlike the adjective legend) since it carries a fourth swatch
+   (the outlined "exception" one) and can run wider than the sheet on a
+   phone. */
+.verb-legend { display: inline-flex; align-items: center; flex-wrap: wrap; row-gap: 4px; color: var(--muted); font-size: var(--fs-micro); }
+.verb-legend[hidden] { display: none; }
+.verb-legend .verb-badge { margin: 0 4px 0 10px; align-self: center; }
+.verb-legend .verb-badge:first-child { margin-left: 0; }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
@@ -925,16 +945,27 @@ body.selftest-mode .selftest-hint { display: block; }
 .table-section:not(.collapsed) { margin-bottom: 30px; }
 #vocabulary .table-section { padding-left: 16px; }
 
-/* The reading column has a content-driven cap, left-aligned: the three
-   text columns don't need the full 1180px sheet, and letting a row run
-   edge-to-edge stranded the meaning text and the row-action icons in a
-   field of white (worst on wide monitors and in dark mode). Everything in
-   the reading flow shares the cap so the category rules, the tables and
-   the Expand-all control keep one right edge. Not a media query -- on a
-   narrower viewport the cap is simply never reached. */
+/* The reading column has a content-driven cap, centred in the sheet (an
+   inset list, the way Apple centres one): the three text columns don't need
+   the full 1180px sheet, and letting a row run edge-to-edge stranded the
+   meaning text and the row-action icons in a field of white (worst on wide
+   monitors and in dark mode), while pinning it to the left instead left an
+   equally bare gap on the right. Everything in the reading flow -- the table
+   index trigger, the toolbar, the category rules, the tables and the
+   Expand-all control -- shares the cap and the same centred axis, so they
+   all keep one left edge, now in the middle of the sheet rather than
+   jammed against it. Not a media query -- on a narrower viewport the cap is
+   simply never reached, so this has no effect below ~900px (a phone or a
+   split-screen window). */
 .page-vocab { --reading-w: 900px; }
+.table-index,
+.page-vocab .vocab-toolbar,
 #vocabulary .table-section,
-#vocabulary .cat-heading { max-width: var(--reading-w); }
+#vocabulary .cat-heading {
+  max-width: var(--reading-w);
+  margin-left: auto;
+  margin-right: auto;
+}
 .table-section:first-of-type { break-before: auto; page-break-before: auto; }
 .page-hidden { display: none !important; }
 .search-hidden { display: none !important; }
@@ -2305,13 +2336,13 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    irregular adjective's badge is *outlined* instead of filled, and its reason
    sits as a footnote under the meaning (.adj-note). Explained once by the
    legend near the toolbar (index.html .adj-legend). */
-.adj-badge, .particle-chip {
+.adj-badge, .verb-badge, .particle-chip {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
   min-width: 20px; height: 20px; padding: 0 5px; margin: 0 0 0 6px; align-self: flex-start;
   border-radius: 10px;
   font: 400 var(--fs-micro)/1 var(--font-ui);
 }
-.adj-badge::after, .particle-chip::after { content: attr(data-badge); }
+.adj-badge::after, .verb-badge::after, .particle-chip::after { content: attr(data-badge); }
 /* The particles a word takes: the same capsule in the app's particle blue, bold
    (the one deliberate use of bold -- see .particle), so a chip reads as
    "particle" wherever it appears. */
@@ -2338,7 +2369,16 @@ button.particle-chip:hover, button.particle-chip[aria-expanded="true"] { backgro
 .role-pop-row:not(.role-pop-current) { opacity: .6; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
-.adj-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.adj-badge-irr, .verb-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+/* 五段/一段/変格 verb-group badge, the same treatment as the adjective badge
+   above: filled for the plain case, outlined (.verb-badge-irr) for the
+   handful of verbs worth a second look -- 切る/帰る (godan despite looking
+   ichidan) and 来る (its kanji reading itself changes, 来る/来ます) -- whose
+   reason sits as a footnote under the meaning (.adj-note, shared with the
+   adjective footnote). Explained once by the legend (index.html .verb-legend). */
+.verb-badge-godan { color: var(--verb-godan-ink); background: color-mix(in srgb, var(--verb-godan-ink) 14%, var(--paper)); }
+.verb-badge-ichidan { color: var(--verb-ichidan-ink); background: color-mix(in srgb, var(--verb-ichidan-ink) 14%, var(--paper)); }
+.verb-badge-irregular { color: var(--irregular-ink); background: color-mix(in srgb, var(--irregular-ink) 14%, var(--paper)); }
 /* Footnotes under the meaning inherit the cell's colour (dimmed by opacity, not
    a colour of their own) so Cover answers / hidden English blank them with the
    meaning -- a note like "what you eat" would otherwise leak the answer. */

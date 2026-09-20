@@ -122,6 +122,40 @@ for (const table of tableList) {
 }
 console.log("Adjective classification validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adj).length, 0) + " adjectives, " + tableList.reduce((n, t) => n + t.rows.filter(r => r.adjNote).length, 0) + " irregular.");
 
+// Verb classification guard, the same idea as the adjective one above but for
+// every verb-pair's group: 五段 (godan), 一段 (ichidan) or 変格 (irregular:
+// する/来る). Godan vs. ichidan isn't visible from spelling alone (both include
+// verbs ending in -eru/-iru), but the two forms already in the data settle
+// it: an ichidan verb's polite form is its plain form with the final る
+// swapped for ます, nothing else touched. A godan verb ending in -eru/-iru
+// (切る, 帰る) looks ichidan and would be mistaken for one, so it needs a
+// verbNote explaining the exception (the outlined badge + footnote in the UI).
+const IE_ROW_KANA = ["い", "き", "し", "ち", "に", "ひ", "み", "り", "ぎ", "じ", "ぢ", "び", "ぴ",
+  "え", "け", "せ", "て", "ね", "へ", "め", "れ", "げ", "ぜ", "で", "べ", "ぺ"];
+function verbFormReading(row, idx) {
+  return row.forms[idx].jp.map(seg => seg.reading || seg.text || "").join("");
+}
+for (const table of tableList) {
+  for (const row of table.rows) {
+    if (row.type !== "verb-pair") continue;
+    const label = table.title + " " + row.id;
+    if (row.verbClass !== "godan" && row.verbClass !== "ichidan" && row.verbClass !== "irregular") {
+      console.error("Verb validation failed: verbClass must be \"godan\", \"ichidan\" or \"irregular\" (" + label + ").");
+      process.exit(1);
+    }
+    const plain = verbFormReading(row, 0), polite = verbFormReading(row, 1);
+    if (row.verbClass === "ichidan" && (!plain.endsWith("る") || polite !== plain.slice(0, -1) + "ます")) {
+      console.error("Verb validation failed: " + plain + " is marked ichidan but its polite form " + polite + " isn't " + plain.slice(0, -1) + "ます (" + label + ").");
+      process.exit(1);
+    }
+    if (row.verbClass === "godan" && !row.verbNote && plain.endsWith("る") && IE_ROW_KANA.includes(plain[plain.length - 2])) {
+      console.error("Verb validation failed: " + plain + " looks ichidan (ends -eru/-iru) but is marked godan -- needs a verbNote explaining the exception (" + label + ").");
+      process.exit(1);
+    }
+  }
+}
+console.log("Verb classification validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.type === "verb-pair" && r.verbClass).length, 0) + " verbs, " + tableList.reduce((n, t) => n + t.rows.filter(r => r.type === "verb-pair" && r.verbNote).length, 0) + " irregular.");
+
 // Particle guard. Every verb row must say what particles it takes (an empty
 // list is a deliberate "none": 疲れる, 寝る, 泳ぐ, 起きる) so a new verb can't
 // ship unclassified; every entry is a known particle (or "に / へ" style pairs)

@@ -346,7 +346,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // argument (search spans tables with no single "current") it shows if any
   // still-matching row anywhere on screen is tinted.
   // The particle legend follows the same rule for the blue particle chips
-  // (Verbs, and 好き / 嫌い / 上手 / 下手 in Adjectives).
+  // (Verbs, and 好き / 嫌い / 上手 / 下手 in Adjectives). The verb legend
+  // follows it too, for the 五段/一段/変格 badges (Verbs only).
   function updateAdjLegend(current) {
     const legend = document.querySelector('.adj-legend');
     if (!legend) return;
@@ -357,6 +358,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     legend.hidden = !has('.jp.adj-i, .jp.adj-na');
     const particleLegend = document.querySelector('.particle-legend');
     if (particleLegend) particleLegend.hidden = !has('.particle-chip');
+    const verbLegend = document.querySelector('.verb-legend');
+    if (verbLegend) verbLegend.hidden = !has('.verb-badge');
   }
   vocab.updateAdjLegend = updateAdjLegend;
 

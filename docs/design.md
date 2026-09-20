@@ -284,6 +284,19 @@ and Help.
   (or, while searching, any still-visible match) has adjectives. A visually-hidden
   "(い-adjective)" note on the Japanese cell carries the real distinction to
   screen readers.
+- **Verb-pairs** carry the same capsule badge (`.verb-badge`) for their group —
+  **五段** (godan/u-verb, `--verb-godan-ink`, teal), **一段** (ichidan/ru-verb,
+  `--verb-ichidan-ink`, terracotta) or **変格** (irregular: する/来る, reusing
+  `--irregular-ink` — the same "this one's an exception" identity the app
+  already uses for a stray irregular-reading row elsewhere). Every verb-pair
+  gets one, unlike the adjective badge which only marks tagged rows. A verb
+  worth a second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji
+  reading itself changes, 来る/来ます) — gets the same **outlined** treatment
+  (`.verb-badge-irr`) and footnote (`.adj-note`, shared with the adjective
+  footnote) as an irregular adjective, from the row's `verbNote`. Its own
+  legend (`.verb-legend`) follows the same show-only-when-relevant rule,
+  wrapping onto a second line on a phone since it carries a fourth swatch
+  (the outlined exception one) the adjective legend doesn't.
 - **Particles a word takes** (`.particle-chip`) are the same capsule as the
   adjective badge, in the app's particle blue and bold (the one deliberate use of
   bold — `.particle`): `を`, `に/へ`, `が`. Like the い/な badge they sit in a

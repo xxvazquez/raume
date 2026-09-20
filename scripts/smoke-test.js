@@ -280,6 +280,42 @@ async function main() {
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
       && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
   })());
+  check("五段/一段/変格 are capsule badges in three distinct tokens (godan/ichidan dedicated, irregular reuses --irregular-ink)", (() => {
+    const godanRule = allCssRules.find(r => r.selectorText === ".verb-badge-godan");
+    const ichidanRule = allCssRules.find(r => r.selectorText === ".verb-badge-ichidan");
+    const irrRule = allCssRules.find(r => r.selectorText === ".verb-badge-irregular");
+    return !!godanRule && /var\(--verb-godan-ink\)/.test(godanRule.style.color)
+      && !!ichidanRule && /var\(--verb-ichidan-ink\)/.test(ichidanRule.style.color)
+      && !!irrRule && /var\(--irregular-ink\)/.test(irrRule.style.color);
+  })());
+  check("every verb-pair row has one verb-group badge in its English cell (not the Japanese cell); the three exceptions are outlined with a footnote", (() => {
+    const verbsSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector(".section-title-text").textContent === "Verbs");
+    const rows = [...verbsSection.querySelectorAll("tbody tr")];
+    const badgeOk = rows.every(r => r.cells[1].querySelectorAll(".verb-badge").length === 1 && r.cells[0].querySelectorAll(".verb-badge").length === 0
+      && r.cells[1].querySelector(".verb-badge").textContent === "");
+    const irr = rows.filter(r => r.cells[1].querySelector(".verb-badge-irr"));
+    const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
+    const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
+    return badgeOk && rows.length === 38 && irr.length === 3
+      && irr.every(r => r.cells[1].querySelector(".adj-note"))
+      && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
+      && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
+      && rows.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
+  })());
+  check("the verb-group legend follows the same show-only-when-relevant rule as the adjective legend", (() => {
+    const legend = document.querySelector(".verb-legend");
+    if (!legend || legend.getAttribute("aria-hidden") !== "true") return false;
+    const counters = document.querySelector('.table-section[data-table="0"]'); // no verbs
+    window.RaumeStudy.vocab.updateAdjLegend(counters);
+    const hiddenOnCounters = legend.hidden === true && window.getComputedStyle(legend).display === "none";
+    const verbsTable = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
+      .find(s => s.querySelector(".section-title-text").textContent === "Verbs");
+    window.RaumeStudy.vocab.updateAdjLegend(verbsTable);
+    const shownOnVerbs = legend.hidden === false && window.getComputedStyle(legend).display !== "none";
+    window.RaumeStudy.vocab.updateAdjLegend(counters); // leave it back the way we found it
+    return hiddenOnCounters && shownOnVerbs;
+  })());
   check("verbs and が-taking adjectives show the particles they take as trailing chip buttons with no caption line, and none is left blank", (() => {
     const section = (name) => [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector(".section-title-text").textContent === name);
     const row = (sec, romaji) => [...sec.querySelectorAll("tbody tr")].find(r => r.querySelector(".jpword").dataset.romaji === romaji);
@@ -751,7 +787,7 @@ async function main() {
     return ["japanese", "furigana", "english"].every(k => inSheet('.opt-switch[data-col="' + k + '"]'))
       && inSheet("#selftestToggle") && inSheet("#politeToggle") && inSheet("#expandAllBtn")
       && inSheet('.print-scope[data-scope="section"]') && inSheet('.print-scope[data-scope="all"]')
-      && inSheet(".adj-legend") && inSheet(".particle-legend")
+      && inSheet(".adj-legend") && inSheet(".verb-legend") && inSheet(".particle-legend")
       && optionsSheet.querySelector(".expand-bar #expandAllBtn");
   })());
   optionsBtn.click();

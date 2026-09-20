@@ -87,6 +87,16 @@ so they're easy to spot in a sentence.
   `adj` (`"i"` / `"na"`) and an optional `adjNote` on the row; a
   visually-hidden note on the cell carries the distinction to screen readers,
   and the badge is drawn by CSS so it stays out of search.
+- **Verb group** — every verb in the Verbs table carries the same style of
+  badge for its conjugation group: teal **五段** (godan/u-verb), terracotta
+  **一段** (ichidan/ru-verb), or **変格** (irregular — する and 来る, plus every
+  suru-compound like 料理する). Godan and ichidan aren't visible from the
+  ending alone (both include verbs ending in -eru/-iru), so the handful that
+  would otherwise be mistaken for the other class get an **outlined** badge
+  and a one-line note: 切る and 帰る (五段 despite looking 一段), and 来る (its
+  own kanji reading changes: 来る is *kuru*, but 来ます is *kimasu*). Driven by
+  `verbClass` and an optional `verbNote` on the row, checked by `npm run
+  validate` against the plain/polite forms already in the data.
 - **Particles a word takes** — each verb, and the adjectives 好き / 嫌い / 上手 /
   下手, shows the particle(s) it takes as small blue chips beside the row icons
   (**を** eat, **に/へ** go, **が** like) — the same blue as particles in

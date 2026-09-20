@@ -228,7 +228,8 @@ js/
     kana.js              the Kana tab
     bootstrap.js         app shell + init
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
-                        (adjective rows also carry adj:"i" / adj:"na" for the type pill)
+                        (adjective rows carry adj:"i" / adj:"na" for the type pill;
+                        verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular")
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
 audio/                  prerendered pronunciation clips — see "Pronunciation audio" below
@@ -328,6 +329,15 @@ row): an `adj: "i"` reading must end in い; a `な`-adjective whose reading end
 よくない) must each carry an `adjNote`; `かわいい` is the one listed exception
 (`REGULAR_II_ADJECTIVES`). A mis-tagged adjective fails the check instead of
 shipping a wrong badge.
+
+Every `verb-pair` row carries the same idea for its group: `verbClass` (`"godan"`
+/ `"ichidan"` / `"irregular"`) drives the 五段/一段/変格 badge, and `verbNote` marks
+the handful worth a second look (切る/帰る — 五段 despite looking 一段; 来る — its
+kanji reading itself changes) with the outlined badge + a footnote. `validate`
+checks the classification against the two forms already in the data: an
+`"ichidan"` verb's polite form must be its plain form with る swapped for ます and
+nothing else touched; a `"godan"` verb ending in -eru/-iru without a `verbNote`
+fails, since it would silently read as ichidan in the UI.
 
 - Run `validate` before committing data changes, and `test` before anything
   touching `js/vocab/` or `js/flashcards/`.

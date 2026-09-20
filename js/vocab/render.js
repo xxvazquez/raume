@@ -169,6 +169,31 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (adj !== 'i' && adj !== 'na') return '';
     return '<span class="visually-hidden">(' + (adj === 'na' ? 'な-adjective' : 'い-adjective') + ')</span>';
   }
+  // Same idea as the adjective badge above, for a verb-pair's group: 五段
+  // (godan/u-verb), 一段 (ichidan/ru-verb) or 変格 (irregular: する/来る).
+  // Every verb-pair carries one; row.verbNote marks the handful worth a
+  // second look -- 切る/帰る (五段 despite looking 一段) and 来る (its kanji
+  // reading itself changes) -- with the outline treatment and a footnote,
+  // exactly like an irregular adjective.
+  var VERB_CLASS_META = {
+    godan: { badge: '五段', label: 'godan verb (u-verb)' },
+    ichidan: { badge: '一段', label: 'ichidan verb (ru-verb)' },
+    irregular: { badge: '変格', label: 'irregular verb' }
+  };
+  function verbBadge(row) {
+    var meta = VERB_CLASS_META[row.verbClass];
+    if (!meta) return '';
+    return '<span class="verb-badge verb-badge-' + row.verbClass + (row.verbNote ? ' verb-badge-irr' : '') +
+      '" data-badge="' + meta.badge + '" title="' + meta.label + (row.verbNote ? ' — ' + esc(row.verbNote) : '') + '" aria-hidden="true"></span>';
+  }
+  function verbNote(row) {
+    var meta = VERB_CLASS_META[row.verbClass];
+    if (!meta) return '';
+    return '<span class="visually-hidden">(' + meta.label + ')</span>';
+  }
+  function verbFootnote(row) {
+    return row.verbNote ? '<div class="adj-note" lang="ja">' + esc(row.verbNote) + '</div>' : '';
+  }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
@@ -254,8 +279,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (each form carries its own speaker + romaji reveal).
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('');
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, '', particleChips(row)) + '</tr>';
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbFootnote(row), verbBadge(row) + particleChips(row)) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and sorted A-Z; the others start neutral.
