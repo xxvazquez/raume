@@ -74,7 +74,8 @@ flowchart LR
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
-- **Table customisations** (names / icons / order) follow the same pattern:
+- **Table customisations** (names / icons / order) follow the same pattern (an
+  unset icon falls back to the shipped table's default in `render.js`, never stored):
   `localStorage` is the immediate source of truth; signed in, they also sync via
   a `table_custom` column on `flashcard_settings`. Sign-in merges per table —
   account wins for tables it has; guest customisations for other tables are

@@ -114,7 +114,12 @@ and Help.
   white 12px-radius cards sitting directly on it — no borders, no coloured
   bars, no rules under headings, no box inside a box. A run of collapsed tables
   is ONE card of list cells (inset hairline between them, disclosure chevron on
-  the right, the per-table ⋯ menu / print kept on the cell as bare glyphs); an
+  the right, the per-table ⋯ menu / print kept on the cell as bare glyphs; the
+  hairline is inset to start under the title, and cells only group with
+  neighbours that are on screen); every table has a 30px **icon tile** — an 8px-radius
+  square in the section's soft tint (`--section-soft`) with the glyph in its deep
+  tone, 28px on an open table's title — from a default per shipped table
+  (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the
   ground above it, so "where does the title end and the table start" is never
   in doubt (on flat white they blended, worst in search results where every

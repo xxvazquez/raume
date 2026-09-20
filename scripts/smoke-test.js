@@ -592,14 +592,19 @@ async function main() {
   // reusing the same .section-icon slot markup either way.
   check("every table header shows a decorative icon slot", [...document.querySelectorAll("#vocabulary .table-section")].every(s => !!s.querySelector(".section-head > .section-icon")));
   check("every table's menu offers a Choose icon item wired to the picker hook", [...document.querySelectorAll("#vocabulary .table-section")].every(s => !!s.querySelector(".section-menu-list .section-icon-btn[data-icon-for]")));
-  check("an untouched table shows the empty '+' slot, not a chosen icon", (() => {
-    const slot = document.querySelector(".section-head > .section-icon");
-    // The empty slot is a plain "+" (two strokes), never a box -- a square
-    // outline here read as an unchecked checkbox.
-    return slot.classList.contains("section-icon-empty")
-      && !!slot.querySelector("svg path")
-      && !slot.querySelector("rect")
-      && !slot.querySelector("[stroke-dasharray]");
+  check("every shipped table starts with a default icon from the library, drawn in the header", (() => {
+    const tables = window.RaumeStudy.data.vocabularyTables;
+    const V = window.RaumeStudy.vocab;
+    return tables.every(t => {
+      const v = V.tableIconValue(t.id);
+      const slot = document.querySelector('#vocabulary .table-section[data-table="' + t.id + '"] .section-head > .section-icon');
+      return !!v && ic.has(v) && !!slot && !slot.classList.contains("section-icon-empty") && !!slot.querySelector("svg");
+    });
+  })());
+  check("a table with no icon of its own and no default keeps the quiet '+' slot", (() => {
+    const V = window.RaumeStudy.vocab;
+    const html = V.tableIconGlyph("no-such-table");
+    return V.tableIconValue("no-such-table") === "" && /<path/.test(html) && !/<rect/.test(html) && !/stroke-dasharray/.test(html);
   })());
   check("choosing an icon updates the header and directory in place", (() => {
     const btn = document.querySelector('.section-menu-list .section-icon-btn[data-icon-for]');

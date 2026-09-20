@@ -1005,15 +1005,37 @@ body.selftest-mode .selftest-hint { display: block; }
 
 /* Collapsed: cells of one grouped card. The per-table menu / print stay
    reachable on the cell (nothing is hidden behind an extra step) -- just as
-   bare glyphs, without their boxes, so the cell stays quiet. */
+   bare glyphs, without their boxes, so the cell stays quiet. A cell is grouped
+   with its neighbours only while both are on screen -- the other sections'
+   tables sit in the DOM too (page-hidden), and counting them left a lone card
+   with square corners and a stray hairline. */
 #vocabulary .table-section.collapsed { background: var(--paper); padding: 0 16px; }
-#vocabulary .table-section.collapsed .section-head { padding: 12px 0; border-bottom: 1px solid var(--row-line); }
 #vocabulary .table-section.collapsed .section-menu-btn,
 #vocabulary .table-section.collapsed .print-one { border-color: transparent; background: none; }
-#vocabulary .table-section.collapsed:not(.table-section.collapsed + .table-section.collapsed) { border-radius: 12px 12px 0 0; }
-#vocabulary .table-section.collapsed:not(:has(+ .table-section.collapsed)) { border-radius: 0 0 12px 12px; }
-#vocabulary .table-section.collapsed:not(.table-section.collapsed + .table-section.collapsed):not(:has(+ .table-section.collapsed)) { border-radius: 12px; }
-#vocabulary .table-section.collapsed:not(:has(+ .table-section.collapsed)) .section-head { border-bottom: 0; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden) + .table-section.collapsed) { border-radius: 14px 14px 0 0; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) { border-radius: 0 0 14px 14px; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) { border-radius: 14px; }
+/* Row: icon tile, title, chevron, actions -- the hairline is inset to start
+   under the title, as in an iOS list, and the last row has none. */
+#vocabulary .table-section.collapsed .section-head { position: relative; padding: 10px 0; border-bottom: 0; }
+#vocabulary .table-section.collapsed .section-head::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  border-bottom: 1px solid var(--row-line);
+}
+#vocabulary .table-section.collapsed .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 39px; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) .section-head::after { display: none; }
+
+/* Icon tile (iOS Settings style): a small rounded square in the section's soft
+   tint with the glyph in its deep tone -- quiet, but it gives every row a shape
+   to find it by. */
+#vocabulary .section-head { align-items: center; }
+#vocabulary .section-head > .section-icon:not(.section-icon-empty) {
+  width: 30px; height: 30px; margin-top: 0; padding: 6px; box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--section-soft); color: var(--section-strong);
+}
+#vocabulary .table-section:not(.collapsed) .section-head > .section-icon:not(.section-icon-empty) { width: 28px; height: 28px; padding: 5.5px; margin-right: 2px; }
+#vocabulary .section-toggle-icon { margin-top: 0; }
 
 /* Open: bold title on the ground, then the white card. */
 #vocabulary .table-section:not(.collapsed) { padding: 0; margin: 16px 0 24px; }
@@ -2073,6 +2095,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { background: none; font-weight: 500; }
   .table-section { scroll-margin-top: 92px; }
+  /* The grey ground runs to the bottom edge, as on iOS: no lighter band and
+     rounded corner under a short list. */
+  body { background: var(--group-ground); }
+  .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
   /* Large screen titles: the screens that have a title carry it big. */

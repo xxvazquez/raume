@@ -240,8 +240,7 @@ window.RaumeStudy.flashcards.views = (function () {
           // page / Customize page, so a table reads identically in both places.
           var vocabNs = window.RaumeStudy.vocab;
           var displayTitle = vocabNs.tableTitle ? vocabNs.tableTitle(tableId, table.title) : table.title;
-          var tc = window.RaumeStudy.tableCustom;
-          var iconHtml = (tc && tc.iconOf(tableId) && vocabNs.tableIconGlyph)
+          var iconHtml = (vocabNs.tableIconValue && vocabNs.tableIconValue(tableId) && vocabNs.tableIconGlyph)
             ? '<span class="fc-manage-table-icon">' + vocabNs.tableIconGlyph(tableId) + "</span>" : "";
           // A fully-added table is the one thing this list exists to surface at
           // a glance -- flagged so the count can pick up the section accent

@@ -384,10 +384,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Filled slots render the chosen icon (js/vocab/icons.js) or an uploaded
   // image instead.
   var EMPTY_ICON = '<svg class="si" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg>';
+  // Every shipped table starts with an icon so a list of tables reads as a set
+  // of distinct rows rather than a wall of titles; a reader's own pick (Choose
+  // icon…) always wins, and a table of their own has none until they choose one.
+  var DEFAULT_TABLE_ICONS = {
+    0: 'list', 1: 'coffee', 2: 'egg', 3: 'apple', 4: 'microwave', 5: 'soup',
+    6: 'sparkles', 7: 'zap', 8: 'hash', 9: 'quote', 10: 'beef', 11: 'cup',
+    12: 'cookie', 13: 'carrot', 14: 'signpost', 15: 'shopping-bag', 16: 'train',
+    17: 'toilet', 18: 'washer', 19: 'bed', 20: 'tag', 21: 'recycle',
+    22: 'utensils', 23: 'hand', 24: 'calendar', 25: 'moon', 26: 'grid',
+    27: 'sun', 28: 'hourglass', 29: 'alarm', 30: 'clock', 31: 'watch'
+  };
   function tableIconValue(id) {
     var tc = window.RaumeStudy.tableCustom;
-    return tc ? tc.iconOf(id) : '';
+    var chosen = tc ? tc.iconOf(id) : '';
+    return chosen || DEFAULT_TABLE_ICONS[id] || '';
   }
+  vocab.tableIconValue = tableIconValue;
   // The name to show for a table: the reader's custom name (Customize page) if
   // they've set one, otherwise the name shipped in the dataset. Used everywhere
   // a table is labelled -- section header, table directory, Flashcards Manage.

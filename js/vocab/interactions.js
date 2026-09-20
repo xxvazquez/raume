@@ -1023,7 +1023,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     function refreshTable(id) {
       const tc = window.RaumeStudy.tableCustom, glyph = window.RaumeStudy.vocab.tableIconGlyph(id);
-      const has = !!tc.iconOf(id);
+      const has = !!window.RaumeStudy.vocab.tableIconValue(id);
       const title = window.RaumeStudy.vocab.tableTitle(id, shippedTitle(id));
       document.querySelectorAll('#vocabulary .table-section[data-table="' + id + '"]').forEach(function (section) {
         const slot = section.querySelector('.section-icon');

@@ -125,7 +125,7 @@ window.RaumeStudy.customize = (function () {
       moveBtns("table", t.id, canUp, canDown) +
       '<button type="button" class="section-icon-btn cz-row-icon" data-icon-for="' + t.id +
         '" title="Choose an icon" aria-label="Choose an icon for ' + esc(name || t.title) + '">' +
-        '<span class="section-icon' + (tc() && tc().iconOf(t.id) ? "" : " section-icon-empty") + '">' + iconSlot(t.id) + "</span></button>" +
+        '<span class="section-icon' + (V().tableIconValue && V().tableIconValue(t.id) ? "" : " section-icon-empty") + '">' + iconSlot(t.id) + "</span></button>" +
       '<label class="cz-row-field">' +
         '<input type="text" class="cz-row-name" maxlength="40" autocomplete="off" ' +
           'aria-label="Custom name for ' + esc(t.title) + '" placeholder="' + esc(t.title) + '"' +
