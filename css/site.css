@@ -2332,27 +2332,28 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 /* い/な-adjective badge: a small capsule in the trailing cluster beside the row
    icons (so the meaning text keeps one left edge on every row) -- a tint of
    purple (い-adj) or green (な-adj) with the glyph in the full ink (--adj-i-ink /
-   --adj-na-ink), drawn from data-badge so it never enters the cell's text. An
-   irregular adjective's badge is *outlined* instead of filled, and its reason
-   sits as a footnote under the meaning (.adj-note). Explained once by the
-   legend near the toolbar (index.html .adj-legend). */
+   --adj-na-ink), drawn from data-badge so it never enters the cell's text. Every
+   badge on the page is a real button now (this one, a verb's 五段/一段/変格, a
+   particle chip): tap / click / hover opens the same one-line popover
+   (.role-pop, js/vocab/interactions.js openPop) naming just that badge --
+   an irregular adjective's reason (きれい's "ends in い but takes な", いい's
+   よくない) lives there, not in a permanent line under the meaning. Explained
+   once by the legend near the toolbar (index.html .adj-legend). */
 .adj-badge, .verb-badge, .particle-chip {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
   min-width: 20px; height: 20px; padding: 0 5px; margin: 0 0 0 6px; align-self: flex-start;
-  border-radius: 10px;
+  border-radius: 10px; appearance: none; border: 0; position: relative; cursor: pointer;
   font: 400 var(--fs-micro)/1 var(--font-ui);
 }
 .adj-badge::after, .verb-badge::after, .particle-chip::after { content: attr(data-badge); }
+/* Hit area padded out past the 20px capsule with an invisible ::before, since
+   it's a small target on a phone. */
+.adj-badge::before, .verb-badge::before, .particle-chip::before { content: ""; position: absolute; inset: -9px -3px; }
 /* The particles a word takes: the same capsule in the app's particle blue, bold
    (the one deliberate use of bold -- see .particle), so a chip reads as
    "particle" wherever it appears. */
 .particle-chip { color: var(--particle); background: color-mix(in srgb, var(--particle) 12%, var(--paper)); font-weight: 700; }
-/* On a word row the chip is a button: tap / click / hover opens the role popover
-   (.role-pop). Its hit area is padded out past the 20px capsule with an invisible
-   ::before, since it's a small target on a phone. */
-button.particle-chip { appearance: none; border: 0; position: relative; cursor: pointer; }
-button.particle-chip::before { content: ""; position: absolute; inset: -9px -3px; }
-button.particle-chip:hover, button.particle-chip[aria-expanded="true"] { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); }
+.particle-chip:hover, .particle-chip[aria-expanded="true"] { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); }
 /* iOS-style popover: a small rounded surface with the one menu shadow and an
    arrow pointing at its chip (--arrow-x is set by the script). */
 .role-pop {
@@ -2365,36 +2366,33 @@ button.particle-chip:hover, button.particle-chip[aria-expanded="true"] { backgro
   margin-left: -5px; background: var(--paper); transform: rotate(45deg); border-radius: 0 0 3px 0;
 }
 .role-pop-below::after { bottom: auto; top: -5px; border-radius: 3px 0 0 0; }
-.role-pop-row + .role-pop-row { margin-top: 3px; }
-.role-pop-row:not(.role-pop-current) { opacity: .6; }
+/* The popover's own glyph reuses the row badge's sizing rule above but never
+   needs the button reset or hover wash -- it's a static echo, not a second
+   control -- so it's excluded from the shared selector there. */
+.role-pop .adj-badge, .role-pop .verb-badge, .role-pop .particle-chip { cursor: default; margin: 0 6px 0 0; }
+.role-pop .adj-badge::before, .role-pop .verb-badge::before, .role-pop .particle-chip::before { content: none; }
+.role-pop .verb-badge ruby { ruby-position: over; }
+.role-pop .verb-badge rt { font-size: 8px; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
-.adj-badge-irr, .verb-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.adj-badge-i:hover, .adj-badge-i[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); }
+.adj-badge-na:hover, .adj-badge-na[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-na-ink) 24%, var(--paper)); }
 /* 五段/一段/変格 verb-group badge, the same treatment as the adjective badge
    above: filled for the plain case, outlined (.verb-badge-irr) for the
    handful of verbs worth a second look -- 切る/帰る (godan despite looking
-   ichidan) and 来る (its kanji reading itself changes, 来る/来ます) -- whose
-   reason sits as a footnote under the meaning (.adj-note, shared with the
-   adjective footnote). Explained once by the legend (index.html .verb-legend). */
+   ichidan) and 来る (its kanji reading itself changes, 来る/来ます). Explained
+   once by the legend (index.html .verb-legend). */
 .verb-badge-godan { color: var(--verb-godan-ink); background: color-mix(in srgb, var(--verb-godan-ink) 14%, var(--paper)); }
 .verb-badge-ichidan { color: var(--verb-ichidan-ink); background: color-mix(in srgb, var(--verb-ichidan-ink) 14%, var(--paper)); }
 .verb-badge-irregular { color: var(--irregular-ink); background: color-mix(in srgb, var(--irregular-ink) 14%, var(--paper)); }
-/* Footnotes under the meaning inherit the cell's colour (dimmed by opacity, not
-   a colour of their own) so Cover answers / hidden English blank them with the
-   meaning -- a note like "what you eat" would otherwise leak the answer. */
-/* A row with a footnote is taller than its Japanese word, which would leave the
-   word at the bottom beside the caption and the meaning at the top. Align both
-   cells on their first-line baseline instead, so the word sits level with the
-   meaning and the caption hangs below it. */
-.vocab tbody tr:has(.adj-note) > td { vertical-align: baseline; }
-/* With the English hidden or covered the footnote is blanked too; it would only
-   leave a tall empty row with the word stranded at the top, so it drops out and
-   the row centres like any other. A revealed row gets it back. */
-body.hide-english .vocab .adj-note,
-body.selftest-mode .vocab tbody tr:not(.revealed) .adj-note { display: none; }
-body.hide-english .vocab tbody tr:has(.adj-note) > td,
-body.selftest-mode .vocab tbody tr:not(.revealed):has(.adj-note) > td { vertical-align: middle; }
-.adj-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
+.verb-badge-godan:hover, .verb-badge-godan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-godan-ink) 24%, var(--paper)); }
+.verb-badge-ichidan:hover, .verb-badge-ichidan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-ichidan-ink) 24%, var(--paper)); }
+.verb-badge-irregular:hover, .verb-badge-irregular[aria-expanded="true"] { background: color-mix(in srgb, var(--irregular-ink) 24%, var(--paper)); }
+/* Outlined (irregular) badges have no fill to darken on hover -- wash in a
+   little of their own ink instead, over the two colour rules above. */
+.adj-badge-irr, .verb-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.adj-badge-irr:hover, .adj-badge-irr[aria-expanded="true"],
+.verb-badge-irr:hover, .verb-badge-irr[aria-expanded="true"] { background: color-mix(in srgb, currentColor 14%, transparent); }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */

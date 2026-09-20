@@ -148,22 +148,22 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // regardless of table type.
   // い/な-adjective rows carry a small capsule badge in the trailing cluster
   // beside the row icons -- like a dictionary's part-of-speech tag, and out of
-  // the narrow Japanese column --
-  // a tinted い or な (the glyph is drawn by CSS from data-badge, so it never
-  // lands in the cell's text, search or speech) -- and a legend near the
-  // toolbar (index.html) explains the two colours once. An irregular one (a
-  // な-adjective that ends in い, or いい's odd conjugation) gets an *outlined*
-  // badge and a one-line footnote under the meaning (row.adjNote). The
-  // distinction still reaches assistive tech via the visually-hidden note
-  // (colour alone is never the only signal).
+  // the narrow Japanese column -- a tinted い or な (the glyph is drawn by CSS
+  // from data-badge, so it never lands in the cell's text, search or speech).
+  // It's a real button: tap / click / hover opens the same small popover a
+  // particle chip does (js/vocab/interactions.js openPop), naming the type
+  // and, for an irregular one (a な-adjective that ends in い, or いい's odd
+  // conjugation), the reason -- nothing sits permanently under the meaning
+  // eating space, and every badge on the page opens the same way.
   function adjClass(adj) {
     return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
   }
   function adjBadge(row) {
     if (row.adj !== 'i' && row.adj !== 'na') return '';
     var na = row.adj === 'na';
-    return '<span class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + (row.adjNote ? ' adj-badge-irr' : '') +
-      '" data-badge="' + (na ? 'な' : 'い') + '" title="' + (na ? 'な' : 'い') + '-adjective' + (row.adjNote ? ' — ' + esc(row.adjNote) : '') + '" aria-hidden="true"></span>';
+    var role = (na ? 'な' : 'い') + '-adjective' + (row.adjNote ? ' — ' + row.adjNote : '');
+    return '<button type="button" class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + (row.adjNote ? ' adj-badge-irr' : '') +
+      '" data-badge="' + (na ? 'な' : 'い') + '" data-role="' + esc(role) + '" aria-label="' + esc(role) + '" aria-expanded="false"></button>';
   }
   function adjNote(adj) {
     if (adj !== 'i' && adj !== 'na') return '';
@@ -173,26 +173,27 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (godan/u-verb), 一段 (ichidan/ru-verb) or 変格 (irregular: する/来る).
   // Every verb-pair carries one; row.verbNote marks the handful worth a
   // second look -- 切る/帰る (五段 despite looking 一段) and 来る (its kanji
-  // reading itself changes) -- with the outline treatment and a footnote,
-  // exactly like an irregular adjective.
+  // reading itself changes) -- with the outline treatment. 五段/一段/変格 are
+  // kanji, unreadable at a glance to someone who doesn't read kanji, so the
+  // popover (not the 20px tile) is where the reading lives, in real furigana
+  // (data-reading, read by js/vocab/interactions.js openPop).
   var VERB_CLASS_META = {
-    godan: { badge: '五段', label: 'godan verb (u-verb)' },
-    ichidan: { badge: '一段', label: 'ichidan verb (ru-verb)' },
-    irregular: { badge: '変格', label: 'irregular verb' }
+    godan: { badge: '五段', reading: 'ごだん', label: 'godan verb (u-verb)' },
+    ichidan: { badge: '一段', reading: 'いちだん', label: 'ichidan verb (ru-verb)' },
+    irregular: { badge: '変格', reading: 'へんかく', label: 'irregular verb' }
   };
   function verbBadge(row) {
     var meta = VERB_CLASS_META[row.verbClass];
     if (!meta) return '';
-    return '<span class="verb-badge verb-badge-' + row.verbClass + (row.verbNote ? ' verb-badge-irr' : '') +
-      '" data-badge="' + meta.badge + '" title="' + meta.label + (row.verbNote ? ' — ' + esc(row.verbNote) : '') + '" aria-hidden="true"></span>';
+    var role = meta.label + (row.verbNote ? ' — ' + row.verbNote : '');
+    return '<button type="button" class="verb-badge verb-badge-' + row.verbClass + (row.verbNote ? ' verb-badge-irr' : '') +
+      '" data-badge="' + meta.badge + '" data-reading="' + meta.reading + '" data-role="' + esc(role) +
+      '" aria-label="' + esc(meta.reading + ' — ' + role) + '" aria-expanded="false"></button>';
   }
   function verbNote(row) {
     var meta = VERB_CLASS_META[row.verbClass];
     if (!meta) return '';
     return '<span class="visually-hidden">(' + meta.label + ')</span>';
-  }
-  function verbFootnote(row) {
-    return row.verbNote ? '<div class="adj-note" lang="ja">' + esc(row.verbNote) + '</div>' : '';
   }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
@@ -242,13 +243,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // display is overridden to flex (the browser no longer sizes it as a table
   // cell), so the <td> stays a plain cell and only its content wrapper flexes.
   // badges: small capsules in a trailing cluster beside the row icons (an
-  // adjective's い/な, the particles a word takes) -- trailing, not leading, so
-  // the meaning text and any caption share one left edge on every row;
-  // notes: optional one-line footnotes under the meaning, like an iOS cell
-  // subtitle. Both are built by the helpers below and sit outside
-  // .meaning-text, so they stay out of sorting and search.
-  function meaningCell(english, vocabId, notes, badges) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + (badges || '') + rowActions(vocabId) + '</div>' + (notes || '') + '</td>';
+  // adjective's い/な, a verb's 五段/一段/変格, the particles a word takes) --
+  // trailing, not leading, so the meaning text shares one left edge on every
+  // row. Built by the helpers below and sits outside .meaning-text, so it
+  // stays out of sorting and search; anything a badge needs to explain opens
+  // in a popover on click (js/vocab/interactions.js), not a permanent line
+  // under the meaning.
+  function meaningCell(english, vocabId, badges) {
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + (badges || '') + rowActions(vocabId) + '</div></td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
   // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's
@@ -263,16 +265,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return '<button type="button" class="particle-chip" data-badge="' + esc(tight(q.p)) + '" data-role="' + esc(q.role) + '" aria-label="' + esc('Particle ' + q.p + ': ' + q.role) + '" aria-expanded="false"></button>';
     }).join('');
   }
-  function adjFootnote(row) {
-    return row.adjNote ? '<div class="adj-note" lang="ja">' + esc(row.adjNote) + '</div>' : '';
-  }
   // Word rows and Phrases sentence rows share this now -- both render as
   // Japanese (with a romaji reveal next to the speaker button) + English, two
   // columns, no separate Romaji column. row.irregular is simply absent on a
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjFootnote(row), adjBadge(row) + particleChips(row)) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
@@ -280,7 +279,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbFootnote(row), verbBadge(row) + particleChips(row)) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row)) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and sorted A-Z; the others start neutral.

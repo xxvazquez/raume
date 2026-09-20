@@ -266,19 +266,20 @@ async function main() {
     return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.color)
       && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.color) && !bar;
   })());
-  check("each adjective row has one badge in its English cell (not in the Japanese cell's text); irregular ones are outlined with a footnote", (() => {
+  check("each adjective row has one clickable badge in its English cell (not the Japanese cell's text); irregular ones are outlined and carry their reason in data-role, not a permanent footnote", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
     const rows = [...adjSection.querySelectorAll("tbody tr")];
-    const badgeOk = rows.every(r => r.cells[1].querySelectorAll(".adj-badge").length === 1 && r.cells[0].querySelectorAll(".adj-badge").length === 0
+    const badgeOk = rows.every(r => r.cells[1].querySelectorAll("button.adj-badge").length === 1 && r.cells[0].querySelectorAll(".adj-badge").length === 0
       && r.cells[1].querySelector(".adj-badge").textContent === "");
     const irr = rows.filter(r => r.cells[1].querySelector(".adj-badge-irr"));
     const kirei = rows.find(r => r.cells[0].textContent.includes("きれい"));
     const ii = rows.find(r => r.cells[0].querySelector(".jpword").textContent.replace(/\s/g, "") === "いい");
-    return badgeOk && irr.length === 5 && irr.every(r => r.cells[1].querySelector(".adj-note"))
+    return badgeOk && document.querySelectorAll(".vocab .adj-note").length === 0
+      && irr.length === 5 && irr.every(r => /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
       && kirei.classList.contains("irregular-row") === false && kirei.cells[0].classList.contains("adj-na")
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
-      && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
+      && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".adj-badge").dataset.role));
   })());
   check("五段/一段/変格 are capsule badges in three distinct tokens (godan/ichidan dedicated, irregular reuses --irregular-ink)", (() => {
     const godanRule = allCssRules.find(r => r.selectorText === ".verb-badge-godan");
@@ -288,20 +289,21 @@ async function main() {
       && !!ichidanRule && /var\(--verb-ichidan-ink\)/.test(ichidanRule.style.color)
       && !!irrRule && /var\(--irregular-ink\)/.test(irrRule.style.color);
   })());
-  check("every verb-pair row has one verb-group badge in its English cell (not the Japanese cell); the three exceptions are outlined with a footnote", (() => {
+  check("every verb-pair row has one clickable verb-group badge in its English cell (not the Japanese cell), reading included; the three exceptions are outlined and carry their reason in data-role, not a permanent footnote", (() => {
     const verbsSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Verbs");
     const rows = [...verbsSection.querySelectorAll("tbody tr")];
-    const badgeOk = rows.every(r => r.cells[1].querySelectorAll(".verb-badge").length === 1 && r.cells[0].querySelectorAll(".verb-badge").length === 0
-      && r.cells[1].querySelector(".verb-badge").textContent === "");
+    const badgeOk = rows.every(r => r.cells[1].querySelectorAll("button.verb-badge").length === 1 && r.cells[0].querySelectorAll(".verb-badge").length === 0
+      && r.cells[1].querySelector(".verb-badge").textContent === "" && r.cells[1].querySelector(".verb-badge").dataset.reading);
     const irr = rows.filter(r => r.cells[1].querySelector(".verb-badge-irr"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
-    return badgeOk && rows.length === 38 && irr.length === 3
-      && irr.every(r => r.cells[1].querySelector(".adj-note"))
+    return badgeOk && rows.length === 38 && document.querySelectorAll(".vocab .adj-note").length === 0
+      && irr.length === 3 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
-      && rows.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !r.cells[1].querySelector(".adj-note"));
+      && kuru.cells[1].querySelector(".verb-badge").dataset.reading === "へんかく"
+      && rows.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".verb-badge").dataset.role));
   })());
   check("the verb-group legend follows the same show-only-when-relevant rule as the adjective legend", (() => {
     const legend = document.querySelector(".verb-legend");
@@ -333,28 +335,40 @@ async function main() {
       // chips trail the meaning (after it in the cell), so the meaning keeps one left edge
       && [...verbs.querySelectorAll("tbody tr")].every(r => { const c = r.cells[1].querySelector(".meaning-cell"); return !c.querySelector(".particle-chip") || c.firstElementChild.classList.contains("meaning-text"); });
   })());
-  check("tapping a particle chip opens a popover with the word's particle roles; outside tap, Escape and Cover answers behave", (() => {
+  check("tapping a particle chip opens a popover with just that chip's own role, never the row's other particle too; the other chip's own tap swaps it; outside tap, Escape and Cover answers behave", (() => {
     const verbs = [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector(".section-title-text").textContent === "Verbs");
     const listen = [...verbs.querySelectorAll("tbody tr")].find(r => r.querySelector(".jpword").dataset.romaji === "kiku");
-    const chip = listen.querySelectorAll("button.particle-chip")[1];
+    const [wo, ni] = listen.querySelectorAll("button.particle-chip");
     const pop = () => document.querySelector(".role-pop");
-    chip.click();
-    const opened = !!pop() && /what you listen to/.test(pop().textContent) && /who you ask/.test(pop().textContent)
-      && chip.getAttribute("aria-expanded") === "true" && pop().getAttribute("aria-hidden") === "true";
+    ni.click();
+    const opened = !!pop() && /who you ask/.test(pop().textContent) && !/what you listen to/.test(pop().textContent)
+      && ni.getAttribute("aria-expanded") === "true" && pop().getAttribute("aria-hidden") === "true";
+    wo.click();
+    const swapped = !!pop() && /what you listen to/.test(pop().textContent) && !/who you ask/.test(pop().textContent)
+      && wo.getAttribute("aria-expanded") === "true" && ni.getAttribute("aria-expanded") === "false";
     document.body.click();
-    const closedOutside = !pop() && chip.getAttribute("aria-expanded") === "false";
-    chip.click(); document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    const closedOutside = !pop() && wo.getAttribute("aria-expanded") === "false";
+    wo.click(); document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
     const closedEsc = !pop();
-    document.body.classList.add("selftest-mode"); chip.click();
+    document.body.classList.add("selftest-mode"); wo.click();
     const blockedInCover = !pop();
     document.body.classList.remove("selftest-mode");
-    return opened && closedOutside && closedEsc && blockedInCover;
+    return opened && swapped && closedOutside && closedEsc && blockedInCover;
   })());
-  check("the note under an irregular adjective inherits the cell's colour (so Cover answers blanks it) and the particle chip is the app's particle blue", (() => {
-    const note = allCssRules.find(r => r.selectorText === ".adj-note");
+  check("an adjective or verb badge opens the same popover mechanism, showing its own colour and (for an irregular one) its reason", (() => {
+    const adjs = [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
+    const kirei = [...adjs.querySelectorAll("tbody tr")].find(r => r.cells[0].textContent.includes("きれい"));
+    const badge = kirei.cells[1].querySelector("button.adj-badge");
+    const pop = () => document.querySelector(".role-pop");
+    badge.click();
+    const opened = !!pop() && /な-adjective/.test(pop().textContent) && /Ends in い but takes な/.test(pop().textContent)
+      && !!pop().querySelector(".adj-badge.adj-badge-na") && badge.getAttribute("aria-expanded") === "true";
+    document.body.click();
+    return opened && !pop();
+  })());
+  check("the particle chip is the app's particle blue, and the particle legend explains it", (() => {
     const chip = allCssRules.find(r => r.selectorText === ".particle-chip");
-    return !!note && note.style.color === "inherit" && !!chip && /var\(--particle\)/.test(chip.style.color)
-      && !!document.querySelector(".particle-legend");
+    return !!chip && /var\(--particle\)/.test(chip.style.color) && !!document.querySelector(".particle-legend");
   })());
   check("the .particle rule is blue (var(--particle)) and bold", (() => {
     const r = allCssRules.find(x => x.selectorText === ".particle");
@@ -1051,10 +1065,6 @@ async function main() {
   check("switching a column off hides it — the switch reads off, body carries hide-english", colBtn("english").getAttribute("aria-pressed") === "false" && colHidden("english") && document.body.classList.contains("hide-english"));
   check("...and the Options button shows a dot with an updated label", optionsDot.hidden === false && optionsBtn.getAttribute("aria-label") === "Options (some changed)");
   check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(2) .sort-button").disabled === true);
-  check("a row footnote (.adj-note) drops out with the English column instead of leaving a tall empty row", (() => {
-    const note = document.querySelector(".vocab .adj-note");
-    return !!note && window.getComputedStyle(note).display === "none";
-  })());
   check("the header keeps its label -- only tbody cells go transparent (CSS), and the header itself stays out of aria-hidden (JS)", (() => {
     const th = document.querySelector(".vocab th:nth-child(2)");
     const scopedToTbody = allCssRules.some(r => r.selectorText && r.selectorText.includes("body.hide-english .vocab tbody td:nth-child(2)"));

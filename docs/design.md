@@ -264,6 +264,20 @@ and Help.
   current direction is full strength in the section tone, the other a ghost,
   and both ghosted on an unsorted column, as in iOS Files. Its tap area is
   padded out with negative margins so it stays generous without growing the row.
+- **Every small row badge is a real `<button>` that opens the same popover** —
+  an い/な-adjective's type, a verb's 五段/一段/変格 group, and a particle a
+  word takes are all the identical capsule shape, the identical interaction
+  (tap, click, or with a mouse hover), and the identical `.role-pop` popover
+  showing one line about *that one badge* — never a permanent caption sitting
+  under the meaning, and never more than the tapped badge's own explanation
+  (a word with two particles opens two different popovers, one per chip, not
+  both roles stacked in one). One mechanism, `openPop()` in
+  `js/vocab/interactions.js`, drives all three so a reader only has to learn
+  the pattern once. It closes on an outside tap, Escape, scroll, resize, or
+  hash change, and is suppressed while the English is hidden or covered (a
+  role like "what you eat" would give the answer away). Every badge's hit
+  area is padded past its 20px capsule with an invisible `::before`, since
+  it's a small target on a phone.
 - **い/な-adjectives** carry a small **capsule badge** (`.adj-badge`) — 20px tall,
   a 14% tint of `--adj-i-ink` (purple) or `--adj-na-ink` (green) behind the glyph
   **い** / **な** in the full ink, 11.5px — in the English cell's trailing cluster
@@ -275,43 +289,48 @@ and Help.
   as saturated as `--particle`, not as muted as the accents, so a small badge reads
   as coloured at a glance. An **irregular** adjective — a な-adjective that ends in
   い (きれい, 嫌い, 有名), or いい / かっこいい, which conjugate as よくない — gets an
-  **outlined** badge (`.adj-badge-irr`: no fill, a 1.5px ring) and a one-line
-  footnote under its meaning (`.adj-note`, `--fs-micro`, secondary, from the row's
-  `adjNote`) like an iOS cell subtitle, so the reason is readable on touch, not
-  hidden in a tooltip. The legend (`.adj-legend`, `aria-hidden`, footnote text in the Options sheet) shows a
-  sample of each — い, な, outlined "irregular" — and `updateAdjLegend()` in
-  `js/vocab/interactions.js` shows it only while the table under the sticky toolbar
-  (or, while searching, any still-visible match) has adjectives. A visually-hidden
-  "(い-adjective)" note on the Japanese cell carries the real distinction to
-  screen readers.
+  **outlined** badge (`.adj-badge-irr`: no fill, a 1.5px ring); tapping it opens
+  the popover with the reason (row's `adjNote`) instead of a permanent line under
+  the meaning eating space on every row that doesn't need it. The legend
+  (`.adj-legend`, `aria-hidden`) shows a sample of each — い, な, outlined
+  "irregular" — as its own tappable buttons (`tabindex="-1"`, since the legend is
+  a sighted quick-reference; a screen reader gets the real distinction from each
+  row's own badge) that open the identical popover, and `updateAdjLegend()` in
+  `js/vocab/interactions.js` shows the legend only while the table under the
+  sticky toolbar (or, while searching, any still-visible match) has adjectives.
+  A visually-hidden "(い-adjective)" note on the Japanese cell carries the type
+  to screen readers regardless of whether the badge's popover is open.
 - **Verb-pairs** carry the same capsule badge (`.verb-badge`) for their group —
   **五段** (godan/u-verb, `--verb-godan-ink`, teal), **一段** (ichidan/ru-verb,
   `--verb-ichidan-ink`, terracotta) or **変格** (irregular: する/来る, reusing
   `--irregular-ink` — the same "this one's an exception" identity the app
   already uses for a stray irregular-reading row elsewhere). Every verb-pair
-  gets one, unlike the adjective badge which only marks tagged rows. A verb
-  worth a second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji
-  reading itself changes, 来る/来ます) — gets the same **outlined** treatment
-  (`.verb-badge-irr`) and footnote (`.adj-note`, shared with the adjective
-  footnote) as an irregular adjective, from the row's `verbNote`. Its own
-  legend (`.verb-legend`) follows the same show-only-when-relevant rule,
-  wrapping onto a second line on a phone since it carries a fourth swatch
-  (the outlined exception one) the adjective legend doesn't.
+  gets one, unlike the adjective badge which only marks tagged rows. 五段/一段/
+  変格 are kanji, unreadable at a glance to someone who doesn't read kanji, so
+  the badge's popover glyph carries real furigana (`data-reading`: ごだん/
+  いちだん/へんかく, `<rt>`, `ruby-position: over`) — the 20px row tile stays
+  kanji-only, but tapping it always tells you how to say it. A verb worth a
+  second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji reading
+  itself changes, 来る/来ます) — gets the same **outlined** treatment
+  (`.verb-badge-irr`) as an irregular adjective, its reason from the row's
+  `verbNote` appended to the popover text. Its own legend (`.verb-legend`)
+  follows the same show-only-when-relevant rule and the same tappable-swatch
+  pattern as the adjective legend, wrapping onto a second line on a phone
+  since it carries a fourth swatch (the outlined exception one) the adjective
+  legend doesn't.
 - **Particles a word takes** (`.particle-chip`) are the same capsule as the
   adjective badge, in the app's particle blue and bold (the one deliberate use of
   bold — `.particle`): `を`, `に/へ`, `が`. Like the い/な badge they sit in a
   **trailing cluster beside the row icons**, after the meaning — leading chips gave
-  every row a different left edge for its meaning. A word can have two (`を` `に`).
-  Each chip is a real `<button>` whose accessible name is its role ("Particle に:
-  who you ask"); **tap, click or (with a mouse) hover** opens a small iOS-style
-  popover (`.role-pop`: a 12px `--paper` bubble, the one menu shadow, an arrow at its
-  chip via `--arrow-x`) listing the word's particles with the tapped one emphasized —
-  the roles live there rather than in a caption under every row ("what you're bad at"
-  under "not good at" only repeated the meaning). It closes on an outside tap,
-  Escape, scroll or resize, and is suppressed while the English is hidden or covered
-  (a role like "what you eat" would give the answer away). The chip's hit area is
-  padded past the 20px capsule with an invisible `::before`. The legend (`.particle-legend`, same footnote) shows only while the
-  table on screen has chips, independently of the adjective legend.
+  every row a different left edge for its meaning. A word can have two (`を` `に`),
+  each its own chip with its own accessible name ("Particle に: who you ask") and
+  its own popover — tapping one shows only that particle's role; tapping the
+  other swaps the popover to its role instead, never both at once. The popover
+  itself (`.role-pop`: a 12px `--paper` bubble, the one menu shadow, an arrow at
+  the tapped badge via `--arrow-x`) repeats the tapped badge as its own small
+  glyph (the exact same capsule, not a plain word) so the popover reads as
+  "that one, explained." The legend (`.particle-legend`) shows only while the
+  table on screen has chips, independently of the adjective and verb legends.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on

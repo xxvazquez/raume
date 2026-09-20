@@ -73,39 +73,51 @@ so they're easy to spot in a sentence.
   above.)
 - **Show polite** (in Options) switches the verb tables between plain form and
   polite 〜ます. Its row only appears while the Verbs table is expanded.
+- **Every small row badge — adjective type, verb group, particle — is a
+  button that opens the same one-line popover** on tap, click, or (with a
+  mouse) hover, naming just that badge: nothing sits permanently under the
+  meaning eating space, and a word with two particles opens two different
+  popovers, one per chip, never both roles stacked in one. Closes on an
+  outside tap, Escape, scroll or resize; suppressed while the English is
+  hidden or covered (a role like *what you eat* would give the answer away).
 - **Adjective type** — every い- / な-adjective in the dataset carries a small
   capsule badge beside its meaning, a lavender **い** or a sage **な**, like a
   dictionary's part-of-speech tag: the Adjectives table, the Taste & Texture
   adjectives, and the stray adjective in an otherwise-noun table (危険). The
-  odd ones are **outlined** instead of filled, with a one-line note under the
-  meaning — a な-adjective that ends in い (きれい, 嫌い, 有名) and the
-  irregular い-adjectives いい / かっこいい (よくない). A small legend at the
-  foot of Options explains the badges once, but only while the table currently on
-  screen actually has them — it's absent on every other table instead of
-  explaining a code that's nowhere in view. Mimetic words (*mochimochi*,
-  *sakusaku*) are 擬態語, not い/な adjectives, so they get no badge. Driven by
-  `adj` (`"i"` / `"na"`) and an optional `adjNote` on the row; a
-  visually-hidden note on the cell carries the distinction to screen readers,
+  odd ones are **outlined** instead of filled — a な-adjective that ends in い
+  (きれい, 嫌い, 有名) and the irregular い-adjectives いい / かっこいい
+  (よくない) — with the reason in the popover, not a permanent note. A small
+  legend at the foot of Options explains the badges once, its own swatches
+  tappable for the same popover, but only while the table currently on screen
+  actually has them — it's absent on every other table instead of explaining
+  a code that's nowhere in view. Mimetic words (*mochimochi*, *sakusaku*) are
+  擬態語, not い/な adjectives, so they get no badge. Driven by `adj` (`"i"` /
+  `"na"`) and an optional `adjNote` on the row; a visually-hidden note on the
+  cell carries the distinction to screen readers regardless of the popover,
   and the badge is drawn by CSS so it stays out of search.
 - **Verb group** — every verb in the Verbs table carries the same style of
   badge for its conjugation group: teal **五段** (godan/u-verb), terracotta
   **一段** (ichidan/ru-verb), or **変格** (irregular — する and 来る, plus every
-  suru-compound like 料理する). Godan and ichidan aren't visible from the
-  ending alone (both include verbs ending in -eru/-iru), so the handful that
-  would otherwise be mistaken for the other class get an **outlined** badge
-  and a one-line note: 切る and 帰る (五段 despite looking 一段), and 来る (its
-  own kanji reading changes: 来る is *kuru*, but 来ます is *kimasu*). Driven by
-  `verbClass` and an optional `verbNote` on the row, checked by `npm run
-  validate` against the plain/polite forms already in the data.
+  suru-compound like 料理する). 五段/一段/変格 are kanji, so the popover's own
+  glyph carries real furigana (ごだん/いちだん/へんかく) — the 20px badge in the
+  table stays kanji-only, but tapping it always says how to read it. Godan and
+  ichidan aren't visible from the ending alone (both include verbs ending in
+  -eru/-iru), so the handful that would otherwise be mistaken for the other
+  class get an **outlined** badge and the reason in the popover: 切る and 帰る
+  (五段 despite looking 一段), and 来る (its own kanji reading changes: 来る is
+  *kuru*, but 来ます is *kimasu*). Driven by `verbClass` and an optional
+  `verbNote` on the row, checked by `npm run validate` against the
+  plain/polite forms already in the data.
 - **Particles a word takes** — each verb, and the adjectives 好き / 嫌い / 上手 /
   下手, shows the particle(s) it takes as small blue chips beside the row icons
   (**を** eat, **に/へ** go, **が** like) — the same blue as particles in
   sentences, in a trailing cluster so the meanings keep one left edge. **Tap or click
-  a chip** (or hover it with a mouse) for a small popover saying what the particle
-  marks — 聞く: **を** *what you listen to*, **に** *who you ask* — so a row stays one
-  line; verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる) show none. する is **を**
-  (do) and **に** (choose); 話す is **と** (talk with) and **を** (speak). Only core
-  arguments are listed — not the place-で or time-に that any verb can take. A legend in
+  a chip** (or hover it with a mouse) for the popover saying what that particle
+  marks — 聞く: tapping **を** shows *what you listen to*, tapping **に** shows
+  *who you ask*, never both at once — so a row stays one line; verbs with no
+  particle (疲れる, 寝る, 泳ぐ, 起きる) show none. する is **を** (do) and **に**
+  (choose); 話す is **と** (talk with) and **を** (speak). Only core arguments
+  are listed — not the place-で or time-に that any verb can take. A legend in
   Options explains the chip whenever the table on screen has them. Driven by a
   `particles: [{ p, role }]` field, which `npm run validate` requires on every verb.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the

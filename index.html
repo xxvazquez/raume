@@ -79,9 +79,9 @@
           </div>
         </div>
         <div class="opt-foot">
-          <span class="adj-legend" aria-hidden="true" hidden><span class="adj-legend-swatch adj-badge adj-badge-i" data-badge="い"></span>い-adj<span class="adj-legend-swatch adj-badge adj-badge-na" data-badge="な"></span>な-adj<span class="adj-legend-irr adj-badge adj-badge-na adj-badge-irr" data-badge="な"></span>irregular</span>
-          <span class="verb-legend" aria-hidden="true" hidden><span class="verb-badge verb-badge-godan" data-badge="五段"></span>godan<span class="verb-badge verb-badge-ichidan" data-badge="一段"></span>ichidan<span class="verb-badge verb-badge-irregular" data-badge="変格"></span>irregular<span class="verb-badge verb-badge-godan verb-badge-irr" data-badge="五段"></span>exception</span>
-          <span class="particle-legend" aria-hidden="true" hidden><span class="particle-chip" data-badge="を"></span>particle it takes</span>
+          <span class="adj-legend" aria-hidden="true" hidden><button type="button" tabindex="-1" class="adj-legend-swatch adj-badge adj-badge-i" data-badge="い" data-role="い-adjective"></button>い-adj<button type="button" tabindex="-1" class="adj-legend-swatch adj-badge adj-badge-na" data-badge="な" data-role="な-adjective"></button>な-adj<button type="button" tabindex="-1" class="adj-legend-irr adj-badge adj-badge-na adj-badge-irr" data-badge="な" data-role="な-adjective — ends in い but takes な"></button>irregular</span>
+          <span class="verb-legend" aria-hidden="true" hidden><button type="button" tabindex="-1" class="verb-badge verb-badge-godan" data-badge="五段" data-reading="ごだん" data-role="godan verb (u-verb)"></button>godan<button type="button" tabindex="-1" class="verb-badge verb-badge-ichidan" data-badge="一段" data-reading="いちだん" data-role="ichidan verb (ru-verb)"></button>ichidan<button type="button" tabindex="-1" class="verb-badge verb-badge-irregular" data-badge="変格" data-reading="へんかく" data-role="irregular verb"></button>irregular<button type="button" tabindex="-1" class="verb-badge verb-badge-godan verb-badge-irr" data-badge="五段" data-reading="ごだん" data-role="godan verb — looks ichidan but conjugates godan"></button>exception</span>
+          <span class="particle-legend" aria-hidden="true" hidden><button type="button" tabindex="-1" class="particle-chip" data-badge="を" data-role="what it marks"></button>particle it takes</span>
         </div>
       </div>
     </div>
@@ -113,9 +113,10 @@
         <li><strong>Furigana</strong> sits above the kanji. Tap any kana to see its romaji, or tap the word itself for its full romaji line.</li>
         <li>The <strong>Options</strong> button beside the search box has switches to hide <strong>Japanese</strong>, <strong>Furigana</strong> or <strong>English</strong>, and <strong>Cover answers</strong>, which blanks the English so you can tap a row to check it (resets on reload). A dot on the button means something is switched on.</li>
         <li><strong>Show polite</strong> (in Options, on verb tables) swaps the dictionary form for the 〜ます form.</li>
-        <li>Blue chips beside a verb (and 好き, 嫌い, 上手, 下手) show the <strong>particle</strong> it takes — tap one to see what it marks (聞く: <strong>を</strong> what you listen to, <strong>に</strong> who you ask).</li>
-        <li>A small <strong>い</strong> or <strong>な</strong> badge marks how an adjective conjugates; an outlined one is irregular (きれい, 嫌い, 有名, or いい → よくない). The legend is at the foot of Options.</li>
-        <li>In the Verbs table, a small <strong>五段</strong> / <strong>一段</strong> / <strong>変格</strong> badge marks the verb's group (godan / ichidan / irregular); an outlined one is worth a second look (切る and 帰る conjugate godan despite looking ichidan; 来る's own reading changes: 来る is <em>kuru</em>, 来ます is <em>kimasu</em>).</li>
+        <li>Every small badge beside a row — a particle, an adjective's い/な, a verb's 五段/一段/変格 — opens the same popover on tap: one line about just that badge, never a permanent line under the meaning.</li>
+        <li>Blue chips beside a verb (and 好き, 嫌い, 上手, 下手) show the <strong>particle</strong> it takes — tap one to see what it marks (聞く: tap <strong>を</strong> for what you listen to, tap <strong>に</strong> for who you ask — never both at once).</li>
+        <li>A small <strong>い</strong> or <strong>な</strong> badge marks how an adjective conjugates; tap it to see which, and for an outlined one, why it's irregular (きれい, 嫌い, 有名, or いい → よくない). The legend is at the foot of Options.</li>
+        <li>In the Verbs table, a small <strong>五段</strong> / <strong>一段</strong> / <strong>変格</strong> badge marks the verb's group (godan / ichidan / irregular). Tap it for the reading (they're kanji) and, for an outlined one, why it's worth a second look (切る and 帰る conjugate godan despite looking ichidan; 来る's own reading changes: 来る is <em>kuru</em>, 来ます is <em>kimasu</em>).</li>
         <li>The speaker icon plays a word's pronunciation. Particles (は, を, から …) show in blue bold — tap one to see how it's read (は as "wa").</li>
         <li>Phrases are question/answer pairs, in their own order rather than A–Z.</li>
       </ul>
