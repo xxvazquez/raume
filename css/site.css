@@ -967,7 +967,7 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 .table-section.collapsed .section-head::before { display: none; }
 /* A collapsed table is a quiet list row, not a section heading. */
-.table-section.collapsed .section-title-text { font-size: 17px; font-weight: 400; }
+.table-section.collapsed .section-title-text { font-size: var(--fs-subhead); font-weight: 400; }
 .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 12px; }
 
 /* iOS "inset grouped" list. One grey ground behind the reference page, white
@@ -1017,12 +1017,12 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) { border-radius: 14px; }
 /* Row: icon tile, title, chevron, actions -- the hairline is inset to start
    under the title, as in an iOS list, and the last row has none. */
-#vocabulary .table-section.collapsed .section-head { position: relative; padding: 10px 0; border-bottom: 0; }
+#vocabulary .table-section.collapsed .section-head { position: relative; padding: 9px 0; border-bottom: 0; }
 #vocabulary .table-section.collapsed .section-head::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0;
   border-bottom: 1px solid var(--row-line);
 }
-#vocabulary .table-section.collapsed .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 39px; }
+#vocabulary .table-section.collapsed .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
 #vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) .section-head::after { display: none; }
 
 /* Icon tile (iOS Settings style): a small rounded square in the section's soft
@@ -1030,7 +1030,7 @@ body.selftest-mode .selftest-hint { display: block; }
    to find it by. */
 #vocabulary .section-head { align-items: center; }
 #vocabulary .section-head > .section-icon:not(.section-icon-empty) {
-  width: 30px; height: 30px; margin-top: 0; padding: 6px; box-sizing: border-box;
+  width: 28px; height: 28px; margin-top: 0; padding: 5.5px; box-sizing: border-box;
   border-radius: 8px;
   background: var(--section-soft); color: var(--section-strong);
 }
@@ -2064,7 +2064,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    the home-indicator inset (viewport-fit=cover in the meta viewport).
    Screen titles step up to a large title. Desktop keeps the top capsule nav. */
 @media (max-width: 640px) {
-  :root { --nav-h: 1px; --tabbar-h: 54px; --fs-large-title: 30px; }
+  :root { --nav-h: 1px; --tabbar-h: 54px; --fs-large-title: 28px; }
   body {
     padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
     padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);

@@ -116,7 +116,7 @@ and Help.
   is ONE card of list cells (inset hairline between them, disclosure chevron on
   the right, the per-table ⋯ menu / print kept on the cell as bare glyphs; the
   hairline is inset to start under the title, and cells only group with
-  neighbours that are on screen); every table has a 30px **icon tile** — an 8px-radius
+  neighbours that are on screen); every table has a 28px **icon tile** — an 8px-radius
   square in the section's soft tint (`--section-soft`) with the glyph in its deep
   tone, 28px on an open table's title — from a default per shipped table
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
@@ -188,7 +188,7 @@ and Help.
   running study session hides the bar and gives the space back like the rest of the
   chrome. The table-index sheet (`z-index` 60) and its scrim (59) cover the bar.
 - **Large screen titles** — on a phone the screens that already have a title
-  (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (30px,
+  (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (28px,
   weight 600) instead of `--fs-page-title`. The reference pages get one too: a
   real `<h2 class="screen-title" id="screenTitle">` that `showSection()` keeps in
   step with the active section (Vocabulary / Grammar / Phrases / Travel), as an
