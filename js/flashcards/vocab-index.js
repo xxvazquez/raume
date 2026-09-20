@@ -95,6 +95,19 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiAnswers = entry.romajiUsable
             ? row.forms.map(function (f) { return normalizeAnswer(f.romaji, true); })
             : [];
+          // Also accept both forms typed together, the way the app itself
+          // displays them everywhere (romajiDisplay/jpInlineHtml): either
+          // slash style, either order -- someone typing what they see on
+          // screen shouldn't be marked wrong for including both forms.
+          if (entry.romajiUsable && row.forms.length > 1) {
+            var romajiForms = row.forms.map(function (f) { return f.romaji; });
+            var reversedForms = romajiForms.slice().reverse();
+            [romajiForms.join(" / "), romajiForms.join("/"),
+              reversedForms.join(" / "), reversedForms.join("/")].forEach(function (combo) {
+              var norm = normalizeAnswer(combo, true);
+              if (entry.romajiAnswers.indexOf(norm) === -1) entry.romajiAnswers.push(norm);
+            });
+          }
           // Un-normalized romaji, same order/length as romajiAnswers -- lets
           // the wrong-answer diff show "kaerimasu", not the folded form used
           // for matching.
