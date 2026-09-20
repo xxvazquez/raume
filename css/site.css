@@ -761,17 +761,16 @@ body[data-active-section="travel"] #vocabulary {
 }
 .search-box.has-value .clear-search { display: block; }
 
-.vocab-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 /* A switch is "on" in the deep section tone in light, and the mid tone in dark
    (the deep one is a pale tint there, which would wash out the white thumb). */
 body { --switch-on: var(--section-strong); }
 :root[data-theme="dark"] body { --switch-on: var(--section); }
 /* Segmented control (iOS): a grey track holding the segments, the selected
-   ones raised on a thumb. The three column toggles are one tool with three
-   positions (Japanese / Furigana / English) -- a column that is showing is
-   raised, one that is hidden lies flat and struck through (.col-hidden,
-   below). Manage's filter (.fc-manage-filters) is the same component with
-   one segment raised at a time. */
+   ones raised on a thumb. The Flashcards dashboard's "Words to review" column
+   toggles (.view-mode) use it with several segments raised at once -- one that
+   is hidden lies flat and struck through (.col-hidden, below). Manage's filter
+   (.fc-manage-filters) is the same component with one segment raised at a
+   time. */
 .view-mode,
 .fc-manage-filters {
   display: inline-flex;
@@ -800,46 +799,113 @@ body { --switch-on: var(--section-strong); }
 }
 .view-mode button:hover,
 .fc-manage-filters button:hover { color: var(--ink); }
-.polite-toggle[hidden] { display: none; }
-/* Cover answers / Show polite: iOS switches. The button keeps its label and
-   its aria-pressed state; the track and thumb are drawn with ::before / ::after
-   at the trailing edge, and the on state fills with the section tone. */
-.selftest-toggle,
-.polite-toggle {
+/* --- Options sheet (search bar's trailing button) ----------------------
+   The sticky bar is just the search field and one Options button; everything
+   else -- the column switches, Cover answers, Show polite, Expand all, Print
+   and the badge legend -- lives in an iOS inset-grouped list behind it. A
+   popover under the button on a wide screen, a bottom sheet with a scrim on a
+   phone (same shape as the table index). It sits inside the sticky toolbar, so
+   while open the toolbar is lifted above the tab bar (.options-open). */
+.vocab-bar { position: relative; display: flex; align-items: center; gap: 4px; max-width: 640px; }
+.vocab-bar .search-box { flex: 1 1 auto; max-width: none; }
+.options-btn {
   appearance: none;
   position: relative;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font: 400 var(--fs-small)/1 var(--font-ui);
-  padding: 8px 40px 8px 4px;
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 8px;
+  border: 0; background: transparent;
+  color: var(--section-strong);
+  font: 400 var(--fs-nav)/1 var(--font-ui);
   cursor: pointer;
-  white-space: nowrap;
 }
-.selftest-toggle::before,
-.polite-toggle::before {
+.options-btn:hover { opacity: .7; }
+.options-btn:active { opacity: .5; }
+.options-btn svg { flex: 0 0 auto; }
+/* Something is off its default (a column hidden, answers covered, polite on):
+   a small dot on the glyph, so a covered table never looks broken. */
+.options-dot {
+  position: absolute; top: 4px; left: 20px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--section);
+  box-shadow: 0 0 0 2px var(--group-ground);
+}
+.options-dot[hidden], .options-sheet[hidden], .options-scrim[hidden], .opt-row[hidden] { display: none; }
+.options-scrim { display: none; }
+.options-sheet {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  width: 320px; max-width: calc(100vw - 32px); max-height: 75vh; overflow: auto;
+  padding: 4px 12px 12px;
+  background: var(--group-ground);
+  border-radius: 14px;
+  box-shadow: var(--shadow-menu);
+}
+.options-grab { display: none; }
+.vocab-toolbar.options-open { z-index: 70; }
+/* iOS list header: 13px sentence-case secondary text, not tracked caps. */
+.opt-head { margin: 0; padding: 12px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.opt-group:not(:has(.opt-head)) { padding-top: 12px; }
+.opt-list { background: var(--paper); border-radius: 12px; overflow: hidden; }
+.opt-row {
+  appearance: none;
+  position: relative;
+  display: flex; align-items: center;
+  width: 100%; min-height: 44px; padding: 0 64px 0 16px;
+  border: 0; background-color: transparent;
+  color: var(--ink); text-align: left;
+  font: 400 15px/1.2 var(--font-ui);
+  cursor: pointer;
+}
+/* Inset hairline between rows (a gradient, since ::after draws the switch thumb). */
+.opt-row + .opt-row {
+  background-image: linear-gradient(var(--row-line), var(--row-line));
+  background-repeat: no-repeat;
+  background-position: 16px 0;
+  background-size: calc(100% - 16px) 1px;
+}
+.opt-row:hover { background-color: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.opt-action { color: var(--section-strong); padding-right: 16px; }
+/* iOS switch at the trailing edge: track + thumb drawn on the row, filled with
+   the section tone when on (aria-pressed / .active). */
+.opt-switch::before {
   content: "";
-  position: absolute; right: 2px; top: 50%;
+  position: absolute; right: 16px; top: 50%;
   width: 34px; height: 20px; margin-top: -10px;
   border-radius: 10px;
   background: var(--switch-off);
   transition: background .15s ease;
 }
-.selftest-toggle::after,
-.polite-toggle::after {
+.opt-switch::after {
   content: "";
-  position: absolute; right: 18px; top: 50%;
+  position: absolute; right: 46px; top: 50%;
   width: 16px; height: 16px; margin-top: -8px;
   border-radius: 50%;
   background: var(--switch-thumb);
   box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
   transition: right .15s ease;
 }
-.selftest-toggle.active::before,
-.polite-toggle.active::before { background: var(--switch-on); }
-.selftest-toggle.active::after,
-.polite-toggle.active::after { right: 4px; }
-.search-count { margin-left: auto; color: var(--faint); font-size: var(--fs-micro); white-space: nowrap; }
+.opt-switch.active::before { background: var(--switch-on); }
+.opt-switch.active::after { right: 20px; }
+.expand-bar.search-hidden { display: none; }
+/* Footnote under the list: what the badges mean, only for a table that has them. */
+.opt-foot { padding: 0 16px; }
+.opt-foot > :not([hidden]) { display: flex; margin-top: 12px; }
+@media (max-width: 640px) {
+  .options-btn-label { display: none; }
+  .options-scrim:not([hidden]) {
+    display: block; position: fixed; inset: 0; z-index: 59;
+    background: color-mix(in srgb, var(--ink) 38%, transparent);
+  }
+  .options-sheet {
+    position: fixed; inset: auto 0 0 0;
+    width: auto; max-width: none; max-height: 82vh;
+    border-radius: 14px 14px 0 0;
+    padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .options-grab { display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 2px; }
+}
+.search-count { color: var(--faint); font-size: var(--fs-micro); }
+.search-count:empty { display: none; }
 /* Explains the い/な badges (and the outlined "irregular" one) once, here,
    instead of repeating a label on every adjective row. Purely a sighted
    quick-reference -- aria-hidden, since the real per-row semantics are carried
@@ -854,33 +920,9 @@ body { --switch-on: var(--section-strong); }
 .adj-legend .adj-badge:first-child, .particle-legend .particle-chip:first-child { margin-left: 0; }
 .particle-legend { display: inline-flex; align-items: center; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; }
 .particle-legend[hidden] { display: none; }
-.adj-legend:not([hidden]) + .particle-legend:not([hidden]) { margin-left: 12px; }
 /* One-line "how to use it" note for Cover answers -- only while the mode is on. */
 .selftest-hint { display: none; margin: 0; color: var(--muted); font-size: var(--fs-small); }
 body.selftest-mode .selftest-hint { display: block; }
-
-/* Expand all / collapse all -- a quiet text control folded into the toolbar's
-   control row (with the column toggles, search count and adj legend) rather
-   than a row of its own, so it costs no extra vertical space. */
-.expand-bar { display: inline-flex; align-items: center; gap: 14px; }
-.expand-bar.search-hidden { display: none; }
-/* iOS plain buttons: tint-coloured text, no box, no underline -- pressed state
-   is a dim, not a colour change. */
-.expand-all-btn {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--section-strong);
-  font: 400 var(--fs-small)/1 var(--font-ui);
-  padding: 8px 2px;
-  cursor: pointer;
-}
-.expand-all-btn:hover { opacity: .7; }
-.expand-all-btn:active { opacity: .5; }
-/* The "Print…" menu sits in the expand bar; its trigger is a quiet text
-   control like Expand all, its dropdown reuses the table overflow menu. */
-.print-menu { position: relative; }
-.print-menu .section-menu-list { min-width: 168px; }
 
 /* --- Table section --------------------------------------------- */
 /* Not a card: no border, no fill, no shadow -- a titled group of rules.
@@ -889,7 +931,7 @@ body.selftest-mode .selftest-hint { display: block; }
    -> rows -- without a box or a heavier heading. */
 .table-section {
   margin: 0 0 20px;
-  scroll-margin-top: 138px;
+  scroll-margin-top: 124px;
   break-before: page;
   page-break-before: always;
 }
@@ -2049,7 +2091,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link[data-section="travel"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { background: none; font-weight: 500; }
-  .table-section { scroll-margin-top: 133px; }
+  .table-section { scroll-margin-top: 92px; }
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
   /* Large screen titles: the screens that have a title carry it big. */

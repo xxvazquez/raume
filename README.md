@@ -54,8 +54,12 @@ so they're easy to spot in a sentence.
   tap) the word or sentence itself to see its romaji as a line underneath —
   no hover trigger, unlike the per-kana reading layer below. It's still
   fully searchable even though it's not shown by default.
-- **Column toggles** — hide **Japanese / Furigana / English** from the
-  toolbar (Furigana hides just the readings). You can't hide both text
+- **Options** — the sticky bar is just the search field and one **Options**
+  button; a small dot on it means something is off its default (a column
+  hidden, answers covered, polite on). It opens an iOS-style list — a popover
+  on a wide screen, a bottom sheet on a phone — holding everything else below.
+- **Column switches** — in Options, switch **Japanese / Furigana / English** off
+  to hide them (Furigana hides just the readings). You can't hide both text
   columns at once. A hidden column keeps its width and header label; just its
   row content goes transparent, so nothing reflows.
 - **Furigana** sits over the exact kanji it belongs to, always shown, with an
@@ -66,16 +70,16 @@ so they're easy to spot in a sentence.
   enters the DOM and search/sort stay clean. Hiragana doesn't get this
   per-character reveal. (This is separate from the whole-word romaji reveal
   above.)
-- **Show polite** switches the verb tables between plain form and polite 〜ます.
-  Only visible while the Verbs table is expanded.
+- **Show polite** (in Options) switches the verb tables between plain form and
+  polite 〜ます. Its row only appears while the Verbs table is expanded.
 - **Adjective type** — every い- / な-adjective in the dataset carries a small
   capsule badge beside its meaning, a lavender **い** or a sage **な**, like a
   dictionary's part-of-speech tag: the Adjectives table, the Taste & Texture
   adjectives, and the stray adjective in an otherwise-noun table (危険). The
   odd ones are **outlined** instead of filled, with a one-line note under the
   meaning — a な-adjective that ends in い (きれい, 嫌い, 有名) and the
-  irregular い-adjectives いい / かっこいい (よくない). A small legend in the
-  toolbar explains the badges once, but only while the table currently on
+  irregular い-adjectives いい / かっこいい (よくない). A small legend at the
+  foot of Options explains the badges once, but only while the table currently on
   screen actually has them — it's absent on every other table instead of
   explaining a code that's nowhere in view. Mimetic words (*mochimochi*,
   *sakusaku*) are 擬態語, not い/な adjectives, so they get no badge. Driven by
@@ -90,8 +94,8 @@ so they're easy to spot in a sentence.
   marks — 聞く: **を** *what you listen to*, **に** *who you ask* — so a row stays one
   line; verbs with no particle (疲れる, 寝る, 泳ぐ, 起きる) show none. する is **を**
   (do) and **に** (choose); 話す is **と** (talk with) and **を** (speak). Only core
-  arguments are listed — not the place-で or time-に that any verb can take. A toolbar
-  legend explains the chip whenever the table on screen has them. Driven by a
+  arguments are listed — not the place-で or time-に that any verb can take. A legend in
+  Options explains the chip whenever the table on screen has them. Driven by a
   `particles: [{ p, role }]` field, which `npm run validate` requires on every verb.
 - **Pronunciation** — a small speaker icon next to the Japanese plays the
   reading aloud. Every built-in word/phrase has a prerendered native-voice
@@ -104,7 +108,7 @@ so they're easy to spot in a sentence.
 
 **Study aids**
 
-- **Cover answers** blanks the English column; tap a row to reveal that one
+- **Cover answers** (in Options) blanks the English column; tap a row to reveal that one
   answer. A cover-and-check aid, not a quiz — no score, resets on reload.
 - **Hide a row** (the eye icon) is a quiet per-table "I know this", with a
   one-click "Show all".
@@ -161,7 +165,9 @@ block for words the built-in dataset doesn't have:
   the first time you sign in.
 
 **Printing** — A4-friendly at three scopes: the printer icon on a table prints
-that table; **Print…** prints the whole section or the whole reference.
+that table; **Print this section** / **Print whole reference** in Options do
+the whole section or the whole reference. **Expand all** / **Collapse all** sit
+there too.
 Collapsed tables still print their rows.
 
 **Theme** — a header control cycles **System → Light → Dark**, applied before

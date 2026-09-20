@@ -133,6 +133,40 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const trigger = document.querySelector('.tindex-trigger');
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
   }
+  // The toolbar's Options sheet (column switches, Cover answers, Show polite,
+  // Expand all, Print, the badge legend).
+  function optionsSheetOpen() {
+    const sheet = document.getElementById('optionsSheet');
+    return !!sheet && !sheet.hidden;
+  }
+  function setOptionsSheet(open) {
+    const sheet = document.getElementById('optionsSheet');
+    if (!sheet) return;
+    sheet.hidden = !open;
+    const scrim = document.getElementById('optionsScrim');
+    if (scrim) scrim.hidden = !open;
+    const btn = document.getElementById('optionsBtn');
+    if (btn) btn.setAttribute('aria-expanded', String(open));
+    const bar = sheet.closest('.vocab-toolbar');
+    if (bar) bar.classList.toggle('options-open', open);
+  }
+  function closeOptionsSheet() { setOptionsSheet(false); }
+  // The Options button carries a dot whenever something is off its default --
+  // a column hidden, answers covered, polite on -- so a covered table never
+  // looks broken with the sheet shut. Polite only counts where it applies (a
+  // verb table on screen); elsewhere it does nothing and its row is hidden.
+  function updateOptionsDot() {
+    const dot = document.getElementById('optionsDot');
+    if (!dot) return;
+    const cl = document.body.classList;
+    const pt = document.getElementById('politeToggle');
+    const changed = cl.contains('hide-japanese') || cl.contains('hide-furigana') || cl.contains('hide-english')
+      || cl.contains('selftest-mode') || (cl.contains('show-polite') && !!pt && !pt.hidden);
+    dot.hidden = !changed;
+    const btn = document.getElementById('optionsBtn');
+    if (btn) btn.setAttribute('aria-label', changed ? 'Options (some changed)' : 'Options');
+  }
+  vocab.updateOptionsDot = updateOptionsDot;
 
   /* The four main study areas. Vocabulary / Grammar / Travel each render a set
      of table-sections (Vocabulary keeps its content-category sub-headings);
@@ -300,6 +334,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const pt = document.getElementById('politeToggle');
     if (!pt) return;
     pt.hidden = !document.querySelector('#vocabulary .table-section:not(.page-hidden):not(.collapsed):not(.search-hidden) .verb-form');
+    updateOptionsDot();
   }
   vocab.updatePoliteVisibility = updatePoliteVisibility;
 
@@ -639,13 +674,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // / the furigana, not the header (still meaningful on its own); the
     // sort control disables regardless, since sorting by hidden content
     // isn't useful even though the header's still visible -- and reflects
-    // each toolbar button's pressed state (pressed = hidden).
+    // each control's pressed state (a Flashcards segment: pressed = hidden; an
+    // Options switch: pressed = showing).
     function applyColVisibility() {
       document.querySelectorAll('.view-mode button').forEach(b => {
         const off = isHidden(b.dataset.col);
         b.classList.toggle('col-hidden', off);
         b.setAttribute('aria-pressed', String(off));
       });
+      // The Options sheet's switches read the other way round: on = showing.
+      document.querySelectorAll('.opt-switch[data-col]').forEach(b => {
+        const on = !isHidden(b.dataset.col);
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      updateOptionsDot();
       document.querySelectorAll('.vocab').forEach(function (table) {
         Object.keys(COL_INDEX).forEach(function (key) {
           const col = COL_INDEX[key], hide = isHidden(key);
@@ -677,7 +720,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (document.body.dataset.activePage !== 'flashcards') runSearch();
     }
     document.addEventListener('click', function (event) {
-      const button = event.target.closest && event.target.closest('.view-mode button');
+      const button = event.target.closest && event.target.closest('.view-mode button, .opt-switch[data-col]');
       if (button && button.dataset.col) toggleColumn(button.dataset.col);
     });
   });
@@ -709,6 +752,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       } else if ((el = t.closest('.print-scope'))) {
         event.stopPropagation();
         closeSectionMenus();
+        closeOptionsSheet();
         printScope(el.dataset.scope);
       } else if ((el = t.closest('.jp-speak-btn'))) {
         event.stopPropagation();
@@ -788,6 +832,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function openTindexMenu() {
       const menu = document.getElementById('tindexMenu');
       closeSectionMenus();
+      closeOptionsSheet();
       menu.hidden = false;
       document.querySelector('.tindex-trigger').setAttribute('aria-expanded', 'true');
       const items = tindexItems();
@@ -843,7 +888,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!panel) return;
       const visible = [...document.querySelectorAll('#vocabulary .table-section:not(.page-hidden):not(.search-hidden)')];
       let current = visible[0];
-      const y = window.scrollY + 130;
+      const y = window.scrollY + 118;
       for (const s of visible) if (s.offsetTop <= y) current = s;
       if (forceId) { const f = visible.find(s => s.dataset.table === String(forceId)); if (f) current = f; }
       panel.querySelectorAll('a[data-target]').forEach(function (a) {
@@ -859,11 +904,51 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }, { passive: true });
 
     // Expand all / collapse all -- read a whole category (or section) straight
-    // through, then snap back to every table closed.
+    // through, then snap back to every table closed. It lives in the Options
+    // sheet; the sheet closes so the result is what you see.
     const expandAllBtn = document.getElementById('expandAllBtn');
     if (expandAllBtn) {
       expandAllBtn.addEventListener('click', function () {
         setExpandAll(!document.body.classList.contains('expand-all-mode'));
+        closeOptionsSheet();
+        const ob = document.getElementById('optionsBtn');
+        if (ob) ob.focus();
+      });
+    }
+
+    // Options sheet: the button toggles it; the scrim (phone), an outside
+    // click, Esc, or focus leaving it closes it. The switches inside stay open
+    // so several can be flipped in one visit; Up/Down walks the visible rows.
+    const optionsBtn = document.getElementById('optionsBtn');
+    const optionsSheet = document.getElementById('optionsSheet');
+    function optionRows() { return [...optionsSheet.querySelectorAll('.opt-row:not([hidden])')]; }
+    if (optionsBtn && optionsSheet) {
+      optionsBtn.addEventListener('click', function () {
+        if (optionsSheetOpen()) { closeOptionsSheet(); return; }
+        closeTableIndexMenu();
+        closeSectionMenus();
+        setOptionsSheet(true);
+        const rows = optionRows();
+        if (rows[0]) rows[0].focus();
+      });
+      document.getElementById('optionsScrim').addEventListener('click', closeOptionsSheet);
+      optionsSheet.addEventListener('keydown', function (event) {
+        const rows = optionRows();
+        const i = rows.indexOf(document.activeElement);
+        if (event.key === 'ArrowDown') { event.preventDefault(); (rows[i + 1] || rows[0]).focus(); }
+        else if (event.key === 'ArrowUp') { event.preventDefault(); (rows[i - 1] || rows[rows.length - 1]).focus(); }
+      });
+      optionsSheet.addEventListener('focusout', function (event) {
+        const to = event.relatedTarget;
+        if (to && !optionsSheet.contains(to) && to !== optionsBtn) closeOptionsSheet();
+      });
+      document.addEventListener('click', function (event) {
+        if (optionsSheetOpen() && !event.target.closest('.options-sheet, .options-btn')) closeOptionsSheet();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape' || !optionsSheetOpen()) return;
+        closeOptionsSheet();
+        optionsBtn.focus();
       });
     }
 
@@ -998,6 +1083,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         politeToggle.setAttribute('aria-pressed', String(on));
       }
       try { localStorage.setItem(POLITE_KEY, on ? '1' : '0'); } catch (e) {}
+      updateOptionsDot();
     }
     if (politeToggle) {
       let startPolite = false;
@@ -1022,6 +1108,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         selftestToggle.classList.toggle('active', on);
         selftestToggle.setAttribute('aria-pressed', String(on));
       }
+      updateOptionsDot();
     }
     if (selftestToggle) {
       selftestToggle.addEventListener('click', function () {

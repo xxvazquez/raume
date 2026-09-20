@@ -41,33 +41,49 @@
   <h2 class="screen-title" id="screenTitle">Vocabulary</h2>
   <nav id="tableIndex" class="table-index" aria-label="Jump to a table"></nav>
   <div class="vocab-toolbar">
-    <label class="search-box">
-      <svg class="search-icon" viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>
-      <input id="tableSearch" type="search" aria-label="Search vocabulary" aria-controls="vocabulary" placeholder="Search Japanese, furigana, romaji or English…" autocomplete="off">
-      <button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button>
-    </label>
-    <div class="vocab-controls">
-      <div class="view-mode" aria-label="Column visibility">
-        <button type="button" data-col="japanese" aria-pressed="false" title="Hide the Japanese column">Japanese</button>
-        <button type="button" data-col="furigana" aria-pressed="false" title="Hide the furigana readings">Furigana</button>
-        <button type="button" data-col="english" aria-pressed="false" title="Hide the English column">English</button>
-      </div>
-      <button type="button" class="selftest-toggle" id="selftestToggle" aria-pressed="false" title="Cover the English column — tap a row to reveal its answer">Cover answers</button>
-      <button type="button" class="polite-toggle" id="politeToggle" aria-pressed="false" title="Switch verb tables between the plain form and the polite 〜ます form">Show polite</button>
-      <span id="searchCount" class="search-count" role="status" aria-live="polite" aria-atomic="true"></span>
-      <span class="adj-legend" aria-hidden="true" hidden><span class="adj-legend-swatch adj-badge adj-badge-i" data-badge="い"></span>い-adj<span class="adj-legend-swatch adj-badge adj-badge-na" data-badge="な"></span>な-adj<span class="adj-legend-irr adj-badge adj-badge-na adj-badge-irr" data-badge="な"></span>irregular</span>
-      <span class="particle-legend" aria-hidden="true" hidden><span class="particle-chip" data-badge="を"></span>particle it takes</span>
-      <span class="expand-bar">
-        <div class="section-menu print-menu">
-          <button type="button" class="expand-all-btn print-menu-btn" aria-haspopup="true" aria-expanded="false" title="Print more than one table">Print…</button>
-          <div class="section-menu-list" role="menu" hidden>
-            <button type="button" class="print-scope" role="menuitem" data-scope="section">This section</button>
-            <button type="button" class="print-scope" role="menuitem" data-scope="all">Whole reference</button>
+    <div class="vocab-bar">
+      <label class="search-box">
+        <svg class="search-icon" viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>
+        <input id="tableSearch" type="search" aria-label="Search vocabulary" aria-controls="vocabulary" placeholder="Search Japanese, furigana, romaji or English…" autocomplete="off">
+        <button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button>
+      </label>
+      <button type="button" class="options-btn" id="optionsBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="optionsSheet" aria-label="Options" title="Reading and study options">
+        <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.5" y="2.5" width="15" height="5.5" rx="2.75"/><rect x="1.5" y="10" width="15" height="5.5" rx="2.75"/><circle cx="12.6" cy="5.25" r="1.3" fill="currentColor" stroke="none"/><circle cx="5.4" cy="12.75" r="1.3" fill="currentColor" stroke="none"/></svg>
+        <span class="options-btn-label">Options</span>
+        <span class="options-dot" id="optionsDot" hidden></span>
+      </button>
+      <div class="options-scrim" id="optionsScrim" hidden></div>
+      <div class="options-sheet" id="optionsSheet" role="dialog" aria-label="Options" hidden>
+        <div class="options-grab"></div>
+        <div class="opt-group">
+          <h3 class="opt-head">Show</h3>
+          <div class="opt-list">
+            <button type="button" class="opt-row opt-switch active" data-col="japanese" aria-pressed="true">Japanese</button>
+            <button type="button" class="opt-row opt-switch active" data-col="furigana" aria-pressed="true">Furigana</button>
+            <button type="button" class="opt-row opt-switch active" data-col="english" aria-pressed="true">English</button>
           </div>
         </div>
-        <button type="button" id="expandAllBtn" class="expand-all-btn" aria-pressed="false">Expand all</button>
-      </span>
+        <div class="opt-group">
+          <h3 class="opt-head">Study</h3>
+          <div class="opt-list">
+            <button type="button" class="opt-row opt-switch" id="selftestToggle" aria-pressed="false" title="Cover the English column — tap a row to reveal its answer">Cover answers</button>
+            <button type="button" class="opt-row opt-switch" id="politeToggle" aria-pressed="false" title="Switch verb tables between the plain form and the polite 〜ます form">Show polite</button>
+          </div>
+        </div>
+        <div class="opt-group expand-bar">
+          <div class="opt-list">
+            <button type="button" id="expandAllBtn" class="opt-row opt-action" aria-pressed="false">Expand all</button>
+            <button type="button" class="opt-row opt-action print-scope" data-scope="section">Print this section</button>
+            <button type="button" class="opt-row opt-action print-scope" data-scope="all">Print whole reference</button>
+          </div>
+        </div>
+        <div class="opt-foot">
+          <span class="adj-legend" aria-hidden="true" hidden><span class="adj-legend-swatch adj-badge adj-badge-i" data-badge="い"></span>い-adj<span class="adj-legend-swatch adj-badge adj-badge-na" data-badge="な"></span>な-adj<span class="adj-legend-irr adj-badge adj-badge-na adj-badge-irr" data-badge="な"></span>irregular</span>
+          <span class="particle-legend" aria-hidden="true" hidden><span class="particle-chip" data-badge="を"></span>particle it takes</span>
+        </div>
+      </div>
     </div>
+    <span id="searchCount" class="search-count" role="status" aria-live="polite" aria-atomic="true"></span>
     <p id="selftestHint" class="selftest-hint" role="status">Tap a row to reveal its answer; tap again to re-hide.</p>
   </div>
   <div id="vocabulary"></div>
@@ -91,11 +107,11 @@
   <ul>
     <li><strong>Furigana</strong> sits above the kanji. Hover or tap any kana to see its romaji.</li>
     <li>Click or tap the Japanese word or sentence itself to see its full romaji reading underneath.</li>
-    <li>The <strong>Japanese / Furigana / English</strong> segments hide those columns (or just the readings) in any combination — a raised segment is showing, a struck-through one is hidden. Cover one side and test yourself.</li>
+    <li>The <strong>Options</strong> button beside the search box holds the reading and study controls; a small dot on it means one of them is on. In it, the <strong>Japanese / Furigana / English</strong> switches hide those columns (or just the readings) in any combination — cover one side and test yourself.</li>
     <li>The <strong>Cover answers</strong> switch blanks the English column and shows a reminder to tap a row to reveal that one answer (tap again to re-hide). It resets when you reload.</li>
     <li>On the Verbs table (and for 好き, 嫌い, 上手, 下手) small blue chips beside the icons show the <strong>particle</strong> each word takes — <strong>を</strong> eat, <strong>に/へ</strong> go, <strong>が</strong> like. Tap or click a chip (or hover it with a mouse) to see what it marks — for 聞く, <strong>を</strong> what you listen to and <strong>に</strong> who you ask.</li>
     <li>The <strong>Show polite</strong> switch, on verb tables, swaps the dictionary form for the 〜ます form.</li>
-    <li>Where a word is an い- or な-adjective, a small <strong>い</strong> or <strong>な</strong> badge follows it to mark how it conjugates; a legend in the toolbar explains them whenever the table on screen actually has one. An <strong>outlined</strong> badge marks an irregular one — a な-adjective that ends in い (きれい, 嫌い, 有名) or いい, which becomes よくない — with a short note under its meaning.</li>
+    <li>Where a word is an い- or な-adjective, a small <strong>い</strong> or <strong>な</strong> badge follows it to mark how it conjugates; a legend at the foot of Options explains them whenever the table on screen actually has one. An <strong>outlined</strong> badge marks an irregular one — a な-adjective that ends in い (きれい, 嫌い, 有名) or いい, which becomes よくない — with a short note under its meaning.</li>
     <li>The small speaker icon next to a word plays its pronunciation, using a natural native-voice recording where one exists.</li>
     <li>Grammatical <strong>particles</strong> (は, を, から …) show in blue and bold wherever Japanese text appears, including flashcards. Hover or tap one to see how it's read (は as "wa", へ as "e").</li>
     <li><strong>Phrases</strong> tables are laid out as question/answer pairs, in their own order rather than A-Z.</li>
@@ -103,9 +119,9 @@
 
   <h3>Getting around a section</h3>
   <ul>
-    <li>A section opens with every table collapsed; click a title to open it (others in that category close). <strong>Expand all</strong> opens everything at once, <strong>Collapse all</strong> closes it back down.</li>
+    <li>A section opens with every table collapsed; click a title to open it (others in that category close). <strong>Expand all</strong> (in Options) opens everything at once, <strong>Collapse all</strong> closes it back down.</li>
     <li>A section remembers which tables you left open when you navigate away and back.</li>
-    <li>The printer icon on a table prints just that table as a clean A4 sheet. <strong>Print…</strong>, by <strong>Expand all</strong>, does the whole section or the whole reference at once.</li>
+    <li>The printer icon on a table prints just that table as a clean A4 sheet. <strong>Print this section</strong> and <strong>Print whole reference</strong>, in Options, do the whole section or the whole reference at once.</li>
   </ul>
 
   <h3>Making it yours</h3>

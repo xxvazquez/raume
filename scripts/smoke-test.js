@@ -671,10 +671,32 @@ async function main() {
     const table = mw(document.querySelector("#vocabulary .table-section"));
     return table && table !== "none" && mw(catHeads[0]) === table;
   })());
-  check("Print… / Expand all live in the toolbar's control row, not a row of their own", (() => {
-    const bar = document.querySelector(".expand-bar");
-    return !!bar && bar.closest(".vocab-controls") && window.getComputedStyle(bar).display.includes("flex");
+  console.log("Options sheet (the sticky bar is just search + one Options button)");
+  const optionsBtn = document.getElementById("optionsBtn");
+  const optionsSheet = document.getElementById("optionsSheet");
+  const optionsDot = document.getElementById("optionsDot");
+  check("the sticky toolbar's bar holds only the search field and the Options button", (() => {
+    const bar = document.querySelector(".vocab-toolbar .vocab-bar");
+    const kids = [...bar.children].map(c => c.className.split(" ")[0]);
+    return !!bar && kids.includes("search-box") && kids.includes("options-btn") && !bar.querySelector(".view-mode");
   })());
+  check("the Options button is labelled, announces a dialog, and starts collapsed", !!optionsBtn && optionsBtn.getAttribute("aria-label") === "Options" && optionsBtn.getAttribute("aria-haspopup") === "dialog" && optionsBtn.getAttribute("aria-expanded") === "false" && optionsSheet.hidden === true);
+  check("no dot while everything is at its default", optionsDot.hidden === true);
+  check("the column switches, Cover answers, Show polite, Expand all and Print live in the sheet", (() => {
+    const inSheet = sel => !!optionsSheet.querySelector(sel);
+    return ["japanese", "furigana", "english"].every(k => inSheet('.opt-switch[data-col="' + k + '"]'))
+      && inSheet("#selftestToggle") && inSheet("#politeToggle") && inSheet("#expandAllBtn")
+      && inSheet('.print-scope[data-scope="section"]') && inSheet('.print-scope[data-scope="all"]')
+      && inSheet(".adj-legend") && inSheet(".particle-legend")
+      && optionsSheet.querySelector(".expand-bar #expandAllBtn");
+  })());
+  optionsBtn.click();
+  check("tapping Options opens the sheet, flips aria-expanded and lifts the toolbar", optionsSheet.hidden === false && optionsBtn.getAttribute("aria-expanded") === "true" && document.querySelector(".vocab-toolbar").classList.contains("options-open") && document.getElementById("optionsScrim").hidden === false);
+  document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  check("Esc closes it again", optionsSheet.hidden === true && optionsBtn.getAttribute("aria-expanded") === "false" && !document.querySelector(".vocab-toolbar").classList.contains("options-open"));
+  optionsBtn.click();
+  document.getElementById("vocabulary").click();
+  check("a click outside the sheet closes it", optionsSheet.hidden === true);
   const tindexMenu = document.getElementById("tindexMenu");
   check("the table-index dropdown menu starts closed", tindexMenu.hidden === true);
   check("its trigger reports collapsed", document.querySelector(".tindex-trigger").getAttribute("aria-expanded") === "false");
@@ -920,24 +942,27 @@ async function main() {
     return !ti.classList.contains("search-hidden") && shown.length === 1 && shown[0].dataset.section === "grammar";
   })());
 
-  console.log("Column visibility toggles (each button hides its own thing)");
-  const colBtn = k => document.querySelector('.view-mode button[data-col="' + k + '"]');
-  check("there's no Romaji toggle any more -- it's not a column", !colBtn("romaji"));
+  console.log("Column visibility switches (each one shows its own thing)");
+  const colBtn = k => document.querySelector('.opt-switch[data-col="' + k + '"]');
+  const colHidden = k => !colBtn(k).classList.contains("active");
+  check("there's no Romaji switch any more -- it's not a column", !colBtn("romaji"));
+  check("every column switch starts on (pressed means showing)", ["japanese", "furigana", "english"].every(k => colBtn(k).getAttribute("aria-pressed") === "true" && !colHidden(k)));
   colBtn("english").click();
-  check("clicking a column button hides that column — pressed means hidden", colBtn("english").getAttribute("aria-pressed") === "true" && colBtn("english").classList.contains("col-hidden"));
+  check("switching a column off hides it — the switch reads off, body carries hide-english", colBtn("english").getAttribute("aria-pressed") === "false" && colHidden("english") && document.body.classList.contains("hide-english"));
+  check("...and the Options button shows a dot with an updated label", optionsDot.hidden === false && optionsBtn.getAttribute("aria-label") === "Options (some changed)");
   check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(2) .sort-button").disabled === true);
   check("the header keeps its label -- only tbody cells go transparent (CSS), and the header itself stays out of aria-hidden (JS)", (() => {
     const th = document.querySelector(".vocab th:nth-child(2)");
     const scopedToTbody = allCssRules.some(r => r.selectorText && r.selectorText.includes("body.hide-english .vocab tbody td:nth-child(2)"));
     return th.getAttribute("aria-hidden") === null && scopedToTbody;
   })());
-  check("the other column is untouched", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
+  check("the other column is untouched", !colHidden("japanese") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("japanese").click();
-  check("the last visible column can't be hidden", !colBtn("japanese").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
+  check("the last visible column can't be switched off", !colHidden("japanese") && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("english").click();
-  check("clicking again shows the column back", !colBtn("english").classList.contains("col-hidden") && document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === null);
+  check("switching it back on shows the column again, and the dot clears", !colHidden("english") && document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === null && optionsDot.hidden === true);
   colBtn("furigana").click();
-  check("the Furigana toggle hides just the readings, not the Japanese column", colBtn("furigana").classList.contains("col-hidden") && document.querySelector(".vocab .furigana").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
+  check("the Furigana switch hides just the readings, not the Japanese column", colHidden("furigana") && document.querySelector(".vocab .furigana").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab td:nth-child(1)").getAttribute("aria-hidden") === null);
   colBtn("furigana").click();
   check("...and shows the readings again", document.querySelector(".vocab .furigana").getAttribute("aria-hidden") === null);
 
@@ -1000,6 +1025,7 @@ async function main() {
   selftestBtn.click();
   check("clicking it turns on the mode and lights the button", document.body.classList.contains("selftest-mode") && selftestBtn.getAttribute("aria-pressed") === "true" && selftestBtn.classList.contains("active"));
   check("...and the hint line appears", window.getComputedStyle(selftestHint).display !== "none" && /tap a row/i.test(selftestHint.textContent));
+  check("...and the Options dot lights so a covered table never looks broken", document.getElementById("optionsDot").hidden === false);
   const stRow = document.querySelector('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden) tbody tr');
   stRow.cells[1].click();
   check("tapping a row reveals it", stRow.classList.contains("revealed"));
@@ -1008,6 +1034,7 @@ async function main() {
   stRow.classList.add("revealed");
   selftestBtn.click();
   check("leaving the mode clears it, the hint, and every revealed row", !document.body.classList.contains("selftest-mode") && selftestBtn.getAttribute("aria-pressed") === "false" && window.getComputedStyle(selftestHint).display === "none" && !document.querySelector("#vocabulary .vocab tbody tr.revealed"));
+  check("...and the dot clears again", document.getElementById("optionsDot").hidden === true);
 
   console.log("Table directory: every table visible at once, click to jump");
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
@@ -1086,23 +1113,21 @@ async function main() {
 
   console.log("Print a whole section or the whole reference");
   document.querySelector('#siteNav .site-nav-link[data-section="grammar"]').click();
-  const printMenuBtn = document.querySelector('.expand-bar .print-menu-btn');
-  const printMenuList = document.querySelector('.expand-bar .print-menu .section-menu-list');
-  check("the expand bar carries a Print… menu, closed", !!printMenuBtn && printMenuBtn.getAttribute("aria-expanded") === "false" && printMenuList.hidden === true);
-  printMenuBtn.click();
-  check("clicking it opens the menu with This section / Whole reference", printMenuList.hidden === false &&
-    !!printMenuList.querySelector('.print-scope[data-scope="section"]') && !!printMenuList.querySelector('.print-scope[data-scope="all"]'));
-  printMenuList.querySelector('.print-scope[data-scope="section"]').click();
+  const printSection = document.querySelector('#optionsSheet .print-scope[data-scope="section"]');
+  const printAll = document.querySelector('#optionsSheet .print-scope[data-scope="all"]');
+  check("the Options sheet carries Print this section / Print whole reference", !!printSection && !!printAll && !document.querySelector(".print-menu-btn"));
+  document.getElementById("optionsBtn").click();
+  printSection.click();
   check("\"This section\" prints every table in the active section", document.body.classList.contains("print-only") &&
     [...document.querySelectorAll('.table-section[data-section="grammar"]')].every(s => s.classList.contains("print-target")));
   check("...and no other section's tables", [...document.querySelectorAll('.table-section:not([data-section="grammar"])')].every(s => !s.classList.contains("print-target")));
   check("...even the collapsed ones in that section", [...document.querySelectorAll('.table-section[data-section="grammar"].collapsed')].length > 0 &&
     [...document.querySelectorAll('.table-section[data-section="grammar"].collapsed')].every(s => s.classList.contains("print-target")));
-  check("the menu closed itself after the pick", printMenuList.hidden === true);
+  check("the sheet closed itself after the pick", document.getElementById("optionsSheet").hidden === true);
   window.dispatchEvent(new window.Event("afterprint"));
   check("afterprint clears every print target", !document.body.classList.contains("print-only") && !document.querySelector(".table-section.print-target"));
-  printMenuBtn.click();
-  printMenuList.querySelector('.print-scope[data-scope="all"]').click();
+  document.getElementById("optionsBtn").click();
+  printAll.click();
   check("\"Whole reference\" prints every table on the page", document.body.classList.contains("print-only") &&
     [...document.querySelectorAll('#vocabulary .table-section')].every(s => s.classList.contains("print-target")));
   window.dispatchEvent(new window.Event("afterprint"));

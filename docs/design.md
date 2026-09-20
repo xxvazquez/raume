@@ -125,22 +125,37 @@ and Help.
   (`--page-bg` under `--paper`), as on iOS.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
-  - **Segmented control** (`.view-mode` column toggles, `.fc-manage-filters`): a
-    grey track with 2px padding, the selected segments raised on a thumb. The
-    column toggles are multi-select — a column that is showing is raised, one
-    that is hidden lies flat, faint and struck through (`.col-hidden`); Manage's
-    filter raises one at a time. Same component in the dashboard's Words to review.
-  - **Switch** (Cover answers `.selftest-toggle`, Show polite `.polite-toggle`,
-    Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
+  - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to
+    review, `.fc-manage-filters`): a grey track with 2px padding, the selected
+    segments raised on a thumb. The dashboard's column toggles are multi-select —
+    a column that is showing is raised, one that is hidden lies flat, faint and
+    struck through (`.col-hidden`); Manage's filter raises one at a time. The
+    reference toolbar no longer uses one: an iOS segmented control is
+    single-select, so its multi-select column toggles are switches in the Options
+    sheet.
+  - **Switch** (the Options sheet's `.opt-switch` rows — Japanese / Furigana /
+    English, Cover answers, Show polite — plus Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
     track filling with the section tone (`--switch-on` — the deep tone in light, the
     mid tone in dark, where the deep one is a pale tint that would wash out the
-    thumb). The two toolbar switches are still `<button aria-pressed>` with their
-    label; the track and thumb are `::before` / `::after`, so no markup changed.
+    thumb). The Options switches are `<button aria-pressed>` rows (pressed = on; a
+    column switch is on while the column shows); the track and thumb are
+    `::before` / `::after`.
   - **Buttons**: *filled* (`.fc-btn-primary`, deep section tone, no shadow),
     *tinted* (`.fc-btn`, soft accent fill, accent text, 10px radius, no border) and
-    *plain* (per-row actions `.fc-btn-vocabaction`, toolbar **Print…** / **Expand
-    all**: tint text, no box, dim on hover/press instead of an underline).
-  - **Menus** (the table ⋯ menu, the Print… menu): a 14px popover, no border, one
+    *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
+    all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
+    instead of an underline).
+  - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
+    an inset-grouped list on `--group-ground` — 13px sentence-case group headers
+    (Show / Study), white 12px cards of 44px rows with inset hairlines, switches
+    at the trailing edge, plain tint-text action rows, and the badge legends as
+    footnote text. A 320px popover under the button on a wide screen; on a phone a
+    bottom sheet with a grab bar and scrim (same shape as the table index) that
+    lifts the toolbar above the tab bar while open (`.options-open`). The sticky
+    bar is then one row — search plus the button; a dot (`.options-dot`) on the
+    button flags a non-default state. Rows that don't apply hide (Show polite
+    outside a verb table; the Expand / Print group while searching).
+  - **Menus** (the table ⋯ menu): a 14px popover, no border, one
     shadow, items 15px in 12px×14px rows separated by hairlines, label first and its
     glyph trailing. The ⋯ trigger itself is a bare glyph.
   - **Checkmark rows** (kana groups, study directions) are unchanged: the row is the
@@ -199,7 +214,7 @@ and Help.
   **outlined** badge (`.adj-badge-irr`: no fill, a 1.5px ring) and a one-line
   footnote under its meaning (`.adj-note`, `--fs-micro`, secondary, from the row's
   `adjNote`) like an iOS cell subtitle, so the reason is readable on touch, not
-  hidden in a tooltip. The toolbar legend (`.adj-legend`, `aria-hidden`) shows a
+  hidden in a tooltip. The legend (`.adj-legend`, `aria-hidden`, footnote text in the Options sheet) shows a
   sample of each — い, な, outlined "irregular" — and `updateAdjLegend()` in
   `js/vocab/interactions.js` shows it only while the table under the sticky toolbar
   (or, while searching, any still-visible match) has adjectives. A visually-hidden
@@ -218,7 +233,7 @@ and Help.
   under "not good at" only repeated the meaning). It closes on an outside tap,
   Escape, scroll or resize, and is suppressed while the English is hidden or covered
   (a role like "what you eat" would give the answer away). The chip's hit area is
-  padded past the 20px capsule with an invisible `::before`. The toolbar legend (`.particle-legend`) shows only while the
+  padded past the 20px capsule with an invisible `::before`. The legend (`.particle-legend`, same footnote) shows only while the
   table on screen has chips, independently of the adjective legend.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
