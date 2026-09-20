@@ -951,6 +951,10 @@ async function main() {
   check("switching a column off hides it — the switch reads off, body carries hide-english", colBtn("english").getAttribute("aria-pressed") === "false" && colHidden("english") && document.body.classList.contains("hide-english"));
   check("...and the Options button shows a dot with an updated label", optionsDot.hidden === false && optionsBtn.getAttribute("aria-label") === "Options (some changed)");
   check("its cells are aria-hidden and its sort control is disabled", document.querySelector(".vocab td:nth-child(2)").getAttribute("aria-hidden") === "true" && document.querySelector(".vocab th:nth-child(2) .sort-button").disabled === true);
+  check("a row footnote (.adj-note) drops out with the English column instead of leaving a tall empty row", (() => {
+    const note = document.querySelector(".vocab .adj-note");
+    return !!note && window.getComputedStyle(note).display === "none";
+  })());
   check("the header keeps its label -- only tbody cells go transparent (CSS), and the header itself stays out of aria-hidden (JS)", (() => {
     const th = document.querySelector(".vocab th:nth-child(2)");
     const scopedToTbody = allCssRules.some(r => r.selectorText && r.selectorText.includes("body.hide-english .vocab tbody td:nth-child(2)"));

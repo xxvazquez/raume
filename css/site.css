@@ -510,25 +510,6 @@ body {
 .page { padding: 16px 28px 48px; }
 .page[hidden] { display: none; }
 
-/* A short list (Phrases' one table, Grammar's three) otherwise ends a third
-   of the way down the screen with bare background filling the rest, reading
-   as unfinished rather than deliberate. min-height is a floor: a longer list
-   already exceeds it, so centering has no visible effect there -- content
-   just fills top-to-bottom as before. Scoped to non-Vocabulary sections only:
-   Vocabulary's category headings rely on adjoining-margin collapsing with
-   the table above them, which a flex container would break (each item's
-   margin would count in full instead of collapsing to the larger one),
-   widening every category gap whenever a table is expanded. Grammar/Phrases/
-   Travel have no such headings, so collapsing was never a factor there. */
-body[data-active-section="grammar"] #vocabulary,
-body[data-active-section="phrases"] #vocabulary,
-body[data-active-section="travel"] #vocabulary {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 50vh;
-}
-
 /* --- Internal table index: a visual directory of every table ---------- */
 /* Stands in for a page heading. Closed: one small control naming the table
    you're on -- very little vertical weight. Open: the whole active section
@@ -705,8 +686,8 @@ body[data-active-section="travel"] #vocabulary {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 0 0 16px;
-  padding: 10px 0 12px;
+  margin: 0 0 4px;
+  padding: 10px 0 8px;
   background: var(--paper);
   border-bottom: 1px solid color-mix(in srgb, var(--section) 24%, var(--line-strong));
 }
@@ -1035,7 +1016,7 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed:not(:has(+ .table-section.collapsed)) .section-head { border-bottom: 0; }
 
 /* Open: bold title on the ground, then the white card. */
-#vocabulary .table-section:not(.collapsed) { padding: 0; margin: 24px 0; }
+#vocabulary .table-section:not(.collapsed) { padding: 0; margin: 16px 0 24px; }
 #vocabulary .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 24px; }
 #vocabulary .table-section:not(.collapsed) .section-head { padding: 0 4px 8px; margin-bottom: 0; border-bottom: 0; }
 #vocabulary .table-section:not(.collapsed) .section-title-text { font-size: 20px; font-weight: 600; }
@@ -2261,6 +2242,13 @@ button.particle-chip:hover, button.particle-chip[aria-expanded="true"] { backgro
    cells on their first-line baseline instead, so the word sits level with the
    meaning and the caption hangs below it. */
 .vocab tbody tr:has(.adj-note) > td { vertical-align: baseline; }
+/* With the English hidden or covered the footnote is blanked too; it would only
+   leave a tall empty row with the word stranded at the top, so it drops out and
+   the row centres like any other. A revealed row gets it back. */
+body.hide-english .vocab .adj-note,
+body.selftest-mode .vocab tbody tr:not(.revealed) .adj-note { display: none; }
+body.hide-english .vocab tbody tr:has(.adj-note) > td,
+body.selftest-mode .vocab tbody tr:not(.revealed):has(.adj-note) > td { vertical-align: middle; }
 .adj-note { margin-top: 3px; color: inherit; opacity: .72; font-size: var(--fs-micro); line-height: 1.4; }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
