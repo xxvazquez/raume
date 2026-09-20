@@ -653,12 +653,18 @@ async function main() {
   check("picking a colour re-tints the table header in place (data-tile) and Reset returns to the automatic one", (() => {
     const tc = window.RaumeStudy.tableCustom;
     const sec = document.querySelector('#vocabulary .table-section[data-table="3"]');
+    // A change can rebuild the directory, so look the link up fresh each time.
+    const link = () => document.querySelector('#tindexMenu a[data-target="3"]');
     const before = sec.dataset.tile;
     tc.setColor("3", "purple");
-    const during = sec.dataset.tile;
+    const during = sec.dataset.tile, linkDuring = link().dataset.tile;
     tc.setColor("3", "");
-    return before === "green" && during === "purple" && sec.dataset.tile === "green";
+    return before === "green" && during === "purple" && linkDuring === "purple" && sec.dataset.tile === "green" && link().dataset.tile === "green";
   })());
+  check("every table-index link carries the same coloured icon tile as its table", [...document.querySelectorAll("#tindexMenu a[data-target]")].every(a => {
+    const sec = document.querySelector('#vocabulary .table-section[data-table="' + a.dataset.target + '"]');
+    return !!a.querySelector(".tindex-icon svg") && !!a.dataset.tile && !!sec && a.dataset.tile === sec.dataset.tile;
+  }));
   check("the icon picker offers an Auto pill plus one swatch per hue, and a swatch applies without closing it", (() => {
     const chosen = [];
     window.RaumeStudy.iconPicker.open("coffee", () => {}, null, { color: "", autoColor: () => "green", onColor: (k) => chosen.push(k), resettable: false });

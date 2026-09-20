@@ -535,7 +535,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       var wide = bySection[sec].length > 5;
       var body = groups.map(function (g) {
         var links = g.tables.map(function (t) {
-          return '<a href="#table-' + t.id + '" data-target="' + t.id + '" role="menuitem">' +
+          var tile = tableTile(t.id, t.category);
+          return '<a href="#table-' + t.id + '" data-target="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : '') + ' role="menuitem">' +
             '<span class="tindex-count" title="' + t.rows.length + ' entries">' + t.rows.length + '</span>' +
             (tableIconValue(t.id) ? '<span class="tindex-icon">' + tableIconGlyph(t.id) + '</span>' : '') +
             '<span class="tindex-tname">' + esc(tableTitle(t.id, t.title)) + '</span></a>';

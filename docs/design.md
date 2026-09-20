@@ -133,6 +133,9 @@ and Help.
   16px to line up with the row content; a collapsed row title is 14px / 400 in
   `--ink`; an open table's title 20px / 600; the phone's large screen title 28px.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
+  The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
+  the link's `data-tile`), with the entry count trailing the row as a secondary
+  value and its category labels in the same 12px grey header voice.
   The search field is the iOS one — a 36px, 10px-radius fill a shade darker than
   the grey ground, borderless. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),

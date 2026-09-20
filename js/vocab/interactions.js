@@ -1025,15 +1025,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const tc = window.RaumeStudy.tableCustom, glyph = window.RaumeStudy.vocab.tableIconGlyph(id);
       const has = !!window.RaumeStudy.vocab.tableIconValue(id);
       const title = window.RaumeStudy.vocab.tableTitle(id, shippedTitle(id));
+      const first = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');
+      const tile = window.RaumeStudy.vocab.tableTile(id, first && first.dataset.category);
       document.querySelectorAll('#vocabulary .table-section[data-table="' + id + '"]').forEach(function (section) {
         const slot = section.querySelector('.section-icon');
         if (slot) { slot.classList.toggle('section-icon-empty', !has); slot.innerHTML = glyph; }
-        const tile = window.RaumeStudy.vocab.tableTile(id, section.dataset.category);
         if (tile) section.dataset.tile = tile; else delete section.dataset.tile;
         const text = section.querySelector('.section-title-text');
         if (text && title) text.textContent = title;
       });
       document.querySelectorAll('#tindexMenu a[data-target="' + id + '"]').forEach(function (a) {
+        if (tile) a.dataset.tile = tile; else delete a.dataset.tile;
         let el = a.querySelector('.tindex-icon');
         if (has) {
           if (!el) { el = document.createElement('span'); el.className = 'tindex-icon'; a.querySelector('.tindex-count').after(el); }

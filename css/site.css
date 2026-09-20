@@ -572,16 +572,16 @@ body {
   gap: 9px;
   margin: 0 0 2px;
   padding: 0 8px;
-  color: var(--section);
+  color: var(--muted);
 }
 .tindex-cat-name {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: .01em;
+  letter-spacing: 0;
 }
 .tindex-menu a {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 9px;
   padding: 5px 8px;
   border-radius: var(--radius-icon);
@@ -589,9 +589,13 @@ body {
   font-size: var(--fs-small);
   color: var(--ink);
 }
+/* The count trails the row (an iOS list's secondary value), after the tile and
+   name, wherever it sits in the markup. */
 .tindex-count {
   flex: 0 0 auto;
-  width: 1.9em;
+  order: 3;
+  margin-left: auto;
+  padding-left: 12px;
   text-align: right;
   color: var(--faint);
   font-size: var(--fs-micro);
@@ -1154,7 +1158,13 @@ svg.si { stroke-width: 1.6; }
 }
 .table-section.collapsed .section-head > .section-icon { width: 16px; height: 16px; }
 
-.tindex-icon { flex: 0 0 auto; width: 15px; height: 15px; color: var(--muted); }
+/* Same tile as the table rows, a size down for the compact menu. */
+.tindex-icon {
+  flex: 0 0 auto; width: 22px; height: 22px; padding: 4.5px; box-sizing: border-box;
+  border-radius: 6px; color: #fff;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000);
+}
+.tindex-icon .si { display: block; width: 100%; height: 100%; }
 
 /* --- Icon picker ---------------------------------------------------- */
 .icon-picker-root[hidden] { display: none; }
