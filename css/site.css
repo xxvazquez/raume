@@ -1025,14 +1025,28 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
 #vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) .section-head::after { display: none; }
 
-/* Icon tile (iOS Settings style): a small rounded square in the section's soft
-   tint with the glyph in its deep tone -- quiet, but it gives every row a shape
-   to find it by. */
+/* Icon tile (iOS Settings style): a small rounded square with a white glyph,
+   filled in a soft, muted hue per content category (Food green, Kitchen orange,
+   Numbers blue, Time indigo, Grammar purple, Travel teal, Phrases amber). The
+   hues are dusty mid-tones, not system-bright, so they sit with the app's cool
+   palette; the colour is the only colour in a row, and it says which group a
+   table belongs to. A table of your own (no known category) takes the section
+   tone. Dark mode dims the fill a touch so the tile doesn't glare. */
+#vocabulary .table-section { --tile: var(--section); --tile-k: 100%; }
+:root[data-theme="dark"] #vocabulary .table-section { --tile-k: 80%; }
+#vocabulary .table-section[data-category="Food & Ingredients"] { --tile: #74a087; }
+#vocabulary .table-section[data-category="Kitchen & Dining"] { --tile: #c8905a; }
+#vocabulary .table-section[data-category="Numbers & Counting"] { --tile: #7093be; }
+#vocabulary .table-section[data-category="Time & Calendar"] { --tile: #8487c0; }
+#vocabulary .table-section[data-category="Grammar"] { --tile: #9c7fb6; }
+#vocabulary .table-section[data-category="Travel"] { --tile: #5fa0a2; }
+#vocabulary .table-section[data-category="Phrases"] { --tile: #bd9a52; }
 #vocabulary .section-head { align-items: center; }
 #vocabulary .section-head > .section-icon:not(.section-icon-empty) {
   width: 28px; height: 28px; margin-top: 0; padding: 5.5px; box-sizing: border-box;
   border-radius: 8px;
-  background: var(--section-soft); color: var(--section-strong);
+  background: color-mix(in srgb, var(--tile) var(--tile-k), #000);
+  color: #fff;
 }
 #vocabulary .table-section:not(.collapsed) .section-head > .section-icon:not(.section-icon-empty) { width: 28px; height: 28px; padding: 5.5px; margin-right: 2px; }
 #vocabulary .section-toggle-icon { margin-top: 0; }
@@ -2163,6 +2177,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   /* Drop the row actions in print. */
   .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   .view-mode { display: none !important; }
+  /* A white glyph on an unprinted tile would vanish. */
+  #vocabulary .section-head > .section-icon:not(.section-icon-empty) { background: none !important; color: var(--muted) !important; }
   /* No override needed for the romaji reveal: it's already an in-flow
      caption line, not a floating popover, so a row pinned open
      (.jp-romaji-on) just prints in place as-is, and an un-clicked row's

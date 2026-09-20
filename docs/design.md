@@ -117,8 +117,13 @@ and Help.
   the right, the per-table ⋯ menu / print kept on the cell as bare glyphs; the
   hairline is inset to start under the title, and cells only group with
   neighbours that are on screen); every table has a 28px **icon tile** — an 8px-radius
-  square in the section's soft tint (`--section-soft`) with the glyph in its deep
-  tone, 28px on an open table's title — from a default per shipped table
+  square with a white glyph, filled in a soft, muted hue **per content category**
+  (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
+  `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
+  purple, Travel `#5fa0a2` teal, Phrases `#bd9a52` amber; a table of your own
+  takes the section tone; dark mode dims the fill to 80%, print drops the tile).
+  These dusty mid-tones are the only colour in a row and say which group a
+  table is in; the rest of the row stays neutral. The glyph comes from a default per shipped table
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the
   ground above it, so "where does the title end and the table start" is never

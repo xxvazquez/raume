@@ -116,7 +116,8 @@ so they're easy to spot in a sentence.
 
 **Customising**
 
-- Every table ships with an **icon** shown as a small tinted tile beside its name
+- Every table ships with an **icon** shown as a small tile beside its name,
+  tinted a soft colour per category (food green, kitchen orange, numbers blue, …)
   (Fruits gets an apple, Verbs a bolt, …); change it to any of ~165 curated line
   icons, or upload your own, and give it a custom **name / order**, on the **Customize** page
   (masthead sliders icon), or via **Choose icon…** in that table's own ⋯ menu
