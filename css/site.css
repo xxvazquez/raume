@@ -700,7 +700,7 @@ body {
   padding: 0 11px;
   background: var(--field-fill);
   border: 1px solid var(--field-line);
-  border-radius: 6px;
+  border-radius: 10px;
 }
 /* Search is one of the app's strongest features and should read as its own
    tool, not just another toolbar control at the same weight as the column
@@ -967,7 +967,7 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 .table-section.collapsed .section-head::before { display: none; }
 /* A collapsed table is a quiet list row, not a section heading. */
-.table-section.collapsed .section-title-text { font-size: var(--fs-subhead); font-weight: 400; }
+.table-section.collapsed .section-title-text { font-size: var(--fs-nav); font-weight: 400; }
 .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 12px; }
 
 /* iOS "inset grouped" list. One grey ground behind the reference page, white
@@ -993,7 +993,11 @@ body.selftest-mode .selftest-hint { display: block; }
   border-color: transparent;
 }
 /* Category name is just a quiet label above its card -- no underline. */
-.page-vocab .cat-heading { border-bottom: 0; padding-bottom: 0; margin-bottom: 8px; }
+.page-vocab .cat-heading { border-bottom: 0; padding: 0 0 0 16px; margin-bottom: 8px; }
+/* iOS / macOS list-header voice: a step smaller than the rows beneath it, in
+   secondary grey, inset to line up with the row content -- the header labels
+   the group, the rows are what you read. */
+.page-vocab .cat-heading { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
 .page-vocab .vocab-toolbar { border-bottom: 0; background: var(--group-ground); }
 
 /* Decorative empty-icon "+" placeholder reads as an add button; drop it. */

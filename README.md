@@ -45,7 +45,7 @@ so they're easy to spot in a sentence.
   to add that word to flashcards or pause it — find a word, tap once.
 - **URL hash** reflects the current view (`#grammar`, `#table-15`,
   `#flashcards`), so any view can be bookmarked and survives a reload.
-- The search field and column filters stay pinned below the nav as you scroll.
+- The search field and the Options button stay pinned below the nav as you scroll.
 
 **Reading the tables**
 

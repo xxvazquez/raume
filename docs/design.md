@@ -128,7 +128,13 @@ and Help.
   picker's nine swatches add clay `#bb7f74` and slate `#8493a3`; the hues are
   `--tile-<key>` tokens, dark mode dims the fill to 80%, print drops the tile).
   These dusty mid-tones are the only colour in a row and say which group a
-  table is in; the rest of the row stays neutral. The glyph comes from a default per shipped table, or — for a table of your own —
+  table is in; the rest of the row stays neutral. **List type scale** (phone and
+  desktop): a category header is 12px / 500 in secondary grey (`--muted`), inset
+  16px to line up with the row content; a collapsed row title is 14px / 400 in
+  `--ink`; an open table's title 20px / 600; the phone's large screen title 28px.
+  A header is always one step below the rows it labels, as in iOS / macOS lists.
+  The search field is the iOS one — a 36px, 10px-radius fill a shade darker than
+  the grey ground, borderless. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the
