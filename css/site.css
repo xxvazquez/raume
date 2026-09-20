@@ -1329,7 +1329,7 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
 .cz-section-label {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 10px; padding: 10px 0;
-  font-size: var(--fs-subhead); font-weight: 500; letter-spacing: .005em;
+  font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0;
   border-bottom: 1px solid var(--row-line);
 }
 /* The section tone lives in the name alone -- no marker bar, no tinted rule. */
@@ -1348,13 +1348,13 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   display: flex; align-items: center; gap: 9px;
   margin: 0 0 8px; padding: 8px 0;
   border-bottom: 1px solid var(--row-line);
-  font-size: var(--fs-small); font-weight: 500; letter-spacing: .01em;
-  color: var(--ink);
+  font-size: 12px; font-weight: 500; letter-spacing: 0;
+  color: var(--muted);
 }
 /* The merged solo case carries the section's own job, so its name (not just
    its marker) picks up the section colour too -- matching the eyebrow it's
    standing in for -- and sits a size up. */
-.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: .005em; }
+.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0; }
 .cz-group-title-solo[data-section="vocabulary"] { color: var(--sec-vocabulary); }
 .cz-group-title-solo[data-section="grammar"] { color: var(--sec-grammar); }
 .cz-group-title-solo[data-section="phrases"] { color: var(--sec-phrases); }
@@ -1396,7 +1396,7 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   appearance: none; width: 100%;
   border: 0; border-radius: 8px;
   background: var(--field-fill); color: var(--ink);
-  font: 400 var(--fs-small)/1.2 var(--font-ui); padding: 6px 9px;
+  font: 400 var(--fs-nav)/1.2 var(--font-ui); padding: 6px 9px;
 }
 .cz-row-name:focus { outline: 2px solid var(--section); outline-offset: 1px; }
 .cz-row-name::placeholder { color: var(--faint); }
@@ -1408,7 +1408,13 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
 }
 .cz-row-reset:hover:not([disabled]) { background: var(--accent-soft); }
 .cz-row-reset[disabled] { opacity: .4; cursor: default; }
-.fc-manage-table-icon { flex: 0 0 auto; align-self: center; width: 15px; height: 15px; color: var(--muted); }
+/* The same icon tile as the reference rows (see "Icon tile" above). */
+.fc-manage-table-icon {
+  flex: 0 0 auto; align-self: center; width: 28px; height: 28px; padding: 5.5px; box-sizing: border-box;
+  border-radius: 8px; color: #fff;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000);
+}
+.fc-manage-table-icon .si { display: block; width: 100%; height: 100%; }
 
 /* --- Customize: your own vocabulary ----------------------------- */
 .cv-section { margin-top: 32px; }
@@ -2086,7 +2092,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 @media (max-width: 640px) {
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   /* A touch more head-room -- the wordmark was sitting right against the top edge. */
-  .masthead { padding: 18px 16px 10px; }
+  .masthead { padding: 18px 16px 10px; background: var(--paper); }
   /* Make room for the help / customize / theme controls on a narrow bar. */
   .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
@@ -2149,7 +2155,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .table-section { scroll-margin-top: 92px; }
   /* The grey ground runs to the bottom edge, as on iOS: no lighter band and
      rounded corner under a short list. */
-  body { background: var(--group-ground); }
+  html, body { background: var(--group-ground); }
+  .app-frame { background: transparent; }
   .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
@@ -2547,14 +2554,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   cursor: pointer; list-style: none;
   display: flex; align-items: baseline; gap: 12px;
   background: transparent; width: auto;
-  margin: 0 0 8px; padding: 0;
+  margin: 0 0 8px; padding: 0 0 0 16px;
 }
 .fc-manage-group-title::-webkit-details-marker { display: none; }
-.fc-manage-group-title .cat-name { font-size: var(--fs-small); font-weight: 400; color: var(--section-strong); letter-spacing: .005em; }
+.fc-manage-group-title .cat-name { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
 /* name · count · caret read as one cluster on the left, not name on one edge
    and count+caret flung to the other. */
 .fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: var(--fs-micro); font-weight: 400; }
-.fc-manage-group-title:hover .cat-name { color: var(--section-strong); }
+.fc-manage-group-title:hover .cat-name { color: var(--ink); }
 .fc-manage-group-title::after {
   content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; align-self: center; margin-left: 2px;
   border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--faint);
@@ -2593,12 +2600,12 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table-label {
   grid-area: label;
   min-width: 0;
-  display: flex; align-items: baseline; gap: 10px;
+  display: flex; align-items: center; gap: 10px;
 }
 .fc-manage-table-title {
   min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink); font: 400 var(--fs-nav-sub)/1.3 var(--font-ui);
+  color: var(--ink); font: 400 var(--fs-nav)/1.3 var(--font-ui);
 }
 .fc-manage-table-progress { flex: 0 0 auto; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* Fully added registers in the section accent -- against a long ladder of
@@ -2901,18 +2908,19 @@ mark.fc-diff-co {
    scripts' five, and stretching it to match left a tall box mostly empty.
    Top-aligned, it's just a smaller box -- which is what it is. */
 .fc-kana-groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; margin: 16px 0 4px; }
-/* One white card per picker, its rows separated by inset hairlines. The legend
-   is floated into normal flow: left as a real legend, a browser paints the
-   fieldset background from the legend's midline, so the label would straddle
-   the card's top edge. */
+/* One list per picker: the legend is the iOS list header (12px grey, inset)
+   on the ground, the rows one white card beneath it, separated by inset
+   hairlines. The legend is floated into normal flow so it sits above the card
+   as a plain label rather than straddling a fieldset border. */
 .fc-kana-fieldset {
-  display: block; border: 0; border-radius: 12px; background: var(--paper);
-  padding: 12px 14px 4px; min-width: 180px; margin: 0;
+  display: block; border: 0; background: transparent;
+  padding: 0; min-width: 180px; margin: 0;
 }
 .fc-kana-fieldset legend {
-  float: left; width: 100%; padding: 0; margin: 0 0 2px;
-  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--muted);
+  float: left; width: 100%; padding: 0 0 6px 16px; margin: 0;
+  font: 500 12px/1 var(--font-ui); color: var(--muted);
 }
+.fc-kana-card { background: var(--paper); border-radius: 12px; padding: 0 14px; }
 .fc-kana-fieldset legend + * { clear: both; }
 .fc-kana-fieldset .fc-kana-group { border-radius: 0; padding: 11px 0; }
 .fc-kana-fieldset .fc-kana-group + .fc-kana-group { border-top: 1px solid var(--row-line); }

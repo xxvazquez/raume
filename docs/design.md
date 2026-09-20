@@ -133,6 +133,15 @@ and Help.
   16px to line up with the row content; a collapsed row title is 14px / 400 in
   `--ink`; an open table's title 20px / 600; the phone's large screen title 28px.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
+  The same voice runs through the rest of the app: Flashcards › Manage (a table
+  row is the 28px tile + a 14px title + its progress, its category header the
+  12px grey label), the Customize page (category titles 12px grey, name fields
+  14px, the tile on each row) and the Kana picker (each script's name is the grey
+  header above one white card of rows). Card titles that carry a description
+  beneath them — the Settings and Dashboard cards — stay 15px / 500 in `--ink`,
+  since they title a card rather than label a list. On a phone the grey ground
+  (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
+  lighter band beneath it; the masthead stays white.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
   the link's `data-tile`), with the entry count trailing the row as a secondary
   value and its category labels in the same 12px grey header voice.

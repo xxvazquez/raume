@@ -315,12 +315,14 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<div class="fc-kana-groups">' +
       ["hiragana", "katakana"].map(function (script) {
         return '<fieldset class="fc-kana-fieldset"><legend>' + (script === "hiragana" ? "Hiragana" : "Katakana") + "</legend>" +
+          '<div class="fc-kana-card">' +
           byScript[script].map(function (g) { return groupCheckbox(g, selected.indexOf(g.id) !== -1); }).join("") +
-          "</fieldset>";
+          "</div></fieldset>";
       }).join("") +
       '<fieldset class="fc-kana-fieldset"><legend>Directions</legend>' +
+      '<div class="fc-kana-card">' +
       DIRECTIONS.map(function (d) { return dirCheckbox(d, dirs.indexOf(d) !== -1); }).join("") +
-      "</fieldset>" +
+      "</div></fieldset>" +
       "</div>" +
       '<p class="fc-kana-summary" id="fcKanaSummary">' + esc(summary) + "</p>" +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcKanaStart"' + (canStudy ? "" : " disabled") + ">Study now</button>";

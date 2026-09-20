@@ -249,7 +249,9 @@ window.RaumeStudy.flashcards.views = (function () {
           var progressHtml = tablePaused
             ? '<span class="fc-manage-table-progress fc-manage-table-dormant">Paused</span>'
             : '<span class="fc-manage-table-progress' + (tableDone ? " fc-manage-progress-done" : "") + '">' + addedCount + " / " + table.ids.length + " added</span>";
-          html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + (tablePaused ? " fc-manage-table-paused" : "") + '">' +
+          var tileKey = vocabNs.tableTile ? vocabNs.tableTile(tableId, cat) : "";
+          html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + (tablePaused ? " fc-manage-table-paused" : "") + '"' +
+            (tileKey ? ' data-tile="' + tileKey + '"' : "") + '>' +
             '<div class="fc-manage-table-head">' +
             '<button type="button" class="fc-manage-table-toggle" data-table-id="' + tableId + '" aria-expanded="' + expanded + '" aria-label="' + (expanded ? "Collapse" : "Expand") + " " + esc(displayTitle) + '">' + CHEVRON_ICON + "</button>" +
             '<span class="fc-manage-table-label">' + iconHtml + '<span class="fc-manage-table-title">' + esc(displayTitle) + '</span>' +
