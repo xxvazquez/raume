@@ -363,8 +363,10 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (!currentUnit()) { renderDone(panel); return; }
     panel.innerHTML =
       '<div class="fc-review-card">' +
-      '<div class="fc-review-meta"><span class="fc-review-progress"></span>' +
-      '<button type="button" class="fc-session-exit" id="fcKanaEnd">End session</button></div>' +
+      '<div class="fc-review-meta">' +
+      '<button type="button" class="fc-session-exit" id="fcKanaEnd">End session</button>' +
+      '<span class="fc-review-progress"></span></div>' +
+      '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
       // r2k wants kana in the field -- lang is set per card in syncReviewCard so
@@ -398,6 +400,8 @@ window.RaumeStudy.flashcards.kana = (function () {
 
     shell.querySelector(".fc-review-progress").textContent =
       DIR_LABEL[unit.dir] + " · " + (session.index + 1) + " / " + session.queue.length;
+    var bar = shell.querySelector(".fc-progress");
+    if (bar) { bar.max = session.queue.length; bar.value = session.index; }
     shell.querySelector(".fc-prompt-label").textContent = r2k ? "Type the kana" : "Type the romaji reading";
 
     var promptEl = shell.querySelector(".fc-prompt");
@@ -436,14 +440,13 @@ window.RaumeStudy.flashcards.kana = (function () {
     // romaji vocabulary answer is, just shown side by side).
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</div>"
-      : '<div class="fc-stage-compare">' + esc(session.userAnswer || "(nothing)") +
-        ' <span class="fc-diff-arrow">&rarr;</span> <span' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>";
+      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div></div>";
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never
       // goes anywhere once checked, so echoing it again just below was
       // showing the same word twice on screen at once.
-      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Not quite") + "</span>" +
       '<div class="fc-stage">' + stageHtml + "</div>" +
       ratingRowHtml(session.correct === false) +
       "</div>";

@@ -226,7 +226,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var typed = String(typedRaw == null ? "" : typedRaw).trim();
     if (!isRomajiTarget) {
-      return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "" };
+      return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "", near: false };
     }
     var correctDisplay = closestRomajiDisplay(entry, normalizeAnswer(typed, true));
     var aligned = alignChars(String(correctDisplay || "").toLowerCase(), typed.toLowerCase());
@@ -238,11 +238,20 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var note = "";
     if (bad.length === 1 && bad[0].you != null && bad[0].co != null) {
       note = "1 letter off &middot; <b>" + esc(bad[0].you) + "</b> should be <b>" + esc(bad[0].co) + "</b>";
+    } else if (bad.length === 1 && bad[0].you == null && bad[0].co != null) {
+      note = "1 letter missing &middot; <b>" + esc(bad[0].co) + "</b>";
+    } else if (bad.length === 1 && bad[0].co == null && bad[0].you != null) {
+      note = "1 extra letter &middot; <b>" + esc(bad[0].you) + "</b>";
     }
+    // A different word altogether lights up every letter, which is noise, not
+    // help -- only mark the letters when it's a slip of a couple of them.
+    var marked = bad.length <= 2;
     return {
-      youHtml: typed ? wordDiffHtml(pairs, "you") : "(nothing)",
-      correctHtml: wordDiffHtml(pairs, "co"),
-      note: note
+      youHtml: typed ? (marked ? wordDiffHtml(pairs, "you") : esc(typed)) : "(nothing)",
+      correctHtml: marked ? wordDiffHtml(pairs, "co") : esc(String(correctDisplay || "")),
+      note: note,
+      // Exactly one letter wrong / missing / extra: a typo, not a different word.
+      near: !!typed && bad.length === 1
     };
   }
 

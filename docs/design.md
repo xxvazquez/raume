@@ -32,9 +32,13 @@ system, and the sections below cover each part of it.
   card, with the direction label (`.fc-prompt-label`) faint and tucked right
   above it. It reads as the anchor from contrast, not sheer size: once
   checked, the prompt recedes to a small, muted `.fc-prompt-small` reminder —
-  still legible, no longer the focus — and the verdict ("Correct" / "Almost
-  correct") is a small tone-coloured tag, not a sized-up word: the comparison
-  underneath it is the thing to read. On a phone the chrome (meta line,
+  still legible, no longer the focus — and the verdict ("Correct" / "Almost" /
+  "Not quite") is one quiet line of text with a small mark — never a pill or a
+  filled block — so the answer beneath it (30px, `--ink`) is the one thing to read.
+  A miss is never red-washed: the card flash is a 5% tint and the ✕ alone carries
+  the coral. The ratings are the standard segmented control (`--seg-track` with the
+  usual choice on `--seg-thumb`), the card is top-anchored (no re-centring when the
+  answer drops in), and a `<progress>` bar under the meta line shows the session. On a phone the chrome (meta line,
   padding, rating row, the "stage" panel) tightens but the prompt keeps its
   full size and air. Past 700px the reading text you rate from (the stage
   panel, rating labels) steps up a size off the shared `--fs-*` scale — but

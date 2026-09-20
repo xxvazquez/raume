@@ -1871,7 +1871,7 @@ async function main() {
     // shorthand property, so (as elsewhere in this file) check the declared
     // rule itself rather than getComputedStyle.
     const rule = allCssRules.find(r => r.selectorText === ".fc-verdict-tag");
-    return !!tag && /^(Correct|Almost correct)$/.test(tag.textContent)
+    return !!tag && /^(Correct|Almost|Not quite)$/.test(tag.textContent)
       && !!rule && parseFloat(rule.style.fontSize) <= 13;
   })());
   check("every rating button carries the data-rating the tone-coding CSS keys off", (() => {

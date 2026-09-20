@@ -687,8 +687,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
     panel.innerHTML =
       '<div class="fc-review-card">' +
-      '<div class="fc-review-meta"><span class="fc-review-progress"></span>' +
-      '<button type="button" class="fc-session-exit" id="fcEndSession">End session</button></div>' +
+      // Cancel-style exit on the left, the direction + count on the right, a thin
+      // progress bar under both.
+      '<div class="fc-review-meta">' +
+      '<button type="button" class="fc-session-exit" id="fcEndSession">End session</button>' +
+      '<span class="fc-review-progress"></span></div>' +
+      '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt-label"></div>' +
       '<div class="fc-prompt"></div>' +
       // No visible Check button -- Enter (or a mobile keyboard's own Go/
@@ -724,6 +728,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
     shell.querySelector(".fc-review-progress").textContent =
       DIRECTION_LABEL[card.direction] + " · " + (session.index + 1) + " / " + session.queue.length;
+    var bar = shell.querySelector(".fc-progress");
+    if (bar) { bar.max = session.queue.length; bar.value = session.index; }
     shell.querySelector(".fc-prompt-label").textContent = askLabelFor(card.direction);
     var promptEl = shell.querySelector(".fc-prompt");
     if (prompt.lang) promptEl.setAttribute("lang", "ja"); else promptEl.removeAttribute("lang");
@@ -760,20 +766,23 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // plain typed-vs-correct pair (English targets, which accept several
     // synonyms -- diffing characters against just one of them isn't fair).
     // Correct answers need none of that -- just the answer, once, restated.
+    var cmp = session.correct ? null : answerCompareHtml(entry, card.direction, session.userAnswer);
+    // Two labelled lines, not "typed -> correct": what you said (quiet, red only
+    // on the text) and the answer (the big one). A single letter off reads
+    // "Almost"; anything else is honestly "Not quite".
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
-      : (function () {
-          var cmp = answerCompareHtml(entry, card.direction, session.userAnswer);
-          return '<div class="fc-stage-compare">' + cmp.youHtml + ' <span class="fc-diff-arrow">&rarr;</span> ' + cmp.correctHtml + "</div>" +
-            (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "");
-        })();
+      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div></div>" +
+          (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "");
+    var verdictText = session.correct ? "Correct" : (cmp.near ? "Almost" : "Not quite");
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never
       // goes anywhere once checked, so echoing it again just below was
       // showing the same word twice on screen at once.
-      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + (session.correct ? "Correct" : "Almost correct") + "</span>" +
-      '<div class="fc-stage">' + stageHtml + '<div class="fc-stage-meaning">' + esc(context.value) + "</div></div>" +
+      '<span class="fc-verdict-tag">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + verdictText + "</span>" +
+      '<div class="fc-stage">' + stageHtml +
+        (String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + esc(context.value) + "</div>") + "</div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy are dimmed -- still one click away (typos happen), just
       // not the default read.

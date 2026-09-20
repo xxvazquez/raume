@@ -235,10 +235,15 @@ streak.
   underline field, no visible Check button — **Enter** (or a mobile keyboard's
   own Go/submit action) checks, **1–4** rates. Once checked, the prompt recedes
   to a small reminder and the card washes once in the matching tone.
-- The result is a compact tag (Correct / Almost correct), not a full-width
-  banner, and everything you actually study from — the comparison, the field
-  of context you *weren't* tested on — sits together in one quiet panel instead
-  of stacked sections.
+- The study card is deliberately calm — the **answer** is the only large thing
+  on it. The verdict is one quiet line of text (Correct / Almost / Not quite) with
+  a small mark, no pill or banner; what you typed stays in the field above (muted),
+  and a near-miss marks the letter that differs with a one-line note ("1 letter
+  missing · a"); the field you *weren't* tested on sits under the answer. The four
+  ratings are one iOS segmented control (grey track, the usual choice raised on
+  the white thumb — Good after a right answer, Again after a miss), with no dark
+  or coloured buttons to pull the eye. The card stays anchored near the top so the
+  prompt never jumps when the answer appears, and a thin bar shows session progress.
 - A wrong romaji answer (Japanese→Romaji, English→Romaji) shows exactly which
   letters were off — `kaeramasu → kaerimasu`, only the mismatched letters
   marked — compared against whichever accepted spelling is the closest match.

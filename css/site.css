@@ -2745,9 +2745,31 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
     min-height: calc(100svh - 60px);
   }
 }
-.fc-review-meta { align-self: stretch; display: flex; justify-content: space-between; align-items: baseline; color: var(--faint); font-size: var(--fs-micro); margin-bottom: 16px; }
-.fc-session-exit { appearance: none; border: 0; background: transparent; padding: 0; font: inherit; color: var(--faint); cursor: pointer; }
-.fc-session-exit:hover { color: var(--wrong); text-decoration: underline; }
+/* The card is anchored near the top, not centred: centring re-centred it every
+   time the verdict and ratings dropped in, so the prompt jumped upward under
+   your thumb. Anchored, the prompt and the field never move; the answer just
+   grows downward. (The wrap-up screen stays centred.) */
+.fc-tabpanel:not([hidden]):has(> .fc-review-card) { justify-content: flex-start; padding-top: clamp(4px, 5svh, 48px); }
+.fc-review-meta {
+  align-self: stretch; display: flex; justify-content: space-between; align-items: center;
+  color: var(--muted); font-size: var(--fs-small); margin-bottom: 4px;
+}
+/* iOS "Cancel": a tint-coloured text button on the leading edge with a full 44pt
+   hit area (the padding, cancelled by a negative margin so the row stays slim). */
+.fc-session-exit {
+  appearance: none; border: 0; background: transparent; font: inherit; cursor: pointer;
+  color: var(--accent-strong); padding: 13px 14px 13px 0; margin: -13px 0;
+}
+.fc-session-exit:hover { opacity: .7; }
+/* Thin session progress bar (a real <progress>, so it's announced too). */
+.fc-progress {
+  appearance: none; -webkit-appearance: none; align-self: stretch; width: 100%; height: 4px;
+  margin: 8px 0 22px; border: 0; border-radius: 2px; overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 9%, var(--paper)); color: var(--accent-strong);
+}
+.fc-progress::-webkit-progress-bar { background: color-mix(in srgb, var(--ink) 9%, var(--paper)); }
+.fc-progress::-webkit-progress-value { background: var(--accent-strong); border-radius: 2px; transition: width .25s ease; }
+.fc-progress::-moz-progress-bar { background: var(--accent-strong); border-radius: 2px; }
 /* A quiet reminder of the direction, hugging the prompt it introduces -- the
    prompt is the thing to read, not this. */
 .fc-prompt-label { color: var(--muted); font-size: var(--fs-small); margin-bottom: 6px; }
@@ -2775,11 +2797,11 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    so mix a stronger-but-still-soft tint.) Shared by both review cards via
    .fc-verdict-ok/-bad below. */
 @keyframes fc-flash-right {
-  0%, 22% { background: color-mix(in srgb, var(--right) 18%, var(--paper)); }
+  0%, 22% { background: color-mix(in srgb, var(--right) 9%, var(--paper)); }
   100% { background: var(--paper); }
 }
 @keyframes fc-flash-wrong {
-  0%, 22% { background: color-mix(in srgb, var(--wrong) 18%, var(--paper)); }
+  0%, 22% { background: color-mix(in srgb, var(--wrong) 5%, var(--paper)); }
   100% { background: var(--paper); }
 }
 
@@ -2792,27 +2814,37 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    -- the tag and stage panel need the full width to centre their own content
    in, the way the approved design shows them. */
 .fc-review-verdict { align-self: stretch; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
+/* The verdict is one quiet line of text with a small mark -- no pill. The field
+   above already shows what you typed; the ANSWER below is the thing to read. */
 .fc-verdict-tag {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--font-ui); font-size: 11px; font-weight: 600;
-  padding: 4px 10px; border-radius: 6px; margin-bottom: 14px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+  margin-bottom: 8px; color: var(--muted);
 }
-.fc-verdict-ok .fc-verdict-tag { background: var(--right-soft); color: var(--right-strong); }
-.fc-verdict-bad .fc-verdict-tag { background: var(--wrong-soft); color: var(--wrong-strong); }
+.fc-verdict-ok .fc-verdict-tag { color: var(--right-strong); }
+.fc-verdict-bad .fc-verdict-tag svg { color: var(--wrong); }
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
-.fc-stage { align-self: stretch; padding: 8px 0 12px; margin-bottom: 4px; }
-.fc-stage-compare { font: 600 24px/1.35 var(--font-ui); color: var(--ink); margin-bottom: 6px; }
-.fc-stage-expected { font: 600 24px var(--font-ui); color: var(--right-strong); margin-bottom: 6px; }
-.fc-stage-meaning { font-size: var(--fs-small); color: var(--muted); }
+.fc-stage { align-self: stretch; padding: 0 0 10px; margin-bottom: 2px; }
+.fc-stage-expected { font: 600 30px/1.25 var(--font-ui); letter-spacing: -.01em; color: var(--ink); margin-bottom: 4px; }
+/* Wrong answer: the ANSWER is the focus -- big, in ink, first thing the eye lands
+   on. What you typed sits under it, small and quiet (no red), so nothing competes. */
+.fc-stage-compare { display: grid; gap: 10px; margin-bottom: 6px; }
+.fc-answer-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.fc-answer-label { font: 400 12px/1.2 var(--font-ui); color: var(--faint); }
+.fc-answer-text { font: 400 16px/1.3 var(--font-ui); }
+.fc-answer-you .fc-answer-text { color: var(--muted); }
+.fc-answer-right .fc-answer-text { font-size: clamp(22px, 7vw, 30px); overflow-wrap: anywhere; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
+.fc-review-dynamic { align-self: stretch; }
 .fc-diff-arrow { color: var(--faint); padding: 0 2px; }
 mark.fc-diff-you {
-  background: var(--wrong-soft); color: var(--wrong-strong); text-decoration: underline wavy var(--wrong);
-  text-decoration-thickness: 1.5px; text-underline-offset: 3px; border-radius: 3px; padding: 0 1px; font-weight: 700;
+  background: transparent; color: var(--wrong-strong); text-decoration: underline;
+  text-decoration-color: var(--wrong); text-decoration-thickness: 1.5px; text-underline-offset: 3px; font-weight: 500;
 }
 mark.fc-diff-co {
-  background: color-mix(in srgb, var(--right) 22%, var(--paper)); color: var(--right-strong);
-  border-radius: 3px; padding: 0 1px; font-weight: 700; box-shadow: inset 0 -2px 0 var(--right);
+  background: color-mix(in srgb, var(--right) 16%, var(--paper)); color: inherit;
+  border-radius: 4px; padding: 0 1px; font-weight: inherit; box-shadow: none;
 }
 .fc-diff-note { font-size: var(--fs-small); color: var(--muted); margin: 0 0 18px; }
 .fc-diff-note b { color: var(--ink); font-weight: 600; }
@@ -2823,43 +2855,40 @@ mark.fc-diff-co {
    kana.js's review card (which reuses every .fc-review-* / .fc-rating-*
    class here -- see the note further down). A tone-coloured key chip
    carries all the colour; nothing else on the row does. */
-.fc-rating-row { align-self: stretch; display: flex; }
+/* One iOS segmented control of four cells -- a grey track, the usual choice
+   raised on the white thumb (the same component as everywhere else). No dark or
+   coloured fills, so nothing pulls the eye off the answer above. */
+.fc-rating-row {
+  align-self: stretch; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+  margin-top: 12px; padding: 2px; background: var(--seg-track); border-radius: 12px;
+}
 .fc-rating-btn {
-  flex: 1 1 0; appearance: none; border: 0; background: transparent;
-  padding: 9px 4px; display: flex; align-items: center; justify-content: center; gap: 6px;
-  text-align: center; cursor: pointer; color: var(--ink);
+  position: relative; appearance: none; border: 0; border-radius: 10px; min-height: 54px; padding: 8px 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  text-align: center; cursor: pointer; color: var(--ink); background: transparent;
   transition: background .12s ease;
 }
-.fc-rating-btn + .fc-rating-btn { border-left: 1px solid var(--line); }
-/* The 1-4 keyboard digit as a small tone-coloured chip -- it's the one
-   genuinely useful hint on the card, and now the row's only colour. */
+.fc-rating-btn:active { opacity: .7; }
+.fc-rating-btn .fc-rating-name { display: block; font: 500 14px/1.2 var(--font-ui); color: inherit; }
+.fc-rating-btn .fc-rating-interval { display: block; font-size: 12px; color: inherit; opacity: .65; }
+/* The 1-4 key hints are for a hardware keyboard: only where there's a hover. */
 .fc-rating-btn .fc-rating-key {
-  display: inline-flex; align-items: center; justify-content: center; min-width: 13px; padding: 1px 5px;
-  border-radius: 4px;
+  display: none; position: absolute; top: 6px; left: 8px; min-width: 13px; padding: 1px 5px;
+  align-items: center; justify-content: center; border-radius: 4px;
   font-family: var(--font-ui); font-size: 10.5px; font-weight: 600; line-height: 1.5;
   font-variant-numeric: tabular-nums;
 }
-.fc-rating-btn .fc-rating-name { display: block; font: 500 12.5px/1.3 var(--font-ui); color: var(--ink); }
-.fc-rating-btn .fc-rating-interval { display: block; font-size: 11px; color: var(--faint); }
-/* All four ratings tone-coded, each its own hue rather than a wrong-to-right
-   intensity spectrum -- a stepped spectrum shipped once (Again at full
-   --wrong, Hard a lighter tint) and read wrong: it made Hard look like it
-   barely mattered next to Again. Four distinct hues instead, all at the same
-   strength, so the choice is muscle memory, not a read-all-four every card:
-   Again in the coral --wrong, Hard in the ochre --fc-hard (the one hue
-   unique to this row), Good in the sage --right, Easy in the lavender
-   --accent -- reusing the palette's tones everywhere but Hard. */
+@media (hover: hover) and (pointer: fine) { .fc-rating-btn .fc-rating-key { display: inline-flex; } }
 .fc-rating-btn[data-rating="again"] .fc-rating-key { background: var(--wrong-soft); color: var(--wrong-strong); }
 .fc-rating-btn[data-rating="hard"] .fc-rating-key { background: var(--fc-hard-soft); color: var(--fc-hard-strong); }
 .fc-rating-btn[data-rating="good"] .fc-rating-key { background: var(--right-soft); color: var(--right-strong); }
 .fc-rating-btn[data-rating="easy"] .fc-rating-key { background: var(--accent-soft); color: var(--accent-strong); }
-.fc-rating-btn:hover:not([disabled]) { background: var(--surface); }
+.fc-rating-btn:hover:not([disabled]) { background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .fc-rating-btn[disabled] { opacity: .45; cursor: not-allowed; }
-/* Wrong answer: Good / Easy recede (but stay usable -- full opacity on hover). */
-.fc-rating-row-missed .fc-rating-btn[data-rating="good"],
-.fc-rating-row-missed .fc-rating-btn[data-rating="easy"] { opacity: .45; }
-.fc-rating-row-missed .fc-rating-btn[data-rating="good"]:hover,
-.fc-rating-row-missed .fc-rating-btn[data-rating="easy"]:hover { opacity: 1; }
+/* The usual choice (Good after a right answer, Again after a miss) is the raised
+   thumb. */
+.fc-rating-row:not(.fc-rating-row-missed) .fc-rating-btn[data-rating="good"],
+.fc-rating-row-missed .fc-rating-btn[data-rating="again"] { background: var(--seg-thumb); }
 .fc-session-done { text-align: center; padding: 40px 16px; color: var(--muted); }
 .fc-session-done-title { margin: 0 0 8px; font-size: var(--fs-section-title); color: var(--ink); font-weight: 500; }
 .fc-session-done-stats { margin: 0 0 4px; font-size: var(--fs-nav-sub); color: var(--muted); }
@@ -2894,14 +2923,9 @@ mark.fc-diff-co {
    instead. */
 @media (max-width: 560px) {
   .fc-review-card { padding: 15px 15px 20px; }
-  .fc-review-meta { margin-bottom: 12px; }
   .fc-review-card .fc-prompt { margin-bottom: 22px; }
   .fc-review-card .fc-prompt-kana { font-size: 29px; margin-bottom: 22px; }
-  .fc-stage { padding: 13px 13px; }
-  .fc-stage-compare, .fc-stage-expected { font-size: 21px; }
-  .fc-rating-btn { padding: 7px 2px; }
-  .fc-rating-btn .fc-rating-name { font-size: var(--fs-micro); margin: 1px 0; }
-  .fc-rating-btn .fc-rating-interval { font-size: 10px; }
+  .fc-stage { padding: 0 0 8px; }
 }
 /* Desktop: the shared --fs-* scale is tuned for the reference tables, and on a
    roomy window the study card's reading text (the answer you type, the revealed
