@@ -1028,6 +1028,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelectorAll('#vocabulary .table-section[data-table="' + id + '"]').forEach(function (section) {
         const slot = section.querySelector('.section-icon');
         if (slot) { slot.classList.toggle('section-icon-empty', !has); slot.innerHTML = glyph; }
+        const tile = window.RaumeStudy.vocab.tableTile(id, section.dataset.category);
+        if (tile) section.dataset.tile = tile; else delete section.dataset.tile;
         const text = section.querySelector('.section-title-text');
         if (text && title) text.textContent = title;
       });
@@ -1059,9 +1061,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // Hand that back to the menu trigger instead, which stays visible.
       const menuBtn = btn.closest('.section-menu');
       const focusTarget = menuBtn ? menuBtn.querySelector('.section-menu-btn') : btn;
-      window.RaumeStudy.iconPicker.open(window.RaumeStudy.tableCustom.iconOf(id), function (value) {
-        window.RaumeStudy.tableCustom.setIcon(id, value); // fires onChange -> redraw
-      }, focusTarget || btn);
+      const tcu = window.RaumeStudy.tableCustom, vocabNs = window.RaumeStudy.vocab;
+      const category = (document.querySelector('#vocabulary .table-section[data-table="' + id + '"]') || {}).dataset;
+      window.RaumeStudy.iconPicker.open(vocabNs.tableIconValue(id), function (value) {
+        tcu.setIcon(id, value); // fires onChange -> redraw
+      }, focusTarget || btn, {
+        resettable: !!tcu.iconOf(id),
+        color: tcu.colorOf(id),
+        autoColor: function () { return vocabNs.tableTile(id, category && category.category) || ''; },
+        onColor: function (key) { tcu.setColor(id, key); }
+      });
     });
     // Redraw on any change -- a local pick, or icons arriving from another
     // device on sign-in (Supabase sync).

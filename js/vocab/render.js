@@ -327,6 +327,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var title = tableTitle(o.id, o.title);
     return '<section class="table-section ' + (o.sectionClass || '') + (o.collapsed ? ' collapsed' : '') +
       '" data-table="' + o.id + '" data-category="' + esc(o.category || '') + '"' +
+      (controls.addTable && tableTile(o.id, o.category) ? ' data-tile="' + tableTile(o.id, o.category) + '"' : '') +
       (o.section ? ' data-section="' + esc(o.section) + '"' : '') +
       ' id="table-' + o.id + '">' +
       '<div class="section-head">' +
@@ -395,12 +396,39 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     22: 'utensils', 23: 'hand', 24: 'calendar', 25: 'moon', 26: 'grid',
     27: 'sun', 28: 'hourglass', 29: 'alarm', 30: 'clock', 31: 'watch'
   };
+  // The icon a table shows: the reader's pick, else the shipped default, else --
+  // for a table of their own -- one suggested from its name (see icons.suggest),
+  // falling back to a bookmark. A synthetic table with no name has none.
   function tableIconValue(id) {
     var tc = window.RaumeStudy.tableCustom;
     var chosen = tc ? tc.iconOf(id) : '';
-    return chosen || DEFAULT_TABLE_ICONS[id] || '';
+    if (chosen) return chosen;
+    if (DEFAULT_TABLE_ICONS[id]) return DEFAULT_TABLE_ICONS[id];
+    var ic = window.RaumeStudy.icons;
+    var name = tableTitle(id, dataTitleOf(id));
+    return ic && name ? (ic.suggest(name) || 'bookmark') : '';
+  }
+  function dataTitleOf(id) {
+    var all = window.RaumeStudy.data && window.RaumeStudy.data.vocabularyTables || [];
+    for (var i = 0; i < all.length; i++) if (String(all[i].id) === String(id)) return all[i].title;
+    return '';
   }
   vocab.tableIconValue = tableIconValue;
+  // The tile colour key for a table (icons.colors): the reader's pick, else its
+  // content category's hue, else the hue of its icon's group (an apple table is
+  // green, a plane table teal). "" means the plain section tone.
+  var CATEGORY_TILE = {
+    'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
+    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Phrases': 'amber'
+  };
+  function tableTile(id, category) {
+    var tc = window.RaumeStudy.tableCustom, ic = window.RaumeStudy.icons;
+    var chosen = tc ? tc.colorOf(id) : '';
+    if (chosen && ic && ic.hasColor(chosen)) return chosen;
+    if (CATEGORY_TILE[category]) return CATEGORY_TILE[category];
+    return ic ? ic.groupColor(tableIconValue(id)) : '';
+  }
+  vocab.tableTile = tableTile;
   // The name to show for a table: the reader's custom name (Customize page) if
   // they've set one, otherwise the name shipped in the dataset. Used everywhere
   // a table is labelled -- section header, table directory, Flashcards Manage.

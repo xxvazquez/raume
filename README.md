@@ -116,10 +116,15 @@ so they're easy to spot in a sentence.
 
 **Customising**
 
-- Every table ships with an **icon** shown as a small tile beside its name,
-  tinted a soft colour per category (food green, kitchen orange, numbers blue, …)
-  (Fruits gets an apple, Verbs a bolt, …); change it to any of ~165 curated line
-  icons, or upload your own, and give it a custom **name / order**, on the **Customize** page
+- Every table has an **icon** shown as a small tile beside its name, tinted a soft
+  colour per category (food green, kitchen orange, numbers blue, …). Shipped
+  tables come with one (Fruits gets an apple, Verbs a bolt, …); a table you create
+  **picks its own icon from its name** — "Animals" gets a paw, "Family members"
+  people, "Kitchen tools" a microwave, a bookmark if nothing fits — and its tile
+  takes the colour of that icon's group (apple → green, plane → teal), updating
+  as you rename it. Don't like either? Change the icon (any of ~165 curated line
+  icons, or upload your own) and the tile **colour** (nine muted hues, or Auto)
+  in the same picker, and give the table a custom **name / order**, on the **Customize** page
   (masthead sliders icon), or via **Choose icon…** in that table's own ⋯ menu
   while browsing. Customisations show everywhere the table appears, including
   Flashcards › Manage.

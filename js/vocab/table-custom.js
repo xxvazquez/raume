@@ -1,4 +1,4 @@
-// Per-table personalisation -- a custom icon, a custom display name, and a
+// Per-table personalisation -- a custom icon and tile colour, a custom display name, and a
 // custom running order for tables and categories -- layered over the Git-only
 // vocabulary data. localStorage is the
 // immediate source of truth so
@@ -42,6 +42,7 @@ window.RaumeStudy.tableCustom = (function () {
   function entry(id) { return load()[String(id)] || {}; }
   function iconOf(id) { return entry(id).icon || ""; }
   function nameOf(id) { return entry(id).name || ""; }
+  function colorOf(id) { return entry(id).color || ""; }
   function getAll() { return JSON.parse(JSON.stringify(load())); }
 
   // Set (or, with a falsy value, clear) one field of a table's record, pruning
@@ -54,6 +55,12 @@ window.RaumeStudy.tableCustom = (function () {
     });
   }
   function setIcon(id, icon) { setField(id, "icon", icon); }
+  // A tile colour key from icons.colors ("green", "clay", …); "" goes back to
+  // the automatic one.
+  function setColor(id, color) {
+    var ic = window.RaumeStudy.icons;
+    setField(id, "color", ic && ic.hasColor(color) ? color : "");
+  }
   function setName(id, name) {
     setField(id, "name", typeof name === "string" ? name.trim().slice(0, 40) : "");
   }
@@ -135,8 +142,8 @@ window.RaumeStudy.tableCustom = (function () {
   function setRemotePush(fn) { remotePush = fn; }
 
   return {
-    iconOf: iconOf, nameOf: nameOf, entry: entry, getAll: getAll,
-    setIcon: setIcon, setName: setName, clear: clear,
+    iconOf: iconOf, nameOf: nameOf, colorOf: colorOf, entry: entry, getAll: getAll,
+    setIcon: setIcon, setColor: setColor, setName: setName, clear: clear,
     tableOrder: tableOrder, categoryOrder: categoryOrder,
     setTableOrder: setTableOrder, setCategoryOrder: setCategoryOrder,
     hasCustomOrder: hasCustomOrder, resetOrder: resetOrder,

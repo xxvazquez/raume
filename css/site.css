@@ -1026,26 +1026,30 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) .section-head::after { display: none; }
 
 /* Icon tile (iOS Settings style): a small rounded square with a white glyph,
-   filled in a soft, muted hue per content category (Food green, Kitchen orange,
-   Numbers blue, Time indigo, Grammar purple, Travel teal, Phrases amber). The
-   hues are dusty mid-tones, not system-bright, so they sit with the app's cool
-   palette; the colour is the only colour in a row, and it says which group a
-   table belongs to. A table of your own (no known category) takes the section
-   tone. Dark mode dims the fill a touch so the tile doesn't glare. */
-#vocabulary .table-section { --tile: var(--section); --tile-k: 100%; }
-:root[data-theme="dark"] #vocabulary .table-section { --tile-k: 80%; }
-#vocabulary .table-section[data-category="Food & Ingredients"] { --tile: #74a087; }
-#vocabulary .table-section[data-category="Kitchen & Dining"] { --tile: #c8905a; }
-#vocabulary .table-section[data-category="Numbers & Counting"] { --tile: #7093be; }
-#vocabulary .table-section[data-category="Time & Calendar"] { --tile: #8487c0; }
-#vocabulary .table-section[data-category="Grammar"] { --tile: #9c7fb6; }
-#vocabulary .table-section[data-category="Travel"] { --tile: #5fa0a2; }
-#vocabulary .table-section[data-category="Phrases"] { --tile: #bd9a52; }
+   filled in a soft, muted hue. Each table's hue is a key (data-tile, set in
+   js/vocab/render.js): its own pick, else its content category's (Food green,
+   Kitchen orange, Numbers blue, Time indigo, Grammar purple, Travel teal,
+   Phrases amber), else its icon group's. The hues are dusty mid-tones, not
+   system-bright, so they sit with the app's cool palette; the colour is the
+   only colour in a row. No key = the section tone. Dark mode dims the fill a
+   touch so the tile doesn't glare. */
+:root {
+  --tile-green: #74a087; --tile-orange: #c8905a; --tile-blue: #7093be;
+  --tile-indigo: #8487c0; --tile-purple: #9c7fb6; --tile-teal: #5fa0a2;
+  --tile-amber: #bd9a52; --tile-clay: #bb7f74; --tile-slate: #8493a3;
+  --tile-k: 100%;
+}
+:root[data-theme="dark"] { --tile-k: 80%; }
+[data-tile="green"] { --tile: var(--tile-green); }   [data-tile="orange"] { --tile: var(--tile-orange); }
+[data-tile="blue"] { --tile: var(--tile-blue); }     [data-tile="indigo"] { --tile: var(--tile-indigo); }
+[data-tile="purple"] { --tile: var(--tile-purple); } [data-tile="teal"] { --tile: var(--tile-teal); }
+[data-tile="amber"] { --tile: var(--tile-amber); }   [data-tile="clay"] { --tile: var(--tile-clay); }
+[data-tile="slate"] { --tile: var(--tile-slate); }
 #vocabulary .section-head { align-items: center; }
 #vocabulary .section-head > .section-icon:not(.section-icon-empty) {
   width: 28px; height: 28px; margin-top: 0; padding: 5.5px; box-sizing: border-box;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--tile) var(--tile-k), #000);
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000);
   color: #fff;
 }
 #vocabulary .table-section:not(.collapsed) .section-head > .section-icon:not(.section-icon-empty) { width: 28px; height: 28px; padding: 5.5px; margin-right: 2px; }
@@ -1178,6 +1182,22 @@ svg.si { stroke-width: 1.6; }
   color: var(--faint); cursor: pointer; padding: 4px; border-radius: 6px;
 }
 .icon-picker-close:hover { color: var(--ink); }
+/* Tile colour row: an "Auto" pill then one dot per hue; applies at once. */
+.icon-picker-colors { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--row-line); }
+.icon-picker-colors[hidden] { display: none; }
+.icon-picker-colors-label { margin-right: 4px; color: var(--muted); font: 400 var(--fs-small)/1 var(--font-ui); }
+.swatch {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px; border-radius: 999px;
+  color: var(--muted); font: 400 var(--fs-small)/1 var(--font-ui);
+  outline: 2px solid transparent; outline-offset: 0;
+}
+.swatch-auto { padding-right: 9px; }
+.swatch-dot {
+  display: block; width: 20px; height: 20px; border-radius: 50%;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000);
+}
+.swatch.selected { outline-color: var(--ink); color: var(--ink); }
 .icon-picker-body { flex: 1 1 auto; overflow: auto; padding: 8px 12px 12px; }
 .icon-picker-group[hidden] { display: none; }
 .icon-picker-group-label {
@@ -1346,7 +1366,11 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
 .cz-move-btn:hover:not([disabled]) { color: var(--ink); }
 .cz-move-btn[disabled] { opacity: .28; cursor: default; }
 .cz-group-title .cz-move { flex-direction: row; margin-right: 2px; }
-.cz-row-icon { width: 20px; height: 20px; }
+.cz-row-icon { width: 28px; height: 28px; }
+.cz-row-icon .section-icon:not(.section-icon-empty) {
+  padding: 5.5px; box-sizing: border-box; border-radius: 8px;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
+}
 /* A fixed-ish basis, not flex:1 -- one of ~25 rows, so a name field stretched
    to fill the whole 720px page read as an oversized box for a short word. A
    bounded width close to what a name (40 chars, max) actually needs keeps

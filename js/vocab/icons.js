@@ -208,5 +208,114 @@ window.RaumeStudy.icons = (function () {
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PATHS[value] + "</svg>";
   }
 
-  return { render: render, has: has, names: Object.keys(PATHS), groups: GROUPS };
+  // The group an icon lives in (its picker heading), or "" for an unknown /
+  // uploaded one. Used to pick a table's default colour from its icon.
+  function groupOf(name) {
+    for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].names.indexOf(name) !== -1) return GROUPS[i].label;
+    return "";
+  }
+
+  // ---- Suggesting an icon from a table's name ---------------------------------
+  // A table you create is named in plain English ("Animals", "Family members",
+  // "At the hospital"); this picks the icon that fits so it never starts blank.
+  // Each word of the name is tried in order -- an alias first, then an icon of
+  // that very name -- and the first hit wins, so "Kitchen tools" finds the
+  // kitchen before "tools" gets a say. Returns "" when nothing fits (the caller
+  // falls back to a generic one). Purely a default: the reader's own pick wins.
+  var ALIASES = {
+    // food & drink
+    fruit: "apple", berry: "cherry", vegetable: "carrot", veggie: "carrot", veg: "carrot",
+    meat: "beef", dairy: "milk", seafood: "fish", chicken: "drumstick", poultry: "drumstick",
+    food: "utensils", meal: "soup", dish: "soup", dinner: "utensils", lunch: "salad", breakfast: "egg",
+    restaurant: "utensils", cook: "utensils", recipe: "utensils", ingredient: "egg", spice: "flame",
+    drink: "coffee", beverage: "coffee", tea: "cup", alcohol: "wine", bar: "beer", sweet: "candy",
+    dessert: "ice-cream", snack: "cookie", bread: "cookie", rice: "soup", noodle: "soup",
+    // home & objects
+    kitchen: "microwave", appliance: "microwave", tableware: "cup", home: "home", house: "home",
+    room: "sofa", furniture: "sofa", bedroom: "bed", bathroom: "bath", toilet: "toilet",
+    laundry: "washer", clothes: "shirt", clothing: "shirt", fashion: "shirt", wear: "shirt",
+    shop: "shopping-bag", shopping: "shopping-bag", store: "store", market: "store", buy: "shopping-cart",
+    money: "wallet", price: "tag", payment: "credit-card", bank: "landmark", gift: "gift",
+    garbage: "recycle", trash: "trash", rubbish: "trash", tool: "wrench", repair: "hammer",
+    electric: "plug", power: "plug", light: "lightbulb", tech: "laptop", computer: "laptop",
+    internet: "globe", phone: "smartphone", device: "smartphone", key: "key", lock: "lock",
+    // travel & places
+    travel: "plane", trip: "luggage", airport: "plane", flight: "plane", train: "train", station: "train",
+    transport: "bus", transit: "bus", bus: "bus", car: "car", drive: "car", driving: "car", road: "signpost",
+    sign: "signpost", direction: "compass", map: "map", place: "map-pin", location: "map-pin",
+    city: "building", town: "building", building: "building", hotel: "bed", accommodation: "bed",
+    stay: "bed", ticket: "ticket", camp: "tent", beach: "palmtree", mountain: "mountain", hike: "mountain",
+    temple: "church", shrine: "landmark", culture: "landmark", sightseeing: "camera", tourist: "camera",
+    // nature & animals
+    animal: "paw", pet: "paw", cat: "cat", dog: "dog", bird: "bird", insect: "bug", bug: "bug",
+    nature: "leaf", plant: "sprout", garden: "flower", flower: "flower", tree: "tree", forest: "tree",
+    weather: "cloud", rain: "cloud-rain", snow: "snowflake", wind: "wind", sun: "sun", sky: "cloud",
+    season: "leaf", spring: "flower", summer: "sun", autumn: "leaf", fall: "leaf", winter: "snowflake",
+    water: "droplet", fire: "flame", temperature: "thermometer", hot: "thermometer", cold: "snowflake",
+    moon: "moon", night: "moon", star: "star",
+    // people, school, work
+    family: "users", relative: "users", people: "users", friend: "users", person: "user", body: "hand",
+    hand: "hand", face: "smile", feeling: "heart", emotion: "smile", love: "heart", health: "heart",
+    medical: "heart", doctor: "heart", hospital: "heart", medicine: "heart", sick: "thermometer",
+    school: "graduation", study: "book", class: "graduation", university: "graduation", education: "graduation",
+    lesson: "notebook", homework: "pencil", exam: "pencil", test: "pencil", write: "pencil", writing: "pencil",
+    book: "book", reading: "book", read: "book", library: "book", word: "quote", sentence: "quote",
+    phrase: "message", greeting: "hand", conversation: "message", talk: "message", speak: "message",
+    language: "languages", japanese: "languages", kanji: "languages", kana: "languages", grammar: "list",
+    work: "briefcase", job: "briefcase", office: "briefcase", business: "briefcase", career: "briefcase",
+    meeting: "users", email: "mail", letter: "mail", mail: "mail", post: "mail", call: "phone",
+    // time & numbers
+    time: "clock", clock: "clock", hour: "clock", minute: "watch", second: "watch", day: "calendar",
+    week: "calendar", month: "moon", year: "calendar", date: "calendar", calendar: "calendar",
+    today: "sun", tomorrow: "sun", yesterday: "sun", morning: "sun", evening: "moon",
+    number: "hash", count: "hash", counter: "list", math: "calculator", digit: "hash", age: "hourglass",
+    // hobbies & misc
+    music: "music", song: "music", sing: "mic", sport: "trophy", game: "dice", play: "dice", hobby: "palette",
+    art: "palette", colour: "palette", color: "palette", paint: "paintbrush", draw: "paintbrush",
+    photo: "camera", picture: "image", movie: "film", film: "film", tv: "monitor", video: "film",
+    holiday: "gift", party: "cake", birthday: "cake", event: "calendar", celebration: "cake",
+    shape: "diamond", size: "ruler", measure: "ruler", opposite: "arrow-right",
+    verb: "zap", adjective: "sparkles", particle: "quote", noun: "tag", adverb: "arrow-right",
+    useful: "star", favourite: "star", favorite: "star", important: "flag", emergency: "alert",
+    safety: "shield", warning: "alert", rule: "shield", law: "shield", idea: "lightbulb", question: "help"
+  };
+  function singular(w) {
+    if (w.length > 4 && /ies$/.test(w)) return w.slice(0, -3) + "y";
+    if (w.length > 4 && /(ches|shes|sses|xes)$/.test(w)) return w.slice(0, -2);
+    if (w.length > 3 && /s$/.test(w) && !/ss$/.test(w)) return w.slice(0, -1);
+    return w;
+  }
+  function suggest(name) {
+    var words = String(name || "").toLowerCase().split(/[^a-z]+/).filter(function (w) { return w.length > 1; });
+    for (var i = 0; i < words.length; i++) {
+      var forms = [words[i], singular(words[i])];
+      for (var j = 0; j < forms.length; j++) {
+        var f = forms[j];
+        if (Object.prototype.hasOwnProperty.call(ALIASES, f)) return ALIASES[f];
+        if (has(f)) return f;
+      }
+    }
+    return "";
+  }
+
+  // The muted tile colours a table can take -- the picker's swatches. `key` is
+  // what's stored; the hues themselves live in CSS (--tile-<key>) so light and
+  // dark are tuned in one place.
+  var COLORS = [
+    { key: "green", label: "Green" }, { key: "orange", label: "Orange" }, { key: "blue", label: "Blue" },
+    { key: "indigo", label: "Indigo" }, { key: "purple", label: "Purple" }, { key: "teal", label: "Teal" },
+    { key: "amber", label: "Amber" }, { key: "clay", label: "Clay" }, { key: "slate", label: "Slate" }
+  ];
+  function hasColor(key) { return COLORS.some(function (c) { return c.key === key; }); }
+  // A table's colour when the reader hasn't picked one: the hue of its icon's
+  // group, so an apple table comes out green and a plane table teal.
+  var GROUP_COLOR = {
+    "Food & drink": "green", "Travel & places": "teal", "Home & objects": "orange",
+    "Nature & weather": "blue", "Symbols & UI": "slate"
+  };
+
+  return {
+    render: render, has: has, names: Object.keys(PATHS), groups: GROUPS,
+    groupOf: groupOf, suggest: suggest, colors: COLORS, hasColor: hasColor, groupColor: function (icon) { return GROUP_COLOR[groupOf(icon)] || ""; }
+  };
 })();

@@ -618,6 +618,60 @@ async function main() {
     window.RaumeStudy.tableCustom.setIcon(id, ""); // reset
     return ok;
   })());
+  console.log("Icons + colours for a table of your own");
+  check("icons.suggest picks an icon from a table's name (plural, multi-word, unknown)", (() => {
+    const sg = ic.suggest;
+    return sg("Animals") === "paw" && sg("Family members") === "users" && sg("Fruits") === "apple"
+      && sg("Kitchen tools") === "microwave" && sg("At the hospital") === "heart" && sg("Xyzzy") === "" && sg("") === "";
+  })());
+  check("a table of your own gets an icon suggested from its name, a bookmark if none fits, and the reader's pick wins", (() => {
+    const V = window.RaumeStudy.vocab, tc = window.RaumeStudy.tableCustom, all = window.RaumeStudy.data.vocabularyTables;
+    all.push({ id: "ct-test", title: "Animals", category: "My vocabulary", rows: [], __custom: true });
+    all.push({ id: "ct-test2", title: "Xyzzy", category: "My vocabulary", rows: [], __custom: true });
+    const auto = V.tableIconValue("ct-test"), fallback = V.tableIconValue("ct-test2");
+    tc.setName("ct-test", "Fruit stall");
+    const renamed = V.tableIconValue("ct-test");
+    tc.setIcon("ct-test", "star");
+    const picked = V.tableIconValue("ct-test");
+    tc.clear("ct-test");
+    all.splice(all.length - 2, 2);
+    return auto === "paw" && fallback === "bookmark" && renamed === "apple" && picked === "star";
+  })());
+  check("a table's tile colour: its category's hue, then the icon group's for your own tables, then your own pick", (() => {
+    const V = window.RaumeStudy.vocab, tc = window.RaumeStudy.tableCustom, all = window.RaumeStudy.data.vocabularyTables;
+    all.push({ id: "ct-test3", title: "Fruit", category: "My vocabulary", rows: [], __custom: true });
+    const known = V.tableTile("3", "Food & Ingredients");
+    const own = V.tableTile("ct-test3", "My vocabulary");
+    tc.setColor("ct-test3", "clay");
+    const picked = V.tableTile("ct-test3", "My vocabulary");
+    tc.setColor("ct-test3", "not-a-colour");
+    const bogus = V.tableTile("ct-test3", "My vocabulary");
+    tc.clear("ct-test3");
+    all.pop();
+    return known === "green" && own === "green" && picked === "clay" && bogus === "green";
+  })());
+  check("picking a colour re-tints the table header in place (data-tile) and Reset returns to the automatic one", (() => {
+    const tc = window.RaumeStudy.tableCustom;
+    const sec = document.querySelector('#vocabulary .table-section[data-table="3"]');
+    const before = sec.dataset.tile;
+    tc.setColor("3", "purple");
+    const during = sec.dataset.tile;
+    tc.setColor("3", "");
+    return before === "green" && during === "purple" && sec.dataset.tile === "green";
+  })());
+  check("the icon picker offers an Auto pill plus one swatch per hue, and a swatch applies without closing it", (() => {
+    const chosen = [];
+    window.RaumeStudy.iconPicker.open("coffee", () => {}, null, { color: "", autoColor: () => "green", onColor: (k) => chosen.push(k), resettable: false });
+    const root = document.querySelector(".icon-picker-root");
+    const swatches = [...root.querySelectorAll(".swatch")];
+    const auto = root.querySelector(".swatch-auto");
+    const clay = root.querySelector('.swatch[data-color="clay"]');
+    clay.click();
+    const stillOpen = !root.hidden && clay.classList.contains("selected") && !auto.classList.contains("selected");
+    const resetHidden = root.querySelector(".icon-picker-remove").hidden === true;
+    window.RaumeStudy.iconPicker.close();
+    return swatches.length === 1 + ic.colors.length && auto.classList.contains("selected") === false && chosen.join() === "clay" && stillOpen && resetHidden;
+  })());
   check("sign-in merges local customisations with the account (account wins per table, local-only kept + pushed up)", (() => {
     const tc = window.RaumeStudy.tableCustom;
     const secs = [...document.querySelectorAll("#vocabulary .table-section[data-table]")];

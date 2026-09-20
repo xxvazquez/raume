@@ -120,10 +120,16 @@ and Help.
   square with a white glyph, filled in a soft, muted hue **per content category**
   (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
   `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
-  purple, Travel `#5fa0a2` teal, Phrases `#bd9a52` amber; a table of your own
-  takes the section tone; dark mode dims the fill to 80%, print drops the tile).
+  purple, Travel `#5fa0a2` teal, Phrases `#bd9a52` amber). The tile key is
+  `data-tile` on the `.table-section` (and the Customize row), resolved in
+  `render.js` `tableTile()`: the reader's pick, else the category's, else — a
+  table of your own — the hue of its icon's group (Food & drink green, Travel
+  teal, Home & objects orange, Nature & weather blue, the rest slate). The
+  picker's nine swatches add clay `#bb7f74` and slate `#8493a3`; the hues are
+  `--tile-<key>` tokens, dark mode dims the fill to 80%, print drops the tile).
   These dusty mid-tones are the only colour in a row and say which group a
-  table is in; the rest of the row stays neutral. The glyph comes from a default per shipped table
+  table is in; the rest of the row stays neutral. The glyph comes from a default per shipped table, or — for a table of your own —
+  `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the
   ground above it, so "where does the title end and the table start" is never

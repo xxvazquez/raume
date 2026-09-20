@@ -108,7 +108,7 @@ window.RaumeStudy.customize = (function () {
   function iconSlot(id) { return V().tableIconGlyph ? V().tableIconGlyph(id) : ""; }
   function isCustomised(id) {
     var e = tc() ? tc().entry(id) : {};
-    return !!(e.icon || e.name);
+    return !!(e.icon || e.name || e.color);
   }
   function moveBtns(kind, key, canUp, canDown) {
     return '<span class="cz-move">' +
@@ -121,10 +121,11 @@ window.RaumeStudy.customize = (function () {
 
   function rowHtml(t, canUp, canDown) {
     var name = tc() ? tc().nameOf(t.id) : "";
-    return '<li class="cz-row" data-table-id="' + t.id + '">' +
+    var tile = V().tableTile ? V().tableTile(t.id, t.category) : "";
+    return '<li class="cz-row" data-table-id="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : "") + '>' +
       moveBtns("table", t.id, canUp, canDown) +
       '<button type="button" class="section-icon-btn cz-row-icon" data-icon-for="' + t.id +
-        '" title="Choose an icon" aria-label="Choose an icon for ' + esc(name || t.title) + '">' +
+        '" title="Choose an icon and colour" aria-label="Choose an icon and colour for ' + esc(name || t.title) + '">' +
         '<span class="section-icon' + (V().tableIconValue && V().tableIconValue(t.id) ? "" : " section-icon-empty") + '">' + iconSlot(t.id) + "</span></button>" +
       '<label class="cz-row-field">' +
         '<input type="text" class="cz-row-name" maxlength="40" autocomplete="off" ' +
@@ -133,7 +134,7 @@ window.RaumeStudy.customize = (function () {
         '<span class="cz-row-original"' + (name ? "" : " hidden") + ">Originally " + esc(t.title) + "</span>" +
       "</label>" +
       '<button type="button" class="cz-row-reset" data-reset-for="' + t.id + '"' +
-        (isCustomised(t.id) ? "" : " disabled") + ' title="Restore this table’s original name and icon">Reset</button>' +
+        (isCustomised(t.id) ? "" : " disabled") + ' title="Restore this table’s original name, icon and colour">Reset</button>' +
       "</li>";
   }
 
