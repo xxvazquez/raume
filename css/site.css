@@ -50,7 +50,7 @@
   --ink-2: #303b49;          /* meaning column -- dark, a hair below --ink */
   --muted: #55606f;          /* secondary -- labels, active nav siblings (AA) */
   --romaji: #5a6675;         /* romaji column -- clearly third, still AA */
-  --faint: #78838f;          /* tertiary -- counts, captions, chevrons (AA on paper) */
+  --faint: #666f7a;          /* tertiary -- counts, captions, chevrons (AA on paper and on the grey ground) */
   --furigana: #5c6a79;       /* reading over kanji -- blue-grey, AA-legible */
 
   --page-bg: #f6f7f9;        /* near-white ground (~#F7F8F9) -- cards lift off it on a real border + shadow */
@@ -228,7 +228,7 @@
   --ink-2: #dbe1e8;
   --muted: #9ba7b4;
   --romaji: #9fabb9;
-  --faint: #808c9a;
+  --faint: #8794a2;
   --furigana: #8e9aa9;   /* a clear step below --romaji again -- still AA on --paper */
 
   --page-bg: #16181c;
@@ -420,8 +420,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -547,6 +547,7 @@ body {
   width: max-content;
   max-width: min(560px, calc(100vw - 40px));
   max-height: 70vh;
+  max-height: 70dvh;
   overflow: auto;
   padding: 12px 12px;
   background: var(--paper);
@@ -625,6 +626,7 @@ body {
     width: auto;
     max-width: none;
     max-height: 72vh;
+    max-height: 72dvh;
     border-radius: 14px 14px 0 0;
     padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
@@ -819,7 +821,7 @@ body { --switch-on: var(--section-strong); }
 .options-scrim { display: none; }
 .options-sheet {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
-  width: 320px; max-width: calc(100vw - 32px); max-height: 75vh; overflow: auto;
+  width: 320px; max-width: calc(100vw - 32px); max-height: 75vh; max-height: 75dvh; overflow: auto;
   padding: 4px 12px 12px;
   background: var(--group-ground);
   border-radius: 14px;
@@ -883,7 +885,7 @@ body { --switch-on: var(--section-strong); }
   }
   .options-sheet {
     position: fixed; inset: auto 0 0 0;
-    width: auto; max-width: none; max-height: 82vh;
+    width: auto; max-width: none; max-height: 82vh; max-height: 82dvh;
     border-radius: 14px 14px 0 0;
     padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
@@ -1042,9 +1044,9 @@ body.selftest-mode .selftest-hint { display: block; }
    only colour in a row. No key = the section tone. Dark mode dims the fill a
    touch so the tile doesn't glare. */
 :root {
-  --tile-green: #74a087; --tile-orange: #c8905a; --tile-blue: #7093be;
-  --tile-indigo: #8487c0; --tile-purple: #9c7fb6; --tile-teal: #5fa0a2;
-  --tile-amber: #bd9a52; --tile-clay: #bb7f74; --tile-slate: #8493a3;
+  --tile-green: #729d84; --tile-orange: #bc8755; --tile-blue: #7093be;
+  --tile-indigo: #8487c0; --tile-purple: #9c7fb6; --tile-teal: #5e9ea0;
+  --tile-amber: #b08f4c; --tile-clay: #bb7f74; --tile-slate: #8493a3;
   --tile-k: 100%;
 }
 :root[data-theme="dark"] { --tile-k: 80%; }
@@ -1177,6 +1179,7 @@ svg.si { stroke-width: 1.6; }
   left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: min(440px, calc(100vw - 32px));
   max-height: min(560px, calc(100vh - 64px));
+  max-height: min(560px, calc(100dvh - 64px));
   display: flex; flex-direction: column;
   background: var(--paper);
   border: 0;
@@ -1254,6 +1257,7 @@ body.icon-picker-open { overflow: hidden; }
     left: 0; right: 0; bottom: 0; top: auto; transform: none;
     width: auto; max-width: none;
     max-height: 80vh;
+    max-height: 80dvh;
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
     border-bottom: 0;
   }
@@ -3360,4 +3364,24 @@ mark.fc-diff-co {
   body.print-only #fcPanelDashboard > *:not(#fcWordsToReview) { display: none !important; }
   body.print-only #fcWordsToReview > *:not(.print-target) { display: none !important; }
   body.print-only #fcWordsToReview { margin: 0 !important; }
+}
+
+/* --- Touch targets and iOS text-size hygiene ---------------------------------
+   Apple's minimum hit area is 44 x 44pt. Where the visible control is smaller
+   (a 32px ⋯ button, 20 x 15 reorder arrows) an invisible ::after extends the
+   tappable area without changing the layout; a collapsed table's whole row is
+   the toggle, not just its title text. Text fields are 16px on a touch screen so
+   iOS Safari doesn't zoom the page on focus -- which is what lets the viewport
+   stay pinch-zoomable. */
+.section-menu-btn, .cz-move-btn { position: relative; }
+.section-menu-btn::after { content: ""; position: absolute; inset: -6px; }
+.cz-move-btn::after { content: ""; position: absolute; inset: -8px -10px; }
+.view-mode button, .fc-manage-filters button { min-height: 32px; }
+.tindex-trigger { min-height: 32px; }
+.options-btn { min-width: 44px; justify-content: center; }
+#vocabulary .section-head { position: relative; }
+#vocabulary .section-toggle::after { content: ""; position: absolute; inset: 0; }
+#vocabulary .section-head > .controls { position: relative; z-index: 1; }
+@media (pointer: coarse), (max-width: 640px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([lang="ja"]), select, textarea { font-size: 16px; }
 }

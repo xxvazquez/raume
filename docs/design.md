@@ -146,6 +146,15 @@ and Help.
   until tapped and opening to a few 14px bullets. On a phone the grey ground
   (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
   lighter band beneath it; the masthead stays white.
+  **Platform hygiene** (checked against Apple's guidance): text fields are 16px on
+  a touch screen so iOS Safari never zooms on focus, which is what allows the
+  viewport to stay pinch-zoomable (no `maximum-scale` / `user-scalable=no`); hit
+  areas are ≥44pt — small controls (the ⋯ button, the reorder arrows) get an
+  invisible `::after` and a collapsed table's whole row is its toggle; the
+  masthead icons are 44px; `--faint` is AA on both `--paper` and the grey ground
+  and the tile hues clear 3:1 against their white glyph; sheets use `dvh` so the
+  iOS toolbar doesn't clip them; `theme-color` has light and dark variants tinted
+  to the masthead.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
   the link's `data-tile`), with the entry count trailing the row as a secondary
   value and its category labels in the same 12px grey header voice.

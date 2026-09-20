@@ -974,8 +974,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         themeToggle.setAttribute('aria-label', 'Theme: ' + THEME_LABEL[choice] + '. Switch to ' + THEME_LABEL[next] + '.');
         themeToggle.title = 'Theme: ' + THEME_LABEL[choice];
       }
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', resolved === 'dark' ? '#191d23' : '#f4f6f8');
+      // The status-bar tint follows the masthead (--paper) -- set on every
+      // theme-color meta so an explicit Light / Dark wins over the OS setting.
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+        meta.setAttribute('content', resolved === 'dark' ? '#232529' : '#ffffff');
+      });
       try {
         if (choice === 'system') localStorage.removeItem(THEME_KEY);
         else localStorage.setItem(THEME_KEY, choice);
