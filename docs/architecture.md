@@ -288,6 +288,9 @@ Web Speech.
   filenames never change, so this cache survives a normal deploy instead of
   being wiped and re-downloaded every time. Clips are cached lazily (on first
   play), not precached at install, keeping the initial install small.
+- **Playback speed**: both paths play at 0.8x (`js/shared.js`) — VOICEVOX's
+  and the Web Speech API's default (1x) both read faster than is easy to
+  follow for a learner sounding out an unfamiliar word.
 
 ## PWA and offline
 

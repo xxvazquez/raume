@@ -149,6 +149,11 @@ window.RaumeStudy.shared = (function () {
       var h = hash(text);
       if (!audioManifest.has(h)) return false;
       var audio = new Audio("audio/" + h + ".mp3");
+      // VOICEVOX's default synthesis speed reads quick and clipped for a
+      // learner -- match the same 0.8 slowdown applied to the Web Speech
+      // fallback below, so pronunciation sounds equally natural whichever
+      // path a given word takes.
+      audio.playbackRate = 0.8;
       currentAudio = audio;
       // Falls back to Web Speech rather than staying silent if the file is
       // somehow missing/corrupt despite being listed in the manifest.
