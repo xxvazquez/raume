@@ -289,18 +289,24 @@ and Help.
   current direction is full strength in the section tone, the other a ghost,
   and both ghosted on an unsorted column, as in iOS Files. Its tap area is
   padded out with negative margins so it stays generous without growing the row.
-- **Every small row badge is a real `<button>` that opens the same popover** —
-  an い/な-adjective's type, a verb's 五段/一段/変格 group, and a particle a
-  word takes are all the identical capsule shape, the identical interaction
-  (tap, click, or with a mouse hover), and the identical `.role-pop` popover
-  showing one line about *that one badge* — never a permanent caption sitting
-  under the meaning, and never more than the tapped badge's own explanation
-  (a word with two particles opens two different popovers, one per chip, not
-  both roles stacked in one). One mechanism, `openPop()` in
-  `js/vocab/interactions.js`, drives all three so a reader only has to learn
-  the pattern once. It closes on an outside tap, Escape, scroll, resize, or
-  hash change, and is suppressed while the English is hidden or covered (a
-  role like "what you eat" would give the answer away). Every badge's hit
+- **Every small row badge that has something to say is a real `<button>` that
+  opens the same popover** — a verb's 五段/一段/変格 group, a particle a word
+  takes, and an irregular い/な-adjective's reason are all the identical
+  capsule shape, the identical interaction (tap, click, or with a mouse
+  hover), and the identical `.role-pop` popover showing one line about *that
+  one badge* — never a permanent caption sitting under the meaning, and never
+  more than the tapped badge's own explanation (a word with two particles
+  opens two different popovers, one per chip, not both roles stacked in one).
+  A plain い/な-adjective badge is the one exception: the glyph itself already
+  names the type, so it's a static (non-`<button>`) span, no popover, no
+  pointer cursor — a popover repeating "い-adjective" would say nothing a
+  sighted reader doesn't already have from the pill's colour and letter (a
+  screen reader still gets it, from the row's own visually-hidden note, not
+  this badge). One mechanism, `openPop()` in `js/vocab/interactions.js`,
+  drives every badge that is a button so a reader only has to learn the
+  pattern once. It closes on an outside tap, Escape, scroll, resize, or hash
+  change, and is suppressed while the English is hidden or covered (a role
+  like "what you eat" would give the answer away). Every badge's hit
   area is padded past its 20px capsule with an invisible `::before`, since
   it's a small target on a phone.
 - **い/な-adjectives** carry a small **capsule badge** (`.adj-badge`) — 20px tall,

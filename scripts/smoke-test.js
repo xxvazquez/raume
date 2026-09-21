@@ -266,20 +266,21 @@ async function main() {
     return !!iRule && /var\(--adj-i-ink\)/.test(iRule.style.color)
       && !!naRule && /var\(--adj-na-ink\)/.test(naRule.style.color) && !bar;
   })());
-  check("each adjective row has one clickable badge in its English cell (not the Japanese cell's text); irregular ones are outlined and carry their reason in data-role, not a permanent footnote", (() => {
+  check("each adjective row has one badge in its English cell (not the Japanese cell's text); a plain row's badge is a static span (the pill + legend already say い/な-adjective, so a popover repeating that is redundant), only an irregular one is a clickable button carrying its reason in data-role, not a permanent footnote", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
     const rows = [...adjSection.querySelectorAll("tbody tr")];
-    const badgeOk = rows.every(r => r.cells[1].querySelectorAll("button.adj-badge").length === 1 && r.cells[0].querySelectorAll(".adj-badge").length === 0
+    const badgeOk = rows.every(r => r.cells[1].querySelectorAll(".adj-badge").length === 1 && r.cells[0].querySelectorAll(".adj-badge").length === 0
       && r.cells[1].querySelector(".adj-badge").textContent === "");
     const irr = rows.filter(r => r.cells[1].querySelector(".adj-badge-irr"));
+    const plain = rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr"));
     const kirei = rows.find(r => r.cells[0].textContent.includes("きれい"));
     const ii = rows.find(r => r.cells[0].querySelector(".jpword").textContent.replace(/\s/g, "") === "いい");
     return badgeOk && document.querySelectorAll(".vocab .adj-note").length === 0
-      && irr.length === 5 && irr.every(r => /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
+      && irr.length === 5 && irr.every(r => r.cells[1].querySelector(".adj-badge-irr").tagName === "BUTTON" && /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
       && kirei.classList.contains("irregular-row") === false && kirei.cells[0].classList.contains("adj-na")
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
-      && rows.filter(r => !r.cells[1].querySelector(".adj-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".adj-badge").dataset.role));
+      && plain.every(r => r.cells[1].querySelector(".adj-badge").tagName === "SPAN" && r.cells[1].querySelector(".adj-badge").dataset.role === undefined);
   })());
   check("五段/一段/変格 are capsule badges in three distinct tokens (godan/ichidan dedicated, irregular reuses --irregular-ink)", (() => {
     const godanRule = allCssRules.find(r => r.selectorText === ".verb-badge-godan");

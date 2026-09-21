@@ -2397,10 +2397,14 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   border-radius: 10px; appearance: none; border: 0; position: relative; cursor: pointer;
   font: 400 var(--fs-micro)/1 var(--font-ui);
 }
+/* A plain い/な-adjective badge (no irregular note) is a static span, not a
+   button -- see js/vocab/render.js adjBadge -- so it gets no pointer cursor
+   and no hit-area padding; there's nothing to tap. */
+span.adj-badge { cursor: default; }
 .adj-badge::after, .verb-badge::after, .particle-chip::after { content: attr(data-badge); }
 /* Hit area padded out past the 20px capsule with an invisible ::before, since
    it's a small target on a phone. */
-.adj-badge::before, .verb-badge::before, .particle-chip::before { content: ""; position: absolute; inset: -9px -3px; }
+button.adj-badge::before, .verb-badge::before, .particle-chip::before { content: ""; position: absolute; inset: -9px -3px; }
 /* The particles a word takes: the same capsule in the app's particle blue, bold
    (the one deliberate use of bold -- see .particle), so a chip reads as
    "particle" wherever it appears. */

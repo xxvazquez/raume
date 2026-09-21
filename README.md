@@ -76,20 +76,23 @@ so they're easy to spot in a sentence.
   above.)
 - **Show polite** (in Options) switches the verb tables between plain form and
   polite 〜ます. Its row only appears while the Verbs table is expanded.
-- **Every small row badge — adjective type, verb group, particle — is a
-  button that opens the same one-line popover** on tap, click, or (with a
-  mouse) hover, naming just that badge: nothing sits permanently under the
-  meaning eating space, and a word with two particles opens two different
-  popovers, one per chip, never both roles stacked in one. Closes on an
-  outside tap, Escape, scroll or resize; suppressed while the English is
-  hidden or covered (a role like *what you eat* would give the answer away).
+- **Every small row badge that has something to say — verb group, particle,
+  and an irregular adjective — is a button that opens the same one-line
+  popover** on tap, click, or (with a mouse) hover, naming just that badge:
+  nothing sits permanently under the meaning eating space, and a word with two
+  particles opens two different popovers, one per chip, never both roles
+  stacked in one. Closes on an outside tap, Escape, scroll or resize;
+  suppressed while the English is hidden or covered (a role like *what you
+  eat* would give the answer away).
 - **Adjective type** — every い- / な-adjective in the dataset carries a small
   capsule badge beside its meaning, a lavender **い** or a sage **な**, like a
   dictionary's part-of-speech tag: the Adjectives table, the Taste & Texture
-  adjectives, and the stray adjective in an otherwise-noun table (危険). The
-  odd ones are **outlined** instead of filled — a な-adjective that ends in い
-  (きれい, 嫌い, 有名) and the irregular い-adjectives いい / かっこいい
-  (よくない) — with the reason in the popover, not a permanent note. A small
+  adjectives, and the stray adjective in an otherwise-noun table (危険). A
+  plain badge is inert — the glyph itself already says い or な, so there's
+  nothing a popover would add. The odd ones are **outlined** instead of
+  filled — a な-adjective that ends in い (きれい, 嫌い, 有名) and the
+  irregular い-adjectives いい / かっこいい (よくない) — and only those are
+  buttons, opening a popover with the reason, not a permanent note. A small
   legend at the foot of Options explains the badges once, its own swatches
   tappable for the same popover, but only while the table currently on screen
   actually has them — it's absent on every other table instead of explaining

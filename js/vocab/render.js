@@ -150,20 +150,25 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // beside the row icons -- like a dictionary's part-of-speech tag, and out of
   // the narrow Japanese column -- a tinted い or な (the glyph is drawn by CSS
   // from data-badge, so it never lands in the cell's text, search or speech).
-  // It's a real button: tap / click / hover opens the same small popover a
-  // particle chip does (js/vocab/interactions.js openPop), naming the type
-  // and, for an irregular one (a な-adjective that ends in い, or いい's odd
-  // conjugation), the reason -- nothing sits permanently under the meaning
-  // eating space, and every badge on the page opens the same way.
+  // The glyph alone already says "い-adjective" / "な-adjective" (plus the
+  // legend near the toolbar, index.html .adj-legend), so a plain row's badge
+  // is a static span -- a popover repeating that would say nothing new. Only
+  // an irregular one (a な-adjective that ends in い, or いい's odd
+  // conjugation) becomes a real button, opening the same small popover a
+  // particle chip does (js/vocab/interactions.js openPop) to give the reason.
   function adjClass(adj) {
     return adj === 'i' ? ' adj-i' : adj === 'na' ? ' adj-na' : '';
   }
   function adjBadge(row) {
     if (row.adj !== 'i' && row.adj !== 'na') return '';
     var na = row.adj === 'na';
-    var role = (na ? 'な' : 'い') + '-adjective' + (row.adjNote ? ' — ' + row.adjNote : '');
-    return '<button type="button" class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + (row.adjNote ? ' adj-badge-irr' : '') +
-      '" data-badge="' + (na ? 'な' : 'い') + '" data-role="' + esc(role) + '" aria-label="' + esc(role) + '" aria-expanded="false"></button>';
+    var glyph = na ? 'な' : 'い';
+    if (!row.adjNote) {
+      return '<span class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + '" data-badge="' + glyph + '" aria-hidden="true"></span>';
+    }
+    var role = glyph + '-adjective — ' + row.adjNote;
+    return '<button type="button" class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + ' adj-badge-irr' +
+      '" data-badge="' + glyph + '" data-role="' + esc(role) + '" aria-label="' + esc(role) + '" aria-expanded="false"></button>';
   }
   function adjNote(adj) {
     if (adj !== 'i' && adj !== 'na') return '';
