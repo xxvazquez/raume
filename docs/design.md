@@ -415,11 +415,14 @@ and Help.
     ground spans the sheet. Everything below is a borderless white 12px card.
   - **The table list** reads Section → category → table as list rows: a
     section-level heading (`.cz-section-label`) and a category heading
-    (`.cz-group-title`), each closed by an inset hairline, no marker bars. The
-    section's name takes its own tone via `data-section`, reading the actual
+    (`.cz-group-title`), each closed by an inset hairline. The section's own
+    tone lives in a short marker bar (`::before`, the same 3px device
+    `.section-head::before` uses on the vocabulary page) reading the actual
     per-section token (`--sec-vocabulary` etc.) rather than the page-global
     `--section` var, which can't tell sections apart when a page shows all of
-    them at once. A section with more than one category (Vocabulary's four)
+    them at once — the name itself stays plain ink, so colour is spent once
+    per row, on the marker, not repeated in the text (colour-and-icon-restraint
+    pass). A section with more than one category (Vocabulary's four)
     is itself collapsible — closing it hides all four at once — with its
     eyebrow above them; a section that's just one category sharing the
     section's own name (Grammar, Phrases, Travel) skips the redundant

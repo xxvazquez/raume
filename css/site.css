@@ -1382,11 +1382,18 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0;
   border-bottom: 1px solid var(--row-line);
 }
-/* The section tone lives in the name alone -- no marker bar, no tinted rule. */
-.cz-section-label[data-section="vocabulary"] { color: var(--sec-vocabulary); }
-.cz-section-label[data-section="grammar"] { color: var(--sec-grammar); }
-.cz-section-label[data-section="phrases"] { color: var(--sec-phrases); }
-.cz-section-label[data-section="travel"] { color: var(--sec-travel); }
+/* The section tone lives in a short marker bar -- the same device
+   .section-head::before uses on the vocabulary page itself -- not in the
+   name's own colour; ink reads as ink everywhere on this page, one accent
+   spent on the marker instead of repeated across every row's text. */
+.cz-section-label::before {
+  content: ""; flex: 0 0 auto; align-self: stretch;
+  width: 3px; min-height: 17px; border-radius: 1px;
+}
+.cz-section-label[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
+.cz-section-label[data-section="grammar"]::before { background: var(--sec-grammar); }
+.cz-section-label[data-section="phrases"]::before { background: var(--sec-phrases); }
+.cz-section-label[data-section="travel"]::before { background: var(--sec-travel); }
 .cz-group { margin-top: 10px; }
 .cz-section-block > .cz-group:first-of-type,
 .cz-section-body > .cz-group:first-of-type { margin-top: 0; }
@@ -1401,14 +1408,18 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   font-size: 12px; font-weight: 500; letter-spacing: 0;
   color: var(--muted);
 }
-/* The merged solo case carries the section's own job, so its name (not just
-   its marker) picks up the section colour too -- matching the eyebrow it's
-   standing in for -- and sits a size up. */
+/* The merged solo case carries the section's own job -- matching the eyebrow
+   it's standing in for -- so it gets the same marker bar as .cz-section-label
+   (not a coloured name) and sits a size up. */
 .cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0; }
-.cz-group-title-solo[data-section="vocabulary"] { color: var(--sec-vocabulary); }
-.cz-group-title-solo[data-section="grammar"] { color: var(--sec-grammar); }
-.cz-group-title-solo[data-section="phrases"] { color: var(--sec-phrases); }
-.cz-group-title-solo[data-section="travel"] { color: var(--sec-travel); }
+.cz-group-title-solo::before {
+  content: ""; flex: 0 0 auto; align-self: stretch;
+  width: 3px; min-height: 17px; border-radius: 1px;
+}
+.cz-group-title-solo[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
+.cz-group-title-solo[data-section="grammar"]::before { background: var(--sec-grammar); }
+.cz-group-title-solo[data-section="phrases"]::before { background: var(--sec-phrases); }
+.cz-group-title-solo[data-section="travel"]::before { background: var(--sec-travel); }
 .cz-group-count { font-weight: 400; color: var(--faint); }
 .cz-reset-order {
   display: inline-block; margin: 0 0 14px;
