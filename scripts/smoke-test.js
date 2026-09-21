@@ -1398,6 +1398,20 @@ async function main() {
     withMockRects(foodGroup().querySelector(".cz-list"), 44, () => { dragGesture(handle, 22, 22, 102); });
     return document.contains(row);
   })());
+  check("a second finger picking up a different handle mid-drag is ignored -- one drag at a time, so it can't orphan the first row mid-transform", (() => {
+    const rows = [...foodGroup().querySelectorAll(".cz-row")];
+    const [rowA, rowB] = rows;
+    const handleA = rowA.querySelector(".cz-drag-handle");
+    const handleB = rowB.querySelector(".cz-drag-handle");
+    let secondIgnored;
+    withMockRects(foodGroup().querySelector(".cz-list"), 44, () => {
+      handleA.dispatchEvent(new window.PointerEvent("pointerdown", { clientX: 10, clientY: 22, pointerId: 201, bubbles: true, cancelable: true }));
+      handleB.dispatchEvent(new window.PointerEvent("pointerdown", { clientX: 10, clientY: 66, pointerId: 202, bubbles: true, cancelable: true }));
+      secondIgnored = !rowB.classList.contains("cz-dragging");
+      document.dispatchEvent(new window.PointerEvent("pointerup", { clientX: 10, clientY: 22, pointerId: 201, bubbles: true, cancelable: true }));
+    });
+    return secondIgnored && !rowA.classList.contains("cz-dragging") && !rowB.classList.contains("cz-dragging");
+  })());
   check("picking up an open category collapses it -- nothing to usefully drag past its neighbours while expanded, and it matches the closed state it lands in", (() => {
     const g = freshFirstVocabGroup();
     g.open = true;

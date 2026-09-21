@@ -466,6 +466,12 @@ window.RaumeStudy.customize = (function () {
     return null;
   }
   function startDrag(handle, e) {
+    // One drag at a time -- drag is a single shared slot, not one per
+    // pointer. A second finger picking up another handle mid-drag would
+    // otherwise silently overwrite it, orphaning the first row mid-transform
+    // (its own pointerup would no longer match drag.pointerId, so endDrag
+    // would never run for it).
+    if (drag) return;
     var ctx = dragTarget(handle);
     if (!ctx || !ctx.list) return;
     // Picking up an open category collapses it -- a tall expanded accordion
