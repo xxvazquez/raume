@@ -369,7 +369,7 @@ window.RaumeStudy.customize = (function () {
     }).join("");
     var canResetOrder = tc() && tc().hasCustomOrder();
     return '<div class="cz-intro">' +
-      "<h2>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") + "</h2>" +
+      "<h1>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") + "</h1>" +
       (canResetOrder ? '<button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") +
       infoPanelHtml("main", czInfoMainOpen,
         '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +

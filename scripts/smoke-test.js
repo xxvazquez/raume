@@ -753,10 +753,15 @@ async function main() {
   console.log("Default landing page is Vocabulary");
   check("vocabulary page is visible on load", document.getElementById("vocabPage").hidden === false);
   check("flashcards page starts hidden", document.getElementById("flashcardsPage").hidden === true);
-  check("the reference pages carry a screen title that names the active section (shown on phones only, hidden on desktop)", (() => {
+  check("the reference pages carry a real <h1> naming the active section -- shown on screen at phone width only (desktop's top nav already names it), but visually-hidden rather than display:none on desktop so it still gives a screen reader an entry point there", (() => {
     const t = document.getElementById("screenTitle");
     const base = allCssRules.find(r => r.selectorText === ".screen-title");
-    return !!t && t.tagName === "H2" && t.textContent === "Vocabulary" && !!base && base.style.display === "none";
+    return !!t && t.tagName === "H1" && t.textContent === "Vocabulary" && !!base && base.style.display !== "none" && base.style.position === "absolute" && base.style.clip === "rect(0px, 0px, 0px, 0px)";
+  })());
+  check("every other screen's own title is a real <h1> too (Flashcards, Customize tables, How this works)", (() => {
+    const flashTitle = document.querySelector(".page-flashcards h1");
+    return !!flashTitle && flashTitle.textContent === "Flashcards"
+      && document.querySelector(".page-help h1").textContent === "How this works";
   })());
   check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
     const base = allCssRules.find(r => r.selectorText === ".site-nav");
@@ -1274,6 +1279,7 @@ async function main() {
   gear.click();
   check("clicking the gear reveals the Customize page", document.getElementById("customizePage").hidden === false);
   check("...and hides the vocabulary view", document.getElementById("vocabPage").hidden === true);
+  check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
   check("it lists every one of the 32 tables", czRows.length === 32);

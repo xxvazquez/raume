@@ -63,7 +63,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // stored on-device preference, not a session. Only fall through to
     // "is there an account session?" when guest mode hasn't been chosen.
     if (isGuestMode()) { renderShell(el); return; }
-    if (!authState.ready) { el.innerHTML = "<h2>Flashcards</h2><p class=\"fc-lede\">Loading…</p>"; return; }
+    if (!authState.ready) { el.innerHTML = "<h1>Flashcards</h1><p class=\"fc-lede\">Loading…</p>"; return; }
     if (authState.session) { renderShell(el); return; }
     renderEntryChoice(el);
   }
@@ -149,7 +149,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // the recovery session back out rather than leaving it live unintended.
   var recoveryError = "";
   function renderPasswordRecovery(el) {
-    el.innerHTML = "<h2>Flashcards</h2>" +
+    el.innerHTML = "<h1>Flashcards</h1>" +
       '<div class="fc-entry-card fc-recovery-card">' +
       "<h3>Set a new password</h3>" +
       '<p class="fc-note">You followed a password-reset link. Choose a new password to finish signing in.</p>' +
@@ -184,7 +184,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // cross-device sync. Guest mode works even without a Supabase project
   // configured; syncing obviously doesn't.
   function renderEntryChoice(el) {
-    el.innerHTML = "<h2>Flashcards</h2>" +
+    el.innerHTML = "<h1>Flashcards</h1>" +
       '<p class="fc-lede">Add vocabulary to your flashcards and track your reviews. Use it right here on this device, or sign in to keep it synced everywhere.</p>' +
       '<div class="fc-entry-grid">' +
       '<div class="fc-entry-card"><h3>This device only</h3>' +
@@ -244,7 +244,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       ? '<div class="fc-signed-in-as">Using this device only — not backed up <button type="button" id="fcGoAccount">Sign in to sync</button></div>'
       : '<div class="fc-signed-in-as">Signed in as ' + esc(currentUser().email) + ' <button type="button" id="fcSignOut">Sign out</button></div>';
     el.innerHTML =
-      "<h2>Flashcards</h2>" +
+      "<h1>Flashcards</h1>" +
       identityHtml +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +

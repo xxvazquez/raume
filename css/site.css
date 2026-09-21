@@ -1312,7 +1312,7 @@ body.icon-picker-open { overflow: hidden; }
 /* --- Customize page (#customize) ---------------------------------- */
 /* The ground spans the whole sheet; the content keeps its reading width. */
 .page-customize > * { max-width: 720px; }
-.cz-intro h2 { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.cz-intro h1 { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
 .info-panel p:not(.cv-hint) { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-small); line-height: 1.55; }
 .cz-tips { margin: 0 0 8px; padding-left: 18px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6; }
 .cz-tips li { margin: 2px 0; }
@@ -1607,7 +1607,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 
 /* --- Help page (#help) ------------------------------------------- */
 .page-help > * { max-width: 680px; }
-.page-help h2 {
+.page-help h1 {
   font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink);
 }
 .page-help .help-lede {
@@ -2172,9 +2172,16 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .vocab td:nth-child(2) { font-size: 12.5px; }
 }
 
-/* The reference pages' screen title -- phone only (see the tab-bar block below);
-   the desktop's top nav already names the section. */
-.screen-title { display: none; }
+/* The reference pages' screen title -- an h1, so every page has one real entry
+   point for a screen reader, but shown on screen at phone width only (see the
+   tab-bar block below); the desktop's top nav already names the section
+   visually. Visually-hidden, not display:none, which would drop it from the
+   accessibility tree along with the pixels and leave desktop with no heading
+   at all for the active section. */
+.screen-title {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
 
 /* --- Phone: the main nav becomes an iOS tab bar ------------------------
    At phone width the same #siteNav (nothing added, nothing removed -- same
@@ -2228,10 +2235,14 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
-  /* Large screen titles: the screens that have a title carry it big. */
-  .screen-title { display: block; }
+  /* Large screen titles: the screens that have a title carry it big. Undoes
+     the visually-hidden clip above -- back in normal flow, on screen. */
+  .screen-title {
+    position: static; width: auto; height: auto; margin: 0; padding: 0;
+    overflow: visible; clip: auto; white-space: normal; border: 0;
+  }
   body.is-searching .screen-title { display: none; }
-  body .screen-title, body .page-flashcards h2, body .cz-intro h2, body .page-help h2 {
+  body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
   }
@@ -2314,7 +2325,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 }
 
 /* --- Flashcards page title ------------------------------------- */
-.page-flashcards h2 {
+.page-flashcards h1 {
   margin: 0 0 4px;
   font-size: var(--fs-page-title);
   font-weight: 400;
