@@ -950,14 +950,19 @@ body.selftest-mode .selftest-hint { display: block; }
    the full 1180px sheet, and letting a row run edge-to-edge stranded the
    meaning text and the row-action icons in a field of white (worst on wide
    monitors and in dark mode), while pinning it to the left instead left an
-   equally bare gap on the right. Everything in the reading flow -- the table
-   index trigger, the toolbar, the category rules, the tables and the
-   Expand-all control -- shares the cap and the same centred axis, so they
-   all keep one left edge, now in the middle of the sheet rather than
-   jammed against it. Not a media query -- on a narrower viewport the cap is
-   simply never reached, so this has no effect below ~900px (a phone or a
-   split-screen window). */
-.page-vocab { --reading-w: 900px; }
+   equally bare gap on the right. 900px still read as centred-but-lost --
+   the sheet's own white edge is nearly invisible against the page past the
+   masthead, so a 900px column inside a 1180px sheet looked stranded on the
+   left rather than centred in anything. 700px (closer to Apple's own
+   inset-list measure) leaves less dead margin either side regardless of
+   whether the sheet's edge reads at a glance. Everything in the reading
+   flow -- the table index trigger, the toolbar, the category rules, the
+   tables and the Expand-all control -- shares the cap and the same centred
+   axis, so they all keep one left edge, in the middle of the sheet rather
+   than jammed against it. Not a media query -- on a narrower viewport the
+   cap is simply never reached, so this has no effect below ~700px (a phone
+   or a split-screen window). */
+.page-vocab { --reading-w: 700px; }
 .table-index,
 .page-vocab .vocab-toolbar,
 #vocabulary .table-section,
@@ -1096,8 +1101,12 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section:not(.collapsed) .section-head > .section-icon:not(.section-icon-empty) { width: 28px; height: 28px; padding: 5.5px; margin-right: 2px; }
 #vocabulary .section-toggle-icon { margin-top: 0; }
 
-/* Open: bold title on the ground, then the white card. */
-#vocabulary .table-section:not(.collapsed) { padding: 0; margin: 16px 0 24px; }
+/* Open: bold title on the ground, then the white card. Top/bottom margin only
+   -- the shorthand `margin: 16px 0 24px` used to reset left/right to 0 here,
+   silently overriding the reading-column centering above (higher specificity,
+   later in the file) the moment a table opened, so a collapsed table read
+   centred but its own opened content snapped back to the frame's left edge. */
+#vocabulary .table-section:not(.collapsed) { padding: 0; margin-top: 16px; margin-bottom: 24px; }
 #vocabulary .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 24px; }
 #vocabulary .table-section:not(.collapsed) .section-head { padding: 0 4px 8px; margin-bottom: 0; border-bottom: 0; }
 #vocabulary .table-section:not(.collapsed) .section-title-text { font-size: 20px; font-weight: 600; }

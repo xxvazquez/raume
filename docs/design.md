@@ -152,6 +152,16 @@ and Help.
   desktop): a category header is 12px / 500 in secondary grey (`--muted`), inset
   16px to line up with the row content; a collapsed row title is 14px / 400 in
   `--ink`; an open table's title 20px / 600; the phone's large screen title 28px.
+- **On a wide desktop window the list is a `--reading-w: 700px` centred column**
+  (`.page-vocab`), not the full 1180px sheet — an inset list stays an inset
+  list, closer to Apple's own measure than the 900px an earlier pass tried.
+  900px still read as stranded on the left rather than centred: the sheet's
+  own white edge is nearly invisible against the page past the masthead, so
+  the gap either side of a too-wide column doesn't register as "centred," just
+  as dead space. Everything in the reading flow — the table index trigger,
+  the toolbar, the category rules, the tables, Expand-all — shares the cap on
+  one centred axis. Only kicks in above ~700px (a phone or a split-screen
+  window never reaches the cap); the masthead and nav stay full width.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
   The same voice runs through the rest of the app: Flashcards › Manage (a table
   row is the 28px tile + a 14px title + its progress, its category header the
