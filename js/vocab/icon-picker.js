@@ -25,7 +25,7 @@ window.RaumeStudy.iconPicker = (function () {
     return icons.groups.map(function (g) {
       var cells = g.names.filter(icons.has).map(function (name) {
         return '<button type="button" class="icon-cell' + (name === current ? " selected" : "") +
-          '" data-icon="' + name + '" title="' + name.replace(/-/g, " ") + '" aria-label="' + name.replace(/-/g, " ") +
+          '" data-icon="' + name + '" aria-label="' + name.replace(/-/g, " ") +
           '"' + (name === current ? ' aria-pressed="true"' : "") + ">" + icons.render(name) + "</button>";
       }).join("");
       return '<div class="icon-picker-group" data-group="' + esc(g.label) + '">' +
@@ -123,10 +123,10 @@ window.RaumeStudy.iconPicker = (function () {
     var auto = typeof o.autoColor === "function" ? o.autoColor() : "";
     return '<span class="icon-picker-colors-label">Colour</span>' +
       '<button type="button" class="swatch swatch-auto' + (sel ? "" : " selected") + '" data-color="" aria-pressed="' + (sel ? "false" : "true") +
-        '" title="Automatic colour" aria-label="Automatic colour"><span class="swatch-dot"' + (auto ? ' data-tile="' + auto + '"' : "") + '></span>Auto</button>' +
+        '" aria-label="Automatic colour"><span class="swatch-dot"' + (auto ? ' data-tile="' + auto + '"' : "") + '></span>Auto</button>' +
       icons.colors.map(function (c) {
         return '<button type="button" class="swatch' + (c.key === sel ? " selected" : "") + '" data-color="' + c.key + '" aria-pressed="' + (c.key === sel) +
-          '" title="' + c.label + '" aria-label="' + c.label + '"><span class="swatch-dot" data-tile="' + c.key + '"></span></button>';
+          '" aria-label="' + c.label + '"><span class="swatch-dot" data-tile="' + c.key + '"></span></button>';
       }).join("");
   }
 

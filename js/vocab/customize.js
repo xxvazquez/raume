@@ -113,9 +113,9 @@ window.RaumeStudy.customize = (function () {
   function moveBtns(kind, key, canUp, canDown) {
     return '<span class="cz-move">' +
       '<button type="button" class="cz-move-btn cz-move-up" data-move="' + kind + '" data-key="' + esc(String(key)) +
-        '" data-dir="-1"' + (canUp ? "" : " disabled") + ' aria-label="Move up" title="Move up">' + ARROW_UP + "</button>" +
+        '" data-dir="-1"' + (canUp ? "" : " disabled") + ' aria-label="Move up">' + ARROW_UP + "</button>" +
       '<button type="button" class="cz-move-btn cz-move-down" data-move="' + kind + '" data-key="' + esc(String(key)) +
-        '" data-dir="1"' + (canDown ? "" : " disabled") + ' aria-label="Move down" title="Move down">' + ARROW_DOWN + "</button>" +
+        '" data-dir="1"' + (canDown ? "" : " disabled") + ' aria-label="Move down">' + ARROW_DOWN + "</button>" +
       "</span>";
   }
 
@@ -125,7 +125,7 @@ window.RaumeStudy.customize = (function () {
     return '<li class="cz-row" data-table-id="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : "") + '>' +
       moveBtns("table", t.id, canUp, canDown) +
       '<button type="button" class="section-icon-btn cz-row-icon" data-icon-for="' + t.id +
-        '" title="Choose an icon and colour" aria-label="Choose an icon and colour for ' + esc(name || t.title) + '">' +
+        '" aria-label="Choose an icon and colour for ' + esc(name || t.title) + '">' +
         '<span class="section-icon' + (V().tableIconValue && V().tableIconValue(t.id) ? "" : " section-icon-empty") + '">' + iconSlot(t.id) + "</span></button>" +
       '<label class="cz-row-field">' +
         '<input type="text" class="cz-row-name" maxlength="40" autocomplete="off" ' +
@@ -134,7 +134,7 @@ window.RaumeStudy.customize = (function () {
         '<span class="cz-row-original"' + (name ? "" : " hidden") + ">Originally " + esc(t.title) + "</span>" +
       "</label>" +
       '<button type="button" class="cz-row-reset" data-reset-for="' + t.id + '"' +
-        (isCustomised(t.id) ? "" : " disabled") + ' title="Restore this table’s original name, icon and colour">Reset</button>' +
+        (isCustomised(t.id) ? "" : " disabled") + ">Reset</button>" +
       "</li>";
   }
 
@@ -211,8 +211,8 @@ window.RaumeStudy.customize = (function () {
             '<span class="cv-owned-ro">' + esc(r.romaji) + "</span>" +
             '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
             '<span class="cv-owned-actions">' +
-            '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word" title="Edit this word">' + EDIT_ICON + "</button>" +
-            '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word" title="Delete this word">' + TRASH_ICON + "</button>" +
+            '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word">' + EDIT_ICON + "</button>" +
+            '<button type="button" class="cv-del-row" data-row="' + esc(r.id) + '" aria-label="Delete this word">' + TRASH_ICON + "</button>" +
             "</span></li>";
         }).join("")
       : '<li class="cv-owned-row cv-owned-row-empty">No words in this table yet.</li>';

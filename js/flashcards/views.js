@@ -157,7 +157,7 @@ window.RaumeStudy.flashcards.views = (function () {
     // "not added" (○), so you can tell progress from a clean slate.
     if (tablePaused && s !== "none") s = "archived";
     var m = STATUS_META[s] || STATUS_META.none;
-    return '<span class="fc-status fc-status-' + s + '" title="' + esc(m.label) + '" aria-label="' + esc(m.label) + '">' + m.glyph + '</span>';
+    return '<span class="fc-status fc-status-' + s + '" aria-label="' + esc(m.label) + '">' + m.glyph + '</span>';
   }
 
   // Rows currently hidden via the vocabulary page's own eye icon are read

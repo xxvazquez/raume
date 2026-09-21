@@ -126,7 +126,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
   function speakButton(reading) {
     if (!reading) return '';
-    return '<button type="button" class="jp-speak-btn" data-jp-speak="' + esc(reading) + '" aria-label="Play pronunciation" title="Play pronunciation">' + SPEAKER_ICON + '</button>';
+    return '<button type="button" class="jp-speak-btn" data-jp-speak="' + esc(reading) + '" aria-label="Play pronunciation">' + SPEAKER_ICON + '</button>';
   }
   vocab.speakButtonHtml = speakButton;
   // Romaji lives here now instead of its own column (see docs/architecture.md
@@ -219,7 +219,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var SECTION_ORDER = ['vocabulary', 'grammar', 'phrases', 'travel'];
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
-    return '<button type="button" class="row-hide-btn" aria-label="Hide this row" title="Hide this row">' + EYE_ICON + '</button>';
+    return '<button type="button" class="row-hide-btn" aria-label="Hide this row">' + EYE_ICON + '</button>';
   }
   // The add-to-flashcards toggle. Always in the DOM but hidden by CSS unless a
   // search is running (body.is-searching) -- the moment you want it is right
@@ -230,7 +230,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var FC_TOGGLE_ADDED = '<svg class="fc-ic-added" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
   function flashcardToggle(vocabId) {
     if (!vocabId) return '';
-    return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-pressed="false" aria-label="Add to flashcards" title="Add to flashcards">' + FC_TOGGLE_ADD + FC_TOGGLE_ADDED + '</button>';
+    return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-pressed="false" aria-label="Add to flashcards">' + FC_TOGGLE_ADD + FC_TOGGLE_ADDED + '</button>';
   }
   // Wrapped in its own cluster so it can sit as a fixed-width flex item
   // pinned to the Meaning cell's right edge (see css/site.css), instead of
@@ -343,10 +343,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (controls.print && menuItems.length) menuItems.push('<button type="button" class="print-one print-menu-item" role="menuitem" aria-label="Print this table">' + menuItemHtml(PRINT_ICON, 'Print') + '</button>');
     if (menuItems.length) {
       ctrlParts.push('<div class="section-menu">' +
-        '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Table options" title="Table options">' + MENU_ICON + '</button>' +
+        '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Table options">' + MENU_ICON + '</button>' +
         '<div class="section-menu-list" role="menu" hidden>' + menuItems.join('') + '</div></div>');
     }
-    if (controls.print) ctrlParts.push('<button type="button" class="print-one print-icon-btn" aria-label="Print this table" title="Print this table">' + PRINT_ICON + '</button>');
+    if (controls.print) ctrlParts.push('<button type="button" class="print-one print-icon-btn" aria-label="Print this table">' + PRINT_ICON + '</button>');
     var defaultSort = o.defaultSort !== false;
     var title = tableTitle(o.id, o.title);
     return '<section class="table-section ' + (o.sectionClass || '') + (o.collapsed ? ' collapsed' : '') +
@@ -604,7 +604,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       groupByCategory(bySection[sec], sec).forEach(function (g) {
         if (sec === 'vocabulary') {
           html += '<h2 class="cat-heading page-hidden" data-section="' + sec + '" data-category="' + esc(g.name) + '">' +
-            esc(g.name) + '<span class="cat-heading-count" title="' + g.tables.length + ' tables" aria-label="' + g.tables.length + ' tables">' + g.tables.length + '</span></h2>';
+            esc(g.name) + '<span class="cat-heading-count" aria-label="' + g.tables.length + ' tables">' + g.tables.length + '</span></h2>';
         }
         g.tables.forEach(function (t) { html += renderTable(t) + '\n'; });
       });
