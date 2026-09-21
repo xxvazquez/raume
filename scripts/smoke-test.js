@@ -1341,6 +1341,85 @@ async function main() {
     return secs[0] === "Cooking Ingredients" && secs[1] === "Drinks";
   })());
 
+  console.log("Customize page: drag-to-reorder (the ▲▼ buttons' pointer-only sibling)");
+  // firstVocabGroup (above) is a snapshot from before the move-down + reset
+  // clicks already re-rendered #customizePage -- a stale, now-detached node.
+  // vocabCats[0] is just the name string, so it's still good as a lookup key
+  // for querying the *current* live element fresh each time.
+  const freshFirstVocabGroup = () => [...document.querySelectorAll("#customizePage .cz-group")].find(g => g.querySelector(".cz-group-name").textContent === vocabCats[0]);
+  check("every row carries a drag handle, pointer-only -- out of the tab order and hidden from a screen reader (the ▲▼ buttons are that path)", (() => {
+    const handles = [...foodGroup().querySelectorAll(".cz-row .cz-drag-handle")];
+    return handles.length === 7 && handles.every(h => h.tagName === "BUTTON" && h.tabIndex === -1 && h.getAttribute("aria-hidden") === "true");
+  })());
+  check("a multi-category section's header carries one too", !!freshFirstVocabGroup().querySelector(".cz-group-title .cz-drag-handle"));
+  check("Grammar (no category move controls) has no category drag handle either -- nothing to drag it against", (() => {
+    const g = [...document.querySelectorAll("#customizePage .cz-group")].find(x => x.querySelector(".cz-group-name").textContent === "Grammar");
+    return !g.querySelector(".cz-group-title .cz-drag-handle");
+  })());
+  check("clicking a category's handle (as a stray click after a drag might) doesn't also toggle its <details> -- same guard the ▲▼ buttons need", (() => {
+    const g = freshFirstVocabGroup();
+    g.open = false;
+    g.querySelector(".cz-group-title .cz-drag-handle").dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+    return g.open === false;
+  })());
+
+  // getBoundingClientRect is always zeroed in jsdom, so a real drag needs its
+  // own deterministic stand-in for the duration of one gesture -- every
+  // sibling stacked rowHeight apart, in current DOM order, matching the flat
+  // list dragTarget() reorders within.
+  function withMockRects(list, rowHeight, fn) {
+    const items = [...list.children];
+    const originals = items.map(el => el.getBoundingClientRect);
+    items.forEach((el, i) => {
+      el.getBoundingClientRect = () => ({ top: i * rowHeight, bottom: (i + 1) * rowHeight, height: rowHeight, left: 0, right: 100, width: 100 });
+    });
+    try { fn(); } finally { items.forEach((el, i) => { el.getBoundingClientRect = originals[i]; }); }
+  }
+  function dragGesture(handle, fromY, toY, pointerId) {
+    const base = { clientX: 10, pointerId, bubbles: true, cancelable: true };
+    handle.dispatchEvent(new window.PointerEvent("pointerdown", Object.assign({}, base, { clientY: fromY })));
+    document.dispatchEvent(new window.PointerEvent("pointermove", Object.assign({}, base, { clientY: toY })));
+    document.dispatchEvent(new window.PointerEvent("pointerup", Object.assign({}, base, { clientY: toY })));
+  }
+  check("dragging the last row's handle to the top reorders it there, through the same tc().setTableOrder the ▲▼ buttons call", (() => {
+    const rowsBefore = [...foodGroup().querySelectorAll(".cz-row")];
+    const last = rowsBefore[rowsBefore.length - 1]; // Vegetables, A-Z last
+    const handle = last.querySelector(".cz-drag-handle");
+    withMockRects(foodGroup().querySelector(".cz-list"), 44, () => {
+      dragGesture(handle, 6 * 44 + 22, 0, 101);
+    });
+    const idsAfter = [...foodGroup().querySelectorAll(".cz-row")].map(r => r.dataset.tableId);
+    return idsAfter[0] === last.dataset.tableId
+      && document.querySelector('#vocabulary .table-section[data-category="Food & Ingredients"]').dataset.table === last.dataset.tableId;
+  })());
+  check("dropping a handle back where it picked up is a no-op -- no needless re-render (the same row node is still in the document)", (() => {
+    const row = foodGroup().querySelector(".cz-row");
+    const handle = row.querySelector(".cz-drag-handle");
+    withMockRects(foodGroup().querySelector(".cz-list"), 44, () => { dragGesture(handle, 22, 22, 102); });
+    return document.contains(row);
+  })());
+  check("picking up an open category collapses it -- nothing to usefully drag past its neighbours while expanded, and it matches the closed state it lands in", (() => {
+    const g = freshFirstVocabGroup();
+    g.open = true;
+    const handle = g.querySelector(".cz-group-title .cz-drag-handle");
+    handle.dispatchEvent(new window.PointerEvent("pointerdown", { clientX: 10, clientY: 5, pointerId: 103, bubbles: true, cancelable: true }));
+    const collapsedOnPickup = g.open === false;
+    document.dispatchEvent(new window.PointerEvent("pointerup", { clientX: 10, clientY: 5, pointerId: 103, bubbles: true, cancelable: true }));
+    return collapsedOnPickup;
+  })());
+  check("dragging a category's handle past a sibling reorders the section, through the same tc().setCategoryOrder the ▲▼ buttons call", (() => {
+    const before = [...document.querySelectorAll("#customizePage .cz-groups > .cz-section-block")]
+      .find(s => s.querySelector(".cz-section-label")?.textContent.includes("Vocabulary"))
+      .querySelector(".cz-section-body");
+    const names = [...before.children].map(g => g.dataset.category);
+    const last = before.children[before.children.length - 1];
+    const handle = last.querySelector(".cz-drag-handle");
+    withMockRects(before, 40, () => { dragGesture(handle, (names.length - 1) * 40 + 20, 0, 104); });
+    const section = document.querySelector("#customizePage .cz-groups > .cz-section-block:has(.cz-section-label)").querySelector(".cz-section-body");
+    return section.children[0].dataset.category === last.dataset.category;
+  })());
+  if (window.RaumeStudy.tableCustom.hasCustomOrder()) window.RaumeStudy.tableCustom.resetOrder();
+
   console.log("Custom vocabulary (your own rows / tables)");
   const cvNs = window.RaumeStudy.customVocab;
   check("RaumeStudy.customVocab is published", !!cvNs && typeof cvNs.parseFurigana === "function");

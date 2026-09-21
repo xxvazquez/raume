@@ -426,6 +426,32 @@ and Help.
     own bottom hairline is the only separator between rows (no divider after
     the last row). Name fields are filled wells (`--field-fill`, no border) with
     a plain-text **Reset**.
+  - **Reordering a table or a category** has two affordances doing the same
+    job through the same `tc().setTableOrder` / `setCategoryOrder` calls:
+    the ▲▼ buttons (`.cz-move-btn`, one step at a time, disabled at either
+    end) are the accessible path — keyboard, screen reader — and stay exactly
+    that; a `.cz-drag-handle` grip (6 dots, `tabindex="-1"`, `aria-hidden`,
+    so it never enters the tab order or gets announced as a control nobody
+    can operate from a keyboard) is a pointer-only sibling for moving
+    something further in one gesture instead of many taps, which the ▲▼
+    buttons alone stayed fiddly at even after their touch target grew
+    (`4207a63`). Both live in the same row/`<summary>`, `.cz-drag-handle`'s
+    `margin-left: auto` pushing it flush to the trailing edge (the same
+    technique `.disclosure-caret::after` already uses for the chevron, so on
+    a category row the two end up glued together at the end). Dragging is
+    Pointer Events (mouse, touch and pen in one code path — no separate
+    touch-event handling to duplicate), reordering nothing in the DOM while
+    the gesture is live: only a CSS `transform` on the dragged item and
+    whichever siblings it's currently passed over, both computed from each
+    element's *original* `getBoundingClientRect()` captured once at
+    `pointerdown` (comparing two numbers taken the same way stays correct
+    even mid-auto-scroll, since the scroll offset cancels out of the
+    comparison). The real reorder — and the one re-render that reflects it —
+    happens once, on drop. Picking up an open category collapses it first;
+    dragging near a viewport edge auto-scrolls. The new handle crowded an
+    already-tight phone row, so `.cz-row`'s `gap` and the handle itself both
+    shrink under 640px, clawing back most of what it took from the name
+    field rather than letting names truncate more than before.
   - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, a
     sentence-case `--fs-subhead` `<summary>`) all start closed. Forms are
     label-over-field with filled, unbordered fields; the parsed-ruby preview and

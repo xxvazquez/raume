@@ -155,8 +155,11 @@ so they're easy to spot in a sentence.
   icons, or upload your own) and the tile **colour** (nine muted hues, or Auto)
   in the same picker, and give the table a custom **name / order**, on the **Customize** page
   (masthead sliders icon), or via **Choose icon…** in that table's own ⋯ menu
-  while browsing. Customisations show everywhere the table appears, including
-  Flashcards › Manage.
+  while browsing. Reorder a table or a category with the ▲▼ buttons, or on a
+  touch or mouse device, pick up its grip handle and drag it straight to
+  where it belongs — either way moves it the same amount, dragging just
+  covers a long list in one gesture instead of many taps. Customisations
+  show everywhere the table appears, including Flashcards › Manage.
 - They save to `localStorage` immediately; signed in, they also sync.
 - The Customize page groups tables the same way the nav does: a **Vocabulary**
   heading over its four categories (Food & Ingredients, Kitchen & Dining,

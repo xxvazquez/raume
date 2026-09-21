@@ -1430,6 +1430,28 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
 .cz-move-btn:hover:not([disabled]) { color: var(--ink); }
 .cz-move-btn[disabled] { opacity: .28; cursor: default; }
 .cz-group-title .cz-move { flex-direction: row; margin-right: 2px; }
+/* The drag handle -- margin-left: auto pushes it flush to the row's trailing
+   edge, same technique .disclosure-caret::after already uses for the
+   category chevron, so on a category row the two end up glued together at
+   the end. touch-action: none is what keeps a touch-drag from also
+   scrolling the page underneath it. */
+.cz-drag-handle {
+  flex: 0 0 auto; appearance: none; border: 0; background: transparent; padding: 0;
+  width: 28px; height: 28px; margin-left: auto; display: flex; align-items: center; justify-content: center;
+  color: var(--faint); cursor: grab; touch-action: none;
+}
+.cz-drag-handle:hover { color: var(--ink); }
+/* The picked-up item -- a background tint stands in for the shadow the
+   design system reserves for the overflow menu alone. */
+.cz-dragging { position: relative; z-index: 5; cursor: grabbing; background: var(--group-ground); border-radius: 8px; }
+.cz-dragging .cz-drag-handle { cursor: grabbing; }
+@media (max-width: 640px) {
+  /* The new handle crowded the row's name field on a phone -- claw back
+     what it took from the gaps and its own size rather than the field. */
+  .cz-row { gap: 6px; }
+  .cz-drag-handle { width: 24px; height: 24px; }
+}
+body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 .cz-row-icon { width: 28px; height: 28px; }
 .cz-row-icon .section-icon:not(.section-icon-empty) {
   padding: 5.5px; box-sizing: border-box; border-radius: 8px;

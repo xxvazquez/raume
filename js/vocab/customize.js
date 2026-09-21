@@ -78,6 +78,14 @@ window.RaumeStudy.customize = (function () {
 
   var ARROW_UP = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 13.5V4.5M4.5 9 9 4.5 13.5 9"/></svg>';
   var ARROW_DOWN = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5v9M4.5 9 9 13.5 13.5 9"/></svg>';
+  // A 6-dot grip, the standard "press here to drag" glyph (iOS Reminders,
+  // Settings). Pointer-only -- tabindex="-1" so it never enters the tab
+  // order and isn't announced as a control a screen reader can't operate;
+  // the ▲▼ buttons above stay the one keyboard/AT-accessible way to reorder.
+  var DRAG_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="6" cy="4.5" r="1.3"/><circle cx="12" cy="4.5" r="1.3"/><circle cx="6" cy="9" r="1.3"/><circle cx="12" cy="9" r="1.3"/><circle cx="6" cy="13.5" r="1.3"/><circle cx="12" cy="13.5" r="1.3"/></svg>';
+  function dragHandleHtml(label) {
+    return '<button type="button" class="cz-drag-handle" tabindex="-1" aria-hidden="true" aria-label="' + esc(label) + '">' + DRAG_ICON + "</button>";
+  }
 
   // Section (fixed: Vocabulary / Grammar / Travel) > category (custom order,
   // then A-Z) > table (custom order, then A-Z) -- the exact sequence the
@@ -135,6 +143,7 @@ window.RaumeStudy.customize = (function () {
       "</label>" +
       '<button type="button" class="cz-row-reset" data-reset-for="' + t.id + '"' +
         (isCustomised(t.id) ? "" : " disabled") + ">Reset</button>" +
+      dragHandleHtml("Drag to reorder " + (name || t.title)) +
       "</li>";
   }
 
@@ -348,11 +357,14 @@ window.RaumeStudy.customize = (function () {
           return rowHtml(t, i > 0, i < g.tables.length - 1);
         }).join("");
         var displayName = solo ? label : g.name;
+        var canMoveCat = g.canMoveUp || g.canMoveDown;
         var summary = '<summary class="cz-group-title disclosure-caret' + (solo ? " cz-group-title-solo" : "") + '" data-section="' + run.section + '">' +
-          (g.canMoveUp || g.canMoveDown ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
+          (canMoveCat ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
           '<span class="cz-group-name">' + esc(displayName) + "</span>" +
-          '<span class="cz-group-count">' + g.tables.length + "</span></summary>";
-        return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '">' +
+          '<span class="cz-group-count">' + g.tables.length + "</span>" +
+          (canMoveCat ? dragHandleHtml("Drag to reorder " + displayName) : "") +
+          "</summary>";
+        return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '" data-category="' + esc(g.name) + '">' +
           summary + '<ul class="cz-list">' + rows + "</ul></details>";
       }).join("");
       // A solo section (Grammar, Phrases, Travel) is already one collapsible
@@ -424,6 +436,127 @@ window.RaumeStudy.customize = (function () {
     if (row) tc().setName(row.dataset.tableId, input.value);
   }
 
+  // ---- drag-to-reorder ----------------------------------------------------
+  // A pointer-only affordance layered on the ▲▼ buttons above, which stay
+  // the accessible path (keyboard, screen reader) -- dragging alone isn't
+  // operable either way, so it never replaces them. Pointer Events cover
+  // mouse, touch and pen in one code path, so this works the same whether
+  // Customize is open on a phone or with a mouse on desktop.
+  //
+  // Nothing reorders in the DOM while dragging -- only a CSS transform on
+  // the dragged item, and a matching one on whichever siblings it's
+  // currently passed over, both computed from each element's *original*
+  // getBoundingClientRect(), captured once at pointerdown. Comparing two
+  // numbers taken the same way stays correct even if the page auto-scrolls
+  // mid-drag (the scroll offset cancels out of the comparison), so nothing
+  // needs re-measuring on every move. The real reorder -- and the one
+  // re-render that reflects it -- happens once, on drop, by calling the
+  // exact same tc().setTableOrder / setCategoryOrder the ▲▼ buttons already
+  // call, just with the whole new order instead of a one-step swap.
+  var drag = null;
+  var dragScrollFrame = null;
+  var AUTOSCROLL_EDGE = 56;  // px from the viewport edge that starts auto-scroll
+  var AUTOSCROLL_SPEED = 14; // px per animation frame at full deflection
+
+  function dragTarget(handle) {
+    var row = handle.closest(".cz-row");
+    if (row) return { item: row, list: row.closest(".cz-list"), kind: "table" };
+    var group = handle.closest(".cz-group");
+    if (group) return { item: group, list: group.closest(".cz-section-body"), kind: "category" };
+    return null;
+  }
+  function startDrag(handle, e) {
+    var ctx = dragTarget(handle);
+    if (!ctx || !ctx.list) return;
+    // Picking up an open category collapses it -- a tall expanded accordion
+    // isn't something you can usefully drag past its neighbours, and this
+    // matches the closed state it lands in anyway.
+    if (ctx.kind === "category" && ctx.item.open) ctx.item.open = false;
+    var items = Array.prototype.slice.call(ctx.list.children);
+    var origIndex = items.indexOf(ctx.item);
+    if (origIndex < 0) return;
+    var rects = items.map(function (el) {
+      var r = el.getBoundingClientRect();
+      return { top: r.top, height: r.height, center: r.top + r.height / 2 };
+    });
+    var next = rects[origIndex + 1], prev = rects[origIndex - 1];
+    var slot = next ? next.top - rects[origIndex].top : (prev ? rects[origIndex].top - prev.top : rects[origIndex].height);
+    drag = {
+      handle: handle, item: ctx.item, kind: ctx.kind,
+      items: items, rects: rects, origIndex: origIndex, newIndex: origIndex, slot: slot,
+      startY: e.clientY, pointerId: e.pointerId, pointerY: e.clientY
+    };
+    ctx.item.classList.add("cz-dragging");
+    document.body.classList.add("cz-drag-active");
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  function applyDragTransforms() {
+    drag.items.forEach(function (el, i) {
+      if (i === drag.origIndex) return;
+      var shift = 0;
+      if (drag.newIndex <= i && i < drag.origIndex) shift = drag.slot;
+      else if (drag.origIndex < i && i <= drag.newIndex) shift = -drag.slot;
+      el.style.transform = shift ? "translateY(" + shift + "px)" : "";
+    });
+  }
+  function autoScrollTick() {
+    if (dragScrollFrame != null || typeof window.requestAnimationFrame !== "function") return;
+    dragScrollFrame = window.requestAnimationFrame(function () {
+      dragScrollFrame = null;
+      if (!drag) return;
+      var y = drag.pointerY, h = window.innerHeight;
+      if (y < AUTOSCROLL_EDGE) window.scrollBy(0, -AUTOSCROLL_SPEED * (1 - y / AUTOSCROLL_EDGE));
+      else if (y > h - AUTOSCROLL_EDGE) window.scrollBy(0, AUTOSCROLL_SPEED * (1 - (h - y) / AUTOSCROLL_EDGE));
+      else return;
+      autoScrollTick();
+    });
+  }
+  function updateDrag(e) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    drag.pointerY = e.clientY;
+    var dy = e.clientY - drag.startY;
+    drag.item.style.transform = "translateY(" + dy + "px)";
+    var draggedCenter = drag.rects[drag.origIndex].center + dy;
+    var newIndex = 0;
+    drag.rects.forEach(function (r, i) { if (i !== drag.origIndex && r.center < draggedCenter) newIndex++; });
+    if (newIndex !== drag.newIndex) { drag.newIndex = newIndex; applyDragTransforms(); }
+    autoScrollTick();
+  }
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    var d = drag; drag = null;
+    if (dragScrollFrame != null) { window.cancelAnimationFrame(dragScrollFrame); dragScrollFrame = null; }
+    try { d.handle.releasePointerCapture(e.pointerId); } catch (err) {}
+    d.item.classList.remove("cz-dragging");
+    document.body.classList.remove("cz-drag-active");
+    d.item.style.transform = "";
+    d.items.forEach(function (el) { if (el !== d.item) el.style.transform = ""; });
+    if (d.newIndex === d.origIndex) return; // dropped back where it started -- nothing to persist
+    var order = d.items.slice();
+    order.splice(d.origIndex, 1);
+    order.splice(d.newIndex, 0, d.item);
+    if (d.kind === "table") {
+      var cat = d.item.closest(".cz-group").dataset.category;
+      pendingFocus = '.cz-row[data-table-id="' + cssAttr(d.item.dataset.tableId) + '"] .cz-drag-handle';
+      tc().setTableOrder(cat, order.map(function (el) { return el.dataset.tableId; }));
+    } else {
+      var sec = d.item.querySelector(".cz-group-title").dataset.section;
+      pendingFocus = '.cz-group[data-category="' + cssAttr(d.item.dataset.category) + '"] .cz-drag-handle';
+      tc().setCategoryOrder(sec, order.map(function (el) { return el.dataset.category; }));
+    }
+  }
+  function wireDrag(host) {
+    host.addEventListener("pointerdown", function (e) {
+      var handle = e.target.closest && e.target.closest(".cz-drag-handle");
+      if (!handle || (e.pointerType === "mouse" && e.button !== 0)) return;
+      e.preventDefault();
+      startDrag(handle, e);
+    });
+    document.addEventListener("pointermove", updateDrag);
+    document.addEventListener("pointerup", endDrag);
+    document.addEventListener("pointercancel", endDrag);
+  }
+
   // ---- lifecycle --------------------------------------------------------
   function wire(host) {
     // A committed name edit (blur / Enter) -- "change", not "input", so this
@@ -447,6 +580,13 @@ window.RaumeStudy.customize = (function () {
         var dir = Number(move.dataset.dir);
         if (move.dataset.move === "table") moveTable(move.dataset.key, dir);
         else moveCategory(move.dataset.key, dir);
+        return;
+      }
+      if (e.target.closest && e.target.closest(".cz-drag-handle")) {
+        // Same reason as the move buttons above -- a category's handle sits
+        // inside its <summary> too. The actual reorder runs off pointer
+        // events, not this click.
+        e.preventDefault();
         return;
       }
       var info = e.target.closest && e.target.closest(".info-btn");
@@ -507,6 +647,7 @@ window.RaumeStudy.customize = (function () {
       if (cvSelfMutating) return; // the action re-renders itself
       if (hostEl && document.body.dataset.activePage === "customize") render(hostEl);
     });
+    wireDrag(host);
   }
 
   // ---- custom vocab actions -------------------------------------------
