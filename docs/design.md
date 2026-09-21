@@ -462,14 +462,18 @@ and Help.
     shrink under 640px, clawing back most of what it took from the name
     field rather than letting names truncate more than before.
   - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, a
-    sentence-case `--fs-subhead` `<summary>`) all start closed. Forms are
-    label-over-field with filled, unbordered fields; the parsed-ruby preview and
-    the import result sit on `--surface`, an error on `--wrong-soft`; the
-    buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
-  - **Words you've added** is one non-collapsible card holding a search field
-    + a Recently added/A–Z sort (`.cv-owned-controls`, filters and reorders
-    via a plain DOM swap in `updateOwnedList()` — no full re-render, so the
-    search input never loses focus mid-keystroke), then one `<details>` per
+    sentence-case `<summary>` at 17px/500 — its own size, not the shared
+    `--fs-subhead` (15px): a touch-screen text field under it (`.cv-owned-search`,
+    next bullet) is forced to 16px so iOS Safari doesn't zoom on focus, which
+    left the heading reading smaller than the field under it) all start
+    closed. Forms are label-over-field with filled, unbordered fields; the
+    parsed-ruby preview and the import result sit on `--surface`, an error on
+    `--wrong-soft`; the buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
+  - **Words you've added** is one non-collapsible card (same 17px heading as
+    above) holding a search field + a Recently added/A–Z sort
+    (`.cv-owned-controls`, filters and reorders via a plain DOM swap in
+    `updateOwnedList()` — no full re-render, so the search input never loses
+    focus mid-keystroke), then one `<details>` per
     table (`.cv-owned-group`) — collapsed by default with a word count in its
     summary, so a reader with words spread across many tables gets a list of
     tables to open, not one long scroll; each keeps its hairline even
