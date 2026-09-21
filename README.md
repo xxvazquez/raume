@@ -36,7 +36,10 @@ so they're easy to spot in a sentence.
 
 - **Jump to a table** (`#tableIndex`) — collapsed, it names the table you're on;
   expanded, it lays out every category and table in the section with entry
-  counts. Keyboard-navigable, hidden during search, never printed.
+  counts. Keyboard-navigable, hidden during search, never printed. The trigger
+  itself only shows once something's actually open — while every table in the
+  section sits collapsed it would just repeat the directory already on screen,
+  so it stays out of the way until there's somewhere to jump *back* to.
 - **Search** ranks by match quality (exact → starts-with → ends-with →
   contains), highlights the match, and pulls from every section — from
   whichever of Japanese/Furigana/English are currently visible, plus romaji

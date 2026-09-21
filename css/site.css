@@ -530,6 +530,11 @@ body {
    internally-scrolling bottom sheet on a phone. */
 .table-index { position: relative; margin: 0 0 12px; }
 .table-index.search-hidden { display: none; }
+/* While every table in the section sits collapsed, the trigger would only
+   repeat the directory already on screen -- hidden then (js/vocab/
+   interactions.js syncTableIndexActive), with the wrapper's own margin
+   collapsing too so a closed section doesn't leave a bare 12px gap. */
+.table-index:has(.tindex-trigger[hidden]) { margin-bottom: 0; }
 .tindex-trigger {
   appearance: none;
   display: inline-flex;
@@ -545,6 +550,7 @@ body {
   font: 400 var(--fs-small)/1.4 var(--font-ui);
   cursor: pointer;
 }
+.tindex-trigger[hidden] { display: none; }
 .tindex-trigger:hover { opacity: .7; }
 .tindex-trigger:active { opacity: .5; }
 .tindex-trigger-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

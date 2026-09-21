@@ -57,6 +57,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!section.classList.contains('collapsed')) collapseSiblingSections(section);
     updatePoliteVisibility(); // expanding/collapsing the Verbs table changes whether "Show polite" applies
     noteSectionLayout(section.dataset.section);
+    if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
   }
   function expandSection(section) {
     section.classList.remove('collapsed');
@@ -899,6 +900,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
       if (label) label.textContent = current ? (current.querySelector('.section-title-text')?.textContent || 'Jump to a table') : 'Jump to a table';
       if (vocab.updateAdjLegend) vocab.updateAdjLegend(current);
+      // The trigger just repeats the directory already on screen while every
+      // table in the section sits collapsed -- hide it until there's
+      // somewhere to jump *back* to (an open table you've scrolled past).
+      const trigger = document.querySelector('.tindex-trigger');
+      if (trigger) trigger.hidden = visible.length > 0 && visible.every(function (s) { return s.classList.contains('collapsed'); });
     };
     window.addEventListener('scroll', function () {
       if (document.getElementById('vocabPage').hidden) return;
