@@ -244,7 +244,11 @@ and Help.
   section tone at weight 500 — no capsule. Nothing is added or removed (same
   five links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
-  is untouched. `--nav-h` drops to ~0 so the sticky reference toolbar sits at
+  is untouched. All five are drawn from the same family as `js/vocab/icons.js`'s
+  own picker (24x24 grid, 1.7 stroke, round caps/joins) — a book, a bullet
+  list, a speech bubble, a map pin, two stacked cards — so the row reads as
+  one matched set rather than five icons with their own stroke weight and
+  visual density. `--nav-h` drops to ~0 so the sticky reference toolbar sits at
   the very top with nothing above it, `body` gets bottom padding for the bar plus
   `env(safe-area-inset-*)` (the meta viewport carries `viewport-fit=cover`), and a
   running study session hides the bar and gives the space back like the rest of the
