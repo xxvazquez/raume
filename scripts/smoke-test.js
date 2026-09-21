@@ -289,13 +289,15 @@ async function main() {
       && !!ichidanRule && /var\(--verb-ichidan-ink\)/.test(ichidanRule.style.color)
       && !!irrRule && /var\(--irregular-ink\)/.test(irrRule.style.color);
   })());
-  check("every verb-pair row has one clickable verb-group badge in its English cell (not the Japanese cell), reading included; the three exceptions are outlined and carry their reason in data-role, not a permanent footnote", (() => {
+  check("every verb-pair row has one clickable verb-group badge in its English cell (not the Japanese cell), reading included; the three look-alike exceptions are outlined and carry their word-specific reason, every other 変格 row still explains why it's irregular (not just named), and godan/ichidan rows carry no reason at all", (() => {
     const verbsSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Verbs");
     const rows = [...verbsSection.querySelectorAll("tbody tr")];
     const badgeOk = rows.every(r => r.cells[1].querySelectorAll("button.verb-badge").length === 1 && r.cells[0].querySelectorAll(".verb-badge").length === 0
       && r.cells[1].querySelector(".verb-badge").textContent === "" && r.cells[1].querySelector(".verb-badge").dataset.reading);
     const irr = rows.filter(r => r.cells[1].querySelector(".verb-badge-irr"));
+    const irregularClass = rows.filter(r => r.cells[1].querySelector(".verb-badge-irregular"));
+    const godanIchidan = rows.filter(r => !r.cells[1].querySelector(".verb-badge-irregular"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
     return badgeOk && rows.length === 38 && document.querySelectorAll(".vocab .adj-note").length === 0
@@ -303,7 +305,10 @@ async function main() {
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
       && kuru.cells[1].querySelector(".verb-badge").dataset.reading === "へんかく"
-      && rows.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".verb-badge").dataset.role));
+      // every 変格 row explains itself, outlined or not (verbNote or the class's own genericNote)
+      && irregularClass.length > 0 && irregularClass.every(r => /—/.test(r.cells[1].querySelector(".verb-badge").dataset.role))
+      // godan/ichidan rows with nothing worth a second look carry no reason at all
+      && godanIchidan.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".verb-badge").dataset.role));
   })());
   check("the verb-group legend follows the same show-only-when-relevant rule as the adjective legend", (() => {
     const legend = document.querySelector(".verb-legend");

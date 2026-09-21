@@ -2390,8 +2390,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    control -- so it's excluded from the shared selector there. */
 .role-pop .adj-badge, .role-pop .verb-badge, .role-pop .particle-chip { cursor: default; margin: 0 6px 0 0; }
 .role-pop .adj-badge::before, .role-pop .verb-badge::before, .role-pop .particle-chip::before { content: none; }
-.role-pop .verb-badge ruby { ruby-position: over; }
-.role-pop .verb-badge rt { font-size: 8px; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
 .adj-badge-i:hover, .adj-badge-i[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); }

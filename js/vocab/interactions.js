@@ -1170,25 +1170,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     // The popover's glyph reuses the badge's own classes so it renders as the
     // same tinted capsule as the thing you just tapped, not a plain word --
-    // the one exception is a verb badge, whose glyph gets real furigana
-    // (data-reading) since 五段/一段/変格 are kanji a reader who doesn't read
-    // kanji can't sound out from the 20px tile alone.
+    // the one exception is a verb badge, whose glyph spells its reading out
+    // in parentheses (data-reading) since 五段/一段/変格 are kanji a reader who
+    // doesn't read kanji can't sound out from the 20px tile alone. That used
+    // to be real ruby furigana, but at this size it renders too small to
+    // read -- "変格 (へんかく)" reads fine at any size.
     function badgeGlyph(el) {
       const glyph = document.createElement('span');
       if (el.classList.contains('particle-chip')) glyph.className = 'particle-chip';
       else if (el.classList.contains('adj-badge')) glyph.className = 'adj-badge ' + (el.classList.contains('adj-badge-na') ? 'adj-badge-na' : 'adj-badge-i');
       else glyph.className = 'verb-badge ' + ['verb-badge-godan', 'verb-badge-ichidan', 'verb-badge-irregular'].find(function (c) { return el.classList.contains(c); });
-      if (el.dataset.reading) {
-        const ruby = document.createElement('ruby');
-        ruby.appendChild(document.createTextNode(el.dataset.badge));
-        const rt = document.createElement('rt');
-        rt.className = 'furigana';
-        rt.textContent = el.dataset.reading;
-        ruby.appendChild(rt);
-        glyph.appendChild(ruby);
-      } else {
-        glyph.textContent = el.dataset.badge;
-      }
+      glyph.textContent = el.dataset.reading ? el.dataset.badge + ' (' + el.dataset.reading + ')' : el.dataset.badge;
       return glyph;
     }
     function openPop(el) {

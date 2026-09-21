@@ -324,13 +324,17 @@ and Help.
   already uses for a stray irregular-reading row elsewhere). Every verb-pair
   gets one, unlike the adjective badge which only marks tagged rows. 五段/一段/
   変格 are kanji, unreadable at a glance to someone who doesn't read kanji, so
-  the badge's popover glyph carries real furigana (`data-reading`: ごだん/
-  いちだん/へんかく, `<rt>`, `ruby-position: over`) — the 20px row tile stays
-  kanji-only, but tapping it always tells you how to say it. A verb worth a
-  second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji reading
-  itself changes, 来る/来ます) — gets the same **outlined** treatment
-  (`.verb-badge-irr`) as an irregular adjective, its reason from the row's
-  `verbNote` appended to the popover text. Its own legend (`.verb-legend`)
+  the badge's popover glyph spells its reading out in parentheses
+  (`data-reading`: "変格 (へんかく)") — real ruby furigana rendered too small
+  there to read — while the 20px row tile stays kanji-only. Every 変格 row's
+  popover text also says *why* it's irregular, not just the group name: `verbNote`
+  gives a word-specific reason when one's worth noting, else `VERB_CLASS_META
+  .irregular.genericNote` explains the group as a whole (doesn't conjugate by
+  the godan/ichidan rules — する becomes します, not a predictable change). A verb
+  worth a second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji's
+  reading itself changes, く in *kuru* vs き in *kimasu*) — gets the same
+  **outlined** treatment (`.verb-badge-irr`) as an irregular adjective. Its own
+  legend (`.verb-legend`)
   follows the same show-only-when-relevant rule and the same tappable-swatch
   pattern as the adjective legend, wrapping onto a second line on a phone
   since it carries a fourth swatch (the outlined exception one) the adjective

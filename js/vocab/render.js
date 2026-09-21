@@ -175,17 +175,22 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // second look -- 切る/帰る (五段 despite looking 一段) and 来る (its kanji
   // reading itself changes) -- with the outline treatment. 五段/一段/変格 are
   // kanji, unreadable at a glance to someone who doesn't read kanji, so the
-  // popover (not the 20px tile) is where the reading lives, in real furigana
-  // (data-reading, read by js/vocab/interactions.js openPop).
+  // popover (not the 20px tile) spells the reading out as "変格 (へんかく)"
+  // (data-reading, read by js/vocab/interactions.js openPop) -- real ruby
+  // furigana renders too small there to read.
   var VERB_CLASS_META = {
     godan: { badge: '五段', reading: 'ごだん', label: 'godan verb (u-verb)' },
     ichidan: { badge: '一段', reading: 'いちだん', label: 'ichidan verb (ru-verb)' },
-    irregular: { badge: '変格', reading: 'へんかく', label: 'irregular verb' }
+    // genericNote fills in for the rows verbNote leaves unexplained (する and
+    // its compounds) -- without it "irregular verb" alone says nothing about
+    // what that means. 来る overrides it with its own, more specific note.
+    irregular: { badge: '変格', reading: 'へんかく', label: 'irregular verb', genericNote: "doesn't conjugate by the godan/ichidan rules -- する becomes します, not a predictable change, so its forms are memorized" }
   };
   function verbBadge(row) {
     var meta = VERB_CLASS_META[row.verbClass];
     if (!meta) return '';
-    var role = meta.label + (row.verbNote ? ' — ' + row.verbNote : '');
+    var note = row.verbNote || meta.genericNote;
+    var role = meta.label + (note ? ' — ' + note : '');
     return '<button type="button" class="verb-badge verb-badge-' + row.verbClass + (row.verbNote ? ' verb-badge-irr' : '') +
       '" data-badge="' + meta.badge + '" data-reading="' + meta.reading + '" data-role="' + esc(role) +
       '" aria-label="' + esc(meta.reading + ' — ' + role) + '" aria-expanded="false"></button>';

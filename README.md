@@ -102,15 +102,19 @@ so they're easy to spot in a sentence.
   badge for its conjugation group: teal **五段** (godan/u-verb), terracotta
   **一段** (ichidan/ru-verb), or **変格** (irregular — する and 来る, plus every
   suru-compound like 料理する). 五段/一段/変格 are kanji, so the popover's own
-  glyph carries real furigana (ごだん/いちだん/へんかく) — the 20px badge in the
-  table stays kanji-only, but tapping it always says how to read it. Godan and
-  ichidan aren't visible from the ending alone (both include verbs ending in
-  -eru/-iru), so the handful that would otherwise be mistaken for the other
-  class get an **outlined** badge and the reason in the popover: 切る and 帰る
-  (五段 despite looking 一段), and 来る (its own kanji reading changes: 来る is
-  *kuru*, but 来ます is *kimasu*). Driven by `verbClass` and an optional
-  `verbNote` on the row, checked by `npm run validate` against the
-  plain/polite forms already in the data.
+  glyph spells its reading out in parentheses ("変格 (へんかく)") — real ruby
+  furigana rendered too small there to read. The popover text also always
+  explains *why* a verb is irregular rather than just naming the group: する
+  and its compounds get a generic note (it doesn't conjugate by the
+  godan/ichidan rules — する becomes します, not a predictable change), and 来る
+  gets its own, more specific one (its kanji's reading itself changes: く in
+  *kuru*, き in *kimasu* — a regular verb's stem reading never does). Godan
+  and ichidan aren't visible from the ending alone (both include verbs ending
+  in -eru/-iru), so the handful that would otherwise be mistaken for the
+  other class get an **outlined** badge too: 切る and 帰る (五段 despite looking
+  一段), on top of 来る. Driven by `verbClass` and an optional `verbNote` on
+  the row, checked by `npm run validate` against the plain/polite forms
+  already in the data.
 - **Particles a word takes** — each verb, and the adjectives 好き / 嫌い / 上手 /
   下手, shows the particle(s) it takes as small blue chips beside the row icons
   (**を** eat, **に/へ** go, **が** like) — the same blue as particles in
