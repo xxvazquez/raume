@@ -39,7 +39,10 @@ system, and the sections below cover each part of it.
   — so it reads as the anchor from contrast, not sheer size. The verdict is
   an icon alone (a check, a caution triangle for a one-letter near-miss, or
   an ✕) in a small tinted circle — never text, never a pill or a filled
-  block — so the answer beneath it (30px, `--ink`) is the one thing to read.
+  block — so the answer beneath it (21px 600, `--ink`) is the one thing to
+  read, prominent by position and contrast, not sheer size — big enough to
+  anchor the card, not so big it shouts on a short word or crowds a long one
+  ("topic / contrast").
   A miss is never red-washed: the card flash is a 5% tint and the icon alone
   carries the coral/ochre. The answer field collapses out of the way once
   checked (opacity + height, never display/visibility, so it stays focused

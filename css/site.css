@@ -2876,7 +2876,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-review-card:has(.fc-verdict-ok) { animation: fc-flash-right .9s ease-out; }
 .fc-review-card:has(.fc-verdict-bad) { animation: fc-flash-wrong .9s ease-out; }
 .fc-stage { align-self: stretch; padding: 0 0 10px; margin-bottom: 2px; }
-.fc-stage-expected { font: 600 30px/1.25 var(--font-ui); letter-spacing: -.01em; color: var(--ink); margin-bottom: 4px; }
+.fc-stage-expected { font: 600 21px/1.3 var(--font-ui); letter-spacing: -.01em; color: var(--ink); margin-bottom: 4px; }
 /* Wrong answer: the ANSWER is the focus -- big, in ink, first thing the eye
    lands on. What you typed is one quiet secondary line below it (the wrong
    word struck through), never a competing red banner. */
@@ -2884,7 +2884,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-answer-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .fc-answer-label { font: 400 12px/1.2 var(--font-ui); color: var(--faint); }
 .fc-answer-text { font: 400 16px/1.3 var(--font-ui); }
-.fc-answer-right .fc-answer-text { font-size: clamp(22px, 7vw, 30px); overflow-wrap: anywhere; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.fc-answer-right .fc-answer-text { font-size: 21px; overflow-wrap: anywhere; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
 .fc-stage-typed { font-size: 12px; color: var(--muted); opacity: .8; overflow-wrap: anywhere; }
 .fc-stage-typed s { text-decoration-color: var(--wrong); opacity: .85; }
 .fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
