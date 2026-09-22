@@ -195,7 +195,9 @@ and Help.
   the link's `data-tile`), with the entry count trailing the row as a secondary
   value and its category labels in the same 12px grey header voice.
   The search field is the iOS one — a 36px, 10px-radius fill a shade darker than
-  the grey ground, borderless. The glyph comes from a default per shipped table, or — for a table of your own —
+  the grey ground, borderless. Its text is 13.5px everywhere, just under the 14px
+  rows it searches; on a touch screen the input stays 16px (no focus zoom) and is
+  scaled down to 13.5px with a transform. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the

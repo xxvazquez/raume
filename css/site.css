@@ -3695,4 +3695,18 @@ mark.fc-diff-co {
 #vocabulary .table-section.menu-open .section-head > .controls { z-index: 70; }
 @media (pointer: coarse), (max-width: 640px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([lang="ja"]), select, textarea { font-size: 16px; }
+  /* The search field keeps that 16px (so focusing it doesn't zoom) but is
+     drawn at 13.5px, the desktop size -- a search field shouldn't read
+     louder than the 14px rows it searches. Scaled from the left edge; its
+     layout width is grown by the same factor (and handed back with a
+     negative margin) so the scaled text still spans the whole field. 24px
+     is the magnifier and its gap. The field is a <label>, so a tap anywhere
+     in it still focuses the input. */
+  .search-box input {
+    flex: 0 1 auto;
+    width: calc((100% - 24px) / .84375);
+    margin-right: calc((100% - 24px) * (1 - 1 / .84375));
+    transform: scale(.84375);
+    transform-origin: left center;
+  }
 }
