@@ -825,7 +825,8 @@ async function main() {
   const tindexMenu = document.getElementById("tindexMenu");
   check("the table-index dropdown menu starts closed", tindexMenu.hidden === true);
   check("its trigger reports collapsed", document.querySelector(".tindex-trigger").getAttribute("aria-expanded") === "false");
-  check("the trigger itself is hidden while every table in the section sits collapsed -- it would only repeat the directory already on screen", document.querySelector(".tindex-trigger").hidden === true);
+  check("the trigger is a permanent button in the sticky search bar, not a row of its own above it",
+    !!document.querySelector(".vocab-toolbar .vocab-bar #tableIndex .tindex-trigger") && document.querySelector(".tindex-trigger").hidden === false);
   check("the control is named 'Jump to a table' wherever that name is fixed", (() => {
     // The visible label is dynamic (it names the table you're on); the tooltip
     // and the landmark aria-label are the fixed identifiers and must agree.
@@ -1099,17 +1100,25 @@ async function main() {
   check("clicking the toggle (the same activation a native button gets from Enter/Space) flips collapsed state", grammarSection.classList.contains("collapsed") !== wasCollapsed);
   check("aria-expanded tracks the toggle", grammarSection.querySelector(".section-toggle").getAttribute("aria-expanded") === String(!grammarSection.classList.contains("collapsed")));
 
-  console.log("Table-index trigger hides while nothing in the section is open to jump back from");
+  console.log("Opening or closing a table never makes a row appear or the tapped row move");
   document.querySelector('#siteNav .site-nav-link[data-section="grammar"]').click();
   const gTrigger = document.querySelector(".tindex-trigger");
   const adjSection = document.querySelector('.table-section[data-section="grammar"]:not(.collapsed)') ||
     document.querySelector('.table-section[data-section="grammar"]');
   if (!adjSection.classList.contains("collapsed")) adjSection.querySelector(".section-toggle").click(); // start from collapsed
-  check("hidden once every Grammar table is collapsed -- it would only repeat the directory above", gTrigger.hidden === true);
+  check("with every Grammar table collapsed the trigger still shows, labelled \"Tables\"",
+    gTrigger.hidden === false && gTrigger.querySelector(".tindex-trigger-label").textContent === "Tables");
   adjSection.querySelector(".section-toggle").click();
-  check("shown once a table opens -- now there's somewhere to jump back to", gTrigger.hidden === false);
+  check("still there, unchanged, once a table opens", gTrigger.hidden === false);
   adjSection.querySelector(".section-toggle").click();
-  check("hidden again once that table closes", gTrigger.hidden === true);
+  check("and once it closes again", gTrigger.hidden === false);
+  check("opening the menu lifts the sticky bar above the tab bar, closing drops it back", (() => {
+    const bar = document.querySelector(".vocab-toolbar");
+    gTrigger.click();
+    const lifted = bar.classList.contains("tindex-open");
+    gTrigger.click();
+    return lifted && !bar.classList.contains("tindex-open");
+  })());
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
 
   console.log("Expand all / collapse all");

@@ -413,6 +413,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     });
   };
 
+  var TINDEX_ICON = '<svg class="tindex-trigger-icon" viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6.5 4.5h9M6.5 9h9M6.5 13.5h9"/><circle cx="2.8" cy="4.5" r=".9" fill="currentColor" stroke="none"/><circle cx="2.8" cy="9" r=".9" fill="currentColor" stroke="none"/><circle cx="2.8" cy="13.5" r=".9" fill="currentColor" stroke="none"/></svg>';
   var CHEVRON_ICON = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
   // Empty icon slot -- a quiet "+", "click to choose". A dashed square here read
   // as an unchecked checkbox, worst as a column of them on the Customize page.
@@ -591,8 +592,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         (wide ? ' tindex-panel--wide' : '') +
         '" data-section="' + sec + '" role="menu">' + body + '</div>';
     }).join('');
+    // A permanent button in the sticky search bar (not a row of its own that
+    // came and went as tables opened, shoving the page down): a list glyph,
+    // plus -- where there's room -- the name of the table you're in.
     return '<button type="button" class="tindex-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
-      '<span class="tindex-trigger-label">Jump to a table</span>' + CHEVRON_ICON + '</button>' +
+      TINDEX_ICON + '<span class="tindex-trigger-label">Tables</span>' + CHEVRON_ICON + '</button>' +
       '<div class="tindex-menu" id="tindexMenu" hidden>' +
       // Decorative only -- a native bottom-sheet grab handle, shown by CSS
       // only in the mobile bottom-sheet layout (desktop's dropdown has

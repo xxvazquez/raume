@@ -40,7 +40,6 @@
 <main class="app">
 <section id="vocabPage" class="page page-vocab">
   <h1 class="screen-title" id="screenTitle">Vocabulary</h1>
-  <nav id="tableIndex" class="table-index" aria-label="Jump to a table"></nav>
   <div class="vocab-toolbar">
     <div class="vocab-bar">
       <label class="search-box">
@@ -48,6 +47,7 @@
         <input id="tableSearch" type="search" aria-label="Search vocabulary" aria-controls="vocabulary" placeholder="Search Japanese or English…" autocomplete="off">
         <button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button>
       </label>
+      <nav id="tableIndex" class="table-index" aria-label="Jump to a table"></nav>
       <button type="button" class="options-btn" id="optionsBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="optionsSheet" aria-label="Options" title="Reading and study options">
         <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.5" y="2.5" width="15" height="5.5" rx="2.75"/><rect x="1.5" y="10" width="15" height="5.5" rx="2.75"/><circle cx="12.6" cy="5.25" r="1.3" fill="currentColor" stroke="none"/><circle cx="5.4" cy="12.75" r="1.3" fill="currentColor" stroke="none"/></svg>
         <span class="options-btn-label">Options</span>
@@ -103,7 +103,7 @@
       <ul>
         <li><strong>Search</strong> looks in Japanese, kana, romaji and English across every section at once, best match first. Press <kbd>/</kbd> to jump to the box.</li>
         <li>Each result has a small <strong>+</strong> that adds the word to Flashcards (it turns into a green ✓; tap again to pause the word).</li>
-        <li><strong>Jump to a table</strong>, above the search box, lists every table in the current section.</li>
+        <li><strong>Jump to a table</strong> — the list button beside the search box — lists every table in the current section.</li>
         <li>Sort the English column with the up/down chevron in its header. Tables start A–Z.</li>
       </ul>
     </details>

@@ -49,6 +49,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   function toggleSection(section) {
+    // Keep the row you tapped under your finger: opening restyles its header
+    // and the accordion may close a table above it, both of which would
+    // otherwise slide it away -- scroll by however far it moved.
+    const head = section.querySelector('.section-head') || section;
+    const topBefore = head.getBoundingClientRect().top;
     section.classList.toggle('collapsed');
     const toggle=section.querySelector('.section-toggle');
     toggle.setAttribute('aria-expanded', String(!section.classList.contains('collapsed')));
@@ -57,6 +62,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!section.classList.contains('collapsed')) collapseSiblingSections(section);
     updatePoliteVisibility(); // expanding/collapsing the Verbs table changes whether "Show polite" applies
     noteSectionLayout(section.dataset.section);
+    const moved = head.getBoundingClientRect().top - topBefore;
+    if (moved) window.scrollBy(0, moved);
     if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
   }
   function expandSection(section) {
@@ -133,6 +140,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (menu) menu.hidden = true;
     const trigger = document.querySelector('.tindex-trigger');
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    const bar = document.querySelector('.vocab-toolbar');
+    if (bar) bar.classList.remove('tindex-open');
   }
   // The toolbar's Options sheet (column switches, Cover answers, Show polite,
   // Expand all, Print, the badge legend).
@@ -839,6 +848,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       closeOptionsSheet();
       menu.hidden = false;
       document.querySelector('.tindex-trigger').setAttribute('aria-expanded', 'true');
+      // Same lift as the Options sheet: the menu lives in the sticky bar, so
+      // the bar rises above the tab bar while it's open.
+      document.querySelector('.vocab-toolbar').classList.add('tindex-open');
       const items = tindexItems();
       const target = items.find(a => a.classList.contains('current')) || items[0];
       if (target) requestAnimationFrame(() => target.focus());
@@ -898,13 +910,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       panel.querySelectorAll('a[data-target]').forEach(function (a) {
         a.classList.toggle('current', !!current && a.dataset.target === current.dataset.table);
       });
-      if (label) label.textContent = current ? (current.querySelector('.section-title-text')?.textContent || 'Jump to a table') : 'Jump to a table';
+      // Names the table you're reading; "Tables" while you're on the list of
+      // closed rows itself rather than inside one.
+      const inside = current && !current.classList.contains('collapsed');
+      if (label) label.textContent = inside ? (current.querySelector('.section-title-text')?.textContent || 'Tables') : 'Tables';
       if (vocab.updateAdjLegend) vocab.updateAdjLegend(current);
-      // The trigger just repeats the directory already on screen while every
-      // table in the section sits collapsed -- hide it until there's
-      // somewhere to jump *back* to (an open table you've scrolled past).
-      const trigger = document.querySelector('.tindex-trigger');
-      if (trigger) trigger.hidden = visible.length > 0 && visible.every(function (s) { return s.classList.contains('collapsed'); });
     };
     window.addEventListener('scroll', function () {
       if (document.getElementById('vocabPage').hidden) return;

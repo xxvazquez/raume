@@ -49,8 +49,10 @@ row. Grammatical **particles are blue and bold** everywhere.
   ends with → contains, with the match highlighted. It searches whichever of
   Japanese / furigana / English are visible, plus romaji. Each result has a
   **+ / ✓** toggle to add the word to flashcards or pause it.
-- **Jump to a table** lists every table in the section with its entry count.
-  It appears once a table is open.
+- **Jump to a table** — the list button in the pinned search bar (named after
+  the table you're reading, on desktop) lists every table in the section with
+  its entry count.
+- Opening or closing a table keeps the row you tapped exactly where it was.
 - **The URL** follows the view (`#grammar`, `#table-15`, `#flashcards`), so
   any view can be bookmarked.
 - The search field and **Options** button stay pinned as you scroll.

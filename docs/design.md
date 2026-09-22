@@ -164,8 +164,7 @@ and Help.
   900px still read as stranded on the left rather than centred: the sheet's
   own white edge is nearly invisible against the page past the masthead, so
   the gap either side of a too-wide column doesn't register as "centred," just
-  as dead space. Everything in the reading flow — the table index trigger,
-  the toolbar, the category rules, the tables, Expand-all — shares the cap on
+  as dead space. Everything in the reading flow — the toolbar, the category rules, the tables, Expand-all — shares the cap on
   one centred axis. Only kicks in above ~700px (a phone or a split-screen
   window never reaches the cap); the masthead and nav stay full width.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
@@ -237,8 +236,12 @@ and Help.
     footnote text. A 320px popover under the button on a wide screen; on a phone a
     bottom sheet with a grab bar and scrim (same shape as the table index) that
     lifts the toolbar above the tab bar while open (`.options-open`). The sticky
-    bar is then one row — search plus the button; a dot (`.options-dot`) on the
-    button flags a non-default state. Rows that don't apply hide (Show polite
+    bar is one row — search, the **Jump to a table** button (`.tindex-trigger`: a
+    list glyph, plus the current table's name on a wide screen; its menu lifts the
+    bar the same way, `.tindex-open`), then Options. Both buttons are permanent —
+    nothing in the bar appears or disappears as tables open and close, and
+    opening a table scroll-compensates so the tapped row stays put. A dot
+    (`.options-dot`) on Options flags a non-default state. Rows that don't apply hide (Show polite
     outside a verb table; the Expand / Print group while searching).
   - **Menus** (the table ⋯ menu): a 14px popover, no border, one
     shadow, items 15px in 12px×14px rows separated by hairlines, label first and its
