@@ -165,7 +165,11 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 
 ### Tabs
 
-| Tab | What it does |
+Four segments — Dashboard, Manage, Kana, Puzzles. **Settings** and **Help**
+sit at the top right, beside the title, and open as their own screen with a
+**‹ Flashcards** back button.
+
+| Screen | What it does |
 | --- | ------------ |
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
@@ -197,7 +201,8 @@ words, or it tells you why not. Clues that give the answer away are left
 out: the word written in its own clue ("Japanese sake" → *sake*), or a
 loanword that just echoes its English (*cola* → コーラ).
 
-- **Source** — *Flashcards* (added, unpaused words) or *A table*: one or more
+- Settings are compact iOS rows: tap one to pick from the native list.
+- **Source** — *Flashcards* (added, unpaused words) or *Tables*: one or more
   vocabulary tables, whether or not they're in flashcards.
 - **More options** — *Crossword* (numbered clue list) or *Arroword* (each clue
   in a square before its answer); script *Romaji* (default), *Japanese*,

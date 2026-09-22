@@ -1837,8 +1837,24 @@ async function main() {
   } finally {
     if (realStorage) Object.defineProperty(window, "localStorage", realStorage); else delete window.localStorage;
   }
-  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  // Settings and Help open like a pushed screen from the title bar; Back
+  // returns to the segment you came from.
+  const fcOpenPushed = t => {
+    const back = document.getElementById("fcBack");
+    if (back) back.click();
+    document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="' + t + '"]').click();
+  };
+  check("the Flashcards sub-tabs are four segments -- Settings and Help moved to the title bar",
+    [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Manage|Kana|Puzzles"
+    && [...document.querySelectorAll("#flashcardsPage .fc-titlebar-btn")].map(b => b.textContent).join("|") === "Settings|Help");
+  document.querySelector('.fc-tab[data-tab="manage"]').click();
+  fcOpenPushed("settings");
+  check("Settings opens as a pushed screen: its own title, a Back button, no segmented control",
+    document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Settings"
+    && !!document.getElementById("fcBack") && !document.querySelector("#flashcardsPage .fc-tabs"));
   check("Settings offers Download backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  document.getElementById("fcBack").click();
+  check("Back returns to the segment you came from", document.querySelector("#flashcardsPage .fc-tab.active").dataset.tab === "manage");
   document.querySelector('.fc-tab[data-tab="dashboard"]').click();
 
   await flush(); // let the async weekly-activity load resolve and re-render
@@ -2310,6 +2326,11 @@ async function main() {
 
   console.log("Flashcards: Crosswords (Puzzles) tab");
   const xw = window.RaumeStudy.flashcards.crosswords.__testHooks;
+  const xwPick = (name, value) => {
+    const sel = document.querySelector('#fcPanelCrosswords [data-pick="' + name + '"]');
+    sel.value = value;
+    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+  };
   check("the tab reads \"Puzzles\", not the internal \"crosswords\" key", document.querySelector('.fc-tab[data-tab="crosswords"]').textContent.trim() === "Puzzles");
   check("hiragana <-> katakana conversion is offset-based and round-trips (the long vowel mark ー is untouched)",
     xw.toKatakana("さくら") === "サクラ" && xw.toHiragana("サクラ") === "さくら"
@@ -2402,14 +2423,16 @@ async function main() {
   check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
   check("Style/Script/Words start collapsed behind \"More options\" -- only Source shows by default, not five rows at once", (() => {
-    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-settings-field-row label")].map(l => l.textContent);
+    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-xw-pick-label")].map(l => l.textContent);
     return labels.includes("Source") && !labels.includes("Style") && !labels.includes("Script") && !labels.includes("Words")
       && !!document.getElementById("fcXwMoreToggle");
   })());
   document.getElementById("fcXwMoreToggle").click();
-  check("tapping \"More options\" reveals Style/Script/Words, in one grouped card, label left / control right", (() => {
-    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-settings-field-row label")].map(l => l.textContent);
-    return labels.includes("Source") && labels.includes("Style") && labels.includes("Script") && labels.includes("Words");
+  check("tapping \"More options\" reveals Style/Script/Words as compact picker rows -- a native select behind each, no segmented controls", (() => {
+    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-xw-pick-label")].map(l => l.textContent);
+    return labels.includes("Source") && labels.includes("Style") && labels.includes("Script") && labels.includes("Words")
+      && document.querySelectorAll("#fcPanelCrosswords .fc-xw-pick-select").length === 4
+      && !document.querySelector("#fcPanelCrosswords .fc-manage-filters");
   })());
   check("the toolbar is New puzzle (tinted) + Check (filled) + a ⋯ menu holding Reveal a letter / Reveal puzzle / Clear answers / Print -- no row of unlabeled icon buttons", (() => {
     const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
@@ -2423,7 +2446,7 @@ async function main() {
   check("the clue bar starts with a prompt, before any square is picked",
     document.querySelector("#fcPanelCrosswords .fc-xw-current").classList.contains("fc-xw-current-idle"));
   check("Romaji is the default script -- a beginner without kana memorized yet still gets a working puzzle -- and its cells skip the Japanese IME hint",
-    document.querySelector('#fcPanelCrosswords [data-seg="script"] [data-value="romaji"]').classList.contains("active")
+    document.querySelector('#fcPanelCrosswords [data-pick="script"]').value === "romaji"
     && !document.querySelector('#fcPanelCrosswords .fc-xw-cell-input[lang="ja"]'));
   document.getElementById("fcXwReveal").click();
   check("...and its cells actually hold romaji letters, not kana, until you switch scripts",
@@ -2474,7 +2497,7 @@ async function main() {
   })());
   document.getElementById("fcXwReset").click();
 
-  document.querySelector('#fcPanelCrosswords [data-seg="mode"] [data-value="arroword"]').click();
+  xwPick("mode", "arroword");
   check("switching to Arroword drops the separate clue list for clue cells inside the grid", !document.querySelector("#fcPanelCrosswords .fc-xw-clues") && !!document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue"));
   check("a fresh Arroword puzzle's cells are empty again -- switching style starts a new grid", [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.value === ""));
   check("an arroword clue cell is keyboard-reachable and knows which cell its word starts at", (() => {
@@ -2496,7 +2519,7 @@ async function main() {
     return pool.length > 0 && pool.every(w => /^[ぁ-ゖァ-ー]+$/.test(w.answer) && w.answer.length >= 2 && w.answer.length <= 10);
   })());
 
-  document.querySelector('#fcPanelCrosswords [data-seg="source"] [data-value="table"]').click();
+  xwPick("source", "table");
   const xwDefaultTable = window.RaumeStudy.data.vocabularyTables.find(t => String(t.id) === String(xw.state.tables[0]));
   check("switching source to \"A table\" collapses behind a Table row, defaulted to the first table with enough words for a real grid, and builds a puzzle from it", (() => {
     const toggle = document.getElementById("fcXwTablesToggle");
@@ -2530,7 +2553,7 @@ async function main() {
       && !document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwDefaultTable.title);
   })());
 
-  document.querySelector('#fcPanelCrosswords [data-seg="source"] [data-value="flashcards"]').click();
+  xwPick("source", "flashcards");
   check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));
 
   // Undo the cards added above -- this section's only job was guaranteeing
@@ -2540,7 +2563,7 @@ async function main() {
   window.RaumeStudy.flashcards.render();
 
   console.log("Flashcards: Settings tab");
-  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  fcOpenPushed("settings");
   check("Settings card titles are sentence case, like the Help tab's", (() => {
     const titles = [...document.querySelectorAll("#fcPanelSettings .fc-settings-section h3")].map(h => h.textContent.trim());
     // no title has a Title-Cased second word (acronyms like FSRS are fine)
@@ -2568,13 +2591,13 @@ async function main() {
   dirChecks.forEach(cb => { cb.checked = false; });
   document.getElementById("fcSaveSettings").click();
   check("saving with no direction enabled is rejected", document.getElementById("fcDirError").hidden === false);
-  document.querySelector('.fc-tab[data-tab="settings"]').click(); // re-render fresh
+  fcOpenPushed("settings"); // re-render fresh
   check("...and nothing was actually saved (still all on)", [...document.querySelectorAll(".fc-dir-checkbox")].every(cb => cb.checked));
   document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]').checked = false;
   document.getElementById("fcSaveSettings").click();
   await flush();
   check("a successful save is acknowledged inline", document.getElementById("fcSettingsSaved").hidden === false);
-  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  fcOpenPushed("settings");
   const roEnBox = document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]');
   check("turning off just one direction is remembered", !roEnBox.checked && document.querySelector('.fc-dir-checkbox[data-direction="jp-en"]').checked);
   roEnBox.checked = true;
@@ -2582,7 +2605,7 @@ async function main() {
   await flush();
 
   // The Kana trainer's own FSRS knobs, in the same tab under the same Save.
-  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  fcOpenPushed("settings");
   check("Settings also exposes the Kana trainer's own FSRS knobs, defaulting to 90%", (() => {
     return ["fcKanaRetention", "fcKanaMaxInterval", "fcKanaFuzz", "fcKanaNewPerDay"].every(id => !!document.getElementById(id))
       && document.getElementById("fcKanaRetention").value === "90"
@@ -2597,7 +2620,7 @@ async function main() {
     const f = (JSON.parse(readLocalStorage("raume-kana-v1") || "{}").fsrs) || {};
     return f.fsrs_request_retention === 0.85 && f.new_per_day === 3 && f.fsrs_maximum_interval === 36500;
   })());
-  document.querySelector('.fc-tab[data-tab="settings"]').click();
+  fcOpenPushed("settings");
   check("the clamped kana values are reflected back into the fields", document.getElementById("fcKanaMaxInterval").value === "36500");
   check("the Kana queue honours the new per-day cap", (() => {
     kh.setGroup("hira-gojuon", true);
@@ -2610,7 +2633,7 @@ async function main() {
   await flush();
 
   console.log("Flashcards: Help tab");
-  document.querySelector('.fc-tab[data-tab="help"]').click();
+  fcOpenPushed("help");
   check("the Manage status legend documents all four states, including Paused", (() => {
     const items = [...document.querySelectorAll("#fcPanelHelp .fc-help-status li")].map(li => li.textContent.trim());
     return items.length === 4 && items.some(t => t.includes("Not added")) && items.some(t => t.includes("In flashcards"))
@@ -2650,7 +2673,8 @@ async function main() {
     // the card we just added, proving setStoredMode/loadCache's in-memory
     // fallback (not just localStorage) is what's actually keeping state.
     document.getElementById("fcUseGuest").click();
-    document.querySelector('.fc-tab[data-tab="dashboard"]').click(); // last tab left active was Settings
+    if (document.getElementById("fcBack")) document.getElementById("fcBack").click(); // last screen left open was Help
+    document.querySelector('.fc-tab[data-tab="dashboard"]').click();
     const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(2) .fc-stat-value").textContent;
     check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "4");
   }

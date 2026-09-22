@@ -366,18 +366,29 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     state.puzzle = buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
-  var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "A table"]];
+  var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
   var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   var SIZE_OPTS = [8, 12, 16, 20];
 
-  function segControl(name, options, current, label) {
-    return '<div class="fc-manage-filters fc-xw-seg" data-seg="' + name + '" role="group" aria-label="' + esc(label) + '">' +
-      options.map(function (o) {
-        var val = Array.isArray(o) ? o[0] : String(o);
-        var text = Array.isArray(o) ? o[1] : String(o);
-        return '<button type="button" data-value="' + val + '" class="' + (String(current) === val ? "active" : "") + '">' + esc(text) + "</button>";
-      }).join("") + "</div>";
+  // An iOS pop-up button row: label left, the current value and a small
+  // up/down chevron right, the whole 44px row the tap target. A real
+  // <select> sits invisibly over the row, so a tap opens the platform's own
+  // picker (the wheel/menu on iOS) -- no oversized segmented control per
+  // setting. The select is 16px so iOS never zooms in on it.
+  var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
+  function pickerRow(name, label, options, current) {
+    var currentText = "";
+    var opts = options.map(function (o) {
+      var val = Array.isArray(o) ? o[0] : String(o);
+      var text = Array.isArray(o) ? o[1] : String(o);
+      if (String(current) === val) currentText = text;
+      return '<option value="' + val + '"' + (String(current) === val ? " selected" : "") + ">" + esc(text) + "</option>";
+    }).join("");
+    return '<div class="fc-settings-field fc-xw-field"><label class="fc-xw-pick">' +
+      '<span class="fc-xw-pick-label">' + esc(label) + "</span>" +
+      '<span class="fc-xw-field-value">' + esc(currentText) + UPDOWN_ICON + "</span>" +
+      '<select class="fc-xw-pick-select" data-pick="' + name + '">' + opts + "</select></label></div>";
   }
 
   function selectedTables() {
@@ -416,7 +427,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function tableFieldRowHtml() {
     return '<div class="fc-settings-field fc-xw-field">' +
       '<button type="button" class="fc-settings-field-row fc-xw-field-row fc-xw-field-btn" id="fcXwTablesToggle" aria-expanded="' + state.tablesOpen + '" aria-controls="fcXwTablePicker">' +
-      "<label>Table</label><span class=\"fc-xw-field-value\">" + esc(tablesSummary()) + CHEVRON_ICON + "</span></button>" +
+      '<span class="fc-xw-pick-label">Tables</span><span class="fc-xw-field-value">' + esc(tablesSummary()) + CHEVRON_ICON + "</span></button>" +
       (state.tablesOpen ? tableChecklistHtml() : "") +
       "</div>";
   }
@@ -432,7 +443,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function moreToggleRowHtml() {
     return '<div class="fc-settings-field fc-xw-field">' +
       '<button type="button" class="fc-settings-field-row fc-xw-field-row fc-xw-field-btn" id="fcXwMoreToggle" aria-expanded="' + state.moreOpen + '">' +
-      "<label>More options</label>" +
+      '<span class="fc-xw-pick-label">More options</span>' +
       '<span class="fc-xw-field-value">' + (state.moreOpen ? "" : esc(moreSummary())) + CHEVRON_ICON + "</span></button></div>";
   }
 
@@ -677,21 +688,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
-  function fieldRow(label, controlHtml) {
-    return '<div class="fc-settings-field fc-xw-field"><div class="fc-settings-field-row fc-xw-field-row"><label>' + esc(label) + "</label>" + controlHtml + "</div></div>";
-  }
-  // One grouped card for every puzzle setting -- label left, control right,
-  // same row style the Settings tab already uses (fc-settings-field), so a
-  // segmented control here reads exactly like a number field there instead
-  // of introducing a second visual language.
+  // One inset-grouped card of 44px rows, iOS Settings-style: Source (and
+  // Table, when it applies), then Style / Script / Words behind More options.
   function configCardHtml() {
-    var rows = fieldRow("Source", segControl("source", SOURCE_OPTS, state.source, "Word source"));
+    var rows = pickerRow("source", "Source", SOURCE_OPTS, state.source);
     if (state.source === "table") rows += tableFieldRowHtml();
     rows += moreToggleRowHtml();
     if (state.moreOpen) {
-      rows += fieldRow("Style", segControl("mode", MODE_OPTS, state.mode, "Puzzle style"));
-      rows += fieldRow("Script", segControl("script", SCRIPT_OPTS, state.script, "Answer script"));
-      rows += fieldRow("Words", segControl("size", SIZE_OPTS, state.size, "Word count"));
+      rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
+      rows += pickerRow("script", "Script", SCRIPT_OPTS, state.script);
+      rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
     }
     return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
   }
@@ -721,11 +727,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // control has to work even when the current source/table pick has
   // nothing yet to build a grid from.
   function bindControls(panel) {
-    panel.querySelectorAll(".fc-xw-seg button").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var seg = btn.closest(".fc-xw-seg").dataset.seg;
-        var val = btn.dataset.value;
-        state[seg] = seg === "size" ? parseInt(val, 10) : val;
+    panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
+      sel.addEventListener("change", function () {
+        var key = sel.dataset.pick;
+        state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
         generate();
         rerender();
       });

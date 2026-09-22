@@ -24,6 +24,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var store = S.store, vidx = S.vocabIndex, sched = S.scheduling;
   var dataOps = S.dataOps, dashboard = S.dashboard, views = S.views, kana = S.kana, crosswords = S.crosswords;
   var esc = window.RaumeStudy.shared.escapeHtml;
+  var BACK_ICON = '<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>';
 
   var isGuestMode = store.isGuestMode, setStoredMode = store.setStoredMode, loadCache = store.loadCache;
   var loadKanaCache = store.loadKanaCache;
@@ -48,6 +49,12 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // App shell / tab routing
   // -----------------------------------------------------------------------
   var activeTab = "dashboard";
+  // Settings and Help are screens you visit, not places you switch between
+  // -- they open like a pushed iOS screen (a Back button, their own title)
+  // instead of being two more segments. Back returns to whichever of the
+  // four segments you came from.
+  var PUSHED_TABS = { settings: "Settings", help: "Help" };
+  var lastMainTab = "dashboard";
 
   function root() { return document.getElementById("flashcardsPage"); }
 
@@ -243,16 +250,29 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     var identityHtml = isGuestMode()
       ? '<div class="fc-signed-in-as">Using this device only — not backed up <button type="button" id="fcGoAccount">Sign in to sync</button></div>'
       : '<div class="fc-signed-in-as">Signed in as ' + esc(currentUser().email) + ' <button type="button" id="fcSignOut">Sign out</button></div>';
+    var pushed = PUSHED_TABS[activeTab];
+    if (!pushed) lastMainTab = activeTab;
+    // Four segments -- iOS's segmented control stops reading at a glance
+    // past about five, and six were squeezed into a phone's width.
+    var header = pushed
+      ? '<button type="button" class="fc-back" id="fcBack">' + BACK_ICON + "Flashcards</button>" +
+        '<div class="fc-titlebar"><h1>' + pushed + "</h1></div>"
+      : '<div class="fc-titlebar"><h1>Flashcards</h1>' +
+        '<div class="fc-titlebar-actions">' +
+        '<button type="button" class="fc-titlebar-btn" data-tab="settings">Settings</button>' +
+        '<button type="button" class="fc-titlebar-btn" data-tab="help">Help</button>' +
+        "</div></div>";
     el.innerHTML =
-      "<h1>Flashcards</h1>" +
+      header +
       identityHtml +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +
+      (pushed ? "" :
       '<div class="fc-tabs" role="tablist">' +
-      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["settings", "Settings"], ["help", "Help"]].map(function (t) {
+      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
       }).join("") +
-      "</div>" +
+      "</div>") +
       '<div class="fc-tabpanel"' + (activeTab === "dashboard" ? "" : " hidden") + ' id="fcPanelDashboard"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "manage" ? "" : " hidden") + ' id="fcPanelManage"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "kana" ? "" : " hidden") + ' id="fcPanelKana"></div>' +
@@ -268,7 +288,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     } else {
       document.getElementById("fcSignOut").addEventListener("click", function () { signOut(); });
     }
-    el.querySelectorAll(".fc-tab").forEach(function (btn) {
+    var back = document.getElementById("fcBack");
+    if (back) back.addEventListener("click", function () { activeTab = lastMainTab; render(); window.scrollTo(0, 0); });
+    el.querySelectorAll(".fc-tab, .fc-titlebar-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         activeTab = btn.dataset.tab;
         dashboard.setSession(null);

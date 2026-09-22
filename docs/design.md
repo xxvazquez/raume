@@ -589,8 +589,11 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
-**Puzzles**: settings are one inset-grouped card (Source, Table, More options)
-with 44px rows; the table list inside is checkmark rows. The toolbar is the
+**Puzzles**: settings are one inset-grouped card of 44px rows (Source,
+Tables, More options → Style / Script / Words). Each choice is an iOS pop-up
+row — label left, value + ⌃⌄ in secondary grey right — with an invisible
+native `<select>` over the row, so a tap opens the platform picker; no
+segmented control per setting. The table list inside is checkmark rows. The toolbar is the
 controls library as-is — tinted **New puzzle** leading, filled **Check**
 trailing, and the reference tables' own ⋯ menu for Reveal a letter / Reveal
 puzzle / Clear answers / Print. A white clue bar above the grid names the clue
@@ -613,8 +616,12 @@ instead of sitting pinned under a stack of chrome it doesn't need. One CSS
 rule covers both the vocabulary and Kana review cards, since they share the
 same markup — no session-state flag to keep in sync in JS.
 
-The active sub-tab (`.fc-tab.active`) is the raised segment of a segmented
-control; the active nav link (`.site-nav-link.active`) is a soft capsule in the
+The sub-tabs are four segments (Dashboard / Manage / Kana / Puzzles) — iOS
+segmented controls stop reading at a glance past about five. Settings and Help
+are plain tint-text buttons at the title's trailing edge (an iOS navigation
+bar's right-hand items) and open as pushed screens: a "‹ Flashcards" back
+button above their own large title, no segmented control. The active sub-tab
+(`.fc-tab.active`) is the raised segment of a segmented control; the active nav link (`.site-nav-link.active`) is a soft capsule in the
 section tone — clearly the live one against the muted rest.
 
 The review card itself is a plain white card (no border or shadow); the answer

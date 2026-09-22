@@ -2383,6 +2383,19 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 }
 
 /* --- Flashcards page title ------------------------------------- */
+/* Title with Settings / Help as plain tint-text buttons at its trailing
+   edge -- an iOS navigation bar's right-hand items. Either one opens as a
+   pushed screen: a "‹ Flashcards" back button above its own title. */
+.fc-titlebar { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.fc-titlebar-actions { display: flex; gap: 18px; flex: 0 0 auto; }
+.fc-titlebar-btn, .fc-back {
+  appearance: none; border: 0; background: none; padding: 0; cursor: pointer;
+  color: var(--section-strong); font: 400 var(--fs-nav)/1.4 var(--font-ui);
+  min-height: 32px;
+}
+.fc-back { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 2px -5px; }
+.fc-titlebar-btn:hover, .fc-back:hover { opacity: .7; }
+.fc-titlebar-btn:active, .fc-back:active { opacity: .5; }
 .page-flashcards h1 {
   margin: 0 0 4px;
   font-size: var(--fs-page-title);
@@ -2544,11 +2557,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-tab:hover { color: var(--ink); }
 .fc-tab.active { background: var(--seg-thumb); color: var(--ink); }
-/* Six segments on a phone: trim the side padding so they still share one
-   row at 375px instead of pushing the page sideways. */
-@media (max-width: 420px) {
-  .fc-tab { min-width: 0; padding: 7px 4px; }
-}
 @media (min-width: 700px) {
   .fc-tabs { display: inline-flex; }
   .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
@@ -2565,18 +2573,23 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* One readable column on a wide screen -- a 1000px-wide settings row puts
    the label a mile from its control. The puzzle below takes what it needs. */
 .fc-xw-config, .fc-xw-actions, .fc-xw-current { max-width: 680px; }
-.fc-xw-field { min-height: 44px; padding: 6px 0; display: flex; flex-direction: column; justify-content: center; }
-.fc-xw-field-row { flex-wrap: wrap; justify-content: space-between; row-gap: 8px; }
-.fc-xw-seg { margin: 0; }
-/* Table and "More options" both collapse to one summary row until tapped --
-   a plain button styled exactly like a settings row, so opening it doesn't
-   look like a different kind of control. */
-.fc-xw-field-btn {
-  width: 100%; min-height: 32px; appearance: none; border: 0; background: transparent; padding: 0;
-  font: inherit; text-align: left; cursor: pointer;
+.fc-settings-field.fc-xw-field { min-height: 44px; padding: 0; display: flex; flex-direction: column; justify-content: center; }
+/* Picker rows (Source / Style / Script / Words) and the two disclosure rows
+   (Tables, More options) share one shape: a 14px regular label, the value
+   in secondary grey at the trailing edge, 44px tall. */
+.fc-settings-field .fc-xw-pick, .fc-xw-field-btn {
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 44px; cursor: pointer;
+  color: var(--ink); font: 400 var(--fs-nav)/1.3 var(--font-ui);
 }
-.fc-xw-field-btn label { cursor: pointer; }
-.fc-xw-field-value { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-small); min-width: 0; }
+.fc-xw-field-btn { appearance: none; border: 0; background: transparent; padding: 0; text-align: left; }
+.fc-xw-pick-select {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+  opacity: 0; appearance: none; border: 0; font-size: 16px; cursor: pointer;
+}
+.fc-xw-pick:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 6px; }
+.fc-xw-updown { flex: none; }
+.fc-xw-field-value { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-nav); min-width: 0; text-align: right; }
 .fc-xw-chevron { flex: none; transition: transform .15s ease; }
 .fc-xw-field-btn[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
 /* The table list: category captions over checkmark rows (.fc-direction-check,
@@ -2957,7 +2970,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    hides the page but doesn't tear its content down) doesn't strand the
    chrome hidden app-wide. */
 body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
-  :is(.masthead, .site-nav, #flashcardsPage > h2, #flashcardsPage > .fc-signed-in-as,
+  :is(.masthead, .site-nav, #flashcardsPage > .fc-titlebar, #flashcardsPage > .fc-back, #flashcardsPage > .fc-signed-in-as,
       #flashcardsPage > .fc-sync-chip, #flashcardsPage > .fc-sync-detail, #flashcardsPage > .fc-tabs) {
   display: none;
 }
@@ -3636,7 +3649,8 @@ mark.fc-diff-co {
    chrome so only that one table (title + grid) reaches the page, matching how
    a vocabulary-page table prints. */
 @media print {
-  body.print-only #flashcardsPage > h2,
+  body.print-only #flashcardsPage > .fc-titlebar,
+  body.print-only #flashcardsPage > .fc-back,
   body.print-only #flashcardsPage > .fc-signed-in-as,
   body.print-only #flashcardsPage > .fc-sync-chip,
   body.print-only #flashcardsPage > .fc-tabs { display: none !important; }
