@@ -1102,9 +1102,17 @@ body.selftest-mode .selftest-hint { display: block; }
 .bar-capsule .table-index:not(.search-hidden) + .options-btn {
   background: linear-gradient(var(--line-strong), var(--line-strong)) left center / 1px 18px no-repeat;
 }
-/* Search: a plain white capsule on the grey ground -- no grey fill, no
-   shadow, no glass (Laura, 2026-09-23). */
-.page-vocab .search-box { background: var(--paper); border-color: transparent; }
+/* Search: the same capsule as Tables | Options beside it -- glass, bright
+   rim, soft shadow -- so the bar reads as one matched pair (Laura,
+   2026-09-23). The field holds no fixed-position children, so the blur can
+   sit on it directly. */
+.page-vocab .search-box {
+  background: var(--glass-bg);
+  border: 0; /* a transparent 1px border here drew the rim 1px inside the edge -- a double line */
+  box-shadow: 0 2px 10px rgba(24, 24, 40, .08), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
 /* Category name is just a quiet label above its card -- no underline. */
 .page-vocab .cat-heading { border-bottom: 0; padding: 0 0 0 16px; margin-bottom: 8px; }
 /* iOS / macOS list-header voice: a step smaller than the rows beneath it, in

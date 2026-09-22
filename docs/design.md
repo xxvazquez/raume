@@ -195,9 +195,9 @@ and Help.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
   the link's `data-tile`), with the entry count trailing the row as a secondary
   value and its category labels in the same 12px grey header voice.
-  The search field is a 36px plain white capsule on the grey ground — no grey
-  fill, no shadow, no glass (Laura, 2026-09-23). The Tables | Options capsule
-  beside it keeps its glass and soft shadow. Its text is 13.5px everywhere, just under the 14px
+  The search field is a 36px capsule styled exactly like the Tables | Options
+  capsule beside it — glass fill, bright top rim, soft shadow — never a grey
+  fill. Its text is 13.5px everywhere, just under the 14px
   rows it searches; the placeholder ends in "…" when the field is narrow. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
