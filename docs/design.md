@@ -584,6 +584,17 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
+**Puzzles**: settings are one inset-grouped card (Source, Table, More options)
+with 44px rows; the table list inside is checkmark rows. The toolbar is the
+controls library as-is — tinted **New puzzle** leading, filled **Check**
+trailing, and the reference tables' own ⋯ menu for Reveal a letter / Reveal
+puzzle / Clear answers / Print. A white clue bar above the grid names the clue
+you're on. The grid draws only the letter squares — white with a hairline,
+blanks are the page ground — at 38px, shrinking to a 26px floor on a phone
+before it scrolls; the active word takes `--accent-soft`, the focused square a
+`--section-strong` ring. Check's verdict is the green / red soft fill. The clue
+list is an inset-grouped card with the active clue tinted.
+
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the
 ochre `--fc-hard`.

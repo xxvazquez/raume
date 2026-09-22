@@ -120,7 +120,15 @@ window.RaumeStudy.flashcards.views = (function () {
       '</div>' +
       '<div class="fc-settings-section"><h3>Kana trainer</h3>' +
       '<p class="fc-note">The <span class="fc-legend-term">Kana</span> tab is a separate hiragana / katakana reading trainer, not built on the vocabulary. Choose the groups you want — gojūon, dakuten, handakuten, yōon (small-ya combinations), and sokuon (the doubling <span lang="ja">っ</span>, in short example words), per script — plus the directions: <em>kana → romaji</em> (type the reading) and <em>romaji → kana</em> (type the glyph — you\'ll want a kana keyboard). It uses the same review card, keyboard shortcuts, and FSRS scheduling as the vocabulary sessions, but keeps its own separate progress and settings. Saved locally in guest mode, synced to your account when signed in — same as the vocabulary flashcards.</p>' +
-      '</div>';
+      '</div>' +
+      '<div class="fc-settings-section"><h3>Puzzles</h3>' +
+      '<ul class="fc-help-list">' +
+      '<li><span class="fc-legend-term">Source</span> — <span class="fc-legend-term">Flashcards</span> (added, non-paused words) or <span class="fc-legend-term">A table</span>: one or more vocabulary tables, whether or not they\'re in flashcards. Every answer is the word\'s reading; kanji is never shown or typed.</li>' +
+      '<li><span class="fc-legend-term">More options</span> — <span class="fc-legend-term">Crossword</span> (numbered clue list) or <span class="fc-legend-term">Arroword</span> (each clue in a square before its answer); the script (<span class="fc-legend-term">Romaji</span>, <span class="fc-legend-term">Japanese</span>, <span class="fc-legend-term">Hiragana</span>, <span class="fc-legend-term">Katakana</span>); and how many words.</li>' +
+      '<li>Tap a square or a clue and type. Typing follows the word\'s direction — tap a crossing square again to switch. The bar above the grid shows the clue you\'re on; Backspace steps back, arrow keys move.</li>' +
+      '<li><span class="fc-legend-term">Check</span> marks filled squares right or wrong. The <span class="fc-legend-term">⋯</span> menu reveals a letter or the whole puzzle, clears your answers, or prints a clean worksheet.</li>' +
+      '<li>Nothing here is saved — every puzzle is generated fresh.</li>' +
+      '</ul></div>';
   }
 
   // --- Manage: browse every vocab entry, add / pause / restore ---

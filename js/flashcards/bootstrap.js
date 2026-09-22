@@ -22,7 +22,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   var S = window.RaumeStudy.flashcards;
   var store = S.store, vidx = S.vocabIndex, sched = S.scheduling;
-  var dataOps = S.dataOps, dashboard = S.dashboard, views = S.views, kana = S.kana;
+  var dataOps = S.dataOps, dashboard = S.dashboard, views = S.views, kana = S.kana, crosswords = S.crosswords;
   var esc = window.RaumeStudy.shared.escapeHtml;
 
   var isGuestMode = store.isGuestMode, setStoredMode = store.setStoredMode, loadCache = store.loadCache;
@@ -249,13 +249,14 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +
       '<div class="fc-tabs" role="tablist">' +
-      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["settings", "Settings"], ["help", "Help"]].map(function (t) {
+      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["settings", "Settings"], ["help", "Help"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
       }).join("") +
       "</div>" +
       '<div class="fc-tabpanel"' + (activeTab === "dashboard" ? "" : " hidden") + ' id="fcPanelDashboard"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "manage" ? "" : " hidden") + ' id="fcPanelManage"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "kana" ? "" : " hidden") + ' id="fcPanelKana"></div>' +
+      '<div class="fc-tabpanel"' + (activeTab === "crosswords" ? "" : " hidden") + ' id="fcPanelCrosswords"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "settings" ? "" : " hidden") + ' id="fcPanelSettings"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "help" ? "" : " hidden") + ' id="fcPanelHelp"></div>';
 
@@ -279,6 +280,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (activeTab === "dashboard") renderDashboard(document.getElementById("fcPanelDashboard"), stats);
     else if (activeTab === "manage") renderManage(document.getElementById("fcPanelManage"));
     else if (activeTab === "kana") kana.renderKana(document.getElementById("fcPanelKana"));
+    else if (activeTab === "crosswords") crosswords.renderCrosswords(document.getElementById("fcPanelCrosswords"));
     else if (activeTab === "help") renderHelp(document.getElementById("fcPanelHelp"));
     else renderSettings(document.getElementById("fcPanelSettings"));
 

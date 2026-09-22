@@ -338,12 +338,29 @@ streak.
   Signed in, that section just says the account already holds it.
 - **Help** — pausing, the Manage status icons, the keyboard shortcuts.
 - **Kana** — see below.
+- **Puzzles** — see below.
 
 **Kana trainer** — a separate hiragana/katakana drill, not built on the
 vocabulary. Pick groups (**gojūon, dakuten, handakuten, yōon, sokuon**, per
 script) and directions. **Kana → romaji** types the reading (a few alternates
 like `si`/`shi` accepted; vowel length *is* checked here); **Romaji → kana**
 types the glyph. Its own FSRS knobs, separate from the word cards.
+
+**Puzzles** — a fill-in crossword or arroword, generated fresh each time.
+
+- **Source** — *Flashcards* (added, unpaused words) or *A table*: one or more
+  vocabulary tables, whether or not they're in flashcards.
+- **More options** — *Crossword* (numbered clue list) or *Arroword* (each clue
+  in a square before its answer); script *Romaji* (default), *Japanese*,
+  *Hiragana* or *Katakana*; 8–20 words. Answers are always readings — kanji is
+  never shown or typed.
+- **Solving** — tap a square or a clue and type. Typing follows the word's
+  direction; tap a crossing square again to switch. The bar above the grid
+  shows the clue you're on. Backspace steps back, arrow keys move.
+- **Check** marks filled squares right or wrong. The **⋯** menu has *Reveal a
+  letter*, *Reveal puzzle*, *Clear answers* and *Print* (a clean A4 worksheet
+  titled like "Crossword — Drinks").
+- Nothing is saved or scheduled.
 
 ---
 

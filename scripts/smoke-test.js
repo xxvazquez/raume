@@ -2299,6 +2299,214 @@ async function main() {
   if (storageUsable) check("guest reviews land in raume-kana-v1, never a signed-in cache key",
     !!readLocalStorage("raume-kana-v1") && readLocalStorage("raume-kana-cache-v1") === null);
 
+  console.log("Flashcards: Crosswords (Puzzles) tab");
+  const xw = window.RaumeStudy.flashcards.crosswords.__testHooks;
+  check("the tab reads \"Puzzles\", not the internal \"crosswords\" key", document.querySelector('.fc-tab[data-tab="crosswords"]').textContent.trim() === "Puzzles");
+  check("hiragana <-> katakana conversion is offset-based and round-trips (the long vowel mark ー is untouched)",
+    xw.toKatakana("さくら") === "サクラ" && xw.toHiragana("サクラ") === "さくら"
+    && xw.toHiragana("コーヒー") === "こーひー" && xw.scriptedAnswer("さくら", "katakana") === "サクラ"
+    && xw.scriptedAnswer("さくら", "native") === "さくら");
+  check("romaji folding takes the first alternative, drops a counter's ~, folds macrons, and strips everything but a-z",
+    xw.foldRomajiForGrid("kōhī") === "kohi" && xw.foldRomajiForGrid("kaeru / kaerimasu") === "kaeru"
+    && xw.foldRomajiForGrid("~hon") === "hon" && xw.foldRomajiForGrid("O-namae wa?") === "onamaewa");
+  check("the improved placement algorithm (multi-pass retries, best of several shuffles) reliably places most of a realistic word set, not just a token few", (() => {
+    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    const pool = xw.tableWordPool([biggest.id]).slice(0, 14);
+    if (pool.length < 10) return false; // the largest table should comfortably clear this
+    const grid = xw.buildGrid(pool, false);
+    return grid.placements.length >= Math.ceil(pool.length * 0.6);
+  })());
+  check("the word pool only ever offers pure kana, 2-10 characters, deduplicated by reading", (() => {
+    const pool = xw.wordPool();
+    const seen = new Set();
+    return pool.length > 0 && pool.every(w => {
+      if (seen.has(w.answer)) return false;
+      seen.add(w.answer);
+      return /^[ぁ-ゖァ-ー]+$/.test(w.answer) && w.answer.length >= 2 && w.answer.length <= 10;
+    });
+  })());
+
+  // Three short words, each sharing a letter directly with the longest (so
+  // every one connects to the backbone regardless of placement order) --
+  // enough to check the grid builder never corrupts a letter at a crossing.
+  const xwWords = [
+    { id: "w1", answer: "さくら", clue: "cherry blossom" },
+    { id: "w2", answer: "くも", clue: "cloud" },
+    { id: "w3", answer: "そら", clue: "sky" }
+  ];
+  function readPlacement(built, p) {
+    const dr = p.dir === "down" ? 1 : 0, dc = p.dir === "across" ? 1 : 0;
+    let out = "";
+    for (let i = 0; i < p.answer.length; i++) out += built.grid[(p.row + dr * i) + "," + (p.col + dc * i)];
+    return out;
+  }
+  const xwGrid = xw.buildGrid(xwWords, false);
+  check("all three words connect into one grid (each shares a letter with the longest)", xwGrid.placements.length === 3);
+  check("every placed word reads back off the grid exactly as its own answer -- a crossing never corrupts a letter",
+    xwGrid.placements.every(p => readPlacement(xwGrid, p) === p.answer));
+  check("crossword mode numbers every word's own start cell", xwGrid.placements.every(p => typeof p.number === "number" && p.number >= 1));
+  const xwArro = xw.buildGrid(xwWords, true);
+  check("arroword mode reserves a clue cell right before every word -- never a letter, never shared", (() => {
+    return xwArro.placements.every(p => {
+      const dr = p.dir === "down" ? 1 : 0, dc = p.dir === "across" ? 1 : 0;
+      const k = (p.row - dr) + "," + (p.col - dc);
+      return xwArro.clueCells[k] && xwArro.clueCells[k].clue === p.clue && xwArro.grid[k] === undefined;
+    });
+  })());
+
+  // Guaranteed pool for the UI checks below, independent of whatever earlier
+  // sections left active -- ビール/コーヒー/コーラ/ジュース are plain katakana,
+  // no kanji, well inside the 2-10 character window wordPool() accepts.
+  // Snapshot first and restore after: a later section (guest-mode's
+  // in-memory fallback) asserts an exact "Total cards" count from the
+  // earlier fixture, so these extra cards can't be left in the deck.
+  const xwCache = window.RaumeStudy.flashcards.store.getCache();
+  const xwCardsBefore = Object.keys(xwCache.cards);
+  await window.RaumeStudy.flashcards.dataOps.addVocabs(["v0007", "v0009", "v0010", "v0012"]);
+  window.RaumeStudy.flashcards.render();
+  document.querySelector('.fc-tab[data-tab="crosswords"]').click();
+  check("the Puzzles tab renders a puzzle once there are enough flashcard words", !!document.querySelector("#fcPanelCrosswords .fc-xw-grid"));
+  check("no element relies on an inline style=\"\" attribute here either (blocked by CSP style-src)", document.querySelectorAll("#fcPanelCrosswords [style]").length === 0);
+  check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
+    [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
+  check("Style/Script/Words start collapsed behind \"More options\" -- only Source shows by default, not five rows at once", (() => {
+    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-settings-field-row label")].map(l => l.textContent);
+    return labels.includes("Source") && !labels.includes("Style") && !labels.includes("Script") && !labels.includes("Words")
+      && !!document.getElementById("fcXwMoreToggle");
+  })());
+  document.getElementById("fcXwMoreToggle").click();
+  check("tapping \"More options\" reveals Style/Script/Words, in one grouped card, label left / control right", (() => {
+    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-settings-field-row label")].map(l => l.textContent);
+    return labels.includes("Source") && labels.includes("Style") && labels.includes("Script") && labels.includes("Words");
+  })());
+  check("the toolbar is New puzzle (tinted) + Check (filled) + a ⋯ menu holding Reveal a letter / Reveal puzzle / Clear answers / Print -- no row of unlabeled icon buttons", (() => {
+    const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
+    const items = menu ? [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim()) : [];
+    return document.getElementById("fcXwNew").classList.contains("fc-btn") && !document.getElementById("fcXwNew").classList.contains("fc-btn-primary")
+      && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
+      && items.join("|") === "Reveal a letter|Reveal puzzle|Clear answers|Print"
+      && menu.querySelector(".section-menu-list").hidden
+      && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
+  })());
+  check("the clue bar starts with a prompt, before any square is picked",
+    document.querySelector("#fcPanelCrosswords .fc-xw-current").classList.contains("fc-xw-current-idle"));
+  check("Romaji is the default script -- a beginner without kana memorized yet still gets a working puzzle -- and its cells skip the Japanese IME hint",
+    document.querySelector('#fcPanelCrosswords [data-seg="script"] [data-value="romaji"]').classList.contains("active")
+    && !document.querySelector('#fcPanelCrosswords .fc-xw-cell-input[lang="ja"]'));
+  document.getElementById("fcXwReveal").click();
+  check("...and its cells actually hold romaji letters, not kana, until you switch scripts",
+    [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => /^[a-z]$/.test(i.value)));
+
+  document.getElementById("fcXwReset").click();
+  const firstInput = document.querySelector("#fcPanelCrosswords .fc-xw-cell-input");
+  firstInput.value = "x";
+  firstInput.dispatchEvent(new window.Event("input", { bubbles: true }));
+  document.getElementById("fcXwCheck").click();
+  check("Check marks a wrong letter without touching cells that are still empty", (() => {
+    const cells = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-letter")];
+    return firstInput.closest(".fc-xw-cell").classList.contains("fc-xw-cell-wrong")
+      && cells.filter(c => c.classList.contains("fc-xw-cell-correct") || c.classList.contains("fc-xw-cell-wrong")).length === 1;
+  })());
+  document.getElementById("fcXwReveal").click();
+  check("Reveal fills every cell with its correct letter and marks it right",
+    [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.value.length === 1 && i.closest(".fc-xw-cell").classList.contains("fc-xw-cell-correct")));
+
+  document.getElementById("fcXwReset").click();
+  check("Reset clears every typed letter and verdict but keeps the same grid to try again", (() => {
+    const cells = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-letter")];
+    return cells.every(c => c.querySelector(".fc-xw-cell-input").value === ""
+      && !c.classList.contains("fc-xw-cell-correct") && !c.classList.contains("fc-xw-cell-wrong"));
+  })());
+  document.getElementById("fcXwHint").click();
+  check("Hint reveals exactly one cell -- a nudge, not the full solution Reveal gives", (() => {
+    const cells = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-letter")];
+    const filled = cells.filter(c => c.querySelector(".fc-xw-cell-input").value !== "");
+    return filled.length === 1 && filled[0].classList.contains("fc-xw-cell-correct");
+  })());
+
+  check("tapping a clue in the list tints it, spells it out in the clue bar, and typing then runs along that word's own direction", (() => {
+    const li = document.querySelector('#fcPanelCrosswords .fc-xw-cluerows li[data-dir="down"]')
+      || document.querySelector("#fcPanelCrosswords .fc-xw-cluerows li");
+    const [r, c] = li.dataset.start.split(",").map(Number);
+    li.click();
+    const start = document.activeElement;
+    const bar = document.querySelector("#fcPanelCrosswords .fc-xw-current");
+    const ok = start.dataset.r === String(r) && start.dataset.c === String(c)
+      && li.classList.contains("fc-xw-clue-active") && !bar.classList.contains("fc-xw-current-idle")
+      && bar.textContent.includes(li.textContent.replace(/^\d+\s*/, "").trim());
+    start.value = "a";
+    start.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const next = document.activeElement;
+    const down = li.dataset.dir === "down";
+    return ok && next.dataset.r === String(down ? r + 1 : r) && next.dataset.c === String(down ? c : c + 1);
+  })());
+  document.getElementById("fcXwReset").click();
+
+  document.querySelector('#fcPanelCrosswords [data-seg="mode"] [data-value="arroword"]').click();
+  check("switching to Arroword drops the separate clue list for clue cells inside the grid", !document.querySelector("#fcPanelCrosswords .fc-xw-clues") && !!document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue"));
+  check("a fresh Arroword puzzle's cells are empty again -- switching style starts a new grid", [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.value === ""));
+  check("an arroword clue cell is keyboard-reachable and knows which cell its word starts at", (() => {
+    const cc = document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue");
+    return cc.getAttribute("tabindex") === "0" && /^\d+,\d+$/.test(cc.dataset.start);
+  })());
+  check("tapping a clue focuses that word's first cell", (() => {
+    const cc = document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue");
+    const [r, c] = cc.dataset.start.split(",");
+    cc.click();
+    const target = document.querySelector('#fcPanelCrosswords .fc-xw-cell-input[data-r="' + r + '"][data-c="' + c + '"]');
+    return document.activeElement === target;
+  })());
+
+  check("a vocabulary table's own word pool works independent of flashcards status, given several table ids", (() => {
+    const counters = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Counters");
+    const drinks = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Drinks");
+    const pool = xw.tableWordPool([counters.id, drinks.id]);
+    return pool.length > 0 && pool.every(w => /^[ぁ-ゖァ-ー]+$/.test(w.answer) && w.answer.length >= 2 && w.answer.length <= 10);
+  })());
+
+  document.querySelector('#fcPanelCrosswords [data-seg="source"] [data-value="table"]').click();
+  const xwDefaultTable = window.RaumeStudy.data.vocabularyTables.find(t => String(t.id) === String(xw.state.tables[0]));
+  check("switching source to \"A table\" collapses behind a Table row, defaulted to the first table with enough words for a real grid, and builds a puzzle from it", (() => {
+    const toggle = document.getElementById("fcXwTablesToggle");
+    return !!xwDefaultTable && xw.tableWordPool([xwDefaultTable.id]).length >= 10 && toggle.textContent.includes(xwDefaultTable.title)
+      && toggle.getAttribute("aria-expanded") === "false" && !!document.querySelector("#fcPanelCrosswords .fc-xw-grid");
+  })());
+  check("the print title names the puzzle style and its source, even though the intro line above it is hidden from print",
+    /^(Crossword|Arroword) — /.test(document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent));
+
+  document.getElementById("fcXwTablesToggle").click();
+  check("opening the Table row shows a checkmark row per table (the Settings tab's .fc-direction-check), grouped by category, the default table already checked", (() => {
+    const picker = document.getElementById("fcXwTablePicker");
+    const cb = picker && picker.querySelector('input[data-table-id="' + xwDefaultTable.id + '"]');
+    return !!picker && picker.querySelectorAll(".fc-xw-table-cat").length > 1 && !!cb && cb.checked
+      && cb.closest("label").classList.contains("fc-direction-check");
+  })());
+
+  const xwOtherTable = window.RaumeStudy.data.vocabularyTables.find(t => t !== xwDefaultTable && xw.tableWordPool([t.id]).length >= 5);
+  const otherCb = document.querySelector('#fcXwTablePicker input[data-table-id="' + xwOtherTable.id + '"]');
+  otherCb.checked = true;
+  otherCb.dispatchEvent(new window.Event("change", { bubbles: true }));
+  check("checking a second table adds it alongside the first -- multiple tables feed one puzzle, not a replacement", (() => {
+    return xw.state.tables.length === 2 && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwOtherTable.title);
+  })());
+
+  const defaultCb = document.querySelector('#fcXwTablePicker input[data-table-id="' + xwDefaultTable.id + '"]');
+  defaultCb.checked = false;
+  defaultCb.dispatchEvent(new window.Event("change", { bubbles: true }));
+  check("unchecking a table drops it, leaving the other selected one active", (() => {
+    return xw.state.tables.length === 1 && String(xw.state.tables[0]) === String(xwOtherTable.id)
+      && !document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwDefaultTable.title);
+  })());
+
+  document.querySelector('#fcPanelCrosswords [data-seg="source"] [data-value="flashcards"]').click();
+  check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));
+
+  // Undo the cards added above -- this section's only job was guaranteeing
+  // a pool for the UI checks, not permanently growing the deck.
+  Object.keys(xwCache.cards).forEach(function (id) { if (xwCardsBefore.indexOf(id) === -1) delete xwCache.cards[id]; });
+  window.RaumeStudy.flashcards.store.saveCache();
+  window.RaumeStudy.flashcards.render();
+
   console.log("Flashcards: Settings tab");
   document.querySelector('.fc-tab[data-tab="settings"]').click();
   check("Settings card titles are sentence case, like the Help tab's", (() => {

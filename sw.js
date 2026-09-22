@@ -62,6 +62,7 @@ const VERSIONED = [
   'js/flashcards/views.js',
   'js/flashcards/kana-data.js',
   'js/flashcards/kana.js',
+  'js/flashcards/crosswords.js',
   'js/flashcards/bootstrap.js',
   'js/sw-register.js',
 ];

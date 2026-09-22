@@ -226,6 +226,7 @@ js/
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups
     kana.js              the Kana tab
+    crosswords.js        the Puzzles tab: crossword/arroword generator, play + print
     bootstrap.js         app shell + init
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;

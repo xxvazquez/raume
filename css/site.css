@@ -1751,7 +1751,8 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .section-menu-list .section-icon-btn,
 .section-menu-list .fc-add-table-btn,
 .section-menu-list .print-menu-item,
-.section-menu-list .print-scope {
+.section-menu-list .print-scope,
+.section-menu-list .fc-xw-menu-item {
   appearance: none;
   border: 0;
   background: transparent;
@@ -1777,10 +1778,12 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .section-menu-list .section-icon-btn:hover,
 .section-menu-list .fc-add-table-btn:hover,
 .section-menu-list .print-menu-item:hover,
-.section-menu-list .print-scope:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.section-menu-list .print-scope:hover,
+.section-menu-list .fc-xw-menu-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
 .section-menu-list .section-icon-btn:hover .menu-item-ic,
 .section-menu-list .fc-add-table-btn:hover .menu-item-ic,
-.section-menu-list .print-menu-item:hover .menu-item-ic { color: var(--accent-strong); }
+.section-menu-list .print-menu-item:hover .menu-item-ic,
+.section-menu-list .fc-xw-menu-item:hover .menu-item-ic { color: var(--accent-strong); }
 .section-menu-list .fc-add-table-btn[disabled] { opacity: .5; cursor: default; }
 .section-menu-list .print-menu-item { display: none; }
 @media (max-width: 700px) {
@@ -2538,11 +2541,127 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-tab:hover { color: var(--ink); }
 .fc-tab.active { background: var(--seg-thumb); color: var(--ink); }
+/* Six segments on a phone: trim the side padding so they still share one
+   row at 375px instead of pushing the page sideways. */
+@media (max-width: 420px) {
+  .fc-tab { min-width: 0; padding: 7px 4px; }
+}
 @media (min-width: 700px) {
   .fc-tabs { display: inline-flex; }
   .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
 }
 .fc-tabpanel[hidden] { display: none; }
+
+/* --- Puzzles tab: settings card, toolbar, clue bar, grid, clue list ------
+   Settings are one inset-grouped card reusing the Settings tab's row style
+   (fc-settings-field), label left / control right, 44px rows. The toolbar
+   is the controls library as-is: tinted New puzzle, filled Check, and the
+   reference tables' own ⋯ menu for the occasional actions -- no icon-only
+   circles. */
+.fc-xw-config { padding: 2px 16px; margin-bottom: 8px; }
+/* One readable column on a wide screen -- a 1000px-wide settings row puts
+   the label a mile from its control. The puzzle below takes what it needs. */
+.fc-xw-config, .fc-xw-actions, .fc-xw-current { max-width: 680px; }
+.fc-xw-field { min-height: 44px; padding: 6px 0; display: flex; flex-direction: column; justify-content: center; }
+.fc-xw-field-row { flex-wrap: wrap; justify-content: space-between; row-gap: 8px; }
+.fc-xw-seg { margin: 0; }
+/* Table and "More options" both collapse to one summary row until tapped --
+   a plain button styled exactly like a settings row, so opening it doesn't
+   look like a different kind of control. */
+.fc-xw-field-btn {
+  width: 100%; min-height: 32px; appearance: none; border: 0; background: transparent; padding: 0;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.fc-xw-field-btn label { cursor: pointer; }
+.fc-xw-field-value { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-small); min-width: 0; }
+.fc-xw-chevron { flex: none; transition: transform .15s ease; }
+.fc-xw-field-btn[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
+/* The table list: category captions over checkmark rows (.fc-direction-check,
+   the Settings tab's own), capped so 30-odd tables don't shove the puzzle
+   off the screen. */
+.fc-xw-table-picker { margin: 6px 0 4px; max-height: 264px; overflow-y: auto; overscroll-behavior: contain; }
+.fc-xw-table-cat + .fc-xw-table-cat { margin-top: 10px; }
+.fc-xw-table-cat-name { font: 400 var(--fs-micro)/1.3 var(--font-ui); color: var(--faint); margin: 0 6px 2px; }
+/* Footnote under a group, iOS-style: secondary text, inset to the card's
+   text edge. */
+.fc-xw-footnote { margin: 0 16px 14px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
+.fc-xw-config + .fc-xw-actions { margin-top: 16px; }
+.fc-xw-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.fc-xw-actions-end { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.fc-xw-actions .fc-btn { min-height: 34px; padding: 7px 16px; }
+/* The clue you're on, spelled out above the grid -- on a phone the clue
+   list is a scroll away below it, and an arroword's in-cell clues are
+   thumbnail-sized. */
+.fc-xw-current {
+  display: flex; align-items: baseline; gap: 10px; min-height: 44px; box-sizing: border-box;
+  margin: 0 0 12px; padding: 12px 16px; background: var(--paper); border-radius: 12px;
+  color: var(--ink); font-size: var(--fs-body); line-height: 1.35;
+}
+.fc-xw-current-idle { color: var(--muted); }
+.fc-xw-current-label { flex: none; color: var(--section-strong); font-size: var(--fs-small); }
+.fc-xw-current-clue { min-width: 0; }
+.fc-xw-puzzle { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-start; }
+/* A worksheet needs a title on the page -- the clue bar and controls sit
+   outside .print-target, so print gets its own, inside the part that
+   actually prints. */
+.fc-xw-print-title { display: none; }
+.fc-xw-gridwrap { max-width: 100%; overflow-x: auto; padding: 1px 0 0 1px; }
+/* Plain nested flex rows, not CSS Grid with per-cell coordinates -- the
+   app's CSP (style-src 'self', no unsafe-inline) drops inline style=""
+   attributes, so a dynamically-sized grid can't be positioned that way.
+   Every cell (including blank ones) is emitted in row-major DOM order, so
+   each flex row is exactly one grid row.
+   Only letter cells are drawn: white squares with a hairline, blanks are
+   the page ground itself (no grey slab around the word shapes). Neighbours
+   overlap by their 1px border so shared edges stay one hairline. Cells are
+   38px but shrink with the row (to a 26px floor, then the wrapper scrolls),
+   so a wide grid still fits a phone; aspect-ratio keeps them square. */
+.fc-xw-grid { display: inline-flex; flex-direction: column; max-width: 100%; }
+.fc-xw-row { display: flex; }
+.fc-xw-cell {
+  box-sizing: border-box; flex: 0 1 38px; min-width: 26px; aspect-ratio: 1;
+  margin: -1px 0 0 -1px; border: 1px solid transparent;
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.fc-xw-cell-letter, .fc-xw-cell-clue { background: var(--paper); border-color: var(--line-strong); }
+.fc-xw-num { position: absolute; top: 1px; left: 2px; font: 400 8px/1 var(--font-ui); color: var(--muted); pointer-events: none; }
+/* A fill-in cell is a live text field -- centred, borderless (the cell's
+   own hairline frames it), one character, 16px so iOS never zooms in. */
+.fc-xw-cell-input {
+  width: 100%; height: 100%; border: 0; margin: 0; padding: 0; border-radius: 0;
+  background: transparent; color: var(--ink); text-align: center; caret-color: transparent;
+  font: 400 16px/1 var(--font-ui); appearance: none;
+}
+.fc-xw-cell-input:focus { outline: 0; }
+.fc-xw-cell-active-word { background: var(--accent-soft); }
+.fc-xw-cell:has(.fc-xw-cell-input:focus) { z-index: 1; border-color: var(--section-strong); box-shadow: inset 0 0 0 1px var(--section-strong); background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
+/* Check's verdict is a background tint, not text colour alone -- the same
+   green/red-on-soft-fill pairing the rating icons use elsewhere. */
+.fc-xw-cell-correct { background: var(--right-soft); }
+.fc-xw-cell-correct .fc-xw-cell-input { color: var(--right-strong); }
+.fc-xw-cell-wrong { background: var(--wrong-soft); }
+.fc-xw-cell-wrong .fc-xw-cell-input { color: var(--wrong-strong); }
+.fc-xw-cell-clue {
+  background: color-mix(in srgb, var(--ink) 5%, var(--paper)); flex-direction: column; gap: 1px;
+  padding: 1px 2px; text-align: center; overflow: hidden; cursor: pointer;
+}
+.fc-xw-cell-clue:hover, .fc-xw-cell-clue:focus-visible { background: var(--accent-soft); }
+.fc-xw-cluetext {
+  font: 400 6.5px/1.1 var(--font-ui); color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.fc-xw-arrow-svg { color: var(--faint); flex: none; pointer-events: none; }
+/* Clue list: iOS inset-grouped -- a 13px secondary header over a white
+   card of hairline rows; the clue you're on is tinted. */
+.fc-xw-clues { flex: 1 1 260px; min-width: 0; max-width: 400px; }
+.fc-xw-cluegroup + .fc-xw-cluegroup { margin-top: 18px; }
+.fc-xw-cluehead { margin: 0 16px 6px; font: 400 var(--fs-micro)/1.3 var(--font-ui); color: var(--muted); }
+.fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: 12px; overflow: hidden; }
+.fc-xw-cluerows li { position: relative; display: flex; gap: 10px; padding: 11px 16px; font-size: var(--fs-body); line-height: 1.35; color: var(--ink); cursor: pointer; }
+.fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
+.fc-xw-cluerows li:hover { background: color-mix(in srgb, var(--section) 7%, var(--paper)); }
+.fc-xw-cluerows li.fc-xw-clue-active { background: var(--accent-soft); }
+.fc-xw-cluerows li b { color: var(--muted); font-weight: 400; min-width: 1.4em; }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across
    the full sheet. Manage keeps the full width (its rows are content-driven,
@@ -3521,6 +3640,37 @@ mark.fc-diff-co {
   body.print-only #fcPanelDashboard > *:not(#fcWordsToReview) { display: none !important; }
   body.print-only #fcWordsToReview > *:not(.print-target) { display: none !important; }
   body.print-only #fcWordsToReview { margin: 0 !important; }
+  /* Printing a puzzle from the Crosswords tab: strip its controls, leaving
+     just the grid (+ clue list, in crossword mode). */
+  body.print-only #fcPanelCrosswords > *:not(.print-target) { display: none !important; }
+  body.print-only #fcPanelCrosswords { margin: 0 !important; }
+  body.print-only .fc-xw-gridwrap { overflow: visible; }
+  /* A focused cell or its word-highlight is an on-screen affordance only --
+     never on paper. Whatever was typed still prints (the input's live
+     value), just without the interaction chrome around it. */
+  body.print-only .fc-xw-cell-active-word,
+  body.print-only .fc-xw-cell:has(.fc-xw-cell-input:focus) { background: #fff !important; box-shadow: none !important; border-color: #999 !important; }
+  body.print-only .fc-xw-cell-letter, body.print-only .fc-xw-cell-clue { border-color: #999 !important; }
+  body.print-only .fc-xw-cluerows { border-radius: 0; }
+  body.print-only .fc-xw-cluerows li { padding: 4px 0; }
+  body.print-only .fc-xw-cluerows li.fc-xw-clue-active { background: none; }
+  /* Check/Reveal's right/wrong colours are tuned per theme for screen
+     contrast (dark mode's pastel wrong/right read poorly against forced-
+     white paper) -- pin them to the light-theme values so a printed sheet
+     is legible whatever theme it was on. */
+  body.print-only .fc-xw-cell-correct { background: #e3ece8 !important; }
+  body.print-only .fc-xw-cell-correct .fc-xw-cell-input { color: #456056 !important; }
+  body.print-only .fc-xw-cell-wrong { background: #f6e5e2 !important; }
+  body.print-only .fc-xw-cell-wrong .fc-xw-cell-input { color: #9c5248 !important; }
+  /* Same "don't split a row across a page break" rule the vocabulary
+     tables print with (css/site.css's .vocab tr) -- the grid stays one
+     block, and a clue never gets cut between its number and its text. */
+  body.print-only .fc-xw-grid, body.print-only .fc-xw-row { break-inside: avoid; page-break-inside: avoid; }
+  body.print-only .fc-xw-cluerows li { break-inside: avoid; page-break-inside: avoid; }
+  body.print-only .fc-xw-print-title {
+    display: block; width: 100%; margin: 0 0 14px;
+    font: 600 var(--fs-page-title)/1.2 var(--font-ui); color: var(--ink);
+  }
 }
 
 /* --- Touch targets and iOS text-size hygiene ---------------------------------
