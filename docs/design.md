@@ -18,10 +18,8 @@ system, and the sections below cover each part of it.
   or high contrast. Default weight is 400; 500 marks a genuinely active or
   labelled state. One type scale (`--fs-*` tokens: `--fs-micro` 11.5 · `--fs-small`
   13 · `--fs-english` 13.5 · `--fs-nav` 14 · `--fs-subhead` 15 · `--fs-card-heading`
-  17 (a card/section heading sitting directly above a text input — every
-  input is forced to 16px on a touch screen so iOS/WebKit doesn't zoom the
-  page on focus, so a heading right above one needs its own size to stay the
-  bigger of the two; `--fs-subhead` alone also sizes non-heading content like
+  17 (a card/section heading sitting directly above a text input, kept a
+  step above the field; `--fs-subhead` alone also sizes non-heading content like
   the flashcard review card's answer text, so it can't just move) ·
   `--fs-section-title` 19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji`
   for the Japanese text itself) is shared by the reference and Flashcards
@@ -181,9 +179,13 @@ and Help.
   until tapped and opening to a few 14px bullets. On a phone the grey ground
   (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
   lighter band beneath it; the masthead stays white.
-  **Platform hygiene** (checked against Apple's guidance): text fields are 16px on
-  a touch screen so iOS Safari never zooms on focus, which is what allows the
-  viewport to stay pinch-zoomable (no `maximum-scale` / `user-scalable=no`); hit
+  **Platform hygiene** (checked against Apple's guidance): text fields keep
+  their designed size (13–14.5px, never larger than the text around them) on
+  every screen. iOS Safari's zoom-on-focus is switched off by
+  `js/theme-init.js` adding `maximum-scale=1` to the viewport **on iOS only** —
+  iOS ignores it for the reader's own pinch-zoom, so zooming stays available,
+  and other platforms (where it could block pinch-zoom) never auto-zoom
+  anyway. Never `user-scalable=no`, and never force fields up to 16px; hit
   areas are ≥44pt — small controls (the ⋯ button, the reorder arrows) get an
   invisible `::after` and a collapsed table's whole row is its toggle; the
   masthead icons are 44px; `--faint` is AA on both `--paper` and the grey ground
@@ -195,8 +197,7 @@ and Help.
   value and its category labels in the same 12px grey header voice.
   The search field is the iOS one — a 36px, 10px-radius fill a shade darker than
   the grey ground, borderless. Its text is 13.5px everywhere, just under the 14px
-  rows it searches; on a touch screen the input stays 16px (no focus zoom) and is
-  scaled down to 13.5px with a transform. The glyph comes from a default per shipped table, or — for a table of your own —
+  rows it searches; the placeholder ends in "…" when the field is narrow. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
   open table is its own card with its title as a bold section title on the
@@ -488,8 +489,7 @@ and Help.
     sentence-case `<summary>` at `--fs-card-heading` (17px/500) — see that
     token's own note above; a touch-screen text field under it
     (`.cv-owned-search`, next bullet, plus `.cv-owned-sort-select` beside it)
-    is fixed at 36px tall like `.search-box`'s own field, so the 16px floor
-    doesn't grow the control's height along with its text) all start
+    is fixed at 36px tall like `.search-box`'s own field) all start
     closed. Forms are label-over-field with filled, unbordered fields; the
     parsed-ruby preview and the import result sit on `--surface`, an error on
     `--wrong-soft`; the buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).

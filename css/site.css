@@ -3739,9 +3739,10 @@ mark.fc-diff-co {
    Apple's minimum hit area is 44 x 44pt. Where the visible control is smaller
    (a 32px ⋯ button, 20 x 15 reorder arrows) an invisible ::after extends the
    tappable area without changing the layout; a collapsed table's whole row is
-   the toggle, not just its title text. Text fields are 16px on a touch screen so
-   iOS Safari doesn't zoom the page on focus -- which is what lets the viewport
-   stay pinch-zoomable. */
+   the toggle, not just its title text. Text fields keep their designed size
+   (14px and under) on a phone too: iOS Safari's zoom-on-focus is switched off
+   by js/theme-init.js adding maximum-scale=1 on iOS only -- iOS still honours
+   pinch-zoom regardless, and other platforms never zoom on focus. */
 .section-menu-btn, .cz-move-btn { position: relative; }
 .section-menu-btn::after { content: ""; position: absolute; inset: -6px; }
 .cz-move-btn::after { content: ""; position: absolute; inset: -8px -10px; }
@@ -3755,20 +3756,3 @@ mark.fc-diff-co {
    can't rise past the next row's controls on its own -- the row whose menu
    is open lifts its controls above every other row's. */
 #vocabulary .table-section.menu-open .section-head > .controls { z-index: 70; }
-@media (pointer: coarse), (max-width: 640px) {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([lang="ja"]), select, textarea { font-size: 16px; }
-  /* The search field keeps that 16px (so focusing it doesn't zoom) but is
-     drawn at 13.5px, the desktop size -- a search field shouldn't read
-     louder than the 14px rows it searches. Scaled from the left edge; its
-     layout width is grown by the same factor (and handed back with a
-     negative margin) so the scaled text still spans the whole field. 24px
-     is the magnifier and its gap. The field is a <label>, so a tap anywhere
-     in it still focuses the input. */
-  .search-box input {
-    flex: 0 1 auto;
-    width: calc((100% - 24px) / .84375);
-    margin-right: calc((100% - 24px) * (1 - 1 / .84375));
-    transform: scale(.84375);
-    transform-origin: left center;
-  }
-}

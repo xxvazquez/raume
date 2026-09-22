@@ -19,3 +19,18 @@
   document.documentElement.setAttribute("data-theme", resolved);
   document.documentElement.setAttribute("data-theme-choice", choice);
 })();
+
+// iOS Safari zooms the page whenever a text field under 16px gets focus,
+// which used to force every field in the app up to 16px -- bigger than the
+// 14px text around it. maximum-scale=1 turns that auto-zoom off; since iOS 10
+// Safari ignores it for the user's own pinch-zoom, so zooming stays
+// available. Added on iOS only: elsewhere maximum-scale can block pinch-zoom,
+// and nothing else auto-zooms on focus anyway.
+(function () {
+  "use strict";
+  var ua = navigator.userAgent || "";
+  var iOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!iOS) return;
+  var meta = document.querySelector('meta[name="viewport"]');
+  if (meta && !/maximum-scale/.test(meta.content)) meta.content += ",maximum-scale=1";
+})();
