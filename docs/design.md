@@ -221,6 +221,13 @@ and Help.
   the next reading (less 3px); only what's left becomes space after the kanji
   (`rb-m-N`, computed in `js/vocab/render.js` `jpSentenceSegments` — CJK glyphs
   are exactly 1em, so the widths are exact). Readings never touch.
+- **Opening a table is an inline disclosure** (iOS): every table, open or
+  closed, is a row of its category's one white card. The tapped row keeps its
+  exact size and position (14px title, same padding), its chevron turns, and
+  the table unfolds flat inside the same card beneath it — nothing above moves,
+  only what's below is pushed down. The row after an open table gets a
+  full-width hairline. (Previously an open table broke out into its own card
+  with a 20px title and a 16–24px gap above, so every tap made the page jump.)
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to
