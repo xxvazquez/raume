@@ -1937,20 +1937,77 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 .jpword ruby { ruby-position: over; ruby-align: start; }
 .jpmain { line-height: 1.05; }
 
-/* Sentence tables (Phrases) -- same Japanese+English shape as every other
-   table now, just weighted for a whole sentence: the Japanese cell wraps
-   within its column instead of running across the row, and eases down a
-   size. Romaji and English both work exactly as they do everywhere else
-   (romaji behind the reveal next to the speaker button, English plainly in
-   the Meaning column) -- Phrases used to hide English behind a translate
-   icon and show Romaji plainly; that's inverted now for consistency with
-   every other table. */
-.vocab.vocab-sentences th:nth-child(1), .vocab.vocab-sentences td:nth-child(1) { width: 50%; }
-.vocab.vocab-sentences th:nth-child(2), .vocab.vocab-sentences td:nth-child(2) { width: 50%; }
-.vocab.vocab-sentences td.jp { white-space: normal; overflow-wrap: anywhere; font-size: 16px; line-height: 2; }
-/* Keep the speaker/romaji controls on the first line's text baseline --
-   flex-start pinned them up level with the furigana instead. */
+/* Sentence tables (tableClass "vocab-sentences" -- Phrases' Self-introduction
+   today, any sentence table later): a stacked row, not two cramped columns --
+     私の家族は四人です。                 🔈
+     There are four people in my family. ⊘
+   the Japanese on its own full-width line (so a sentence wraps once, not
+   every few characters), the English under it in secondary grey, romaji on
+   tap in between (the .jp-romaji-on caption), the speaker and hide glyphs
+   at the trailing edge of each line. Pure CSS over the same row markup, so
+   search, Cover answers, the column switches and Flashcards are untouched.
+   No column headers -- there's nothing to sort, sentences keep their
+   authored order. */
+.vocab.vocab-sentences thead { display: none; }
+.vocab.vocab-sentences, .vocab.vocab-sentences tbody { display: block; }
+.vocab.vocab-sentences tr { display: block; border-bottom: 1px solid var(--row-line); }
+.vocab.vocab-sentences tbody tr:last-child { border-bottom: 0; }
+.vocab.vocab-sentences td,
+.vocab.vocab-sentences td:nth-child(1),
+.vocab.vocab-sentences td:nth-child(2) { display: block; width: auto; border-bottom: 0; }
+/* One inset all round: 14px from the card's left and right edges (the
+   speaker and hide glyphs included), and the top padding sized so the
+   furigana -- which rises above the first line -- sits ~14px under the
+   row's hairline, matching the space under the English. */
+.vocab.vocab-sentences td.jp {
+  padding: 20px 14px 2px 14px;
+  white-space: normal; overflow-wrap: anywhere; font-size: 16px;
+  /* Tighter than the old 2 -- the furigana overhangs (below) instead of
+     needing a whole extra line of air. */
+  line-height: 1.9;
+  /* Kinsoku: 。、」 never start a line; text-wrap: pretty avoids a lone
+     か。 dangling on the last line where the browser supports it. */
+  line-break: strict;
+  text-wrap: pretty;
+}
+.vocab.vocab-sentences td:nth-child(2),
+.vocab.vocab-sentences tbody tr:has(ruby) td:nth-child(2) {
+  padding: 0 14px 14px 14px; color: var(--muted); font-size: var(--fs-nav); line-height: 1.4;
+}
 .vocab.vocab-sentences .jp-line { align-items: first baseline; }
+/* Furigana wider than its kanji: the reading starts where its kanji start
+   (never to their left) and floats above without widening them -- the ruby
+   box is exactly the kanji -- running on to the right over the next kana by
+   up to 7px; no more gap pushed into the sentence (弟　と). js/vocab/render.js jpSentenceSegments groups
+   consecutive kanji under one reading and adds rb-m-N margin only when a
+   reading needs more room than that, so two readings never meet. */
+/* line-height 1 on the ruby box: it's exactly the kanji glyph, so the
+   reading sits right on top of it rather than above the line's leading. */
+.vocab.vocab-sentences .jpword ruby { display: inline-block; position: relative; line-height: 1; }
+.vocab.vocab-sentences .jpword rt.furigana {
+  position: absolute; bottom: 100%; left: 0;
+  margin-bottom: 1px; white-space: nowrap; line-height: 1;
+}
+.vocab.vocab-sentences ruby.rb-m-2 { margin-right: 2px; }
+.vocab.vocab-sentences ruby.rb-m-4 { margin-right: 4px; }
+.vocab.vocab-sentences ruby.rb-m-6 { margin-right: 6px; }
+.vocab.vocab-sentences ruby.rb-m-8 { margin-right: 8px; }
+.vocab.vocab-sentences ruby.rb-m-10 { margin-right: 10px; }
+.vocab.vocab-sentences ruby.rb-m-12 { margin-right: 12px; }
+.vocab.vocab-sentences ruby.rb-m-14 { margin-right: 14px; }
+.vocab.vocab-sentences ruby.rb-m-16 { margin-right: 16px; }
+.vocab.vocab-sentences ruby.rb-m-18 { margin-right: 18px; }
+.vocab.vocab-sentences ruby.rb-m-20 { margin-right: 20px; }
+.vocab.vocab-sentences ruby.rb-m-22 { margin-right: 22px; }
+.vocab.vocab-sentences ruby.rb-m-24 { margin-right: 24px; }
+.vocab.vocab-sentences ruby.rb-m-26 { margin-right: 26px; }
+.vocab.vocab-sentences ruby.rb-m-28 { margin-right: 28px; }
+.vocab.vocab-sentences ruby.rb-m-30 { margin-right: 30px; }
+.vocab.vocab-sentences ruby.rb-m-32 { margin-right: 32px; }
+.vocab.vocab-sentences ruby.rb-m-34 { margin-right: 34px; }
+.vocab.vocab-sentences ruby.rb-m-36 { margin-right: 36px; }
+.vocab.vocab-sentences ruby.rb-m-38 { margin-right: 38px; }
+.vocab.vocab-sentences ruby.rb-m-40 { margin-right: 40px; }
 
 /* Romaji reveal: click (or tap) the Japanese word/sentence itself -- not
    hover, unlike the per-kana reading layer below (.kr) -- to see its romaji

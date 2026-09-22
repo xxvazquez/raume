@@ -121,6 +121,43 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         : plain(seg.text);
     }).join('');
   }
+  // Sentence tables set furigana the way printed Japanese does: consecutive
+  // kanji share one reading (三十三歳 over さんじゅうさんさい, not four
+  // squeezed ones), and the reading starts exactly where its kanji start --
+  // never left of them -- without widening them (css/site.css): a longer
+  // reading runs on to the right over the next kana instead of pushing a gap
+  // into the sentence (父と母と弟と私 used to read 弟　と). It may run over
+  // every plain kana up to the next kanji's reading, less a 3px gap, so two
+  // readings never meet; only what's left over becomes space after the
+  // kanji (rb-m-N, N px, 2px steps -- no inline style under the CSP). CJK glyphs are exactly 1em, so the
+  // widths are exact from character counts at the sentence size (16px kanji,
+  // 11px furigana).
+  var SENT_KANJI_PX = 16, SENT_RT_PX = 11, SENT_READING_GAP = 3, SENT_MAX_MARGIN = 40;
+  function jpSentenceSegments(segments) {
+    var groups = [];
+    segments.forEach(function (seg) {
+      var last = groups[groups.length - 1];
+      if (seg.kanji && last && last.kanji) { last.kanji += seg.kanji; last.reading += seg.reading; }
+      else groups.push(seg.kanji ? { kanji: seg.kanji, reading: seg.reading } : seg);
+    });
+    // Plain kana (and particles) between a kanji group and the next one --
+    // the room its reading may run into. Nothing after it: the line's end.
+    function roomAfter(i) {
+      var chars = 0;
+      for (var j = i + 1; j < groups.length; j++) {
+        if (groups[j].kanji) return chars * SENT_KANJI_PX - SENT_READING_GAP;
+        chars += String(groups[j].text || groups[j].p || '').length;
+      }
+      return Infinity;
+    }
+    return groups.map(function (seg, i) {
+      if (!seg.kanji) return jpSegments([seg], true);
+      var over = seg.reading.length * SENT_RT_PX - seg.kanji.length * SENT_KANJI_PX;
+      var margin = Math.min(SENT_MAX_MARGIN, Math.ceil(Math.max(0, over - Math.max(0, roomAfter(i))) / 2) * 2);
+      return '<ruby' + (margin ? ' class="rb-m-' + margin + '"' : '') + '><rb class="jpmain">' + esc(seg.kanji) +
+        '</rb><rt class="furigana">' + esc(seg.reading) + '</rt></ruby>';
+    }).join('');
+  }
   // Hidden by default (css/site.css) until js/shared.js confirms the browser
   // actually has a Japanese voice installed -- see RaumeStudy.shared.speech.
   var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
@@ -205,10 +242,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!meta) return '';
     return '<span class="visually-hidden">(' + meta.label + ')</span>';
   }
-  function jpCell(row, romaji) {
+  function jpCell(row, romaji, sentence) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
-    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpSegments(row.jp, true) + '</span>';
+    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + (sentence ? jpSentenceSegments(row.jp) : jpSegments(row.jp, true)) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
@@ -279,9 +316,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Japanese (with a romaji reveal next to the speaker button) + English, two
   // columns, no separate Romaji column. row.irregular is simply absent on a
   // sentence row, so this needs no sentences-specific branch.
-  function wordRow(row) {
+  function wordRow(row, sentence) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
+    return openTag + jpCell(row, row.romaji, sentence) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
@@ -310,9 +347,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function byEnglish(a, b) {
     return vocab.compareCellText(String(a.english || ''), String(b.english || ''), 'asc');
   }
-  function rowsHtmlFor(rows) {
+  function rowsHtmlFor(rows, sentence) {
     return rows.map(function (row) {
-      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row);
+      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row, sentence);
     }).join('\n    ');
   }
   // Column-visibility toggles, identical to the reference toolbar's set
@@ -395,7 +432,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var rows = sentences ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
-      rowsHtml: rowsHtmlFor(rows),
+      rowsHtml: rowsHtmlFor(rows, sentences),
       controls: { addTable: true, print: true },
       sectionClass: 'page-hidden', collapsed: true, defaultSort: !sentences
     });
