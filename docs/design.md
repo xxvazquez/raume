@@ -195,8 +195,9 @@ and Help.
   The table-index dropdown uses the same tile (22px, `.tindex-icon`, tinted from
   the link's `data-tile`), with the entry count trailing the row as a secondary
   value and its category labels in the same 12px grey header voice.
-  The search field is the iOS one — a 36px, 10px-radius fill a shade darker than
-  the grey ground, borderless. Its text is 13.5px everywhere, just under the 14px
+  The search field is the iOS 26 one — a 36px capsule of light glass (the glass
+  fill + blur, a bright top rim and a soft shadow lifting it off the bar), never
+  a grey fill. Its text is 13.5px everywhere, just under the 14px
   rows it searches; the placeholder ends in "…" when the field is narrow. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
