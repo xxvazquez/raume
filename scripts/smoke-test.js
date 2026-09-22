@@ -2422,17 +2422,11 @@ async function main() {
   check("no element relies on an inline style=\"\" attribute here either (blocked by CSP style-src)", document.querySelectorAll("#fcPanelCrosswords [style]").length === 0);
   check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
-  check("Style/Script/Words start collapsed behind \"More options\" -- only Source shows by default, not five rows at once", (() => {
-    const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-xw-pick-label")].map(l => l.textContent);
-    return labels.includes("Source") && !labels.includes("Style") && !labels.includes("Script") && !labels.includes("Words")
-      && !!document.getElementById("fcXwMoreToggle");
-  })());
-  document.getElementById("fcXwMoreToggle").click();
-  check("tapping \"More options\" reveals Style/Script/Words as compact picker rows -- a native select behind each, no segmented controls", (() => {
+  check("Source / Style / Script / Words are all in view as compact picker rows -- a native select behind each, no segmented controls, no \"More options\" disclosure", (() => {
     const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-xw-pick-label")].map(l => l.textContent);
     return labels.includes("Source") && labels.includes("Style") && labels.includes("Script") && labels.includes("Words")
       && document.querySelectorAll("#fcPanelCrosswords .fc-xw-pick-select").length === 4
-      && !document.querySelector("#fcPanelCrosswords .fc-manage-filters");
+      && !document.querySelector("#fcPanelCrosswords .fc-manage-filters") && !document.getElementById("fcXwMoreToggle");
   })());
   check("the toolbar is New puzzle (tinted) + Check (filled) + a ⋯ menu holding Reveal a letter / Reveal puzzle / Clear answers / Print -- no row of unlabeled icon buttons", (() => {
     const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");

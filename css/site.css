@@ -2589,6 +2589,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-xw-pick:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 6px; }
 .fc-xw-updown { flex: none; }
+/* One line each: the label never wraps, a long value ("Kitchen Tools &
+   Appliances, Drinks") truncates instead of stacking. */
+.fc-xw-pick-label { flex: none; white-space: nowrap; }
+.fc-xw-value-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fc-xw-field-value { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-nav); min-width: 0; text-align: right; }
 .fc-xw-chevron { flex: none; transition: transform .15s ease; }
 .fc-xw-field-btn[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }

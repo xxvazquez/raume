@@ -337,7 +337,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], moreOpen: false, tablesOpen: false, mode: "crossword", script: "romaji", size: 12, puzzle: null, poolCount: 0 };
+  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 12, puzzle: null, poolCount: 0 };
 
   function rerender() { S.render(); }
 
@@ -387,7 +387,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }).join("");
     return '<div class="fc-settings-field fc-xw-field"><label class="fc-xw-pick">' +
       '<span class="fc-xw-pick-label">' + esc(label) + "</span>" +
-      '<span class="fc-xw-field-value">' + esc(currentText) + UPDOWN_ICON + "</span>" +
+      '<span class="fc-xw-field-value"><span class="fc-xw-value-text">' + esc(currentText) + "</span>" + UPDOWN_ICON + "</span>" +
       '<select class="fc-xw-pick-select" data-pick="' + name + '">' + opts + "</select></label></div>";
   }
 
@@ -427,26 +427,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function tableFieldRowHtml() {
     return '<div class="fc-settings-field fc-xw-field">' +
       '<button type="button" class="fc-settings-field-row fc-xw-field-row fc-xw-field-btn" id="fcXwTablesToggle" aria-expanded="' + state.tablesOpen + '" aria-controls="fcXwTablePicker">' +
-      '<span class="fc-xw-pick-label">Tables</span><span class="fc-xw-field-value">' + esc(tablesSummary()) + CHEVRON_ICON + "</span></button>" +
+      '<span class="fc-xw-pick-label">Tables</span><span class="fc-xw-field-value"><span class="fc-xw-value-text">' + esc(tablesSummary()) + "</span>" + CHEVRON_ICON + "</span></button>" +
       (state.tablesOpen ? tableChecklistHtml() : "") +
       "</div>";
   }
-  function moreSummary() {
-    var styleLabel = MODE_OPTS.filter(function (o) { return o[0] === state.mode; })[0][1];
-    var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
-    return styleLabel + " · " + scriptLabel + " · " + state.size + " words";
-  }
-  // Style/Script/Words collapse behind this one row by default -- Source
-  // (and Table, when it's showing) are the decisions worth a look every
-  // time; the rest are set-once-and-forget, so showing all of them open
-  // was three rows of a settings card nobody was reading most sessions.
-  function moreToggleRowHtml() {
-    return '<div class="fc-settings-field fc-xw-field">' +
-      '<button type="button" class="fc-settings-field-row fc-xw-field-row fc-xw-field-btn" id="fcXwMoreToggle" aria-expanded="' + state.moreOpen + '">' +
-      '<span class="fc-xw-pick-label">More options</span>' +
-      '<span class="fc-xw-field-value">' + (state.moreOpen ? "" : esc(moreSummary())) + CHEVRON_ICON + "</span></button></div>";
-  }
-
   function arrowIcon(dir) {
     return dir === "down"
       ? '<svg class="fc-xw-arrow-svg" width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v11M4.5 10l4.5 4.5L13.5 10"/></svg>'
@@ -689,16 +673,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // One inset-grouped card of 44px rows, iOS Settings-style: Source (and
-  // Table, when it applies), then Style / Script / Words behind More options.
+  // Tables, when it applies), Style, Script, Words -- all in view; at 44px a
+  // row is cheaper than a "More options" disclosure hiding three of them.
   function configCardHtml() {
     var rows = pickerRow("source", "Source", SOURCE_OPTS, state.source);
     if (state.source === "table") rows += tableFieldRowHtml();
-    rows += moreToggleRowHtml();
-    if (state.moreOpen) {
-      rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
-      rows += pickerRow("script", "Script", SCRIPT_OPTS, state.script);
-      rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
-    }
+    rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
+    rows += pickerRow("script", "Script", SCRIPT_OPTS, state.script);
+    rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
     return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
   }
 
@@ -735,8 +717,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         rerender();
       });
     });
-    var moreToggle = document.getElementById("fcXwMoreToggle");
-    if (moreToggle) moreToggle.addEventListener("click", function () { state.moreOpen = !state.moreOpen; rerender(); });
     var tablesToggle = document.getElementById("fcXwTablesToggle");
     if (tablesToggle) tablesToggle.addEventListener("click", function () { state.tablesOpen = !state.tablesOpen; rerender(); });
     panel.querySelectorAll("#fcXwTablePicker input[type=checkbox]").forEach(function (cb) {

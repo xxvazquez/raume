@@ -204,9 +204,9 @@ loanword that just echoes its English (*cola* → コーラ).
 - Settings are compact iOS rows: tap one to pick from the native list.
 - **Source** — *Flashcards* (added, unpaused words) or *Tables*: one or more
   vocabulary tables, whether or not they're in flashcards.
-- **More options** — *Crossword* (numbered clue list) or *Arroword* (each clue
-  in a square before its answer); script *Romaji* (default), *Japanese*,
-  *Hiragana* or *Katakana*; 8–20 words. Answers are always readings — kanji is
+- **Style** — *Crossword* (numbered clue list) or *Arroword* (each clue
+  in a square before its answer). **Script** — *Romaji* (default), *Japanese*,
+  *Hiragana* or *Katakana*. **Words** — 8–20. Answers are always readings — kanji is
   never shown or typed.
 - **Solving** — tap a square or a clue and type. Typing follows the word's
   direction; tap a crossing square again to switch. The bar above the grid

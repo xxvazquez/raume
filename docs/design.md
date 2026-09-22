@@ -590,7 +590,7 @@ with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
 **Puzzles**: settings are one inset-grouped card of 44px rows (Source,
-Tables, More options → Style / Script / Words). Each choice is an iOS pop-up
+Tables, Style, Script, Words — all in view; no disclosure row). Each choice is an iOS pop-up
 row — label left, value + ⌃⌄ in secondary grey right — with an invisible
 native `<select>` over the row, so a tap opens the platform picker; no
 segmented control per setting. The table list inside is checkmark rows. The toolbar is the
