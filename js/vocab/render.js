@@ -596,7 +596,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // came and went as tables opened, shoving the page down): a list glyph,
     // plus -- where there's room -- the name of the table you're in.
     return '<button type="button" class="tindex-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
-      TINDEX_ICON + '<span class="tindex-trigger-label">Tables</span>' + CHEVRON_ICON + '</button>' +
+      TINDEX_ICON + '<span class="tindex-trigger-label">Tables</span><span class="tindex-trigger-short" aria-hidden="true">Tables</span>' + CHEVRON_ICON + '</button>' +
       '<div class="tindex-menu" id="tindexMenu" hidden>' +
       // Decorative only -- a native bottom-sheet grab handle, shown by CSS
       // only in the mobile bottom-sheet layout (desktop's dropdown has

@@ -477,6 +477,19 @@ body {
 :root:not([data-theme-choice="light"]):not([data-theme-choice="dark"]) .theme-toggle .theme-icon-system { display: block; }
 :root[data-theme-choice="light"] .theme-toggle .theme-icon-light { display: block; }
 :root[data-theme-choice="dark"] .theme-toggle .theme-icon-dark { display: block; }
+/* Words under the glyphs wherever there's no hover to reveal a tooltip (a
+   phone, a tablet) -- a bare sliders or monitor glyph is guesswork on touch.
+   Same icon-over-caption shape as the tab bar; Theme names the mode it's in. */
+.masthead-cap { display: none; }
+@media (hover: none), (max-width: 640px) {
+  .theme-toggle, .masthead-gear { flex-direction: column; gap: 3px; width: auto; min-width: 52px; height: 50px; border-radius: 12px; }
+  .masthead-cap { display: block; font: 400 10px/1 var(--font-ui); letter-spacing: .01em; color: inherit; }
+  .theme-toggle .masthead-cap { display: none; }
+  :root:not([data-theme-choice="light"]):not([data-theme-choice="dark"]) .theme-toggle .theme-cap-system,
+  :root[data-theme-choice="light"] .theme-toggle .theme-cap-light,
+  :root[data-theme-choice="dark"] .theme-toggle .theme-cap-dark { display: block; }
+  .masthead-account-dot { top: 5px; right: calc(50% - 15px); }
+}
 
 /* --- Horizontal navigation --------------------------------------- */
 /* Five short items -- padding/font tighten at <=640px (below) so they still
@@ -540,7 +553,7 @@ body {
    it used to be its own row above the bar that appeared only once a table
    was open, shoving the page down on every open/close, and scrolled away
    just when you wanted it. Always there now, always reachable. */
-.table-index { position: relative; flex: 0 1 auto; min-width: 0; }
+.table-index { position: relative; flex: 0 0 auto; }
 .table-index.search-hidden { display: none; }
 .tindex-trigger {
   appearance: none;
@@ -559,6 +572,7 @@ body {
   cursor: pointer;
 }
 .tindex-trigger-icon { flex: 0 0 auto; }
+.tindex-trigger-short { display: none; }
 .tindex-trigger:hover { opacity: .7; }
 .tindex-trigger:active { opacity: .5; }
 .tindex-trigger-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -758,6 +772,8 @@ body {
   font: 400 var(--fs-english)/1 var(--font-ui);
 }
 .search-box input::placeholder { color: var(--faint); }
+/* A narrow field ends the placeholder in "…" rather than slicing a letter. */
+.search-box input { text-overflow: ellipsis; }
 /* .clear-search is the only clear affordance -- suppress the browser's native
    one so a type="search" field doesn't show two side by side. */
 .search-box input[type="search"]::-webkit-search-cancel-button { display: none; }
@@ -878,6 +894,12 @@ body { --switch-on: var(--section-strong); }
 }
 .opt-row:hover { background-color: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
 .opt-action { color: var(--section-strong); padding-right: 16px; }
+/* What the row icons mean -- a phone has no hover tooltip, so the one sheet
+   of reading settings also spells out the small glyphs down each row.
+   Read-only rows: glyph in secondary grey, then the words. */
+.opt-legend { gap: 12px; padding-right: 16px; cursor: default; font-size: var(--fs-small); line-height: 1.35; }
+.opt-legend:hover { background-color: transparent; }
+.opt-legend svg { flex: none; color: var(--muted); }
 /* iOS switch at the trailing edge: track + thumb drawn on the row, filled with
    the section tone when on (aria-pressed / .active). */
 .opt-switch::before {
@@ -904,10 +926,15 @@ body { --switch-on: var(--section-strong); }
 .opt-foot { padding: 0 16px; }
 .opt-foot > :not([hidden]) { display: flex; margin-top: 12px; }
 @media (max-width: 640px) {
-  .options-btn-label { display: none; }
-  /* Glyph only on a phone, same as Options beside it. */
-  .tindex-trigger { min-width: 44px; justify-content: center; padding: 0 8px; }
-  .tindex-trigger-label, .tindex-trigger svg:last-child { display: none; }
+  .vocab-bar { gap: 14px; }
+  .options-btn { padding: 0; min-width: 0; }
+  .options-btn svg { display: none; }
+  .options-dot { left: auto; right: -2px; top: 7px; }
+  /* A phone has no hover to explain a glyph, so both bar buttons are words
+     -- iOS text bar buttons, "Tables" and "Options". */
+  .tindex-trigger { min-width: 0; justify-content: center; padding: 0; }
+  .tindex-trigger svg, .tindex-trigger-label { display: none; }
+  .tindex-trigger-short { display: inline; }
   .options-scrim:not([hidden]) {
     display: block; position: fixed; inset: 0; z-index: 59;
     background: color-mix(in srgb, var(--ink) 38%, transparent);
@@ -2910,10 +2937,13 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    next to it needed, truncating longer titles ("Kitchen Tools &
    Appliances", "Washing Machine & Dryer") well before the row ran out of
    real room. Icon-only frees that back for the name instead. */
+.fc-btn-tx-short { display: none; }
+/* ...but as a short word ("Pause"), not a bare icon: a phone has no hover
+   to explain a glyph. */
 @media (max-width: 560px) {
-  .fc-manage-table-actions .fc-btn-tableaction { padding: 5px 8px; }
+  .fc-manage-table-actions .fc-btn-tableaction { padding: 5px 10px; }
   .fc-manage-table-actions .fc-btn-tx { display: none; }
-  .fc-manage-table-actions .fc-btn-ic { display: block; }
+  .fc-manage-table-actions .fc-btn-tx-short { display: inline; }
 }
 /* Category-wide "Add all", sitting just under the category summary. */
 .fc-manage-cat-actions { margin: 4px 0 14px; }
@@ -2950,12 +2980,11 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-btn-vocabaction[data-action="add"]:focus-visible {
   background: var(--accent-soft); color: var(--accent-dark);
 }
-/* Phone: drop the button labels (icon only) and the separate romaji column, so
-   each row stays one tight line -- kanji + English + a compact action. */
+/* Phone: drop the separate romaji column so each row stays one tight line --
+   kanji + English + the action, which keeps its one-word label (Add / Pause
+   / Restore) rather than shrinking to an unexplained icon. */
 @media (max-width: 560px) {
-  .fc-manage-row .fc-btn-vocabaction { padding: 5px 7px; }
-  .fc-manage-row .fc-btn-vocabaction .fc-btn-tx { display: none; }
-  .fc-manage-row .fc-btn-vocabaction .fc-btn-ic { display: block; }
+  .fc-manage-row .fc-btn-vocabaction { padding: 5px 8px; }
   .fc-manage-word .fc-ro { display: none; }
 }
 .fc-empty { padding: 24px 16px; color: var(--muted); text-align: center; }

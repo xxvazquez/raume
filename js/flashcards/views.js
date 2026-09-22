@@ -37,28 +37,29 @@ window.RaumeStudy.flashcards.views = (function () {
   // the vocab modules since it's a tiny, self-contained bit of markup.
   var CHEVRON_ICON = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
 
-  // The per-table Manage actions. Each button carries both a text label and an
-  // icon; CSS drops the label to icon-only on a narrow screen when a table
-  // shows two of them, so they never wrap onto their own row.
+  // The per-table Manage actions. Each carries a full label ("Pause table")
+  // and a short one ("Pause") -- a phone shows the short word, never a bare
+  // icon (no hover there to explain one), and it still leaves the table
+  // name room. The icon stays in the markup for anything that wants it.
   var SVG_OPEN = '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
   var TABLE_ACTIONS = {
     "add-table": {
-      label: "Add table",
+      label: "Add table", short: "Add",
       title: "Adds every word in this table to your flashcards (skips any row you’ve hidden on the vocabulary page)",
       icon: SVG_OPEN + '<path d="M9 4v10M4 9h10"/></svg>'
     },
     "remove-table": {
-      label: "Pause table",
+      label: "Pause table", short: "Pause",
       title: "Pause the whole table — its cards keep every bit of their progress and drop out of review until you resume it",
       icon: SVG_OPEN + '<path d="M6 4v10M12 4v10"/></svg>'
     },
     "resume-table": {
-      label: "Resume table",
+      label: "Resume table", short: "Resume",
       title: "Resume this table — every card picks up its own progress exactly where it left off",
       icon: SVG_OPEN + '<path d="M3 9a6 6 0 1 1 1.8 4.3M3 13V9h4"/></svg>'
     },
     "restore-table": {
-      label: "Restore table",
+      label: "Restore table", short: "Restore",
       title: "Un-pause every individually paused word in this table, progress intact",
       icon: SVG_OPEN + '<path d="M3 9a6 6 0 1 1 1.8 4.3M3 13V9h4"/></svg>'
     }
@@ -68,7 +69,8 @@ window.RaumeStudy.flashcards.views = (function () {
     return '<button type="button" class="fc-btn fc-btn-tableaction" data-table-action="' + action +
       '" data-table-id="' + tableId + '" title="' + esc(a.title) + '" aria-label="' + esc(a.label) + '">' +
       '<span class="fc-btn-ic" aria-hidden="true">' + a.icon + '</span>' +
-      '<span class="fc-btn-tx">' + a.label + '</span></button>';
+      '<span class="fc-btn-tx">' + a.label + '</span>' +
+      '<span class="fc-btn-tx-short" aria-hidden="true">' + a.short + '</span></button>';
   }
 
   function renderHelp(panel) {

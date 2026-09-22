@@ -70,6 +70,7 @@ row. Grammatical **particles are blue and bold** everywhere.
   - **Show polite** switches verbs to 〜ます. It only appears while the
     Verbs table is open.
   - **Expand all**, **Print** and a legend for any badges on screen.
+  - **Row icons** — what the small speaker, hide, + and ⋯ glyphs on each row do.
 - **Furigana** is always shown, with an 11px minimum size.
 - **Katakana reading** — hover or tap any katakana to see its romaji above it.
 - **Pronunciation** — the speaker icon plays a native-voice clip.
@@ -123,6 +124,10 @@ flashcard directions. Changes save immediately and sync when signed in.
   the whole reference (both in Options). Collapsed tables still print.
 - **Theme** — cycles **System → Light → Dark**, applied before first paint.
 - **Help** — the masthead **?** (Flashcards has its own Help tab).
+- **On a phone or tablet** the masthead icons carry captions (Account, Help,
+  Customize, and the current theme), the search bar's buttons read **Tables**
+  and **Options**, and Manage's buttons keep a one-word label — nothing relies
+  on hover to explain itself.
 - **Sign-in dot** on the person icon: **green** means everything is synced.
   **Amber** means you're offline or a change hasn't reached your account yet.
   Hover it for details.

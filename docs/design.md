@@ -251,7 +251,15 @@ and Help.
 - **Masthead and nav are one bar** on `--paper`, closed by a single row hairline
   (no rule above the nav). The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
-  targets: no box, no outline. The page a glyph opens (Customize, Help) shows
+  targets: no box, no outline. Where there's no hover (a phone, a tablet —
+  `(hover: none), (max-width: 640px)`) each glyph gets a 10px caption under it,
+  tab-bar style — Account / Help / Customize / the current theme (Auto / Light /
+  Dark) — since a tooltip can't explain it there. **The rule app-wide: no
+  unexplained icon-only control on touch.** The sticky bar's Tables / Options
+  become text bar buttons on a phone; Manage's buttons keep a one-word label
+  (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are
+  spelled out in the Options sheet's **Row icons** group. Standard iOS glyphs
+  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
   amber when offline or something's queued, the glyph tinting to match). The
