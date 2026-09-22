@@ -218,6 +218,14 @@
   --fs-small: 13px;
   --fs-micro: 11.5px;
   --fs-subhead: 15px; /* card / section sub-headings inside Flashcards */
+  /* A card/section heading that sits directly above a text input -- every
+     text input is forced to 16px on a touch screen (the shared rule further
+     down) so iOS/WebKit doesn't zoom the page on focus, which left a
+     --fs-subhead (15px) heading reading smaller than the field under it.
+     Its own token, not a bump to --fs-subhead itself, since that also sizes
+     non-heading content (the flashcard review card's answer text) that has
+     nothing to do with this. */
+  --fs-card-heading: 17px;
 
   /* One sans family everywhere -- wordmark, titles, navigation, tables,
      controls. No serif. Japanese keeps its own CJK stack (td.jp / .furigana). */
@@ -1510,16 +1518,13 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
   border-radius: 12px;
   background: var(--paper); padding: 16px 16px 18px; margin-bottom: 12px;
 }
-/* 17px, not --fs-subhead (15px) -- a touch-screen text input right under
-   this heading (.cv-owned-search, below) is forced to 16px so iOS Safari
-   doesn't zoom the page on focus (see the shared input rule further down),
-   which left the heading reading smaller than the field under it. 17px
-   keeps the heading clearly the bigger of the two again. Scoped to this
-   card family, not the shared token -- --fs-subhead also sizes the
-   flashcard review card's answer text, which this isn't about. */
+/* --fs-card-heading, not --fs-subhead -- a touch-screen text input right
+   under this heading (.cv-owned-search, below) is forced to 16px, which
+   left a --fs-subhead (15px) heading reading smaller than the field under
+   it. See --fs-card-heading's own comment in the type scale. */
 .cv-card h3, .cv-card-summary {
   display: flex; align-items: center; gap: 8px;
-  margin: 0 0 12px; font-size: 17px; font-weight: 500; color: var(--ink);
+  margin: 0 0 12px; font-size: var(--fs-card-heading); font-weight: 500; color: var(--ink);
 }
 /* The three action cards (Add a word / New table / Import a list) are
    <details>, collapsed by default except Add a word -- occasional actions
@@ -3123,7 +3128,10 @@ mark.fc-diff-co {
 .fc-entry-grid > .fc-entry-card:first-child { background: var(--accent-soft); }
 /* A tinted button on a tinted card would vanish -- it takes the white fill. */
 .fc-entry-grid > .fc-entry-card:first-child .fc-btn { background: var(--paper); }
-.fc-entry-card h3 { margin: 0 0 6px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
+/* --fs-card-heading, not --fs-subhead -- the email/password fields in
+   .fc-auth below (and the recovery card's) are forced to 16px on a touch
+   screen; see --fs-card-heading's own comment in the type scale. */
+.fc-entry-card h3 { margin: 0 0 6px; color: var(--ink); font-size: var(--fs-card-heading); font-weight: 500; }
 .fc-entry-card .fc-note { margin: 0 0 16px; font-size: var(--fs-nav-sub); color: var(--muted); }
 .fc-entry-card .fc-btn { width: 100%; min-height: 34px; padding: 7px 18px; font-size: var(--fs-small); }
 .fc-entry-card .fc-auth { max-width: none; margin: 0; }
@@ -3193,7 +3201,10 @@ mark.fc-diff-co {
 
 /* Settings */
 .fc-settings-section { background: var(--paper); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
-.fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-subhead); color: var(--ink); font-weight: 500; }
+/* --fs-card-heading, not --fs-subhead -- the number fields below
+   (.fc-settings-field input[type="number"]) are forced to 16px on a touch
+   screen; see --fs-card-heading's own comment in the type scale. */
+.fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-card-heading); color: var(--ink); font-weight: 500; }
 /* Explanatory prose under a heading/control shouldn't compete with it -- a
    true caption size + the tertiary (--faint) tone, not the --muted/--fs-small
    pairing .fc-note uses elsewhere (dashboard status lines, auth notices),

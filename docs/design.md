@@ -17,9 +17,15 @@ system, and the sections below cover each part of it.
 - Hierarchy comes from size, spacing, position, and colour — **not** bold weight
   or high contrast. Default weight is 400; 500 marks a genuinely active or
   labelled state. One type scale (`--fs-*` tokens: `--fs-micro` 11.5 · `--fs-small`
-  13 · `--fs-english` 13.5 · `--fs-nav` 14 · `--fs-subhead` 15 · `--fs-section-title`
-  19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji` for the Japanese text
-  itself) is shared by the reference and Flashcards sides — a size that
+  13 · `--fs-english` 13.5 · `--fs-nav` 14 · `--fs-subhead` 15 · `--fs-card-heading`
+  17 (a card/section heading sitting directly above a text input — every
+  input is forced to 16px on a touch screen so iOS/WebKit doesn't zoom the
+  page on focus, so a heading right above one needs its own size to stay the
+  bigger of the two; `--fs-subhead` alone also sizes non-heading content like
+  the flashcard review card's answer text, so it can't just move) ·
+  `--fs-section-title` 19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji`
+  for the Japanese text itself) is shared by the reference and Flashcards
+  sides — a size that
   duplicates a token is written as the token. Labels are **sentence case**;
   the one ALL-CAPS label left is the masthead's `JAPANESE REFERENCE` kicker
   (tracked wide, a brand mark rather than a label). Deliberate literal sizes
@@ -462,15 +468,16 @@ and Help.
     shrink under 640px, clawing back most of what it took from the name
     field rather than letting names truncate more than before.
   - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, a
-    sentence-case `<summary>` at 17px/500 — its own size, not the shared
-    `--fs-subhead` (15px): a touch-screen text field under it (`.cv-owned-search`,
-    next bullet) is forced to 16px so iOS Safari doesn't zoom on focus, which
-    left the heading reading smaller than the field under it) all start
+    sentence-case `<summary>` at `--fs-card-heading` (17px/500) — see that
+    token's own note above; a touch-screen text field under it
+    (`.cv-owned-search`, next bullet, plus `.cv-owned-sort-select` beside it)
+    is fixed at 36px tall like `.search-box`'s own field, so the 16px floor
+    doesn't grow the control's height along with its text) all start
     closed. Forms are label-over-field with filled, unbordered fields; the
     parsed-ruby preview and the import result sit on `--surface`, an error on
     `--wrong-soft`; the buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
-  - **Words you've added** is one non-collapsible card (same 17px heading as
-    above) holding a search field + a Recently added/A–Z sort
+  - **Words you've added** is one non-collapsible card (same `--fs-card-heading`
+    heading as above) holding a search field + a Recently added/A–Z sort
     (`.cv-owned-controls`, filters and reorders via a plain DOM swap in
     `updateOwnedList()` — no full re-render, so the search input never loses
     focus mid-keystroke), then one `<details>` per
