@@ -1081,13 +1081,22 @@ body.selftest-mode .selftest-hint { display: block; }
   background: var(--group-ground);
   border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
 }
-/* Tables and Options share one capsule beside the search field -- iOS 26
-   groups related bar buttons in a single pill -- a plain white capsule
-   like the search field itself (no shadow, no glass: Laura, 2026-09-23),
-   a hairline between the two words. */
+/* Tables and Options share one glass capsule beside the search field --
+   iOS 26 groups related bar buttons in a single pill -- the same height,
+   glass and shadow as the search capsule, a hairline between the two
+   words. The glass is a ::before layer, not the capsule itself: the Tables
+   bottom sheet (position: fixed) lives inside it, and backdrop-filter would
+   make the capsule its containing block. */
 .bar-capsule {
   position: relative; flex: 0 0 auto; display: flex; align-items: center;
-  height: 36px; border-radius: 999px; background: var(--paper);
+  height: 36px; border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(24, 24, 40, .08), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
+.bar-capsule::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 .bar-capsule .tindex-trigger, .bar-capsule .options-btn { height: 36px; border-radius: 999px; }
 .bar-capsule .table-index:not(.search-hidden) + .options-btn {
