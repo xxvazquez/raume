@@ -2309,15 +2309,22 @@ async function main() {
   check("romaji folding takes the first alternative, drops a counter's ~, folds macrons, and strips everything but a-z",
     xw.foldRomajiForGrid("kōhī") === "kohi" && xw.foldRomajiForGrid("kaeru / kaerimasu") === "kaeru"
     && xw.foldRomajiForGrid("~hon") === "hon" && xw.foldRomajiForGrid("O-namae wa?") === "onamaewa");
-  check("the improved placement algorithm (multi-pass retries, best of several shuffles) reliably places most of a realistic word set, not just a token few", (() => {
+  check("given a whole pool and a size, the builder swaps in words that cross until it reaches that size -- not a pre-picked handful that mostly doesn't", (() => {
     const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
-    const pool = xw.tableWordPool([biggest.id]).slice(0, 14);
-    if (pool.length < 10) return false; // the largest table should comfortably clear this
-    const grid = xw.buildGrid(pool, false);
-    return grid.placements.length >= Math.ceil(pool.length * 0.6);
+    const pool = xw.tableWordPool([biggest.id]).filter(w => w.romaji).map(w => ({ id: w.id, clue: w.clue, answer: w.romaji }));
+    if (pool.length < 30) return false; // the largest table should comfortably clear this
+    return [0, 1, 2].every(() => xw.buildGrid(pool, false, 12).placements.length === 12);
   })());
+  check("a clue that gives its answer away is dropped: the answer written in the clue, or a loanword whose English is the word",
+    xw.isGiveaway("さけ", "sake", "Japanese sake") && xw.isGiveaway("コーラ", "kora", "cola")
+    && xw.isGiveaway("コーヒー", "kohi", "coffee") && xw.isGiveaway("ジュース", "jusu", "juice")
+    && xw.isGiveaway("ビール", "biru", "beer") && xw.isGiveaway("フォーク", "foku", "fork") && xw.isGiveaway("ソース", "sosu", "sauce")
+    && xw.isGiveaway("トイレットペーパー", "toirettopepa", "toilet paper") && !xw.isGiveaway("キャベツ", "kyabetsu", "cabbage")
+    && !xw.isGiveaway("こうちゃ", "kocha", "black tea") && !xw.isGiveaway("みず", "mizu", "water")
+    && !xw.isGiveaway("ナイフ", "naifu", "fork"));
   check("the word pool only ever offers pure kana, 2-10 characters, deduplicated by reading", (() => {
-    const pool = xw.wordPool();
+    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    const pool = xw.tableWordPool([biggest.id]);
     const seen = new Set();
     return pool.length > 0 && pool.every(w => {
       if (seen.has(w.answer)) return false;
@@ -2354,18 +2361,34 @@ async function main() {
     });
   })());
 
+  // Too few words: no grid, a line saying why. ビール/コーヒー/コーラ/ジュース
+  // are all loanwords whose English is the answer, so they don't count.
+  const xwCache = window.RaumeStudy.flashcards.store.getCache();
+  const xwCardsBefore = Object.keys(xwCache.cards);
+  const xwActiveBefore = Object.keys(xwCache.cards).filter(id => xwCache.cards[id].active);
+  xwActiveBefore.forEach(id => { xwCache.cards[id].active = false; });
+  await window.RaumeStudy.flashcards.dataOps.addVocabs(["v0007", "v0009", "v0010", "v0012"]);
+  xw.state.puzzle = null;
+  window.RaumeStudy.flashcards.render();
+  document.querySelector('.fc-tab[data-tab="crosswords"]').click();
+  check("with fewer than 6 usable words the tab explains itself instead of showing a tiny grid",
+    !document.querySelector("#fcPanelCrosswords .fc-xw-grid")
+    && /at least 6 usable words/.test(document.querySelector("#fcPanelCrosswords .fc-xw-footnote").textContent));
+  xwActiveBefore.forEach(id => { xwCache.cards[id].active = true; });
+
   // Guaranteed pool for the UI checks below, independent of whatever earlier
-  // sections left active -- ビール/コーヒー/コーラ/ジュース are plain katakana,
-  // no kanji, well inside the 2-10 character window wordPool() accepts.
+  // sections left active -- every word of the Vegetables table (plenty of
+  // kana-only readings that cross in romaji).
   // Snapshot first and restore after: a later section (guest-mode's
   // in-memory fallback) asserts an exact "Total cards" count from the
   // earlier fixture, so these extra cards can't be left in the deck.
-  const xwCache = window.RaumeStudy.flashcards.store.getCache();
-  const xwCardsBefore = Object.keys(xwCache.cards);
-  await window.RaumeStudy.flashcards.dataOps.addVocabs(["v0007", "v0009", "v0010", "v0012"]);
+  const xwVeg = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Vegetables");
+  await window.RaumeStudy.flashcards.dataOps.addVocabs(xw.tableWordPool([xwVeg.id]).map(w => w.id));
+  xw.state.puzzle = null;
   window.RaumeStudy.flashcards.render();
   document.querySelector('.fc-tab[data-tab="crosswords"]').click();
-  check("the Puzzles tab renders a puzzle once there are enough flashcard words", !!document.querySelector("#fcPanelCrosswords .fc-xw-grid"));
+  check("the Puzzles tab renders a puzzle once there are enough flashcard words -- never fewer than 6 of them",
+    !!document.querySelector("#fcPanelCrosswords .fc-xw-grid") && xw.state.puzzle.placements.length >= 6);
   check("no element relies on an inline style=\"\" attribute here either (blocked by CSP style-src)", document.querySelectorAll("#fcPanelCrosswords [style]").length === 0);
   check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
@@ -2482,7 +2505,7 @@ async function main() {
       && cb.closest("label").classList.contains("fc-direction-check");
   })());
 
-  const xwOtherTable = window.RaumeStudy.data.vocabularyTables.find(t => t !== xwDefaultTable && xw.tableWordPool([t.id]).length >= 5);
+  const xwOtherTable = window.RaumeStudy.data.vocabularyTables.find(t => t !== xwDefaultTable && xw.tableWordPool([t.id]).filter(w => w.romaji).length >= 20);
   const otherCb = document.querySelector('#fcXwTablePicker input[data-table-id="' + xwOtherTable.id + '"]');
   otherCb.checked = true;
   otherCb.dispatchEvent(new window.Event("change", { bubbles: true }));

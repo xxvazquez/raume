@@ -28,7 +28,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   var KANA_ONLY = /^[ぁ-ゖァ-ー]+$/;
   var MIN_LEN = 2, MAX_LEN = 10;
-  var MIN_POOL = 3;
+  // A grid with fewer crossing words than this isn't a puzzle -- below it
+  // the tab says why instead of showing one.
+  var MIN_WORDS = 6;
   // Same printer glyph as the reference pages' print buttons (js/vocab/
   // render.js's PRINT_ICON) -- print always reads as this icon in raume,
   // never a bare text button.
@@ -58,8 +60,46 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       .replace(/[āâ]/g, "a").replace(/[īî]/g, "i").replace(/[ūû]/g, "u").replace(/[ēê]/g, "e").replace(/[ōô]/g, "o")
       .replace(/[^a-z]/g, "");
   }
+  // A clue that hands over its own answer isn't a clue: "Japanese sake" for
+  // *sake*, or a loanword whose English is the word itself (cola -> コーラ,
+  // coffee -> コーヒー). The second is caught by comparing consonant
+  // skeletons -- English spelling folded the way katakana borrows it (c ->
+  // k/s, l -> r, f/ph -> h, v -> b...), vowels and doubles dropped -- so
+  // "kora"/"cola" and "koohii"/"coffee" both collapse to the same letters.
+  // `dropR` models the other way katakana borrows a closing r: sometimes
+  // sounded (beer -> bīru), sometimes not (fork -> fōku, butter -> batā) --
+  // an English clue is compared both ways.
+  function consonantSkeleton(s, english, dropR) {
+    s = String(s || "").toLowerCase().replace(/[^a-z]/g, "");
+    if (english) {
+      if (dropR) s = s.replace(/r(?![aeiouy])/g, "");
+      s = s.replace(/^kn/, "n").replace(/ph/g, "f").replace(/tch/g, "ch").replace(/th/g, "s").replace(/ck/g, "k")
+        .replace(/c(?=[eiy])/g, "s").replace(/g(?=[eiy])/g, "j").replace(/ch/g, "C").replace(/c/g, "k").replace(/q/g, "k")
+        .replace(/x/g, "ks").replace(/l/g, "r").replace(/v/g, "b").replace(/([aeiou])w/g, "$1");
+    } else {
+      s = s.replace(/([^aeiou])y/g, "$1"); // menyū, kyabetsu: y only palatalises
+    }
+    s = s.replace(/sh/g, "s").replace(/ch/g, "C").replace(/ts/g, "s").replace(/z/g, "s").replace(/f/g, "h");
+    return s.replace(/[aeiou]/g, "").replace(/(.)\1+/g, "$1");
+  }
+  function isGiveaway(reading, romaji, clue) {
+    if (!romaji) return false;
+    var clueLetters = clue.toLowerCase().replace(/[^a-z]/g, "");
+    if (romaji.length >= 3 && clueLetters.indexOf(romaji) !== -1) return true;
+    if (!/^[ァ-ー]+$/.test(reading)) return false; // only a loanword can echo its English
+    var sk = consonantSkeleton(romaji, false);
+    // Same skeleton, or the English running on past it (toilet -> トイレ),
+    // word by word or for the clue as one run (toilet paper).
+    return !!sk && clue.split(/[\s,/()-]+/).concat([clue]).some(function (w) {
+      if (w.length < 3) return false;
+      return [false, true].some(function (dropR) {
+        var ew = consonantSkeleton(w, true, dropR);
+        return !!ew && (ew === sk || (sk.length >= 2 && ew.indexOf(sk) === 0));
+      });
+    });
+  }
   // Turns a list of vocab-index entries into puzzle words: kana reading
-  // only, trimmed to a usable grid length (a counter's leading 〜 is
+  // only, giveaways dropped, trimmed to a usable grid length (a counter's leading 〜 is
   // stripped, same as the romaji answers), deduplicated by reading -- two
   // entries that read the same would just collide on the grid. Each word
   // also carries a romaji spelling when the vocab index considers the row's
@@ -76,8 +116,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       seen[reading] = true;
       var clue = String(entry.englishDisplay || "").split(" / ")[0].trim();
       if (!clue) return;
+      if (isGiveaway(reading, foldRomajiForGrid(entry.romajiDisplay), clue)) return;
       var romaji = entry.romajiUsable ? foldRomajiForGrid(entry.romajiDisplay) : "";
-      if (romaji.length < MIN_LEN || romaji.length > MAX_LEN * 2) romaji = "";
+      if (romaji.length < MIN_LEN + 1 || romaji.length > MAX_LEN * 2) romaji = "";
       pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null });
     });
     return pool;
@@ -150,19 +191,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // first letter is reserved for its clue (never a letter, never shared
   // with another word's clue), folded into the same placement check.
   // -----------------------------------------------------------------------
-  // Tries to place every word, several times over with a fresh shuffle each
-  // time, and keeps whichever attempt placed the most (ties broken by the
-  // smaller grid) -- a single greedy pass left plenty of words that *could*
-  // cross something unplaced just because they were tried too early, before
-  // that something else existed. Cheap at this scale (a couple dozen short
-  // words), and it's the difference between a puzzle with 3 words in it and
-  // one that actually uses most of what was asked for.
-  function buildGrid(words, arroword) {
+  // `words` is every candidate (the whole eligible pool, not a pre-picked
+  // handful) and `limit` how many to place: a word that can't cross gets
+  // swapped for the next one that can, so the grid reaches the size asked
+  // for instead of stopping at whatever happened to share a letter. Several
+  // attempts, each with a fresh shuffle, keep whichever placed the most
+  // (ties broken by the smaller grid). Cheap at this scale -- a few hundred
+  // short words at most.
+  function buildGrid(words, arroword, limit) {
     if (!words.length) return { placements: [], rows: 0, cols: 0, grid: {}, clueCells: {}, numbers: {} };
+    limit = limit || words.length;
     var ATTEMPTS = 8;
     var best = null;
     for (var a = 0; a < ATTEMPTS; a++) {
-      var attempt = buildGridOnce(words, arroword);
+      var attempt = buildGridOnce(words, arroword, limit);
       if (!best || attempt.placements.length > best.placements.length ||
         (attempt.placements.length === best.placements.length && attempt.rows * attempt.cols < best.rows * best.cols)) {
         best = attempt;
@@ -171,8 +213,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return best;
   }
 
-  function buildGridOnce(words, arroword) {
-    var list = shuffle(words).sort(function (a, b) { return b.answer.length - a.answer.length; });
+  function buildGridOnce(words, arroword, limit) {
+    // Shuffled, with the longest of the first `limit` moved to the front as
+    // the backbone -- the rest stay in random order, so a big pool doesn't
+    // always yield the same handful of long words.
+    var list = shuffle(words);
+    var head = list.slice(0, limit), longest = 0;
+    head.forEach(function (w, i) { if (w.answer.length > head[longest].answer.length) longest = i; });
+    list.unshift(list.splice(longest, 1)[0]);
     var grid = {}, clueCells = {}, placements = [];
     function key(r, c) { return r + "," + c; }
 
@@ -213,10 +261,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // has more letters on the board. Stop once a full pass places nothing.
     var remaining = list.slice(1);
     var madeProgress = true;
-    while (madeProgress && remaining.length) {
+    while (madeProgress && remaining.length && placements.length < limit) {
       madeProgress = false;
       var stillRemaining = [];
       remaining.forEach(function (word) {
+        if (placements.length >= limit) return;
         var best = null;
         var cells = Object.keys(grid);
         for (var i = 0; i < word.answer.length; i++) {
@@ -297,7 +346,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // grid (the very first table can be a handful of counters).
     if (state.source === "table" && !state.tables.length) {
       var tables = vocabTables();
-      var roomy = tables.filter(function (t) { return tableWordPool([t.id]).length >= 10; })[0] || tables[0];
+      var roomy = tables.filter(function (t) { return tableWordPool([t.id]).length >= MIN_WORDS * 2; })[0] || tables[0];
       if (roomy) state.tables = [roomy.id];
     }
     var pool = wordPool();
@@ -305,12 +354,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // verb-pair's casual/polite split, say, still isn't one) -- filtered
     // before picking, not after, so "Words" still means what it says.
     var eligible = state.script === "romaji" ? pool.filter(function (w) { return !!w.romaji; }) : pool;
-    state.poolCount = eligible.length;
-    var picked = shuffle(eligible).slice(0, state.size).map(function (w) {
+    // Every eligible word is a candidate; the builder places up to Words of
+    // them. Deduped again on the final answer -- folding to one script or to
+    // romaji can make two readings spell the same.
+    var seen = {};
+    var candidates = eligible.map(function (w) {
       var answer = state.script === "romaji" ? w.romaji : scriptedAnswer(w.answer, state.script);
       return { id: w.id, clue: w.clue, answer: answer };
-    });
-    state.puzzle = buildGrid(picked, state.mode === "arroword");
+    }).filter(function (w) { if (seen[w.answer]) return false; seen[w.answer] = true; return true; });
+    state.poolCount = candidates.length;
+    state.puzzle = buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "A table"]];
@@ -695,17 +748,28 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   function renderCrosswords(panel) {
     if (!panel) return;
-    var pool = wordPool();
-    if (pool.length < MIN_POOL) {
-      var msg = state.source === "table"
-        ? (state.tables.length ? "Not enough short, kana-only words here for a puzzle — add another table." : "Choose a table to build a puzzle from.")
-        : "Add a few more words to flashcards first, or build a puzzle from a table instead.";
-      panel.innerHTML = configCardHtml() + '<p class="fc-xw-footnote">' + msg + "</p>";
+    // Below MIN_WORDS there's no real puzzle to show -- say why, and what
+    // would fix it, instead of a two-word grid.
+    function notEnough(msg, canRetry) {
+      panel.innerHTML = configCardHtml() + '<p class="fc-xw-footnote">' + msg + "</p>" +
+        (canRetry ? '<div class="fc-xw-actions"><button type="button" class="fc-btn" id="fcXwNew">Try again</button></div>' : "");
       bindControls(panel);
+      var retry = document.getElementById("fcXwNew");
+      if (retry) retry.addEventListener("click", function () { generate(); rerender(); });
+    }
+    var more = state.source === "table" ? "add another table" : "add more words to flashcards, or build one from a table";
+    if (!state.puzzle) generate();
+    if (state.poolCount < MIN_WORDS) {
+      notEnough(state.source === "table" && !state.tables.length
+        ? "Choose a table to build a puzzle from."
+        : "A puzzle needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — this has " + state.poolCount : "") + ". To get more, " + more + ".", false);
       return;
     }
-    if (!state.puzzle) generate();
     var p = state.puzzle;
+    if (p.placements.length < MIN_WORDS) {
+      notEnough("These words don’t cross each other enough for a " + MIN_WORDS + "-word puzzle. Try again, or " + more + ".", true);
+      return;
+    }
     var arroword = state.mode === "arroword";
     var romajiMode = state.script === "romaji";
     var placedCount = p.placements.length;
@@ -758,7 +822,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
       buildGrid: buildGrid, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
-      foldRomajiForGrid: foldRomajiForGrid, state: state
+      foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS, state: state
     }
   };
 })();

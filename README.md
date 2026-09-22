@@ -190,7 +190,10 @@ settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, generated fresh each time.
+A fill-in crossword or arroword, generated fresh each time — at least 6
+words, or it tells you why not. Clues that give the answer away are left
+out: the word written in its own clue ("Japanese sake" → *sake*), or a
+loanword that just echoes its English (*cola* → コーラ).
 
 - **Source** — *Flashcards* (added, unpaused words) or *A table*: one or more
   vocabulary tables, whether or not they're in flashcards.
