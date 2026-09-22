@@ -3689,6 +3689,10 @@ mark.fc-diff-co {
 #vocabulary .section-head { position: relative; }
 #vocabulary .section-toggle::after { content: ""; position: absolute; inset: 0; }
 #vocabulary .section-head > .controls { position: relative; z-index: 1; }
+/* Each row's controls are their own z-index:1 layer, so an open ⋯ menu
+   can't rise past the next row's controls on its own -- the row whose menu
+   is open lifts its controls above every other row's. */
+#vocabulary .table-section.menu-open .section-head > .controls { z-index: 70; }
 @media (pointer: coarse), (max-width: 640px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([lang="ja"]), select, textarea { font-size: 16px; }
 }
