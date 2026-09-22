@@ -800,10 +800,13 @@ async function main() {
   const optionsBtn = document.getElementById("optionsBtn");
   const optionsSheet = document.getElementById("optionsSheet");
   const optionsDot = document.getElementById("optionsDot");
-  check("the sticky toolbar's bar holds only the search field and the Options button", (() => {
+  check("the sticky toolbar's bar holds only the search field and one shared capsule of Tables + Options", (() => {
     const bar = document.querySelector(".vocab-toolbar .vocab-bar");
     const kids = [...bar.children].map(c => c.className.split(" ")[0]);
-    return !!bar && kids.includes("search-box") && kids.includes("options-btn") && !bar.querySelector(".view-mode");
+    const cap = bar.querySelector(":scope > .bar-capsule");
+    return !!bar && kids.includes("search-box") && !!cap
+      && !!cap.querySelector(":scope > #tableIndex") && !!cap.querySelector(":scope > .options-btn")
+      && !bar.querySelector(".view-mode");
   })());
   check("the Options button is labelled, announces a dialog, and starts collapsed", !!optionsBtn && optionsBtn.getAttribute("aria-label") === "Options" && optionsBtn.getAttribute("aria-haspopup") === "dialog" && optionsBtn.getAttribute("aria-expanded") === "false" && optionsSheet.hidden === true);
   check("no dot while everything is at its default", optionsDot.hidden === true);
