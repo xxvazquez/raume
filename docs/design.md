@@ -261,6 +261,16 @@ and Help.
     glyph trailing. The ⋯ trigger itself is a bare glyph.
   - **Checkmark rows** (kana groups, study directions) are unchanged: the row is the
     tap target and a tick appears at the trailing edge.
+- **iOS 26 materials** (the "iOS 26 materials" block at the end of
+  `css/site.css`): the sticky search bar, the Options / Tables sheets, popovers
+  and ⋯ menus are translucent glass — `backdrop-filter` blur with the
+  `-webkit-` prefix for iPhone (WebKit), a thin bright top rim and one soft
+  float shadow, and a near-opaque `@supports` fallback. Content surfaces (list
+  cards, tables, the review card) stay solid. The search bar's blur sits on a
+  `::before` layer: backdrop-filter on the bar itself would become the
+  containing block for its `position: fixed` bottom sheets. Radii: cards 20px
+  (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
+  / the search field are capsules.
 - **Masthead and nav are one bar** on `--paper`, closed by a single row hairline
   (no rule above the nav). The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
@@ -283,7 +293,10 @@ and Help.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS tab bar**, pinned to the
   bottom edge (`position: fixed`, one hairline above it): five equal tabs, an
   icon over an 11.5px label, unselected in `--faint`, the selected one in its
-  section tone at weight 500 — no capsule. Nothing is added or removed (same
+  section tone at weight 500 on a square, full-height cell of neutral fill — no
+  capsule, no rounded bubble. It deliberately stays this traditional, solid bar
+  under iOS 26 (a floating glass capsule was tried and didn't sit well over
+  scrolling content). Nothing is added or removed (same
   five links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
   is untouched. All five are drawn from the same family as `js/vocab/icons.js`'s

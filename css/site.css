@@ -163,7 +163,12 @@
   --seg-thumb: var(--paper);
   --switch-off: color-mix(in srgb, var(--ink) 18%, var(--paper));
   --switch-thumb: #fff;
-  --radius-button: 10px;
+  --radius-button: 999px; /* iOS 26: every button is a capsule */
+  /* iOS 26 corner radii -- larger and concentric: a list card, a floating
+     menu / popover, a bottom sheet's top edge. */
+  --radius-card: 20px;
+  --radius-menu: 22px;
+  --radius-sheet: 30px;
   --row-line: var(--line);
   --band: var(--paper);
   --row-alt: #eef0f3;
@@ -592,7 +597,7 @@ body {
   padding: 12px 12px;
   background: var(--paper);
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-menu);
   box-shadow: var(--shadow-menu);
 }
 .tindex-menu[hidden] { display: none; }
@@ -667,7 +672,7 @@ body {
     max-width: none;
     max-height: 72vh;
     max-height: 72dvh;
-    border-radius: 14px 14px 0 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
   /* A real bottom sheet needs something to grab -- a small centred bar,
@@ -743,10 +748,10 @@ body {
   width: 100%;
   max-width: 560px;
   height: 36px;
-  padding: 0 11px;
+  padding: 0 13px;
   background: var(--field-fill);
   border: 1px solid var(--field-line);
-  border-radius: 10px;
+  border-radius: 999px; /* iOS 26 search: a capsule */
 }
 /* Search is one of the app's strongest features and should read as its own
    tool, not just another toolbar control at the same weight as the column
@@ -807,13 +812,13 @@ body { --switch-on: var(--section-strong); }
   gap: 2px;
   padding: 2px;
   background: var(--seg-track);
-  border-radius: 9px;
+  border-radius: 999px;
 }
 .view-mode button,
 .fc-manage-filters button {
   appearance: none;
   border: 0;
-  border-radius: 7px;
+  border-radius: 999px;
   background: transparent;
   color: var(--muted);
   font: 400 var(--fs-small)/1 var(--font-ui);
@@ -866,7 +871,7 @@ body { --switch-on: var(--section-strong); }
   width: 320px; max-width: calc(100vw - 32px); max-height: 75vh; max-height: 75dvh; overflow: auto;
   padding: 4px 12px 12px;
   background: var(--group-ground);
-  border-radius: 14px;
+  border-radius: var(--radius-menu);
   box-shadow: var(--shadow-menu);
 }
 .options-grab { display: none; }
@@ -874,7 +879,7 @@ body { --switch-on: var(--section-strong); }
 /* iOS list header: 13px sentence-case secondary text, not tracked caps. */
 .opt-head { margin: 0; padding: 12px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .opt-group:not(:has(.opt-head)) { padding-top: 12px; }
-.opt-list { background: var(--paper); border-radius: 12px; overflow: hidden; }
+.opt-list { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .opt-row {
   appearance: none;
   position: relative;
@@ -942,7 +947,7 @@ body { --switch-on: var(--section-strong); }
   .options-sheet {
     position: fixed; inset: auto 0 0 0;
     width: auto; max-width: none; max-height: 82vh; max-height: 82dvh;
-    border-radius: 14px 14px 0 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .options-grab { display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 2px; }
@@ -1105,9 +1110,9 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed { background: var(--paper); padding: 0 16px; }
 #vocabulary .table-section.collapsed .section-menu-btn,
 #vocabulary .table-section.collapsed .print-one { border-color: transparent; background: none; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed) { border-radius: 14px 14px 0 0; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 0 0 14px 14px; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 14px; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed) { border-radius: var(--radius-card) var(--radius-card) 0 0; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 0 0 var(--radius-card) var(--radius-card); }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: var(--radius-card); }
 /* Row: icon tile, title, chevron, actions -- the hairline is inset to start
    under the title, as in an iOS list, and the last row has none. */
 #vocabulary .table-section.collapsed .section-head { position: relative; padding: 9px 0; border-bottom: 0; }
@@ -1157,7 +1162,7 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed + .table-section:not(.collapsed) { margin-top: 24px; }
 #vocabulary .table-section:not(.collapsed) .section-head { padding: 0 4px 8px; margin-bottom: 0; border-bottom: 0; }
 #vocabulary .table-section:not(.collapsed) .section-title-text { font-size: 20px; font-weight: 600; }
-#vocabulary .table-section:not(.collapsed) .vocab { background: var(--paper); border-radius: 12px; }
+#vocabulary .table-section:not(.collapsed) .vocab { background: var(--paper); border-radius: var(--radius-card); }
 #vocabulary .table-section:not(.collapsed) .vocab thead th:first-child { border-top-left-radius: 12px; }
 #vocabulary .table-section:not(.collapsed) .vocab thead th:last-child { border-top-right-radius: 12px; }
 #vocabulary .table-section:not(.collapsed) .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 12px; }
@@ -1270,7 +1275,7 @@ svg.si { stroke-width: 1.6; }
   display: flex; flex-direction: column;
   background: var(--paper);
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-menu);
   box-shadow: var(--shadow-menu);
   overflow: hidden;
 }
@@ -1406,7 +1411,7 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
    the margin here is gone and the last row's hairline is stripped since
    nothing follows it inside the card. */
 .cz-groups {
-  background: var(--paper); border-radius: 12px; padding: 6px 14px; margin: 0 0 16px;
+  background: var(--paper); border-radius: var(--radius-card); padding: 6px 14px; margin: 0 0 16px;
 }
 .cz-section-block:last-child > .cz-section-label,
 .cz-section-block:last-child > .cz-group > .cz-group-title-solo {
@@ -1554,7 +1559,7 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
   background: var(--surface); border-radius: 4px; padding: 1px 5px; color: var(--ink);
 }
 .cv-card {
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--paper); padding: 16px 16px 18px; margin-bottom: 12px;
 }
 /* --fs-card-heading, not --fs-subhead -- a touch-screen text input right
@@ -1707,7 +1712,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 /* Topics are iOS-style disclosure rows in one inset-grouped card: a title with a
    one-line gist under it and a chevron, closed until tapped, so the page is a
    short menu rather than a wall of bullets. */
-.help-list { margin-top: 18px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+.help-list { margin-top: 18px; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .help-group + .help-group { border-top: 1px solid var(--row-line); }
 .help-group summary {
   position: relative; display: block; cursor: pointer; list-style: none;
@@ -1782,7 +1787,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   overflow: hidden;
   background: var(--paper);
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-menu);
   box-shadow: var(--shadow-menu);
 }
 .section-menu-list[hidden] { display: none; }
@@ -2643,11 +2648,11 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* The Flashcards sub-tabs are the shared segmented control (see .view-mode):
    a grey track, the selected tab raised on a thumb. Full width on a phone,
    sized to its content on a wide window. */
-.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 9px; }
+.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
 .fc-tab {
   flex: 1 1 auto;
   appearance: none; border: 0; background: transparent;
-  padding: 7px 8px; border-radius: 7px; text-align: center; white-space: nowrap;
+  padding: 7px 8px; border-radius: 999px; text-align: center; white-space: nowrap;
   color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
   cursor: pointer;
 }
@@ -2710,7 +2715,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    thumbnail-sized. */
 .fc-xw-current {
   display: flex; align-items: baseline; gap: 10px; min-height: 44px; box-sizing: border-box;
-  margin: 0 0 12px; padding: 12px 16px; background: var(--paper); border-radius: 12px;
+  margin: 0 0 12px; padding: 12px 16px; background: var(--paper); border-radius: var(--radius-card);
   color: var(--ink); font-size: var(--fs-body); line-height: 1.35;
 }
 .fc-xw-current-idle { color: var(--muted); }
@@ -2772,7 +2777,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-clues { flex: 1 1 260px; min-width: 0; max-width: 400px; }
 .fc-xw-cluegroup + .fc-xw-cluegroup { margin-top: 18px; }
 .fc-xw-cluehead { margin: 0 16px 6px; font: 400 var(--fs-micro)/1.3 var(--font-ui); color: var(--muted); }
-.fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: 12px; overflow: hidden; }
+.fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-xw-cluerows li { position: relative; display: flex; gap: 10px; padding: 11px 16px; font-size: var(--fs-body); line-height: 1.35; color: var(--ink); cursor: pointer; }
 .fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
 .fc-xw-cluerows li:hover { background: color-mix(in srgb, var(--section) 7%, var(--paper)); }
@@ -2801,7 +2806,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    "Right now" and "your stats" are one card each; "your progress" is a stack
    of cards, one per chart / list (see .fc-viz-grid below). */
 .fc-dash-now, .fc-dash-stats {
-  background: var(--paper); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+  background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 16px;
 }
 .fc-dash-progress { margin-bottom: 16px; }
 .fc-dash-now > *:last-child, .fc-dash-stats > *:last-child, .fc-dash-progress > *:last-child {
@@ -2837,7 +2842,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   gap: 16px;
   align-items: start;
 }
-.fc-viz-card { background: var(--paper); border-radius: 12px; padding: 16px 18px; }
+.fc-viz-card { background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
@@ -2946,7 +2951,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 /* One table = one white card: its header row on top (chevron, name, progress,
    actions), the words beneath as hairline-separated rows. */
-.fc-manage-table { margin-bottom: 12px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+.fc-manage-table { margin-bottom: 12px; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-manage-table:last-child { margin-bottom: 0; }
 /* Deliberate columns: [chevron] [ name + progress ] [ Add table · Pause table ].
    A grid, not flex -- the middle column is the only one that flexes (and its
@@ -3080,7 +3085,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-review-card {
   width: 100%; max-width: 560px; margin: 0 auto;
   background: var(--paper);
-  border-radius: 12px; padding: 24px 22px;
+  border-radius: var(--radius-card); padding: 24px 22px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 /* With the chrome above hidden, a session shows just the card (or the
@@ -3326,7 +3331,7 @@ mark.fc-diff-co {
   float: left; width: 100%; padding: 0 0 6px 16px; margin: 0;
   font: 500 12px/1 var(--font-ui); color: var(--muted);
 }
-.fc-kana-card { background: var(--paper); border-radius: 12px; padding: 0 14px; }
+.fc-kana-card { background: var(--paper); border-radius: var(--radius-card); padding: 0 14px; }
 .fc-kana-fieldset legend + * { clear: both; }
 .fc-kana-fieldset .fc-kana-group { border-radius: 0; padding: 11px 0; }
 .fc-kana-fieldset .fc-kana-group + .fc-kana-group { border-top: 1px solid var(--row-line); }
@@ -3359,7 +3364,7 @@ mark.fc-diff-co {
   margin-top: 4px;
   max-width: 760px;
 }
-.fc-entry-card { background: var(--paper); border-radius: 12px; padding: 20px 22px; }
+.fc-entry-card { background: var(--paper); border-radius: var(--radius-card); padding: 20px 22px; }
 /* "This device only" is the gently preferred path: a soft accent-tinted
    surface. "Sync across devices" stays neutral white. */
 .fc-entry-grid > .fc-entry-card:first-child { background: var(--accent-soft); }
@@ -3437,7 +3442,7 @@ mark.fc-diff-co {
 .fc-sync-detail li { padding: 1px 0; }
 
 /* Settings */
-.fc-settings-section { background: var(--paper); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+.fc-settings-section { background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 16px; }
 /* --fs-card-heading, not --fs-subhead -- the number fields below
    (.fc-settings-field input[type="number"]) are forced to 16px on a touch
    screen; see --fs-card-heading's own comment in the type scale. */
@@ -3727,7 +3732,7 @@ mark.fc-diff-co {
    section. Strip the filled header strip, the category chip and the heavy
    accent rule; the title matches the other dashboard card headings. */
 #fcWordsToReview { margin-top: 16px; }
-#fcWordsToReview:has(> .table-section) { background: var(--paper); border-radius: 12px; overflow: hidden; }
+#fcWordsToReview:has(> .table-section) { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 #fcWordsToReview .fc-note { padding: 4px 0; }
 #fcWordsToReview .section-head {
   padding: 14px 16px;
@@ -3813,3 +3818,75 @@ mark.fc-diff-co {
    can't rise past the next row's controls on its own -- the row whose menu
    is open lifts its controls above every other row's. */
 #vocabulary .table-section.menu-open .section-head > .controls { z-index: 70; }
+
+/* ==========================================================================
+   iOS 26 materials (Liquid Glass) -- CLAUDE.md › Design.
+   Controls float above the content on translucent glass: the sticky search
+   bar, sheets, popovers and menus. (The phone tab bar deliberately stays the
+   traditional full-width, square bar -- see below.) Content surfaces (list cards, tables, the
+   review card) stay solid. backdrop-filter is paired with the -webkit-
+   prefix for iPhone Chrome/Safari (WebKit), and a browser without it gets
+   a near-opaque fill instead (@supports), so text over glass stays legible
+   everywhere. Glass is never used for print.
+   ========================================================================== */
+:root {
+  --glass-bg: color-mix(in srgb, var(--paper) 96%, transparent);
+  --glass-edge: color-mix(in srgb, var(--ink) 8%, transparent);
+  /* The bright rim along the top edge -- CSS can't refract, but this thin
+     specular line is what reads as "glass" rather than frosted plastic. */
+  --glass-rim: rgba(255, 255, 255, .75);
+  --glass-shadow: 0 10px 30px rgba(24, 24, 40, .12), 0 1px 3px rgba(24, 24, 40, .08);
+  --glass-blur: saturate(180%) blur(20px);
+}
+:root[data-theme="dark"] {
+  --glass-edge: rgba(255, 255, 255, .09);
+  --glass-rim: rgba(255, 255, 255, .16);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --glass-bg: color-mix(in srgb, var(--paper) 62%, transparent); }
+  :root[data-theme="dark"] { --glass-bg: color-mix(in srgb, var(--paper) 58%, transparent); }
+}
+.glass-surface,
+.options-sheet, .tindex-menu, .section-menu-list {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+/* Menus and popovers: glass, a hairline edge, the one soft float shadow. */
+.tindex-menu, .section-menu-list {
+  background: var(--glass-bg);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
+/* The Options sheet is an inset-grouped list: its ground turns to glass,
+   the white row cards inside stay solid. */
+.options-sheet {
+  background: color-mix(in srgb, var(--group-ground) 78%, transparent);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
+/* Sticky search bar: glass once content scrolls under it, edge to edge on a
+   phone like an iOS navigation bar. The blur sits on a ::before layer, not
+   the bar itself: backdrop-filter makes an element the containing block for
+   position:fixed descendants, which would trap the Options / Tables bottom
+   sheets (they live inside the bar) at its top instead of the screen's
+   bottom. */
+.page-vocab .vocab-toolbar { background: transparent; }
+.page-vocab .vocab-toolbar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: color-mix(in srgb, var(--group-ground) 72%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+@media (max-width: 640px) {
+  .page-vocab .vocab-toolbar { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  /* The tab bar stays the traditional one -- full width, fixed to the bottom
+     edge, square, a hairline on top (Laura, 2026-09-23: a floating rounded
+     capsule didn't sit well over scrolling content). The selected section
+     is a square cell of neutral fill, full height, its icon and label in the
+     section tone -- no bubble, no rounded highlight. */
+  .site-nav-link.active { background: color-mix(in srgb, var(--ink) 6%, var(--paper)); color: var(--section-strong); }
+}
+@media print {
+  .options-sheet, .tindex-menu, .section-menu-list, .page-vocab .vocab-toolbar::before {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+}
