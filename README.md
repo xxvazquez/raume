@@ -103,6 +103,10 @@ On the **Customize** page (masthead sliders icon):
   picks an icon from its name ("Animals" → paw). You can choose from about 165
   icons, upload your own, and pick one of nine muted colours. The picker also
   opens from **Choose icon…** in a table's **⋯** menu.
+- **Hide a table** — **Hide table** in its **⋯** menu (or **Hide** on
+  Customize) takes it off the reference pages, the Tables list and search.
+  **Show** on Customize brings it back. Flashcards isn't affected — that's what
+  Pause table is for.
 - **Name and order** — rename any table. Move tables and categories with
   ▲▼ or by dragging the grip handle.
 - **Your vocabulary** — add words the built-in set doesn't have:

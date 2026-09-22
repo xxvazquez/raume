@@ -302,6 +302,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var PRINT_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6V2.5h8V6"/><rect x="2.5" y="6" width="13" height="7" rx="1.2"/><path d="M5 11.5h8V15.5H5Z"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
   var CHOOSE_ICON_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/><circle cx="6.5" cy="7" r="1.2"/><path d="M15 11.5 11.5 8 5 14"/></svg>';
+  var HIDE_TABLE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
   var ADD_TO_FC_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
   function menuItemHtml(icon, label) {
     return '<span class="menu-item-ic" aria-hidden="true">' + icon + '</span><span class="menu-item-tx">' + label + '</span>';
@@ -348,6 +349,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // (interactions.js) needs no logic change to open the picker from here.
     if (controls.addTable) menuItems.push('<button type="button" class="section-icon-btn" role="menuitem" data-icon-for="' + o.id + '">' + menuItemHtml(CHOOSE_ICON_ICON, 'Choose icon…') + '</button>');
     if (controls.addTable) menuItems.push('<button type="button" class="fc-add-table-btn" role="menuitem" data-table="' + o.id + '" title="Add every row in this table to your flashcards">' + menuItemHtml(ADD_TO_FC_ICON, 'Add to flashcards') + '</button>');
+    // Hide the whole table from the reference pages -- Customize lists it
+    // with a Show button to bring it back.
+    if (controls.addTable) menuItems.push('<button type="button" class="hide-table-btn" role="menuitem" data-hide-table="' + o.id + '">' + menuItemHtml(HIDE_TABLE_ICON, 'Hide table') + '</button>');
     // Only fold print into the menu when the menu already exists for other
     // reasons -- a table whose only control is print keeps just the icon.
     if (controls.print && menuItems.length) menuItems.push('<button type="button" class="print-one print-menu-item" role="menuitem" aria-label="Print this table">' + menuItemHtml(PRINT_ICON, 'Print') + '</button>');
@@ -678,25 +682,45 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // No re-render -- existing section nodes keep their expand/collapse state,
   // hidden rows, and sort. Called by interactions.js after an order change and
   // on section navigation.
+  // A table the reader hid (Customize / the table's ⋯ menu) drops out of
+  // the reference entirely: its section is marked .user-hidden and parked at
+  // the very end of the page -- so it never sits between two visible rows
+  // and breaks their shared rounded card -- a category whose tables are all
+  // hidden loses its heading, the heading's count only counts what shows,
+  // and the Tables directory leaves it out.
+  function isUserHidden(id) {
+    var tc = window.RaumeStudy.tableCustom;
+    return !!(tc && tc.isHidden && tc.isHidden(id));
+  }
+  vocab.isUserHidden = isUserHidden;
   function reflowLayout() {
     if (!host || !vocabularyTables) return;
     var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
-    var ordered = [];
+    var ordered = [], parked = [];
     SECTION_ORDER.forEach(function (sec) {
       groupByCategory(bySection[sec], sec).forEach(function (g) {
+        var shown = g.tables.filter(function (t) { return !isUserHidden(t.id); }).length;
         if (sec === 'vocabulary') {
           var h = host.querySelector('.cat-heading[data-section="vocabulary"][data-category="' + cssAttr(g.name) + '"]');
-          if (h) ordered.push(h);
+          if (h) {
+            h.classList.toggle('user-hidden', shown === 0);
+            var count = h.querySelector('.cat-heading-count');
+            if (count) { count.textContent = shown; count.setAttribute('aria-label', shown + ' tables'); }
+            ordered.push(h);
+          }
         }
         g.tables.forEach(function (t) {
           var s = host.querySelector('.table-section[data-table="' + t.id + '"]');
-          if (s) ordered.push(s);
+          if (!s) return;
+          var hidden = isUserHidden(t.id);
+          s.classList.toggle('user-hidden', hidden);
+          (hidden ? parked : ordered).push(s);
         });
       });
     });
-    ordered.forEach(function (el) { host.appendChild(el); });
-    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables);
+    ordered.concat(parked).forEach(function (el) { host.appendChild(el); });
+    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables.filter(function (t) { return !isUserHidden(t.id); }));
   }
   // Escape a category name for use inside a [data-category="..."] selector.
   function cssAttr(v) { return String(v).replace(/["\\]/g, '\\$&'); }

@@ -77,7 +77,10 @@ flowchart LR
 - **Table customisations** (names / icons / order) follow the same pattern (an
   unset icon falls back to the shipped table's default — or, for your own table, one
   suggested from its name — in `render.js`, never stored; a record is
-  `{ name?, icon?, color? }`, `color` a key from `icons.colors`):
+  `{ name?, icon?, color?, hidden? }`, `color` a key from `icons.colors`,
+  `hidden: true` = left out of the reference pages, directory and search —
+  `render.js` `reflowLayout` marks it `.user-hidden` and parks it after every
+  visible table; Reset keeps it, only Show clears it):
   `localStorage` is the immediate source of truth; signed in, they also sync via
   a `table_custom` column on `flashcard_settings`. Sign-in merges per table —
   account wins for tables it has; guest customisations for other tables are

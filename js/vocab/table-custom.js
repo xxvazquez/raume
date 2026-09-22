@@ -44,6 +44,10 @@ window.RaumeStudy.tableCustom = (function () {
   function nameOf(id) { return entry(id).name || ""; }
   function colorOf(id) { return entry(id).color || ""; }
   function getAll() { return JSON.parse(JSON.stringify(load())); }
+  // Hidden from the reference pages entirely (Customize brings it back).
+  // Separate from Flashcards' Pause table -- this is about what you browse,
+  // not what you study.
+  function isHidden(id) { return !!entry(id).hidden; }
 
   // Set (or, with a falsy value, clear) one field of a table's record, pruning
   // the record entirely once it holds nothing.
@@ -61,13 +65,20 @@ window.RaumeStudy.tableCustom = (function () {
     var ic = window.RaumeStudy.icons;
     setField(id, "color", ic && ic.hasColor(color) ? color : "");
   }
+  function setHidden(id, hidden) { setField(id, "hidden", !!hidden); }
   function setName(id, name) {
     setField(id, "name", typeof name === "string" ? name.trim().slice(0, 40) : "");
   }
   // Drop every customisation for one table (the Customize page's per-row reset).
-  // Order lives under a separate key, so a table keeps its custom position.
+  // Order lives under a separate key, so a table keeps its custom position;
+  // hidden survives too -- Reset is about name/icon/colour, and un-hiding has
+  // its own control.
   function clear(id) {
-    mutate(function () { delete cache[String(id)]; });
+    mutate(function () {
+      var k = String(id), keep = cache[k] && cache[k].hidden;
+      delete cache[k];
+      if (keep) cache[k] = { hidden: true };
+    });
   }
 
   // ---- Running order -------------------------------------------------------
@@ -143,6 +154,7 @@ window.RaumeStudy.tableCustom = (function () {
 
   return {
     iconOf: iconOf, nameOf: nameOf, colorOf: colorOf, entry: entry, getAll: getAll,
+    isHidden: isHidden, setHidden: setHidden,
     setIcon: setIcon, setColor: setColor, setName: setName, clear: clear,
     tableOrder: tableOrder, categoryOrder: categoryOrder,
     setTableOrder: setTableOrder, setCategoryOrder: setCategoryOrder,

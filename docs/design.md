@@ -421,6 +421,10 @@ and Help.
   translate icon; that's inverted, for consistency.
 - **Help and Settings** are prose, held to a readable measure (680px).
 - **The Customize page** stacks the table list, then a *Your vocabulary* block.
+  Each table row ends in plain tint-text actions — **Hide** / **Show** always,
+  **Reset** only when there's something to reset (a disabled Reset took width
+  from the name field on a phone). A hidden table's tile and name dim, with a
+  "Hidden from the reference" note.
   Everything collapsible on it shares one disclosure mechanic — a native
   `<details>`/`<summary>` with a shared `.disclosure-caret` mixin (hidden
   native marker, one small triangle that flips on `[open]`), the same caret

@@ -616,8 +616,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const tbody = section.querySelector('tbody');
         const ranked = [];
         let sectionRows = 0, sectionBest = null;
+        // A table the reader hid never turns up in results either.
+        const userHidden = section.classList.contains('user-hidden');
         tbody.querySelectorAll('tr').forEach(row => {
-          const { match, rank } = evaluateRow(row, q);
+          const { match: rowMatch, rank } = evaluateRow(row, q);
+          const match = rowMatch && !userHidden;
           row.classList.toggle('search-hidden', !match);
           if (match) {
             sectionRows++;
@@ -783,6 +786,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       } else if ((el = t.closest('.sort-button'))) {
         event.stopPropagation();
         vocab.sortTableFromButton(el);
+      } else if ((el = t.closest('.hide-table-btn'))) {
+        event.stopPropagation();
+        closeSectionMenus();
+        if (window.RaumeStudy.tableCustom) window.RaumeStudy.tableCustom.setHidden(el.dataset.hideTable, true); // onChange -> reflow
       } else if (t.closest('.fc-add-table-btn') || t.closest('.section-menu-list .section-icon-btn')) {
         closeSectionMenus();
       }

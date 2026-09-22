@@ -130,7 +130,8 @@ window.RaumeStudy.customize = (function () {
   function rowHtml(t, canUp, canDown) {
     var name = tc() ? tc().nameOf(t.id) : "";
     var tile = V().tableTile ? V().tableTile(t.id, t.category) : "";
-    return '<li class="cz-row" data-table-id="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : "") + '>' +
+    var hidden = !!(tc() && tc().isHidden && tc().isHidden(t.id));
+    return '<li class="cz-row' + (hidden ? " cz-row-hidden" : "") + '" data-table-id="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : "") + '>' +
       moveBtns("table", t.id, canUp, canDown) +
       '<button type="button" class="section-icon-btn cz-row-icon" data-icon-for="' + t.id +
         '" aria-label="Choose an icon and colour for ' + esc(name || t.title) + '">' +
@@ -140,7 +141,11 @@ window.RaumeStudy.customize = (function () {
           'aria-label="Custom name for ' + esc(t.title) + '" placeholder="' + esc(t.title) + '"' +
           (name ? ' value="' + esc(name) + '"' : "") + ">" +
         '<span class="cz-row-original"' + (name ? "" : " hidden") + ">Originally " + esc(t.title) + "</span>" +
+        (hidden ? '<span class="cz-row-original">Hidden from the reference</span>' : "") +
       "</label>" +
+      // Hide takes the table off the reference pages; Show puts it back.
+      '<button type="button" class="cz-row-vis" data-vis-for="' + t.id + '" aria-pressed="' + hidden + '"' +
+        ' aria-label="' + (hidden ? "Show " : "Hide ") + esc(name || t.title) + ' in the reference">' + (hidden ? "Show" : "Hide") + "</button>" +
       '<button type="button" class="cz-row-reset" data-reset-for="' + t.id + '"' +
         (isCustomised(t.id) ? "" : " disabled") + ">Reset</button>" +
       dragHandleHtml("Drag to reorder " + (name || t.title)) +
@@ -604,6 +609,12 @@ window.RaumeStudy.customize = (function () {
         else if (infoKey === "import") cvInfoImportOpen = !cvInfoImportOpen;
         pendingFocus = '.info-btn[data-info="' + infoKey + '"]';
         render(host);
+        return;
+      }
+      var vis = e.target.closest && e.target.closest(".cz-row-vis");
+      if (vis && tc()) {
+        pendingFocus = '.cz-row-vis[data-vis-for="' + vis.dataset.visFor + '"]'; // set first: setHidden re-renders synchronously
+        tc().setHidden(vis.dataset.visFor, !tc().isHidden(vis.dataset.visFor));
         return;
       }
       var reset = e.target.closest && e.target.closest(".cz-row-reset");

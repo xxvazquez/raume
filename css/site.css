@@ -1018,6 +1018,9 @@ body.selftest-mode .selftest-hint { display: block; }
 .table-section:first-of-type { break-before: auto; page-break-before: auto; }
 .page-hidden { display: none !important; }
 .search-hidden { display: none !important; }
+/* A table (or a whole category's heading) the reader hid from the reference
+   -- js/vocab/render.js reflowLayout. On screen, in search, and in print. */
+.user-hidden { display: none !important; }
 
 /* Every open table announces where it starts: a short section-colour marker
    beside the title, the title in dark ink at reading size, and a hairline
@@ -1102,9 +1105,9 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section.collapsed { background: var(--paper); padding: 0 16px; }
 #vocabulary .table-section.collapsed .section-menu-btn,
 #vocabulary .table-section.collapsed .print-one { border-color: transparent; background: none; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden) + .table-section.collapsed) { border-radius: 14px 14px 0 0; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) { border-radius: 0 0 14px 14px; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) { border-radius: 14px; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed) { border-radius: 14px 14px 0 0; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 0 0 14px 14px; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section.collapsed):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 14px; }
 /* Row: icon tile, title, chevron, actions -- the hairline is inset to start
    under the title, as in an iOS list, and the last row has none. */
 #vocabulary .table-section.collapsed .section-head { position: relative; padding: 9px 0; border-bottom: 0; }
@@ -1113,7 +1116,7 @@ body.selftest-mode .selftest-hint { display: block; }
   border-bottom: 1px solid var(--row-line);
 }
 #vocabulary .table-section.collapsed .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
-#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden))) .section-head::after { display: none; }
+#vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(:has(+ .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden))) .section-head::after { display: none; }
 
 /* Icon tile (iOS Settings style): a small rounded square with a white glyph,
    filled in a soft, muted hue. Each table's hue is a key (data-tile, set in
@@ -1521,14 +1524,20 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 }
 .cz-row-name:focus { outline: 2px solid var(--section); outline-offset: 1px; }
 .cz-row-name::placeholder { color: var(--faint); }
-.cz-row-reset {
+.cz-row-reset, .cz-row-vis {
   flex: 0 0 auto; appearance: none; border: 0;
   border-radius: var(--radius-button); background: transparent;
   font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
   padding: 8px 10px; cursor: pointer;
 }
-.cz-row-reset:hover:not([disabled]) { background: var(--accent-soft); }
-.cz-row-reset[disabled] { opacity: .4; cursor: default; }
+.cz-row-reset:hover:not([disabled]), .cz-row-vis:hover { background: var(--accent-soft); }
+/* Nothing to reset: no button at all, rather than a greyed-out one taking
+   width from the name field on a phone. */
+.cz-row-reset[disabled] { display: none; }
+/* A table hidden from the reference: its tile and name dim, a note says so,
+   and its Hide button reads Show. */
+.cz-row-hidden .cz-row-icon, .cz-row-hidden .cz-row-name { opacity: .45; }
+.cz-row-vis { padding-left: 6px; padding-right: 6px; }
 /* The same icon tile as the reference rows (see "Icon tile" above). */
 .fc-manage-table-icon {
   flex: 0 0 auto; align-self: center; width: 28px; height: 28px; padding: 5.5px; box-sizing: border-box;
@@ -1782,7 +1791,8 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .section-menu-list .fc-add-table-btn,
 .section-menu-list .print-menu-item,
 .section-menu-list .print-scope,
-.section-menu-list .fc-xw-menu-item {
+.section-menu-list .fc-xw-menu-item,
+.section-menu-list .hide-table-btn {
   appearance: none;
   border: 0;
   background: transparent;
@@ -1809,11 +1819,13 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .section-menu-list .fc-add-table-btn:hover,
 .section-menu-list .print-menu-item:hover,
 .section-menu-list .print-scope:hover,
-.section-menu-list .fc-xw-menu-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.section-menu-list .fc-xw-menu-item:hover,
+.section-menu-list .hide-table-btn:hover { background: var(--accent-soft); color: var(--accent-strong); }
 .section-menu-list .section-icon-btn:hover .menu-item-ic,
 .section-menu-list .fc-add-table-btn:hover .menu-item-ic,
 .section-menu-list .print-menu-item:hover .menu-item-ic,
-.section-menu-list .fc-xw-menu-item:hover .menu-item-ic { color: var(--accent-strong); }
+.section-menu-list .fc-xw-menu-item:hover .menu-item-ic,
+.section-menu-list .hide-table-btn:hover .menu-item-ic { color: var(--accent-strong); }
 .section-menu-list .fc-add-table-btn[disabled] { opacity: .5; cursor: default; }
 .section-menu-list .print-menu-item { display: none; }
 @media (max-width: 700px) {

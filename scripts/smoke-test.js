@@ -1293,7 +1293,7 @@ async function main() {
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
   check("it lists every one of the 32 tables", czRows.length === 32);
-  check("each row has a name field and a reset control", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset")));
+  check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
     const field = czRows[0].querySelector(".cz-row-field");
@@ -1443,6 +1443,49 @@ async function main() {
     return section.children[0].dataset.category === last.dataset.category;
   })());
   if (window.RaumeStudy.tableCustom.hasCustomOrder()) window.RaumeStudy.tableCustom.resetOrder();
+
+  console.log("Hiding a whole table from the reference");
+  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
+  const hideTc = window.RaumeStudy.tableCustom;
+  const hideSec = [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]')].find(s => s.querySelector(".hide-table-btn"));
+  const hideId = hideSec.dataset.table;
+  const hideCat = hideSec.dataset.category;
+  const catCountBefore = Number(document.querySelector('#vocabulary .cat-heading[data-category="' + hideCat + '"] .cat-heading-count').textContent);
+  hideSec.querySelector(".section-menu-btn").click();
+  hideSec.querySelector(".hide-table-btn").click();
+  check("the table's ⋯ menu has Hide table, and it hides the table (stored with the other table customisations)",
+    hideTc.isHidden(hideId) && hideSec.classList.contains("user-hidden") && window.getComputedStyle(hideSec).display === "none");
+  check("...parked after every visible table, so it never splits a group's rounded card",
+    [...document.querySelectorAll("#vocabulary .table-section")].pop() === hideSec);
+  check("...dropped from the Tables directory", !document.querySelector('#tindexMenu a[data-target="' + hideId + '"]'));
+  check("...and its category heading counts one table fewer",
+    Number(document.querySelector('#vocabulary .cat-heading[data-category="' + hideCat + '"] .cat-heading-count').textContent) === catCountBefore - 1);
+  check("...and it never turns up in search results", (() => {
+    const input = document.getElementById("tableSearch");
+    const word = hideSec.querySelector("tbody tr td.en, tbody tr td:last-child").textContent.trim().split(/\s+/)[0];
+    input.value = word;
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const found = hideSec.querySelectorAll("tbody tr:not(.search-hidden)").length;
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return found === 0;
+  })());
+  document.getElementById("customizeToggle").click();
+  check("Customize lists it as hidden, with a Show button in place of Hide", (() => {
+    const row = document.querySelector('#customizePage .cz-row[data-table-id="' + hideId + '"]');
+    return row.classList.contains("cz-row-hidden") && row.querySelector(".cz-row-vis").textContent === "Show";
+  })());
+  document.querySelector('#customizePage .cz-row[data-table-id="' + hideId + '"] .cz-row-vis').click();
+  check("Show brings it back: no longer hidden, back in the directory, and the stored record is cleaned up",
+    !hideTc.isHidden(hideId) && !hideSec.classList.contains("user-hidden")
+    && !!document.querySelector('#tindexMenu a[data-target="' + hideId + '"]') && !hideTc.getAll()[hideId]);
+  check("Reset on Customize leaves a hidden table hidden (it only resets name / icon / colour)", (() => {
+    hideTc.setHidden(hideId, true); hideTc.setName(hideId, "Tmp"); hideTc.clear(hideId);
+    const ok = hideTc.isHidden(hideId) && !hideTc.nameOf(hideId);
+    hideTc.setHidden(hideId, false);
+    return ok && !hideTc.getAll()[hideId];
+  })());
+  // Leaves the Customize page open, as the Custom vocabulary checks below expect.
 
   console.log("Custom vocabulary (your own rows / tables)");
   const cvNs = window.RaumeStudy.customVocab;
