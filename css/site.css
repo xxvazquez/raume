@@ -1624,6 +1624,9 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .cv-preview[lang], .cv-preview span[lang="ja"] { font-size: var(--fs-subhead); }
 .cv-preview-sep { color: var(--faint); }
 .cv-preview-bad { background: var(--wrong-soft); color: var(--wrong-strong); display: block; }
+/* display: flex above would otherwise win over [hidden] and leave an empty
+   grey bar under an empty field. */
+.cv-preview[hidden] { display: none; }
 .cv-add-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .cv-btn {
   flex: 0 0 auto; appearance: none; border: 0;
