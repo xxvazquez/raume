@@ -258,14 +258,16 @@ window.RaumeStudy.flashcards.views = (function () {
           var tableDone = table.ids.length > 0 && addedCount === table.ids.length;
           var progressHtml = tablePaused
             ? '<span class="fc-manage-table-progress fc-manage-table-dormant">Paused</span>'
-            : '<span class="fc-manage-table-progress' + (tableDone ? " fc-manage-progress-done" : "") + '">' + addedCount + " / " + table.ids.length + " added</span>";
+            : '<span class="fc-manage-table-progress' + (tableDone ? " fc-manage-progress-done" : "") + '" aria-label="' + addedCount + " of " + table.ids.length + ' added">' + addedCount + " / " + table.ids.length + "</span>";
           var tileKey = vocabNs.tableTile ? vocabNs.tableTile(tableId, cat) : "";
           html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + (tablePaused ? " fc-manage-table-paused" : "") + '"' +
             (tileKey ? ' data-tile="' + tileKey + '"' : "") + '>' +
             '<div class="fc-manage-table-head">' +
             '<button type="button" class="fc-manage-table-toggle" data-table-id="' + tableId + '" aria-expanded="' + expanded + '" aria-label="' + (expanded ? "Collapse" : "Expand") + " " + esc(displayTitle) + '">' + CHEVRON_ICON + "</button>" +
-            '<span class="fc-manage-table-label">' + iconHtml + '<span class="fc-manage-table-title">' + esc(displayTitle) + '</span>' +
-            progressHtml + "</span>";
+            // Title over its count, iOS list-row style: the name gets the whole
+            // width (and may wrap) instead of being cut off beside "0 / 19".
+            '<span class="fc-manage-table-label">' + iconHtml + '<span class="fc-manage-table-text"><span class="fc-manage-table-title">' + esc(displayTitle) + '</span>' +
+            progressHtml + "</span></span>";
           // Table-level actions per filter. A paused table (only ever shown
           // under "all") gets just Resume. Otherwise "all" shows only what
           // applies -- Add table until it's full, Pause table once something's
@@ -291,7 +293,8 @@ window.RaumeStudy.flashcards.views = (function () {
             // Plain kanji here, not the furigana ruby the reference tables use:
             // Manage is a deck-management checklist, and ruby made every row a
             // different height so the status dots and buttons never lined up.
-            // The reading is still one column over (romaji, desktop).
+            // The reading comes as romaji right after it, small, on every
+            // screen; the English sits on the line below.
             html += '<div class="fc-manage-row">' +
               statusIndicatorHtml(id, tablePaused) +
               '<span class="fc-manage-word">' +

@@ -636,8 +636,10 @@ be scannable at a glance:
 
 **Manage**: the category name is a quiet label on the ground above its cards
 (section tone, no rule beneath, disclosure caret at the end); each table is one
-white card — a header row (chevron, name, "N / M added", table actions) over its
-words as hairline rows. **Kana**'s group pickers and **Settings**' / **Help**'s
+white card — a header row (chevron, icon tile, the name over a quiet "N / M"
+subtitle, table actions; the name wraps rather than truncating) over its words
+as hairline rows of two lines: the kanji with its romaji small and faint
+beside it, the English under them. **Kana**'s group pickers and **Settings**' / **Help**'s
 sections are the same white cards; a picker's rows are checkmark rows with inset
 hairlines (the `legend` is floated into flow so a browser doesn't paint the
 card's background from the legend's midline). The sync chip is a tinted capsule

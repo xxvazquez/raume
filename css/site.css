@@ -3024,14 +3024,17 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table-label {
   grid-area: label;
   min-width: 0;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 12px;
 }
+/* Title over its count (iOS list-row title + subtitle): the name has the
+   whole width and wraps rather than truncating; "3 / 19" is a quiet line
+   under it -- "added" dropped, the fraction already says it. */
+.fc-manage-table-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .fc-manage-table-title {
-  min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink); font: 400 var(--fs-nav)/1.3 var(--font-ui);
+  min-width: 0; overflow-wrap: break-word;
+  color: var(--ink); font: 400 15px/1.3 var(--font-ui);
 }
-.fc-manage-table-progress { flex: 0 0 auto; color: var(--muted); font-size: var(--fs-micro); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fc-manage-table-progress { color: var(--muted); font-size: var(--fs-small); white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* Fully added registers in the section accent -- against a long ladder of
    otherwise-identical "N / M added" counts, this is the one that should
    actually catch the eye. */
@@ -3072,17 +3075,21 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    glyphs and the action buttons line up in clean columns down the list. */
 .fc-manage-row {
   display: flex; align-items: center; gap: 10px;
-  min-height: 42px; padding: 3px 14px;
+  min-height: 52px; padding: 6px 14px;
   border-top: 1px solid var(--row-line);
 }
 .fc-manage-row:first-child { border-top: 0; }
+/* Two lines, so you can see what you're adding: the Japanese with its romaji
+   right after it (small, faint -- the reading, not a second answer), then the
+   English under them. */
 .fc-manage-word {
   flex: 1 1 auto; min-width: 0;
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 11px;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 8px;
 }
-.fc-manage-word .fc-jp { font-size: var(--fs-nav); color: var(--ink); }
-.fc-manage-word .fc-ro { color: var(--muted); font-size: var(--fs-nav-sub); }
-.fc-manage-word .fc-en { color: var(--muted); font-size: var(--fs-nav-sub); }
+.fc-manage-word .fc-jp { order: 1; font-size: 15px; color: var(--ink); }
+.fc-manage-word .fc-ro { order: 2; color: var(--faint); font-size: 12px; }
+.fc-manage-word .fc-tag { order: 3; }
+.fc-manage-word .fc-en { order: 4; flex-basis: 100%; color: var(--muted); font-size: var(--fs-small); }
 .fc-manage-word .fc-tag { color: var(--faint); font-size: var(--fs-micro); }
 .fc-manage-word .fc-tag-leech { color: var(--warn-strong); }
 .fc-manage-row .fc-actions { flex: 0 0 auto; display: flex; gap: 6px; }
@@ -3103,7 +3110,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    / Restore) rather than shrinking to an unexplained icon. */
 @media (max-width: 560px) {
   .fc-manage-row .fc-btn-vocabaction { padding: 5px 8px; }
-  .fc-manage-word .fc-ro { display: none; }
 }
 .fc-empty { padding: 24px 16px; color: var(--muted); text-align: center; }
 
