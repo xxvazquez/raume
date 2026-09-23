@@ -191,7 +191,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards (below) |
 | **Puzzles** | Crossword / arroword from your words (below) |
-| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Guests also get **Back up & restore** (a JSON file) |
+| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused

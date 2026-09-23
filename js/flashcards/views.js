@@ -29,8 +29,6 @@ window.RaumeStudy.flashcards.views = (function () {
   // so this file does not depend on its load order.
   function rerender() { window.RaumeStudy.flashcards.render(); }
 
-  var SAVED_FLASH_MS = 3000;
-  var settingsSavedAt = 0; // timestamp of the last successful Settings save -- lets the "Saved ✓" note survive an unrelated re-render for a few seconds
   var manageFilter = "all"; // all | mine | archived
   var manageExpandedTables = {}; // tableId -> true; session-only UI state, collapsed (absent) by default
   // Same chevron used for every other collapse/expand control in the app
@@ -463,37 +461,45 @@ window.RaumeStudy.flashcards.views = (function () {
   }
 
   // --- Settings ---
+  // Settings follows iOS Settings: a grey group header, a white card of 44px
+  // rows (label left, value or control right), and a short grey footnote
+  // under the card -- instead of a paragraph under every field. Changes save
+  // as you make them (a number when you leave its field, a switch or tick at
+  // once); there's no Save button, same as iOS.
+  function setNum(id, label, value, min, max, unit) {
+    return '<label class="set-row"><span class="set-label">' + esc(label) + '</span><span class="set-value">' +
+      '<input type="number" class="set-num" id="' + id + '" min="' + min + '" max="' + max + '" value="' + value + '" inputmode="numeric">' +
+      (unit ? '<span class="set-unit' + (unit === "%" ? " set-unit-tight" : "") + '">' + unit + "</span>" : "") + "</span></label>";
+  }
+  function setSwitch(id, label, on) {
+    return '<label class="set-row"><span class="set-label">' + esc(label) + '</span>' +
+      '<input type="checkbox" class="set-switch" id="' + id + '"' + (on ? " checked" : "") + "></label>";
+  }
+  function setGroup(head, rowsHtml, foot) {
+    return '<h3 class="help-head">' + head + '</h3><div class="help-card set-card">' + rowsHtml + "</div>" +
+      (foot ? '<p class="set-foot">' + foot + "</p>" : "");
+  }
   function renderSettings(panel) {
     var s = getCache().settings;
     var k = getKanaFsrs();
     panel.innerHTML =
-      '<div class="fc-settings-section"><h3>Study directions</h3><p class="fc-note">Which of the 4 directions "Study now" pulls cards from — turning one off never deletes its cards or progress, it is just left out of review until you turn it back on.</p>' +
-      '<div class="fc-direction-checks">' + DIRECTIONS.map(function (d) {
-        return '<label class="fc-direction-check"><input type="checkbox" data-direction="' + d + '" class="fc-dir-checkbox" ' + (s.enabled_directions[d] !== false ? "checked" : "") + ">" + esc(DIRECTION_LABEL[d]) + "</label>";
-      }).join("") + "</div>" +
-      '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div></div>' +
-      '<div class="fc-settings-section"><h3>FSRS scheduling</h3><p class="fc-note">Tunable knobs FSRS-6 itself supports — the trained algorithm and its weights never change.</p>' +
-      settingsField("Desired retention (%)", '<input type="number" id="fcRetention" min="70" max="99" value="' + Math.round(s.fsrs_request_retention * 100) + '">',
-        "The recall probability FSRS-6 aims for when each card comes due. Higher means shorter, more frequent reviews and stronger recall; lower means longer gaps but more forgetting in between. 90% is FSRS's own recommended default.") +
-      settingsField("Maximum interval (days)", '<input type="number" id="fcMaxInterval" min="30" max="36500" value="' + s.fsrs_maximum_interval + '">',
-        "A ceiling on the longest gap FSRS-6 will ever schedule, however well you know a card. 36500 (100 years) effectively means no ceiling.") +
-      settingsField("Fuzz scheduled intervals", '<input type="checkbox" id="fcFuzz" ' + (s.fsrs_enable_fuzz ? "checked" : "") + ">",
-        "Adds a small random wobble to each computed interval, so a batch of cards added on the same day don't all come due on exactly the same day too.") +
-      "</div>" +
-      '<div class="fc-settings-section"><h3>Daily session</h3><p class="fc-note">Not an FSRS setting — just how many brand-new cards a review session introduces per day.</p>' +
-      settingsField("New cards per day", '<input type="number" id="fcNewPerDay" min="0" max="200" value="' + s.queue_new_cards_per_day + '">',
-        "A cap on how many never-studied cards \"Study now\" introduces in one day, on top of anything already due for review. Doesn't affect scheduling, only pacing.") +
-      "</div>" +
-      '<div class="fc-settings-section"><h3>Kana trainer scheduling</h3><p class="fc-note">The same four knobs as the vocabulary blocks above — see there for what each does — kept on their own so the Kana tab can run a different schedule.</p>' +
-      settingsField("Desired retention (%)", '<input type="number" id="fcKanaRetention" min="70" max="99" value="' + Math.round(k.fsrs_request_retention * 100) + '">') +
-      settingsField("Maximum interval (days)", '<input type="number" id="fcKanaMaxInterval" min="30" max="36500" value="' + k.fsrs_maximum_interval + '">') +
-      settingsField("Fuzz scheduled intervals", '<input type="checkbox" id="fcKanaFuzz" ' + (k.fsrs_enable_fuzz ? "checked" : "") + ">") +
-      settingsField("New kana per day", '<input type="number" id="fcKanaNewPerDay" min="0" max="200" value="' + k.new_per_day + '">') +
-      "</div>" +
-      '<div class="fc-cta-row fc-cta-row-spaced fc-settings-save">' +
-      '<button type="button" class="fc-btn fc-btn-primary" id="fcSaveSettings">Save settings</button>' +
-      '<span class="fc-settings-saved" id="fcSettingsSaved" role="status"' +
-      (Date.now() - settingsSavedAt < SAVED_FLASH_MS ? "" : " hidden") + ">Saved ✓</span></div>" +
+      setGroup("Study directions", DIRECTIONS.map(function (d) {
+        return '<label class="set-row fc-direction-check"><input type="checkbox" data-direction="' + d + '" class="fc-dir-checkbox" ' + (s.enabled_directions[d] !== false ? "checked" : "") + ">" + esc(DIRECTION_LABEL[d]) + "</label>";
+      }).join(""), "Study now only draws from the ticked directions. Turning one off keeps its cards and progress.") +
+      '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div>' +
+      setGroup("Word cards",
+        setNum("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), 70, 99, "%") +
+        setNum("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, 30, 36500, "days") +
+        setNum("fcNewPerDay", "New cards per day", s.queue_new_cards_per_day, 0, 200, "") +
+        setSwitch("fcFuzz", "Fuzz intervals", s.fsrs_enable_fuzz),
+        "FSRS-6 brings a card back when your recall is expected to fall to this level — 90% is its default. 36,500 days means no cap. Fuzz spreads out cards added on the same day.") +
+      setGroup("Kana cards",
+        setNum("fcKanaRetention", "Desired retention", Math.round(k.fsrs_request_retention * 100), 70, 99, "%") +
+        setNum("fcKanaMaxInterval", "Maximum interval", k.fsrs_maximum_interval, 30, 36500, "days") +
+        setNum("fcKanaNewPerDay", "New kana per day", k.new_per_day, 0, 200, "") +
+        setSwitch("fcKanaFuzz", "Fuzz intervals", k.fsrs_enable_fuzz),
+        "Its own schedule, separate from word cards.") +
+      '<p class="set-status" id="fcSettingsSaved" role="status" aria-live="polite"></p>' +
       backupSectionHtml();
     wireBackup();
 
@@ -504,31 +510,22 @@ window.RaumeStudy.flashcards.views = (function () {
     function reportSettingsError(e) {
       window.alert("Saved on this device, but couldn't sync — " + (e.message || "check your connection and try again."));
     }
-    function clearSavedNote() {
-      settingsSavedAt = 0;
-      var n = document.getElementById("fcSettingsSaved");
-      if (n) n.hidden = true;
-    }
-    // One Save for the whole tab -- no guessing which of three buttons a given
-    // field belongs to, plus a visible acknowledgement. The ack is driven by a
-    // timestamp (not just this node) so an unrelated re-render mid-save still
-    // shows it.
-    document.getElementById("fcSaveSettings").addEventListener("click", async function () {
-      var saveBtn = document.getElementById("fcSaveSettings");
+    // Saves run one after another, so two quick edits can't race each other.
+    var saving = Promise.resolve();
+    async function saveAll(changed) {
       var enabledMap = {};
       panel.querySelectorAll(".fc-dir-checkbox").forEach(function (cb) { enabledMap[cb.dataset.direction] = cb.checked; });
       if (!DIRECTIONS.some(function (d) { return enabledMap[d]; })) {
+        // The last direction can't be turned off: put its tick back.
+        if (changed && changed.classList.contains("fc-dir-checkbox")) changed.checked = true;
         document.getElementById("fcDirError").hidden = false;
         return;
       }
       document.getElementById("fcDirError").hidden = true;
 
       var retention = Math.min(0.99, Math.max(0.7, Number(document.getElementById("fcRetention").value) / 100));
-      var maxInterval = Math.max(1, Number(document.getElementById("fcMaxInterval").value));
+      var maxInterval = Math.min(36500, Math.max(1, Number(document.getElementById("fcMaxInterval").value)));
       var newPerDay = Math.max(0, Number(document.getElementById("fcNewPerDay").value));
-
-      saveBtn.disabled = true;
-      clearSavedNote();
       try {
         await saveDirectionSettings(enabledMap);
         await saveFsrsSettings({
@@ -553,25 +550,22 @@ window.RaumeStudy.flashcards.views = (function () {
         document.getElementById("fcKanaRetention").value = Math.round(kSaved.fsrs_request_retention * 100);
         document.getElementById("fcKanaMaxInterval").value = kSaved.fsrs_maximum_interval;
         document.getElementById("fcKanaNewPerDay").value = kSaved.new_per_day;
-        settingsSavedAt = Date.now();
         var note = document.getElementById("fcSettingsSaved");
-        if (note) note.hidden = false;
-        setTimeout(function () {
-          if (Date.now() - settingsSavedAt >= SAVED_FLASH_MS) return;
-          settingsSavedAt = 0;
-          var n = document.getElementById("fcSettingsSaved");
-          if (n) n.hidden = true;
-        }, SAVED_FLASH_MS);
+        if (note) note.textContent = "Saved";
       } catch (e) {
         reportSettingsError(e);
-      } finally {
-        var b = document.getElementById("fcSaveSettings");
-        if (b) b.disabled = false;
       }
+    }
+    // A number saves when you leave its field (or press Return); a tick or
+    // switch saves at once. Settings in the Back up card aren't settings.
+    panel.addEventListener("change", function (e) {
+      if (!e.target.closest(".set-card")) return;
+      var target = e.target;
+      saving = saving.then(function () { return saveAll(target); });
     });
-    // Any edit clears a lingering "Saved ✓" so it always reflects the current form.
-    panel.addEventListener("input", clearSavedNote);
-    panel.addEventListener("change", clearSavedNote);
+    panel.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && e.target.classList && e.target.classList.contains("set-num")) e.target.blur();
+    });
   }
   // --- Back up & restore (guest mode) ---
   // Guest data lives only in this browser, so this is the one place a reader can
@@ -580,16 +574,14 @@ window.RaumeStudy.flashcards.views = (function () {
     var backup = window.RaumeStudy.flashcards.backup;
     if (!backup) return "";
     if (!backup.available()) {
-      return '<div class="fc-settings-section fc-backup-section"><h3>Back up &amp; restore</h3>' +
-        '<p class="fc-note">Your progress is saved to your account, so there is nothing to back up here.</p></div>';
+      return '<h3 class="help-head">Back up &amp; restore</h3><p class="set-foot set-foot-alone">Your progress is saved to your account, so there is nothing to back up here.</p>';
     }
-    return '<div class="fc-settings-section fc-backup-section"><h3>Back up &amp; restore</h3>' +
-      '<p class="fc-note">This device is the only copy of your flashcards, Kana progress, table names and icons, and any words you added — clearing this browser\'s site data loses them. Save a backup file now and then; restoring one replaces what is on this device with what was in the file.</p>' +
-      '<div class="fc-cta-row">' +
-      '<button type="button" class="fc-btn" id="fcBackupExport">Download backup</button>' +
-      '<button type="button" class="fc-btn" id="fcBackupImport">Restore from a file…</button>' +
+    return '<h3 class="help-head">Back up &amp; restore</h3><div class="help-card set-card-actions">' +
+      '<button type="button" class="set-row set-action" id="fcBackupExport">Download backup</button>' +
+      '<button type="button" class="set-row set-action" id="fcBackupImport">Restore from a file…</button>' +
       '<input type="file" id="fcBackupFile" accept="application/json,.json" hidden></div>' +
-      '<div class="fc-auth-error" id="fcBackupError" role="alert" hidden></div></div>';
+      '<p class="set-foot">This device is the only copy of your flashcards, Kana progress, table customisations and your own words. Restoring replaces what\'s here with the file.</p>' +
+      '<div class="fc-auth-error" id="fcBackupError" role="alert" hidden></div>';
   }
   function wireBackup() {
     var backup = window.RaumeStudy.flashcards.backup;
@@ -624,10 +616,6 @@ window.RaumeStudy.flashcards.views = (function () {
         window.location.reload();
       }, function () { showError("Couldn't read that file."); });
     });
-  }
-  function settingsField(label, controlHtml, help) {
-    return '<div class="fc-settings-field"><div class="fc-settings-field-row"><label>' + esc(label) + "</label>" + controlHtml + "</div>" +
-      (help ? '<p class="fc-settings-help">' + esc(help) + "</p>" : "") + "</div>";
   }
 
   // -----------------------------------------------------------------------

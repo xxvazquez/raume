@@ -239,6 +239,14 @@ and Help.
   between. Masthead topics are disclosure rows led by an iOS Settings-style
   icon tile; Flashcards Help puts a 13px grey header over each card. Keep a
   row to one idea and one line of explanation; keys are `kbd` chips.
+- **Settings** (Flashcards › Settings) follows iOS Settings: a 13px grey header
+  over each white card of 44px rows (label left, value or control right), a
+  short grey footnote under the card. Numbers are plain right-aligned values
+  you tap to edit (no grey box), on/off is a 51×31 iOS switch (`.set-switch`),
+  study directions are checkmark rows, Back up & restore is two tint-text action
+  rows. Changes save as you make them — a number when you leave its field, a
+  tick or switch at once — with no Save button; the last direction can't be
+  unticked.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to

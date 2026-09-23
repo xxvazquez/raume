@@ -433,11 +433,9 @@ async function main() {
     const tick = allCssRules.find(r => r.selectorText && /\.fc-kana-group:has\(input:checked\)::after/.test(r.selectorText));
     return !!hidden && !!tick;
   })());
-  check("the standalone Fuzz checkbox is a restyled (appearance:none) switch, not a checkmark row", (() => {
-    const rule = allCssRules.find(r => r.selectorText
-      && /\.fc-settings-field input\[type="checkbox"\]/.test(r.selectorText)
-      && r.style.appearance === "none");
-    const tick = allCssRules.find(r => r.selectorText === '.fc-settings-field input[type="checkbox"]:checked::after');
+  check("the Fuzz setting is a restyled (appearance:none) iOS switch, not a checkmark row", (() => {
+    const rule = allCssRules.find(r => r.selectorText === ".set-switch" && r.style.appearance === "none");
+    const tick = allCssRules.find(r => r.selectorText === ".set-switch:checked::after");
     return !!rule && !!tick;
   })());
   check("the review prompt is sized up from the generic .fc-prompt", (() => {
@@ -2608,7 +2606,7 @@ async function main() {
   console.log("Flashcards: Settings tab");
   fcOpenPushed("settings");
   check("Settings card titles are sentence case, like the Help tab's", (() => {
-    const titles = [...document.querySelectorAll("#fcPanelSettings .fc-settings-section h3")].map(h => h.textContent.trim());
+    const titles = [...document.querySelectorAll("#fcPanelSettings .help-head")].map(h => h.textContent.trim());
     // no title has a Title-Cased second word (acronyms like FSRS are fine)
     return titles.length >= 3 && titles.every(t => !/ [A-Z][a-z]/.test(t));
   })());
@@ -2617,37 +2615,34 @@ async function main() {
       && /#fcPanelHelp/.test(r.selectorText) && /#fcPanelSettings/.test(r.selectorText));
     return !!rule && parseInt(rule.style.maxWidth, 10) > 0 && parseInt(rule.style.maxWidth, 10) <= 720;
   })());
-  check("the Kana scheduling block doesn't repeat the vocab knobs' helper text", (() => {
-    // its fields carry labels but not their own paragraph of grey micro-text
-    const kanaField = document.getElementById("fcKanaRetention").closest(".fc-settings-field");
-    return kanaField && !kanaField.querySelector(".fc-settings-help");
-  })());
-  check("a settings field's label sits with its control, not flung to the row's opposite edge", (() => {
-    const row = document.getElementById("fcRetention").closest(".fc-settings-field-row");
-    return window.getComputedStyle(row).justifyContent !== "space-between";
+  check("Settings is iOS rows: label left, value right, a short footnote under each card -- no paragraph per field", (() => {
+    const row = document.getElementById("fcRetention").closest(".set-row");
+    return !!row && window.getComputedStyle(row).justifyContent === "space-between"
+      && !document.querySelector("#fcPanelSettings .fc-settings-help")
+      && document.querySelectorAll("#fcPanelSettings .set-foot").length >= 3;
   })());
   const dirChecks = [...document.querySelectorAll(".fc-dir-checkbox")];
   check("all 4 directions are offered as a setting", dirChecks.length === 4);
   check("all 4 are enabled by default", dirChecks.every(cb => cb.checked));
-  check("one Save button covers the whole tab (not one per section)",
-    !!document.getElementById("fcSaveSettings") && !document.getElementById("fcSaveDirections") && !document.getElementById("fcSaveFsrs"));
-  dirChecks.forEach(cb => { cb.checked = false; });
-  document.getElementById("fcSaveSettings").click();
-  check("saving with no direction enabled is rejected", document.getElementById("fcDirError").hidden === false);
-  fcOpenPushed("settings"); // re-render fresh
-  check("...and nothing was actually saved (still all on)", [...document.querySelectorAll(".fc-dir-checkbox")].every(cb => cb.checked));
+  const fcChange = el => el.dispatchEvent(new window.Event("change", { bubbles: true }));
+  check("there's no Save button -- changes save as you make them, as in iOS Settings", !document.getElementById("fcSaveSettings"));
+  for (const cb of dirChecks) { cb.checked = false; fcChange(cb); await flush(); }
+  check("the last direction can't be turned off: its tick comes back with a note",
+    document.getElementById("fcDirError").hidden === false
+    && [...document.querySelectorAll(".fc-dir-checkbox")].filter(cb => cb.checked).length === 1);
+  for (const cb of [...document.querySelectorAll(".fc-dir-checkbox")]) { if (!cb.checked) { cb.checked = true; fcChange(cb); await flush(); } }
   document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]').checked = false;
-  document.getElementById("fcSaveSettings").click();
+  fcChange(document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]'));
   await flush();
-  check("a successful save is acknowledged inline", document.getElementById("fcSettingsSaved").hidden === false);
+  check("a saved change is announced to a screen reader", document.getElementById("fcSettingsSaved").textContent === "Saved");
   fcOpenPushed("settings");
   const roEnBox = document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]');
   check("turning off just one direction is remembered", !roEnBox.checked && document.querySelector('.fc-dir-checkbox[data-direction="jp-en"]').checked);
   roEnBox.checked = true;
-  document.getElementById("fcSaveSettings").click(); // leave every direction enabled again for later checks
+  fcChange(roEnBox); // leave every direction enabled again for later checks
   await flush();
 
-  // The Kana trainer's own FSRS knobs, in the same tab under the same Save.
+  // The Kana trainer's own FSRS knobs, in the same tab.
   fcOpenPushed("settings");
   check("Settings also exposes the Kana trainer's own FSRS knobs, defaulting to 90%", (() => {
     return ["fcKanaRetention", "fcKanaMaxInterval", "fcKanaFuzz", "fcKanaNewPerDay"].every(id => !!document.getElementById(id))
@@ -2657,7 +2652,7 @@ async function main() {
   document.getElementById("fcKanaRetention").value = "85";
   document.getElementById("fcKanaNewPerDay").value = "3";
   document.getElementById("fcKanaMaxInterval").value = "9999999"; // above the ceiling -> clamps to 36500
-  document.getElementById("fcSaveSettings").click();
+  fcChange(document.getElementById("fcKanaMaxInterval"));
   await flush();
   if (storageUsable) check("the kana knobs persist to the kana cache, independent of the vocab knobs and clamped", (() => {
     const f = (JSON.parse(readLocalStorage("raume-kana-v1") || "{}").fsrs) || {};
@@ -2672,7 +2667,7 @@ async function main() {
   })());
   document.getElementById("fcKanaRetention").value = "90";
   document.getElementById("fcKanaNewPerDay").value = "15";
-  document.getElementById("fcSaveSettings").click(); // restore defaults for later checks
+  fcChange(document.getElementById("fcKanaNewPerDay")); // restore defaults for later checks
   await flush();
 
   console.log("Flashcards: Help tab");
