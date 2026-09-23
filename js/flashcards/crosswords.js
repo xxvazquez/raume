@@ -353,7 +353,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Romaji mode only offers words with a usable romaji spelling (a
     // verb-pair's casual/polite split, say, still isn't one) -- filtered
     // before picking, not after, so "Words" still means what it says.
-    var eligible = state.script === "romaji" ? pool.filter(function (w) { return !!w.romaji; }) : pool;
+    // Hiragana / Katakana mean words that are really written that way --
+    // native words (their reading is hiragana, whether or not the word has
+    // kanji) or loanwords (katakana) -- never a word forced into the other
+    // script (ビール as びーる, 水 as ミズ), which just teaches a spelling
+    // nobody uses.
+    var eligible = pool.filter(function (w) {
+      if (state.script === "romaji") return !!w.romaji;
+      if (state.script === "hiragana") return /^[ぁ-ゖー]+$/.test(w.answer);
+      if (state.script === "katakana") return /^[ァ-ヶー]+$/.test(w.answer);
+      return true;
+    });
     // Every eligible word is a candidate; the builder places up to Words of
     // them. Deduped again on the final answer -- folding to one script or to
     // romaji can make two readings spell the same.

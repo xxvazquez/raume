@@ -2594,6 +2594,14 @@ async function main() {
       && !document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwDefaultTable.title);
   })());
 
+  check("Katakana and Hiragana puzzles only use words really written that way -- never a word forced into the other script", (() => {
+    xwPick("script", "katakana");
+    const k = xw.state.puzzle.placements.every(p => /^[ァ-ヶー]+$/.test(p.answer));
+    xwPick("script", "hiragana");
+    const h = xw.state.puzzle.placements.every(p => /^[ぁ-ゖー]+$/.test(p.answer));
+    xwPick("script", "romaji");
+    return k && h;
+  })());
   xwPick("source", "flashcards");
   check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));
 

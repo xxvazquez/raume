@@ -222,7 +222,8 @@ loanword that just echoes its English (*cola* → コーラ).
   vocabulary tables, whether or not they're in flashcards.
 - **Style** — *Crossword* (numbered clue list) or *Arroword* (each clue
   in a square before its answer). **Script** — *Romaji* (default), *Japanese*,
-  *Hiragana* or *Katakana*. **Words** — 8–20. Answers are always readings — kanji is
+  *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) —
+  a word is never forced into a script it isn't written in. **Words** — 8–20. Answers are always readings — kanji is
   never shown or typed.
 - **Solving** — tap a square or a clue and type. Typing follows the word's
   direction; tap a crossing square again to switch. The bar above the grid
