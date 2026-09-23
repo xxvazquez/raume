@@ -4096,4 +4096,7 @@ mark.fc-diff-co {
    the same edge. */
 @media (min-width: 641px) {
   #flashcardsPage { padding-left: max(28px, calc((100% - 900px) / 2)); padding-right: max(28px, calc((100% - 900px) / 2)); }
+  /* Customize and Help: the same, on their own reading widths. */
+  #customizePage { padding-left: max(28px, calc((100% - 720px) / 2)); padding-right: max(28px, calc((100% - 720px) / 2)); }
+  #helpPage { padding-left: max(28px, calc((100% - 680px) / 2)); padding-right: max(28px, calc((100% - 680px) / 2)); }
 }
