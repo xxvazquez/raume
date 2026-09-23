@@ -3090,8 +3090,15 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 /* One table = one white card: its header row on top (chevron, name, progress,
    actions), the words beneath as hairline-separated rows. */
-.fc-manage-table { margin-bottom: 12px; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+/* A category's tables are one inset-grouped card, as on the reference
+   pages: rows back to back, an inset hairline between them (from the title,
+   past the chevron and tile), the card's corners only on the first and last
+   row -- not a stack of separate cards 12px apart. */
+.fc-manage-table { position: relative; background: var(--paper); overflow: hidden; }
+.fc-manage-table:not(.fc-manage-table + .fc-manage-table) { border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card); }
+.fc-manage-table:not(:has(+ .fc-manage-table)) { border-bottom-left-radius: var(--radius-card); border-bottom-right-radius: var(--radius-card); margin-bottom: 12px; }
 .fc-manage-table:last-child { margin-bottom: 0; }
+.fc-manage-table + .fc-manage-table::before { content: ""; position: absolute; top: 0; left: 82px; right: 0; border-top: 1px solid var(--row-line); }
 /* Deliberate columns: [chevron] [ name + progress ] [ Add table · Pause table ].
    A grid, not flex -- the middle column is the only one that flexes (and its
    text ellipsises), so the action buttons keep their own column and never

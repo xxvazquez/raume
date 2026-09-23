@@ -600,7 +600,10 @@ and Help.
   `#flashcardsPage`, so the inline-flex tabs line up too). Customize (720px)
   and Help (680px) centre on their own widths the same way, so no page hugs
   the left edge of a wide window. **Manage** fills
-  that column — its rows are content-driven, not a proportional grid. Its word rows show the plain kanji, not the furigana ruby
+  that column — its rows are content-driven, not a proportional grid. A
+  category's tables are one inset-grouped card (rows back to back, an inset
+  hairline from the title, corners on the first and last row only), as on
+  the reference pages — not a stack of separate cards. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made
   every row a different height so the status glyphs and action buttons never
   lined up. The reading stays one column over (romaji, hidden on a phone).
