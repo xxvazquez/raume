@@ -2937,17 +2937,18 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    into a narrow block. (Genuine explanatory prose still gets a reading-width
    cap; a short note like this does not.) */
 .fc-retention-note { margin: 2px 0 16px; max-width: none; }
-/* Buttons (iOS): tinted secondary by default -- soft accent fill, accent text,
-   no border. .fc-btn-primary is the one filled button; per-row actions
-   (.fc-btn-vocabaction) drop to plain text so a long list isn't a wall of
-   tinted pills. */
+/* Buttons (iOS 26): the secondary button is a white capsule with accent
+   text, a 0.5px hairline and a soft lift (--control-lift) -- the same crisp
+   control as the search field, not a greyish tinted fill. .fc-btn-primary is
+   the one filled button; per-row actions (.fc-btn-vocabaction) drop to plain
+   text so a long list isn't a wall of capsules. */
 .fc-btn {
-  appearance: none; border: 0; background: var(--accent-soft); color: var(--accent-strong);
+  appearance: none; border: 0; background: var(--paper); color: var(--accent-strong); box-shadow: var(--control-lift);
   font: 400 var(--fs-small)/1 var(--font-ui);
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
 }
-.fc-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
+.fc-btn:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
 .fc-btn:active { opacity: .7; }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
 /* The primary action -- a filled button in the deep section tone
@@ -2955,7 +2956,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    tinted buttons around it by fill alone. */
 .fc-btn-primary {
   background: var(--section-strong); color: var(--paper);
-  font-weight: 500;
+  font-weight: 500; box-shadow: none;
 }
 .fc-btn-primary:hover {
   background: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
@@ -3098,7 +3099,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    column of tinted pills; Add is quieter still at rest (it's the common case
    down a long, mostly-untouched list -- exactly like "Add table") and takes
    the tinted fill on hover / focus. */
-.fc-btn-vocabaction { gap: 6px; background: transparent; }
+.fc-btn-vocabaction { gap: 6px; background: transparent; box-shadow: none; }
 .fc-btn-vocabaction:hover { background: var(--accent-soft); }
 .fc-btn-vocabaction[data-action="add"] { color: var(--faint); }
 .fc-btn-vocabaction[data-action="add"]:hover,

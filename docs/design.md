@@ -639,7 +639,8 @@ be scannable at a glance:
 white card — a header row (chevron, icon tile, the name over a quiet "N / M"
 subtitle, table actions; the name wraps rather than truncating) over its words
 as hairline rows of two lines: the kanji with its romaji small and faint
-beside it, the English under them. **Kana**'s group pickers and **Settings**' / **Help**'s
+beside it, the English under them. Secondary buttons everywhere (`.fc-btn`)
+are white capsules with accent text on `--control-lift` — never a grey tint. **Kana**'s group pickers and **Settings**' / **Help**'s
 sections are the same white cards; a picker's rows are checkmark rows with inset
 hairlines (the `legend` is floated into flow so a browser doesn't paint the
 card's background from the legend's midline). The sync chip is a tinted capsule
