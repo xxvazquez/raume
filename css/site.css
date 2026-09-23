@@ -2566,7 +2566,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      look instead of adopting that anchor. */
   .vocab td:nth-child(2) { vertical-align: middle !important; }
   /* Drop the row actions in print. */
-  .sort-button, .row-hide-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
+  .sort-button, .row-hide-btn, .row-info-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   .view-mode { display: none !important; }
   /* A white glyph on an unprinted tile would vanish. */
   #vocabulary .section-head > .section-icon:not(.section-icon-empty) { background: none !important; color: var(--muted) !important; }
@@ -2675,6 +2675,9 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
   padding: 9px 13px; border-radius: 12px; background: var(--paper); color: var(--ink);
   box-shadow: var(--shadow-menu); font-size: var(--fs-small); line-height: 1.45;
 }
+/* The ⓘ popover: one line per grammar note on the row. */
+.role-pop-list { max-width: min(300px, calc(100vw - 16px)); }
+.role-pop-line + .role-pop-line { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--row-line); }
 .role-pop::after {
   content: ""; position: absolute; left: var(--arrow-x, 50%); bottom: -5px; width: 10px; height: 10px;
   margin-left: -5px; background: var(--paper); transform: rotate(45deg); border-radius: 0 0 3px 0;
@@ -2713,6 +2716,22 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 .row-actions { flex: 0 0 auto; display: flex; align-items: center; white-space: nowrap; }
+/* Grammar badges no longer sit on the row -- the ⓘ opens them all in one
+   popover (js/vocab/interactions.js openInfoPop). They stay in the DOM as
+   its data and for screen readers (their aria-labels), just not painted. */
+.meaning-cell .row-badges { display: none; }
+.row-info-btn {
+  display: inline-flex; vertical-align: middle; margin-left: 5px; padding: 2px;
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  color: var(--muted); opacity: .75; transition: opacity .12s ease, color .12s ease;
+}
+.row-info-btn:hover, .row-info-btn[aria-expanded="true"] { opacity: 1; color: var(--section-strong); }
+.row-info-btn::after { content: ""; position: absolute; inset: -8px; }
+.row-info-btn { position: relative; }
+/* Nothing to explain while the English is hidden or covered (a particle's
+   role would give the answer away), so the ⓘ fades with the row icons. */
+body.hide-english .vocab .row-info-btn,
+body.selftest-mode .vocab .row-info-btn { visibility: hidden; }
 .fc-toggle-btn,
 .row-hide-btn {
   display: inline-flex;

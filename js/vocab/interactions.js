@@ -1221,7 +1221,48 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       el.setAttribute('aria-expanded', 'true');
       popOwner = el;
     }
+    // The row's ⓘ: every grammar note on that row in one popover -- a line
+    // per badge (verb group, adjective type, each particle), each led by the
+    // badge's own tinted glyph. A plain い/な badge has no note of its own, so
+    // its line just names the type.
+    function openInfoPop(btn) {
+      closePop();
+      if (popBlocked()) return;
+      const row = btn.closest('tr');
+      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge]')] : [];
+      if (!badges.length) return;
+      pop = document.createElement('div');
+      pop.className = 'role-pop role-pop-list';
+      pop.setAttribute('aria-hidden', 'true');
+      pop.lang = 'ja';
+      badges.forEach(function (b) {
+        const line = document.createElement('div');
+        line.className = 'role-pop-line';
+        line.appendChild(badgeGlyph(b));
+        const role = b.dataset.role || (b.dataset.badge + '-adjective');
+        line.appendChild(document.createTextNode(' ' + role));
+        pop.appendChild(line);
+      });
+      document.body.appendChild(pop);
+      const r = btn.getBoundingClientRect();
+      const w = pop.offsetWidth, h = pop.offsetHeight;
+      const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+      const above = r.top - h - 10 >= 8;
+      pop.style.left = left + 'px';
+      pop.style.top = (above ? r.top - h - 10 : r.bottom + 10) + 'px';
+      pop.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
+      pop.classList.toggle('role-pop-below', !above);
+      btn.setAttribute('aria-expanded', 'true');
+      popOwner = btn;
+      popPinned = true;
+    }
     document.addEventListener('click', function (event) {
+      const info = event.target.closest && event.target.closest('.row-info-btn');
+      if (info) {
+        event.stopPropagation();
+        if (popOwner === info) closePop(); else openInfoPop(info);
+        return;
+      }
       const el = event.target.closest && event.target.closest(BADGE_SEL);
       if (el) {
         if (popOwner === el && popPinned) closePop();

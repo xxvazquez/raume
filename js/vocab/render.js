@@ -280,8 +280,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Wrapped in its own cluster so it can sit as a fixed-width flex item
   // pinned to the Meaning cell's right edge (see css/site.css), instead of
   // flowing inline after the text at a position that drifts with its length.
-  function rowActions(vocabId) {
-    return '<span class="row-actions">' + flashcardToggle(vocabId) + rowHideButton() + '</span>';
+  // A row with grammar to explain (verb group, adjective type, the particles
+  // it takes) gets one ⓘ instead of a strip of capsules beside the meaning:
+  // tapping it opens the popover listing every one of them
+  // (js/vocab/interactions.js openInfoPop). The English keeps the width.
+  var INFO_ICON = '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg>';
+  function rowInfoButton() {
+    return '<button type="button" class="row-info-btn" aria-label="Grammar notes" aria-expanded="false">' + INFO_ICON + '</button>';
+  }
+  function rowActions(vocabId, hasInfo) {
+    return '<span class="row-actions">' + flashcardToggle(vocabId) + (hasInfo ? rowInfoButton() : '') + rowHideButton() + '</span>';
   }
   // The flex row lives on a <div> wrapper, not the <td> itself -- table-layout:
   // fixed's column-width percentages stop being respected on a cell whose own
@@ -294,8 +302,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // stays out of sorting and search; anything a badge needs to explain opens
   // in a popover on click (js/vocab/interactions.js), not a permanent line
   // under the meaning.
+  // The badges stay in the row (hidden -- .row-badges) as the data the ⓘ
+  // popover reads, and still reach a screen reader through their labels.
   function meaningCell(english, vocabId, badges) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' + (badges || '') + rowActions(vocabId) + '</div></td>';
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' +
+      (badges ? '<span class="row-badges">' + badges + '</span>' : '') + rowActions(vocabId, !!badges) + '</div></td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
   // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's

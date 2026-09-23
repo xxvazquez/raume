@@ -85,11 +85,12 @@ row. Grammatical **particles are blue and bold** everywhere.
 - **Hide a row** (eye icon) marks a word as known for now. **Show all**
   brings them back.
 
-### Row badges
+### Grammar notes (ⓘ)
 
-Tap a badge (or hover it with a mouse) for a one-line explanation. Badges are
-suppressed while the English is hidden or covered, so they don't give the
-answer away.
+A row with grammar to explain carries an **ⓘ** beside the hide eye instead of
+a strip of badges: tap it for one popover listing each note, led by its tinted
+badge. It's hidden while the English is hidden or covered, so it can't give
+the answer away. The notes:
 
 | Badge | Meaning | Outlined when… |
 | ----- | ------- | -------------- |

@@ -372,6 +372,23 @@ async function main() {
     document.body.click();
     return opened && !pop();
   })());
+  check("a row with grammar shows one ⓘ instead of badges; it opens every note on the row in one popover", (() => {
+    const row = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => r.querySelectorAll(".row-badges [data-badge]").length >= 2);
+    if (!row) return false;
+    const btn = row.querySelector(".row-info-btn");
+    const hiddenRule = allCssRules.find(r => r.selectorText === ".meaning-cell .row-badges" && r.style.display === "none");
+    btn.click();
+    const pop = document.querySelector(".role-pop-list");
+    const lines = pop ? pop.querySelectorAll(".role-pop-line").length : 0;
+    const expanded = btn.getAttribute("aria-expanded") === "true";
+    btn.click();
+    return !!btn && !!hiddenRule && lines === row.querySelectorAll(".row-badges [data-badge]").length && expanded
+      && !document.querySelector(".role-pop-list");
+  })());
+  check("rows with nothing to explain get no ⓘ", (() => {
+    const plain = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => !r.querySelector(".row-badges"));
+    return !!plain && !plain.querySelector(".row-info-btn");
+  })());
   check("the particle chip is the app's particle blue, and the particle legend explains it", (() => {
     const chip = allCssRules.find(r => r.selectorText === ".particle-chip");
     return !!chip && /var\(--particle\)/.test(chip.style.color) && !!document.querySelector(".particle-legend");

@@ -247,6 +247,11 @@ and Help.
   rows. Changes save as you make them — a number when you leave its field, a
   tick or switch at once — with no Save button; the last direction can't be
   unticked.
+- **Grammar notes** — a row's badges (い / な, 五段 / 一段 / 変格, particle
+  chips) are not painted on the row: they stay in the DOM (`.row-badges`,
+  hidden) as data and for screen readers, and one **ⓘ** (`.row-info-btn`)
+  beside the hide eye opens a popover (`.role-pop-list`) with a line per note,
+  each led by its own tinted glyph. The English keeps the row's full width.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to
