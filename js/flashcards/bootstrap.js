@@ -97,8 +97,11 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-auth-field"><label for="fcPassword">Password</label><input id="fcPassword" type="password" required autocomplete="' + (authMode === "signup" ? "new-password" : "current-password") + '" minlength="6"></div>' +
       (authMode === "signin" ? '<button type="button" class="fc-auth-forgot" id="fcForgotPassword">Forgot password?</button>' : "") +
       '<button type="submit" class="fc-btn">' + (authMode === "signup" ? "Sign up" : "Sign in") + "</button>" +
-      '<div class="fc-auth-switch">' + (authMode === "signup" ? "Already have an account? " : "Need an account? ") +
-      '<button type="button" id="fcAuthSwitch">' + (authMode === "signup" ? "Sign in" : "Sign up") + "</button></div>" +
+      // Only offered while the project accepts new accounts (config.allowSignups).
+      ((window.RaumeStudy.config && window.RaumeStudy.config.allowSignups) || authMode === "signup"
+        ? '<div class="fc-auth-switch">' + (authMode === "signup" ? "Already have an account? " : "Need an account? ") +
+          '<button type="button" id="fcAuthSwitch">' + (authMode === "signup" ? "Sign in" : "Sign up") + "</button></div>"
+        : "") +
       "</form>";
   }
   function bindAuthForm() {

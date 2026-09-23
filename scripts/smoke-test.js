@@ -1669,6 +1669,22 @@ async function main() {
   }
 
   document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]').click();
+  check("with sign-ups off (config.allowSignups false) the form offers Sign in only -- no Sign up link that would just error", (() => {
+    // The page is seeded unconfigured (no auth form at all), so point it at a
+    // placeholder project just long enough to render the form -- rendering
+    // never touches the network.
+    const cfg = window.RaumeStudy.config;
+    cfg.url = "https://example.invalid"; cfg.anonKey = "test";
+    cfg.allowSignups = false;
+    window.RaumeStudy.flashcards.render();
+    const off = !document.getElementById("fcAuthSwitch") && !!document.getElementById("fcEmail");
+    cfg.allowSignups = true;
+    window.RaumeStudy.flashcards.render();
+    const on = !!document.getElementById("fcAuthSwitch");
+    cfg.url = ""; cfg.anonKey = ""; delete cfg.allowSignups;
+    window.RaumeStudy.flashcards.render();
+    return off && on;
+  })());
   const guestBtn = document.getElementById("fcUseGuest");
   check("a \"Continue without an account\" option is offered alongside signing in", !!guestBtn);
   // Neither entry button is a filled primary -- the tinted "This device only"

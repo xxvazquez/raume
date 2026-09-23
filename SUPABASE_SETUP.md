@@ -20,6 +20,15 @@ The Flashcards section stores your learning data (which vocab entries you've add
 1. Go to **Authentication** → **Providers** and confirm **Email** is enabled (it is by default).
 2. Under **Authentication** → **Settings**, you can turn off "Confirm email" if you'd rather sign in immediately without clicking an email link — reasonable for a personal single-user site, but optional.
 
+### Keep it to your own account
+
+Once you've created your account, turn off **Authentication** → **Sign In /
+Providers** → **User Signups** → **Allow new users to sign up**. It covers every
+provider, so nobody else can create an account; your own sign-in, sync and
+"Forgot password?" keep working. The app matches it with `allowSignups: false`
+in `js/config.js`, which hides the "Sign up" link. To add an account later,
+turn both on, sign up, then turn both off again.
+
 ## 4. Enable "Forgot password?"
 
 The app's own "Forgot password?" link calls Supabase's `resetPasswordForEmail`,

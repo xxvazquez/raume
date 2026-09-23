@@ -247,6 +247,7 @@ never mix.
 | Network | None | Syncs; works offline and catches up on reconnect |
 | Backup | Settings › Back up & restore | The account is the backup |
 | Custom tables | — | Yes |
+| New accounts | — | Off by default: the project's sign-ups are closed and `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |
 
 - **Local-first** — reviews, customisations and custom words apply
   immediately. Anything that couldn't sync is queued, survives a reload and
