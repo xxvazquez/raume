@@ -24,9 +24,9 @@ system, and the sections below cover each part of it.
   `--fs-section-title` 19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji`
   for the Japanese text itself) is shared by the reference and Flashcards
   sides — a size that
-  duplicates a token is written as the token. Labels are **sentence case**;
-  the one ALL-CAPS label left is the masthead's `JAPANESE REFERENCE` kicker
-  (tracked wide, a brand mark rather than a label). Deliberate literal sizes
+  duplicates a token is written as the token. Labels are **sentence case**,
+  everywhere — no ALL-CAPS labels at all (the masthead is the wordmark alone).
+  Deliberate literal sizes
   remain only where a token would be wrong: the prompt and kana glyphs on the
   review card, the verdict badge (a test reads its declared size) and tiny
   chips. The sole exception is a **particle** (`.particle`,

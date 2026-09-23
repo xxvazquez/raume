@@ -426,16 +426,6 @@ body {
   text-decoration: none;
   line-height: 1;
 }
-/* The one uppercase label left in the app, tracked wide on purpose -- a brand
-   kicker beside the wordmark, not a label for content. */
-.masthead-tag {
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: .17em;
-  text-transform: uppercase;
-  color: var(--muted);
-  white-space: nowrap;
-}
 /* iOS bar-button glyphs: no box, no outline -- a bare 20px icon in secondary
    grey inside a 40px tap target. The page a glyph opens (Customize, Help)
    shows as the tinted one, the way a selected bar item does on iOS. */
@@ -2444,7 +2434,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      lets the ground run to the edge; the large title below does the naming. */
   .masthead { padding: 18px 16px 10px; background: var(--group-ground); }
   /* Make room for the help / customize / theme controls on a narrow bar. */
-  .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
   .page { padding: 14px 16px 40px; }
   .cat-heading { margin-top: 22px; }
