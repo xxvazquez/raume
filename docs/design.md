@@ -625,10 +625,13 @@ be scannable at a glance:
   Card progress, Reviews this week, Due next 7 days, Missed today, Leeches
   (only when there are any) and Words to review. The two small charts still pair
   side by side on a wide window;
-- **"N to study"** (`.fc-next-review`) is a plain title and sub-line inside the
-  "right now" card — no bar, no tinted box; the signal is the title's colour
-  alone: coral when cards are waiting (an attention state, not an error), quiet
-  sage (`-clear`) when the queue is empty;
+- **"Right now"** leads with the count: a large 44px ink figure with "cards to
+  study" under it and one secondary line (what's in the queue, or when the
+  next review lands) — a number to act on, never a coral warning line. Study
+  now sits on the same row (`.fc-now-row`), trailing. Nothing due: a sage tick
+  in a soft circle over a larger "All caught up", Study now disabled in place.
+  Today is one quiet footer line under a hairline — "Today", a thin 4px sage
+  bar, "N of M";
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender — no shadow, it outranks the tinted buttons by fill alone;
 - **stat tiles** — a plain figure over a caption, no edge rule. The one signal

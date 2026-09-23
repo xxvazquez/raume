@@ -3733,50 +3733,52 @@ mark.fc-diff-co {
 .fc-status-due { color: var(--warn-strong); font-weight: 500; }
 .fc-status-archived { color: var(--faint); }
 
-/* Top row: Next review + Today's progress, side by side on wide screens and
-   stacked on narrow. */
-.fc-top-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: start;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-/* One shared grid past 620px for the Dashboard's three multi-item rows --
-   this one, .fc-stats-grid and .fc-viz-grid -- so a seam in one lines up with
+/* "Right now": the count (or All caught up) and Study now share one row --
+   the headline and the thing you do about it side by side -- then today's
+   progress as one quiet footer line under a hairline. */
+.fc-now-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fc-now-btn { flex: none; min-height: 40px; padding: 8px 20px; }
+/* One shared grid past 620px for the Dashboard's multi-item rows --
+   .fc-stats-grid and .fc-viz-grid -- so a seam in one lines up with
    a seam in another instead of three grids each rounding independently (each
    was previously its own auto-fit / 2-col / 4-col system). Placed after all
    three base rules so it wins the cascade regardless of source order. */
 @media (min-width: 620px) {
-  .fc-top-row, .fc-stats-grid, .fc-viz-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-  .fc-next-review, .fc-today { grid-column: span 6; }
+  .fc-stats-grid, .fc-viz-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
   .fc-stat-tile { grid-column: span 3; }
   .fc-viz-card { grid-column: span 6; }
 }
 
-.fc-today-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 9px; }
-.fc-today-label { color: var(--ink); font-weight: 500; font-size: var(--fs-nav-sub); }
-.fc-today-count { color: var(--muted); font-size: var(--fs-small); }
-.fc-today-pct { margin-left: auto; color: var(--ink); font-weight: 500; font-size: var(--fs-small); }
-.fc-progress { border-radius: 999px; overflow: hidden; background: var(--surface); }
-.fc-progress-svg { display: block; width: 100%; height: 6px; }
-.fc-progress-track { fill: var(--surface); }
-.fc-progress-fill { fill: var(--accent); }
-
-/* Next review -- the dashboard's "here's what needs you" line paired with the
-   Study now button below it. Just a title and a sub-line inside the .fc-dash-now
-   card; the signal is the title's colour alone (no edge bar, no tinted box).
-   Cards waiting to be studied is an attention state (not an error): coral. An
-   empty queue is the calm, nothing-to-do state -- a quiet sage green. */
-.fc-next-review {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 0;
+.fc-today {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--row-line);
+  color: var(--muted); font-size: var(--fs-small);
 }
-.fc-next-review-title { font-weight: 500; font-size: var(--fs-nav-sub); }
-.fc-next-review-due .fc-next-review-title { color: var(--warn-strong); }
-.fc-next-review-clear .fc-next-review-title { color: var(--right-strong); }
-.fc-next-review-sub { color: var(--muted); font-size: var(--fs-small); }
-.fc-next-review-due .fc-next-review-sub { color: color-mix(in srgb, var(--warn-strong) 70%, var(--muted)); }
+.fc-today .fc-progress { flex: 1; }
+.fc-today-count { color: var(--ink); font-variant-numeric: tabular-nums; }
+.fc-progress { border-radius: 999px; overflow: hidden; background: var(--surface); }
+.fc-progress-svg { display: block; width: 100%; height: 4px; }
+.fc-progress-track { fill: var(--surface); }
+/* Sage -- progress made, the "done" tone. */
+.fc-progress-fill { fill: var(--right); }
+
+/* Next review -- the dashboard's "here's what needs you", beside Study now.
+   Cards to study: the count is the headline, large ink, with "cards to
+   study" under it -- a number to act on, not a coloured warning line.
+   Nothing due: a sage tick over "All caught up". The second line says what's
+   in the queue or when the next review lands. */
+.fc-next-review { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.fc-next-review-count {
+  font-size: 44px; line-height: .95; font-weight: 500; letter-spacing: -.02em;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.fc-next-review-check {
+  display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  margin-bottom: 8px; border-radius: 50%; background: var(--right-soft); color: var(--right-strong);
+}
+.fc-next-review-title { font-size: var(--fs-subhead); color: var(--ink); margin-top: 4px; }
+.fc-next-review-clear .fc-next-review-title { font-size: 26px; line-height: 1.1; font-weight: 500; letter-spacing: -.01em; margin-top: 0; }
+.fc-next-review-sub { color: var(--muted); font-size: var(--fs-small); margin-top: 2px; text-wrap: balance; }
 
 /* "Missed today" -- a shortlist of words to revisit. Each row is one unit:
    the Japanese pair (strongest), one "romaji · english" supporting line, and

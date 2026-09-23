@@ -2080,7 +2080,7 @@ async function main() {
       const rule = allCssRules.find(r => r.selectorText === "#fcPanelDashboard");
       return !!rule && parseInt(rule.style.maxWidth, 10) > 0;
     })());
-    check("the top row, the stat tiles and the viz cards share one 12-col grid past 620px, so their seams line up", (() => {
+    check("the stat tiles and the viz cards share one 12-col grid past 620px, so their seams line up", (() => {
       const media = allCssRules.find(r => r.media && /min-width:\s*620px/.test(r.media.mediaText));
       if (!media) return false;
       const rules = [...media.cssRules];
@@ -2089,7 +2089,14 @@ async function main() {
         return r && r.style.gridTemplateColumns;
       };
       const grid12 = /repeat\(\s*12\s*,/;
-      return grid12.test(cols(".fc-top-row") || "") && grid12.test(cols(".fc-stats-grid") || "") && grid12.test(cols(".fc-viz-grid") || "");
+      return grid12.test(cols(".fc-stats-grid") || "") && grid12.test(cols(".fc-viz-grid") || "");
+    })());
+    check("the right-now card leads with the count, large, and puts Study now on the same row -- no coral warning line", (() => {
+      const row = document.querySelector("#fcPanelDashboard .fc-dash-now .fc-now-row");
+      const count = row && row.querySelector(".fc-next-review-count");
+      return !!count && /^\d+$/.test(count.textContent) && !!row.querySelector("#fcStudyNow")
+        && /cards? to study/.test(row.querySelector(".fc-next-review-title").textContent)
+        && !!document.querySelector("#fcPanelDashboard .fc-dash-now > .fc-today");
     })());
   }
 
@@ -2213,7 +2220,7 @@ async function main() {
     // review the moment it lands. Guest here; the signed-in outbox path adds to
     // the same computation and needs live verification.
     const todayText = (document.querySelector("#fcPanelDashboard .fc-today-count") || {}).textContent || "";
-    const reviewed = parseInt((todayText.match(/(\d+)\s*\//) || [])[1], 10) || 0;
+    const reviewed = parseInt((todayText.match(/(\d+)\s+of\b/) || [])[1], 10) || 0;
     const cols = document.querySelectorAll("#fcPanelDashboard .fc-week-col");
     const todayCount = parseInt((cols[cols.length - 1].querySelector(".fc-week-count") || {}).textContent, 10) || 0;
     return reviewed >= 1 && todayCount >= 1;

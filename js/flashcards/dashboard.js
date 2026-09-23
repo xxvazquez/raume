@@ -42,6 +42,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // The verdict tag's icon -- same line-icon idiom as the speaker button
   // (js/vocab/render.js), just two glyphs, kept local since nothing else uses them.
   var VERDICT_OK_ICON = '<svg width="10" height="10" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  // The dashboard's "All caught up" tick -- the same mark, a size up.
+  var CHECK_ICON = '<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
   var VERDICT_BAD_ICON = '<svg width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
   // A near-miss (exactly one letter off) reads as a caution, not a flat pass
   // or fail -- same stroke style as the two icons above.
@@ -133,9 +135,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // "your stats" (the 4 tiles) and "your progress" (the charts) -- each
     // item keeping its own colour/accent but losing its individual box.
     panel.innerHTML =
+      // What needs you, with the button that does it on the same row, and
+      // today's progress as one quiet line underneath.
       '<div class="fc-dash-now">' +
-      '<div class="fc-top-row">' + nextReviewHtml(now, ready, newInSession) + todayProgressHtml() + "</div>" +
-      '<div class="fc-cta-row fc-cta-row-primary"><button type="button" class="fc-btn fc-btn-primary" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
+      '<div class="fc-now-row">' + nextReviewHtml(now, ready, newInSession) +
+      '<button type="button" class="fc-btn fc-btn-primary fc-now-btn" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
+      todayProgressHtml() +
       "</div>" +
       '<div class="fc-dash-stats">' +
       '<div class="fc-stats-grid">' +
@@ -176,13 +181,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var target = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
     var done = reviewInsights ? reviewInsights.reviewedToday : 0;
     var pct = target > 0 ? Math.min(100, Math.round(done / target * 100)) : (done > 0 ? 100 : 0);
-    return '<div class="fc-today">' +
-      '<div class="fc-today-head"><span class="fc-today-label">Today</span>' +
-      '<span class="fc-today-count">' + done + " / " + target + " cards</span>" +
-      '<span class="fc-today-pct">' + pct + '%</span></div>' +
+    return '<div class="fc-today"><span class="fc-today-label">Today</span>' +
       '<div class="fc-progress"><svg viewBox="0 0 100 6" preserveAspectRatio="none" class="fc-progress-svg" aria-hidden="true">' +
       '<rect class="fc-progress-track" x="0" y="0" width="100" height="6"></rect>' +
-      '<rect class="fc-progress-fill" x="0" y="0" width="' + pct + '" height="6"></rect></svg></div></div>';
+      '<rect class="fc-progress-fill" x="0" y="0" width="' + pct + '" height="6"></rect></svg></div>' +
+      '<span class="fc-today-count">' + done + " of " + target + "</span></div>";
   }
 
   // "in 8 minutes" for something imminent, "Tomorrow at 09:30" for something
@@ -229,13 +232,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var title, sub, variant;
     if (readyNow > 0) {
       variant = "due";
-      title = readyNow + " to study";
+      title = readyNow === 1 ? "card to study" : "cards to study";
       if (laterToday > 0) sub = laterToday + " more due later today";
       else if (nextTs) sub = "Next review: " + friendlyWhen(now, nextTs);
       // Fresh deck -- nothing scheduled to return yet. Describe the queue so
       // the card carries a second line instead of just a bare count.
       else if (ready.length > 0) sub = ready.length + " due now, " + newInSession + " new";
-      else sub = "All new — nothing reviewed yet";
+      else sub = "All new so far";
     } else if (laterToday > 0) {
       variant = "clear";
       title = "All caught up";
@@ -245,7 +248,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       title = "All caught up";
       sub = "Next review: " + (nextTs ? friendlyWhen(now, nextTs) : "no cards scheduled yet");
     }
-    return '<div class="fc-next-review fc-next-review-' + variant + '">' +
+    // Due: the count is the headline, large, with its caption under it.
+    // Clear: a sage tick over "All caught up".
+    var lead = variant === "due"
+      ? '<span class="fc-next-review-count">' + readyNow + "</span>"
+      : '<span class="fc-next-review-check" aria-hidden="true">' + CHECK_ICON + "</span>";
+    return '<div class="fc-next-review fc-next-review-' + variant + '">' + lead +
       '<span class="fc-next-review-title">' + esc(title) + "</span>" +
       (sub ? '<span class="fc-next-review-sub">' + esc(sub) + "</span>" : "") + "</div>";
   }

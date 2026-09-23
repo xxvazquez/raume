@@ -102,6 +102,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Cards to study</span><span class="help-desc">What Study now would start with: due reviews plus today’s new cards.</span></li>' +
       '<li><span class="help-term">Today</span><span class="help-desc">Reviews done against your daily new-card target.</span></li>' +
       '<li><span class="help-term">Next review</span><span class="help-desc">When the next card is due.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
