@@ -96,7 +96,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // Before FSRS has enough reviews to forecast, spell it out -- a lone "—"
     // in a stat tile reads as a broken value.
     var retentionPending = stats.estimatedRetention == null;
-    var retentionText = retentionPending ? "Not enough reviews yet" : Math.round(stats.estimatedRetention * 100) + "%";
+    var retentionText = retentionPending ? "After a few reviews" : Math.round(stats.estimatedRetention * 100) + "%";
     var settings = getCache().settings;
     // A couple of points under target is normal noise, not a real dip -- only
     // flag it once it's meaningfully below what Settings asks FSRS to aim for,
@@ -533,11 +533,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         '<rect class="' + barCls + '" x="0" y="' + (100 - barH) + '" width="10" height="' + barH + '"></rect></svg>' +
         '<span class="fc-week-label">' + esc(d.label) + "</span></div>";
     }).join("");
-    // A week with no reviews at all: say so, so the bare day axis doesn't read
-    // as a broken chart.
+    // A week with no reviews at all: one line instead of an empty chart --
+    // seven flat baselines under a tall blank space read as broken.
     var noneYet = days.every(function (d) { return !d.count; });
-    return (noneYet ? '<p class="fc-note fc-week-none">No reviews yet this week.</p>' : "") +
-      '<div class="fc-week-chart" role="img" aria-label="Reviews per day over the last 7 days">' + cols + "</div>";
+    if (noneYet) return '<p class="fc-note fc-week-none">No reviews yet this week.</p>';
+    return '<div class="fc-week-chart" role="img" aria-label="Reviews per day over the last 7 days">' + cols + "</div>";
   }
 
   // --- Dashboard: due forecast ---

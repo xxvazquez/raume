@@ -1662,7 +1662,7 @@ async function main() {
   check("the guest button is a quiet button, not a filled primary", guestBtn.classList.contains("fc-btn") && !guestBtn.classList.contains("fc-btn-primary"));
   guestBtn.click();
   check("choosing it goes straight to the Dashboard tab, no session needed", !!document.querySelector("#fcPanelDashboard"));
-  check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("Using this device only"));
+  check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("This device only"));
 
   // The vocabulary page's own "Add to flashcards" (table-options kebab) used
   // to call addVocabsRemote/fetchAllFromServer unconditionally, so it threw
@@ -1910,8 +1910,9 @@ async function main() {
     const legend = document.querySelector("#fcPanelDashboard .fc-breakdown-legend");
     return legend && /New/.test(legend.textContent) && /Learning/.test(legend.textContent) && /Review/.test(legend.textContent);
   })());
-  check("the reviews-this-week chart marks today's column and only that one", (() => {
+  check("reviews this week: with no reviews it's one line, not an empty chart; otherwise today's column (only) is marked", (() => {
     const cols = document.querySelectorAll("#fcPanelDashboard .fc-week-col");
+    if (document.querySelector("#fcPanelDashboard .fc-week-none")) return cols.length === 0;
     if (cols.length !== 7) return false;
     return cols[6].classList.contains("fc-week-col-today")
       && [...cols].slice(0, 6).every(c => !c.classList.contains("fc-week-col-today"));

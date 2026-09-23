@@ -248,8 +248,8 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     }
     var stats = computeStats(new Date());
     var identityHtml = isGuestMode()
-      ? '<div class="fc-signed-in-as">Using this device only — not backed up <button type="button" id="fcGoAccount">Sign in to sync</button></div>'
-      : '<div class="fc-signed-in-as">Signed in as ' + esc(currentUser().email) + ' <button type="button" id="fcSignOut">Sign out</button></div>';
+      ? '<div class="fc-signed-in-as"><span class="fc-signed-in-text">This device only · not backed up</span> <button type="button" id="fcGoAccount">Sign in</button></div>'
+      : '<div class="fc-signed-in-as"><span class="fc-signed-in-text">Signed in as ' + esc(currentUser().email) + '</span> <button type="button" id="fcSignOut">Sign out</button></div>';
     var pushed = PUSHED_TABS[activeTab];
     if (!pushed) lastMainTab = activeTab;
     // Four segments -- iOS's segmented control stops reading at a glance

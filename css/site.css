@@ -2374,7 +2374,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 @media (max-width: 640px) {
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   /* A touch more head-room -- the wordmark was sitting right against the top edge. */
-  .masthead { padding: 18px 16px 10px; background: var(--paper); }
+  /* On the page's own grey ground, not a white band across the top -- iOS 26
+     lets the ground run to the edge; the large title below does the naming. */
+  .masthead { padding: 18px 16px 10px; background: var(--group-ground); }
   /* Make room for the help / customize / theme controls on a narrow bar. */
   .masthead-tag { display: none; }
   .masthead-right { gap: 8px; }
@@ -3338,7 +3340,8 @@ mark.fc-diff-co {
    read as oversized when it scaled up. Placed before the kana -kana / -romaji
    rules so those, at equal specificity, still win for the Kana drill (their
    own sizes -- unaffected). */
-.fc-review-card .fc-prompt { font-size: 26px; line-height: 1.28; margin-bottom: 22px; }
+/* The prompt is the one thing on the card -- iOS large-title scale. */
+.fc-review-card .fc-prompt { font-size: 32px; line-height: 1.25; margin-bottom: 22px; }
 
 /* Kana tab. The review card reuses every .fc-review-* / .fc-rating-* rule
    above; only the prompt glyph and the group picker need their own styling.
@@ -3404,7 +3407,7 @@ mark.fc-diff-co {
 @media (max-width: 560px) {
   .fc-kana-fieldset { flex: 1 1 100%; }
 }
-.fc-kana-group { display: flex; align-items: center; gap: 8px; font-size: var(--fs-nav-sub); color: var(--ink); cursor: pointer; }
+.fc-kana-group { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink); cursor: pointer; }
 .fc-kana-group-n { color: var(--faint); font-variant-numeric: tabular-nums; font-size: var(--fs-micro); }
 .fc-kana-summary { margin: 12px 0 16px; font-size: var(--fs-small); color: var(--muted); }
 
@@ -3467,8 +3470,11 @@ mark.fc-diff-co {
 .fc-auth-error { color: var(--danger); font-size: var(--fs-small); margin-bottom: 10px; }
 .fc-auth-switch { margin-top: 12px; font-size: var(--fs-small); color: var(--muted); }
 .fc-auth-switch button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
+/* One line, always: the status truncates before it ever wraps, and the
+   action (Sign in / Sign out) keeps its place at the end. */
 .fc-signed-in-as { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--muted); font-size: var(--fs-small); }
-.fc-signed-in-as button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
+.fc-signed-in-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-signed-in-as button { flex: 0 0 auto; appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; white-space: nowrap; }
 /* Offline / pending-sync status. The only signal that reviews aren't on the
    account yet, so it has to actually register -- a filled pill with an edge,
    not the hairline ghost it used to be. Still quiet by the site's standards:
@@ -3584,7 +3590,7 @@ mark.fc-diff-co {
   padding: 8px 6px; border-radius: 6px;
   transition: background .12s ease;
 }
-.fc-kana-group { font-size: var(--fs-nav-sub); }
+.fc-kana-group { font-size: 15px; } /* an iOS list row, not a caption */
 .fc-kana-group:hover,
 .fc-direction-check:hover {
   background: color-mix(in srgb, var(--section) 7%, transparent);
