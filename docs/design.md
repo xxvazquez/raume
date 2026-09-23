@@ -532,17 +532,16 @@ and Help.
     is the placeholder, also in ink) and becomes a `--field-fill` well with an
     inset focus ring only while being edited — no grey box per row; a
     plain-text **Reset**.
-  - **Reordering a table or a category** has two affordances doing the same
-    job through the same `tc().setTableOrder` / `setCategoryOrder` calls:
-    the ▲▼ buttons (`.cz-move-btn`, one step at a time, disabled at either
-    end) are the accessible path — keyboard, screen reader — and stay exactly
-    that; a `.cz-drag-handle` grip (6 dots, `tabindex="-1"`, `aria-hidden`,
-    so it never enters the tab order or gets announced as a control nobody
-    can operate from a keyboard) is a pointer-only sibling for moving
-    something further in one gesture instead of many taps, which the ▲▼
-    buttons alone stayed fiddly at even after their touch target grew
-    (`4207a63`). Both live in the same row/`<summary>`, `.cz-drag-handle`'s
-    `margin-left: auto` pushing it flush to the trailing edge. On a category
+  - **Reordering a table or a category** has one control, as in iOS's edit
+    mode: the `.cz-drag-handle` grip (6 dots) at the trailing edge. Drag it,
+    or focus it and press ↑ / ↓ to move one step — a real button in the tab
+    order (focus ring, 44pt hit area), labelled with its place ("Reorder
+    Drinks, 2 of 7") so a screen reader hears where the item landed; focus
+    follows it through the re-render. Both paths go through
+    `tc().setTableOrder` / `setCategoryOrder`. (Separate ▲▼ buttons beside
+    each row were dropped, 2026-09-23: two controls for one job.)
+    `.cz-drag-handle`'s `margin-left: auto` pushes it flush to the trailing
+    edge. On a category
     row the chevron (`.disclosure-caret::after`) takes that slack instead and
     the grip follows it (`order`), so every grip, category or table, sits in
     one column at the trailing edge — two auto margins would split the space

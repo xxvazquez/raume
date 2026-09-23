@@ -1486,15 +1486,6 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   display: flex; align-items: center; gap: 10px;
   padding: 9px 0; border-bottom: 1px solid var(--row-line);
 }
-.cz-move { flex: 0 0 auto; display: flex; flex-direction: column; }
-.cz-move-btn {
-  appearance: none; border: 0; background: transparent; padding: 0;
-  width: 20px; height: 15px; display: flex; align-items: center; justify-content: center;
-  color: var(--faint); cursor: pointer;
-}
-.cz-move-btn:hover:not([disabled]) { color: var(--ink); }
-.cz-move-btn[disabled] { opacity: .28; cursor: default; }
-.cz-group-title .cz-move { flex-direction: row; margin-right: 2px; }
 /* The drag handle -- margin-left: auto pushes it flush to the row's trailing
    edge, same technique .disclosure-caret::after already uses for the
    category chevron, so on a category row the two end up glued together at
@@ -1506,6 +1497,11 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   color: var(--faint); cursor: grab; touch-action: none;
 }
 .cz-drag-handle:hover { color: var(--ink); }
+/* A real control now (arrow keys move it): a visible focus ring, and a 44pt
+   hit area around the small glyph. */
+.cz-drag-handle { position: relative; border-radius: 8px; }
+.cz-drag-handle:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; color: var(--ink); }
+.cz-drag-handle::after { content: ""; position: absolute; inset: -8px; }
 /* A category row has both the handle and the caret, each with an auto
    margin -- they split the free space, which left each handle stranded
    mid-row at a different spot. The caret takes the slack and the handle
@@ -3935,15 +3931,14 @@ mark.fc-diff-co {
 
 /* --- Touch targets and iOS text-size hygiene ---------------------------------
    Apple's minimum hit area is 44 x 44pt. Where the visible control is smaller
-   (a 32px ⋯ button, 20 x 15 reorder arrows) an invisible ::after extends the
+   (a 32px ⋯ button, a 28px drag handle) an invisible ::after extends the
    tappable area without changing the layout; a collapsed table's whole row is
    the toggle, not just its title text. Text fields keep their designed size
    (14px and under) on a phone too: iOS Safari's zoom-on-focus is switched off
    by js/theme-init.js adding maximum-scale=1 on iOS only -- iOS still honours
    pinch-zoom regardless, and other platforms never zoom on focus. */
-.section-menu-btn, .cz-move-btn { position: relative; }
+.section-menu-btn { position: relative; }
 .section-menu-btn::after { content: ""; position: absolute; inset: -6px; }
-.cz-move-btn::after { content: ""; position: absolute; inset: -8px -10px; }
 .view-mode button, .fc-manage-filters button { min-height: 32px; }
 .tindex-trigger { min-height: 32px; }
 .options-btn { min-width: 44px; justify-content: center; }

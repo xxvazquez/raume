@@ -1333,13 +1333,19 @@ async function main() {
 
   console.log("Customize page: reordering tables and categories");
   const foodGroup = () => [...document.querySelectorAll("#customizePage .cz-group")].find(g => g.querySelector(".cz-group-name").textContent === "Food & Ingredients");
-  check("rows carry move-up / move-down controls", foodGroup().querySelectorAll(".cz-row .cz-move-up").length > 0 && foodGroup().querySelectorAll(".cz-row .cz-move-down").length > 0);
-  check("the first row's move-up and the last row's move-down are disabled", (() => {
+  // One reorder control, as in iOS edit mode: the drag handle, which also
+  // moves its item one step on Up / Down.
+  const arrowKey = (el, key) => el.dispatchEvent(new window.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+  check("no separate move-up / move-down buttons -- the drag handle is the one reorder control", !document.querySelector("#customizePage .cz-move-btn"));
+  check("Up on the first row's handle and Down on the last's change nothing", (() => {
+    const before = [...foodGroup().querySelectorAll(".cz-row")].map(r => r.dataset.tableId).join();
     const rows = [...foodGroup().querySelectorAll(".cz-row")];
-    return rows[0].querySelector(".cz-move-up").disabled && rows[rows.length - 1].querySelector(".cz-move-down").disabled;
+    arrowKey(rows[0].querySelector(".cz-drag-handle"), "ArrowUp");
+    arrowKey([...foodGroup().querySelectorAll(".cz-row")].pop().querySelector(".cz-drag-handle"), "ArrowDown");
+    return [...foodGroup().querySelectorAll(".cz-row")].map(r => r.dataset.tableId).join() === before && !window.RaumeStudy.tableCustom.hasCustomOrder();
   })());
   const foodIdsBefore = [...foodGroup().querySelectorAll(".cz-row")].map(r => r.dataset.tableId);
-  foodGroup().querySelector(".cz-row .cz-move-down").click();
+  arrowKey(foodGroup().querySelector(".cz-row .cz-drag-handle"), "ArrowDown");
   const foodIdsAfter = [...foodGroup().querySelectorAll(".cz-row")].map(r => r.dataset.tableId);
   check("moving a table down swaps it past the next one", foodIdsAfter[0] === foodIdsBefore[1] && foodIdsAfter[1] === foodIdsBefore[0]);
   check("the vocabulary section order follows in place", (() => {
@@ -1353,12 +1359,11 @@ async function main() {
   })());
   const vocabCats = [...document.querySelectorAll("#customizePage .cz-group-name")].map(e => e.textContent).filter(c => window.RaumeStudy.vocab.sectionOf(c) === "vocabulary");
   const firstVocabGroup = [...document.querySelectorAll("#customizePage .cz-group")].find(g => g.querySelector(".cz-group-name").textContent === vocabCats[0]);
-  check("a multi-category section's headers carry move controls", !!firstVocabGroup.querySelector(".cz-group-title .cz-move-down"));
-  check("Grammar (single category in its section) has no category move controls", (() => {
-    const g = [...document.querySelectorAll("#customizePage .cz-group")].find(x => x.querySelector(".cz-group-name").textContent === "Grammar");
-    return !g.querySelector(".cz-group-title .cz-move-btn");
+  check("the moved row's handle keeps focus and names its new position", (() => {
+    const h = document.activeElement;
+    return !!h && h.classList.contains("cz-drag-handle") && h.closest(".cz-row").dataset.tableId === foodIdsBefore[0] && / 2 of \d+$/.test(h.getAttribute("aria-label"));
   })());
-  firstVocabGroup.querySelector(".cz-group-title .cz-move-down").click();
+  arrowKey(firstVocabGroup.querySelector(".cz-group-title .cz-drag-handle"), "ArrowDown");
   const vocabCatsAfter = [...document.querySelectorAll("#customizePage .cz-group-name")].map(e => e.textContent).filter(c => window.RaumeStudy.vocab.sectionOf(c) === "vocabulary");
   check("moving a category down reorders the section", vocabCatsAfter[0] === vocabCats[1] && vocabCatsAfter[1] === vocabCats[0]);
   check("...and the vocabulary category headings follow", (() => {
@@ -1373,22 +1378,23 @@ async function main() {
     return secs[0] === "Cooking Ingredients" && secs[1] === "Drinks";
   })());
 
-  console.log("Customize page: drag-to-reorder (the ▲▼ buttons' pointer-only sibling)");
+  console.log("Customize page: drag-to-reorder");
   // firstVocabGroup (above) is a snapshot from before the move-down + reset
   // clicks already re-rendered #customizePage -- a stale, now-detached node.
   // vocabCats[0] is just the name string, so it's still good as a lookup key
   // for querying the *current* live element fresh each time.
   const freshFirstVocabGroup = () => [...document.querySelectorAll("#customizePage .cz-group")].find(g => g.querySelector(".cz-group-name").textContent === vocabCats[0]);
-  check("every row carries a drag handle, pointer-only -- out of the tab order and hidden from a screen reader (the ▲▼ buttons are that path)", (() => {
+  check("every row carries a drag handle -- a real button in the tab order, labelled with its position, for keyboard and screen-reader users too", (() => {
     const handles = [...foodGroup().querySelectorAll(".cz-row .cz-drag-handle")];
-    return handles.length === 7 && handles.every(h => h.tagName === "BUTTON" && h.tabIndex === -1 && h.getAttribute("aria-hidden") === "true");
+    return handles.length === 7 && handles.every((h, i) => h.tagName === "BUTTON" && h.tabIndex === 0 && !h.hasAttribute("aria-hidden")
+      && new RegExp("^Reorder .+, " + (i + 1) + " of 7$").test(h.getAttribute("aria-label")));
   })());
   check("a multi-category section's header carries one too", !!freshFirstVocabGroup().querySelector(".cz-group-title .cz-drag-handle"));
-  check("Grammar (no category move controls) has no category drag handle either -- nothing to drag it against", (() => {
+  check("Grammar (single category in its section) has no category drag handle -- nothing to drag it against", (() => {
     const g = [...document.querySelectorAll("#customizePage .cz-group")].find(x => x.querySelector(".cz-group-name").textContent === "Grammar");
     return !g.querySelector(".cz-group-title .cz-drag-handle");
   })());
-  check("clicking a category's handle (as a stray click after a drag might) doesn't also toggle its <details> -- same guard the ▲▼ buttons need", (() => {
+  check("clicking a category's handle (as a stray click after a drag might) doesn't also toggle its <details>", (() => {
     const g = freshFirstVocabGroup();
     g.open = false;
     g.querySelector(".cz-group-title .cz-drag-handle").dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
@@ -1413,7 +1419,7 @@ async function main() {
     document.dispatchEvent(new window.PointerEvent("pointermove", Object.assign({}, base, { clientY: toY })));
     document.dispatchEvent(new window.PointerEvent("pointerup", Object.assign({}, base, { clientY: toY })));
   }
-  check("dragging the last row's handle to the top reorders it there, through the same tc().setTableOrder the ▲▼ buttons call", (() => {
+  check("dragging the last row's handle to the top reorders it there, through the same tc().setTableOrder the arrow keys use", (() => {
     const rowsBefore = [...foodGroup().querySelectorAll(".cz-row")];
     const last = rowsBefore[rowsBefore.length - 1]; // Vegetables, A-Z last
     const handle = last.querySelector(".cz-drag-handle");
@@ -1453,7 +1459,7 @@ async function main() {
     document.dispatchEvent(new window.PointerEvent("pointerup", { clientX: 10, clientY: 5, pointerId: 103, bubbles: true, cancelable: true }));
     return collapsedOnPickup;
   })());
-  check("dragging a category's handle past a sibling reorders the section, through the same tc().setCategoryOrder the ▲▼ buttons call", (() => {
+  check("dragging a category's handle past a sibling reorders the section, through the same tc().setCategoryOrder the arrow keys use", (() => {
     const before = [...document.querySelectorAll("#customizePage .cz-groups > .cz-section-block")]
       .find(s => s.querySelector(".cz-section-label")?.textContent.includes("Vocabulary"))
       .querySelector(".cz-section-body");

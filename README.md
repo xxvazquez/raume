@@ -113,8 +113,8 @@ On the **Customize** page (masthead sliders icon):
   Customize) takes it off the reference pages, the Tables list and search.
   **Show** on Customize brings it back. Flashcards isn't affected — that's what
   Pause table is for.
-- **Name and order** — rename any table. Move tables and categories with
-  ▲▼ or by dragging the grip handle.
+- **Name and order** — rename any table. Move tables and categories by
+  dragging the grip handle, or focus it and press ↑ / ↓.
 - **Your vocabulary** — add words the built-in set doesn't have:
   - **Add a word** to any table, built-in or your own.
   - **Import a list** from pasted text or a `.csv` / `.txt` file, one word per

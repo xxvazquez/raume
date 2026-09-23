@@ -76,15 +76,16 @@ window.RaumeStudy.customize = (function () {
   function V() { return window.RaumeStudy.vocab; }
   function tables() { return window.RaumeStudy.data.vocabularyTables || []; }
 
-  var ARROW_UP = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 13.5V4.5M4.5 9 9 4.5 13.5 9"/></svg>';
-  var ARROW_DOWN = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4.5v9M4.5 9 9 13.5 13.5 9"/></svg>';
   // A 6-dot grip, the standard "press here to drag" glyph (iOS Reminders,
-  // Settings). Pointer-only -- tabindex="-1" so it never enters the tab
-  // order and isn't announced as a control a screen reader can't operate;
-  // the ▲▼ buttons above stay the one keyboard/AT-accessible way to reorder.
+  // Settings) -- the one reorder control, as in iOS's edit mode. Drag it, or
+  // focus it and press Up / Down to move one step: a real button in the tab
+  // order, labelled with where the item sits ("Reorder Drinks, 2 of 7"), so
+  // keyboard and screen-reader users reorder with it too.
   var DRAG_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="6" cy="4.5" r="1.3"/><circle cx="12" cy="4.5" r="1.3"/><circle cx="6" cy="9" r="1.3"/><circle cx="12" cy="9" r="1.3"/><circle cx="6" cy="13.5" r="1.3"/><circle cx="12" cy="13.5" r="1.3"/></svg>';
-  function dragHandleHtml(label) {
-    return '<button type="button" class="cz-drag-handle" tabindex="-1" aria-hidden="true" aria-label="' + esc(label) + '">' + DRAG_ICON + "</button>";
+  function dragHandleHtml(kind, key, label, pos, count) {
+    return '<button type="button" class="cz-drag-handle" data-move="' + kind + '" data-key="' + esc(String(key)) + '"' +
+      ' aria-label="Reorder ' + esc(label) + ", " + pos + " of " + count + '" aria-keyshortcuts="ArrowUp ArrowDown"' +
+      ' title="Drag to reorder, or use the Up and Down arrow keys">' + DRAG_ICON + "</button>";
   }
 
   // Section (fixed: Vocabulary / Grammar / Travel) > category (custom order,
@@ -103,9 +104,7 @@ window.RaumeStudy.customize = (function () {
       var names = V().orderedCategoryNames(Object.keys(byCat), sec);
       names.forEach(function (name, i) {
         out.push({
-          section: sec, name: name,
-          canMoveUp: names.length > 1 && i > 0,
-          canMoveDown: names.length > 1 && i < names.length - 1,
+          section: sec, name: name, pos: i + 1, count: names.length,
           tables: V().orderTables(name, byCat[name])
         });
       });
@@ -118,21 +117,11 @@ window.RaumeStudy.customize = (function () {
     var e = tc() ? tc().entry(id) : {};
     return !!(e.icon || e.name || e.color);
   }
-  function moveBtns(kind, key, canUp, canDown) {
-    return '<span class="cz-move">' +
-      '<button type="button" class="cz-move-btn cz-move-up" data-move="' + kind + '" data-key="' + esc(String(key)) +
-        '" data-dir="-1"' + (canUp ? "" : " disabled") + ' aria-label="Move up">' + ARROW_UP + "</button>" +
-      '<button type="button" class="cz-move-btn cz-move-down" data-move="' + kind + '" data-key="' + esc(String(key)) +
-        '" data-dir="1"' + (canDown ? "" : " disabled") + ' aria-label="Move down">' + ARROW_DOWN + "</button>" +
-      "</span>";
-  }
-
-  function rowHtml(t, canUp, canDown) {
+  function rowHtml(t, pos, count) {
     var name = tc() ? tc().nameOf(t.id) : "";
     var tile = V().tableTile ? V().tableTile(t.id, t.category) : "";
     var hidden = !!(tc() && tc().isHidden && tc().isHidden(t.id));
     return '<li class="cz-row' + (hidden ? " cz-row-hidden" : "") + '" data-table-id="' + t.id + '"' + (tile ? ' data-tile="' + tile + '"' : "") + '>' +
-      moveBtns("table", t.id, canUp, canDown) +
       '<button type="button" class="section-icon-btn cz-row-icon" data-icon-for="' + t.id +
         '" aria-label="Choose an icon and colour for ' + esc(name || t.title) + '">' +
         '<span class="section-icon' + (V().tableIconValue && V().tableIconValue(t.id) ? "" : " section-icon-empty") + '">' + iconSlot(t.id) + "</span></button>" +
@@ -148,7 +137,7 @@ window.RaumeStudy.customize = (function () {
         ' aria-label="' + (hidden ? "Show " : "Hide ") + esc(name || t.title) + ' in the reference">' + (hidden ? "Show" : "Hide") + "</button>" +
       '<button type="button" class="cz-row-reset" data-reset-for="' + t.id + '"' +
         (isCustomised(t.id) ? "" : " disabled") + ">Reset</button>" +
-      dragHandleHtml("Drag to reorder " + (name || t.title)) +
+      dragHandleHtml("table", t.id, name || t.title, pos, count) +
       "</li>";
   }
 
@@ -359,15 +348,14 @@ window.RaumeStudy.customize = (function () {
       var solo = run.items.length === 1 && run.items[0].name === label;
       var body = run.items.map(function (g) {
         var rows = g.tables.map(function (t, i) {
-          return rowHtml(t, i > 0, i < g.tables.length - 1);
+          return rowHtml(t, i + 1, g.tables.length);
         }).join("");
         var displayName = solo ? label : g.name;
-        var canMoveCat = g.canMoveUp || g.canMoveDown;
+        var canMoveCat = g.count > 1;
         var summary = '<summary class="cz-group-title disclosure-caret' + (solo ? " cz-group-title-solo" : "") + '" data-section="' + run.section + '">' +
-          (canMoveCat ? moveBtns("category", g.name, g.canMoveUp, g.canMoveDown) : "") +
           '<span class="cz-group-name">' + esc(displayName) + "</span>" +
           '<span class="cz-group-count">' + g.tables.length + "</span>" +
-          (canMoveCat ? dragHandleHtml("Drag to reorder " + displayName) : "") +
+          (canMoveCat ? dragHandleHtml("category", g.name, displayName, g.pos, g.count) : "") +
           "</summary>";
         return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '" data-category="' + esc(g.name) + '">' +
           summary + '<ul class="cz-list">' + rows + "</ul></details>";
@@ -422,7 +410,7 @@ window.RaumeStudy.customize = (function () {
     var sameCat = tables().filter(function (x) { return (x.category || "Tables") === cat; });
     var ids = V().orderTables(cat, sameCat).map(function (x) { return String(x.id); });
     if (moveOne(ids, String(id), dir)) {
-      pendingFocus = '.cz-row[data-table-id="' + id + '"] .cz-move-btn:not([disabled])';
+      pendingFocus = '.cz-row[data-table-id="' + id + '"] .cz-drag-handle';
       tc().setTableOrder(cat, ids);
     }
   }
@@ -430,7 +418,7 @@ window.RaumeStudy.customize = (function () {
     var sec = V().sectionOf(name);
     var names = categoriesInSection(sec);
     if (moveOne(names, name, dir)) {
-      pendingFocus = '.cz-group-title .cz-move-btn[data-key="' + cssAttr(name) + '"]:not([disabled])';
+      pendingFocus = '.cz-group-title .cz-drag-handle[data-key="' + cssAttr(name) + '"]';
       tc().setCategoryOrder(sec, names);
     }
   }
@@ -576,6 +564,15 @@ window.RaumeStudy.customize = (function () {
       if (e.target.classList.contains("cz-row-name")) commitName(e.target);
     });
     host.addEventListener("keydown", function (e) {
+      // Up / Down on a focused handle moves its item one step (focus follows
+      // it through the re-render via pendingFocus).
+      if ((e.key === "ArrowUp" || e.key === "ArrowDown") && e.target.classList.contains("cz-drag-handle")) {
+        e.preventDefault();
+        var step = e.key === "ArrowUp" ? -1 : 1;
+        if (e.target.dataset.move === "table") moveTable(e.target.dataset.key, step);
+        else moveCategory(e.target.dataset.key, step);
+        return;
+      }
       if (e.key === "Enter" && e.target.classList.contains("cz-row-name")) {
         e.preventDefault();
         commitName(e.target);
@@ -583,20 +580,11 @@ window.RaumeStudy.customize = (function () {
       }
     });
     host.addEventListener("click", function (e) {
-      var move = e.target.closest && e.target.closest(".cz-move-btn");
-      if (move && !move.disabled) {
-        // A category's move buttons sit inside its <summary> -- without this
-        // the click would also toggle the <details> open/closed as a side effect.
-        e.preventDefault();
-        var dir = Number(move.dataset.dir);
-        if (move.dataset.move === "table") moveTable(move.dataset.key, dir);
-        else moveCategory(move.dataset.key, dir);
-        return;
-      }
       if (e.target.closest && e.target.closest(".cz-drag-handle")) {
-        // Same reason as the move buttons above -- a category's handle sits
-        // inside its <summary> too. The actual reorder runs off pointer
-        // events, not this click.
+        // A category's handle sits inside its <summary> -- without this the
+        // click would also toggle the <details> open/closed as a side effect.
+        // The actual reorder runs off pointer events / arrow keys, not this
+        // click.
         e.preventDefault();
         return;
       }
