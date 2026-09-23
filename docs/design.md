@@ -658,7 +658,15 @@ be scannable at a glance:
   bar, "N of M";
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender — no shadow, it outranks the tinted buttons by fill alone;
-- **stat tiles** — a plain figure over a caption, no edge rule. The one signal
+- **stat tiles** — a plain figure over a caption, no edge rule; each caption
+  leads with a 12px `--faint` glyph (flame, cards, check, target), as iOS
+  Health marks its summary cards — never coloured. The empty dashboard ("No
+  flashcards yet") carries the one large muted glyph (44px). Colour stays
+  sparing: section tone only for what you can act on (tint, hover, current,
+  focus); semantic green / red / amber only for state (a table's complete
+  "N / N" count is `--right-strong`, not the section tone); titles are ink.
+  Settings value rows carry no icon tiles — iOS puts tiles only on rows
+  that open another screen. The one signal
   is **Estimated retention**'s figure turning coral once it drops under the
   Settings target (`.fc-stat-attention`);
 - **Card progress** uses three distinct hues, not one hue at three lightnesses —

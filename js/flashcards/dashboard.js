@@ -73,6 +73,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   function renderEmptyDashboard(panel) {
     panel.innerHTML =
       '<div class="fc-dash-empty">' +
+      // One large muted glyph for the empty state, iOS-style -- the only big
+      // icon on the Flashcards screens.
+      '<svg class="fc-dash-empty-glyph" viewBox="0 0 18 18" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS["Total cards"] + "</svg>" +
       "<h3>No flashcards yet</h3>" +
       "<p>Add words from the vocabulary tables and they’ll show up here to review on an FSRS schedule. Open a table, then use the card icon on any row — or add the whole table from its menu.</p>" +
       '<div class="fc-cta-row fc-cta-row-primary">' +
@@ -170,9 +173,20 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     lastReadyCount = ready.length;
     startDashboardPoll();
   }
+  // A small muted glyph before each stat's label, as iOS Health marks its
+  // summary cards -- a quick "which one is this" cue, never coloured.
+  var STAT_GLYPH_PATHS = {
+    "Day streak": '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/>',
+    "Total cards": '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>',
+    "Reviews completed": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
+    "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
+  };
   function statTile(value, label, variant, pending) {
     var cls = (variant ? " fc-stat-" + variant : "") + (pending ? " fc-stat-tile-pending" : "");
-    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + esc(label) + "</span></div>";
+    var glyph = STAT_GLYPH_PATHS[label]
+      ? '<svg class="fc-stat-glyph" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
+      : "";
+    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + esc(label) + "</span></div>";
   }
 
   // --- Dashboard: Today's progress, Next review, Missed today, Words to Review ---

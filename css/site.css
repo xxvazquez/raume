@@ -2627,7 +2627,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   font-size: var(--fs-page-title);
   font-weight: 400;
   letter-spacing: -.01em;
-  color: var(--section-ink);
+  color: var(--ink);
 }
 
 /* ---------------------------------------------------------------------
@@ -2976,7 +2976,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-stat-tile { position: relative; padding: 0; }
 .fc-stat-attention .fc-stat-value { color: var(--warn-strong); }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
-.fc-stat-label { display: block; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
+.fc-stat-label { display: flex; align-items: center; gap: 4px; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
+.fc-stat-glyph { flex: none; color: var(--faint); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
 .fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
 .fc-longest-streak { margin-top: -10px; margin-bottom: 16px; }
@@ -3153,7 +3154,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Fully added registers in the section accent -- against a long ladder of
    otherwise-identical "N / M added" counts, this is the one that should
    actually catch the eye. */
-.fc-manage-progress-done { color: var(--section-strong); font-weight: 500; }
+/* Complete: the semantic "done" green, not the section tone -- colour for
+   state, at the same weight as the counts around it. */
+.fc-manage-progress-done { color: var(--right-strong); }
 /* A table paused as a unit -- dormant, not gone. The header reads quieter and
    the count is replaced by a plain "Paused" so it doesn't look like a fully
    added table sitting at "17 / 17". */
@@ -3511,6 +3514,7 @@ mark.fc-diff-co {
 /* Dashboard before anything is added -- a single next step, not a wall of
    zeroes. */
 .fc-dash-empty { text-align: center; padding: 32px 16px 20px; }
+.fc-dash-empty-glyph { display: block; margin: 0 auto 14px; color: var(--faint); opacity: .7; }
 .fc-dash-empty h3 { margin: 0 0 10px; font-size: var(--fs-section-title); color: var(--ink); font-weight: 500; }
 .fc-dash-empty p { margin: 0 auto 20px; max-width: 46ch; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.55; }
 .fc-dash-empty .fc-cta-row { justify-content: center; }
