@@ -219,12 +219,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (data-reading, read by js/vocab/interactions.js openPop) -- real ruby
   // furigana renders too small there to read.
   var VERB_CLASS_META = {
-    godan: { badge: '五段', reading: 'ごだん', label: 'godan verb (u-verb)' },
-    ichidan: { badge: '一段', reading: 'いちだん', label: 'ichidan verb (ru-verb)' },
+    // The label is English only: the badge already shows the kanji and the
+    // popover its reading (ごだん), so "godan" in romaji would say it a third time.
+    godan: { badge: '五段', reading: 'ごだん', label: 'u-verb' },
+    ichidan: { badge: '一段', reading: 'いちだん', label: 'ru-verb' },
     // genericNote fills in for the rows verbNote leaves unexplained (する and
     // its compounds) -- without it "irregular verb" alone says nothing about
     // what that means. 来る overrides it with its own, more specific note.
-    irregular: { badge: '変格', reading: 'へんかく', label: 'irregular verb', genericNote: "doesn't conjugate by the godan/ichidan rules -- する becomes します, not a predictable change, so its forms are memorized" }
+    irregular: { badge: '変格', reading: 'へんかく', label: 'irregular verb', genericNote: "doesn't follow the u-verb / ru-verb rules -- する becomes します, not a predictable change, so its forms are memorized" }
   };
   function verbBadge(row) {
     var meta = VERB_CLASS_META[row.verbClass];
