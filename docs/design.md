@@ -184,7 +184,8 @@ and Help.
   lighter band beneath it; the masthead stays white.
   **Platform hygiene** (checked against Apple's guidance): text fields keep
   their designed size (13–14.5px, never larger than the text around them) on
-  every screen. iOS Safari's zoom-on-focus is switched off by
+  every screen, and are borderless `--field-fill` fills with a focus ring —
+  never a bordered rectangle (the sign-in fields are 44pt tall). iOS Safari's zoom-on-focus is switched off by
   `js/theme-init.js` adding `maximum-scale=1` to the viewport **on iOS only** —
   iOS ignores it for the reader's own pinch-zoom, so zooming stays available,
   and other platforms (where it could block pinch-zoom) never auto-zoom
