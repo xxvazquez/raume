@@ -520,8 +520,10 @@ and Help.
     The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) sit inside one
     shared card (`.cz-groups`), iOS Settings grouped-list style — each row's
     own bottom hairline is the only separator between rows (no divider after
-    the last row). Name fields are filled wells (`--field-fill`, no border) with
-    a plain-text **Reset**.
+    the last row). A name reads as the row's plain ink title (the shipped name
+    is the placeholder, also in ink) and becomes a `--field-fill` well with an
+    inset focus ring only while being edited — no grey box per row; a
+    plain-text **Reset**.
   - **Reordering a table or a category** has two affordances doing the same
     job through the same `tc().setTableOrder` / `setCategoryOrder` calls:
     the ▲▼ buttons (`.cz-move-btn`, one step at a time, disabled at either

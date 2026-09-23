@@ -1545,14 +1545,21 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 .cz-row-field { flex: 0 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .cz-row-original { font-size: var(--fs-micro); color: var(--faint); }
 .cz-row-original[hidden] { display: none; }
+/* The name reads as the row's plain title (ink, no box) -- the shipped name
+   is the placeholder, so it shows in ink too -- and turns into a field only
+   while you're editing it, like renaming a list in iOS. A grey box per row
+   read as a disabled form. */
 .cz-row-name {
-  appearance: none; width: 100%;
+  appearance: none; width: calc(100% + 6px); margin-left: -6px;
   border: 0; border-radius: 8px;
-  background: var(--field-fill); color: var(--ink);
-  font: 400 var(--fs-nav)/1.2 var(--font-ui); padding: 6px 9px;
+  background: transparent; color: var(--ink);
+  font: 400 var(--fs-nav)/1.2 var(--font-ui); padding: 6px;
 }
-.cz-row-name:focus { outline: 2px solid var(--section); outline-offset: 1px; }
-.cz-row-name::placeholder { color: var(--faint); }
+.cz-row-name:hover { background: color-mix(in srgb, var(--field-fill) 60%, transparent); }
+/* The ring sits inside the field -- outside, it ran into the icon tile. */
+.cz-row-name:focus { background: var(--field-fill); outline: 2px solid var(--section); outline-offset: -2px; }
+.cz-row-name::placeholder { color: var(--ink); opacity: 1; }
+.cz-row-name:focus::placeholder { color: var(--faint); }
 .cz-row-reset, .cz-row-vis {
   flex: 0 0 auto; appearance: none; border: 0;
   border-radius: var(--radius-button); background: transparent;
