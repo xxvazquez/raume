@@ -4035,3 +4035,57 @@ mark.fc-diff-co {
 .fc-tab.active,
 .fc-manage-filters button.active,
 .view-mode button:not(.col-hidden) { box-shadow: var(--control-lift); }
+
+/* --- Desktop / tablet frame: no sheet ---------------------------------
+   Past phone width the page used to be a bordered white sheet floating on
+   a lighter grey, a white band carrying the masthead and tabs, then the
+   grey ground. Now the ground runs edge to edge like the phone, and the
+   content keeps its old 1180px column. */
+@media (min-width: 641px) {
+  :root { --nav-h: 45px; } /* the tab row's height, so the sticky search bar stops right under it */
+  html, body { background: var(--group-ground); }
+  .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; background: transparent; }
+  /* width: 100% -- auto margins stop a grid item stretching (desktop below). */
+  .app-frame > .app { width: 100%; max-width: 1180px; margin: 0 auto; }
+  .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
+  /* Tablet: the tabs keep their own row under the masthead, pinned as a
+     glass band once content scrolls under it. No fixed-position children,
+     so the blur can sit on the nav itself. */
+  .site-nav {
+    background: color-mix(in srgb, var(--group-ground) 72%, transparent);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    border-bottom: 0;
+  }
+}
+/* Desktop: one glass top bar, like an iPadOS 26 / macOS window -- the
+   wordmark leading, the five sections as a white floating capsule in the
+   middle, the utility glyphs trailing -- pinned while you scroll, so the
+   sections are always one click away. The masthead and #siteNav share the
+   first grid row (the nav laid over the masthead's centre), so the markup
+   and the phone's bottom tab bar are untouched. */
+@media (min-width: 900px) {
+  :root { --nav-h: 64px; }
+  .app-frame { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .masthead {
+    grid-row: 1; grid-column: 1; position: sticky; top: 0; z-index: 49;
+    height: 64px; padding: 0 28px; box-sizing: border-box;
+  }
+  /* The blur on a ::before layer, per the glass rule -- the masthead's
+     own children stay free of a new containing block. */
+  .masthead::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: color-mix(in srgb, var(--group-ground) 72%, transparent);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  }
+  .site-nav {
+    grid-row: 1; grid-column: 1; justify-self: center; align-self: start;
+    position: sticky; top: 12px; z-index: 50; margin-top: 12px;
+    padding: 4px; gap: 2px; border-radius: 999px;
+    background: var(--paper); box-shadow: var(--control-lift);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .app-frame > .app { grid-column: 1; }
+}
+@media print {
+  .app-frame { display: block; }
+}

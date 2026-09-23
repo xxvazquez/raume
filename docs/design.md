@@ -167,7 +167,7 @@ and Help.
   the gap either side of a too-wide column doesn't register as "centred," just
   as dead space. Everything in the reading flow — the toolbar, the category rules, the tables, Expand-all — shares the cap on
   one centred axis. Only kicks in above ~700px (a phone or a split-screen
-  window never reaches the cap); the masthead and nav stay full width.
+  window never reaches the cap); the top bar stays full width.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
   The same voice runs through the rest of the app: Flashcards › Manage (a table
   row is the 28px tile + a 14px title + its progress, its category header the
@@ -181,7 +181,7 @@ and Help.
   card — a 15px title, a one-line grey gist under it, a chevron — each closed
   until tapped and opening to a few 14px bullets. On a phone the grey ground
   (`--group-ground`) is also `html` / `body` / `.app-frame`, so a short page has no
-  lighter band beneath it; the masthead stays white.
+  lighter band beneath it — at every width now, not just the phone.
   **Platform hygiene** (checked against Apple's guidance): text fields keep
   their designed size (13–14.5px, never larger than the text around them) on
   every screen, and are borderless `--field-fill` fills with a focus ring —
@@ -309,8 +309,16 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
-- **Masthead and nav are one bar** on `--paper`, closed by a single row hairline
-  (no rule above the nav). The four masthead controls — account, help,
+- **No sheet.** Past phone width there is no bordered white page any more:
+  the `--group-ground` runs edge to edge like the phone, and the content keeps
+  a centred 1180px column (`.app-frame > .app`). **≥900px the masthead is one
+  sticky glass bar** (64px; blur on a `::before` layer): the wordmark leading,
+  the five sections as a white floating capsule (`--control-lift`) laid over
+  its centre (both share the frame's first grid row, so the markup is the
+  phone's), the utility glyphs trailing; the sticky search bar stops under it
+  (`--nav-h: 64px`). **641–899px** the tabs keep their own row under the
+  masthead, a sticky glass band (`--nav-h: 45px`). The phone keeps its bottom
+  tab bar. The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
   targets: no box, no outline. Where there's no hover (a phone, a tablet —
   `(hover: none), (max-width: 640px)`) each glyph gets a 10px caption under it,
