@@ -71,12 +71,12 @@ row. Grammatical **particles are blue and bold** everywhere.
     Verbs table is open.
   - **Expand all**, **Print** and a legend for any badges on screen.
   - **Row icons** — what the small speaker, hide, + and ⋯ glyphs on each row do.
-- **Furigana** is always shown, with an 11px minimum size.
+- **Furigana** is always shown, with an 11px minimum size. Each reading starts
+  where its kanji start; consecutive kanji share one reading (三十三歳 →
+  さんじゅうさんさい), and a long reading runs on over the following kana instead
+  of pushing a gap into the word (料理する).
 - **Sentence tables** (Phrases) stack each row: the Japanese on its own line,
-  the English under it, romaji on tap. Readings start where their kanji start;
-  consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and a long
-  reading runs on over the following kana instead of pushing a gap into the
-  sentence.
+  the English under it, romaji on tap.
 - **Katakana reading** — hover or tap any katakana to see its romaji above it.
 - **Pronunciation** — the speaker icon plays a native-voice clip.
   Custom words use the browser's speech engine.

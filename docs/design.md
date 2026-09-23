@@ -217,12 +217,15 @@ and Help.
   secondary grey, romaji on tap between them, speaker and hide glyphs at the
   trailing edge of each line; no column headers (authored order, nothing to sort).
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
-  Furigana is start-aligned — a reading begins exactly where its kanji begin and
-  never extends left of them. Consecutive kanji share one reading; the reading
-  floats above without widening its kanji and may run over the plain kana up to
-  the next reading (less 3px); only what's left becomes space after the kanji
-  (`rb-m-N`, computed in `js/vocab/render.js` `jpSentenceSegments` — CJK glyphs
-  are exactly 1em, so the widths are exact). Readings never touch.
+- **Furigana in every reference table** (word, verb and sentence rows) is
+  start-aligned — a reading begins exactly where its kanji begin and never
+  extends left of them. Consecutive kanji share one reading; the reading floats
+  above without widening its kanji and may run over the plain kana up to the
+  next reading (less 3px); only what's left becomes space after the kanji, so no
+  gap is pushed into a word (料理する, 弟と). `js/vocab/render.js`
+  `jpGroupedSegments` tags each ruby with class-set custom properties (`rt-N`
+  reading length, `kb-N` kanji count, `rm-N` room after it) and the CSS does the
+  arithmetic in em, so it holds at every table's size. Readings never touch.
 - **Opening a table is an inline disclosure** (iOS): every table, open or
   closed, is a row of its category's one white card. The tapped row keeps its
   exact size and position (14px title, same padding), its chevron turns, and

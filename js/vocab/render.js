@@ -121,40 +121,38 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         : plain(seg.text);
     }).join('');
   }
-  // Sentence tables set furigana the way printed Japanese does: consecutive
-  // kanji share one reading (三十三歳 over さんじゅうさんさい, not four
-  // squeezed ones), and the reading starts exactly where its kanji start --
-  // never left of them -- without widening them (css/site.css): a longer
-  // reading runs on to the right over the next kana instead of pushing a gap
-  // into the sentence (父と母と弟と私 used to read 弟　と). It may run over
+  // Reference furigana is set the way printed Japanese does, in word and
+  // sentence tables alike: consecutive kanji share one reading (三十三歳 over
+  // さんじゅうさんさい, not four squeezed ones), and the reading starts exactly
+  // where its kanji start -- never left of them -- without widening them
+  // (css/site.css): a longer reading runs on to the right over the next kana
+  // instead of pushing a gap into the word (料理 する, 弟　と). It may run over
   // every plain kana up to the next kanji's reading, less a 3px gap, so two
-  // readings never meet; only what's left over becomes space after the
-  // kanji (rb-m-N, N px, 2px steps -- no inline style under the CSP). CJK glyphs are exactly 1em, so the
-  // widths are exact from character counts at the sentence size (16px kanji,
-  // 11px furigana).
-  var SENT_KANJI_PX = 16, SENT_RT_PX = 11, SENT_READING_GAP = 3, SENT_MAX_MARGIN = 40;
-  function jpSentenceSegments(segments) {
+  // readings never meet; only what's left becomes space after the kanji.
+  // The counts go to CSS as custom properties set by classes (no inline style
+  // under the CSP) -- rt-N (reading length), kb-N (kanji count), rm-N (plain
+  // kana after it, rm-x = to the end) -- and CSS does the arithmetic in em,
+  // so it holds at every table's font size.
+  var RT_MAX = 12, KB_MAX = 8, RM_MAX = 8;
+  function jpGroupedSegments(segments) {
     var groups = [];
     segments.forEach(function (seg) {
       var last = groups[groups.length - 1];
       if (seg.kanji && last && last.kanji) { last.kanji += seg.kanji; last.reading += seg.reading; }
       else groups.push(seg.kanji ? { kanji: seg.kanji, reading: seg.reading } : seg);
     });
-    // Plain kana (and particles) between a kanji group and the next one --
-    // the room its reading may run into. Nothing after it: the line's end.
     function roomAfter(i) {
       var chars = 0;
       for (var j = i + 1; j < groups.length; j++) {
-        if (groups[j].kanji) return chars * SENT_KANJI_PX - SENT_READING_GAP;
+        if (groups[j].kanji) return String(Math.min(RM_MAX, chars));
         chars += String(groups[j].text || groups[j].p || '').length;
       }
-      return Infinity;
+      return 'x';
     }
     return groups.map(function (seg, i) {
       if (!seg.kanji) return jpSegments([seg], true);
-      var over = seg.reading.length * SENT_RT_PX - seg.kanji.length * SENT_KANJI_PX;
-      var margin = Math.min(SENT_MAX_MARGIN, Math.ceil(Math.max(0, over - Math.max(0, roomAfter(i))) / 2) * 2);
-      return '<ruby' + (margin ? ' class="rb-m-' + margin + '"' : '') + '><rb class="jpmain">' + esc(seg.kanji) +
+      var cls = 'rb rt-' + Math.min(RT_MAX, seg.reading.length) + ' kb-' + Math.min(KB_MAX, seg.kanji.length) + ' rm-' + roomAfter(i);
+      return '<ruby class="' + cls + '"><rb class="jpmain">' + esc(seg.kanji) +
         '</rb><rt class="furigana">' + esc(seg.reading) + '</rt></ruby>';
     }).join('');
   }
@@ -242,10 +240,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!meta) return '';
     return '<span class="visually-hidden">(' + meta.label + ')</span>';
   }
-  function jpCell(row, romaji, sentence) {
+  function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
-    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + (sentence ? jpSentenceSegments(row.jp) : jpSegments(row.jp, true)) + '</span>';
+    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpGroupedSegments(row.jp) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
@@ -318,14 +316,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row, sentence) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji, sentence) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
   // (each form carries its own speaker + romaji reveal).
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpSegments(f.jp, true) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
     return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row)) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
