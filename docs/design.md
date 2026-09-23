@@ -217,13 +217,15 @@ and Help.
   (`--page-bg` under `--paper`), as on iOS.
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Phrases' Self-introduction,
   and any future sentence table wherever it lives): stacked rows, not two columns —
-  the Japanese full width at 16px / line-height 1.9, the English under it at 14px
+  the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし
+  outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   secondary grey, romaji on tap between them, speaker and hide glyphs at the
   trailing edge of each line; no column headers (authored order, nothing to sort).
   **Question / answer pairs** (`tr.qa-q` / `tr.qa-a`): no rule between a
-  question and its answer; the answer is set in 16px with a 2px `--line-strong`
-  reply bar at its leading edge (a border, so it prints); the pair's hairline
-  comes after the answer. Search keeps a pair together.
+  question and its answer, which sits ~10px under it, indented 20px — the
+  indent alone marks the reply, as in Mail; no bar, no box. The one hairline
+  after each pair is the same full-width rule as every other row. Search keeps
+  a pair together.
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never
