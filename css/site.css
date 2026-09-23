@@ -1978,9 +1978,10 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 }
 .vocab td {
   /* Asymmetric on purpose: the Japanese cell carries furigana above its
-     kanji, so a little more room on top keeps the reading clear of the row's
-     upper hairline while the bottom stays tight for density. */
-  padding: 9px 14px 6px 0;
+     kanji (absolutely placed, so it takes no height of its own) -- the top
+     room is what keeps the reading ~7px clear of the row's upper hairline.
+     Every row gets it, furigana or not, so rows stay one height. */
+  padding: 15px 14px 6px 0;
   border-bottom: 1px solid var(--row-line);
   vertical-align: bottom;
   font-size: var(--fs-english);
