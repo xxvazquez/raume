@@ -226,7 +226,7 @@ loanword that just echoes its English (*cola* → コーラ).
 - **Style** — *Crossword* (numbered clue list) or *Arroword* (each clue
   in a square before its answer). **Script** — *Romaji* (default), *Japanese*,
   *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) —
-  a word is never forced into a script it isn't written in. **Words** — 8–20. Answers are always readings — kanji is
+  a word is never forced into a script it isn't written in. **Words** — 10, 15, 20, 30 or 40. Answers are always readings — kanji is
   never shown or typed.
 - **Solving** — tap a square or a clue and type. Typing follows the word's
   direction; tap a crossing square again to switch. The bar above the grid
@@ -234,6 +234,8 @@ loanword that just echoes its English (*cola* → コーラ).
 - **Check** marks filled squares right or wrong. The **⋯** menu has *Reveal a
   letter*, *Reveal puzzle*, *Clear answers* and *Print* (a clean A4 worksheet
   titled like "Crossword — Drinks").
+- Grids are built compact — each word goes where it crosses the most and
+  grows the grid the least — so even 40 words stay a dense block.
 - Nothing is saved or scheduled.
 
 ---

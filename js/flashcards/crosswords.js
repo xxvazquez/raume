@@ -196,22 +196,25 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // swapped for the next one that can, so the grid reaches the size asked
   // for instead of stopping at whatever happened to share a letter. Several
   // attempts, each with a fresh shuffle, keep whichever placed the most
-  // (ties broken by the smaller grid). Cheap at this scale -- a few hundred
-  // short words at most.
+  // (ties broken by the denser grid -- fewer empty squares). Cheap at this
+  // scale -- a few hundred short words at most.
   function buildGrid(words, arroword, limit) {
     if (!words.length) return { placements: [], rows: 0, cols: 0, grid: {}, clueCells: {}, numbers: {} };
     limit = limit || words.length;
-    var ATTEMPTS = 8;
+    // Up to 16 attempts, but never much past ~150ms in all -- a 40-word grid
+    // from a big pool still answers New puzzle at once on a phone.
+    var ATTEMPTS = 16, BUDGET_MS = 150, started = Date.now();
     var best = null;
-    for (var a = 0; a < ATTEMPTS; a++) {
+    for (var a = 0; a < ATTEMPTS && (a < 2 || Date.now() - started < BUDGET_MS); a++) {
       var attempt = buildGridOnce(words, arroword, limit);
       if (!best || attempt.placements.length > best.placements.length ||
-        (attempt.placements.length === best.placements.length && attempt.rows * attempt.cols < best.rows * best.cols)) {
+        (attempt.placements.length === best.placements.length && density(attempt) > density(best))) {
         best = attempt;
       }
     }
     return best;
   }
+  function density(p) { return Object.keys(p.grid).length / (p.rows * p.cols); }
 
   function buildGridOnce(words, arroword, limit) {
     // Shuffled, with the longest of the first `limit` moved to the front as
@@ -254,37 +257,74 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       placements.push({ id: word.id, clue: word.clue, answer: word.answer, row: row, col: col, dir: dir });
     }
 
-    place(list[0], 0, 0, "across");
+    // The bounding box so far -- every placement is scored against it, so
+    // the grid grows as a compact block instead of sprawling in one
+    // direction and leaving most of its squares empty.
+    var box = { r0: 0, r1: 0, c0: 0, c1: 0 };
+    function grow(answer, row, col, dir) {
+      var r1 = dir === "down" ? row + answer.length - 1 : row, c1 = dir === "across" ? col + answer.length - 1 : col;
+      if (arroword) { if (dir === "down") row--; else col--; }
+      return { r0: Math.min(box.r0, row), r1: Math.max(box.r1, r1), c0: Math.min(box.c0, col), c1: Math.max(box.c1, c1) };
+    }
 
-    // Try every not-yet-placed word against the CURRENT grid, then repeat:
-    // a word that couldn't cross anything on pass 1 often can once pass 2
-    // has more letters on the board. Stop once a full pass places nothing.
-    var remaining = list.slice(1);
-    var madeProgress = true;
-    while (madeProgress && remaining.length && placements.length < limit) {
-      madeProgress = false;
-      var stillRemaining = [];
-      remaining.forEach(function (word) {
-        if (placements.length >= limit) return;
-        var best = null;
-        var cells = Object.keys(grid);
-        for (var i = 0; i < word.answer.length; i++) {
-          var ch = word.answer[i];
-          for (var g = 0; g < cells.length; g++) {
-            if (grid[cells[g]] !== ch) continue;
-            var parts = cells[g].split(","), gr = +parts[0], gc = +parts[1];
-            var candidates = [["across", gr, gc - i], ["down", gr - i, gc]];
-            for (var ci = 0; ci < candidates.length; ci++) {
-              var cand = candidates[ci];
-              var score = fits(word.answer, cand[1], cand[2], cand[0]);
-              if (score > 0 && (!best || score > best.score)) best = { row: cand[1], col: cand[2], dir: cand[0], score: score };
-            }
+    place(list[0], 0, 0, "across");
+    box = grow(list[0].answer, 0, 0, "across");
+
+    // Grow one word at a time: of the words not yet on the grid (a sample
+    // of them, from a big pool), place whichever has the best legal spot --
+    // one that crosses the most letters and grows the box the least,
+    // leaning towards a slightly wide rectangle (it sits beside or above its
+    // clues, on screen and on paper). Every word must cross the grid, so it
+    // stays one connected piece; stop when nothing left can.
+    var byLetter = {};
+    function indexCells(answer, row, col, dir) {
+      for (var i = 0; i < answer.length; i++) {
+        var r = dir === "down" ? row + i : row, c = dir === "across" ? col + i : col;
+        (byLetter[answer[i]] = byLetter[answer[i]] || []).push([r, c]);
+      }
+    }
+    indexCells(list[0].answer, 0, 0, "across");
+    function bestSpot(word) {
+      var best = null, seen = {};
+      var h = box.r1 - box.r0 + 1, w = box.c1 - box.c0 + 1;
+      for (var i = 0; i < word.answer.length; i++) {
+        var hits = byLetter[word.answer[i]] || [];
+        for (var g = 0; g < hits.length; g++) {
+          var gr = hits[g][0], gc = hits[g][1];
+          var candidates = [["across", gr, gc - i], ["down", gr - i, gc]];
+          for (var ci = 0; ci < candidates.length; ci++) {
+            var cand = candidates[ci], ck = cand.join();
+            if (seen[ck]) continue;
+            seen[ck] = true;
+            var crosses = fits(word.answer, cand[1], cand[2], cand[0]);
+            if (crosses <= 0) continue;
+            var nb = grow(word.answer, cand[1], cand[2], cand[0]);
+            var nh = nb.r1 - nb.r0 + 1, nw = nb.c1 - nb.c0 + 1;
+            var score = crosses * 4 - ((nh + nw) - (h + w)) * 2 - Math.abs(nw - nh * 1.25) * 0.5 + Math.random() * 0.5;
+            if (!best || score > best.score) best = { row: cand[1], col: cand[2], dir: cand[0], score: score, box: nb };
           }
         }
-        if (best) { place(word, best.row, best.col, best.dir); madeProgress = true; }
-        else stillRemaining.push(word);
-      });
-      remaining = stillRemaining;
+      }
+      return best;
+    }
+    var remaining = list.slice(1);
+    var SAMPLE = 12;
+    while (remaining.length && placements.length < limit) {
+      var pick = null, pickIdx = -1;
+      for (var wi = 0; wi < remaining.length && wi < SAMPLE; wi++) {
+        var spot = bestSpot(remaining[wi]);
+        if (spot && (!pick || spot.score > pick.score)) { pick = spot; pickIdx = wi; }
+      }
+      if (!pick) {
+        // Nothing in the sample fits -- drop it and try the next batch.
+        if (remaining.length <= SAMPLE) break;
+        remaining = remaining.slice(SAMPLE);
+        continue;
+      }
+      var word = remaining.splice(pickIdx, 1)[0];
+      place(word, pick.row, pick.col, pick.dir);
+      indexCells(word.answer, pick.row, pick.col, pick.dir);
+      box = pick.box;
     }
 
     var keys = Object.keys(grid).concat(Object.keys(clueCells));
@@ -337,7 +377,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 12, puzzle: null, poolCount: 0 };
+  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0 };
 
   function rerender() { S.render(); }
 
@@ -379,7 +419,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
   var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
-  var SIZE_OPTS = [8, 12, 16, 20];
+  var SIZE_OPTS = [10, 15, 20, 30, 40];
 
   // An iOS pop-up button row: label left, the current value and a small
   // up/down chevron right, the whole 44px row the tap target. A real
