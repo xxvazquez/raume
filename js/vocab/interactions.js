@@ -618,17 +618,33 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         let sectionRows = 0, sectionBest = null;
         // A table the reader hid never turns up in results either.
         const userHidden = section.classList.contains('user-hidden');
-        tbody.querySelectorAll('tr').forEach(row => {
-          const { match: rowMatch, rank } = evaluateRow(row, q);
-          const match = rowMatch && !userHidden;
-          row.classList.toggle('search-hidden', !match);
-          if (match) {
+        // A question and its answer (qa-q / qa-a rows) travel together: a
+        // match on either line shows the whole exchange, question first,
+        // ranked by its better line -- an answer alone reads as a reply to
+        // nothing. The count stays the rows that actually matched.
+        const pairKey = row => row.classList.contains('qa-q') ? row.dataset.vocabId
+          : row.classList.contains('qa-a') ? row.dataset.answers : null;
+        const results = [...tbody.querySelectorAll('tr')]
+          .sort((a, b) => Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex))
+          .map(row => {
+            const { match: rowMatch, rank } = evaluateRow(row, q);
+            return { row, rank, match: rowMatch && !userHidden, key: pairKey(row) };
+          });
+        const pairRank = {};
+        results.forEach(r => {
+          if (r.key && r.match && (pairRank[r.key] === undefined || r.rank < pairRank[r.key])) pairRank[r.key] = r.rank;
+        });
+        results.forEach(r => {
+          const inPair = Boolean(q) && r.key !== null && pairRank[r.key] !== undefined;
+          const shown = r.match || inPair;
+          r.row.classList.toggle('search-hidden', !shown);
+          if (shown) ranked.push({ row: r.row, rank: inPair ? pairRank[r.key] : r.rank, index: Number(r.row.dataset.originalIndex) });
+          if (r.match) {
             sectionRows++;
-            ranked.push({ row, rank });
-            if (sectionBest === null || rank < sectionBest) sectionBest = rank;
+            if (sectionBest === null || r.rank < sectionBest) sectionBest = r.rank;
           }
         });
-        if (q) { ranked.sort((a, b) => a.rank - b.rank); ranked.forEach(r => tbody.appendChild(r.row)); }
+        if (q) { ranked.sort((a, b) => a.rank - b.rank || a.index - b.index); ranked.forEach(r => tbody.appendChild(r.row)); }
         else restoreOrder(tbody);
 
         if (q) {

@@ -328,7 +328,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // columns, no separate Romaji column. row.irregular is simply absent on a
   // sentence row, so this needs no sentences-specific branch.
   function wordRow(row, sentence) {
-    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
+    // Question / answer rows (sentence tables): qa-q / qa-a, so CSS can set
+    // each answer under its question as one pair. The data guarantees the
+    // answer follows its question (scripts/validate-vocabulary.js).
+    var cls = [row.irregular ? 'irregular-row' : '', row.qa === 'q' ? 'qa-q' : row.qa === 'a' ? 'qa-a' : ''].filter(Boolean).join(' ');
+    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.answers ? ' data-answers="' + esc(row.answers) + '"' : '') + (cls ? ' class="' + cls + '">' : '>');
     return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --

@@ -2074,6 +2074,16 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   padding: 0 14px 14px 14px; color: var(--muted); font-size: var(--fs-nav); line-height: 1.4;
 }
 .vocab.vocab-sentences .jp-line { align-items: first baseline; }
+/* Question / answer pairs (rows tagged qa-q / qa-a by render.js): read as a
+   short exchange, not a flat list. No rule between a question and its
+   answer; the answer is set in one step under it, a thin reply bar at its
+   leading edge; the pair's hairline comes after the answer. */
+.vocab.vocab-sentences tbody tr.qa-q { border-bottom: 0; }
+.vocab.vocab-sentences tbody tr.qa-q td:nth-child(2) { padding-bottom: 8px; }
+.vocab.vocab-sentences tbody tr.qa-a { margin-left: 16px; border-left: 2px solid var(--line-strong); } /* a border, not a shadow, so it prints */
+.vocab.vocab-sentences tbody tr.qa-a td.jp { padding-top: 6px; }
+/* ...except the answer's own furigana needs the room a row top gives it. */
+.vocab.vocab-sentences tbody tr.qa-a:has(ruby) td.jp { padding-top: 18px; }
 /* Furigana in every reference table (word, verb and sentence rows): the
    reading starts where its kanji start (never to their left) and floats above
    without widening them -- the ruby box is exactly the kanji -- running on to

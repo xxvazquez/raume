@@ -220,6 +220,10 @@ and Help.
   the Japanese full width at 16px / line-height 1.9, the English under it at 14px
   secondary grey, romaji on tap between them, speaker and hide glyphs at the
   trailing edge of each line; no column headers (authored order, nothing to sort).
+  **Question / answer pairs** (`tr.qa-q` / `tr.qa-a`): no rule between a
+  question and its answer; the answer is set in 16px with a 2px `--line-strong`
+  reply bar at its leading edge (a border, so it prints); the pair's hairline
+  comes after the answer. Search keeps a pair together.
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never

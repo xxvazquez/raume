@@ -152,7 +152,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 32 table sections", sections.length === 32);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 660 vocabulary rows", totalRows === 660);
+  check("renders 661 vocabulary rows", totalRows === 661);
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
@@ -961,7 +961,26 @@ async function main() {
     const firstEn = selfIntro.querySelector('tbody tr .meaning-text').textContent.trim();
     return firstEn === "What is your name?"; // v0530, first row of the table
   })());
+  check("questions and answers are tagged as pairs, each answer right after its question", (() => {
+    const rows = [...selfIntro.querySelectorAll('tbody tr')];
+    const qs = rows.filter(r => r.classList.contains('qa-q')), as = rows.filter(r => r.classList.contains('qa-a'));
+    return qs.length >= 10 && as.length >= qs.length
+      && as.every(a => { const prev = a.previousElementSibling; return prev && (prev.dataset.vocabId === a.dataset.answers || prev.dataset.answers === a.dataset.answers); });
+  })());
+  check("おいくつですか has its own answer now, separate from 何歳ですか's", (() => {
+    const own = selfIntro.querySelector('tr.qa-a[data-answers="v0540"]'), other = selfIntro.querySelector('tr.qa-a[data-answers="v0541"]');
+    return !!own && !!other && own !== other;
+  })());
   window.location.hash = "";
+  check("a search that matches only an answer still shows its question above it -- a pair travels together", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "warushawa";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const shown = [...selfIntro.querySelectorAll('tbody tr:not(.search-hidden)')].map(r => r.dataset.vocabId);
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return shown.join() === "v0549,v0550";
+  })());
   check("search still finds a phrase by its romaji, though the column is gone", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "sunde imasu";

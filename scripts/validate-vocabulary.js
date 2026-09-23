@@ -9,7 +9,7 @@ const tableList = (sandbox.window.RaumeStudy && sandbox.window.RaumeStudy.data.v
 const tableCount = tableList.length;
 const rowCount = tableList.reduce((total, t) => total + t.rows.length, 0);
 const expectedTables = 32;
-const expectedRows = 660;
+const expectedRows = 661;
 if (tableCount !== expectedTables || rowCount !== expectedRows) {
   console.error("Vocabulary validation failed: found " + rowCount + " rows across " + tableCount + " tables; expected " + expectedRows + " rows across " + expectedTables + " tables.");
   process.exit(1);
@@ -194,3 +194,39 @@ for (const table of tableList) {
   }
 }
 console.log("Particle validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.particles && r.particles.length).length, 0) + " words take particles.");
+
+// Question / answer pairs (sentence tables like Self-introduction): a row is
+// "qa": "q" or "qa": "a"; an answer names its question ("answers": id) and
+// sits right after it (or after another answer to the same question), since
+// the table keeps authored order and draws each pair as one unit. Every
+// question needs at least one answer.
+let qaPairs = 0;
+for (const table of tableList) {
+  const byId = new Map(table.rows.map(r => [r.id, r]));
+  const answered = new Set();
+  table.rows.forEach((row, i) => {
+    const label = table.title + " " + row.id;
+    if (row.qa === undefined) {
+      if (row.answers !== undefined) { console.error("Q/A validation failed: `answers` needs \"qa\": \"a\" (" + label + ")."); process.exit(1); }
+      return;
+    }
+    if (row.qa !== "q" && row.qa !== "a") { console.error("Q/A validation failed: qa must be \"q\" or \"a\" (" + label + ")."); process.exit(1); }
+    if (row.qa === "q") {
+      if (row.answers !== undefined) { console.error("Q/A validation failed: a question can't have `answers` (" + label + ")."); process.exit(1); }
+      return;
+    }
+    const q = byId.get(row.answers);
+    if (!q || q.qa !== "q") { console.error("Q/A validation failed: an answer must name a question in the same table (" + label + " -> " + row.answers + ")."); process.exit(1); }
+    const prev = table.rows[i - 1];
+    if (!prev || !(prev.id === q.id || (prev.qa === "a" && prev.answers === q.id))) {
+      console.error("Q/A validation failed: an answer must come right after its question (" + label + ").");
+      process.exit(1);
+    }
+    answered.add(q.id);
+    qaPairs++;
+  });
+  for (const row of table.rows) {
+    if (row.qa === "q" && !answered.has(row.id)) { console.error("Q/A validation failed: question " + row.id + " has no answer (" + table.title + ")."); process.exit(1); }
+  }
+}
+console.log("Q/A validation passed: " + qaPairs + " answers, each after its question.");

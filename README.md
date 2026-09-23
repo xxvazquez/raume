@@ -76,7 +76,9 @@ row. Grammatical **particles are blue and bold** everywhere.
   さんじゅうさんさい), and a long reading runs on over the following kana instead
   of pushing a gap into the word (料理する).
 - **Sentence tables** (Phrases) stack each row: the Japanese on its own line,
-  the English under it, romaji on tap.
+  the English under it, romaji on tap. Questions and answers read as pairs —
+  the answer set in under its question — and search shows the whole pair when
+  either line matches.
 - **Katakana reading** — hover or tap any katakana to see its romaji above it.
 - **Pronunciation** — the speaker icon plays a native-voice clip.
   Custom words use the browser's speech engine.
