@@ -113,48 +113,47 @@
 <section id="customizePage" class="page page-customize" hidden></section>
 <section id="helpPage" class="page page-help" hidden>
   <h1>How this works</h1>
-  <p class="help-lede">Four reference pages to read, search and quiz yourself on, plus Flashcards — spaced-repetition review of the same words, with its own Help (top right of the Flashcards page). Tap a topic below.</p>
+  <p class="help-lede">Four reference sections, plus Flashcards for spaced-repetition review. Tap a topic.</p>
   <div class="help-list">
     <details class="help-group">
-      <summary><h3>Finding words</h3><span class="help-sub">Search, jump to a table, sort</span></summary>
-      <ul>
-        <li><strong>Search</strong> looks in Japanese, kana, romaji and English across every section at once, best match first. Press <kbd>/</kbd> to jump to the box.</li>
-        <li>Each result has a small <strong>+</strong> that adds the word to Flashcards (it turns into a green ✓; tap again to pause the word).</li>
-        <li><strong>Jump to a table</strong> — the list button beside the search box — lists every table in the current section.</li>
-        <li>Sort the English column with the up/down chevron in its header. Tables start A–Z.</li>
+      <summary><span class="help-tile" data-tile="blue" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg></span><span class="help-sum"><h3>Finding words</h3><span class="help-sub">Search, tables, sort</span></span></summary>
+      <ul class="help-rows">
+        <li><span class="help-term">Search</span><span class="help-desc">Japanese, kana, romaji or English, every section at once. Press <kbd>/</kbd> to jump in.</span></li>
+        <li><span class="help-term">+ on a result</span><span class="help-desc">Adds the word to Flashcards. Tap the ✓ again to pause it.</span></li>
+        <li><span class="help-term">Tables</span><span class="help-desc">Lists every table in the section — tap one to go there.</span></li>
+        <li><span class="help-term">Sort</span><span class="help-desc">The chevron in the English header sorts A–Z or Z–A.</span></li>
       </ul>
     </details>
     <details class="help-group">
-      <summary><h3>Reading and self-testing</h3><span class="help-sub">Furigana, Options, particles, badges</span></summary>
-      <ul>
-        <li><strong>Furigana</strong> sits above the kanji. Tap any kana to see its romaji, or tap the word itself for its full romaji line.</li>
-        <li>The <strong>Options</strong> button beside the search box has switches to hide <strong>Japanese</strong>, <strong>Furigana</strong> or <strong>English</strong>, and <strong>Cover answers</strong>, which blanks the English so you can tap a row to check it (resets on reload). A dot on the button means something is switched on.</li>
-        <li><strong>Show polite</strong> (in Options, on verb tables) swaps the dictionary form for the 〜ます form.</li>
-        <li>Every small badge beside a row with something to say — a particle, a verb's 五段/一段/変格, an outlined (irregular) adjective — opens the same popover on tap: one line about just that badge, never a permanent line under the meaning.</li>
-        <li>Blue chips beside a verb (and 好き, 嫌い, 上手, 下手) show the <strong>particle</strong> it takes — tap one to see what it marks (聞く: tap <strong>を</strong> for what you listen to, tap <strong>に</strong> for who you ask — never both at once).</li>
-        <li>A small <strong>い</strong> or <strong>な</strong> badge marks how an adjective conjugates — the letter itself says which, so a plain one doesn't tap to anything. An outlined one is irregular; tap it to see why (きれい, 嫌い, 有名, or いい → よくない). The legend is at the foot of Options.</li>
-        <li>In the Verbs table, a small <strong>五段</strong> / <strong>一段</strong> / <strong>変格</strong> badge marks the verb's group (godan / ichidan / irregular). Tap it for the reading (they're kanji) and, for an outlined one, why it's worth a second look (切る and 帰る conjugate godan despite looking ichidan; 来る's own reading changes: 来る is <em>kuru</em>, 来ます is <em>kimasu</em>).</li>
-        <li>The speaker icon plays a word's pronunciation. Particles (は, を, から …) show in blue bold — tap one to see how it's read (は as "wa").</li>
-        <li>Phrases are question/answer pairs, in their own order rather than A–Z.</li>
+      <summary><span class="help-tile" data-tile="green" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.6V3.4A1.9 1.9 0 0 1 4.9 1.5H15v15H4.9a1.9 1.9 0 0 1 0-3.8H15"/></svg></span><span class="help-sum"><h3>Reading</h3><span class="help-sub">Furigana, romaji, audio, badges</span></span></summary>
+      <ul class="help-rows">
+        <li><span class="help-term">Furigana</span><span class="help-desc">Always shown above the kanji.</span></li>
+        <li><span class="help-term">Romaji</span><span class="help-desc">Tap a word for its romaji. Tap any katakana for that sound alone.</span></li>
+        <li><span class="help-term">Speaker</span><span class="help-desc">Plays the word aloud.</span></li>
+        <li><span class="help-term">Particles</span><span class="help-desc">Blue and bold, like <span class="particle">は</span> — tap one to see how it reads.</span></li>
+        <li><span class="help-term">Badges</span><span class="help-desc">い / な, 五段 / 一段 / 変格, and the particles a verb takes. Tap for a one-line note; an outlined badge is an exception.</span></li>
+        <li><span class="help-term">Phrases</span><span class="help-desc">Each sentence with its English underneath, in question-and-answer order.</span></li>
       </ul>
     </details>
     <details class="help-group">
-      <summary><h3>Getting around a section</h3><span class="help-sub">Open, expand, print</span></summary>
-      <ul>
-        <li>A section opens with every table collapsed. Tap a title to open it (others in that category close), or use <strong>Expand all</strong> / <strong>Collapse all</strong> in Options.</li>
-        <li>A section remembers which tables you left open.</li>
-        <li>The printer icon on a table prints just that table as clean A4. <strong>Print this section</strong> and <strong>Print whole reference</strong>, in Options, do more.</li>
+      <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, cover, polite, print</span></span></summary>
+      <ul class="help-rows">
+        <li><span class="help-term">Japanese · Furigana · English</span><span class="help-desc">Switch any of them off. A dot on Options means something is changed.</span></li>
+        <li><span class="help-term">Cover answers</span><span class="help-desc">Blanks the English — tap a row to check yourself.</span></li>
+        <li><span class="help-term">Show polite</span><span class="help-desc">Verb tables switch to the 〜ます form.</span></li>
+        <li><span class="help-term">Expand all</span><span class="help-desc">Opens every table in the section.</span></li>
+        <li><span class="help-term">Print</span><span class="help-desc">One table (its ⋯ menu), the section, or everything, as A4.</span></li>
       </ul>
     </details>
     <details class="help-group">
-      <summary><h3>Making it yours</h3><span class="help-sub">Hide, customize, add words, sync</span></summary>
-      <ul>
-        <li>The eye icon at the end of a row hides a word you already know; <strong>Show all</strong> brings them back. <strong>Options › Row icons</strong> lists what every small row icon does.</li>
-        <li>The <strong>sliders icon</strong> in the top bar opens <strong>Customize</strong>: rename tables, change their icons and colours, reorder tables and categories, hide a table you don't need (<strong>Show</strong> brings it back), and add your own vocabulary.</li>
-        <li><strong>Your vocabulary</strong> takes one word at a time, or a paste / CSV of <code>japanese(furigana),romaji,english</code> — write each kanji's reading in brackets right after it: <code>帰(かえ)る</code>. Signed in, you can also build whole tables of your own; each word or table can be edited or deleted (both ask first).</li>
-        <li>A table's <strong>⋯ menu</strong> has <strong>Choose icon…</strong> (icon and colour — a table you create picks an icon from its name until you choose one) and <strong>Add to flashcards</strong>.</li>
-        <li>Sign in on the Flashcards page to sync flashcards, customisations and your own words across devices. Everything also works signed out, saved in this browser — <strong>Back up &amp; restore</strong> in Flashcards › Settings saves that copy to a file.</li>
-        <li>The <strong>person icon</strong> in the top bar shows a dot once you're signed in: green when everything is synced, amber if you're offline or something hasn't reached your account yet. A change made offline is saved on this device and syncs automatically.</li>
+      <summary><span class="help-tile" data-tile="orange" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.3 3.7 14.3 5.7 6 14H4v-2z"/></svg></span><span class="help-sum"><h3>Making it yours</h3><span class="help-sub">Hide, customize, your words, sync</span></span></summary>
+      <ul class="help-rows">
+        <li><span class="help-term">Hide a row</span><span class="help-desc">The eye icon. <strong>Show all</strong> brings rows back.</span></li>
+        <li><span class="help-term">Hide a table</span><span class="help-desc">A table’s ⋯ menu › Hide table. Customize › Show brings it back.</span></li>
+        <li><span class="help-term">Customize</span><span class="help-desc">Rename, recolour and reorder tables — the sliders icon at the top.</span></li>
+        <li><span class="help-term">Your vocabulary</span><span class="help-desc">Add words one by one or paste a list: <code>帰(かえ)る,kaeru,to return</code>.</span></li>
+        <li><span class="help-term">Sync</span><span class="help-desc">Sign in on Flashcards. The dot on the person icon: green synced, amber waiting.</span></li>
+        <li><span class="help-term">Back up</span><span class="help-desc">Signed out? Flashcards › Settings › Back up &amp; restore.</span></li>
       </ul>
     </details>
   </div>

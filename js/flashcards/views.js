@@ -73,64 +73,63 @@ window.RaumeStudy.flashcards.views = (function () {
       '<span class="fc-btn-tx-short" aria-hidden="true">' + a.short + '</span></button>';
   }
 
+  // Same iOS list as the masthead Help page: a small grey header over a
+  // white card of two-line rows -- the term, then one short plain line -- so
+  // the screen scans instead of reading as paragraphs.
   function renderHelp(panel) {
     panel.innerHTML =
-      '<div class="fc-settings-section"><h3>Adding &amp; pausing vocabulary</h3>' +
-      '<ul class="fc-help-list">' +
-      '<li><span class="fc-legend-term">Add</span> starts studying a word — or a whole table at once, from the Manage tab, or from a vocabulary search result (the small <span class="fc-legend-term">+</span> beside it).</li>' +
-      '<li><span class="fc-legend-term">Pause</span> stops reviewing a word but keeps every bit of its progress. Add it back any time and it resumes exactly where you left off. Paused words collect under the <span class="fc-legend-term">Archived</span> filter.</li>' +
-      '<li><span class="fc-legend-term">Pause table</span> makes a whole table dormant in one step — it drops out of review and the stat tiles and only shows under <span class="fc-legend-term">All vocabulary</span> (as <em>Paused</em>, with a <span class="fc-legend-term">Resume table</span> button). Its cards aren\'t archived one by one, so a paused table never clutters the Archived list. Resume brings every card back exactly as it was.</li>' +
-      '<li>Nothing is ever permanently deleted. A paused word or table keeps its full FSRS scheduling state and complete review history for good.</li>' +
-      '<li>Using it without an account? Your progress lives only in this browser — <span class="fc-legend-term">Settings → Back up &amp; restore</span> saves it to a file and restores it from one, so clearing site data doesn\'t lose it.</li>' +
-      '<li>Studying a word the built-in tables don\'t have? Add it under <span class="fc-legend-term">Your vocabulary</span> on the Customize page (the sliders icon) — one at a time or a paste / CSV import — then it\'s a normal word you can add here. Signed in, you can build whole tables of your own; editing or deleting a word or table you made there is a real change (there\'s no review history on the word itself to keep).</li>' +
-      '</ul></div>' +
-      '<div class="fc-settings-section"><h3>Status icons in Manage</h3>' +
-      '<ul class="fc-help-list fc-help-status">' +
+      '<h3 class="help-head">Adding &amp; pausing</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Add</span><span class="help-desc">A single word, or a whole table from Manage or a search result.</span></li>' +
+      '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps every bit of progress. Paused words collect under Archived.</span></li>' +
+      '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back exactly as it was.</span></li>' +
+      '<li><span class="help-term">Nothing is deleted</span><span class="help-desc">Scheduling and review history are kept for good.</span></li>' +
+      '<li><span class="help-term">Your own words</span><span class="help-desc">Add them under Customize › Your vocabulary, then study them like any other.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Manage icons</h3>' +
+      '<ul class="help-rows help-card fc-help-status">' +
       '<li><span class="fc-status fc-status-none">' + STATUS_META.none.glyph + '</span> Not added</li>' +
       '<li><span class="fc-status fc-status-active">' + STATUS_META.active.glyph + '</span> In flashcards</li>' +
       '<li><span class="fc-status fc-status-due">' + STATUS_META.due.glyph + '</span> Due for review now</li>' +
       '<li><span class="fc-status fc-status-archived">' + STATUS_META.archived.glyph + '</span> Paused</li>' +
-      '</ul></div>' +
-      '<div class="fc-settings-section"><h3>Review sessions</h3>' +
-      '<ul class="fc-help-list">' +
-      '<li>Each rating is saved the moment you pick it, so <span class="fc-legend-term">End session</span> (top-right of the card) never loses anything — it just stops early and shows the wrap-up.</li>' +
-      '<li>The wrap-up counts what you reviewed and how many you got right; <span class="fc-legend-term">Keep going</span> appears when more cards are ready.</li>' +
-      '<li>Pronunciation plays automatically the moment an answer reveals, using a natural native-voice recording where one exists, and a speaker icon next to any Japanese text plays it again on click.</li>' +
-      '</ul></div>' +
-      '<div class="fc-settings-section"><h3>Review keyboard shortcuts</h3>' +
-      '<ul class="fc-help-list">' +
-      '<li><kbd>Space</kbd> or <kbd>Enter</kbd> — check your answer</li>' +
-      '<li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> — rate Again / Hard / Good / Easy (only after the answer is checked)</li>' +
-      '</ul></div>' +
-      '<div class="fc-settings-section"><h3>Dashboard</h3>' +
-      '<ul class="fc-help-list">' +
-      '<li><span class="fc-legend-term">Today</span> — cards reviewed today against your daily target (New cards per day, under Settings → Daily session).</li>' +
-      '<li><span class="fc-legend-term">Next review</span> — when the next scheduled card is due, taken straight from the FSRS schedule.</li>' +
-      '<li><span class="fc-legend-term">Due next 7 days</span> — how many cards come due on each of the coming days, from the same FSRS schedule. Anything overdue is counted under Today; cards further out are summarised as "N more after that". Paused words and tables, and directions you\'ve turned off, aren\'t counted.</li>' +
-      '<li><span class="fc-legend-term">Missed today</span> — words you missed in today\'s reviews, most-missed first. Click one to practice it right away.</li>' +
-      '<li><span class="fc-legend-term">Leeches</span> — words that keep slipping out of memory (forgotten 8 or more times after you\'d learned them). <span class="fc-legend-term">Pause</span> takes one out of review with its progress kept, or <span class="fc-legend-term">Keep</span> leaves it studied and stops flagging it until it slips 4 more times. Manage marks the same words with a <span class="fc-legend-term">Leech</span> tag. The card only appears when there\'s something to show.</li>' +
-      '<li><span class="fc-legend-term">Words to Review</span> — words you get wrong repeatedly over time, shown as a normal vocabulary table you can sort, print, and hide columns on (the same Japanese / Furigana / English toggles as the reference pages) to quiz yourself.</li>' +
-      '</ul></div>' +
-      '<div class="fc-settings-section"><h3>Casual &amp; polite forms</h3>' +
-      '<p class="fc-note">On the vocabulary tables, the <span class="fc-legend-term">Show polite</span> toggle switches verb columns between the plain / dictionary form and the polite <span lang="ja">〜ます</span> form. One form is shown at a time. Words with no distinct polite form are left unchanged.</p>' +
-      '</div>' +
-      '<div class="fc-settings-section"><h3>Study directions</h3>' +
-      '<p class="fc-note">Settings → Study directions turns any of the four review directions on or off. Turning one off never deletes its cards or progress — it just leaves that direction out of review until you turn it back on.</p>' +
-      '</div>' +
-      '<div class="fc-settings-section"><h3>Syncing (signed in)</h3>' +
-      '<p class="fc-note">Every rating is saved on this device first, then synced to your account. A chip under your name shows the state: a calm <em>Syncing…</em> while it works, and an amber <em>Offline</em> or <em>couldn\'t sync</em> with a <span class="fc-legend-term">Sync now</span> button if it stalls. Whenever something\'s queued, a <span class="fc-legend-term">What\'s pending?</span> link under the chip lists exactly which reviews, own-words changes, or table changes haven\'t reached your account yet. Your reviews are never lost — <span class="fc-legend-term">Sync now</span> just retries the queue. Guest mode keeps everything on this device and shows only the offline hint.</p>' +
-      '</div>' +
-      '<div class="fc-settings-section"><h3>Kana trainer</h3>' +
-      '<p class="fc-note">The <span class="fc-legend-term">Kana</span> tab is a separate hiragana / katakana reading trainer, not built on the vocabulary. Choose the groups you want — gojūon, dakuten, handakuten, yōon (small-ya combinations), and sokuon (the doubling <span lang="ja">っ</span>, in short example words), per script — plus the directions: <em>kana → romaji</em> (type the reading) and <em>romaji → kana</em> (type the glyph — you\'ll want a kana keyboard). It uses the same review card, keyboard shortcuts, and FSRS scheduling as the vocabulary sessions, but keeps its own separate progress and settings. Saved locally in guest mode, synced to your account when signed in — same as the vocabulary flashcards.</p>' +
-      '</div>' +
-      '<div class="fc-settings-section"><h3>Puzzles</h3>' +
-      '<ul class="fc-help-list">' +
-      '<li><span class="fc-legend-term">Source</span> — <span class="fc-legend-term">Flashcards</span> (added, non-paused words) or <span class="fc-legend-term">Tables</span>: one or more vocabulary tables, whether or not they\'re in flashcards. Every answer is the word\'s reading; kanji is never shown or typed. A puzzle always has at least 6 words, and clues that give the answer away (<em>sake</em> for さけ, <em>cola</em> for コーラ) are left out.</li>' +
-      '<li><span class="fc-legend-term">Style</span>, <span class="fc-legend-term">Script</span>, <span class="fc-legend-term">Words</span> — <span class="fc-legend-term">Crossword</span> (numbered clue list) or <span class="fc-legend-term">Arroword</span> (each clue in a square before its answer); the script (<span class="fc-legend-term">Romaji</span>, <span class="fc-legend-term">Japanese</span>, <span class="fc-legend-term">Hiragana</span>, <span class="fc-legend-term">Katakana</span>); and how many words.</li>' +
-      '<li>Tap a square or a clue and type. Typing follows the word\'s direction — tap a crossing square again to switch. The bar above the grid shows the clue you\'re on; Backspace steps back, arrow keys move.</li>' +
-      '<li><span class="fc-legend-term">Check</span> marks filled squares right or wrong. The <span class="fc-legend-term">⋯</span> menu reveals a letter or the whole puzzle, clears your answers, or prints a clean worksheet.</li>' +
-      '<li>Nothing here is saved — every puzzle is generated fresh.</li>' +
-      '</ul></div>';
+      '</ul>' +
+      '<h3 class="help-head">Reviewing</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term"><kbd>Enter</kbd> or <kbd>Space</kbd></span><span class="help-desc">Check your answer.</span></li>' +
+      '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — once the answer shows.</span></li>' +
+      '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
+      '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
+      '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns any of the four directions on or off — progress is kept.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Dashboard</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Today</span><span class="help-desc">Reviews done against your daily new-card target.</span></li>' +
+      '<li><span class="help-term">Next review</span><span class="help-desc">When the next card is due.</span></li>' +
+      '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
+      '<li><span class="help-term">Missed today</span><span class="help-desc">Words you missed, most-missed first — tap one to practise it.</span></li>' +
+      '<li><span class="help-term">Leeches</span><span class="help-desc">Words forgotten 8+ times after learning. Pause, or Keep studying.</span></li>' +
+      '<li><span class="help-term">Words to review</span><span class="help-desc">Words you often miss, as a table you can sort, print and cover.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Kana</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Groups</span><span class="help-desc">Gojūon, dakuten, handakuten, yōon and sokuon, for each script.</span></li>' +
+      '<li><span class="help-term">Directions</span><span class="help-desc">Kana → romaji, or romaji → kana (needs a kana keyboard).</span></li>' +
+      '<li><span class="help-term">Progress</span><span class="help-desc">Its own FSRS schedule and settings, separate from word cards.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Puzzles</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Source</span><span class="help-desc">Your flashcards or any tables. At least 6 words; no clues that give the answer away.</span></li>' +
+      '<li><span class="help-term">Style · Script · Words</span><span class="help-desc">Crossword or arroword, romaji or kana, and how many words.</span></li>' +
+      '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type. Tap a crossing square again to switch direction.</span></li>' +
+      '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals, clears or prints.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Syncing</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Signed in</span><span class="help-desc">Saved on this device first, then synced to your account.</span></li>' +
+      '<li><span class="help-term">Status</span><span class="help-desc"><em>Syncing…</em>, <em>Offline</em>, or <em>couldn’t sync</em> with Sync now to retry.</span></li>' +
+      '<li><span class="help-term">What’s pending?</span><span class="help-desc">Lists exactly what hasn’t reached your account yet.</span></li>' +
+      '<li><span class="help-term">Guest</span><span class="help-desc">Everything stays in this browser — Settings › Back up &amp; restore saves a copy.</span></li>' +
+      '</ul>';
   }
 
   // --- Manage: browse every vocab entry, add / pause / restore ---

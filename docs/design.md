@@ -228,6 +228,12 @@ and Help.
   only what's below is pushed down. The row after an open table gets a
   full-width hairline. (Previously an open table broke out into its own card
   with a 20px title and a 16–24px gap above, so every tap made the page jump.)
+- **Help screens** (masthead Help, Flashcards › Help) are iOS lists, not
+  prose: each topic / group is a white card of two-line rows — the term on its
+  own line (15px ink), one short plain line under it (13px muted) — hairlines
+  between. Masthead topics are disclosure rows led by an iOS Settings-style
+  icon tile; Flashcards Help puts a 13px grey header over each card. Keep a
+  row to one idea and one line of explanation; keys are `kbd` chips.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to

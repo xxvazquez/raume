@@ -132,7 +132,9 @@ flashcard directions. Changes save immediately and sync when signed in.
 - **Print** — A4 at three scopes: one table (printer icon), this section, or
   the whole reference (both in Options). Collapsed tables still print.
 - **Theme** — cycles **System → Light → Dark**, applied before first paint.
-- **Help** — the masthead **?** (Flashcards has its own Help tab).
+- **Help** — the masthead **?**: four topics (Finding words, Reading,
+  Options, Making it yours), each a short list of one-line rows. Flashcards
+  has its own Help screen (top right of the Flashcards page) in the same style.
 - **On a phone or tablet** the masthead icons carry captions (Account, Help,
   Customize, and the current theme), the search bar's buttons read **Tables**
   and **Options**, and Manage's buttons keep a one-word label — nothing relies

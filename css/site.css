@@ -1744,9 +1744,18 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .help-list { margin-top: 18px; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .help-group + .help-group { border-top: 1px solid var(--row-line); }
 .help-group summary {
-  position: relative; display: block; cursor: pointer; list-style: none;
-  padding: 11px 40px 11px 16px;
+  position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none;
+  padding: 10px 40px 10px 16px;
 }
+/* An iOS Settings-style tile leads each topic: a white glyph on a soft
+   muted hue (the same --tile palette as the table rows). */
+.help-tile {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
+}
+.help-tile svg { display: block; }
+.help-sum { min-width: 0; }
 .help-group summary::-webkit-details-marker { display: none; }
 .help-group summary::after {
   content: ""; position: absolute; right: 18px; top: 50%; width: 7px; height: 7px; margin-top: -6px;
@@ -1757,11 +1766,28 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 .help-group summary:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
 .page-help h3 { margin: 0; padding: 0; font-size: 15px; font-weight: 400; color: var(--ink); }
 .help-sub { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-small); }
-.page-help ul {
-  margin: 0; padding: 2px 16px 12px 34px;
-  color: var(--ink); font-size: var(--fs-nav); line-height: 1.55;
+/* Inside a topic, and on the Flashcards Help screen: scannable two-line
+   rows -- the term on its own line (15px), one short plain line under it in
+   secondary grey -- hairline-separated like an iOS list, instead of
+   paragraphs of bold-studded sentences. */
+.help-rows { list-style: none; margin: 0; padding: 0; }
+.help-rows > li { position: relative; margin: 0; padding: 10px 16px; }
+.help-rows > li + li::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
+.help-group .help-rows { border-top: 1px solid var(--row-line); padding-left: 42px; }
+.help-group .help-rows > li + li::before { left: 16px; }
+.help-term { display: block; font: 400 15px/1.3 var(--font-ui); color: var(--ink); }
+.help-desc { display: block; margin-top: 2px; font: 400 var(--fs-small)/1.4 var(--font-ui); color: var(--muted); }
+.help-rows kbd {
+  display: inline-block; min-width: 1.5em; padding: 0 5px; border-radius: 5px;
+  background: color-mix(in srgb, var(--ink) 7%, var(--paper)); color: var(--ink);
+  font: 500 12px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; text-align: center;
 }
-.page-help li { margin: 5px 0; }
+.help-rows code { font-size: 12px; }
+/* Flashcards Help: iOS list headers over white cards of those rows. */
+.help-head { margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.help-head:first-child { margin-top: 4px; }
+.help-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+.help-card.fc-help-status > li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--ink); }
 .page-help strong { font-weight: 600; }
 .page-help kbd {
   font: 600 var(--fs-micro)/1 var(--font-ui);
@@ -3587,39 +3613,6 @@ mark.fc-diff-co {
    Today / Next review / Missed today / Words to Review sections. All
    reuse the existing card, list and palette language.
    --------------------------------------------------------------------- */
-
-/* Help & Documentation -- reuses the Settings card + list styling. A true
-   caption size + tone (matching the .fc-note treatment above and the kbd
-   glyphs below, already --fs-micro) rather than near-body-text weight. */
-.fc-help-list {
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  color: var(--faint);
-  font-size: var(--fs-micro);
-  line-height: 1.55;
-}
-.fc-help-list li { position: relative; padding-left: 16px; margin: 5px 0; }
-.fc-help-list li::before {
-  content: "";
-  position: absolute; left: 0; top: .6em;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--line-strong);
-}
-.fc-help-list.fc-help-status li::before { display: none; }
-.fc-help-list.fc-help-status li { padding-left: 0; display: flex; align-items: center; gap: 10px; }
-.fc-help-list kbd {
-  display: inline-block;
-  min-width: 1.4em;
-  padding: 1px 6px;
-  border: 1px solid var(--line-strong);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 500 var(--fs-micro)/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  text-align: center;
-}
 
 /* Manage status indicator -- one glyph per row, computed from live card state. */
 .fc-manage-row .fc-status,
