@@ -528,9 +528,11 @@ and Help.
     something further in one gesture instead of many taps, which the ▲▼
     buttons alone stayed fiddly at even after their touch target grew
     (`4207a63`). Both live in the same row/`<summary>`, `.cz-drag-handle`'s
-    `margin-left: auto` pushing it flush to the trailing edge (the same
-    technique `.disclosure-caret::after` already uses for the chevron, so on
-    a category row the two end up glued together at the end). Dragging is
+    `margin-left: auto` pushing it flush to the trailing edge. On a category
+    row the chevron (`.disclosure-caret::after`) takes that slack instead and
+    the grip follows it (`order`), so every grip, category or table, sits in
+    one column at the trailing edge — two auto margins would split the space
+    and strand the grip mid-row. Dragging is
     Pointer Events (mouse, touch and pen in one code path — no separate
     touch-event handling to duplicate), reordering nothing in the DOM while
     the gesture is live: only a CSS `transform` on the dragged item and

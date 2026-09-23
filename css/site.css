@@ -1516,6 +1516,12 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   color: var(--faint); cursor: grab; touch-action: none;
 }
 .cz-drag-handle:hover { color: var(--ink); }
+/* A category row has both the handle and the caret, each with an auto
+   margin -- they split the free space, which left each handle stranded
+   mid-row at a different spot. The caret takes the slack and the handle
+   sits after it at the trailing edge, in the same column as the table rows'. */
+.cz-group-title .cz-drag-handle { order: 2; margin-left: 6px; }
+.cz-group-title:has(.cz-drag-handle)::after { order: 1; }
 /* The picked-up item -- a background tint stands in for the shadow the
    design system reserves for the overflow menu alone. */
 .cz-dragging { position: relative; z-index: 5; cursor: grabbing; background: var(--group-ground); border-radius: 8px; }
