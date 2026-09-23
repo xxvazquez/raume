@@ -706,7 +706,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!host || !vocabularyTables) return;
     mergeCustomVocab();
     host.innerHTML = renderAll(vocabularyTables);
-    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables);
+    if (indexHost) { indexHost.innerHTML = renderTableIndex(vocabularyTables); lastIndexHtml = null; }
     tagOriginalIndex();
     // Every freshly rendered section starts .page-hidden. If the reader is
     // currently on a vocabulary section, re-run routing to reveal it again;
@@ -721,7 +721,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     mergeCustomVocab();
     host.innerHTML = renderAll(vocabularyTables);
     if (navHost) navHost.innerHTML = renderNav();
-    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables);
+    if (indexHost) { indexHost.innerHTML = renderTableIndex(vocabularyTables); lastIndexHtml = null; }
   }
   tagOriginalIndex();
 
@@ -746,11 +746,19 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var ordered = [], parked = [];
+    // Headings and sections are the host's direct children -- look them up
+    // from one pass over those, not an attribute query per table, which has
+    // to search every row of every table.
+    var sectionById = {}, headingByCat = {};
+    Array.prototype.forEach.call(host.children, function (el) {
+      if (el.classList.contains('table-section') && !(el.dataset.table in sectionById)) sectionById[el.dataset.table] = el;
+      else if (el.classList.contains('cat-heading') && el.dataset.section === 'vocabulary' && !(el.dataset.category in headingByCat)) headingByCat[el.dataset.category] = el;
+    });
     SECTION_ORDER.forEach(function (sec) {
       groupByCategory(bySection[sec], sec).forEach(function (g) {
         var shown = g.tables.filter(function (t) { return !isUserHidden(t.id); }).length;
         if (sec === 'vocabulary') {
-          var h = host.querySelector('.cat-heading[data-section="vocabulary"][data-category="' + cssAttr(g.name) + '"]');
+          var h = headingByCat[g.name];
           if (h) {
             h.classList.toggle('user-hidden', shown === 0);
             var count = h.querySelector('.cat-heading-count');
@@ -759,7 +767,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           }
         }
         g.tables.forEach(function (t) {
-          var s = host.querySelector('.table-section[data-table="' + t.id + '"]');
+          var s = sectionById[String(t.id)];
           if (!s) return;
           var hidden = isUserHidden(t.id);
           s.classList.toggle('user-hidden', hidden);
@@ -767,10 +775,20 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         });
       });
     });
-    ordered.concat(parked).forEach(function (el) { host.appendChild(el); });
-    if (indexHost) indexHost.innerHTML = renderTableIndex(vocabularyTables.filter(function (t) { return !isUserHidden(t.id); }));
+    // Moving a section drags its whole table along, so only move when the
+    // sequence actually changed: the wanted elements already sitting, in
+    // order, at the end of the host is the common case (a hidden-table
+    // toggle or rename that re-sorts nothing).
+    var wanted = ordered.concat(parked), kids = host.children, offset = kids.length - wanted.length;
+    var inPlace = offset >= 0 && wanted.every(function (el, i) { return kids[offset + i] === el; });
+    if (!inPlace) wanted.forEach(function (el) { host.appendChild(el); });
+    if (indexHost) {
+      var indexHtml = renderTableIndex(vocabularyTables.filter(function (t) { return !isUserHidden(t.id); }));
+      // Same markup as last time -> the live directory is already right (and
+      // keeps its current-table mark).
+      if (indexHtml !== lastIndexHtml) { indexHost.innerHTML = indexHtml; lastIndexHtml = indexHtml; }
+    }
   }
-  // Escape a category name for use inside a [data-category="..."] selector.
-  function cssAttr(v) { return String(v).replace(/["\\]/g, '\\$&'); }
+  var lastIndexHtml = null;
   vocab.reflowLayout = reflowLayout;
 })();

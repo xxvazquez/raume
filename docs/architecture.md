@@ -84,7 +84,13 @@ flowchart LR
   `localStorage` is the immediate source of truth; signed in, they also sync via
   a `table_custom` column on `flashcard_settings`. Sign-in merges per table —
   account wins for tables it has; guest customisations for other tables are
-  pushed up, not dropped.
+  pushed up, not dropped. A change tells listeners what moved
+  (`tableCustom.onChange(fn)` gets `{ id }` for an icon or colour pick, `null`
+  otherwise): an icon/colour patches just that table's header and directory
+  link; anything else (a name can re-sort the A–Z default) runs
+  `applyTableOrder`, and `reflowLayout` only moves sections or rebuilds the
+  directory when the order or markup actually changed. Customize re-renders
+  only while it's on screen.
 - **Custom vocabulary** (`js/vocab/custom-vocab.js`, `RaumeStudy.customVocab`) —
   the reader's own rows and tables. Two `localStorage` keys, mirroring the
   flashcards cache split: `raume-custom-vocab-guest-v1` (guest = authoritative)

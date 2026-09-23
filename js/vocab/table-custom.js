@@ -27,15 +27,19 @@ window.RaumeStudy.tableCustom = (function () {
   function persistLocal() {
     try { window.localStorage.setItem(KEY, JSON.stringify(cache)); } catch (e) {}
   }
-  function announce() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
+  // `change` tells listeners how much moved: { id } when only that one
+  // table's look changed (its icon or colour -- patch it in place), nothing
+  // when anything else may have (hidden, a name, which can re-sort the A-Z
+  // default, order, a reset, a sync) -- re-sequence everything.
+  function announce(change) { listeners.forEach(function (fn) { try { fn(change || null); } catch (e) {} }); }
 
   // A local edit: write through to localStorage, tell the UI, and push the
   // whole object to the account if one is connected (last edit wins).
-  function mutate(fn) {
+  function mutate(fn, change) {
     load();
     fn();
     persistLocal();
-    announce();
+    announce(change);
     if (remotePush) { try { remotePush(getAll()); } catch (e) {} }
   }
 
@@ -56,7 +60,7 @@ window.RaumeStudy.tableCustom = (function () {
       var k = String(id);
       if (value) { cache[k] = cache[k] || {}; cache[k][field] = value; }
       else if (cache[k]) { delete cache[k][field]; if (!Object.keys(cache[k]).length) delete cache[k]; }
-    });
+    }, field === "icon" || field === "color" ? { id: String(id) } : null);
   }
   function setIcon(id, icon) { setField(id, "icon", icon); }
   // A tile colour key from icons.colors ("green", "clay", …); "" goes back to

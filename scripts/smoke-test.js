@@ -705,6 +705,9 @@ async function main() {
     const picked = V.tableIconValue("ct-test");
     tc.clear("ct-test");
     all.splice(all.length - 2, 2);
+    // The data was edited directly, not through custom-vocab (which re-renders
+    // on its own) -- re-sync so the directory drops the fake tables' links.
+    V.applyTableOrder();
     return auto === "paw" && fallback === "bookmark" && renamed === "apple" && picked === "star";
   })());
   check("a table's tile colour: its category's hue, then the icon group's for your own tables, then your own pick", (() => {
@@ -718,6 +721,7 @@ async function main() {
     const bogus = V.tableTile("ct-test3", "My vocabulary");
     tc.clear("ct-test3");
     all.pop();
+    V.applyTableOrder();
     return known === "green" && own === "green" && picked === "clay" && bogus === "green";
   })());
   check("picking a colour re-tints the table header in place (data-tile) and Reset returns to the automatic one", (() => {

@@ -659,7 +659,8 @@ window.RaumeStudy.customize = (function () {
         else if (e.key === "Escape") { cvEditingId = null; cvEditError = null; render(host); }
       }
     });
-    if (tc()) tc().onChange(function () { if (hostEl) render(hostEl); });
+    // Only while it's on screen -- opening Customize renders it fresh.
+    if (tc()) tc().onChange(function () { if (hostEl && document.body.dataset.activePage === "customize") render(hostEl); });
     if (cv()) cv().onChange(function () {
       if (cvSelfMutating) return; // the action re-renders itself
       if (hostEl && document.body.dataset.activePage === "customize") render(hostEl);

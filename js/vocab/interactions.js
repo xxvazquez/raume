@@ -1050,20 +1050,36 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const t = (window.RaumeStudy.data.vocabularyTables || []).filter(function (x) { return String(x.id) === String(id); })[0];
       return t ? t.title : null;
     }
-    function refreshTable(id) {
-      const tc = window.RaumeStudy.tableCustom, glyph = window.RaumeStudy.vocab.tableIconGlyph(id);
+    // `ids` limits the pass to those tables; omitted, every table. One query
+    // for all headers and one for all directory links, grouped by id --
+    // a query per table was the slow part of every customisation change.
+    function refreshTables(ids) {
+      const only = ids ? ids.map(String) : null;
+      const sections = {}, links = {};
+      document.querySelectorAll('#vocabulary .table-section[data-table]').forEach(function (s) {
+        const id = s.dataset.table;
+        if (!only || only.indexOf(id) !== -1) (sections[id] = sections[id] || []).push(s);
+      });
+      document.querySelectorAll('#tindexMenu a[data-target]').forEach(function (a) {
+        const id = a.dataset.target;
+        if (!only || only.indexOf(id) !== -1) (links[id] = links[id] || []).push(a);
+      });
+      Object.keys(sections).forEach(function (id) { refreshTable(id, sections[id], links[id] || []); });
+      if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
+    }
+    function refreshTable(id, sections, links) {
+      const glyph = window.RaumeStudy.vocab.tableIconGlyph(id);
       const has = !!window.RaumeStudy.vocab.tableIconValue(id);
       const title = window.RaumeStudy.vocab.tableTitle(id, shippedTitle(id));
-      const first = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');
-      const tile = window.RaumeStudy.vocab.tableTile(id, first && first.dataset.category);
-      document.querySelectorAll('#vocabulary .table-section[data-table="' + id + '"]').forEach(function (section) {
+      const tile = window.RaumeStudy.vocab.tableTile(id, sections[0] && sections[0].dataset.category);
+      sections.forEach(function (section) {
         const slot = section.querySelector('.section-icon');
         if (slot) { slot.classList.toggle('section-icon-empty', !has); slot.innerHTML = glyph; }
         if (tile) section.dataset.tile = tile; else delete section.dataset.tile;
         const text = section.querySelector('.section-title-text');
         if (text && title) text.textContent = title;
       });
-      document.querySelectorAll('#tindexMenu a[data-target="' + id + '"]').forEach(function (a) {
+      links.forEach(function (a) {
         if (tile) a.dataset.tile = tile; else delete a.dataset.tile;
         let el = a.querySelector('.tindex-icon');
         if (has) {
@@ -1073,14 +1089,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const tname = a.querySelector('.tindex-tname');
         if (tname && title) tname.textContent = title;
       });
-      if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
     }
-    function refreshAllTables() {
-      // A custom-order change (or order synced from another device) needs the
-      // headings/sections physically re-sequenced and the directory rebuilt...
+    function refreshAllTables(change) {
+      // An icon or colour pick touches one table: patch just its header and
+      // directory link.
+      if (change && change.id) { refreshTables([change.id]); return; }
+      // Anything else (order, hidden, a name, a sync) may re-sequence the
+      // headings/sections and rebuild the directory...
       applyTableOrder();
       // ...then the section headers get their icon/name refreshed in place.
-      document.querySelectorAll('#vocabulary .table-section[data-table]').forEach(function (s) { refreshTable(s.dataset.table); });
+      refreshTables();
     }
     document.addEventListener('click', function (event) {
       const btn = event.target.closest && event.target.closest('.section-icon-btn');
