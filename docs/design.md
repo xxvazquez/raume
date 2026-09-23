@@ -43,7 +43,7 @@ system, and the sections below cover each part of it.
   — so it reads as the anchor from contrast, not sheer size. The verdict is
   an icon alone (a check, a caution triangle for a one-letter near-miss, or
   an ✕) in a small tinted circle — never text, never a pill or a filled
-  block — so the answer beneath it (21px 600, `--ink`) is the one thing to
+  block — so the answer beneath it (24px 500, `--ink` — size, not bold) is the one thing to
   read, prominent by position and contrast, not sheer size — big enough to
   anchor the card, not so big it shouts on a short word or crowds a long one
   ("topic / contrast").
@@ -57,9 +57,10 @@ system, and the sections below cover each part of it.
   the word once checked, except for a kana-only word (レモン), which is its
   own reading. The ratings are a plain text action row — no pills, no
   track, no key chip — a hairline above marking them off from the card, each
-  label coloured only in its own tone; the usual choice (Good after a right
-  answer, Again after a miss) reads bold and full-strength, the other three
-  at reduced (not faint) opacity. The card is top-anchored (no re-centring
+  label (15px 500, its interval 12px under it) coloured only in its own tone;
+  the usual choice (Good after a right answer, Again after a miss) reads
+  full-strength, the other three at reduced (not faint) opacity — same weight.
+  The speaker glyph beside the prompt stays small but takes a 44pt tap area. The card is top-anchored (no re-centring
   when the answer drops in), and a `<progress>` bar under the meta line shows
   the session. On a phone the chrome (meta line, padding, rating row, the
   "stage" panel) tightens but the prompt keeps its full size and air. Past
