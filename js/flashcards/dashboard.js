@@ -750,8 +750,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // The reading, right under the word -- only Japanese -> English needs it
     // (Japanese -> Romaji already tests the reading itself), and only once
     // checked, so it can't be used to dodge the meaning question above it.
+    // A kana-only word (レモン, りんご) is its own reading -- nothing to add.
     var readingEl = shell.querySelector(".fc-prompt-reading");
-    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en";
+    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en" &&
+      !!entry.jpReading && entry.jpReading !== entry.jpPlain;
     readingEl.hidden = !showReading;
     readingEl.textContent = showReading ? entry.jpReading : "";
 
@@ -783,15 +785,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // Correct answers need none of that -- just the answer, once, restated.
     var cmp = session.correct ? null : answerCompareHtml(entry, card.direction, session.userAnswer);
     // The ANSWER is the focus -- big, first thing the eye lands on. What you
-    // typed is one quiet line below it: the romaji diff already marks the
-    // bad letters (cmp.marked), so that stays plain; a fully different or
-    // English-target answer gets struck through instead, since there's
-    // nothing else marking it as wrong. A single letter off is "Almost";
+    // typed is one quiet line below it, never struck through (hard to read):
+    // the romaji diff marks the bad letters (cmp.marked), and otherwise the
+    // verdict icon above already says it's wrong. A single letter off is "Almost";
     // anything else is "Not quite" -- the icon above carries that, not text.
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
-          '<div class="fc-stage-typed">You wrote ' + (cmp.marked ? cmp.youHtml : "<s>" + cmp.youHtml + "</s>") + "</div>" +
+          '<div class="fc-stage-typed">You wrote ' + cmp.youHtml + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
     var verdictKind = session.correct ? "ok" : (cmp.near ? "almost" : "bad");
     var verdictIcon = verdictKind === "ok" ? VERDICT_OK_ICON : (verdictKind === "almost" ? VERDICT_ALMOST_ICON : VERDICT_BAD_ICON);

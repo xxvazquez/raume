@@ -445,7 +445,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</div>"
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>" +
-          '<div class="fc-stage-typed">You wrote <s' + (r2k ? ' lang="ja"' : "") + ">" + esc(typedRaw || "(nothing)") + "</s></div></div>";
+          '<div class="fc-stage-typed">You wrote <span' + (r2k ? ' lang="ja"' : "") + ">" + esc(typedRaw || "(nothing)") + "</span></div></div>";
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never

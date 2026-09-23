@@ -3356,7 +3356,6 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-answer-text { font: 400 16px/1.3 var(--font-ui); }
 .fc-answer-right .fc-answer-text { font-size: 21px; overflow-wrap: anywhere; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
 .fc-stage-typed { font-size: 12px; color: var(--muted); opacity: .8; overflow-wrap: anywhere; }
-.fc-stage-typed s { text-decoration-color: var(--wrong); opacity: .85; }
 .fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
 .fc-review-dynamic { align-self: stretch; }
 mark.fc-diff-you {

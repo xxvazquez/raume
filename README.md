@@ -175,6 +175,8 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - A wrong romaji answer highlights exactly which letters were off
   (`kaeramasu → kaerimasu`). Long vowels are ignored — `kōhī`, `koohii` and
   `kouhii` all match.
+- Japanese → English shows the word's reading under it once checked — not for
+  kana-only words like レモン, where it would just repeat the word.
 - After a wrong answer, **Again / Hard** read first and Good / Easy are
   dimmed, but still one tap away if it was just a typo.
 - Results are announced to screen readers without moving focus.

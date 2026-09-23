@@ -51,9 +51,11 @@ system, and the sections below cover each part of it.
   carries the coral/ochre. The answer field collapses out of the way once
   checked (opacity + height, never display/visibility, so it stays focused
   and a phone's on-screen keyboard doesn't close) and what you typed becomes
-  one quiet secondary line below the answer, the wrong part struck through
-  (or, for a one-letter romaji slip, the same letter-level marks as the
-  answer above it). The ratings are a plain text action row — no pills, no
+  one quiet secondary line below the answer — never struck through, which
+  was hard to read (a one-letter romaji slip gets the same letter-level
+  marks as the answer above it). Japanese → English shows the reading under
+  the word once checked, except for a kana-only word (レモン), which is its
+  own reading. The ratings are a plain text action row — no pills, no
   track, no key chip — a hairline above marking them off from the card, each
   label coloured only in its own tone; the usual choice (Good after a right
   answer, Again after a miss) reads bold and full-strength, the other three

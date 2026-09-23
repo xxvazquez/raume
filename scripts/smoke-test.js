@@ -2143,7 +2143,10 @@ async function main() {
   check("the reveal shows one field of context (meaning/reading), not just the answer -- the reading sits under the word for Japanese -> English, the meaning line under the answer for the other three directions", (() => {
     const direction = (document.querySelector(".fc-review-progress") || {}).textContent || "";
     if (direction.indexOf("Japanese → English") === 0) {
+      // ...unless the word is kana-only (レモン) -- then it is its own reading.
       const readingEl = document.querySelector(".fc-prompt-reading");
+      const word = document.querySelector(".fc-review-card .fc-prompt").textContent.trim();
+      if (/^[\u3040-\u30ff\s]+$/.test(word)) return !!readingEl && readingEl.hidden;
       return !!readingEl && !readingEl.hidden && readingEl.textContent.trim().length > 0;
     }
     const meaningEl = document.querySelector(".fc-stage-meaning");
@@ -2165,9 +2168,9 @@ async function main() {
   check("the rating row has no separate key-hint chip -- the label text itself carries the colour now", (() => {
     return document.querySelectorAll(".fc-rating-key").length === 0;
   })());
-  check("what you typed shows as a quiet secondary line, struck through, below the big answer", (() => {
+  check("what you typed shows as a quiet secondary line below the big answer, never struck through", (() => {
     const typedEl = document.querySelector(".fc-stage-typed");
-    return !!typedEl && /you wrote/i.test(typedEl.textContent) && !!typedEl.querySelector("s, mark.fc-diff-you");
+    return !!typedEl && /you wrote/i.test(typedEl.textContent) && !typedEl.querySelector("s");
   })());
   check("a wrong answer marks only the letters that differ, not the whole word", (() => {
     // "definitely-not-right" is wrong regardless of direction, so .fc-stage-compare
