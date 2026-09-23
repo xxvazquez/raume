@@ -1829,6 +1829,8 @@ async function main() {
     return !!rule && /px/.test(rule.style.minHeight || "");
   });
   firstAddBtn.click();
+  check("tapping Add shows it at once -- the button reads Adding… and disables while the change is saved",
+    firstAddBtn.disabled === true && firstAddBtn.querySelector(".fc-btn-tx").textContent === "Adding…");
   await flush();
   document.querySelector('.fc-tab[data-tab="dashboard"]').click();
   const totalTileAfter = document.querySelector(".fc-stat-tile:nth-child(2) .fc-stat-value").textContent;

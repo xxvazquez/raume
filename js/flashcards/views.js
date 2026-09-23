@@ -18,6 +18,7 @@ window.RaumeStudy.flashcards.views = (function () {
   var DIRECTIONS = store.DIRECTIONS, DIRECTION_LABEL = store.DIRECTION_LABEL;
   var getVocabIndex = vidx.getVocabIndex;
   var addVocab = dataOps.addVocab, archiveVocab = dataOps.archiveVocab;
+  var withTimeout = dataOps.withTimeout;
   var addVocabs = dataOps.addVocabs, archiveVocabs = dataOps.archiveVocabs;
   var refreshData = dataOps.refreshData;
   var saveFsrsSettings = dataOps.saveFsrsSettings, saveQueueSettings = dataOps.saveQueueSettings, saveDirectionSettings = dataOps.saveDirectionSettings;
@@ -364,18 +365,29 @@ window.RaumeStudy.flashcards.views = (function () {
   }
   function bindManageActionButtons(scope) {
     scope.querySelectorAll("[data-action]").forEach(function (btn) {
-      btn.addEventListener("click", function () { runVocabAction(btn.dataset.action, btn.dataset.vocabId); });
+      btn.addEventListener("click", function () { runVocabAction(btn.dataset.action, btn.dataset.vocabId, btn); });
     });
   }
-  async function runVocabAction(action, vocabId) {
+  // The tap shows at once ("Adding…", disabled) -- signed in, the change
+  // waits on the account, and a button that sat unchanged read as "nothing
+  // happened". Every account round-trip is capped (dataOps.withTimeout, 20s),
+  // so a stalled connection ends in a clear message instead of silence.
+  var VOCAB_ACTION_PENDING = { add: "Adding…", remove: "Pausing…", restore: "Restoring…" };
+  async function runVocabAction(action, vocabId, btn) {
+    var label = btn && btn.querySelector(".fc-btn-tx");
+    var originalLabel = label ? label.textContent : "";
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = VOCAB_ACTION_PENDING[action] || "Working…";
     try {
-      if (action === "add" || action === "restore") await addVocab(vocabId);
-      else if (action === "remove") await archiveVocab(vocabId);
-      await refreshData();
+      var change = action === "remove" ? archiveVocab(vocabId) : addVocab(vocabId);
+      await withTimeout(change, "update");
+      await withTimeout(refreshData(), "refresh");
       invalidateInsights();
       rerender();
       refreshRowToggleButtons();
     } catch (e) {
+      if (btn) btn.disabled = false;
+      if (label) label.textContent = originalLabel;
       window.alert("Couldn't update flashcards — " + (e.message || "check your connection and try again."));
     }
   }
@@ -397,15 +409,15 @@ window.RaumeStudy.flashcards.views = (function () {
       if (action === "add-table") {
         var visible = visibleVocabIdsForTable(tableId);
         var targetIds = visible.length ? visible.filter(function (id) { return allIds.indexOf(id) !== -1; }) : allIds;
-        await addVocabs(targetIds);
+        await withTimeout(addVocabs(targetIds), "update");
       } else if (action === "remove-table") {
-        await setTablePaused(tableId, true);
+        await withTimeout(setTablePaused(tableId, true), "update");
       } else if (action === "resume-table") {
-        await setTablePaused(tableId, false);
+        await withTimeout(setTablePaused(tableId, false), "update");
       } else if (action === "restore-table") {
-        await addVocabs(allIds.filter(function (id) { return vocabState(id) === "archived"; }));
+        await withTimeout(addVocabs(allIds.filter(function (id) { return vocabState(id) === "archived"; })), "update");
       }
-      await refreshData();
+      await withTimeout(refreshData(), "refresh");
       invalidateInsights();
       rerender();
       refreshRowToggleButtons();
