@@ -451,7 +451,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     try {
       var client = getClient(), user = currentUser();
       var since = new Date(); since.setDate(since.getDate() - 120);
-      var res = await client.from("review_logs").select("card_id, rating, reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
+      var res = await dataOps.fetchAllRows(function () { return client.from("review_logs").select("card_id, rating, reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString()); });
       if (res.error) throw res.error;
       var cards = getCache().cards;
       events = res.data.map(function (row) {
@@ -491,7 +491,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     try {
       var client = getClient(), user = currentUser();
       var since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - 6);
-      var res = await client.from("review_logs").select("reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString());
+      var res = await dataOps.fetchAllRows(function () { return client.from("review_logs").select("reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString()); });
       if (res.error) throw res.error;
       res.data.forEach(function (row) {
         if (row.client_review_id) synced[row.client_review_id] = true;

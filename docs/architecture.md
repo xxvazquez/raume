@@ -116,6 +116,16 @@ flowchart LR
   individually after. Sign-in unions the two lists (a device's pauses aren't
   dropped).
 
+### Reading all of an account's rows
+
+Supabase (PostgREST) returns **at most 1000 rows per request**. Every "load all
+my rows" read — `flashcards`, `kana_cards`, `custom_tables`, `custom_rows`, and
+the dashboard's `review_logs` windows — goes through `dataOps.fetchAllRows`,
+which pages with `.order("id").range()` until a short page comes back. A plain
+`.select()` silently stopped at 1000: past that, newly added cards were saved
+but never loaded, so Add looked like it did nothing. Any new list query must
+use the helper too.
+
 ### Guest backup
 
 `js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) is guest-only —

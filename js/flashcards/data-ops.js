@@ -92,9 +92,26 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // -----------------------------------------------------------------------
   // Remote store (Supabase = source of truth)
   // -----------------------------------------------------------------------
+  // Supabase (PostgREST) returns at most 1000 rows per request by default, so
+  // a single select silently stops at 1000 -- with a big enough deck the
+  // newest cards never loaded, and Add looked like it did nothing (the card
+  // was saved, then missing from the reload). Every "all my rows" read pages
+  // through instead: `makeQuery` builds a fresh filtered query each time,
+  // ordered by id so the pages don't overlap.
+  var PAGE_SIZE = 1000;
+  async function fetchAllRows(makeQuery) {
+    var all = [];
+    for (var from = 0; ; from += PAGE_SIZE) {
+      var res = await makeQuery().order("id").range(from, from + PAGE_SIZE - 1);
+      if (res.error) return { data: null, error: res.error };
+      all = all.concat(res.data || []);
+      if (!res.data || res.data.length < PAGE_SIZE) return { data: all, error: null };
+    }
+  }
+
   async function fetchAllFromServer() {
     var client = getClient(), user = currentUser();
-    var cardsRes = await client.from("flashcards").select("*").eq("user_id", user.id);
+    var cardsRes = await fetchAllRows(function () { return client.from("flashcards").select("*").eq("user_id", user.id); });
     if (cardsRes.error) throw cardsRes.error;
     var settingsRes = await client.from("flashcard_settings").select("*").eq("user_id", user.id).maybeSingle();
     if (settingsRes.error) throw settingsRes.error;
@@ -170,9 +187,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // The reader's own vocabulary rows/tables (js/vocab/custom-vocab.js) --
     // their own Supabase tables, not this settings row.
     if (window.RaumeStudy.customVocab) {
-      var ctRes = await client.from("custom_tables").select("*").eq("user_id", user.id);
+      var ctRes = await fetchAllRows(function () { return client.from("custom_tables").select("*").eq("user_id", user.id); });
       if (ctRes.error) throw ctRes.error;
-      var crRes = await client.from("custom_rows").select("*").eq("user_id", user.id);
+      var crRes = await fetchAllRows(function () { return client.from("custom_rows").select("*").eq("user_id", user.id); });
       if (crRes.error) throw crRes.error;
       window.RaumeStudy.customVocab.applyRemote({
         tables: (ctRes.data || []).map(function (r) {
@@ -697,7 +714,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   async function fetchKanaFromServer() {
     if (isGuestMode() || !currentUser()) return;
     var client = getClient(), user = currentUser();
-    var cardsRes = await client.from("kana_cards").select("*").eq("user_id", user.id);
+    var cardsRes = await fetchAllRows(function () { return client.from("kana_cards").select("*").eq("user_id", user.id); });
     if (cardsRes.error) throw cardsRes.error;
     var setRes = await client.from("flashcard_settings").select("kana_prefs, kana_fsrs").eq("user_id", user.id).maybeSingle();
     if (setRes.error) throw setRes.error;
@@ -748,7 +765,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (!rows.length) return null;
     var res = await client.from("kana_cards").upsert(rows, { onConflict: "user_id,kana_id,direction", ignoreDuplicates: true });
     if (res.error) throw res.error;
-    var all = await client.from("kana_cards").select("*").eq("user_id", user.id);
+    var all = await fetchAllRows(function () { return client.from("kana_cards").select("*").eq("user_id", user.id); });
     if (all.error) throw all.error;
     return all.data;
   }
@@ -868,6 +885,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     customVocabAddTableQueued: customVocabAddTableQueued, customVocabDeleteTableQueued: customVocabDeleteTableQueued,
     syncCvOutbox: syncCvOutbox,
     recordStudyActivity: recordStudyActivity, syncOutbox: syncOutbox, syncNow: syncNow, withTimeout: withTimeout,
+    fetchAllRows: fetchAllRows,
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState, pendingItems: pendingItems,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,
     getKanaFsrs: getKanaFsrs, saveKanaFsrs: saveKanaFsrs,
