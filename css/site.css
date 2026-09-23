@@ -4089,3 +4089,11 @@ mark.fc-diff-co {
 @media print {
   .app-frame { display: block; }
 }
+/* Flashcards on a wide window: one centred 900px column (the dashboard's
+   own cap) for everything -- title bar, status, tabs and every panel --
+   instead of a title bar spanning 1124px over a left-aligned dashboard.
+   Padding, not per-child margins, so inline-flex rows (the tabs) line up on
+   the same edge. */
+@media (min-width: 641px) {
+  #flashcardsPage { padding-left: max(28px, calc((100% - 900px) / 2)); padding-right: max(28px, calc((100% - 900px) / 2)); }
+}

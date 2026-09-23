@@ -596,8 +596,10 @@ and Help.
   borderless 14px surfaces with the one menu shadow; the current table in the
   index is a soft fill, not a bar; the picker's group labels are sentence-case
   `--fs-small`.
-- **Manage** runs the full sheet — its rows are content-driven, not a
-  proportional grid. Its word rows show the plain kanji, not the furigana ruby
+- **Flashcards is one centred 900px column** past phone width — title bar,
+  status line, tabs and every panel on the same edges (padding on
+  `#flashcardsPage`, so the inline-flex tabs line up too). **Manage** fills
+  that column — its rows are content-driven, not a proportional grid. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Manage is a deck-management checklist, and ruby made
   every row a different height so the status glyphs and action buttons never
   lined up. The reading stays one column over (romaji, hidden on a phone).
