@@ -601,6 +601,11 @@ and Help.
   borderless 14px surfaces with the one menu shadow; the current table in the
   index is a soft fill, not a bar; the picker's group labels are sentence-case
   `--fs-small`.
+- **Flashcards header**: the four-segment control and Settings / Help share
+  the title bar. On a phone: the large "Flashcards" title with Settings / Help,
+  the segments full width under it. Wider: the title is visually hidden (the
+  top bar names the page, as on the reference pages), segments leading and
+  Settings / Help trailing on one row, the status line under it.
 - **Flashcards is one centred 900px column** past phone width — title bar,
   status line, tabs and every panel on the same edges (padding on
   `#flashcardsPage`, so the inline-flex tabs line up too). Customize (720px)
@@ -702,22 +707,26 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
-**Puzzles**: settings are one inset-grouped card of 44px rows (Source,
-Tables, Style, Script, Words — all in view; no disclosure row). Each choice is an iOS pop-up
-row — label left, value + ⌃⌄ in secondary grey right — with an invisible
-native `<select>` over the row, so a tap opens the platform picker; no
-segmented control per setting. The table list inside is checkmark rows. The toolbar is the
-controls library as-is — tinted **New puzzle** leading, filled **Check**
-trailing, and the reference tables' own ⋯ menu for Reveal a letter / Reveal
-puzzle / Clear answers / Print. A white clue bar above the grid names the clue
-you're on. The grid draws only the letter squares — white with a hairline,
-blanks are the page ground — at 40px, shrinking to a 24px floor on a phone
-before it scrolls, centred in its column; the active word takes
-`--accent-soft`, the focused square a `--section-strong` ring. Check's verdict
-is the green / red soft fill. Grid and clues sit side by side while there's
-room; Across and Down are two inset-grouped cards side by side (stacked when
-narrow), compact rows with the number as a quiet right-aligned tabular column
-the clue hangs from, the active clue tinted.
+**Puzzles** puts the puzzle first. One toolbar: a white capsule **summary
+button** ("Crossword · Flashcards · 15 words · Romaji ⌄") leading, then
+**New puzzle** (white) and filled **Check** trailing with the reference
+tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Print; on a
+phone New puzzle moves into it). The summary opens the settings — Source,
+Tables, Style, Script, Words as iOS pop-up rows (label left, value + ⌃⌄ right,
+an invisible native `<select>` over the row; the table list is checkmark rows)
+— in a glass popover under it (`.fc-xw-sheet`, the Options pattern), a bottom
+sheet over a scrim on a phone; it stays open while you change things and
+closes on an outside tap or Escape. The puzzle is one grid-areas layout:
+≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
+watermelon") and the Across / Down cards beside it, so the whole puzzle is in
+view without scrolling; narrower, the clue bar sits above a full-width grid
+and the lists below. The grid draws only the letter squares — white with a
+hairline, blanks are the page ground — shrinking to a 24px floor before it
+scrolls; the active word takes `--accent-soft`, the focused square a
+`--section-strong` ring. Check's verdict is the green / red soft fill. Across
+and Down are inset-grouped cards (side by side when there's room), compact rows
+with the number as a quiet right-aligned tabular column, the active clue
+tinted.
 
 Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
 line under it (source · N words · script), the grid centred at 9mm squares

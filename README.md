@@ -222,7 +222,10 @@ words, or it tells you why not. Clues that give the answer away are left
 out: the word written in its own clue ("Japanese sake" → *sake*), or a
 loanword that just echoes its English (*cola* → コーラ).
 
-- Settings are compact iOS rows: tap one to pick from the native list.
+- The puzzle comes first. Its settings sit behind one summary button
+  ("Crossword · Flashcards · 15 words · Romaji") that opens them as a popover
+  (a bottom sheet on a phone); changing one makes a new puzzle. On a wide
+  window the clue you're on and the Across / Down lists sit beside the grid.
 - **Source** — *Flashcards* (added, unpaused words) or *Tables*: one or more
   vocabulary tables, whether or not they're in flashcards.
 - **Style** — *Crossword* (numbered clue list) or *Arroword* (each clue

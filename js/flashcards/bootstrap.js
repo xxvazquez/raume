@@ -258,10 +258,20 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (!pushed) lastMainTab = activeTab;
     // Four segments -- iOS's segmented control stops reading at a glance
     // past about five, and six were squeezed into a phone's width.
+    // The tabs live in the title bar: on a phone they wrap to their own
+    // full-width row under the large title; on a wider window the title is
+    // visually hidden (the top bar already names the page, as on the
+    // reference pages) and tabs + Settings / Help share one row.
+    var tabsHtml = '<div class="fc-tabs" role="tablist">' +
+      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"]].map(function (t) {
+        return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
+      }).join("") +
+      "</div>";
     var header = pushed
       ? '<button type="button" class="fc-back" id="fcBack">' + BACK_ICON + "Flashcards</button>" +
-        '<div class="fc-titlebar"><h1>' + pushed + "</h1></div>"
+        '<div class="fc-titlebar fc-titlebar-pushed"><h1>' + pushed + "</h1></div>"
       : '<div class="fc-titlebar"><h1>Flashcards</h1>' +
+        tabsHtml +
         '<div class="fc-titlebar-actions">' +
         '<button type="button" class="fc-titlebar-btn" data-tab="settings">Settings</button>' +
         '<button type="button" class="fc-titlebar-btn" data-tab="help">Help</button>' +
@@ -271,12 +281,6 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       identityHtml +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +
-      (pushed ? "" :
-      '<div class="fc-tabs" role="tablist">' +
-      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"]].map(function (t) {
-        return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
-      }).join("") +
-      "</div>") +
       '<div class="fc-tabpanel"' + (activeTab === "dashboard" ? "" : " hidden") + ' id="fcPanelDashboard"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "manage" ? "" : " hidden") + ' id="fcPanelManage"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "kana" ? "" : " hidden") + ' id="fcPanelKana"></div>' +

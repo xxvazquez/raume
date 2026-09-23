@@ -4121,3 +4121,98 @@ mark.fc-diff-co {
   #customizePage { padding-left: max(28px, calc((100% - 720px) / 2)); padding-right: max(28px, calc((100% - 720px) / 2)); }
   #helpPage { padding-left: max(28px, calc((100% - 680px) / 2)); padding-right: max(28px, calc((100% - 680px) / 2)); }
 }
+/* Flashcards header: the tabs share the title bar. Phone: large title and
+   Settings / Help on the first row, the tabs full width under them. Wider:
+   the title is visually hidden (the top bar names the page, as on the
+   reference pages -- it stays in the accessibility tree), tabs leading and
+   Settings / Help trailing on one row, the status line under it. */
+.fc-titlebar:not(.fc-titlebar-pushed) { flex-wrap: wrap; row-gap: 10px; align-items: center; }
+.fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
+.fc-titlebar + .fc-signed-in-as { margin-top: 10px; }
+@media (min-width: 641px) {
+  .fc-titlebar:not(.fc-titlebar-pushed) > h1 {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .fc-titlebar > .fc-tabs { order: 0; flex: 0 1 auto; }
+  .fc-titlebar + .fc-signed-in-as { margin-top: 8px; margin-bottom: 16px; }
+}
+
+/* --- Puzzles: the puzzle first ----------------------------------------
+   One toolbar -- a summary button for the settings ("Crossword · Flashcards
+   · 15 words · Romaji ⌄"), New puzzle, Check, ⋯ -- then the puzzle. The
+   settings open as a glass popover under the summary (the reference pages'
+   Options pattern); on a phone, a bottom sheet over a scrim. */
+.fc-xw-actions, .fc-xw-current { max-width: none; }
+.fc-xw-actions { margin-bottom: 14px; }
+.fc-xw-options { position: relative; flex: 0 1 auto; min-width: 0; }
+.fc-xw-summary {
+  appearance: none; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
+  height: 36px; padding: 0 14px; border-radius: 999px;
+  background: var(--paper); box-shadow: var(--control-lift);
+  color: var(--ink); font: 400 var(--fs-nav)/1 var(--font-ui);
+}
+.fc-xw-summary:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+.fc-xw-summary-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-xw-summary-dot { color: var(--faint); margin: 0 6px; }
+.fc-xw-summary .fc-xw-chevron { color: var(--faint); }
+.fc-xw-summary[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
+.fc-xw-sheet {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
+  width: 340px; max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 10px; border-radius: var(--radius-menu);
+  background: color-mix(in srgb, var(--group-ground) 82%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
+.fc-xw-sheet[hidden], .fc-xw-scrim[hidden] { display: none; }
+.fc-xw-sheet .fc-xw-config { margin: 0; max-width: none; }
+.fc-xw-sheet-foot { margin: 8px 8px 2px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
+.fc-xw-scrim { display: none; }
+/* New puzzle has its own button on a wide window, a ⋯ item on a phone. */
+.section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: none; }
+.fc-xw-actions + .fc-xw-footnote { margin-top: -6px; }
+/* New puzzle joins Check at the trailing edge. */
+.fc-xw-options + #fcXwNew { margin-left: auto; }
+.fc-xw-options ~ .fc-xw-actions-end { margin-left: 0; }
+
+/* The puzzle: one DOM order (clue bar, grid, clue lists) laid out by grid
+   areas -- stacked on a phone (clue bar above the grid, lists below), the
+   grid leading with the clue bar and lists beside it on a wide window, so
+   the whole puzzle is in view without scrolling. */
+.fc-xw-puzzle {
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "current" "grid" "clues"; gap: 14px; align-items: start;
+}
+.fc-xw-puzzle > .fc-xw-current { grid-area: current; margin: 0; }
+.fc-xw-puzzle > .fc-xw-gridwrap { grid-area: grid; }
+.fc-xw-puzzle > .fc-xw-clues { grid-area: clues; max-width: none; }
+@media (min-width: 760px) {
+  .fc-xw-puzzle {
+    grid-template-columns: max-content minmax(260px, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "grid current" "grid clues";
+    gap: 14px 24px;
+  }
+  .fc-xw-puzzle > .fc-xw-gridwrap .fc-xw-grid { margin: 0; }
+  /* The grid's column sizes to its cells' intrinsic width, which ignores
+     their 40px flex basis -- give them the width outright (they still shrink
+     if a very wide grid needs it). */
+  .fc-xw-puzzle .fc-xw-cell { width: 40px; }
+}
+@media (max-width: 640px) {
+  #fcXwNew { display: none; }
+  .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: flex; }
+  .fc-xw-options { flex: 1 1 auto; }
+  .fc-xw-summary { width: 100%; justify-content: space-between; }
+  .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
+  .fc-xw-sheet {
+    position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;
+    max-height: 80vh; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+}
+@media print {
+  body.print-only .fc-xw-current { display: none !important; }
+}

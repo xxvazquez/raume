@@ -2551,18 +2551,27 @@ async function main() {
   check("no element relies on an inline style=\"\" attribute here either (blocked by CSP style-src)", document.querySelectorAll("#fcPanelCrosswords [style]").length === 0);
   check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
-  check("Source / Style / Script / Words are all in view as compact picker rows -- a native select behind each, no segmented controls, no \"More options\" disclosure", (() => {
+  check("the settings fold into one summary button that opens them as a sheet -- the puzzle comes first", (() => {
+    const btn = document.getElementById("fcXwOptions"), sheet = document.getElementById("fcXwSheet");
+    if (!btn || !sheet || !sheet.hidden || btn.getAttribute("aria-expanded") !== "false") return false;
+    const summary = btn.textContent;
+    btn.click();
+    const opened = !sheet.hidden && btn.getAttribute("aria-expanded") === "true";
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    return /Crossword|Arroword/.test(summary) && /\d+ words/.test(summary) && opened && sheet.hidden;
+  })());
+  check("Source / Style / Script / Words are compact picker rows inside that sheet -- a native select behind each, no segmented controls", (() => {
     const labels = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-config .fc-xw-pick-label")].map(l => l.textContent);
     return labels.includes("Source") && labels.includes("Style") && labels.includes("Script") && labels.includes("Words")
       && document.querySelectorAll("#fcPanelCrosswords .fc-xw-pick-select").length === 4
       && !document.querySelector("#fcPanelCrosswords .fc-manage-filters") && !document.getElementById("fcXwMoreToggle");
   })());
-  check("the toolbar is New puzzle (tinted) + Check (filled) + a ⋯ menu holding Reveal a letter / Reveal puzzle / Clear answers / Print -- no row of unlabeled icon buttons", (() => {
+  check("the toolbar is New puzzle (tinted) + Check (filled) + a ⋯ menu holding Reveal a letter / Reveal puzzle / Clear answers / Print (plus New puzzle, shown there on a phone) -- no row of unlabeled icon buttons", (() => {
     const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
     const items = menu ? [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim()) : [];
     return document.getElementById("fcXwNew").classList.contains("fc-btn") && !document.getElementById("fcXwNew").classList.contains("fc-btn-primary")
       && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
-      && items.join("|") === "Reveal a letter|Reveal puzzle|Clear answers|Print"
+      && items.join("|") === "New puzzle|Reveal a letter|Reveal puzzle|Clear answers|Print"
       && menu.querySelector(".section-menu-list").hidden
       && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
   })());

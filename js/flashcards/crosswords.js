@@ -377,7 +377,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0 };
+  var state = { source: "flashcards", tables: [], tablesOpen: false, optionsOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0 };
 
   function rerender() { S.render(); }
 
@@ -739,9 +739,36 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // everything occasional (Hint, Reveal, Clear, Print) in a ⋯ menu beside
   // it. A row of unlabeled icon circles made every action look equally
   // important and none of them recognisable.
-  var MENU_ACTIONS = [["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Print", PRINT_ICON]];
+  // New puzzle is also in the menu, shown there only on a phone, where the
+  // toolbar has no room for its own button (CSS swaps them).
+  var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
+  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Print", PRINT_ICON]];
+  function optionLabel(opts, value) {
+    var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
+    return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
+  }
+  // One summary button stands in for the four settings rows -- "Crossword ·
+  // Flashcards · 15 words · Romaji" -- and opens them as a sheet: a popover
+  // under it on a wide window, a bottom sheet on a phone (the reference
+  // pages' Options pattern). The puzzle itself comes first.
+  function optionsSummary() {
+    var src = state.source === "table" ? tablesSummary() : "Flashcards";
+    return [optionLabel(MODE_OPTS, state.mode), src, state.size + " words", optionLabel(SCRIPT_OPTS, state.script)];
+  }
   function toolbarHtml() {
+    var parts = optionsSummary();
     return '<div class="fc-xw-actions">' +
+      '<div class="fc-xw-options">' +
+      '<button type="button" class="fc-xw-summary" id="fcXwOptions" aria-haspopup="dialog" aria-expanded="' + state.optionsOpen + '" aria-controls="fcXwSheet">' +
+      '<span class="fc-xw-summary-text">' + parts.map(function (t, i) {
+        return '<span class="fc-xw-summary-part' + (i === 1 ? " fc-xw-summary-src" : "") + '">' + esc(t) + "</span>";
+      }).join('<span class="fc-xw-summary-dot" aria-hidden="true">·</span>') + "</span>" +
+      CHEVRON_ICON + "</button>" +
+      '<div class="fc-xw-scrim"' + (state.optionsOpen ? "" : " hidden") + "></div>" +
+      '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Puzzle options"' + (state.optionsOpen ? "" : " hidden") + ">" +
+      configCardHtml() +
+      '<p class="fc-xw-sheet-foot">Changing any of these makes a new puzzle.</p>' +
+      "</div></div>" +
       '<button type="button" class="fc-btn" id="fcXwNew">New puzzle</button>' +
       '<div class="fc-xw-actions-end">' +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>' +
@@ -758,7 +785,41 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Wiring shared by the empty-state and full-puzzle renders below -- every
   // control has to work even when the current source/table pick has
   // nothing yet to build a grid from.
+  function setOptionsOpen(panel, open) {
+    state.optionsOpen = open;
+    var btn = panel.querySelector("#fcXwOptions"), sheet = panel.querySelector(".fc-xw-sheet"), scrim = panel.querySelector(".fc-xw-scrim");
+    if (!btn || !sheet) return;
+    btn.setAttribute("aria-expanded", String(open));
+    sheet.hidden = !open;
+    if (scrim) scrim.hidden = !open;
+    if (!open) btn.focus();
+  }
+  // Wired once per panel: outside clicks and Escape close the sheet.
+  var optionsDocWired = false;
+  function wireOptionsDismiss() {
+    if (optionsDocWired) return;
+    optionsDocWired = true;
+    document.addEventListener("click", function (e) {
+      // A control inside the sheet can re-render the panel before this runs,
+      // detaching the clicked node -- that was a click inside, not outside.
+      if (!state.optionsOpen || !e.target.isConnected) return;
+      var panel = document.getElementById("fcPanelCrosswords");
+      var box = panel && panel.querySelector(".fc-xw-options");
+      if (!box || (box.contains(e.target) && !e.target.classList.contains("fc-xw-scrim"))) return;
+      setOptionsOpen(panel, false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || !state.optionsOpen) return;
+      var panel = document.getElementById("fcPanelCrosswords");
+      if (panel) setOptionsOpen(panel, false);
+    });
+  }
   function bindControls(panel) {
+    var optionsBtn = panel.querySelector("#fcXwOptions");
+    if (optionsBtn) {
+      wireOptionsDismiss();
+      optionsBtn.addEventListener("click", function () { setOptionsOpen(panel, !state.optionsOpen); });
+    }
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
@@ -817,14 +878,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
     var printMeta = titleLabel + " · " + placedCount + " words · " + scriptLabel;
 
+    // Toolbar, then the puzzle: grid leading with the current clue and the
+    // clue lists beside it on a wide window; on a phone the clue bar sits
+    // above the grid and the lists below (grid areas, one DOM order).
     panel.innerHTML =
-      configCardHtml() +
-      (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
       toolbarHtml() +
-      '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start.</p>' +
-      '<div class="fc-xw-puzzle print-target">' +
+      (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
+      '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
+      '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start.</p>' +
       '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
       gridHtml(p, arroword, romajiMode) + "</div></div>" +
       (arroword ? "" : clueListHtml(p)) +
@@ -838,6 +901,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.getElementById("fcXwCheck").addEventListener("click", function () { checkGrid(gridEl, p); });
     var menu = panel.querySelector(".fc-xw-menu");
     var actions = {
+      newMenu: function () { generate(); rerender(); },
       hint: function () { hintGrid(gridEl, p, nav); },
       reveal: function () { revealGrid(gridEl, p); },
       reset: function () { resetGridInputs(gridEl); },
