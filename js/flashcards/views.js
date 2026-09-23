@@ -127,7 +127,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Signed in</span><span class="help-desc">Saved on this device first, then synced to your account.</span></li>' +
       '<li><span class="help-term">Status</span><span class="help-desc"><em>Syncing…</em>, <em>Offline</em>, or <em>couldn’t sync</em> with Sync now to retry.</span></li>' +
       '<li><span class="help-term">What’s pending?</span><span class="help-desc">Lists exactly what hasn’t reached your account yet.</span></li>' +
-      '<li><span class="help-term">Guest</span><span class="help-desc">Everything stays in this browser — Settings › Back up &amp; restore saves a copy.</span></li>' +
+      '<li><span class="help-term">Guest</span><span class="help-desc">Starts with Fruits added; everything stays in this browser — Settings › Back up &amp; restore saves a copy.</span></li>' +
       '</ul>';
   }
 

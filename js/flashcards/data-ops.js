@@ -336,6 +336,18 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     });
     saveCache();
   }
+  // A first-time guest starts with one small table already added, so the
+  // Dashboard, a study session and Puzzles all have something to show.
+  // Only into a deck that has never held a card -- archiving keeps cards,
+  // so anyone who has used guest mode before is left exactly as they were.
+  var STARTER_TABLE_ID = 3; // Fruits
+  function seedGuestStarter() {
+    if (Object.keys(getCache().cards).length) return false;
+    var table = (window.RaumeStudy.data.vocabularyTables || []).find(function (t) { return t.id === STARTER_TABLE_ID; });
+    if (!table) return false;
+    addVocabsLocal(table.rows.map(function (row) { return row.id; }));
+    return true;
+  }
   function archiveVocabsLocal(vocabIds) {
     var c = getCache();
     Object.keys(c.cards).forEach(function (id) {
@@ -873,7 +885,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     resetPassword: resetPassword, updatePassword: updatePassword, clearPasswordRecovery: clearPasswordRecovery,
     onAuthChange: onAuthChange, authState: authState,
     fetchAllFromServer: fetchAllFromServer,
-    addVocab: addVocab, addVocabs: addVocabs, addVocabsRemote: addVocabsRemote,
+    addVocab: addVocab, addVocabs: addVocabs, addVocabsRemote: addVocabsRemote, seedGuestStarter: seedGuestStarter,
     archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused, keepLeech: keepLeech,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,

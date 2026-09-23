@@ -245,6 +245,7 @@ never mix.
 | --- | --- | --- |
 | Where data lives | This browser's `localStorage` | Your own [Supabase](SUPABASE_SETUP.md) project, per account via Row Level Security |
 | Network | None | Syncs; works offline and catches up on reconnect |
+| First visit | Starts with the Fruits table added, so the Dashboard, study and Puzzles have something to show | Your own deck |
 | Backup | Settings › Back up & restore | The account is the backup |
 | Custom tables | — | Yes |
 | New accounts | — | Off by default: the project's sign-ups are closed and `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |

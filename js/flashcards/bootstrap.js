@@ -207,9 +207,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       "</div></div>";
     document.getElementById("fcUseGuest").addEventListener("click", function () {
       setStoredMode("guest");
+      dataOps.seedGuestStarter(); // a first-time guest starts with Fruits added, not an empty deck
       invalidateInsights();
       render();
-      refreshRowToggleButtons(); // the vocabulary page's own "added" icons switch to this mode's (empty, at first) cache too
+      refreshRowToggleButtons(); // the vocabulary page's own "added" icons switch to this mode's cache too
     });
     if (configured()) bindAuthForm();
   }

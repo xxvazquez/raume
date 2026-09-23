@@ -1694,6 +1694,16 @@ async function main() {
   guestBtn.click();
   check("choosing it goes straight to the Dashboard tab, no session needed", !!document.querySelector("#fcPanelDashboard"));
   check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("This device only"));
+  const starterCards = Object.values(window.RaumeStudy.flashcards.store.getCache().cards);
+  const fruitIds = window.RaumeStudy.data.vocabularyTables.find(t => t.id === 3).rows.map(r => r.id);
+  check("a first-time guest starts with the Fruits table added, not an empty deck",
+    starterCards.length > 0 && starterCards.every(c => fruitIds.includes(c.vocabId))
+    && fruitIds.every(id => starterCards.some(c => c.vocabId === id)));
+  check("...and only into a deck that has never held a card", window.RaumeStudy.flashcards.dataOps.seedGuestStarter() === false);
+  // Clear the starter set so the checks below start from a pristine deck.
+  starterCards.forEach(c => { delete window.RaumeStudy.flashcards.store.getCache().cards[c.id]; });
+  window.RaumeStudy.flashcards.store.saveCache();
+  window.RaumeStudy.flashcards.render();
 
   // The vocabulary page's own "Add to flashcards" (table-options kebab) used
   // to call addVocabsRemote/fetchAllFromServer unconditionally, so it threw
