@@ -2613,8 +2613,9 @@ async function main() {
     return !!xwDefaultTable && xw.tableWordPool([xwDefaultTable.id]).length >= 10 && toggle.textContent.includes(xwDefaultTable.title)
       && toggle.getAttribute("aria-expanded") === "false" && !!document.querySelector("#fcPanelCrosswords .fc-xw-grid");
   })());
-  check("the print title names the puzzle style and its source, even though the intro line above it is hidden from print",
-    /^(Crossword|Arroword) — /.test(document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent));
+  check("the printed sheet is headed by the puzzle style, with its source, word count and script on a quiet line under it",
+    /^(Crossword|Arroword)$/.test(document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent)
+    && /^.+ · \d+ words · (Romaji|Japanese|Hiragana|Katakana)$/.test(document.querySelector("#fcPanelCrosswords .fc-xw-print-meta").textContent));
 
   document.getElementById("fcXwTablesToggle").click();
   check("opening the Table row shows a checkmark row per table (the Settings tab's .fc-direction-check), grouped by category, the default table already checked", (() => {
@@ -2629,7 +2630,7 @@ async function main() {
   otherCb.checked = true;
   otherCb.dispatchEvent(new window.Event("change", { bubbles: true }));
   check("checking a second table adds it alongside the first -- multiple tables feed one puzzle, not a replacement", (() => {
-    return xw.state.tables.length === 2 && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwOtherTable.title);
+    return xw.state.tables.length === 2 && document.querySelector("#fcPanelCrosswords .fc-xw-print-meta").textContent.includes(xwOtherTable.title);
   })());
 
   const defaultCb = document.querySelector('#fcXwTablePicker input[data-table-id="' + xwDefaultTable.id + '"]');
@@ -2637,7 +2638,7 @@ async function main() {
   defaultCb.dispatchEvent(new window.Event("change", { bubbles: true }));
   check("unchecking a table drops it, leaving the other selected one active", (() => {
     return xw.state.tables.length === 1 && String(xw.state.tables[0]) === String(xwOtherTable.id)
-      && !document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent.includes(xwDefaultTable.title);
+      && !document.querySelector("#fcPanelCrosswords .fc-xw-print-meta").textContent.includes(xwDefaultTable.title);
   })());
 
   check("Katakana and Hiragana puzzles only use words really written that way -- never a word forced into the other script", (() => {

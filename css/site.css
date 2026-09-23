@@ -2858,12 +2858,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-current-idle { color: var(--muted); }
 .fc-xw-current-label { flex: none; color: var(--section-strong); font-size: var(--fs-small); }
 .fc-xw-current-clue { min-width: 0; }
-.fc-xw-puzzle { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-start; }
+/* Grid and clues side by side while there's room, the grid centred in its
+   own column and the clues taking the rest; stacked on a phone. */
+.fc-xw-puzzle { display: flex; flex-wrap: wrap; gap: 20px 24px; align-items: flex-start; }
 /* A worksheet needs a title on the page -- the clue bar and controls sit
    outside .print-target, so print gets its own, inside the part that
    actually prints. */
-.fc-xw-print-title { display: none; }
-.fc-xw-gridwrap { max-width: 100%; overflow-x: auto; padding: 1px 0 0 1px; }
+.fc-xw-print-head { display: none; }
+.fc-xw-gridwrap { flex: 1 1 auto; min-width: 0; max-width: 100%; overflow-x: auto; padding: 1px 0 0 1px; }
 /* Plain nested flex rows, not CSS Grid with per-cell coordinates -- the
    app's CSP (style-src 'self', no unsafe-inline) drops inline style=""
    attributes, so a dynamically-sized grid can't be positioned that way.
@@ -2874,10 +2876,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    overlap by their 1px border so shared edges stay one hairline. Cells are
    38px but shrink with the row (to a 26px floor, then the wrapper scrolls),
    so a wide grid still fits a phone; aspect-ratio keeps them square. */
-.fc-xw-grid { display: inline-flex; flex-direction: column; max-width: 100%; }
+.fc-xw-grid { display: flex; flex-direction: column; width: max-content; max-width: 100%; margin: 0 auto; }
 .fc-xw-row { display: flex; }
 .fc-xw-cell {
-  box-sizing: border-box; flex: 0 1 38px; min-width: 26px; aspect-ratio: 1;
+  box-sizing: border-box; flex: 0 1 40px; min-width: 24px; aspect-ratio: 1;
   margin: -1px 0 0 -1px; border: 1px solid transparent;
   position: relative; display: flex; align-items: center; justify-content: center;
 }
@@ -2910,16 +2912,21 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-xw-arrow-svg { color: var(--faint); flex: none; pointer-events: none; }
 /* Clue list: iOS inset-grouped -- a 13px secondary header over a white
-   card of hairline rows; the clue you're on is tinted. */
-.fc-xw-clues { flex: 1 1 260px; min-width: 0; max-width: 400px; }
-.fc-xw-cluegroup + .fc-xw-cluegroup { margin-top: 18px; }
-.fc-xw-cluehead { margin: 0 16px 6px; font: 400 var(--fs-micro)/1.3 var(--font-ui); color: var(--muted); }
+   card of hairline rows; the clue you're on is tinted. Across and Down sit
+   side by side when there's room (a 40-word puzzle is two short lists, not
+   one very long one); rows are compact, the number a quiet tabular column
+   the text hangs from. */
+.fc-xw-clues {
+  flex: 1 1 300px; min-width: 0; max-width: 620px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start;
+}
+.fc-xw-cluehead { margin: 0 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
-.fc-xw-cluerows li { position: relative; display: flex; gap: 10px; padding: 11px 16px; font-size: var(--fs-body); line-height: 1.35; color: var(--ink); cursor: pointer; }
-.fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
+.fc-xw-cluerows li { position: relative; display: flex; gap: 8px; padding: 9px 16px; font-size: var(--fs-nav); line-height: 1.35; color: var(--ink); cursor: pointer; }
+.fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 44px; right: 0; border-top: 1px solid var(--row-line); }
 .fc-xw-cluerows li:hover { background: color-mix(in srgb, var(--section) 7%, var(--paper)); }
 .fc-xw-cluerows li.fc-xw-clue-active { background: var(--accent-soft); }
-.fc-xw-cluerows li b { color: var(--muted); font-weight: 400; min-width: 1.4em; }
+.fc-xw-cluerows li b { flex: none; width: 20px; text-align: right; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across
    the full sheet. Manage keeps the full width (its rows are content-driven,
@@ -3889,8 +3896,23 @@ mark.fc-diff-co {
   body.print-only .fc-xw-cell-active-word,
   body.print-only .fc-xw-cell:has(.fc-xw-cell-input:focus) { background: #fff !important; box-shadow: none !important; border-color: #999 !important; }
   body.print-only .fc-xw-cell-letter, body.print-only .fc-xw-cell-clue { border-color: #999 !important; }
-  body.print-only .fc-xw-cluerows { border-radius: 0; }
-  body.print-only .fc-xw-cluerows li { padding: 4px 0; }
+  /* The sheet: a title and one quiet line of what it is, the grid centred
+     across the page (9mm squares, smaller only when a big grid needs it to
+     fit), then Across and Down side by side as plain two-column lists --
+     no cards, no row rules, just a tabular number column the clue hangs
+     from, the way a well-set worksheet reads. */
+  body.print-only .fc-xw-puzzle { display: block; }
+  body.print-only .fc-xw-gridwrap { padding: 0; margin: 0 0 9mm; }
+  body.print-only .fc-xw-grid { margin: 0 auto; }
+  body.print-only .fc-xw-cell { flex-basis: 9mm; min-width: 4.5mm; }
+  body.print-only .fc-xw-cell-input { font-size: 12pt; }
+  body.print-only .fc-xw-num { font-size: 6pt; top: .4mm; left: .6mm; color: #555 !important; }
+  body.print-only .fc-xw-clues { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10mm; max-width: none; }
+  body.print-only .fc-xw-cluehead { margin: 0 0 2mm; padding-bottom: 1.5mm; border-bottom: .5pt solid #bbb; font: 600 9pt/1.2 var(--font-ui); color: #111 !important; }
+  body.print-only .fc-xw-cluerows { background: none !important; border-radius: 0; overflow: visible; }
+  body.print-only .fc-xw-cluerows li { padding: 1.1mm 0; gap: 2.5mm; font-size: 9.5pt; line-height: 1.3; color: #111 !important; }
+  body.print-only .fc-xw-cluerows li + li::before { display: none; }
+  body.print-only .fc-xw-cluerows li b { width: 5mm; color: #777 !important; }
   body.print-only .fc-xw-cluerows li.fc-xw-clue-active { background: none; }
   /* Check/Reveal's right/wrong colours are tuned per theme for screen
      contrast (dark mode's pastel wrong/right read poorly against forced-
@@ -3905,10 +3927,9 @@ mark.fc-diff-co {
      block, and a clue never gets cut between its number and its text. */
   body.print-only .fc-xw-grid, body.print-only .fc-xw-row { break-inside: avoid; page-break-inside: avoid; }
   body.print-only .fc-xw-cluerows li { break-inside: avoid; page-break-inside: avoid; }
-  body.print-only .fc-xw-print-title {
-    display: block; width: 100%; margin: 0 0 14px;
-    font: 600 var(--fs-page-title)/1.2 var(--font-ui); color: var(--ink);
-  }
+  body.print-only .fc-xw-print-head { display: block; margin: 0 0 8mm; }
+  body.print-only .fc-xw-print-title { margin: 0; font: 700 20pt/1.15 var(--font-ui); letter-spacing: -.01em; color: #111 !important; }
+  body.print-only .fc-xw-print-meta { margin: 1.5mm 0 0; font: 400 9.5pt/1.3 var(--font-ui); color: #777 !important; }
 }
 
 /* --- Touch targets and iOS text-size hygiene ---------------------------------

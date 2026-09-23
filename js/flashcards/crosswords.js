@@ -813,7 +813,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // speaks for itself.
     var footnote = placedCount < wanted ? placedCount + " of " + wanted + " words fit — New puzzle tries another mix." : "";
     var titleLabel = state.source === "table" ? tablesSummary() : "Flashcards";
-    var printTitle = (arroword ? "Arroword" : "Crossword") + " — " + titleLabel;
+    var printTitle = arroword ? "Arroword" : "Crossword";
+    var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
+    var printMeta = titleLabel + " · " + placedCount + " words · " + scriptLabel;
 
     panel.innerHTML =
       configCardHtml() +
@@ -821,7 +823,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       toolbarHtml() +
       '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start.</p>' +
       '<div class="fc-xw-puzzle print-target">' +
-      '<h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
+      '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
+      '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
       gridHtml(p, arroword, romajiMode) + "</div></div>" +
       (arroword ? "" : clueListHtml(p)) +

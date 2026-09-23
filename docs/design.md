@@ -676,10 +676,19 @@ controls library as-is — tinted **New puzzle** leading, filled **Check**
 trailing, and the reference tables' own ⋯ menu for Reveal a letter / Reveal
 puzzle / Clear answers / Print. A white clue bar above the grid names the clue
 you're on. The grid draws only the letter squares — white with a hairline,
-blanks are the page ground — at 38px, shrinking to a 26px floor on a phone
-before it scrolls; the active word takes `--accent-soft`, the focused square a
-`--section-strong` ring. Check's verdict is the green / red soft fill. The clue
-list is an inset-grouped card with the active clue tinted.
+blanks are the page ground — at 40px, shrinking to a 24px floor on a phone
+before it scrolls, centred in its column; the active word takes
+`--accent-soft`, the focused square a `--section-strong` ring. Check's verdict
+is the green / red soft fill. Grid and clues sit side by side while there's
+room; Across and Down are two inset-grouped cards side by side (stacked when
+narrow), compact rows with the number as a quiet right-aligned tabular column
+the clue hangs from, the active clue tinted.
+
+Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
+line under it (source · N words · script), the grid centred at 9mm squares
+(smaller only when a big grid must fit the width), then Across and Down as
+two plain columns — a rule under each heading, no cards, no row rules, a grey
+tabular number column.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

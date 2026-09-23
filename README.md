@@ -232,8 +232,9 @@ loanword that just echoes its English (*cola* → コーラ).
   direction; tap a crossing square again to switch. The bar above the grid
   shows the clue you're on. Backspace steps back, arrow keys move.
 - **Check** marks filled squares right or wrong. The **⋯** menu has *Reveal a
-  letter*, *Reveal puzzle*, *Clear answers* and *Print* (a clean A4 worksheet
-  titled like "Crossword — Drinks").
+  letter*, *Reveal puzzle*, *Clear answers* and *Print* (a clean A4 worksheet:
+  the title, one line like "Drinks · 20 words · Romaji", the grid, then Across
+  and Down side by side).
 - Grids are built compact — each word goes where it crosses the most and
   grows the grid the least — so even 40 words stay a dense block.
 - Nothing is saved or scheduled.
