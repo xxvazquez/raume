@@ -2212,7 +2212,16 @@ async function main() {
       return !!readingEl && !readingEl.hidden && readingEl.textContent.trim().length > 0;
     }
     const meaningEl = document.querySelector(".fc-stage-meaning");
+    // A Japanese meaning line keeps its furigana, like Japanese everywhere else.
+    const jpLine = meaningEl && meaningEl.querySelector('[lang="ja"]');
+    if (jpLine && /[\u4e00-\u9faf]/.test(jpLine.textContent) && !jpLine.querySelector("ruby rt")) return false;
     return !!meaningEl && meaningEl.textContent.trim().length > 0;
+  })());
+  check("the Japanese line on a Romaji/English-prompt reveal carries furigana, not plain kanji", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const entry = Object.values(vi.getVocabIndex()).find(e => / \/ /.test(e.jpPlain) && /[\u4e00-\u9faf]/.test(e.jpPlain));
+    const ctx = entry && vi.contextDisplayFor(entry, "ro-en");
+    return !!ctx && ctx.value === entry.jpPlain && /<rt[ >]/.test(ctx.html);
   })());
   check("the verdict is an icon-only badge, not a text word -- feedback stays out of the way", (() => {
     const badge = document.querySelector(".fc-verdict-badge");

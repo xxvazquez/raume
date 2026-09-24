@@ -3318,7 +3318,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-progress::-webkit-progress-value { background: var(--accent-strong); border-radius: 2px; transition: width .25s ease; }
 .fc-progress::-moz-progress-bar { background: var(--accent-strong); border-radius: 2px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
-.fc-prompt .jpword ruby { ruby-position: over; ruby-align: start; }
+.fc-prompt .jpword ruby, .fc-stage-meaning .jpword ruby { ruby-position: over; ruby-align: start; }
 /* The Japanese word's reading, shown only once checked and only on
    Japanese -> English cards -- the other Japanese-prompt direction
    (Japanese -> Romaji) already tests the reading itself, so restating it

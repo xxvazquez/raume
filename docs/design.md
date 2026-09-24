@@ -38,7 +38,8 @@ sections below cover each part of it.
   card, with no direction label above it at all: the answer field's own
   placeholder (English…/Romaji…) already says what to type, so a second label
   saying the same thing was redundant. A kanji prompt always carries
-  furigana; Japanese → English cards also reveal the reading in small type
+  furigana, and so does the Japanese a Romaji / English card reveals under
+  its answer; Japanese → English cards also reveal the reading in small type
   right under the word once checked (the other three directions already show
   the reading elsewhere, so repeating it there would just echo the answer).
   The prompt itself never moves once checked — nothing echoes it again below

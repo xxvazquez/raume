@@ -172,7 +172,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function contextDisplayFor(entry, direction) {
     if (direction === "jp-en") return { label: "Romaji", value: entry.romajiDisplay };
     if (direction === "jp-ro") return { label: "English", value: entry.englishDisplay };
-    return { label: "Japanese", value: entry.jpPlain }; // ro-en, en-ro
+    // ro-en, en-ro. Japanese always carries its furigana -- `html` is the
+    // ruby markup to show, `value` the plain text for comparisons and labels.
+    return { label: "Japanese", value: entry.jpPlain, html: entry.jpInlineHtml };
   }
   function checkAnswer(entry, direction, input) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";

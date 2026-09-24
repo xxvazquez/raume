@@ -187,6 +187,8 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
   card says which one it wants and the field stays open for another go.
 - Japanese → English shows the word's reading under it once checked — not for
   kana-only words like レモン, where it would just repeat the word.
+- Romaji and English prompts reveal the Japanese under the answer once
+  checked, with its furigana — Japanese never appears without it.
 - After a wrong answer, **Again / Hard** read first and Good / Easy are
   dimmed, but still one tap away if it was just a typo.
 - Results are announced to screen readers without moving focus.
