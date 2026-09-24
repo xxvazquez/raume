@@ -1059,6 +1059,22 @@ async function main() {
     return vis(".theme-icon-system") && !vis(".theme-icon-light") && !vis(".theme-icon-dark");
   })());
 
+  console.log("Phone account menu (one masthead button on a phone)");
+  const acctMenu = document.getElementById("accountMenu");
+  check("the account menu starts hidden and lists Account / Customize tables / Help + an Appearance switch", !!acctMenu && acctMenu.hidden
+    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace("›", "").trim()).join("|") === "Account|Customize tables|Help"
+    && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
+  window.RaumeStudy.vocab.toggleAccountMenu();
+  check("opening it marks the account button expanded", !acctMenu.hidden && document.getElementById("accountToggle").getAttribute("aria-expanded") === "true");
+  acctMenu.querySelector('[data-theme-set="dark"]').click();
+  check("Appearance applies at once, marks its choice, and leaves the menu open", themeChoice() === "dark" && !acctMenu.hidden
+    && acctMenu.querySelector('[data-theme-set="dark"]').getAttribute("aria-pressed") === "true");
+  acctMenu.querySelector('[data-theme-set="system"]').click();
+  acctMenu.querySelector('[data-menu-go="help"]').click();
+  check("a page item opens that page and closes the menu", acctMenu.hidden && document.body.dataset.activePage === "help");
+  window.location.hash = "";
+  window.dispatchEvent(new window.Event("popstate"));
+
   console.log("Jumping to a table from the dropdown");
   // On Grammar: open the menu, jump to Verbs, menu closes.
   const verbsSec = [...document.querySelectorAll('.table-section[data-section="grammar"]')].find(s => s.querySelector('.section-title-text').textContent === "Verbs");

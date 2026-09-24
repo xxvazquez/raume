@@ -40,6 +40,22 @@
       <span class="masthead-cap theme-cap-dark" aria-hidden="true">Dark</span>
     </button>
   </div>
+  <!-- Phone only: the account button opens this menu instead of four
+       captioned glyphs across the top (desktop keeps the glyphs). -->
+  <div class="account-menu" id="accountMenu" role="menu" aria-label="Account and settings" hidden>
+    <div class="account-menu-who"><b id="accountMenuName">Guest</b><span id="accountMenuStatus">This device only · not backed up</span></div>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="account">Account<span aria-hidden="true">›</span></button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="customize">Customize tables<span aria-hidden="true">›</span></button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="help">Help<span aria-hidden="true">›</span></button>
+    <div class="account-menu-sep" role="separator"></div>
+    <div class="account-menu-label" id="accountMenuAppearance">Appearance</div>
+    <div class="account-menu-seg" role="group" aria-labelledby="accountMenuAppearance">
+      <button type="button" data-theme-set="system" aria-pressed="false">System</button>
+      <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+
 </header>
 <nav class="site-nav" id="siteNav" aria-label="Sections"></nav>
 <main class="app">
@@ -150,7 +166,7 @@
       <ul class="help-rows">
         <li><span class="help-term">Hide a row</span><span class="help-desc">The eye icon. <strong>Show all</strong> brings rows back.</span></li>
         <li><span class="help-term">Hide a table</span><span class="help-desc">A table’s ⋯ menu › Hide table. Customize › Show brings it back.</span></li>
-        <li><span class="help-term">Customize</span><span class="help-desc">Rename, recolour and reorder tables — the sliders icon at the top.</span></li>
+        <li><span class="help-term">Customize</span><span class="help-desc">Rename, recolour and reorder tables — the sliders icon at the top (on a phone, the account button's menu).</span></li>
         <li><span class="help-term">Your vocabulary</span><span class="help-desc">Add words one by one or paste a list: <code>帰(かえ)る,kaeru,to return</code>.</span></li>
         <li><span class="help-term">Sync</span><span class="help-desc">Sign in on Flashcards. The dot on the person icon: green synced, amber waiting.</span></li>
         <li><span class="help-term">Back up</span><span class="help-desc">Signed out? Flashcards › Settings › Back up &amp; restore.</span></li>

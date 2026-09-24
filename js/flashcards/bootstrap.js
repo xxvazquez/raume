@@ -502,6 +502,13 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       : "Signed in as " + currentUser().email + " — synced";
     btn.setAttribute("aria-label", label);
     btn.title = label;
+    // The phone's account menu header says the same, in two lines.
+    var name = document.getElementById("accountMenuName"), status = document.getElementById("accountMenuStatus");
+    if (name) name.textContent = signedIn ? currentUser().email : "Guest";
+    if (status) status.textContent = !signedIn ? "This device only · not backed up"
+      : !st.online ? "Offline · changes are saved on this device"
+      : pending ? st.pending + (st.pending === 1 ? " change" : " changes") + " not yet synced"
+      : "Synced";
   }
   updateAccountIndicator();
   onSyncStateChange(updateAccountIndicator);

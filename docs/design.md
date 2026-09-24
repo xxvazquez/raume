@@ -326,10 +326,16 @@ and Help.
   masthead, a sticky glass band (`--nav-h: 45px`). The phone keeps its bottom
   tab bar. The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
-  targets: no box, no outline. Where there's no hover (a phone, a tablet —
-  `(hover: none), (max-width: 640px)`) each glyph gets a 10px caption under it,
-  tab-bar style — Account / Help / Customize / the current theme (Auto / Light /
-  Dark) — since a tooltip can't explain it there. **The rule app-wide: no
+  targets: no box, no outline. On a tablet (`hover: none`) each glyph gets a 10px
+  caption under it — Account / Help / Customize / the current theme — since a
+  tooltip can't explain it there. **On a phone (≤640px) the masthead is App
+  Store style**: no wordmark row, the large screen title is the top of every
+  screen, and one 34px round white account button (`--control-lift`, the sync
+  dot on its corner) sits at the title row's trailing edge (the masthead is
+  pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
+  menu of words: who you are + sync state, Account / Customize tables / Help,
+  and Appearance as a System / Light / Dark segmented control that applies at
+  once. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Manage's buttons keep a one-word label
   (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are

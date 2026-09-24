@@ -850,9 +850,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // signed-in/guest state is set by js/flashcards/bootstrap.js once auth
     // resolves (this file loads before flashcards, so it can only wire the
     // click, not know the state yet).
+    // Account: on a wide window it goes straight to Flashcards (sign in /
+    // sync). On a phone it's the one masthead control and opens the account
+    // menu instead (wired with the theme code below).
     const accountToggle = document.getElementById('accountToggle');
+    const phoneWidth = window.matchMedia ? window.matchMedia('(max-width: 640px)') : null;
     if (accountToggle) {
       accountToggle.addEventListener('click', function () {
+        if (phoneWidth && phoneWidth.matches && vocab.toggleAccountMenu) { vocab.toggleAccountMenu(); return; }
         if (vocab.showFlashcardsPage) vocab.showFlashcardsPage();
       });
     }
@@ -1025,12 +1030,52 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (choice === 'system') localStorage.removeItem(THEME_KEY);
         else localStorage.setItem(THEME_KEY, choice);
       } catch (e) {}
+      document.querySelectorAll('#accountMenu [data-theme-set]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.themeSet === choice));
+      });
     }
     if (themeToggle) {
       applyThemeChoice(currentThemeChoice());
       themeToggle.addEventListener('click', function () {
         applyThemeChoice(THEME_ORDER[(THEME_ORDER.indexOf(currentThemeChoice()) + 1) % THEME_ORDER.length]);
       });
+    }
+    // The phone's account menu (index.html #accountMenu): who you are and the
+    // sync state (filled in by js/flashcards/bootstrap.js), Account /
+    // Customize tables / Help -- the same pages the desktop glyphs open -- and
+    // Appearance as a System / Light / Dark switch that applies at once and
+    // leaves the menu open. Closes on an outside tap or Escape.
+    const accountMenu = document.getElementById('accountMenu');
+    function setAccountMenu(open) {
+      if (!accountMenu) return;
+      accountMenu.hidden = !open;
+      if (accountToggle) accountToggle.setAttribute('aria-expanded', String(open));
+      if (open) { const first = accountMenu.querySelector('.account-menu-item'); if (first) first.focus(); }
+    }
+    vocab.toggleAccountMenu = function () { setAccountMenu(!!accountMenu && accountMenu.hidden); };
+    if (accountMenu) {
+      if (themeToggle) applyThemeChoice(currentThemeChoice()); // sync the switch's pressed state
+      accountMenu.addEventListener('click', function (e) {
+        const set = e.target.closest('[data-theme-set]');
+        if (set) { applyThemeChoice(set.dataset.themeSet); return; }
+        const go = e.target.closest('[data-menu-go]');
+        if (!go) return;
+        setAccountMenu(false);
+        if (go.dataset.menuGo === 'account') { if (vocab.showFlashcardsPage) vocab.showFlashcardsPage(); }
+        else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
+        else if (go.dataset.menuGo === 'help') { const h = document.getElementById('helpToggle'); if (h) h.click(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (accountMenu.hidden || accountMenu.contains(e.target) || (accountToggle && accountToggle.contains(e.target))) return;
+        setAccountMenu(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || accountMenu.hidden) return;
+        setAccountMenu(false);
+        if (accountToggle) accountToggle.focus();
+      });
+      // Rotating to a wide window hands the masthead back to its glyphs.
+      if (phoneWidth && phoneWidth.addEventListener) phoneWidth.addEventListener('change', function () { if (!phoneWidth.matches) setAccountMenu(false); });
     }
     if (darkMedia) {
       const onOsThemeChange = function () { if (currentThemeChoice() === 'system') applyThemeChoice('system'); };
