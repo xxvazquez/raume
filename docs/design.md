@@ -1,17 +1,19 @@
 # Design
 
-The look is one iOS-style system across the whole app: a grey grouped ground,
-white borderless 12px cards sitting directly on it, inset hairlines between
-rows, segmented controls and switches, and a small set of muted tones that carry
-hierarchy — dusty lavender for what you act on, soft sage for progress, muted
-coral for attention, deep ink for anything you read. Calm, not washed out. This
-note records the rules so they stay consistent; it is the single source for the
-system, and the sections below cover each part of it.
+The target is iOS 26 (Liquid Glass): content first, chrome that recedes. One
+system across the whole app — a grey grouped ground, white borderless cards
+(20px, `--radius-card`) sitting directly on it, inset hairlines between rows,
+capsule controls, and floating chrome (the sticky search band, sheets, ⋯ menus)
+in translucent glass. A small set of muted tones carries hierarchy — dusty
+lavender for what you act on, soft sage for progress, muted coral for attention,
+deep ink for anything you read. Calm, not washed out. This note records the
+rules so they stay consistent; it is the single source for the system, and the
+sections below cover each part of it.
 
 ## Type
 
 - **Space Grotesk** is used in exactly one place — the `raume` wordmark in the
-  header, opposite a small `JAPANESE REFERENCE`.
+  desktop top bar (the phone has no wordmark row).
 - **Inter** is everything else. Both are self-hosted (SIL OFL); there is no
   external font runtime.
 - Hierarchy comes from size, spacing, position, and colour — **not** bold weight
@@ -76,10 +78,12 @@ A small set of **muted, desaturated tones** — nothing bright, nothing neon: a
 dusty lavender (`#82799B`), a soft sage (`#78968B`) and a muted coral (`#C77C72`)
 on a grey grouped ground. Deeper ink and colour that signals hierarchy rather
 than decorating. No true red except the one destructive-delete `--danger`.
-Gradients are out; **shadows are out too, except the one under a floating menu
-or sheet** (`--shadow-menu`) and the switch thumb — cards lift off the ground by
-fill alone (white on grey; in dark the ground is *darker* than the card). All CSS
-custom properties in `css/site.css`.
+Gradients are out. Shadows are kept to three jobs: the soft float shadow under
+glass menus and sheets (`--glass-shadow`), the very soft lift under white
+controls on the ground (`--control-lift`, with a 0.5px hairline) and the switch
+thumb — content cards lift off the ground by fill alone (white on grey; in dark
+the ground is *darker* than the card). All CSS custom properties in
+`css/site.css`.
 
 | Hex (light) | Variable | Used for |
 |---|---|---|
@@ -136,9 +140,9 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcard
 › Manage, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **The reference pages are an iOS inset-grouped list** (step 1 of the app-wide
-  iOS system in PLAN). One grey ground (`--group-ground`) behind the page and
-  white 12px-radius cards sitting directly on it — no borders, no coloured
+- **The reference pages are an iOS inset-grouped list.** One grey ground
+  (`--group-ground`) behind the page and white `--radius-card` cards sitting
+  directly on it — no borders, no coloured
   bars, no rules under headings, no box inside a box. A run of collapsed tables
   is ONE card of list cells (inset hairline between them, disclosure chevron on
   the right, the per-table ⋯ menu / print kept on the cell as bare glyphs; the
@@ -158,7 +162,7 @@ and Help.
   table is in; the rest of the row stays neutral. **List type scale** (phone and
   desktop): a category header is 12px / 500 in secondary grey (`--muted`), inset
   16px to line up with the row content; a collapsed row title is 14px / 400 in
-  `--ink`; an open table's title 20px / 600; the phone's large screen title 28px.
+  `--ink` — the same size once the table is open; the phone's large screen title 28px.
 - **On a wide desktop window the list is a `--reading-w: 700px` centred column**
   (`.page-vocab`), not the full 1180px sheet — an inset list stays an inset
   list, closer to Apple's own measure than the 900px an earlier pass tried.
@@ -206,12 +210,8 @@ and Help.
   ink 6%) with the selected segment raised in white on the same lift. Its text is 13.5px everywhere, just under the 14px
   rows it searches; the placeholder ends in "…" when the field is narrow. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
-  (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one; an
-  open table is its own card with its title as a bold section title on the
-  ground above it, so "where does the title end and the table start" is never
-  in doubt (on flat white they blended, worst in search results where every
-  table is open). The category name is a quiet label above its card; the search
-  field is a slightly darker borderless fill. Scoped to `#vocabulary` /
+  (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one.
+  The category name is a quiet label above its card. Scoped to `#vocabulary` /
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
@@ -279,14 +279,14 @@ and Help.
     thumb). The Options switches are `<button aria-pressed>` rows (pressed = on; a
     column switch is on while the column shows); the track and thumb are
     `::before` / `::after`.
-  - **Buttons**: *filled* (`.fc-btn-primary`, deep section tone, no shadow),
-    *tinted* (`.fc-btn`, soft accent fill, accent text, 10px radius, no border) and
-    *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
+  - **Buttons** (all capsules): *filled* (`.fc-btn-primary`, deep section tone,
+    no shadow), *white* secondary (`.fc-btn`, accent text on `--control-lift`,
+    no border — never a grey tint) and *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
     all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
     instead of an underline).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
-    (Show / Study), white 12px cards of 44px rows with inset hairlines, switches
+    (Show / Study), white `--radius-card` cards of 44px rows with inset hairlines, switches
     at the trailing edge, plain tint-text action rows, and the badge legends as
     footnote text. A 320px popover under the button on a wide screen; on a phone a
     bottom sheet with a grab bar and scrim (same shape as the table index) that
@@ -300,9 +300,9 @@ and Help.
     opening a table scroll-compensates so the tapped row stays put. A dot
     (`.options-dot`) on Options flags a non-default state. Rows that don't apply hide (Show polite
     outside a verb table; the Expand / Print group while searching).
-  - **Menus** (the table ⋯ menu): a 14px popover, no border, one
-    shadow, items 15px in 12px×14px rows separated by hairlines, label first and its
-    glyph trailing. The ⋯ trigger itself is a bare glyph.
+  - **Menus** (the table ⋯ menu): a glass popover (`--radius-menu`), items
+    15px in 12px×14px rows separated by hairlines, label first and its glyph
+    trailing. The ⋯ trigger itself is a bare glyph.
   - **Checkmark rows** (kana groups, study directions) are unchanged: the row is the
     tap target and a tick appears at the trailing edge.
 - **iOS 26 materials** (the "iOS 26 materials" block at the end of
@@ -386,90 +386,30 @@ and Help.
   toolbar at the top.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
-  "English" — not the tracked ALL-CAPS micro-label Customize/Help section
-  headers still use) in a ~44px-tall row, closed by
+  "English" — never a tracked ALL-CAPS micro-label) in a ~44px-tall row, closed by
   the same hairline as the body rows (everywhere, Flashcards' Words to review included). The sort control is one up/down chevron pair (`SORT_ICON` in
   `js/vocab/render.js`) rather than a text arrow glyph: the chevron matching the
   current direction is full strength in the section tone, the other a ghost,
   and both ghosted on an unsorted column, as in iOS Files. Its tap area is
   padded out with negative margins so it stays generous without growing the row.
-- **Every small row badge that has something to say is a real `<button>` that
-  opens the same popover** — a verb's 五段/一段/変格 group, a particle a word
-  takes, and an irregular い/な-adjective's reason are all the identical
-  capsule shape, the identical interaction (tap, click, or with a mouse
-  hover), and the identical `.role-pop` popover showing one line about *that
-  one badge* — never a permanent caption sitting under the meaning, and never
-  more than the tapped badge's own explanation (a word with two particles
-  opens two different popovers, one per chip, not both roles stacked in one).
-  A plain い/な-adjective badge is the one exception: the glyph itself already
-  names the type, so it's a static (non-`<button>`) span, no popover, no
-  pointer cursor — a popover repeating "い-adjective" would say nothing a
-  sighted reader doesn't already have from the pill's colour and letter (a
-  screen reader still gets it, from the row's own visually-hidden note, not
-  this badge). One mechanism, `openPop()` in `js/vocab/interactions.js`,
-  drives every badge that is a button so a reader only has to learn the
-  pattern once. It closes on an outside tap, Escape, scroll, resize, or hash
-  change, and is suppressed while the English is hidden or covered (a role
-  like "what you eat" would give the answer away). Every badge's hit
-  area is padded past its 20px capsule with an invisible `::before`, since
-  it's a small target on a phone.
-- **い/な-adjectives** carry a small **capsule badge** (`.adj-badge`) — 20px tall,
-  a 14% tint of `--adj-i-ink` (purple) or `--adj-na-ink` (green) behind the glyph
-  **い** / **な** in the full ink, 11.5px — in the English cell's trailing cluster
-  beside the row icons, like a dictionary's part-of-speech tag. (An earlier version put
-  a coloured bar down the Japanese cell's edge; iOS has no edge bars, and a
-  badge beside the word stole width from the narrow Japanese column, wrapping
-  words like つまらない.) The glyph is drawn by CSS from `data-badge`, so it never
-  enters the cell's text, search or speech. The dedicated tokens are deliberately
-  as saturated as `--particle`, not as muted as the accents, so a small badge reads
-  as coloured at a glance. An **irregular** adjective — a な-adjective that ends in
-  い (きれい, 嫌い, 有名), or いい / かっこいい, which conjugate as よくない — gets an
-  **outlined** badge (`.adj-badge-irr`: no fill, a 1.5px ring); tapping it opens
-  the popover with the reason (row's `adjNote`) instead of a permanent line under
-  the meaning eating space on every row that doesn't need it. The legend
-  (`.adj-legend`, `aria-hidden`) shows a sample of each — い, な, outlined
-  "irregular" — as its own tappable buttons (`tabindex="-1"`, since the legend is
-  a sighted quick-reference; a screen reader gets the real distinction from each
-  row's own badge) that open the identical popover, and `updateAdjLegend()` in
-  `js/vocab/interactions.js` shows the legend only while the table under the
-  sticky toolbar (or, while searching, any still-visible match) has adjectives.
-  A visually-hidden "(い-adjective)" note on the Japanese cell carries the type
-  to screen readers regardless of whether the badge's popover is open.
-- **Verb-pairs** carry the same capsule badge (`.verb-badge`) for their group —
-  **五段** (godan/u-verb, `--verb-godan-ink`, teal), **一段** (ichidan/ru-verb,
-  `--verb-ichidan-ink`, terracotta) or **変格** (irregular: する/来る, reusing
-  `--irregular-ink` — the same "this one's an exception" identity the app
-  already uses for a stray irregular-reading row elsewhere). Every verb-pair
-  gets one, unlike the adjective badge which only marks tagged rows. 五段/一段/
-  変格 are kanji, unreadable at a glance to someone who doesn't read kanji, so
-  the badge's popover glyph spells its reading out in parentheses
-  (`data-reading`: "変格 (へんかく)") — real ruby furigana rendered too small
-  there to read — while the 20px row tile stays kanji-only. Every 変格 row's
-  popover text also says *why* it's irregular, not just the group name: `verbNote`
-  gives a word-specific reason when one's worth noting, else `VERB_CLASS_META
-  .irregular.genericNote` explains the group as a whole (doesn't conjugate by
-  the godan/ichidan rules — する becomes します, not a predictable change). A verb
-  worth a second look — 切る/帰る (五段 despite looking 一段), 来る (its kanji's
-  reading itself changes, く in *kuru* vs き in *kimasu*) — gets the same
-  **outlined** treatment (`.verb-badge-irr`) as an irregular adjective. Its own
-  legend (`.verb-legend`)
-  follows the same show-only-when-relevant rule and the same tappable-swatch
-  pattern as the adjective legend, wrapping onto a second line on a phone
-  since it carries a fourth swatch (the outlined exception one) the adjective
-  legend doesn't.
-- **Particles a word takes** (`.particle-chip`) are the same capsule as the
-  adjective badge, in the app's particle blue and bold (the one deliberate use of
-  bold — `.particle`): `を`, `に/へ`, `が`. Like the い/な badge they sit in a
-  **trailing cluster beside the row icons**, after the meaning — leading chips gave
-  every row a different left edge for its meaning. A word can have two (`を` `に`),
-  each its own chip with its own accessible name ("Particle に: who you ask") and
-  its own popover — tapping one shows only that particle's role; tapping the
-  other swaps the popover to its role instead, never both at once. The popover
-  itself (`.role-pop`: a 12px `--paper` bubble, the one menu shadow, an arrow at
-  the tapped badge via `--arrow-x`) repeats the tapped badge as its own small
-  glyph (the exact same capsule, not a plain word) so the popover reads as
-  "that one, explained." The legend (`.particle-legend`) shows only while the
-  table on screen has chips, independently of the adjective and verb legends.
+- **Grammar badges** are one capsule vocabulary, shown only inside the ⓘ
+  popover (see *Grammar notes* above) and in the Options sheet's footnote
+  legends — never painted on the row. **い / な** (`.adj-badge`) are purple /
+  green (`--adj-i-ink` / `--adj-na-ink`, as saturated as `--particle` so a small
+  capsule reads as coloured); a verb's group (`.verb-badge`) is **五段** teal,
+  **一段** terracotta or **変格** (`--irregular-ink`), its reading in parentheses
+  and its English name (u-verb / ru-verb / irregular verb) beside it; a particle
+  the word takes (`.particle-chip`) is the particle blue, bold. An exception — a
+  な-adjective ending in い, いい / かっこいい, 切る / 帰る, 来る — gets the
+  **outlined** capsule (`-irr`, a 1.5px ring, no fill) and its reason on the
+  line (`adjNote` / `verbNote`, else `VERB_CLASS_META.irregular.genericNote`).
+  The popover (`.role-pop`, `openPop()` in `js/vocab/interactions.js`) is a
+  small white rounded surface with the menu shadow and an arrow at its
+  trigger; it closes on an outside tap, Escape, scroll, resize or hash change
+  and is suppressed while the English is hidden or covered (a role like "what
+  you eat" would give the answer away). The legends show only while the table
+  under the sticky bar has that kind of badge (`updateAdjLegend()`); a screen
+  reader gets each row's type from its visually-hidden note instead.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
   column anywhere, including Phrases. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on
@@ -504,7 +444,6 @@ and Help.
   A-Z. Otherwise they're the same Japanese+English shape as every other
   table now — Phrases used to show romaji plainly and hide English behind a
   translate icon; that's inverted, for consistency.
-- **Help and Settings** are prose, held to a readable measure (680px).
 - **The Customize page** stacks the table list, then a *Your vocabulary* block.
   Each table row ends in plain tint-text actions — **Hide** / **Show** always,
   **Reset** only when there's something to reset (a disabled Reset took width
@@ -512,25 +451,22 @@ and Help.
   "Hidden from the reference" note.
   Everything collapsible on it shares one disclosure mechanic — a native
   `<details>`/`<summary>` with a shared `.disclosure-caret` mixin (hidden
-  native marker, one small triangle that flips on `[open]`), the same caret
-  language Flashcards › Manage already uses. Every open/close is persisted
+  native marker, one iOS chevron that turns from right to down on `[open]`),
+  the same disclosure language as Flashcards › Manage and the masthead Help. Every open/close is persisted
   (`localStorage`, `raume-customize-open-v1`, keyed per item) via a `toggle`
   listener attached to each `<details>` in `applyDetailsState()`, not just
   held in memory — so what a reader leaves open survives an actual reload,
   and everything starts collapsed for anyone who hasn't touched it yet:
   - **The page is on the grey ground** (`.page-customize`, like every other
     page); content keeps its 720px reading width via `.page-customize > *`, so the
-    ground spans the sheet. Everything below is a borderless white 12px card.
+    ground spans the sheet. Everything below is a borderless white `--radius-card` card.
   - **The table list** reads Section → category → table as list rows: a
     section-level heading (`.cz-section-label`) and a category heading
-    (`.cz-group-title`), each closed by an inset hairline. The section's own
-    tone lives in a short marker bar (`::before`, the same 3px device
-    `.section-head::before` uses on the vocabulary page) reading the actual
-    per-section token (`--sec-vocabulary` etc.) rather than the page-global
-    `--section` var, which can't tell sections apart when a page shows all of
-    them at once — the name itself stays plain ink, so colour is spent once
-    per row, on the marker, not repeated in the text (colour-and-icon-restraint
-    pass). A section with more than one category (Vocabulary's four)
+    (`.cz-group-title`, the 12px grey header voice), each closed by an inset
+    hairline. As in iOS Settings a row is plain ink with its table count as a
+    trailing secondary value and a chevron that points right while closed and
+    turns down when open (`.disclosure-caret`, shared by every collapsible row
+    on the page) — no coloured marker bars. A section with more than one category (Vocabulary's four)
     is itself collapsible — closing it hides all four at once — with its
     eyebrow above them; a section that's just one category sharing the
     section's own name (Grammar, Phrases, Travel) skips the redundant
@@ -572,19 +508,18 @@ and Help.
     already-tight phone row, so `.cz-row`'s `gap` and the handle itself both
     shrink under 640px, clawing back most of what it took from the name
     field rather than letting names truncate more than before.
-  - **Your vocabulary**'s three action cards (`.cv-card` as `<details>`, a
-    sentence-case `<summary>` at `--fs-card-heading` (17px/500) — see that
-    token's own note above; a touch-screen text field under it
-    (`.cv-owned-search`, next bullet, plus `.cv-owned-sort-select` beside it)
-    is fixed at 36px tall like `.search-box`'s own field) all start
-    closed. Forms are label-over-field with filled, unbordered fields; the
+  - **Your vocabulary**'s action rows (Add a word / New table / Import a list,
+    each a `.cv-card` `<details>` with a sentence-case `<summary>` at
+    `--fs-card-heading`) sit back to back as one inset-grouped card — an inset
+    hairline between them, corners only on the ends — and all start closed. Forms are label-over-field with filled, unbordered fields; the
     parsed-ruby preview and the import result sit on `--surface`, an error on
     `--wrong-soft`; the buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
   - **Words you've added** is one non-collapsible card (same `--fs-card-heading`
     heading as above) holding a search field + a Recently added/A–Z sort
     (`.cv-owned-controls`, filters and reorders via a plain DOM swap in
     `updateOwnedList()` — no full re-render, so the search input never loses
-    focus mid-keystroke), then one `<details>` per
+    focus mid-keystroke; the sort is an iOS pop-up button, tint text with the
+    native chevron, no fill), then one `<details>` per
     table (`.cv-owned-group`) — collapsed by default with a word count in its
     summary, so a reader with words spread across many tables gets a list of
     tables to open, not one long scroll; each keeps its hairline even
@@ -609,8 +544,9 @@ and Help.
   rows in one white card (see the type-scale note above) — no rules between
   bullets, no ALL-CAPS headings, nothing open until tapped.
 - **Sheets** (the table-index popover / bottom sheet, the icon picker) are
-  borderless 14px surfaces with the one menu shadow; the current table in the
-  index is a soft fill, not a bar; the picker's group labels are sentence-case
+  glass surfaces (`--radius-menu`, `--radius-sheet` for a phone bottom sheet's
+  top corners) with the one float shadow; the current table in the index is a
+  soft fill, not a bar; the picker's group labels are sentence-case
   `--fs-small`.
 - **Flashcards header**: the four-segment control and Settings / Help share
   the title bar. On a phone: the large "Flashcards" title with Settings / Help,
@@ -654,9 +590,9 @@ library" below).
 
 The whole Flashcards page follows the iOS rules the reference pages do: it sits
 on the grey ground (`.page-flashcards` → `--group-ground`, the same as
-`.page-vocab`), every group is a **white 12px card straight on the ground — no
-border, no shadow, no coloured edge bar**, and rows inside a card are separated
-by inset hairlines (`--row-line`). The five sub-tabs are the shared segmented
+`.page-vocab`), every group is a **white `--radius-card` card straight on the
+ground — no border, no shadow, no coloured edge bar**, and rows inside a card are
+separated by inset hairlines (`--row-line`). The four sub-tabs are the shared segmented
 control (see "Controls library"), full width on a phone. The dashboard has to
 be scannable at a glance:
 

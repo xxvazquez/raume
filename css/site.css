@@ -1387,23 +1387,22 @@ body.icon-picker-open { overflow: hidden; }
 .info-panel > :last-child { margin-bottom: 0; }
 /* Shared by every collapsible <summary> on this page (category groups, the
    Your vocabulary action cards, one per custom table in Words you've added):
-   hides the native marker and draws one small caret instead, flipped when
-   its <details> is open. Each context keeps its own type/colour rules --
-   this is only the disclosure mechanics. */
+   hides the native marker and draws an iOS chevron instead -- pointing
+   right while closed, turning down when its <details> opens. Each context
+   keeps its own type/colour rules -- this is only the disclosure mechanics. */
 .disclosure-caret { cursor: pointer; list-style: none; }
 .disclosure-caret::-webkit-details-marker { display: none; }
 .disclosure-caret::marker { content: ""; }
 .disclosure-caret::after {
-  content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; margin-left: auto;
-  border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--faint);
-  transition: transform .15s ease;
+  content: ""; display: inline-block; width: 7px; height: 7px; flex: 0 0 auto; margin: 0 4px 0 auto;
+  border-right: 1.6px solid var(--faint); border-bottom: 1.6px solid var(--faint);
+  transform: rotate(-45deg); transition: transform .15s ease;
 }
-details[open] > .disclosure-caret::after { transform: rotate(180deg); }
+details[open] > .disclosure-caret::after { transform: rotate(45deg); }
 
 /* Section > category > table, as list rows in one white card: the section
-   name in its own tone (data-section, since this page shows every section's
-   tables at once and the page-global --section can't tell them apart), each
-   row closed by an inset hairline -- no marker bars.
+   name in plain ink with its count trailing as a secondary value, each row
+   closed by an inset hairline -- no marker bars, as in iOS Settings.
 
    A section eyebrow sits above a run of categories that belong to it
    (Vocabulary's four today). A section with a single category sharing its
@@ -1436,25 +1435,11 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0;
   border-bottom: 1px solid var(--row-line);
 }
-/* The section tone lives in a short marker bar -- the same device
-   .section-head::before uses on the vocabulary page itself -- not in the
-   name's own colour; ink reads as ink everywhere on this page, one accent
-   spent on the marker instead of repeated across every row's text. */
-.cz-section-label::before {
-  content: ""; flex: 0 0 auto; align-self: stretch;
-  width: 3px; min-height: 17px; border-radius: 1px;
-}
-.cz-section-label[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
-.cz-section-label[data-section="grammar"]::before { background: var(--sec-grammar); }
-.cz-section-label[data-section="phrases"]::before { background: var(--sec-phrases); }
-.cz-section-label[data-section="travel"]::before { background: var(--sec-travel); }
 .cz-group { margin-top: 10px; }
 .cz-section-block > .cz-group:first-of-type,
 .cz-section-body > .cz-group:first-of-type { margin-top: 0; }
-/* Category row -- the same short coloured marker + hairline every open
-   table on the vocabulary page announces itself with (.section-head), so a
-   category reads as a distinct block here too, not a line of coloured text
-   with nothing framing it. */
+/* Category row -- the list's grey header voice over its tables, closed by
+   a hairline. */
 .cz-group-title {
   display: flex; align-items: center; gap: 9px;
   margin: 0 0 8px; padding: 8px 0;
@@ -1463,18 +1448,11 @@ details[open] > .disclosure-caret::after { transform: rotate(180deg); }
   color: var(--muted);
 }
 /* The merged solo case carries the section's own job -- matching the eyebrow
-   it's standing in for -- so it gets the same marker bar as .cz-section-label
-   (not a coloured name) and sits a size up. */
-.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0; }
-.cz-group-title-solo::before {
-  content: ""; flex: 0 0 auto; align-self: stretch;
-  width: 3px; min-height: 17px; border-radius: 1px;
-}
-.cz-group-title-solo[data-section="vocabulary"]::before { background: var(--sec-vocabulary); }
-.cz-group-title-solo[data-section="grammar"]::before { background: var(--sec-grammar); }
-.cz-group-title-solo[data-section="phrases"]::before { background: var(--sec-phrases); }
-.cz-group-title-solo[data-section="travel"]::before { background: var(--sec-travel); }
-.cz-group-count { font-weight: 400; color: var(--faint); }
+   it's standing in for -- so it reads as a section row, a size up, in ink. */
+.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0; color: var(--ink); }
+/* The count is the row's trailing value, just before the chevron. */
+.cz-group-count { margin-left: auto; font-weight: 400; color: var(--faint); }
+.cz-section-label::after, .cz-group-title::after { margin-left: 10px; }
 .cz-reset-order {
   display: inline-block; margin: 0 0 14px;
   appearance: none; border: 0; background: transparent; padding: 0;
@@ -1592,6 +1570,10 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
    stay out of the way, the common one doesn't need an extra click. */
 .cv-card-summary:hover { color: var(--accent-strong); }
 details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
+/* Add a word / New table / Import a list are one inset-grouped card of
+   disclosure rows: back to back, a hairline between, corners on the ends. */
+details.cv-card:has(+ details.cv-card) { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-radius: 0; background: linear-gradient(var(--row-line), var(--row-line)) 16px 0 / calc(100% - 16px) 1px no-repeat var(--paper); }
 .cv-hint { margin: 0; color: var(--faint); font-size: var(--fs-micro); line-height: 1.6; }
 .cv-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 .cv-field > span { font-size: var(--fs-micro); color: var(--muted); }
@@ -1666,6 +1648,7 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
   background: var(--field-fill); color: var(--ink);
   font: 400 var(--fs-small)/1 var(--font-ui); padding: 0 9px;
 }
+.cv-owned-sort-select { width: auto; background: transparent; color: var(--accent-strong); cursor: pointer; }
 .cv-owned-search:focus, .cv-owned-sort-select:focus { outline: 2px solid var(--section); outline-offset: 1px; }
 .cv-owned-search::placeholder { color: var(--faint); }
 /* One collapsed-by-default <details> per table -- see customListHtml() in
