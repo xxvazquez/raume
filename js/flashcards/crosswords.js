@@ -42,6 +42,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // MENU_ICON) -- the menu itself reuses that one's markup, so the delegated
   // open/close/Escape handling in js/vocab/interactions.js covers it too.
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
+  // Same ⓘ glyph as a reference row's grammar notes (js/vocab/render.js's
+  // INFO_ICON), at the ⋯ menu's size.
+  var INFO_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg>';
   var CHEVRON_ICON = '<svg class="fc-xw-chevron" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
 
   function vocabIndex() { return S.vocabIndex.getVocabIndex(); }
@@ -588,6 +591,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         var label = arroword ? (pl.dir === "down" ? "Down" : "Across") : pl.number + " " + (pl.dir === "down" ? "Down" : "Across");
         currentEl.innerHTML = '<span class="fc-xw-current-label">' + label + "</span>" + '<span class="fc-xw-current-clue">' + esc(pl.clue) + "</span>";
         currentEl.classList.remove("fc-xw-current-idle");
+        currentEl.hidden = false;
       }
     }
     function focusAt(key, d) {
@@ -771,6 +775,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       "</div></div>" +
       '<button type="button" class="fc-btn" id="fcXwNew">New puzzle</button>' +
       '<div class="fc-xw-actions-end">' +
+      '<div class="fc-xw-tip">' +
+      '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
+      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>Tap a square or a clue, then type. Tap a crossing square again to switch direction.</p>' +
+      "</div>" +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>' +
       '<div class="section-menu fc-xw-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More puzzle actions">' + MENU_ICON + "</button>" +
@@ -794,7 +802,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (scrim) scrim.hidden = !open;
     if (!open) btn.focus();
   }
-  // Wired once per panel: outside clicks and Escape close the sheet.
+  function setTipOpen(open) {
+    var btn = document.getElementById("fcXwTip"), pop = document.getElementById("fcXwTipPop");
+    if (!btn || !pop) return;
+    btn.setAttribute("aria-expanded", String(open));
+    pop.hidden = !open;
+  }
+  // Wired once per panel: outside clicks and Escape close the sheet (and the ⓘ tip).
   var optionsDocWired = false;
   function wireOptionsDismiss() {
     if (optionsDocWired) return;
@@ -802,6 +816,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.addEventListener("click", function (e) {
       // A control inside the sheet can re-render the panel before this runs,
       // detaching the clicked node -- that was a click inside, not outside.
+      var tip = document.querySelector("#fcPanelCrosswords .fc-xw-tip");
+      if (tip && !tip.contains(e.target)) setTipOpen(false);
       if (!state.optionsOpen || !e.target.isConnected) return;
       var panel = document.getElementById("fcPanelCrosswords");
       var box = panel && panel.querySelector(".fc-xw-options");
@@ -809,6 +825,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       setOptionsOpen(panel, false);
     });
     document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setTipOpen(false);
       if (e.key !== "Escape" || !state.optionsOpen) return;
       var panel = document.getElementById("fcPanelCrosswords");
       if (panel) setOptionsOpen(panel, false);
@@ -818,6 +835,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var optionsBtn = panel.querySelector("#fcXwOptions");
     if (optionsBtn) {
       wireOptionsDismiss();
+      panel.querySelector("#fcXwTip").addEventListener("click", function () {
+        setTipOpen(this.getAttribute("aria-expanded") !== "true");
+      });
       optionsBtn.addEventListener("click", function () { setOptionsOpen(panel, !state.optionsOpen); });
     }
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
@@ -887,7 +907,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
-      '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start.</p>' +
+      '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite" hidden></p>' +
       '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
       gridHtml(p, arroword, romajiMode) + "</div></div>" +
       (arroword ? "" : clueListHtml(p)) +

@@ -666,7 +666,9 @@ closes on an outside tap or Escape. The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
 watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid
-and the lists below. The grid draws only the letter squares — white with a
+and the lists below. The clue bar only shows once a square is picked — the
+how-to lives behind a bare ⓘ beside Check (a small glass popover), not as a
+standing line. The grid draws only the letter squares — white with a
 hairline, blanks are the page ground — shrinking to a 24px floor before it
 scrolls; the active word takes `--accent-soft`, the focused square a
 `--section-strong` ring. Check's verdict is the green / red soft fill. Across

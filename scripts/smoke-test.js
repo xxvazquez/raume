@@ -2601,8 +2601,16 @@ async function main() {
       && menu.querySelector(".section-menu-list").hidden
       && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
   })());
-  check("the clue bar starts with a prompt, before any square is picked",
-    document.querySelector("#fcPanelCrosswords .fc-xw-current").classList.contains("fc-xw-current-idle"));
+  check("the clue bar stays hidden until a square is picked -- how to solve sits behind an ⓘ beside Check, opening and closing a tip", (() => {
+    const bar = document.querySelector("#fcPanelCrosswords .fc-xw-current");
+    const tip = document.getElementById("fcXwTip"), pop = document.getElementById("fcXwTipPop");
+    if (!bar.hidden || bar.textContent || !tip || !pop.hidden || tip.nextElementSibling !== pop) return false;
+    tip.click();
+    const opened = !pop.hidden && tip.getAttribute("aria-expanded") === "true" && /Tap a square/.test(pop.textContent);
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    return opened && pop.hidden
+      && tip.closest(".fc-xw-actions-end").querySelector("#fcXwCheck") !== null;
+  })());
   check("Romaji is the default script -- a beginner without kana memorized yet still gets a working puzzle -- and its cells skip the Japanese IME hint",
     document.querySelector('#fcPanelCrosswords [data-pick="script"]').value === "romaji"
     && !document.querySelector('#fcPanelCrosswords .fc-xw-cell-input[lang="ja"]'));
@@ -2645,7 +2653,7 @@ async function main() {
     const start = document.activeElement;
     const bar = document.querySelector("#fcPanelCrosswords .fc-xw-current");
     const ok = start.dataset.r === String(r) && start.dataset.c === String(c)
-      && li.classList.contains("fc-xw-clue-active") && !bar.classList.contains("fc-xw-current-idle")
+      && li.classList.contains("fc-xw-clue-active") && !bar.classList.contains("fc-xw-current-idle") && !bar.hidden
       && bar.textContent.includes(li.textContent.replace(/^\d+\s*/, "").trim());
     start.value = "a";
     start.dispatchEvent(new window.Event("input", { bubbles: true }));
