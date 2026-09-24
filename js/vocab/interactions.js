@@ -853,12 +853,20 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Account: on a wide window it goes straight to Flashcards (sign in /
     // sync). On a phone it's the one masthead control and opens the account
     // menu instead (wired with the theme code below).
+    // Flashcards page, and for a guest straight to its sign-in screen
+    // (flashcards.openAccount) -- otherwise a guest lands on the dashboard
+    // they're already on and nothing seems to happen.
+    function openAccount() {
+      if (vocab.showFlashcardsPage) vocab.showFlashcardsPage();
+      const fc = window.RaumeStudy.flashcards;
+      if (fc && fc.openAccount) fc.openAccount();
+    }
     const accountToggle = document.getElementById('accountToggle');
     const phoneWidth = window.matchMedia ? window.matchMedia('(max-width: 640px)') : null;
     if (accountToggle) {
       accountToggle.addEventListener('click', function () {
         if (phoneWidth && phoneWidth.matches && vocab.toggleAccountMenu) { vocab.toggleAccountMenu(); return; }
-        if (vocab.showFlashcardsPage) vocab.showFlashcardsPage();
+        openAccount();
       });
     }
 
@@ -1061,7 +1069,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const go = e.target.closest('[data-menu-go]');
         if (!go) return;
         setAccountMenu(false);
-        if (go.dataset.menuGo === 'account') { if (vocab.showFlashcardsPage) vocab.showFlashcardsPage(); }
+        if (go.dataset.menuGo === 'account') openAccount();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
         else if (go.dataset.menuGo === 'help') { const h = document.getElementById('helpToggle'); if (h) h.click(); }
       });

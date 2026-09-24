@@ -141,8 +141,9 @@ flashcard directions. Changes save immediately and sync when signed in.
   has its own Help screen (top right of the Flashcards page) in the same style.
 - **On a phone** there's no wordmark row: each screen starts with its large
   title and one round **account button** beside it, which opens a menu —
-  who you're signed in as and whether you're synced, **Account**, **Customize
-  tables**, **Help**, and **Appearance** (System / Light / Dark). On a tablet
+  who you're signed in as and whether you're synced, **Account** (**Sign in**
+  for a guest — straight to the sign-in screen), **Customize tables**, **Help**,
+  and **Appearance** (System / Light / Dark). On a tablet
   the masthead icons carry captions (Account, Help, Customize, the current
   theme). The search bar's buttons read **Tables** and **Options**, and
   Manage's buttons keep a one-word label — nothing relies on hover.

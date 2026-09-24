@@ -333,7 +333,8 @@ and Help.
   screen, and one 34px round white account button (`--control-lift`, the sync
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
-  menu of words: who you are + sync state, Account / Customize tables / Help,
+  menu of words: who you are + sync state, Account (reads "Sign in" for a guest
+  and opens the sign-in screen, as the desktop glyph does) / Customize tables / Help,
   and Appearance as a System / Light / Dark segmented control that applies at
   once. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options

@@ -449,6 +449,14 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   // Called back into by the view modules (dashboard.js, views.js).
   S.render = render;
+  // The masthead's account control (desktop glyph, phone menu item): a guest
+  // goes to the sign-in screen -- the same as the status line's "Sign in",
+  // guest data left untouched -- anyone signed in to Flashcards, where their
+  // account status and Sign out live.
+  S.openAccount = function () {
+    if (isGuestMode()) { setStoredMode(null); invalidateInsights(); refreshRowToggleButtons(); }
+    render();
+  };
   S.setActiveTab = function (t) { activeTab = t; };
   S.getActiveTab = function () { return activeTab; };
 
@@ -505,6 +513,8 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // The phone's account menu header says the same, in two lines.
     var name = document.getElementById("accountMenuName"), status = document.getElementById("accountMenuStatus");
     if (name) name.textContent = signedIn ? currentUser().email : "Guest";
+    var go = document.querySelector('#accountMenu [data-menu-go="account"]');
+    if (go && go.firstChild) go.firstChild.textContent = signedIn ? "Account" : "Sign in";
     if (status) status.textContent = !signedIn ? "This device only · not backed up"
       : !st.online ? "Offline · changes are saved on this device"
       : pending ? st.pending + (st.pending === 1 ? " change" : " changes") + " not yet synced"

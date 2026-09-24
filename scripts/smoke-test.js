@@ -1061,8 +1061,8 @@ async function main() {
 
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
-  check("the account menu starts hidden and lists Account / Customize tables / Help + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace("›", "").trim()).join("|") === "Account|Customize tables|Help"
+  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help + an Appearance switch", !!acctMenu && acctMenu.hidden
+    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace("›", "").trim()).join("|") === "Sign in|Customize tables|Help"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
   window.RaumeStudy.vocab.toggleAccountMenu();
   check("opening it marks the account button expanded", !acctMenu.hidden && document.getElementById("accountToggle").getAttribute("aria-expanded") === "true");
