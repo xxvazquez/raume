@@ -2818,10 +2818,15 @@ async function main() {
     });
     const wrap = document.createElement("div");
     wrap.innerHTML = withToggles;
-    const cols = [...wrap.querySelectorAll(".section-head .view-mode button")].map(b => b.dataset.col);
+    const cols = [...wrap.querySelectorAll(".section-menu-list .col-menu-item[role=menuitemcheckbox]")].map(b => b.dataset.col);
     return typeof window.RaumeStudy.vocab.applyColVisibility === "function"
-      && !/view-mode/.test(without)
+      && !/col-menu-item/.test(without)
       && ["japanese", "furigana", "english"].every(k => cols.includes(k));
+  })());
+  check("Words to Review's column items are ⋯ menu checkmarks, never a multi-select segmented control", (() => {
+    const host = document.getElementById("fcWordsToReview");
+    return !document.querySelector(".view-mode")
+      && (!host || !host.querySelector(".col-menu-item") || [...host.querySelectorAll(".col-menu-item")].every(b => b.hasAttribute("aria-checked")));
   })());
 
   const goAccountBtn = document.getElementById("fcGoAccount");

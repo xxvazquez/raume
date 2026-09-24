@@ -367,32 +367,32 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row, sentence);
     }).join('\n    ');
   }
-  // Column-visibility toggles, identical to the reference toolbar's set
-  // (index.html). The click handler is delegated on document (js/vocab/
+  // Column-visibility items for a table's ⋯ menu -- the same set as the
+  // reference Options sheet's switches (index.html). An iOS segmented control is
+  // single-select, so these multi-select toggles are checkmark menu items
+  // instead. The click handler is delegated on document (js/vocab/
   // interactions.js), so this works wherever the markup lands; it drives the
   // global `body.hide-*` state, so a column hidden here stays hidden on the
-  // reference pages too. No Romaji button -- there's no Romaji column left to
+  // reference pages too. No Romaji item -- there's no Romaji column left to
   // hide (it's an on-demand reveal on the word itself instead, see jpCell).
-  var VIEW_MODE_CONTROL =
-    '<div class="view-mode" aria-label="Column visibility">' +
-    '<button type="button" data-col="japanese" aria-pressed="false" title="Hide the Japanese column">Japanese</button>' +
-    '<button type="button" data-col="furigana" aria-pressed="false" title="Hide the furigana readings">Furigana</button>' +
-    '<button type="button" data-col="english" aria-pressed="false" title="Hide the English column">English</button>' +
-    '</div>';
+  var CHECK_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>';
+  var COL_MENU_ITEMS = [['japanese', 'Japanese'], ['furigana', 'Furigana'], ['english', 'English']].map(function (c) {
+    return '<button type="button" class="col-menu-item" role="menuitemcheckbox" aria-checked="true" data-col="' + c[0] + '">' +
+      '<span class="menu-item-check">' + CHECK_ICON + '</span><span class="menu-item-tx">' + c[1] + '</span></button>';
+  });
   // Shared table-section markup -- every vocabulary table on the page goes
   // through here so it's structurally identical: same columns, sort controls,
   // print button, furigana markup, and every feature that keys off
-  // `.table-section` / `.vocab` (search, print, view-mode, row hiding).
+  // `.table-section` / `.vocab` (search, print, column visibility, row hiding).
   function sectionMarkup(o) {
     var controls = o.controls || {};
     var ctrlParts =['<span class="rows-hidden-status" hidden><span class="rows-hidden-count"></span> · <button type="button" class="show-all-rows">Show all</button></span>'];
-    if (controls.viewMode) ctrlParts.push(VIEW_MODE_CONTROL);
     // Secondary actions collapse into a quiet overflow menu so only its icon
     // sits next to the title. Print is a standalone icon on desktop, but on
     // narrow screens the full title takes priority, so print folds into the
     // menu there too (the .print-menu-item copy, CSS-toggled by width) and the
     // standalone icon is hidden.
-    var menuItems = [];
+    var menuItems = controls.viewMode ? COL_MENU_ITEMS.slice() : [];
     // Choose icon lives in the menu, not as its own always-visible button on
     // the header, so normal browsing stays clean -- only a table you can
     // actually customise (controls.addTable, i.e. a real table, never a

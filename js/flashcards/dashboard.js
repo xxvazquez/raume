@@ -347,7 +347,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       controls: { print: true, viewMode: true }
     });
     window.RaumeStudy.flashcards.refreshRowToggleButtons();
-    // Sync the just-drawn view-mode buttons (and this table's cell aria-hidden)
+    // Sync the just-drawn column checkmarks (and this table's cell aria-hidden)
     // to whatever columns are currently hidden globally.
     if (window.RaumeStudy.vocab.applyColVisibility) window.RaumeStudy.vocab.applyColVisibility();
   }

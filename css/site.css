@@ -790,12 +790,9 @@ body {
 body { --switch-on: var(--section-strong); }
 :root[data-theme="dark"] body { --switch-on: var(--section); }
 /* Segmented control (iOS): a grey track holding the segments, the selected
-   ones raised on a thumb. The Flashcards dashboard's "Words to review" column
-   toggles (.view-mode) use it with several segments raised at once -- one that
-   is hidden lies flat and struck through (.col-hidden, below). Manage's filter
-   (.fc-manage-filters) is the same component with one segment raised at a
-   time. */
-.view-mode,
+   one raised on a thumb -- single-select only (Manage's .fc-manage-filters;
+   the Flashcards tabs and the Appearance picker share the look). Multi-select
+   on/off sets are switches or checkmark menu items, never this. */
 .fc-manage-filters {
   display: inline-flex;
   align-items: stretch;
@@ -804,7 +801,6 @@ body { --switch-on: var(--section-strong); }
   background: var(--seg-track);
   border-radius: 999px;
 }
-.view-mode button,
 .fc-manage-filters button {
   appearance: none;
   border: 0;
@@ -816,12 +812,10 @@ body { --switch-on: var(--section-strong); }
   cursor: pointer;
   white-space: nowrap;
 }
-.view-mode button:not(.col-hidden),
 .fc-manage-filters button.active {
   background: var(--seg-thumb);
   color: var(--ink);
 }
-.view-mode button:hover,
 .fc-manage-filters button:hover { color: var(--ink); }
 /* --- Options sheet (search bar's trailing button) ----------------------
    The sticky bar is just the search field and one Options button; everything
@@ -1918,6 +1912,21 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .section-menu-list .hide-table-btn:hover .menu-item-ic { color: var(--accent-strong); }
 .section-menu-list .fc-add-table-btn[disabled] { opacity: .5; cursor: default; }
 .section-menu-list .print-menu-item { display: none; }
+/* Column checkmarks (Words to review's ⋯ menu): an iOS menu's multi-select
+   group -- the tick leads, a blank slot keeps the labels aligned when a
+   column is hidden, and a ground-coloured band sets the group off from the
+   actions below it. */
+.section-menu-list .col-menu-item {
+  appearance: none; border: 0; background: transparent; width: 100%;
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  padding: 12px 14px 12px 10px; border-radius: 0; color: var(--ink);
+  font: 400 var(--fs-subhead)/1.3 var(--font-ui); cursor: pointer; white-space: nowrap;
+}
+.section-menu-list .col-menu-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.section-menu-list .menu-item-check { flex: 0 0 14px; display: flex; color: var(--accent-strong); }
+.section-menu-list .menu-item-check svg { display: block; }
+.section-menu-list .col-menu-item[aria-checked="false"] .menu-item-check { visibility: hidden; }
+.section-menu-list .col-menu-item + :not(.col-menu-item) { border-top: 6px solid var(--group-ground); }
 @media (max-width: 700px) {
   .controls .section-menu ~ .print-icon-btn { display: none; }
   .section-menu-list .print-menu-item { display: flex; }
@@ -2398,12 +2407,6 @@ body.hide-furigana .vocab .furigana {
 /* Keep the row action icons usable even when their column's text is hidden. */
 body.hide-english .vocab td:last-child .row-hide-btn,
 body.hide-english .vocab td:last-child .fc-toggle-btn { color: var(--faint) !important; }
-/* The pressed (= hidden) segment lies flat on the track: struck through, faint. */
-.view-mode button.col-hidden {
-  color: var(--faint);
-  text-decoration: line-through;
-}
-.view-mode button.col-hidden:hover { color: var(--muted); }
 
 /* "Cover answers" mode (body.selftest-mode): a session-only cover-and-check
    aid. Blank the English column's text row by row; a tap adds .revealed to
@@ -2576,7 +2579,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .vocab td:nth-child(2) { vertical-align: middle !important; }
   /* Drop the row actions in print. */
   .sort-button, .row-hide-btn, .row-info-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
-  .view-mode { display: none !important; }
   /* A white glyph on an unprinted tile would vanish. */
   #vocabulary .section-head > .section-icon:not(.section-icon-empty) { background: none !important; color: var(--muted) !important; }
   /* No override needed for the romaji reveal: it's already an in-flow
@@ -2781,7 +2783,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 .fc-lede { margin: 0 0 20px; color: var(--muted); font-size: var(--fs-nav-sub); line-height: 1.5; max-width: 60ch; }
 
-/* The Flashcards sub-tabs are the shared segmented control (see .view-mode):
+/* The Flashcards sub-tabs are the shared segmented control (see .fc-manage-filters):
    a grey track, the selected tab raised on a thumb. Full width on a phone,
    sized to its content on a wide window. */
 .fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
@@ -3066,7 +3068,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-legend-term { color: var(--accent-dark); }
 
 /* Manage: reuses the overview list-row pattern. The filter is the shared
-   segmented control (see .view-mode above), one segment raised at a time. */
+   segmented control (see above), one segment raised at a time. */
 .fc-manage-filters { margin-bottom: 14px; }
 /* Category group -- a quiet label on the ground above its cards, like the
    reference pages' .cat-heading: name in the section tone, count beside it, a
@@ -3869,6 +3871,8 @@ mark.fc-diff-co {
    accent rule; the title matches the other dashboard card headings. */
 #fcWordsToReview { margin-top: 16px; }
 #fcWordsToReview:has(> .table-section) { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+/* Let the ⋯ menu float out of the card while it is open. */
+#fcWordsToReview:has(.menu-open) { overflow: visible; }
 #fcWordsToReview .fc-note { padding: 4px 0; }
 #fcWordsToReview .section-head {
   padding: 14px 16px;
@@ -3881,12 +3885,6 @@ mark.fc-diff-co {
 #fcWordsToReview .section-head::before { display: none; }
 #fcWordsToReview .section-title-text { font-size: var(--fs-subhead); font-weight: 500; }
 #fcWordsToReview .section-toggle-icon { width: 20px; height: 20px; }
-/* The column-visibility toggles are a wide control for a section head -- let
-   them fall onto their own line under the title rather than crushing it when
-   the card is narrow; if even that is too narrow the segments wrap inside
-   their track. */
-#fcWordsToReview .section-head { flex-wrap: wrap; row-gap: 10px; }
-#fcWordsToReview .section-head .view-mode { flex-wrap: wrap; }
 
 /* Printing the Words to Review table from the Dashboard: strip the Flashcards
    chrome so only that one table (title + grid) reaches the page, matching how
@@ -3957,7 +3955,7 @@ mark.fc-diff-co {
    pinch-zoom regardless, and other platforms never zoom on focus. */
 .section-menu-btn { position: relative; }
 .section-menu-btn::after { content: ""; position: absolute; inset: -6px; }
-.view-mode button, .fc-manage-filters button { min-height: 32px; }
+.fc-manage-filters button { min-height: 32px; }
 .tindex-trigger { min-height: 32px; }
 .options-btn { min-width: 44px; justify-content: center; }
 #vocabulary .section-head { position: relative; }
@@ -4046,8 +4044,7 @@ mark.fc-diff-co {
 :root { --control-lift: 0 0 0 .5px rgba(24, 24, 40, .12), 0 1px 3px rgba(24, 24, 40, .07); }
 :root[data-theme="dark"] { --control-lift: 0 0 0 .5px rgba(255, 255, 255, .1), 0 1px 3px rgba(0, 0, 0, .4); }
 .fc-tab.active,
-.fc-manage-filters button.active,
-.view-mode button:not(.col-hidden) { box-shadow: var(--control-lift); }
+.fc-manage-filters button.active { box-shadow: var(--control-lift); }
 
 /* --- Desktop / tablet frame: no sheet ---------------------------------
    Past phone width the page used to be a bordered white sheet floating on

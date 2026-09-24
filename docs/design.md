@@ -264,14 +264,13 @@ and Help.
   each led by its own tinted glyph. The English keeps the row's full width.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
-  - **Segmented control** (`.view-mode` column toggles in the dashboard's Words to
-    review, `.fc-manage-filters`): a grey track with 2px padding, the selected
-    segments raised on a thumb. The dashboard's column toggles are multi-select —
-    a column that is showing is raised, one that is hidden lies flat, faint and
-    struck through (`.col-hidden`); Manage's filter raises one at a time. The
-    reference toolbar no longer uses one: an iOS segmented control is
-    single-select, so its multi-select column toggles are switches in the Options
-    sheet.
+  - **Segmented control** (`.fc-manage-filters`, the Flashcards tabs, the
+    Appearance picker): a grey track with 2px padding, the selected segment raised
+    on a thumb. Single-select only — never several segments raised at once. A
+    multi-select on/off set is switches (the reference Options sheet's Japanese /
+    Furigana / English) or checkmark items in a ⋯ menu (the dashboard's Words to
+    review: `.col-menu-item`, `role="menuitemcheckbox"`, tick leading, a ground
+    band setting the group off from Print).
   - **Switch** (the Options sheet's `.opt-switch` rows — Japanese / Furigana /
     English, Cover answers, Show polite — plus Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
     track filling with the section tone (`--switch-on` — the deep tone in light, the

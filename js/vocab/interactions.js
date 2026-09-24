@@ -2,7 +2,7 @@
 //
 // Section routing (Vocabulary / Grammar / Phrases / Travel / Flashcards), the
 // per-table accordion and overflow menus, print, cross-section search, the
-// view-mode column filter, the top navigation and the casual/polite toggle.
+// column-visibility filter, the top navigation and the casual/polite toggle.
 // Augments the RaumeStudy.vocab object that js/vocab/render.js creates. Loaded
 // after render.js; keeps the exact DOMContentLoaded lifecycle the old
 // js/app.js had.
@@ -706,15 +706,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // / the furigana, not the header (still meaningful on its own); the
     // sort control disables regardless, since sorting by hidden content
     // isn't useful even though the header's still visible -- and reflects
-    // each control's pressed state (a Flashcards segment: pressed = hidden; an
-    // Options switch: pressed = showing).
+    // each control's state (a ⋯ menu checkmark or an Options switch: on =
+    // showing).
     function applyColVisibility() {
-      document.querySelectorAll('.view-mode button').forEach(b => {
-        const off = isHidden(b.dataset.col);
-        b.classList.toggle('col-hidden', off);
-        b.setAttribute('aria-pressed', String(off));
+      document.querySelectorAll('.col-menu-item').forEach(b => {
+        b.setAttribute('aria-checked', String(!isHidden(b.dataset.col)));
       });
-      // The Options sheet's switches read the other way round: on = showing.
       document.querySelectorAll('.opt-switch[data-col]').forEach(b => {
         const on = !isHidden(b.dataset.col);
         b.classList.toggle('active', on);
@@ -738,8 +735,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
     }
     // Exposed so synthetic tables rendered outside this page (the Flashcards
-    // dashboard's "Words to review") can sync a freshly-drawn `.view-mode`
-    // control -- and their cells' aria-hidden -- to the current column state.
+    // dashboard's "Words to review") can sync their freshly-drawn ⋯ menu
+    // checkmarks -- and their cells' aria-hidden -- to the current column state.
     vocab.applyColVisibility = applyColVisibility;
     function toggleColumn(key) {
       const cls = 'hide-' + key;
@@ -752,7 +749,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (document.body.dataset.activePage !== 'flashcards') runSearch();
     }
     document.addEventListener('click', function (event) {
-      const button = event.target.closest && event.target.closest('.view-mode button, .opt-switch[data-col]');
+      const button = event.target.closest && event.target.closest('.col-menu-item, .opt-switch[data-col]');
       if (button && button.dataset.col) toggleColumn(button.dataset.col);
     });
   });
