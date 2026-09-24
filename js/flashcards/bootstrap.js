@@ -533,7 +533,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       // *Queued flags a failed push as dirty and retries it (whole current
       // state, last-edit-wins) on reconnect / "Sync now", and counts toward
       // getSyncState()'s pending total -- see data-ops.js.
-      if (authState.session) dataOps.saveTableCustomRemoteQueued(obj);
+      if (authState.session) dataOps.saveTableCustomRemoteQueued();
     });
   }
 

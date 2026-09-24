@@ -684,20 +684,33 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       else window.localStorage.removeItem(TC_DIRTY_KEY);
     } catch (e) {}
   }
-  async function saveTableCustomRemoteQueued(obj) {
-    try {
-      await withTimeout(saveTableCustomRemote(obj), "table customization sync");
-      setTcDirty(false);
-    } catch (e) {
-      console.warn("Flashcards: could not sync a table customization, will retry", e);
-      setTcDirty(true);
-    }
-    notifySyncStateChange();
+  // Pushes run one at a time and each sends the state as it is *when it goes
+  // out*, not when it was queued: two quick edits (an icon, then a colour)
+  // used to race as two whole-object writes, and if the older one landed
+  // last the account kept a value this device had already cleared -- which
+  // then came back on the next sign-in, since the account wins per table.
+  // A push already waiting to go covers any edit made meanwhile.
+  var tcPushChain = Promise.resolve(), tcPushWaiting = false;
+  function saveTableCustomRemoteQueued() {
+    if (tcPushWaiting) return tcPushChain;
+    tcPushWaiting = true;
+    tcPushChain = tcPushChain.then(async function () {
+      tcPushWaiting = false;
+      var tc = window.RaumeStudy.tableCustom;
+      try {
+        await withTimeout(saveTableCustomRemote(tc ? tc.getAll() : {}), "table customization sync");
+        setTcDirty(false);
+      } catch (e) {
+        console.warn("Flashcards: could not sync a table customization, will retry", e);
+        setTcDirty(true);
+      }
+      notifySyncStateChange();
+    });
+    return tcPushChain;
   }
   function syncTableCustomIfDirty() {
     if (!tcDirty() || !configured() || !currentUser()) return;
-    var tc = window.RaumeStudy.tableCustom;
-    if (tc) saveTableCustomRemoteQueued(tc.getAll());
+    saveTableCustomRemoteQueued();
   }
 
   window.addEventListener("online", function () {
