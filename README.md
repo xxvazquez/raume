@@ -167,8 +167,9 @@ flashcards**, or single words from **Manage** or a search result.
   EN → Romaji**. You never type Japanese. **Study directions** in Settings
   picks which ones you get.
 - A session mixes everything due (plus learning steps due within 20 minutes)
-  with the day's new cards. It spaces them so the same word never appears
-  twice in a row.
+  with the day's new cards, in a fresh random order every time. Each word's
+  directions are dealt one per round, each round reshuffled, so the same word
+  never appears twice in a row and no stretch of words repeats.
 
 ### Reviewing
 

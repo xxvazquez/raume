@@ -2217,6 +2217,21 @@ async function main() {
     if (jpLine && /[\u4e00-\u9faf]/.test(jpLine.textContent) && !jpLine.querySelector("ruby rt")) return false;
     return !!meaningEl && meaningEl.textContent.trim().length > 0;
   })());
+  check("a session deals one card per word per round, reshuffling each round -- never the same word order twice in a row, never a word back to back", (() => {
+    const sched = window.RaumeStudy.flashcards.scheduling;
+    const cards = [];
+    for (let w = 0; w < 6; w++) for (let d = 0; d < 4; d++) cards.push({ vocabId: "w" + w, d });
+    let reordered = false;
+    for (let run = 0; run < 20; run++) {
+      const ids = sched.spaceByVocab(cards.slice()).map(c => c.vocabId);
+      if (ids.length !== 24) return false;
+      for (let i = 1; i < ids.length; i++) if (ids[i] === ids[i - 1]) return false;
+      const rounds = [0, 6, 12, 18].map(i => ids.slice(i, i + 6));
+      if (rounds.some(r => new Set(r).size !== 6)) return false;
+      if (rounds.some((r, i) => i && r.join() !== rounds[i - 1].join())) reordered = true;
+    }
+    return reordered;
+  })());
   check("the Japanese line on a Romaji/English-prompt reveal carries furigana, not plain kanji", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const entry = Object.values(vi.getVocabIndex()).find(e => / \/ /.test(e.jpPlain) && /[\u4e00-\u9faf]/.test(e.jpPlain));

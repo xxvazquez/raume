@@ -143,23 +143,26 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   }
   // Spread a word's own cards apart: with 4 directions per word, a flat
   // shuffle still routinely lands "English meaning of X" right next to
-  // "romaji of X". Deal the cards out round-robin by word instead, so the
-  // same word's directions are always (# of remaining words) apart. Order
-  // within each word, and the order words first appear, both come from the
-  // caller's shuffle, so it stays different every session.
+  // "romaji of X". Deal the cards out in rounds by word instead -- one card
+  // per word per round -- so a word's directions sit about a round apart.
+  // Each round is reshuffled: dealing every round in the same word order
+  // replayed the session's first stretch (A, B, C, … then A, B, C, … again)
+  // and made it feel like the same few words every time. A word never
+  // straddles two rounds back to back.
   function spaceByVocab(cards) {
     var groups = {}, order = [];
     cards.forEach(function (card) {
       if (!groups[card.vocabId]) { groups[card.vocabId] = []; order.push(card.vocabId); }
       groups[card.vocabId].push(card);
     });
-    var out = [], dealt = true;
-    while (dealt) {
-      dealt = false;
-      for (var k = 0; k < order.length; k++) {
-        var g = groups[order[k]];
-        if (g.length) { out.push(g.shift()); dealt = true; }
+    var out = [], last = null;
+    while (order.length) {
+      var round = shuffle(order.slice());
+      if (round.length > 1 && round[0] === last) {
+        var t = round[0]; round[0] = round[round.length - 1]; round[round.length - 1] = t;
       }
+      round.forEach(function (id) { out.push(groups[id].shift()); last = id; });
+      order = order.filter(function (id) { return groups[id].length; });
     }
     return out;
   }
@@ -244,7 +247,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     retrievabilityOf: retrievabilityOf, formatInterval: formatInterval,
     fsrsRowFields: fsrsRowFields,
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
-    LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle,
+    LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
     readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday
   };
