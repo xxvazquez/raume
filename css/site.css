@@ -1688,22 +1688,35 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 }
 .cv-del-table:hover { color: var(--wrong-strong); }
 .cv-owned-list { list-style: none; margin: 0; padding: 0; }
+/* A list row, as in Flashcards › Manage: the Japanese in ink with its romaji
+   small and grey beside it (wrapping under it only when there's no room),
+   the English on the line below, edit / delete centred on the whole row. */
 .cv-owned-row {
-  display: flex; align-items: baseline; gap: 10px; padding: 6px 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "main actions" "en actions";
+  align-items: center; column-gap: 12px; row-gap: 2px; padding: 9px 0;
   border-top: 1px solid var(--row-line); font-size: var(--fs-small);
 }
-.cv-owned-row-empty { color: var(--faint); }
-.cv-owned-jp { flex: 0 0 34%; color: var(--ink); }
-.cv-owned-ro { flex: 0 0 24%; color: var(--muted); }
-.cv-owned-en { flex: 1 1 auto; color: var(--muted); }
-.cv-owned-actions { flex: 0 0 auto; display: flex; gap: 6px; }
+.cv-owned-row-empty { display: block; color: var(--faint); }
+.cv-owned-main { grid-area: main; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-width: 0; }
+/* Wrap between phrases, not inside one: your own sentences are often typed
+   with spaces between phrases (どこで ハンバーガーを 食べますか。), so break
+   only at those (keep-all) -- never leaving か。 alone -- and anywhere only
+   when a line has no space to break at. */
+.cv-owned-jp {
+  color: var(--ink); font-size: var(--fs-subhead); line-height: 1.4;
+  word-break: keep-all; overflow-wrap: anywhere; line-break: strict;
+}
+.cv-owned-ro { color: var(--faint); font-size: var(--fs-micro); }
+.cv-owned-en { grid-area: en; color: var(--muted); line-height: 1.35; }
+.cv-owned-actions { grid-area: actions; display: flex; gap: 4px; }
 .cv-edit-row, .cv-del-row {
   flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
-  color: var(--faint); padding: 2px; line-height: 0;
+  color: var(--faint); padding: 7px; line-height: 0; border-radius: 8px;
 }
 .cv-edit-row:hover { color: var(--ink); }
 .cv-del-row:hover { color: var(--wrong-strong); }
-.cv-owned-row-edit { flex-wrap: wrap; align-items: center; }
+.cv-owned-row-edit { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .cv-edit-input {
   flex: 1 1 260px; border: 0; border-radius: 8px;
   background: var(--field-fill); font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--ink);
@@ -1716,10 +1729,6 @@ details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 }
 .cv-edit-cancel:hover { color: var(--ink); }
 .cv-edit-error { flex: 1 1 100%; margin-top: 4px; }
-@media (max-width: 560px) {
-  .cv-owned-row { flex-wrap: wrap; }
-  .cv-owned-jp, .cv-owned-ro, .cv-owned-en { flex-basis: auto; }
-}
 
 /* --- Help page (#help) ------------------------------------------- */
 .page-help > * { max-width: 680px; }

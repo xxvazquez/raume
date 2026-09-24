@@ -596,7 +596,11 @@ and Help.
     word swaps its row for a single text field (same line format as adding
     one) with Save/Cancel, reusing the trash icon's stroke style for a
     matching pencil icon. Deleting a word asks for confirmation first, same
-    as deleting a table.
+    as deleting a table. A word's row is a list row, as in Flashcards › Manage:
+    the Japanese plain (no furigana) in ink with its romaji small and grey
+    beside it, the English under, the pencil / trash centred on the row
+    (44pt-ish targets). Sentences wrap only at the spaces between phrases
+    (`word-break: keep-all`, anywhere as a fallback), never leaving か。 alone.
   - A heading's explanatory text (the page intro, the Your vocabulary intro,
     the import format) lives in an `.info-panel` (an unboxed footnote) toggled
     by an adjacent `.info-btn` — a bare "i" glyph that takes the accent tint

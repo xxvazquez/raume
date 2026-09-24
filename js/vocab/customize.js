@@ -162,6 +162,11 @@ window.RaumeStudy.customize = (function () {
   // The reverse of parseFurigana -- segments back to the single-line
   // "japanese(furigana),romaji,english" form the add-word / import forms use,
   // so editing a row starts from text in the same format you'd type to add it.
+  // Plain Japanese for a list row -- no furigana, the way Flashcards › Manage
+  // lists words (the reference tables are where you read them).
+  function segmentsToPlain(jp) {
+    return (jp || []).map(function (s) { return s.kanji ? s.kanji : (s.text || s.p || ""); }).join("");
+  }
   function segmentsToText(jp) {
     return (jp || []).map(function (s) { return s.kanji ? s.kanji + "(" + s.reading + ")" : (s.text || ""); }).join("");
   }
@@ -209,9 +214,11 @@ window.RaumeStudy.customize = (function () {
     return rows.length
       ? rows.map(function (r) {
           if (r.id === cvEditingId) return editRowHtml(r);
+          // An iOS list row: the Japanese with its romaji small beside it,
+          // the English under, edit / delete centred at the trailing edge.
           return '<li class="cv-owned-row">' +
-            '<span class="cv-owned-jp" lang="ja">' + V().jpSegmentsHtml(r.jp, false) + "</span>" +
-            '<span class="cv-owned-ro">' + esc(r.romaji) + "</span>" +
+            '<span class="cv-owned-main"><span class="cv-owned-jp" lang="ja">' + esc(segmentsToPlain(r.jp)) + "</span>" +
+            '<span class="cv-owned-ro">' + esc(r.romaji) + "</span></span>" +
             '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
             '<span class="cv-owned-actions">' +
             '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word">' + EDIT_ICON + "</button>" +
