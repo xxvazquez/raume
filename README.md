@@ -182,7 +182,8 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
   open.
 - A wrong romaji answer highlights exactly which letters were off
   (`kaeramasu → kaerimasu`). Long vowels are ignored — `kōhī`, `koohii` and
-  `kouhii` all match. A noun + suru verb also takes its optional を —
+  `kouhii` all match, and likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked
+  letters treat them as the same sound too. A noun + suru verb also takes its optional を —
   `ryouri o shimasu` counts for `ryōri shimasu`.
 - Typing the right answer in the wrong language — the romaji on a card that
   asks for the English, or the English on a romaji card — isn't graded: the

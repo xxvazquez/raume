@@ -2217,6 +2217,14 @@ async function main() {
     if (jpLine && /[\u4e00-\u9faf]/.test(jpLine.textContent) && !jpLine.querySelector("ruby rt")) return false;
     return !!meaningEl && meaningEl.textContent.trim().length > 0;
   })());
+  check("every long vowel can be typed doubled (aa ii uu ee oo, or ou) for its macron, and a wrong answer's letter marks treat them as the same sound", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const cook = Object.values(vi.getVocabIndex()).find(e => e.romajiDisplay === "ryōri suru / ryōri shimasu");
+    const fake = { romajiUsable: true, romajiAnswers: ["kādo", "ōkii", "sūji", "onēsan", "okāsan"].map(r => vi.normalizeAnswer(r, true)) };
+    const accepted = ["kaado", "ookii", "suuji", "oneesan", "okaasan", "oukii"].every(t => fake.romajiAnswers.indexOf(vi.normalizeAnswer(t, true)) !== -1);
+    const cmp = vi.answerCompareHtml(cook, "en-ro", "ryoori shimasi");
+    return accepted && cmp.near && (cmp.youHtml.match(/<mark/g) || []).length === 1 && /<mark[^>]*>i<\/mark>$/.test(cmp.youHtml);
+  })());
   check("a noun + suru verb accepts the optional を typed in (ryoori o shimasu / wo suru), and a plain verb doesn't take a stray o", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const entries = Object.values(vi.getVocabIndex());

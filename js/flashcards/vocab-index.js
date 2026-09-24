@@ -216,20 +216,34 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // same length as the longer side (a null on one side renders as nothing,
   // not a gap character), so a wrong-answer reveal can mark just the letters
   // that differ instead of re-showing the whole word as an error.
+  //
+  // It compares sounds, not raw letters: a long vowel is one unit however
+  // it's spelled (ō, oo, ou -- likewise aa/ā, ii/ī, uu/ū, ee/ē) and, as in
+  // the answer check itself, length-insensitive, so "ryoori" against "ryōri"
+  // lines up clean and only the real slip gets marked.
+  var ROMAJI_UNIT = /[āâ]|a{2,}|[īî]|i{2,}|[ūû]|u{2,}|[ēê]|e{2,}|[ōô]|o{2,}|ou|[\s\S]/g;
+  function romajiUnits(s) {
+    return (s.match(ROMAJI_UNIT) || []).map(function (text) {
+      return { text: text, key: foldLongVowels(foldMacrons(text)) };
+    });
+  }
   function alignChars(target, typed) {
-    var a = typed, b = target, n = a.length, m = b.length;
+    var ua = romajiUnits(typed), ub = romajiUnits(target);
+    var a = ua.map(function (u) { return u.text; }), b = ub.map(function (u) { return u.text; });
+    var ka = ua.map(function (u) { return u.key; }), kb = ub.map(function (u) { return u.key; });
+    var n = a.length, m = b.length;
     var dp = [], i, j;
     for (i = 0; i <= n; i++) { dp.push(new Array(m + 1).fill(0)); dp[i][0] = i; }
     for (j = 0; j <= m; j++) dp[0][j] = j;
     for (i = 1; i <= n; i++) {
       for (j = 1; j <= m; j++) {
-        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+        dp[i][j] = ka[i - 1] === kb[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
       }
     }
     i = n; j = m;
     var pairs = [];
     while (i > 0 || j > 0) {
-      if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) { pairs.unshift({ you: a[i - 1], co: b[j - 1], bad: false }); i--; j--; }
+      if (i > 0 && j > 0 && ka[i - 1] === kb[j - 1]) { pairs.unshift({ you: a[i - 1], co: b[j - 1], bad: false }); i--; j--; }
       else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) { pairs.unshift({ you: a[i - 1], co: b[j - 1], bad: true }); i--; j--; }
       else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) { pairs.unshift({ you: a[i - 1], co: null, bad: true }); i--; }
       else { pairs.unshift({ you: null, co: b[j - 1], bad: true }); j--; }
