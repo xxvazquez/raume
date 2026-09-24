@@ -710,6 +710,16 @@ async function main() {
     V.applyTableOrder();
     return auto === "paw" && fallback === "bookmark" && renamed === "apple" && picked === "star";
   })());
+  check("deleting a table of your own forgets its customisation record and its place in a saved order", (() => {
+    const tc = window.RaumeStudy.tableCustom;
+    tc.setName("ct-gone", "Old table");
+    tc.setHidden("ct-gone", true);
+    tc.setTableOrder("My vocabulary", ["ct-keep", "ct-gone"]);
+    tc.forget("ct-gone");
+    const ok = !("ct-gone" in tc.getAll()) && tc.tableOrder("My vocabulary").join() === "ct-keep";
+    tc.resetOrder();
+    return ok;
+  })());
   check("a table's tile colour: its category's hue, then the icon group's for your own tables, then your own pick", (() => {
     const V = window.RaumeStudy.vocab, tc = window.RaumeStudy.tableCustom, all = window.RaumeStudy.data.vocabularyTables;
     all.push({ id: "ct-test3", title: "Fruit", category: "My vocabulary", rows: [], __custom: true });

@@ -85,6 +85,22 @@ window.RaumeStudy.tableCustom = (function () {
     });
   }
 
+  // A table of your own was deleted: drop everything held for it -- name,
+  // icon, colour, hidden, and its place in any saved order -- so the record
+  // doesn't linger in the account's settings row after the table is gone.
+  function forget(id) {
+    var k = String(id);
+    mutate(function () {
+      delete cache[k];
+      var rec = cache[ORDER_KEY];
+      if (rec && rec.tables) {
+        Object.keys(rec.tables).forEach(function (cat) {
+          rec.tables[cat] = (rec.tables[cat] || []).filter(function (x) { return String(x) !== k; });
+        });
+      }
+    });
+  }
+
   // ---- Running order -------------------------------------------------------
   // One reserved record, "__order", holds the custom sequence the reader set
   // on the Customize page:
@@ -159,7 +175,7 @@ window.RaumeStudy.tableCustom = (function () {
   return {
     iconOf: iconOf, nameOf: nameOf, colorOf: colorOf, entry: entry, getAll: getAll,
     isHidden: isHidden, setHidden: setHidden,
-    setIcon: setIcon, setColor: setColor, setName: setName, clear: clear,
+    setIcon: setIcon, setColor: setColor, setName: setName, clear: clear, forget: forget,
     tableOrder: tableOrder, categoryOrder: categoryOrder,
     setTableOrder: setTableOrder, setCategoryOrder: setCategoryOrder,
     hasCustomOrder: hasCustomOrder, resetOrder: resetOrder,

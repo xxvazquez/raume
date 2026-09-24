@@ -330,6 +330,8 @@ window.RaumeStudy.customVocab = (function () {
     c.tables = c.tables.filter(function (t) { return t.id !== id; });
     c.rows = c.rows.filter(function (r) { return r.tableId !== id; });
     persist();
+    // Its name / icon / colour / order go with it (synced like any edit).
+    if (window.RaumeStudy.tableCustom && window.RaumeStudy.tableCustom.forget) window.RaumeStudy.tableCustom.forget(id);
     refreshApp();
     if (remote) { try { remote.deleteTable(id, rowIds); } catch (e) { console.warn("custom vocab: delete sync failed", e); } }
   }

@@ -93,7 +93,9 @@ flowchart LR
   only while it's on screen. Pushes to the account run one at a time and each
   sends the state as it is when it goes out (`saveTableCustomRemoteQueued`),
   so two quick edits can't land out of order and leave the account holding a
-  value this device already cleared.
+  value this device already cleared. Deleting a table of your own also
+  forgets its record and its place in any saved order (`tableCustom.forget`),
+  so nothing lingers in the settings row.
 - **Custom vocabulary** (`js/vocab/custom-vocab.js`, `RaumeStudy.customVocab`) —
   the reader's own rows and tables. Two `localStorage` keys, mirroring the
   flashcards cache split: `raume-custom-vocab-guest-v1` (guest = authoritative)
