@@ -549,7 +549,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // (no network/auth/cache access), just lets answer-checking / vocab-index
   // behavior be tested without a live Supabase project.
   S.__testHooks = {
-    normalizeAnswer: vidx.normalizeAnswer, checkAnswer: vidx.checkAnswer,
+    normalizeAnswer: vidx.normalizeAnswer, checkAnswer: vidx.checkAnswer, otherLanguageHint: vidx.otherLanguageHint,
     getVocabIndex: vidx.getVocabIndex, directionsForEntry: vidx.directionsForEntry,
     isRomajiUsable: vidx.isRomajiUsable, promptFor: vidx.promptFor
   };

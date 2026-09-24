@@ -2876,6 +2876,15 @@ async function main() {
   check("vocab index resolves a known entry by content", !!beerEntry);
   check("checkAnswer accepts an exact (normalized) match", fc.checkAnswer(beerEntry, "jp-en", "  BEER "));
   check("checkAnswer rejects a clearly wrong answer", !fc.checkAnswer(beerEntry, "jp-en", "wine"));
+  check("the right answer in the other language gets a hint, not a grade", (() => {
+    const kaeru = Object.values(vocabIndex).find(e => e.romajiDisplay === "kaeru / kaerimasu");
+    return !!kaeru
+      && /reading/.test(fc.otherLanguageHint(kaeru, "jp-en", "kaeru / kaerimasu"))
+      && /reading/.test(fc.otherLanguageHint(kaeru, "jp-en", "Kaeru"))
+      && /meaning/.test(fc.otherLanguageHint(kaeru, "jp-ro", "go home"))
+      && fc.otherLanguageHint(kaeru, "jp-en", "leave") === ""
+      && fc.otherLanguageHint(kaeru, "jp-ro", "kaeri") === "";
+  })());
   const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "hear / listen / ask");
   check("multi-answer English fields accept any listed alternative", !!listenEntry && fc.checkAnswer(listenEntry, "jp-en", "listen") && fc.checkAnswer(listenEntry, "jp-en", "ask"));
   check("multi-answer English fields still reject an unlisted word", !fc.checkAnswer(listenEntry, "jp-en", "speak"));

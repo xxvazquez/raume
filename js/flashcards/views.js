@@ -97,6 +97,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term"><kbd>Enter</kbd> or <kbd>Space</kbd></span><span class="help-desc">Check your answer.</span></li>' +
       '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — once the answer shows.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
+      '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
       '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns any of the four directions on or off — progress is kept.</span></li>' +
       '</ul>' +

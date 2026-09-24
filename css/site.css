@@ -3386,6 +3386,9 @@ mark.fc-diff-co {
   background: color-mix(in srgb, var(--right) 16%, var(--paper)); color: inherit;
   border-radius: 4px; padding: 0 1px; font-weight: inherit; box-shadow: none;
 }
+/* "That's the reading -- type the English meaning": the answer was right in
+   the other language, so the field stays open for another go. */
+.fc-answer-hint { margin: 10px 0 0; text-align: center; font-size: var(--fs-small); color: var(--muted); }
 .fc-diff-note { font-size: 11px; color: var(--muted); opacity: .75; margin: 4px 0 0; }
 .fc-diff-note b { color: var(--ink); font-weight: 600; opacity: 1; }
 

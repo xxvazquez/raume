@@ -180,6 +180,20 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var answers = isRomajiTarget ? entry.romajiAnswers : entry.englishAnswers;
     return answers.indexOf(norm) !== -1;
   }
+  // A wrong answer that is really the right answer in the other language --
+  // the romaji typed on a card that asks for the English, or the English on
+  // one that asks for the romaji. Both card kinds can show the same kanji, so
+  // this is a mix-up about the question, not a lapse in memory: the review
+  // says which one it wants and lets you answer again instead of grading it.
+  function otherLanguageHint(entry, direction, input) {
+    var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
+    if (isRomajiTarget) {
+      return entry.englishAnswers.indexOf(normalizeAnswer(input, false)) !== -1
+        ? "That’s the meaning — type the romaji reading." : "";
+    }
+    return entry.romajiUsable && entry.romajiAnswers.indexOf(normalizeAnswer(input, true)) !== -1
+      ? "That’s the reading — type the English meaning." : "";
+  }
 
   var esc = window.RaumeStudy.shared.escapeHtml;
 
@@ -284,6 +298,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
+    otherLanguageHint: otherLanguageHint,
     answerCompareHtml: answerCompareHtml,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow

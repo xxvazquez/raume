@@ -26,7 +26,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var getVocabIndex = vidx.getVocabIndex, promptFor = vidx.promptFor, askLabelFor = vidx.askLabelFor;
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
   var contextDisplayFor = vidx.contextDisplayFor;
-  var checkAnswer = vidx.checkAnswer, getRawVocabRow = vidx.getRawVocabRow;
+  var checkAnswer = vidx.checkAnswer, otherLanguageHint = vidx.otherLanguageHint, getRawVocabRow = vidx.getRawVocabRow;
   var answerCompareHtml = vidx.answerCompareHtml;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
   var recordStudyActivity = dataOps.recordStudyActivity, syncOutbox = dataOps.syncOutbox;
@@ -650,6 +650,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!card || !entry || !input) return;
     session.userAnswer = input.value;
     session.correct = checkAnswer(entry, card.direction, input.value);
+    // Right answer, wrong language: say which one the card wants and keep the
+    // field open (text selected, ready to overtype) -- no grade, no reveal.
+    session.hint = session.correct ? "" : otherLanguageHint(entry, card.direction, input.value);
+    if (session.hint) {
+      if (!syncReviewCard()) rerender();
+      input.select();
+      return;
+    }
     session.checked = true;
     session.preview = previewRatings(getScheduler(getCache().settings), card, new Date());
     // Pronunciation plays automatically the moment the answer reveals --
@@ -791,7 +799,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
       if (form) form.classList.remove("fc-answer-form-checked");
-      dyn.innerHTML = "";
+      dyn.innerHTML = session.hint ? '<p class="fc-answer-hint">' + esc(session.hint) + "</p>" : "";
       return true;
     }
 
@@ -910,6 +918,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.index++;
     session.checked = false;
     session.userAnswer = "";
+    session.hint = "";
     // Advance in place where we can (keeps the answer field + a phone keyboard
     // alive); full render for the wrap-up at the end of the queue.
     if (session.done || session.index >= session.queue.length || !advanceReviewCard()) rerender();
