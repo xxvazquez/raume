@@ -3920,7 +3920,12 @@ mark.fc-diff-co {
   body.print-only .fc-xw-puzzle { display: block; }
   body.print-only .fc-xw-gridwrap { padding: 0; margin: 0 0 9mm; }
   body.print-only .fc-xw-grid { margin: 0 auto; }
-  body.print-only .fc-xw-cell { flex-basis: 9mm; min-width: 4.5mm; }
+  /* Squares are sized as if empty (contain: size): a clue's text runs
+     bigger on paper than on screen, and a cell that grew to hold it pushed
+     the rest of its row off the grid lines. Content-free, a cell has no
+     intrinsic width, so it's given the 9mm outright (still shrinking to fit
+     a wide grid). */
+  body.print-only .fc-xw-cell { flex-basis: 9mm; width: 9mm; min-width: 4.5mm; contain: size; }
   body.print-only .fc-xw-cell-input { font-size: 12pt; }
   body.print-only .fc-xw-num { font-size: 6pt; top: .4mm; left: .6mm; color: #555 !important; }
   body.print-only .fc-xw-clues { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10mm; max-width: none; }
