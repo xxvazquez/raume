@@ -2217,6 +2217,16 @@ async function main() {
     if (jpLine && /[\u4e00-\u9faf]/.test(jpLine.textContent) && !jpLine.querySelector("ruby rt")) return false;
     return !!meaningEl && meaningEl.textContent.trim().length > 0;
   })());
+  check("a noun + suru verb accepts the optional を typed in (ryoori o shimasu / wo suru), and a plain verb doesn't take a stray o", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const entries = Object.values(vi.getVocabIndex());
+    const cook = entries.find(e => e.romajiDisplay === "ryōri suru / ryōri shimasu");
+    const plain = entries.find(e => /^\S+ \/ \S+$/.test(e.romajiDisplay || "") && e.romajiUsable);
+    return !!cook && !!plain
+      && vi.checkAnswer(cook, "en-ro", "ryoori o shimasu") && vi.checkAnswer(cook, "en-ro", "ryōri wo suru")
+      && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
+      && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
+  })());
   check("a session deals one card per word per round, reshuffling each round -- never the same word order twice in a row, never a word back to back", (() => {
     const sched = window.RaumeStudy.flashcards.scheduling;
     const cards = [];

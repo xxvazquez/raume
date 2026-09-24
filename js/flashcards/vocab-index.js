@@ -108,6 +108,18 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
               if (entry.romajiAnswers.indexOf(norm) === -1) entry.romajiAnswers.push(norm);
             });
           }
+          // A noun + suru verb takes an optional を: 料理をします is as right
+          // as 料理します, so "ryouri o shimasu" (or "wo") counts too.
+          if (entry.romajiUsable) {
+            row.forms.forEach(function (f) {
+              var m = /^(.+) (suru|shimasu)$/.exec(f.romaji);
+              if (!m) return;
+              ["o", "wo"].forEach(function (particle) {
+                var norm = normalizeAnswer(m[1] + " " + particle + " " + m[2], true);
+                if (entry.romajiAnswers.indexOf(norm) === -1) entry.romajiAnswers.push(norm);
+              });
+            });
+          }
           // Un-normalized romaji, same order/length as romajiAnswers -- lets
           // the wrong-answer diff show "kaerimasu", not the folded form used
           // for matching.
