@@ -152,7 +152,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 32 table sections", sections.length === 32);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 677 vocabulary rows", totalRows === 677);
+  check("renders 690 vocabulary rows", totalRows === 690);
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
@@ -277,7 +277,7 @@ async function main() {
     const kirei = rows.find(r => r.cells[0].textContent.includes("きれい"));
     const ii = rows.find(r => r.cells[0].querySelector(".jpword").textContent.replace(/\s/g, "") === "いい");
     return badgeOk && document.querySelectorAll(".vocab .adj-note").length === 0
-      && irr.length === 5 && irr.every(r => r.cells[1].querySelector(".adj-badge-irr").tagName === "BUTTON" && /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
+      && irr.length === 6 && irr.every(r => r.cells[1].querySelector(".adj-badge-irr").tagName === "BUTTON" && /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
       && kirei.classList.contains("irregular-row") === false && kirei.cells[0].classList.contains("adj-na")
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
       && plain.every(r => r.cells[1].querySelector(".adj-badge").tagName === "SPAN" && r.cells[1].querySelector(".adj-badge").dataset.role === undefined);
