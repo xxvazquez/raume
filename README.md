@@ -273,7 +273,7 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 | --- | --- |
 | **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
 | **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search* or *Match* |
-| **Script** | *Romaji* (default), *Japanese*, *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Answers are always readings; kanji is never shown or typed |
+| **Script** | *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
 | **Words** | 10, 15, 20, 30 or 40 |
 
 <details>

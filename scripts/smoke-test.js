@@ -2903,7 +2903,29 @@ async function main() {
   document.getElementById("fcXwReset").click();
   check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelCrosswords .fc-mt-done")
     && document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile:not([disabled])").length === xw.state.puzzle.rounds[0].length * 2);
+
+  const xwIndex = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
+  const writtenOf = id => String(xwIndex[id].jpPlain || xwIndex[id].jpReading).replace(/^〜/, "");
+  xwPick("script", "native");
+  check("Japanese in Match is the word as written -- kanji and all, not its reading", (() => {
+    const ps = xw.state.puzzle.placements;
+    return ps.length >= 6 && ps.every(w => w.answer === writtenOf(w.id))
+      && document.querySelector('#fcPanelCrosswords .fc-mt-tile[data-side="l"]').getAttribute("lang") === "ja";
+  })());
+  xwPick("mode", "wordsearch");
+  check("...and in a word search, leaving out one-kanji words, with a found word's reading shown beside its kanji", (() => {
+    const ps = xw.state.puzzle.placements;
+    const kanjiItem = ps.findIndex(w => /[一-龯]/.test(w.answer));
+    const shown = kanjiItem === -1 ? "" : document.querySelector('#fcPanelCrosswords .fc-ws-list li[data-i="' + kanjiItem + '"] .fc-ws-answer').textContent;
+    return ps.every(w => w.answer === writtenOf(w.id) && w.answer.length >= 2)
+      && (kanjiItem === -1 || shown.includes("（"));
+  })());
   xwPick("mode", "crossword");
+  check("a crossword doesn't offer Japanese (a square can't take a whole kanji) -- it falls back to Hiragana", (() => {
+    const opts = [...document.querySelectorAll('#fcPanelCrosswords [data-pick="script"] option')].map(o => o.value);
+    return xw.state.script === "hiragana" && opts.indexOf("native") === -1 && opts.indexOf("hiragana") !== -1;
+  })());
+  xwPick("script", "romaji");
 
   xwPick("source", "flashcards");
   check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));

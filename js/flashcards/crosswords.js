@@ -8,8 +8,9 @@
 // themed puzzle ("Numbers", "Drinks"...) without first adding the table to
 // flashcards. Each answer is the word's own kana reading, reconstructed from
 // its furigana exactly like the pronunciation layer does (js/vocab/render.js's
-// jpReadingOf) -- kanji is never shown or typed here. English meanings are
-// the clues.
+// jpReadingOf) -- except the Japanese script in Match and Word search, which
+// uses the word as written, kanji and all (see writtenForm). English meanings
+// are the clues.
 //
 // Two layouts share one grid builder: a classic crossword (numbered
 // across/down clue list) or an arroword (the clue sits in a cell right
@@ -473,8 +474,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function wordSearchListHtml(p) {
     return '<div class="fc-xw-clues fc-ws-list"><div class="fc-xw-cluegroup"><h4 class="fc-xw-cluehead">Find the Japanese for</h4><ol class="fc-xw-cluerows">' +
       p.placements.map(function (pl, i) {
+        // A word found in kanji also shows how it's read: 水（みず）.
+        var entry = vocabIndex()[pl.id];
+        var reading = entry ? String(entry.jpReading || "").replace(/^〜/, "").trim() : "";
+        var shown = /[一-龯々]/.test(pl.answer) && reading ? pl.answer + "（" + reading + "）" : pl.answer;
         return '<li data-i="' + i + '"><span class="fc-ws-tick">' + TICK_ICON + '</span><span class="fc-ws-clue">' + esc(pl.clue) +
-          '</span><span class="fc-ws-answer"' + (/^[a-z]/.test(pl.answer) ? "" : ' lang="ja"') + " hidden>" + esc(pl.answer) + "</span></li>";
+          '</span><span class="fc-ws-answer"' + (/^[a-z]/.test(pl.answer) ? "" : ' lang="ja"') + " hidden>" + esc(shown) + "</span></li>";
       }).join("") + "</ol></div></div>";
   }
 
@@ -788,7 +793,23 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   function rerender() { S.render(); }
 
+  // "Japanese" is the word as it's written -- kanji and all (水, 食べる,
+  // ビール) -- in Match and Word search. A crossword square would need a
+  // whole kanji typed through the keyboard's conversion, and words rarely
+  // share one to cross on, so the grid styles offer the kana scripts only.
+  // null when the row has no clean written form to show.
+  function isGridMode() { return state.mode === "crossword" || state.mode === "arroword"; }
+  function scriptOpts() {
+    return isGridMode() ? SCRIPT_OPTS.filter(function (o) { return o[0] !== "native"; }) : SCRIPT_OPTS;
+  }
+  function writtenForm(w) {
+    var entry = vocabIndex()[w.id];
+    var written = String((entry && entry.jpPlain) || w.answer).replace(/^〜/, "").trim();
+    return /^[ぁ-ゖァ-ヶー一-龯々]+$/.test(written) ? written : null;
+  }
+
   function generate() {
+    if (state.script === "native" && isGridMode()) state.script = "hiragana";
     // First pick of "A table": the first one with enough words for a real
     // grid (the very first table can be a handful of counters).
     if (state.source === "table" && !state.tables.length) {
@@ -809,19 +830,23 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (state.script === "romaji") return !!w.romaji;
       if (state.script === "hiragana") return /^[ぁ-ゖー]+$/.test(w.answer);
       if (state.script === "katakana") return /^[ァ-ヶー]+$/.test(w.answer);
-      return true;
+      return !!writtenForm(w);
     });
     // Every eligible word is a candidate; the builder places up to Words of
     // them. Deduped again on the final answer -- folding to one script or to
     // romaji can make two readings spell the same.
     var seen = {};
     var candidates = eligible.map(function (w) {
-      var answer = state.script === "romaji" ? w.romaji : scriptedAnswer(w.answer, state.script);
+      var answer = state.script === "romaji" ? w.romaji
+        : state.script === "native" ? writtenForm(w)
+        : scriptedAnswer(w.answer, state.script);
       return { id: w.id, clue: w.clue, answer: answer };
     }).filter(function (w) { if (seen[w.answer]) return false; seen[w.answer] = true; return true; });
     // A two-letter romaji word turns up by chance all over a word search's
     // filler -- finding "ki" there is luck, not recall.
     if (state.mode === "wordsearch" && state.script === "romaji") candidates = candidates.filter(function (w) { return w.answer.length >= 3; });
+    // Likewise a one-kanji word (水) is a single square to spot.
+    if (state.mode === "wordsearch" && state.script === "native") candidates = candidates.filter(function (w) { return w.answer.length >= 2; });
     // Match shows clues side by side: two words that share an English
     // meaning would be a coin toss, so keep only the first of them.
     if (state.mode === "match") {
@@ -1153,7 +1178,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var rows = pickerRow("source", "Source", SOURCE_OPTS, state.source);
     if (state.source === "table") rows += tableFieldRowHtml();
     rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
-    rows += pickerRow("script", "Script", SCRIPT_OPTS, state.script);
+    rows += pickerRow("script", "Script", scriptOpts(), state.script);
     rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
     return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
   }
