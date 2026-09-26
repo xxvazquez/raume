@@ -701,6 +701,16 @@ a small shake (none under reduced motion). The list is one inset-grouped
 card headed "Find the Japanese for": the clue, and once found a sage tick
 before it and the reading in grey after it.
 
+**Match** swaps Check for a quiet tabular clock ("0:12.3", sage when done)
+and trims the ⋯ menu to New game / Restart. The board is two columns of solid
+white tiles on the ground (`--control-lift`, 14px corners, at least 52px
+tall, text wrapping) — the reading leading at 17px, the English trailing at
+14px — under a quiet "Round 1 of 3". A picked tile takes a section-tone ring
+and faint fill; a right pair washes sage and then goes invisible in place so
+nothing shifts; a wrong pair washes coral with the word search's small shake
+(none under reduced motion). The end is one white card: the time large, a
+grey line ("New best · 1 miss"), a filled Play again.
+
 Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
 line under it (source · N words · script), the grid centred at 9mm squares
 (smaller only when a big grid must fit the width), then Across and Down as

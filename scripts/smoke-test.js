@@ -2859,6 +2859,50 @@ async function main() {
   check("Clear found words starts the same grid over", wsCount().startsWith("0 of") && !document.querySelector("#fcPanelCrosswords .fc-ws-found"));
   document.getElementById("fcXwReveal").click();
   check("Reveal puzzle marks every word", /^All \d+ found$/.test(wsCount()) && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === xw.state.puzzle.placements.length);
+
+  check("Match splits its words into even rounds of at most 6 pairs", (() => {
+    const same = (a, b) => a.join() === b.join();
+    const forty = xw.matchRounds(40);
+    return same(xw.matchRounds(10), [5, 5]) && same(xw.matchRounds(15), [5, 5, 5]) && same(xw.matchRounds(6), [6])
+      && forty.reduce((a, b) => a + b, 0) === 40 && forty.every(n => n <= 6 && n >= 5);
+  })());
+  try { window.localStorage.removeItem(xw.MATCH_BEST_KEY); } catch (e) { /* ignore */ }
+  xwPick("mode", "match");
+  const mtTile = (side, i) => document.querySelector('#fcPanelCrosswords .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
+  const mtClock = () => document.getElementById("fcMtClock").textContent;
+  check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / Restart in the ⋯ menu", (() => {
+    const p = xw.state.puzzle;
+    const clues = p.placements.map(w => w.clue.toLowerCase());
+    return document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile").length === p.rounds[0].length * 2
+      && !document.getElementById("fcXwCheck") && mtClock() === "0:00.0"
+      && [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && new Set(clues).size === clues.length
+      && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
+  })());
+  check("a wrong pair adds a second and clears nothing", (() => {
+    mtTile("l", 0).click(); mtTile("r", 1).click();
+    return mtClock() >= "0:01.0" && !mtTile("l", 0).disabled && mtTile("l", 0).classList.contains("fc-mt-wrong");
+  })());
+  check("a right pair -- either side first -- clears both tiles in place", (() => {
+    mtTile("r", 0).click(); mtTile("l", 0).click();
+    return mtTile("l", 0).disabled && mtTile("r", 0).disabled && mtTile("r", 0).classList.contains("fc-mt-right");
+  })());
+  for (let round = 0; round < xw.state.puzzle.rounds.length; round++) {
+    for (let i = 0; i < xw.state.puzzle.rounds[round].length; i++) {
+      if (!mtTile("l", i).disabled) { mtTile("l", i).click(); mtTile("r", i).click(); }
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+  check("clearing every round ends on the time, New best and the miss count, and keeps the best time", (() => {
+    const done = document.querySelector("#fcPanelCrosswords .fc-mt-done");
+    let saved = {};
+    try { saved = JSON.parse(window.localStorage.getItem(xw.MATCH_BEST_KEY)) || {}; } catch (e) { /* ignore */ }
+    // file:// jsdom may refuse localStorage (storageUsable) -- then only the card is checked.
+    return !!done && /New best · 1 miss/.test(done.textContent) && (!storageUsable || Object.keys(saved).length === 1);
+  })());
+  document.getElementById("fcXwReset").click();
+  check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelCrosswords .fc-mt-done")
+    && document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile:not([disabled])").length === xw.state.puzzle.rounds[0].length * 2);
   xwPick("mode", "crossword");
 
   xwPick("source", "flashcards");

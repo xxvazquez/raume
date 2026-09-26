@@ -3013,6 +3013,38 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ws-clue { min-width: 0; }
 .fc-ws-answer { margin-left: auto; padding-left: 8px; color: var(--muted); }
 .fc-ws-done .fc-ws-tick { color: var(--right-strong); }
+/* Match: two columns of solid white tiles on the ground (controls on the
+   grey ground are white, not glass) -- readings leading, English trailing.
+   A picked tile takes the section ring; a right pair washes sage and then
+   goes invisible in place (visibility, so no tile moves under a finger); a
+   wrong pair washes coral with a small shake. */
+.fc-mt { max-width: 640px; }
+.fc-mt-round { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-micro); }
+.fc-mt-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.fc-mt-col { display: flex; flex-direction: column; gap: 8px; }
+.fc-mt-tile {
+  appearance: none; border: 0; margin: 0; cursor: pointer;
+  min-height: 52px; padding: 10px 14px; border-radius: 14px;
+  background: var(--paper); color: var(--ink); box-shadow: var(--control-lift);
+  font: 400 14px/1.3 var(--font-ui); text-align: left; overflow-wrap: anywhere;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: background-color .15s ease, box-shadow .15s ease, opacity .2s ease;
+}
+.fc-mt-jp { font-size: 17px; }
+.fc-mt-tile:focus { outline: 0; }
+.fc-mt-tile:focus-visible, .fc-mt-tile[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--section); }
+.fc-mt-tile[aria-pressed="true"] { background: color-mix(in srgb, var(--section) 10%, var(--paper)); }
+.fc-mt-right { background: color-mix(in srgb, var(--right) 16%, var(--paper)); color: var(--right-strong); cursor: default; }
+.fc-mt-gone { visibility: hidden; }
+.fc-mt-wrong { background: color-mix(in srgb, var(--wrong) 14%, var(--paper)); animation: fc-ws-miss .3s ease; }
+@media (prefers-reduced-motion: reduce) { .fc-mt-wrong { animation: none; } .fc-mt-tile { transition: none; } }
+.fc-mt-clock { min-width: 4.5ch; text-align: right; }
+.fc-mt-done {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 28px 20px 24px; border-radius: var(--radius-card); background: var(--paper);
+}
+.fc-mt-done-time { margin: 0; font-size: 34px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fc-mt-done-meta { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-nav); }
 .fc-ws-done .fc-ws-clue { color: var(--muted); }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across

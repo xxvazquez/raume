@@ -13,7 +13,7 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Reference**   | Vocabulary, Grammar, Phrases and Travel tables — furigana, search, audio, print |
 | **Flashcards**  | FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
-| **Puzzles**     | Crosswords, arrowords and word searches built from your words    |
+| **Puzzles**     | Crosswords, arrowords, word searches and a timed Match game from your words |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -234,7 +234,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
-| **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
+| **Puzzles** | Crossword / arroword / word search / Match from your words ([below](#puzzles)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -257,8 +257,9 @@ settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, or a word search, generated fresh each time —
-at least 6 words, or it tells you why not. Nothing is saved or scheduled.
+A fill-in crossword or arroword, a word search, or a timed Match game,
+generated fresh each time — at least 6 words, or it tells you why not. Nothing
+is scheduled; the only thing kept is Match's best time.
 Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
@@ -271,7 +272,7 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 | Setting | Choices |
 | --- | --- |
 | **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
-| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer) or *Word search* |
+| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search* or *Match* |
 | **Script** | *Romaji* (default), *Japanese*, *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Answers are always readings; kanji is never shown or typed |
 | **Words** | 10, 15, 20, 30 or 40 |
 
@@ -305,6 +306,23 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   many are found.
 - The **⋯** menu has *Reveal a word*, *Reveal puzzle*, *Clear found words* and
   *Print*.
+
+</details>
+
+<details>
+<summary><b>Match</b></summary>
+
+- Two columns: the words (in the chosen script) on the left, their English on
+  the right, each shuffled. Tap a word, then its meaning — either side first.
+- A right pair clears in place (nothing moves); a wrong pair shakes and adds
+  a second to your time.
+- The words come in even rounds of at most 6 pairs (15 words → three rounds
+  of 5), so a round fits a phone. The clock starts on your first tap.
+- At the end: your time, *New best* or your best so far, and your misses.
+  Best times are kept in this browser, one per source, script and word count.
+  Two words with the same English never appear together.
+- **New game** picks new words; the **⋯** menu's *Restart* plays the same
+  words again. Practice only — it never changes your flashcard schedule.
 
 </details>
 

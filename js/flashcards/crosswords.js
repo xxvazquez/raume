@@ -16,9 +16,11 @@
 // before the answer starts, an arrow pointing into it -- no separate list).
 // A third style, the word search, has its own builder (see "Word search"
 // below): the answers hidden in a block of letters, found by dragging.
+// A fourth, Match (see "Match" below), is a timed game: tap each reading and
+// then its English, a few pairs a round.
 // Every crossword square is a live text field, so it plays on screen as well as
-// printing as a worksheet. Nothing here is scheduled, scored, or saved --
-// regenerating is free.
+// printing as a worksheet. Nothing here is scheduled or scored for FSRS --
+// regenerating is free; the only thing kept is Match's best time.
 window.RaumeStudy = window.RaumeStudy || {};
 window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 window.RaumeStudy.flashcards.crosswords = (function () {
@@ -644,6 +646,135 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // -----------------------------------------------------------------------
+  // Match -- a timed pairs game. The words split into even rounds of at
+  // most MATCH_ROUND pairs (10 -> 5+5, 15 -> 5+5+5), so a round fits a
+  // phone without scrolling; each round lays the readings out in one column
+  // and the English in the other, each shuffled on its own. Tap a tile and
+  // then its partner, from either side: a right pair clears (its tiles keep
+  // their place, so nothing under your finger moves), a wrong one costs a
+  // second. The clock starts on the first tap, not on render. The best time
+  // per word set (source + script + pair count) is the one thing this tab
+  // keeps -- practice only, never an FSRS review.
+  // -----------------------------------------------------------------------
+  var MATCH_ROUND = 6;
+  var MATCH_PENALTY_MS = 1000;
+  var MATCH_BEST_KEY = "raume-match-best";
+  function matchRounds(n) {
+    var count = Math.ceil(n / MATCH_ROUND), sizes = [];
+    for (var i = 0; i < count; i++) sizes.push(Math.floor(n / count) + (i < n % count ? 1 : 0));
+    return sizes;
+  }
+  function buildMatch(words, limit) {
+    var picked = shuffle(words).slice(0, limit);
+    var rounds = [], at = 0;
+    matchRounds(picked.length).forEach(function (size) { rounds.push(picked.slice(at, at + size)); at += size; });
+    return { placements: picked, rounds: rounds };
+  }
+  function formatClock(ms) {
+    var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
+  }
+  function matchBestKey(p) {
+    var src = state.source === "table" ? "tables:" + state.tables.map(String).sort().join(",") : "flashcards";
+    return src + "|" + state.script + "|" + p.placements.length;
+  }
+  function readBest() {
+    try { return JSON.parse(localStorage.getItem(MATCH_BEST_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveBest(key, ms) {
+    // A private window can refuse storage -- the game still plays, it just
+    // can't remember a best.
+    try { var all = readBest(); all[key] = ms; localStorage.setItem(MATCH_BEST_KEY, JSON.stringify(all)); } catch (e) { /* ignore */ }
+  }
+  var matchTimer = null;
+  function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
+
+  function wireMatch(boardEl, clockEl, p, romajiMode) {
+    var round, start, penalty, misses, selected, left, game = 0;
+    function elapsed() { return start === null ? 0 : Date.now() - start + penalty; }
+    function tick() {
+      if (!clockEl.isConnected) { stopMatchTimer(); return; }
+      clockEl.textContent = formatClock(elapsed());
+    }
+    function tileHtml(side, i, text) {
+      var jp = side === "l";
+      return '<button type="button" class="fc-mt-tile' + (jp ? " fc-mt-jp" : "") + '" data-side="' + side + '" data-i="' + i + '" aria-pressed="false"' +
+        (jp && !romajiMode ? ' lang="ja"' : "") + ">" + esc(text) + "</button>";
+    }
+    function renderRound() {
+      var words = p.rounds[round];
+      var order = words.map(function (w, i) { return i; });
+      left = words.length;
+      selected = null;
+      boardEl.innerHTML =
+        (p.rounds.length > 1 ? '<p class="fc-mt-round">Round ' + (round + 1) + " of " + p.rounds.length + "</p>" : "") +
+        '<div class="fc-mt-cols">' +
+        '<div class="fc-mt-col">' + shuffle(order).map(function (i) { return tileHtml("l", i, words[i].answer); }).join("") + "</div>" +
+        '<div class="fc-mt-col">' + shuffle(order).map(function (i) { return tileHtml("r", i, words[i].clue); }).join("") + "</div>" +
+        "</div>";
+    }
+    function finish() {
+      stopMatchTimer();
+      var total = elapsed();
+      clockEl.textContent = formatClock(total);
+      clockEl.classList.add("fc-ws-count-done");
+      var key = matchBestKey(p), best = readBest()[key];
+      var isBest = typeof best !== "number" || total < best;
+      if (isBest) saveBest(key, total);
+      var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
+        '<p class="fc-mt-done-meta">' + (isBest ? "New best" : "Best " + formatClock(best)) + " · " + missText + "</p>" +
+        '<button type="button" class="fc-btn fc-btn-primary" id="fcMtAgain">Play again</button></div>';
+      document.getElementById("fcMtAgain").addEventListener("click", function () { generate(); rerender(); });
+    }
+    function select(tile) {
+      if (selected) selected.setAttribute("aria-pressed", "false");
+      selected = tile;
+      if (tile) tile.setAttribute("aria-pressed", "true");
+    }
+    boardEl.addEventListener("click", function (e) {
+      var tile = e.target.closest(".fc-mt-tile");
+      if (!tile || tile.disabled) return;
+      if (start === null) { start = Date.now(); matchTimer = setInterval(tick, 100); }
+      // Nothing picked yet, or another tile on the same side: (re)pick it.
+      // Tapping the picked tile again lets it go.
+      if (!selected || selected.dataset.side === tile.dataset.side) {
+        select(selected === tile ? null : tile);
+        return;
+      }
+      var a = selected, pair = [a, tile], thisGame = game;
+      select(null);
+      if (a.dataset.i === tile.dataset.i) {
+        pair.forEach(function (t) { t.classList.add("fc-mt-right"); t.disabled = true; });
+        setTimeout(function () { pair.forEach(function (t) { t.classList.add("fc-mt-gone"); }); }, 250);
+        if (--left) return;
+        setTimeout(function () {
+          if (thisGame !== game || !boardEl.isConnected) return;
+          if (round + 1 < p.rounds.length) { round++; renderRound(); } else finish();
+        }, 350);
+      } else {
+        penalty += MATCH_PENALTY_MS;
+        misses++;
+        tick();
+        pair.forEach(function (t) { t.classList.remove("fc-mt-wrong"); void t.offsetWidth; t.classList.add("fc-mt-wrong"); });
+        setTimeout(function () { pair.forEach(function (t) { t.classList.remove("fc-mt-wrong"); }); }, 450);
+      }
+    });
+    // Same words, reshuffled, clock back to zero.
+    function restart() {
+      stopMatchTimer();
+      game++;
+      round = 0; start = null; penalty = 0; misses = 0;
+      clockEl.textContent = formatClock(0);
+      clockEl.classList.remove("fc-ws-count-done");
+      renderRound();
+    }
+    restart();
+    return { restart: restart };
+  }
+
+  // -----------------------------------------------------------------------
   // State + rendering. Purely a play/print utility -- nothing here persists
   // across a reload; regenerating is free. What's typed into the grid lives
   // only in the live <input> elements, not in this state object -- every
@@ -691,12 +822,25 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // A two-letter romaji word turns up by chance all over a word search's
     // filler -- finding "ki" there is luck, not recall.
     if (state.mode === "wordsearch" && state.script === "romaji") candidates = candidates.filter(function (w) { return w.answer.length >= 3; });
+    // Match shows clues side by side: two words that share an English
+    // meaning would be a coin toss, so keep only the first of them.
+    if (state.mode === "match") {
+      var seenClue = {};
+      candidates = candidates.filter(function (w) {
+        var key = w.clue.toLowerCase();
+        if (seenClue[key]) return false;
+        seenClue[key] = true;
+        return true;
+      });
+    }
     state.poolCount = candidates.length;
-    state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size) : buildGrid(candidates, state.mode === "arroword", state.size);
+    state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size)
+      : state.mode === "match" ? buildMatch(candidates, state.size)
+      : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   var SIZE_OPTS = [10, 15, 20, 30, 40];
 
@@ -1025,6 +1169,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Print", PRINT_ICON]];
   // A word search has no letters to type, so its menu reveals whole words.
   var WS_MENU_LABELS = { hint: "Reveal a word", reset: "Clear found words" };
+  // Match has nothing to reveal or print mid-game (a reveal would make the
+  // clock meaningless): just a new game, or the same words again.
+  var MT_MENU_LABELS = { newMenu: "New game", reset: "Restart" };
   function optionLabel(opts, value) {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
@@ -1039,7 +1186,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function toolbarHtml() {
     var parts = optionsSummary();
-    var ws = state.mode === "wordsearch";
+    var ws = state.mode === "wordsearch", mt = state.mode === "match";
+    var labels = mt ? MT_MENU_LABELS : ws ? WS_MENU_LABELS : {};
+    var actions = mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
     return '<div class="fc-xw-actions">' +
       '<div class="fc-xw-options">' +
       '<button type="button" class="fc-xw-summary" id="fcXwOptions" aria-haspopup="dialog" aria-expanded="' + state.optionsOpen + '" aria-controls="fcXwSheet">' +
@@ -1052,22 +1201,25 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       configCardHtml() +
       '<p class="fc-xw-sheet-foot">Changing any of these makes a new puzzle.</p>' +
       "</div></div>" +
-      '<button type="button" class="fc-btn" id="fcXwNew">New puzzle</button>' +
+      '<button type="button" class="fc-btn" id="fcXwNew">' + (mt ? "New game" : "New puzzle") + "</button>" +
       '<div class="fc-xw-actions-end">' +
       '<div class="fc-xw-tip">' +
       '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
-      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (ws
+      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (mt
+        ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
+        : ws
         ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
         : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
       "</div>" +
-      (ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
+      (mt ? '<span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
+        : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
         : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>') +
       '<div class="section-menu fc-xw-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More puzzle actions">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
-      MENU_ACTIONS.map(function (a) {
+      actions.map(function (a) {
         return '<button type="button" class="fc-xw-menu-item" role="menuitem" id="fcXw' + a[0].charAt(0).toUpperCase() + a[0].slice(1) + '" data-action="' + a[0] + '">' +
-          '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + ((ws && WS_MENU_LABELS[a[0]]) || a[1]) + "</span></button>";
+          '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + (labels[a[0]] || a[1]) + "</span></button>";
       }).join("") +
       "</div></div></div></div>";
   }
@@ -1146,6 +1298,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   function renderCrosswords(panel) {
     if (!panel) return;
+    stopMatchTimer();
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
     function notEnough(msg, canRetry) {
@@ -1180,6 +1333,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var printTitle = optionLabel(MODE_OPTS, state.mode);
     var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
     var printMeta = titleLabel + " · " + placedCount + " words · " + scriptLabel;
+
+    if (state.mode === "match") {
+      panel.innerHTML = toolbarHtml() + '<div class="fc-mt"></div>';
+      bindControls(panel);
+      document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+      var game = wireMatch(panel.querySelector(".fc-mt"), document.getElementById("fcMtClock"), p, romajiMode);
+      bindMenu(panel, { reset: game.restart });
+      return;
+    }
 
     // Toolbar, then the puzzle: grid leading with the current clue and the
     // clue lists beside it on a wide window; on a phone the clue bar sits
@@ -1238,7 +1400,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS, state: state
     }
   };

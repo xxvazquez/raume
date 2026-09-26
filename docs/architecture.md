@@ -163,7 +163,9 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
 `raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
 collapsible sections a reader has open, keyed per item, browser-local only
-(not part of the account sync any of the others above get)). Installs from
+(not part of the account sync any of the others above get), `raume-match-best` —
+Puzzles › Match best times, one per source + script + pair count, also
+browser-local only). Installs from
 before the `sakura` → `raume` rename are migrated once by
 [`js/storage-migration.js`](../js/storage-migration.js), the first `<head>`
 script — it moves each key across and drops the old name.
@@ -250,7 +252,7 @@ js/
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups
     kana.js              the Kana tab
-    crosswords.js        the Puzzles tab: crossword/arroword/word search generator, play + print
+    crosswords.js        the Puzzles tab: crossword/arroword/word search generator, play + print; timed Match game
     bootstrap.js         app shell + init
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
