@@ -209,6 +209,7 @@
   --radius-icon: 4px;
 
   --nav-h: 39px;
+  --vocab-toolbar-h: 54px; /* .vocab-toolbar's height at every width */
 
   /* One type scale for the whole page. Restrained sizes, weight 400 the
      default everywhere, 500 only for a genuinely active/selected state. */
@@ -1127,6 +1128,17 @@ body.selftest-mode .selftest-hint { display: block; }
   border-bottom: 1px solid var(--row-line);
 }
 #vocabulary .table-section .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
+/* An open table's title row pins under the search bar while you scroll
+   through it (sticky inside its own section, so the next table's title
+   takes over), so you always know which table you're in and can close it
+   from anywhere. --vocab-toolbar-h is the search bar's fixed height. */
+#vocabulary .table-section:not(.collapsed) > .section-head {
+  position: sticky; top: calc(var(--nav-h) - 1px + var(--vocab-toolbar-h)); z-index: 40;
+  /* The shadows paint the card's 16px side padding too, so rows scrolling
+     under the pinned title don't peek out beside it. */
+  background: var(--paper); box-shadow: -16px 0 0 var(--paper), 16px 0 0 var(--paper);
+}
+#vocabulary .table-section.menu-open:not(.collapsed) > .section-head { z-index: 44; }
 /* Open or closed, the row's title is the same 14px -- growing it on open
    would move the row you just tapped. */
 #vocabulary .table-section .section-title-text { font-size: var(--fs-nav); font-weight: 400; }
@@ -2544,6 +2556,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
 /* --- Print: a clean A4 reference sheet ------------------------- */
 @media print {
+  #vocabulary .table-section > .section-head { position: relative !important; top: auto; }
   /* Always print light, whatever the on-screen theme. */
   :root, :root[data-theme="dark"] {
     --paper: #fff; --page-bg: #fff;

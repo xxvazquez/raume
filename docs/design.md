@@ -245,6 +245,10 @@ and Help.
   only what's below is pushed down. The row after an open table gets a
   full-width hairline. (Previously an open table broke out into its own card
   with a 20px title and a 16–24px gap above, so every tap made the page jump.)
+  While a table is open its title row pins under the search bar as you scroll
+  through it (sticky within its own table), so you always know where you are
+  and can close it from anywhere — closing keeps that row where it was, and
+  the next tables follow straight under it.
 - **Help screens** (masthead Help, Flashcards › Help) are iOS lists, not
   prose: each topic / group is a white card of two-line rows — the term on its
   own line (15px ink), one short plain line under it (13px muted) — hairlines
