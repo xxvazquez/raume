@@ -658,7 +658,10 @@ device only" card gives its button a white fill so it still reads as a button).
 button** ("Crossword · Flashcards · 15 words · Romaji ⌄") leading, then
 **New puzzle** (white) and filled **Check** trailing with the reference
 tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Print; on a
-phone New puzzle moves into it). The summary opens the settings — Source,
+phone New puzzle moves into it). The summary is never ellipsised: on a
+phone it drops its dots for a gap, takes the row to itself when it doesn't fit
+beside Check (which moves to the trailing edge below), and only wraps its parts
+— whole — if even the full row is too narrow. The summary opens the settings — Source,
 Tables, Style, Script, Words as iOS pop-up rows (label left, value + ⌃⌄ right,
 an invisible native `<select>` over the row; the table list is checkmark rows)
 — in a glass popover under it (`.fc-xw-sheet`, the Options pattern), a bottom

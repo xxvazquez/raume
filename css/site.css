@@ -4268,8 +4268,21 @@ mark.fc-diff-co {
 @media (max-width: 640px) {
   #fcXwNew { display: none; }
   .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: flex; }
-  .fc-xw-options { flex: 1 1 auto; }
-  .fc-xw-summary { width: 100%; justify-content: space-between; }
+  /* The whole summary always reads on a phone, never ellipsised: when it
+     doesn't fit beside Check and ⋯ it takes the row to itself (they drop to
+     the trailing edge of the next), and only if even the full row is too
+     narrow do its parts wrap -- whole, with a gap in place of the dots. */
+  .fc-xw-actions { flex-wrap: wrap; row-gap: 8px; }
+  .fc-xw-options { flex: 1 1 max-content; max-width: 100%; }
+  .fc-xw-options ~ .fc-xw-actions-end { margin-left: auto; }
+  .fc-xw-summary {
+    width: 100%; justify-content: space-between;
+    height: auto; min-height: 36px; padding: 8px 14px; border-radius: 18px;
+    text-align: left; line-height: 1.3;
+  }
+  .fc-xw-summary-text { display: flex; flex-wrap: wrap; column-gap: 12px; white-space: normal; overflow: visible; }
+  .fc-xw-summary-part { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .fc-xw-summary-dot { display: none; }
   .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
   .fc-xw-sheet {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;
