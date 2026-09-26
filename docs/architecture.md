@@ -356,9 +356,9 @@ row): an `adj: "i"` reading must end in い; a `な`-adjective whose reading end
 (きれい, 嫌い, 有名) and an い-adjective in the いい family (いい, かっこいい →
 よくない) must each carry an `adjNote`; `かわいい` is the one listed exception
 (`REGULAR_II_ADJECTIVES`). A mis-tagged adjective fails the check instead of
-shipping a wrong badge. An optional `usageNote` (多い) is a usage trap on a
-regular adjective — it needs an `adj`, keeps the plain badge, and shows in the ⓘ
-popover.
+shipping a wrong badge. An optional `usageNote` (多い, 古い, 遊ぶ) is a usage trap on a
+regular adjective or verb — on a word it needs an `adj`; it keeps the plain
+badge and shows in the ⓘ popover.
 
 Sentence tables can pair rows as a short exchange: a question row carries
 `qa: "q"`, an answer row `qa: "a"` plus `answers: "<question id>"`. `validate`

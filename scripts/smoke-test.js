@@ -310,7 +310,7 @@ async function main() {
       // every 変格 row explains itself, outlined or not (verbNote or the class's own genericNote)
       && irregularClass.length > 0 && irregularClass.every(r => /—/.test(r.cells[1].querySelector(".verb-badge").dataset.role))
       // godan/ichidan rows with nothing worth a second look carry no reason at all
-      && godanIchidan.filter(r => !r.cells[1].querySelector(".verb-badge-irr")).every(r => !/—/.test(r.cells[1].querySelector(".verb-badge").dataset.role));
+      && godanIchidan.filter(r => !r.cells[1].querySelector(".verb-badge-irr, [data-usage]")).every(r => !/—/.test(r.cells[1].querySelector(".verb-badge").dataset.role));
   })());
   check("the verb-group legend follows the same show-only-when-relevant rule as the adjective legend", (() => {
     const legend = document.querySelector(".verb-legend");
@@ -397,6 +397,12 @@ async function main() {
     btn.click();
     return shown && badge.tagName === "SPAN" && !badge.classList.contains("adj-badge-irr")
       && /多くの人/.test(row.cells[0].querySelector(".visually-hidden").textContent);
+  })());
+  check("a regular verb's usage note (遊ぶ) joins its popover line without the exception outline", (() => {
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v0147"]');
+    const badge = row && row.querySelector(".verb-badge");
+    return !!badge && badge.hasAttribute("data-usage") && !badge.classList.contains("verb-badge-irr")
+      && /テニスをする/.test(badge.dataset.role) && /u-verb/.test(badge.dataset.role);
   })());
   check("rows with nothing to explain get no ⓘ", (() => {
     const plain = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => !r.querySelector(".row-badges"));

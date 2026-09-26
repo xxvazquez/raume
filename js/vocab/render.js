@@ -237,9 +237,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var meta = VERB_CLASS_META[row.verbClass];
     if (!meta) return '';
     var note = row.verbNote || meta.genericNote;
-    var role = meta.label + (note ? ' — ' + note : '');
+    // row.usageNote: a usage trap on an otherwise regular verb (遊ぶ isn't for
+    // sports) -- added to the popover line, no outline.
+    var role = meta.label + (note ? ' — ' + note : '') + (row.usageNote ? ' — ' + row.usageNote : '');
     return '<button type="button" class="verb-badge verb-badge-' + row.verbClass + (row.verbNote ? ' verb-badge-irr' : '') +
-      '" data-badge="' + meta.badge + '" data-reading="' + meta.reading + '" data-role="' + esc(role) +
+      '"' + (row.usageNote ? ' data-usage=""' : '') + ' data-badge="' + meta.badge + '" data-reading="' + meta.reading + '" data-role="' + esc(role) +
       '" aria-label="' + esc(meta.reading + ' — ' + role) + '" aria-expanded="false"></button>';
   }
   function verbNote(row) {

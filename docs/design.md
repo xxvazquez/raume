@@ -404,8 +404,8 @@ and Help.
   な-adjective ending in い, いい / かっこいい, 切る / 帰る, 来る — gets the
   **outlined** capsule (`-irr`, a 1.5px ring, no fill) and its reason on the
   line (`adjNote` / `verbNote`, else `VERB_CLASS_META.irregular.genericNote`).
-  A regular adjective's `usageNote` (多い) keeps the plain capsule and just
-  adds its line.
+  A regular adjective's or verb's `usageNote` (多い, 遊ぶ) keeps the plain
+  capsule and just adds to its line.
   The popover (`.role-pop`, `openPop()` in `js/vocab/interactions.js`) is a
   small white rounded surface with the menu shadow and an arrow at its
   trigger; it closes on an outside tap, Escape, scroll, resize or hash change

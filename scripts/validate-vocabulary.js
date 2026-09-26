@@ -99,7 +99,7 @@ function readingOf(row) {
 }
 for (const table of tableList) {
   for (const row of table.rows) {
-    if (row.adj === undefined && row.adjNote === undefined && row.usageNote === undefined) continue;
+    if (row.adj === undefined && row.adjNote === undefined && (row.usageNote === undefined || row.type === "verb-pair")) continue;
     const label = table.title + " " + row.id;
     if (row.adj !== "i" && row.adj !== "na") {
       console.error("Adjective validation failed: adj must be \"i\" or \"na\" (" + label + ").");
