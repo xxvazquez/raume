@@ -25,7 +25,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var previewRatings = sched.previewRatings, getScheduler = sched.getScheduler, applyRating = sched.applyRating, fsrsRowFields = sched.fsrsRowFields;
   var getVocabIndex = vidx.getVocabIndex, promptFor = vidx.promptFor, askLabelFor = vidx.askLabelFor;
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
-  var contextDisplayFor = vidx.contextDisplayFor;
+  var contextDisplayFor = vidx.contextDisplayFor, homophonesOf = vidx.homophonesOf;
   var checkAnswer = vidx.checkAnswer, otherLanguageHint = vidx.otherLanguageHint, getRawVocabRow = vidx.getRawVocabRow;
   var answerCompareHtml = vidx.answerCompareHtml;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
@@ -824,6 +824,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
           '<div class="fc-stage-typed">You wrote ' + cmp.youHtml + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
+    // A Romaji -> English prompt can't tell namesakes apart (any of their
+    // meanings was accepted) -- so the reveal names the others, kanji first.
+    var sameSound = card.direction === "ro-en" ? homophonesOf(entry) : [];
+    var sameSoundHtml = sameSound.length
+      ? '<div class="fc-stage-meaning fc-stage-homophones"><span class="fc-answer-label">Same sound</span>' +
+        sameSound.map(function (h) {
+          return '<span class="fc-homophone"><span lang="ja">' + h.jpInlineHtml + "</span> " + esc(h.englishDisplay) + "</span>";
+        }).join("") + "</div>"
+      : "";
     var verdictKind = session.correct ? "ok" : (cmp.near ? "almost" : "bad");
     var verdictIcon = verdictKind === "ok" ? VERDICT_OK_ICON : (verdictKind === "almost" ? VERDICT_ALMOST_ICON : VERDICT_BAD_ICON);
     dyn.innerHTML =
@@ -833,7 +842,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // showing the same word twice on screen at once.
       '<span class="fc-verdict-badge fc-verdict-badge-' + verdictKind + '">' + verdictIcon + "</span>" +
       '<div class="fc-stage">' + stageHtml +
-        (card.direction === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + "</div>" +
+        (card.direction === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + sameSoundHtml + "</div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy sit at reduced opacity -- still one click away (typos
       // happen), just not the default read.
@@ -847,6 +856,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (session.correct ? "Correct." : (cmp.near ? "Almost." : "Not quite.")) +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
       " " + context.label + ": " + context.value + "." +
+      (sameSound.length ? " Same sound: " + sameSound.map(function (h) { return h.jpPlain + ", " + h.englishDisplay; }).join("; ") + "." : "") +
       " Answer: " + expected + ".");
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });

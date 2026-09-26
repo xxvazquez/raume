@@ -192,6 +192,9 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
   kana-only words like レモン, where it would just repeat the word.
 - Romaji and English prompts reveal the Japanese under the answer once
   checked, with its furigana — Japanese never appears without it.
+- Romaji → English can't tell words spelled alike apart (*atsui*: 暑い /
+  熱い / 厚い), so any of their meanings counts, and the reveal lists the
+  others under **Same sound**.
 - After a wrong answer, **Again / Hard** read first and Good / Easy are
   dimmed, but still one tap away if it was just a typo.
 - Results are announced to screen readers without moving focus.

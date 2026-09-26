@@ -2235,6 +2235,17 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
   })());
+  check("a Romaji -> English card accepts any same-spelled word's meaning (atsui: 暑い / 熱い / 厚い), but no other direction does", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    const weather = idx.v0509, touch = idx.v0318;
+    return !!weather && !!touch && weather.homophoneIds.length === 2
+      && vi.homophonesOf(weather).some(h => h === touch)
+      && vi.checkAnswer(weather, "ro-en", "hot to the touch") && vi.checkAnswer(weather, "ro-en", "thick (flat things)")
+      && !vi.checkAnswer(weather, "jp-en", "hot to the touch")
+      && !vi.checkAnswer(weather, "ro-en", "cold (weather)")
+      && idx.v0111.homophoneIds.length === 0;
+  })());
   check("a session deals one card per word per round, reshuffling each round -- never the same word order twice in a row, never a word back to back", (() => {
     const sched = window.RaumeStudy.flashcards.scheduling;
     const cards = [];

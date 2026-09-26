@@ -142,6 +142,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
         index[row.id] = entry;
       });
     });
+    // Words spelled the same in romaji (atsui: 暑い / 熱い / 厚い). A Romaji ->
+    // English card shows only that spelling, so it can't say which of them
+    // it means -- each entry knows its namesakes, and any of their meanings
+    // is a right answer there.
+    var bySound = {};
+    Object.keys(index).forEach(function (id) {
+      var e = index[id];
+      if (!e.romajiUsable) return;
+      var key = String(e.romajiDisplay).trim().toLowerCase();
+      (bySound[key] = bySound[key] || []).push(id);
+    });
+    Object.keys(index).forEach(function (id) {
+      var e = index[id];
+      var group = e.romajiUsable ? bySound[String(e.romajiDisplay).trim().toLowerCase()] : null;
+      e.homophoneIds = group ? group.filter(function (other) { return other !== id; }) : [];
+    });
     return index;
   }
   function getVocabIndex() {
@@ -192,7 +208,16 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var norm = normalizeAnswer(input, isRomajiTarget);
     var answers = isRomajiTarget ? entry.romajiAnswers : entry.englishAnswers;
-    return answers.indexOf(norm) !== -1;
+    if (answers.indexOf(norm) !== -1) return true;
+    // "atsui" alone could be any of its namesakes -- their meanings count too.
+    return direction === "ro-en" && homophonesOf(entry).some(function (h) {
+      return h.englishAnswers.indexOf(norm) !== -1;
+    });
+  }
+  // The other entries sharing this one's romaji spelling (see buildVocabIndex).
+  function homophonesOf(entry) {
+    var index = getVocabIndex();
+    return (entry.homophoneIds || []).map(function (id) { return index[id]; }).filter(Boolean);
   }
   // A wrong answer that is really the right answer in the other language --
   // the romaji typed on a card that asks for the English, or the English on
@@ -326,7 +351,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
-    otherLanguageHint: otherLanguageHint,
+    otherLanguageHint: otherLanguageHint, homophonesOf: homophonesOf,
     answerCompareHtml: answerCompareHtml,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow
