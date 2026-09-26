@@ -100,6 +100,9 @@ the answer away. The notes:
 | **五段** / **一段** / **変格** | Verb group: u-verb, ru-verb, irregular | The group is easy to mistake from the ending (切る, 帰る), or the verb is 来る |
 | **を** **に** **が** … (blue) | The particles a verb or adjective takes, e.g. 聞く: を *what you listen to*, に *who you ask* | — |
 
+A regular adjective with a usage trap gets that on its line too, with a plain
+badge — 多い doesn't go right before a noun (多くの人 or 人が多い, not 多い人).
+
 Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not adjectives, and get no
 badge.
 

@@ -198,16 +198,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (row.adj !== 'i' && row.adj !== 'na') return '';
     var na = row.adj === 'na';
     var glyph = na ? 'な' : 'い';
+    // row.usageNote: a regular adjective with a usage trap (多い never goes
+    // right before a noun) -- still a static badge, but the ⓘ popover reads
+    // the note off it.
     if (!row.adjNote) {
-      return '<span class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + '" data-badge="' + glyph + '" aria-hidden="true"></span>';
+      return '<span class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + '" data-badge="' + glyph + '"' +
+        (row.usageNote ? ' data-usage="' + esc(glyph + '-adjective — ' + row.usageNote) + '"' : '') + ' aria-hidden="true"></span>';
     }
     var role = glyph + '-adjective — ' + row.adjNote;
     return '<button type="button" class="adj-badge ' + (na ? 'adj-badge-na' : 'adj-badge-i') + ' adj-badge-irr' +
       '" data-badge="' + glyph + '" data-role="' + esc(role) + '" aria-label="' + esc(role) + '" aria-expanded="false"></button>';
   }
-  function adjNote(adj) {
-    if (adj !== 'i' && adj !== 'na') return '';
-    return '<span class="visually-hidden">(' + (adj === 'na' ? 'な-adjective' : 'い-adjective') + ')</span>';
+  function adjNote(row) {
+    if (row.adj !== 'i' && row.adj !== 'na') return '';
+    return '<span class="visually-hidden">(' + (row.adj === 'na' ? 'な-adjective' : 'い-adjective') +
+      (row.usageNote ? ' — ' + esc(row.usageNote) : '') + ')</span>';
   }
   // Same idea as the adjective badge above, for a verb-pair's group: 五段
   // (godan/u-verb), 一段 (ichidan/ru-verb) or 変格 (irregular: する/来る).
@@ -249,7 +254,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div>' + adjNote(row.adj) + '</td>';
+    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div>' + adjNote(row) + '</td>';
   }
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.

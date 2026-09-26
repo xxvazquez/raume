@@ -163,7 +163,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0112","type":"word","jp":[{"kanji":"小","reading":"ちい"},{"text":"さい"}],"romaji":"chiisai","english":"small","adj":"i"},
     {"id":"v0113","type":"word","jp":[{"kanji":"高","reading":"たか"},{"text":"い"}],"romaji":"takai","english":"expensive / high / tall","adj":"i"},
     {"id":"v0114","type":"word","jp":[{"kanji":"安","reading":"やす"},{"text":"い"}],"romaji":"yasui","english":"cheap / inexpensive","adj":"i"},
-    {"id":"v0115","type":"word","jp":[{"kanji":"多","reading":"おお"},{"text":"い"}],"romaji":"ōi","english":"many / much","adj":"i"},
+    {"id":"v0115","type":"word","jp":[{"kanji":"多","reading":"おお"},{"text":"い"}],"romaji":"ōi","english":"many / much","adj":"i","usageNote":"Doesn’t go right before a noun: 多くの人 or 人が多い, not 多い人"},
     {"id":"v0116","type":"word","jp":[{"kanji":"少","reading":"すく"},{"text":"ない"}],"romaji":"sukunai","english":"few / little","adj":"i"},
     {"id":"v0117","type":"word","jp":[{"kanji":"新","reading":"あたら"},{"text":"しい"}],"romaji":"atarashii","english":"new","adj":"i"},
     {"id":"v0118","type":"word","jp":[{"kanji":"古","reading":"ふる"},{"text":"い"}],"romaji":"furui","english":"old","adj":"i"},

@@ -160,8 +160,9 @@ async function main() {
     if (tagged.length < 30) return false;
     const labelsOk = tagged.every(td => {
       const note = td.querySelector(".visually-hidden");
-      const i = td.classList.contains("adj-i") && note && note.textContent === "(い-adjective)";
-      const na = td.classList.contains("adj-na") && note && note.textContent === "(な-adjective)";
+      // "(い-adjective)", or with a usage note after it: "(い-adjective — …)".
+      const i = td.classList.contains("adj-i") && note && /^\(い-adjective( — .+)?\)$/.test(note.textContent);
+      const na = td.classList.contains("adj-na") && note && /^\(な-adjective( — .+)?\)$/.test(note.textContent);
       return i || na;
     });
     // No tag leaks onto a non-adjective row (e.g. the Verbs table).
@@ -384,6 +385,18 @@ async function main() {
     btn.click();
     return !!btn && !!hiddenRule && lines === row.querySelectorAll(".row-badges [data-badge]").length && expanded
       && !document.querySelector(".role-pop-list");
+  })());
+  check("a regular adjective's usage note (多い) keeps the plain badge and shows as its line in the ⓘ popover", (() => {
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v0115"]');
+    if (!row) return false;
+    const badge = row.querySelector(".row-badges .adj-badge");
+    const btn = row.querySelector(".row-info-btn");
+    btn.click();
+    const pop = document.querySelector(".role-pop-list");
+    const shown = !!pop && /多くの人/.test(pop.textContent) && /い-adjective/.test(pop.textContent);
+    btn.click();
+    return shown && badge.tagName === "SPAN" && !badge.classList.contains("adj-badge-irr")
+      && /多くの人/.test(row.cells[0].querySelector(".visually-hidden").textContent);
   })());
   check("rows with nothing to explain get no ⓘ", (() => {
     const plain = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => !r.querySelector(".row-badges"));

@@ -1323,7 +1323,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const line = document.createElement('div');
         line.className = 'role-pop-line';
         line.appendChild(badgeGlyph(b));
-        const role = b.dataset.role || (b.dataset.badge + '-adjective');
+        const role = b.dataset.role || b.dataset.usage || (b.dataset.badge + '-adjective');
         line.appendChild(document.createTextNode(' ' + role));
         pop.appendChild(line);
       });
