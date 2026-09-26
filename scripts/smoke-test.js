@@ -1090,8 +1090,9 @@ async function main() {
 
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
-  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace("›", "").trim()).join("|") === "Sign in|Customize tables|Help"
+  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
+    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+    && acctMenu.querySelector('a[href="https://ko-fi.com/raume"]').rel === "noopener"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
   window.RaumeStudy.vocab.toggleAccountMenu();
   check("opening it marks the account button expanded", !acctMenu.hidden && document.getElementById("accountToggle").getAttribute("aria-expanded") === "true");
@@ -1657,6 +1658,7 @@ async function main() {
     const g = [...document.querySelectorAll("#helpPage .help-group")];
     return g.length === 4 && g.every(d => !d.open && !!d.querySelector("summary h3") && !!d.querySelector(".help-sub") && d.querySelectorAll("li").length >= 3);
   })());
+  check("it ends with the Ko-fi support link, opening in a new tab", (() => { const a = document.querySelector("#helpPage .help-support"); return !!a && a.href === "https://ko-fi.com/raume" && a.target === "_blank"; })());
   check("its content is a real rundown, not a stub", document.querySelectorAll("#helpPage h3").length >= 3 && /Furigana/.test(document.getElementById("helpPage").textContent));
   check("no nav link is active on the Help page", !document.querySelector('#siteNav .site-nav-link.active'));
   check("the help button reflects the active state", helpBtn.classList.contains("active"));

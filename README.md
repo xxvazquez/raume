@@ -141,13 +141,14 @@ flashcard directions. Changes save immediately and sync when signed in.
 - **Theme** — cycles **System → Light → Dark**, applied before first paint
   (on a phone: **Appearance** in the account button's menu).
 - **Help** — the masthead **?**: four topics (Finding words, Reading,
-  Options, Making it yours), each a short list of one-line rows. Flashcards
+  Options, Making it yours), each a short list of one-line rows, then a
+  **Support raume** link to the Ko-fi page (`ko-fi.com/raume`). Flashcards
   has its own Help screen (top right of the Flashcards page) in the same style.
 - **On a phone** there's no wordmark row: each screen starts with its large
   title and one round **account button** beside it, which opens a menu —
   who you're signed in as and whether you're synced, **Account** (**Sign in**
   for a guest — straight to the sign-in screen), **Customize tables**, **Help**,
-  and **Appearance** (System / Light / Dark). On a tablet
+  **Support raume** (Ko-fi, new tab), and **Appearance** (System / Light / Dark). On a tablet
   the masthead icons carry captions (Account, Help, Customize, the current
   theme). The search bar's buttons read **Tables** and **Options**, and
   Manage's buttons keep a one-word label — nothing relies on hover.

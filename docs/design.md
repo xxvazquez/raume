@@ -545,7 +545,10 @@ and Help.
     while open — instead of sitting on the page unconditionally.
 - **The masthead Help page** (`.page-help`) is a short menu of four disclosure
   rows in one white card (see the type-scale note above) — no rules between
-  bullets, no ALL-CAPS headings, nothing open until tapped.
+  bullets, no ALL-CAPS headings, nothing open until tapped. Under it, a
+  one-row card for the Ko-fi support link (amber tile, trailing ↗ since it
+  leaves the site) with one grey footnote — a quiet thank-you, never a banner
+  or a prompt elsewhere in the app.
 - **Sheets** (the table-index popover / bottom sheet, the icon picker) are
   glass surfaces (`--radius-menu`, `--radius-sheet` for a phone bottom sheet's
   top corners) with the one float shadow; the current table in the index is a
