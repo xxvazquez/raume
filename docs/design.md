@@ -410,6 +410,10 @@ and Help.
   line (`adjNote` / `verbNote`, else `VERB_CLASS_META.irregular.genericNote`).
   A regular adjective's or verb's `usageNote` (多い, 遊ぶ) keeps the plain
   capsule and just adds to its line.
+- **A meaning's note** (`enNote`: "before a noun", "weather") sits on its own
+  line under the English (`.meaning-note`, 11.5px `--faint`, a clear step below
+  the 14.5px answer) — never in brackets in the answer. Flashcards puts it under an English prompt (`.fc-prompt-note`)
+  or answer (`.fc-stage-note`) in 15px muted.
   The popover (`.role-pop`, `openPop()` in `js/vocab/interactions.js`) is a
   small white rounded surface with the menu shadow and an arrow at its
   trigger; it closes on an outside tap, Escape, scroll, resize or hash change

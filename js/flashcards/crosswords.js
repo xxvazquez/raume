@@ -124,6 +124,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       seen[reading] = true;
       var clue = String(entry.englishDisplay || "").split(" / ")[0].trim();
       if (!clue) return;
+      if (entry.englishNote) clue += " (" + entry.englishNote + ")";
       if (isGiveaway(reading, foldRomajiForGrid(entry.romajiDisplay), clue)) return;
       var romaji = entry.romajiUsable ? foldRomajiForGrid(entry.romajiDisplay) : "";
       if (romaji.length < MIN_LEN + 1 || romaji.length > MAX_LEN * 2) romaji = "";

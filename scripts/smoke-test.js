@@ -2264,6 +2264,24 @@ async function main() {
       && vi.checkAnswer(idx.v0509, "jp-en", "hot") && vi.checkAnswer(idx.v0509, "jp-en", "hot (weather)")
       && !vi.checkAnswer(idx.v0509, "jp-en", "weather");
   })());
+  check("several right answers typed together count (grandfather, old man / yon / shi), and each reading of a two-reading word counts alone", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    return vi.checkAnswer(idx.v0856, "jp-en", "grandfather, old man") && vi.checkAnswer(idx.v0856, "jp-en", "old man or grandfather")
+      && !vi.checkAnswer(idx.v0856, "jp-en", "grandfather, cat")
+      && vi.checkAnswer(idx.v0166, "jp-ro", "yon") && vi.checkAnswer(idx.v0166, "jp-ro", "shi") && vi.checkAnswer(idx.v0166, "jp-ro", "yon / shi")
+      && vi.checkAnswer(idx.v0622, "jp-ro", "mainen");
+  })());
+  check("a meaning's note is its own field: shown under the English in the table, never required in an answer", (() => {
+    const cell = document.querySelector('tr[data-vocab-id="v0825"] .meaning-text');
+    const note = cell && cell.querySelector(".meaning-note");
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const e = vi.getVocabIndex().v0825;
+    return !!note && note.textContent === "before a noun" && cell.firstChild.textContent.trim() === "which"
+      && e.englishNote === "before a noun" && e.englishFull === "which (before a noun)"
+      && vi.promptFor(e, "en-ro").note === "before a noun"
+      && vi.checkAnswer(e, "jp-en", "which") && !vi.checkAnswer(e, "jp-en", "before a noun");
+  })());
   check("a Romaji -> English card accepts any same-spelled word's meaning (atsui: 暑い / 熱い / 厚い), but no other direction does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();

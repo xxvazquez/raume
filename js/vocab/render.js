@@ -27,7 +27,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Prefer the cell's own .meaning-text span so a sort key never picks up
     // an adjacent icon's label or the adj pill.
     var t = cell && cell.querySelector('.meaning-text');
-    return ((t || cell)?.textContent || '').trim();
+    var note = t && t.querySelector('.meaning-note');
+    var text = ((t || cell)?.textContent || '');
+    return (note ? text.slice(0, text.length - note.textContent.length) : text).trim();
   }
   function key(v){
     v=v.toLowerCase().replace(/\s+/g,' ').trim();
@@ -312,8 +314,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // under the meaning.
   // The badges stay in the row (hidden -- .row-badges) as the data the ⓘ
   // popover reads, and still reach a screen reader through their labels.
-  function meaningCell(english, vocabId, badges) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) + '</span>' +
+  // row.enNote is context for the meaning ("before a noun"), set apart under
+  // it in small grey -- read, never typed as part of a flashcard answer.
+  function meaningCell(english, vocabId, badges, note) {
+    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) +
+      (note ? ' <span class="meaning-note">' + esc(note) + '</span>' : '') + '</span>' +
       (badges ? '<span class="row-badges">' + badges + '</span>' : '') + rowActions(vocabId, !!badges) + '</div></td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
@@ -339,7 +344,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // answer follows its question (scripts/validate-vocabulary.js).
     var cls = [row.irregular ? 'irregular-row' : '', row.qa === 'q' ? 'qa-q' : row.qa === 'a' ? 'qa-a' : ''].filter(Boolean).join(' ');
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.answers ? ' data-answers="' + esc(row.answers) + '"' : '') + (cls ? ' class="' + cls + '">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row)) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row), row.enNote) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column
@@ -347,7 +352,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row)) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row), row.enNote) + '</tr>';
   }
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and sorted A-Z; the others start neutral.

@@ -362,6 +362,13 @@ shipping a wrong badge. An optional `usageNote` (多い, 古い, 遊ぶ) is a us
 regular adjective or verb — on a word it needs an `adj`; it keeps the plain
 badge and shows in the ⓘ popover.
 
+`english` holds only what a learner types; context for it goes in an optional
+`enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note shows in
+small grey under the English in the tables, under an English prompt or answer in
+Flashcards, and in parentheses in lists and puzzle clues — it's never part of a
+right answer. Parentheses left in `english` are optional words inside the answer
+itself ("take (a day) off"); answer-checking accepts it with or without them.
+
 Sentence tables can pair rows as a short exchange: a question row carries
 `qa: "q"`, an answer row `qa: "a"` plus `answers: "<question id>"`. `validate`
 checks that every answer names a question in its table and sits right after it

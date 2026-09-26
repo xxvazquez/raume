@@ -287,7 +287,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<p class="fc-note">Words that keep slipping out of memory. Pausing takes one out of review — its progress is kept, and you can resume it any time in Manage. Keep leaves it studied and stops flagging it for now.</p>' +
       '<ul class="fc-leech-list">' + rows.slice(0, LEECH_SHOWN).map(function (w) {
         var e = idx[w.vocabId];
-        var what = e.englishDisplay;
+        var what = e.englishFull;
         return '<li class="fc-leech-row">' +
           '<div class="fc-leech-word"><span class="fc-missed-jp" lang="ja">' + e.jpInlineHtml + "</span>" +
           '<span class="fc-missed-gloss"><span class="fc-missed-ro">' + esc(e.romajiDisplay) + '</span><span class="fc-missed-sep"> · </span><span class="fc-missed-en">' + esc(what) + "</span></span>" +
@@ -318,7 +318,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         '<span class="fc-missed-gloss">' +
         '<span class="fc-missed-ro">' + esc(e.romajiDisplay) + "</span>" +
         '<span class="fc-missed-sep"> · </span>' +
-        '<span class="fc-missed-en">' + esc(e.englishDisplay) + "</span>" +
+        '<span class="fc-missed-en">' + esc(e.englishFull) + "</span>" +
         "</span>" +
         '<span class="fc-missed-badge">' + m.count + "× today</span>" +
         "</button></li>";
@@ -775,7 +775,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // and the second call's cancel() -- seeing the first still in flight --
     // wedged the speech engine permanently: exactly the failure mode
     // speak()'s own comment already warns about, just self-inflicted.
-    promptEl.innerHTML = prompt.html || esc(prompt.text);
+    promptEl.innerHTML = prompt.html || esc(prompt.text) +
+      (prompt.note ? '<span class="fc-prompt-note">' + esc(prompt.note) + "</span>" : "");
 
     // The reading, right under the word -- only Japanese -> English needs it
     // (Japanese -> Romaji already tests the reading itself), and only once
@@ -824,13 +825,17 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
           '<div class="fc-stage-typed">You wrote ' + cmp.youHtml + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
+    // An English answer's note ("before a noun") sits right under it.
+    if ((card.direction === "jp-en" || card.direction === "ro-en") && entry.englishNote) {
+      stageHtml += '<div class="fc-stage-note">' + esc(entry.englishNote) + "</div>";
+    }
     // A Romaji -> English prompt can't tell namesakes apart (any of their
     // meanings was accepted) -- so the reveal names the others, kanji first.
     var sameSound = card.direction === "ro-en" ? homophonesOf(entry) : [];
     var sameSoundHtml = sameSound.length
       ? '<div class="fc-stage-meaning fc-stage-homophones"><span class="fc-answer-label">Same sound</span>' +
         sameSound.map(function (h) {
-          return '<span class="fc-homophone"><span lang="ja">' + h.jpInlineHtml + "</span> " + esc(h.englishDisplay) + "</span>";
+          return '<span class="fc-homophone"><span lang="ja">' + h.jpInlineHtml + "</span> " + esc(h.englishFull) + "</span>";
         }).join("") + "</div>"
       : "";
     var verdictKind = session.correct ? "ok" : (cmp.near ? "almost" : "bad");
@@ -856,8 +861,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (session.correct ? "Correct." : (cmp.near ? "Almost." : "Not quite.")) +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
       " " + context.label + ": " + context.value + "." +
-      (sameSound.length ? " Same sound: " + sameSound.map(function (h) { return h.jpPlain + ", " + h.englishDisplay; }).join("; ") + "." : "") +
-      " Answer: " + expected + ".");
+      (sameSound.length ? " Same sound: " + sameSound.map(function (h) { return h.jpPlain + ", " + h.englishFull; }).join("; ") + "." : "") +
+      " Answer: " + expected + (entry.englishNote && (card.direction === "jp-en" || card.direction === "ro-en") ? ", " + entry.englishNote : "") + ".");
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });

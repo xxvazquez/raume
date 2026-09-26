@@ -98,6 +98,8 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — once the answer shows.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
       '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
+      '<li><span class="help-term">Notes</span><span class="help-desc">The grey line under a meaning (“before a noun”) is a hint — type just the meaning.</span></li>' +
+      '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man.</span></li>' +
       '<li><span class="help-term">Same sound</span><span class="help-desc">Romaji like atsui can be several words — any of their meanings counts.</span></li>' +
       '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns any of the four directions on or off — progress is kept.</span></li>' +
@@ -303,7 +305,7 @@ window.RaumeStudy.flashcards.views = (function () {
               '<span class="fc-manage-word">' +
               '<span class="fc-jp" lang="ja">' + esc(entry.jpPlain) + "</span>" +
               '<span class="fc-ro">' + esc(entry.romajiDisplay) + "</span>" +
-              '<span class="fc-en">' + esc(entry.englishDisplay) + "</span>" +
+              '<span class="fc-en">' + esc(entry.englishFull) + "</span>" +
               (entry.romajiUsable ? "" : '<span class="fc-tag">EN only</span>') +
               (leechIds[id] ? '<span class="fc-tag fc-tag-leech" title="You keep forgetting this word — consider pausing it">Leech</span>' : "") +
               "</span>" +

@@ -143,11 +143,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.jpReading = jpReadingFn(row.jp);
           entry.romajiDisplay = row.romaji;
           entry.romajiUsable = isRomajiUsable(row.romaji);
-          entry.romajiAnswers = entry.romajiUsable ? [normalizeAnswer(row.romaji, true)] : [];
-          entry.romajiAnswerDisplays = entry.romajiUsable ? [row.romaji] : [];
+          // Two readings ("yon / shi", "maitoshi / mainen") are two right
+          // answers, each one on its own -- like a verb pair's two forms.
+          var romajiAlts = entry.romajiUsable ? splitAlternatives(row.romaji) : [];
+          entry.romajiAnswers = romajiAlts.map(function (r) { return normalizeAnswer(r, true); });
+          entry.romajiAnswerDisplays = romajiAlts;
         }
         entry.englishDisplay = row.english;
-        entry.englishAnswers = splitAlternatives(row.english).reduce(function (all, a) { return all.concat(englishAnswerVariants(a)); }, []);
+        // The meaning's note ("before a noun") is shown, never required --
+        // though typing it along with the answer still counts.
+        entry.englishNote = row.enNote || "";
+        entry.englishFull = row.english + (row.enNote ? " (" + row.enNote + ")" : "");
+        entry.englishAnswers = splitAlternatives(row.english).reduce(function (all, a) {
+          var list = englishAnswerVariants(a);
+          if (row.enNote) list.push(normalizeAnswer(a + " " + row.enNote, false));
+          return all.concat(list);
+        }, []);
         index[row.id] = entry;
       });
     });
@@ -185,7 +196,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function promptFor(entry, direction) {
     if (direction === "jp-en" || direction === "jp-ro") return { html: entry.jpPromptHtml, lang: "ja" };
     if (direction === "ro-en") return { text: entry.romajiDisplay };
-    return { text: entry.englishDisplay }; // en-ro
+    return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro
   }
   function askLabelFor(direction) {
     return direction === "jp-en" || direction === "ro-en" ? "Type the English meaning" : "Type the romaji reading";
@@ -208,7 +219,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // since English is already the prompt there.
   function contextDisplayFor(entry, direction) {
     if (direction === "jp-en") return { label: "Romaji", value: entry.romajiDisplay };
-    if (direction === "jp-ro") return { label: "English", value: entry.englishDisplay };
+    if (direction === "jp-ro") return { label: "English", value: entry.englishFull };
     // ro-en, en-ro. Japanese always carries its furigana -- `html` is the
     // ruby markup to show, `value` the plain text for comparisons and labels.
     return { label: "Japanese", value: entry.jpPlain, html: entry.jpInlineHtml };
@@ -218,10 +229,18 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var norm = normalizeAnswer(input, isRomajiTarget);
     var answers = isRomajiTarget ? entry.romajiAnswers : entry.englishAnswers;
     if (answers.indexOf(norm) !== -1) return true;
+    if (allAlternativesTyped(answers, input, isRomajiTarget)) return true;
     // "atsui" alone could be any of its namesakes -- their meanings count too.
     return direction === "ro-en" && homophonesOf(entry).some(function (h) {
       return h.englishAnswers.indexOf(norm) !== -1;
     });
+  }
+  // Several right answers typed together -- "grandfather, old man",
+  // "yon / shi", "this or this one" -- count when every one of them is right.
+  function allAlternativesTyped(answers, input, romaji) {
+    var parts = String(input == null ? "" : input).split(/\s*(?:\/|,|;|\bor\b)\s*/i)
+      .map(function (p) { return normalizeAnswer(p, romaji); }).filter(Boolean);
+    return parts.length > 1 && parts.every(function (p) { return answers.indexOf(p) !== -1; });
   }
   // The other entries sharing this one's romaji spelling (see buildVocabIndex).
   function homophonesOf(entry) {

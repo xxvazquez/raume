@@ -72,7 +72,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 
 | | |
 | --- | --- |
-| **Columns** | **Japanese** (with furigana) and **English**. Tap a word to show its **romaji** underneath; romaji is always searchable. |
+| **Columns** | **Japanese** (with furigana) and **English**. Tap a word to show its **romaji** underneath; romaji is always searchable. Context for a meaning ("before a noun", "weather") is a small grey note under the English. |
 | **Furigana** | Always shown, 11px minimum. Each reading starts where its kanji start; consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and a long reading runs on over the following kana instead of pushing a gap into the word (料理する). |
 | **Sentence tables** | (Phrases) Japanese on its own line, English under it, romaji on tap. Answers are set in under their question, and search shows the whole pair when either line matches. |
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
@@ -200,8 +200,12 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - Long vowels are ignored — `kōhī`, `koohii` and `kouhii` all match, and
   likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked letters treat them as the
   same sound too.
-- An English answer's notes are optional — for *which … (before a noun)*
-  plain `which` counts, and for *hot (weather)* plain `hot`.
+- You only type the meaning, never its note: どの is *which* with the note
+  *before a noun* shown under it, and brackets in your own words are optional
+  too.
+- Several right answers typed together count — `grandfather, old man`,
+  `yon / shi` — and a word with two readings (四: *yon / shi*) accepts either
+  one alone.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
   for `ryōri shimasu`.
 - The right answer in the wrong language — the romaji on a card that asks for
