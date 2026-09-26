@@ -17,9 +17,20 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
-**Contents** — [Quick start](#quick-start) · [The reference](#the-reference) ·
-[Flashcards](#flashcards) · [Accounts and storage](#accounts-and-storage) ·
-[Development](#development) · [License](#license)
+## Contents
+
+- [Quick start](#quick-start)
+- [The reference](#the-reference)
+  - [Sections](#sections) · [Finding things](#finding-things) ·
+    [Reading the tables](#reading-the-tables) · [Options](#options) ·
+    [Grammar notes](#grammar-notes) · [Customising](#customising) ·
+    [Print, theme and navigation](#print-theme-and-navigation)
+- [Flashcards](#flashcards)
+  - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
+    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles)
+- [Accounts and storage](#accounts-and-storage)
+- [Development](#development)
+- [License](#license)
 
 ---
 
@@ -34,6 +45,8 @@ python3 -m http.server     # only needed to test the service worker / offline
 
 ## The reference
 
+### Sections
+
 | Section        | What's in it |
 | -------------- | ------------ |
 | **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
@@ -47,54 +60,45 @@ row. Grammatical **particles are blue and bold** everywhere.
 
 ### Finding things
 
-- **Search** covers every section. Results are ranked exact → starts with →
-  ends with → contains, with the match highlighted. It searches whichever of
-  Japanese / furigana / English are visible, plus romaji. Each result has a
-  **+ / ✓** toggle to add the word to flashcards or pause it.
-- **Jump to a table** — the list button in the pinned search bar (named after
-  the table you're reading, on desktop) lists every table in the section with
-  its entry count.
-- Opening or closing a table keeps the row you tapped exactly where it was.
-- **The URL** follows the view (`#grammar`, `#table-15`, `#flashcards`), so
-  any view can be bookmarked.
-- The search field and **Options** button stay pinned as you scroll.
+| | |
+| --- | --- |
+| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
+| **Tables** | The list button in the pinned search bar (named after the table you're reading, on desktop) lists every table in the section with its entry count. |
+| **Opening a table** | Keeps the row you tapped exactly where it was. |
+| **URL** | Follows the view (`#grammar`, `#table-15`, `#flashcards`), so any view can be bookmarked. |
+| **Pinned bar** | The search field and **Options** stay pinned as you scroll. |
 
 ### Reading the tables
 
-- Every table has two columns, **Japanese** (with furigana) and **English**.
-  Tap a word to show its **romaji** underneath. Romaji is always searchable.
-- **Options** holds the display settings. A dot on the button means one is
-  off its default. It opens as a popover on desktop and a bottom sheet on a
-  phone:
-  - **Japanese / Furigana / English** switches hide a column without
-    reflowing the table. You can't hide both text columns at once.
-  - **Cover answers** blanks the English. Tap a row to reveal it.
-  - **Show polite** switches verbs to 〜ます. It only appears while the
-    Verbs table is open.
-  - **Expand all**, **Print** and a legend for any badges on screen.
-  - **Row icons** — what the small speaker, hide, + and ⋯ glyphs on each row do.
-- **Furigana** is always shown, with an 11px minimum size. Each reading starts
-  where its kanji start; consecutive kanji share one reading (三十三歳 →
-  さんじゅうさんさい), and a long reading runs on over the following kana instead
-  of pushing a gap into the word (料理する).
-- **Sentence tables** (Phrases) stack each row: the Japanese on its own line,
-  the English under it, romaji on tap. Questions and answers read as pairs —
-  the answer set in under its question — and search shows the whole pair when
-  either line matches.
-- **Katakana reading** — hover or tap any katakana to see its romaji above it.
-- **Pronunciation** — the speaker icon plays a native-voice clip.
-  Custom words use the browser's speech engine.
-- **Sorting** — the English column sorts A–Z / Z–A. Japanese has no single
-  natural order, so it doesn't sort.
-- **Hide a row** (eye icon) marks a word as known for now. **Show all**
-  brings them back.
+| | |
+| --- | --- |
+| **Columns** | **Japanese** (with furigana) and **English**. Tap a word to show its **romaji** underneath; romaji is always searchable. |
+| **Furigana** | Always shown, 11px minimum. Each reading starts where its kanji start; consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and a long reading runs on over the following kana instead of pushing a gap into the word (料理する). |
+| **Sentence tables** | (Phrases) Japanese on its own line, English under it, romaji on tap. Answers are set in under their question, and search shows the whole pair when either line matches. |
+| **Katakana** | Hover or tap any katakana to see its romaji above it. |
+| **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
+| **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. |
+| **Hide a row** | The eye icon marks a word as known for now. **Show all** brings them back. |
 
-### Grammar notes (ⓘ)
+### Options
+
+The **Options** button holds the display settings — a popover on desktop, a
+bottom sheet on a phone. A dot on it means something is off its default.
+
+| Option | Does |
+| --- | --- |
+| **Japanese / Furigana / English** | Hide a column without reflowing the table. You can't hide both text columns at once. |
+| **Cover answers** | Blanks the English. Tap a row to reveal it. |
+| **Show polite** | Switches verbs to 〜ます. Only appears while the Verbs table is open. |
+| **Expand all · Print** | Open every table; print the section or everything. |
+| **Legends** | The badges on screen, and **Row icons** — what the speaker, hide, + and ⋯ glyphs do. |
+
+### Grammar notes
 
 A row with grammar to explain carries an **ⓘ** beside the hide eye instead of
 a strip of badges: tap it for one popover listing each note, led by its tinted
 badge. It's hidden while the English is hidden or covered, so it can't give
-the answer away. The notes:
+the answer away.
 
 | Badge | Meaning | Outlined when… |
 | ----- | ------- | -------------- |
@@ -102,61 +106,57 @@ the answer away. The notes:
 | **五段** / **一段** / **変格** | Verb group: u-verb, ru-verb, irregular | The group is easy to mistake from the ending (切る, 帰る), or the verb is 来る |
 | **を** **に** **が** … (blue) | The particles a verb or adjective takes, e.g. 聞く: を *what you listen to*, に *who you ask* | — |
 
-A regular adjective or verb with a usage trap gets that on its line too, with a
-plain badge — 多い doesn't go right before a noun (多くの人 or 人が多い, not 多い人);
-遊ぶ isn't for sports or instruments.
-
-Mimetic words (*mochimochi*, *sakusaku*) are 擬態語, not adjectives, and get no
-badge.
+- **Usage traps** get a plain badge on their own line — 多い doesn't go right
+  before a noun (多くの人 or 人が多い, not 多い人); 遊ぶ isn't for sports or
+  instruments.
+- **Mimetic words** (*mochimochi*, *sakusaku*) are 擬態語, not adjectives, and
+  get no badge.
 
 ### Customising
 
-On the **Customize** page (masthead sliders icon; on a phone, the account button's menu):
+The **Customize** page — masthead sliders icon; on a phone, the account
+button's menu.
 
-- **Icon and colour** — every table has an icon tile. A table you create
-  picks an icon from its name ("Animals" → paw). You can choose from about 165
-  icons, upload your own, and pick one of nine muted colours. The picker also
-  opens from **Choose icon…** in a table's **⋯** menu.
-- **Hide a table** — **Hide table** in its **⋯** menu (or **Hide** on
-  Customize) takes it off the reference pages, the Tables list and search.
-  **Show** on Customize brings it back. Flashcards isn't affected — that's what
-  Pause table is for.
-- **Name and order** — rename any table. Move tables and categories by
-  dragging the grip handle, or focus it and press ↑ / ↓.
-- **Your vocabulary** — add words the built-in set doesn't have:
-  - **Add a word** to any table, built-in or your own.
-  - **Import a list** from pasted text or a `.csv` / `.txt` file, one word per
-    line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return`.
-    Rows that don't parse are skipped and listed with the reason.
-  - **New table** needs an account. Guests can still add words to existing
-    tables.
-  - **Words you've added** — edit or delete your words. It's searchable and
-    sorts by date added or A–Z.
+| | |
+| --- | --- |
+| **Icon and colour** | Every table has an icon tile. A table you create picks an icon from its name ("Animals" → paw). Choose from about 165 icons, upload your own, and pick one of nine muted colours. Also opens from **Choose icon…** in a table's **⋯** menu. |
+| **Hide a table** | **Hide table** in its **⋯** menu (or **Hide** on Customize) takes it off the reference pages, the Tables list and search. **Show** on Customize brings it back. Flashcards isn't affected — that's what Pause table is for. |
+| **Name and order** | Rename any table. Move tables and categories by dragging the grip, or focus it and press ↑ / ↓. |
+
+**Your vocabulary** — words the built-in set doesn't have:
+
+| | |
+| --- | --- |
+| **Add a word** | To any table, built-in or your own. |
+| **Import a list** | Pasted text or a `.csv` / `.txt` file, one word per line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return`. Rows that don't parse are skipped and listed with the reason. |
+| **New table** | Needs an account. Guests can still add words to existing tables. |
+| **Words you've added** | Edit or delete your words. Searchable; sorts by date added or A–Z. |
 
 Custom words work everywhere — furigana, search, print, audio, all four
 flashcard directions. Changes save immediately and sync when signed in.
 
-### Printing, theme and status
+### Print, theme and navigation
 
-- **Print** — A4 at three scopes: one table (printer icon), this section, or
-  the whole reference (both in Options). Collapsed tables still print.
-- **Theme** — cycles **System → Light → Dark**, applied before first paint
-  (on a phone: **Appearance** in the account button's menu).
-- **Help** — the masthead **?**: four topics (Finding words, Reading,
-  Options, Making it yours), each a short list of one-line rows, then a
-  **Support raume** link to the Ko-fi page (`ko-fi.com/raume`). Flashcards
-  has its own Help screen (top right of the Flashcards page) in the same style.
-- **On a phone** there's no wordmark row: each screen starts with its large
-  title and one round **account button** beside it, which opens a menu —
-  who you're signed in as and whether you're synced, **Account** (**Sign in**
-  for a guest — straight to the sign-in screen), **Customize tables**, **Help**,
-  **Support raume** (Ko-fi, new tab), and **Appearance** (System / Light / Dark). On a tablet
-  the masthead icons carry captions (Account, Help, Customize, the current
-  theme). The search bar's buttons read **Tables** and **Options**, and
-  Manage's buttons keep a one-word label — nothing relies on hover.
-- **Sign-in dot** on the person icon: **green** means everything is synced.
-  **Amber** means you're offline or a change hasn't reached your account yet.
-  Hover it for details.
+| | |
+| --- | --- |
+| **Print** | A4 at three scopes: one table (printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
+| **Theme** | Cycles **System → Light → Dark**, applied before first paint (on a phone: **Appearance** in the account button's menu). |
+| **Help** | The masthead **?**: four topics (Finding words, Reading, Options, Making it yours), each a short list of one-line rows, then a **Support raume** link to the Ko-fi page (`ko-fi.com/raume`). Flashcards has its own Help screen in the same style. |
+| **Sign-in dot** | On the person icon: **green** = everything synced; **amber** = offline or a change hasn't reached your account yet. Hover it for details. |
+
+**On a phone** there's no wordmark row: each screen starts with its large
+title and one round **account button** beside it, which opens a menu —
+
+- who you're signed in as and whether you're synced
+- **Account** (**Sign in** for a guest — straight to the sign-in screen)
+- **Customize tables** · **Help** · **Support raume** (Ko-fi, new tab)
+- **Appearance** (System / Light / Dark)
+
+On a tablet the masthead icons carry captions (Account, Help, Customize, the
+current theme). The search bar's buttons read **Tables** and **Options**, and
+Manage's buttons keep a one-word label — nothing relies on hover.
+
+<sub>[↑ Contents](#contents)</sub>
 
 ---
 
@@ -187,27 +187,41 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - Every rating saves at once, so **End session** never loses progress.
 - The answer field stays focused from card to card, so a phone keyboard stays
   open.
+- After a wrong answer, **Again / Hard** read first and Good / Easy are
+  dimmed, but still one tap away if it was just a typo.
+- During a session the navigation hides and the card gets the whole screen.
+- Results are announced to screen readers without moving focus.
+
+<details>
+<summary><b>How answers are checked</b></summary>
+
 - A wrong romaji answer highlights exactly which letters were off
-  (`kaeramasu → kaerimasu`). Long vowels are ignored — `kōhī`, `koohii` and
-  `kouhii` all match, and likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked
-  letters treat them as the same sound too. A noun + suru verb also takes its optional を —
-  `ryouri o shimasu` counts for `ryōri shimasu`.
-- Typing the right answer in the wrong language — the romaji on a card that
-  asks for the English, or the English on a romaji card — isn't graded: the
-  card says which one it wants and the field stays open for another go.
+  (`kaeramasu → kaerimasu`).
+- Long vowels are ignored — `kōhī`, `koohii` and `kouhii` all match, and
+  likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked letters treat them as the
+  same sound too.
+- A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
+  for `ryōri shimasu`.
+- The right answer in the wrong language — the romaji on a card that asks for
+  the English, or the English on a romaji card — isn't graded: the card says
+  which one it wants and the field stays open for another go.
+- Romaji → English can't tell words spelled alike apart (*atsui*: 暑い / 熱い /
+  厚い), so any of their meanings counts, and the reveal lists the others
+  under **Same sound**.
+
+</details>
+
+<details>
+<summary><b>What the answer reveals</b></summary>
+
 - Japanese → English shows the word's reading under it once checked — not for
   kana-only words like レモン, where it would just repeat the word.
 - Romaji and English prompts reveal the Japanese under the answer once
   checked, with its furigana — Japanese never appears without it.
-- Romaji → English can't tell words spelled alike apart (*atsui*: 暑い /
-  熱い / 厚い), so any of their meanings counts, and the reveal lists the
-  others under **Same sound**.
-- After a wrong answer, **Again / Hard** read first and Good / Easy are
-  dimmed, but still one tap away if it was just a typo.
-- Results are announced to screen readers without moving focus.
-- During a session the navigation hides and the card gets the whole screen.
 
-### Tabs
+</details>
+
+### Screens
 
 Four segments — Dashboard, Manage, Kana, Puzzles. **Settings** and **Help**
 sit at the top right, beside the title, and open as their own screen with a
@@ -217,8 +231,8 @@ sit at the top right, beside the title, and open as their own screen with a
 | --- | ------------ |
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
-| **Kana** | A hiragana / katakana drill, separate from the word cards (below) |
-| **Puzzles** | Crossword / arroword / word search from your words (below) |
+| **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
+| **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -231,51 +245,68 @@ history are always kept.
 Choose groups (**gojūon, dakuten, handakuten, yōon, sokuon**, for each script)
 and directions:
 
-- **Kana → romaji** — type the reading. A few alternates like `si` / `shi`
-  are accepted. Vowel length counts here.
-- **Romaji → kana** — type the kana itself.
+| Direction | You type |
+| --- | --- |
+| **Kana → romaji** | The reading. A few alternates like `si` / `shi` are accepted. Vowel length counts here. |
+| **Romaji → kana** | The kana itself. |
 
 It uses the same review card as the word flashcards, with its own FSRS
 settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, or a word search, generated fresh each time — at least 6
-words, or it tells you why not. Clues that give the answer away are left
-out: the word written in its own clue ("Japanese sake" → *sake*), or a
-loanword that just echoes its English (*cola* → コーラ).
+A fill-in crossword or arroword, or a word search, generated fresh each time —
+at least 6 words, or it tells you why not. Nothing is saved or scheduled.
+Clues that give the answer away are left out: the word written in its own
+clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
+(*cola* → コーラ).
 
-- The puzzle comes first. Its settings sit behind one summary button
-  ("Crossword · Flashcards · 15 words · Romaji") that opens them as a popover
-  (a bottom sheet on a phone); changing one makes a new puzzle. On a wide
-  window the clue you're on and the Across / Down lists sit beside the grid.
-- **Source** — *Flashcards* (added, unpaused words) or *Tables*: one or more
-  vocabulary tables, whether or not they're in flashcards.
-- **Style** — *Crossword* (numbered clue list), *Arroword* (each clue
-  in a square before its answer) or *Word search* (below). **Script** — *Romaji* (default), *Japanese*,
-  *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) —
-  a word is never forced into a script it isn't written in. **Words** — 10, 15, 20, 30 or 40. Answers are always readings — kanji is
-  never shown or typed.
-- **Solving** — tap a square or a clue and type. Typing follows the word's
-  direction; tap a crossing square again to switch. The bar above the grid
-  shows the clue you're on (it appears once you pick a square; the ⓘ beside
-  Check has the how-to). Backspace steps back, arrow keys move.
+The puzzle comes first. Its settings sit behind one summary button
+("Crossword · Flashcards · 15 words · Romaji") that opens them as a popover
+(a bottom sheet on a phone); changing one makes a new puzzle. On a wide
+window the clue you're on and the Across / Down lists sit beside the grid.
+
+| Setting | Choices |
+| --- | --- |
+| **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
+| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer) or *Word search* |
+| **Script** | *Romaji* (default), *Japanese*, *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Answers are always readings; kanji is never shown or typed |
+| **Words** | 10, 15, 20, 30 or 40 |
+
+<details>
+<summary><b>Solving a crossword / arroword</b></summary>
+
+- Tap a square or a clue and type. Typing follows the word's direction; tap a
+  crossing square again to switch. The bar above the grid shows the clue
+  you're on (it appears once you pick a square; the ⓘ beside Check has the
+  how-to). Backspace steps back, arrow keys move.
 - **Check** marks filled squares right or wrong. The **⋯** menu has *Reveal a
   letter*, *Reveal puzzle*, *Clear answers* and *Print* (a clean A4 worksheet:
   the title, one line like "Drinks · 20 words · Romaji", the grid, then Across
   and Down side by side).
 - Grids are built compact — each word goes where it crosses the most and
   grows the grid the least — so even 40 words stay a dense block.
-- **Word search** — the answers hidden in a square of letters, built to be
-  hard: the list gives only the English clue, words run in all eight
-  directions (backwards and diagonally too), each word sits where it shares
-  the most letters with the others, and the spare squares are filled with
-  the answers' own letters. In romaji, words shorter than three letters are
-  left out (they turn up by chance). Drag across a word, or tap its first
-  and last letter; a found word gets a capsule, a tick and its reading in
-  the list, and the toolbar counts how many are found. The **⋯** menu has
-  *Reveal a word*, *Reveal puzzle*, *Clear found words* and *Print*.
-- Nothing is saved or scheduled.
+
+</details>
+
+<details>
+<summary><b>Word search</b></summary>
+
+- Built to be hard: the list gives only the English clue, words run in all
+  eight directions (backwards and diagonally too), each word sits where it
+  shares the most letters with the others, and the spare squares are filled
+  with the answers' own letters.
+- In romaji, words shorter than three letters are left out (they turn up by
+  chance).
+- Drag across a word, or tap its first and last letter; a found word gets a
+  capsule, a tick and its reading in the list, and the toolbar counts how
+  many are found.
+- The **⋯** menu has *Reveal a word*, *Reveal puzzle*, *Clear found words* and
+  *Print*.
+
+</details>
+
+<sub>[↑ Contents](#contents)</sub>
 
 ---
 
@@ -305,6 +336,8 @@ never mix.
   Security protects the data. Never commit the service-role key.
 
 Full storage model and schema: [`docs/architecture.md`](docs/architecture.md).
+
+<sub>[↑ Contents](#contents)</sub>
 
 ---
 
@@ -336,8 +369,9 @@ name, wordmark and logo are reserved — see [`NOTICE`](NOTICE).
 
 Third-party parts keep their own licenses:
 
-- `ts-fsrs` and `supabase-js` — MIT. The Lucide-derived icons — ISC.
-  License files are in `vendor/*.LICENSE.txt`.
-- Inter and Space Grotesk — SIL Open Font License (`fonts/*.LICENSE.txt`).
-- Pronunciation audio (`audio/*.mp3`) — generated with
-  [VOICEVOX](https://voicevox.hiroshiba.jp/), voice VOICEVOX:四国めたん.
+| Part | License |
+| --- | --- |
+| `ts-fsrs`, `supabase-js` | MIT (`vendor/*.LICENSE.txt`) |
+| Lucide-derived icons | ISC (`vendor/*.LICENSE.txt`) |
+| Inter, Space Grotesk | SIL Open Font License (`fonts/*.LICENSE.txt`) |
+| Pronunciation audio (`audio/*.mp3`) | Generated with [VOICEVOX](https://voicevox.hiroshiba.jp/), voice VOICEVOX:四国めたん |
