@@ -152,7 +152,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 41 table sections", sections.length === 41);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 901 vocabulary rows", totalRows === 901);
+  check("renders 910 vocabulary rows", totalRows === 910);
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
