@@ -268,7 +268,7 @@ window.RaumeStudy.icons = (function () {
     time: "clock", clock: "clock", hour: "clock", minute: "watch", second: "watch", day: "calendar",
     week: "calendar", month: "moon", year: "calendar", date: "calendar", calendar: "calendar",
     today: "sun", tomorrow: "sun", yesterday: "sun", morning: "sun", evening: "moon",
-    number: "hash", count: "hash", counter: "list", math: "calculator", digit: "hash", age: "hourglass",
+    number: "hash", count: "hash", counting: "calculator", counter: "list", math: "calculator", digit: "hash", age: "hourglass",
     // hobbies & misc
     music: "music", song: "music", sing: "mic", sport: "trophy", game: "dice", play: "dice", hobby: "palette",
     art: "palette", colour: "palette", color: "palette", paint: "paintbrush", draw: "paintbrush",

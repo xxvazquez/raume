@@ -13,6 +13,16 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0004","type":"word","jp":[{"text":"〜"},{"kanji":"杯","reading":"はい"}],"romaji":"~hai","english":"cups, glasses and bowls of drinks / food"},
     {"id":"v0005","type":"word","jp":[{"text":"〜"},{"kanji":"皿","reading":"さら"}],"romaji":"~sara","english":"servings on plates"},
     {"id":"v0006","type":"word","jp":[{"text":"〜"},{"kanji":"切","reading":"き"},{"text":"れ"}],"romaji":"~kire","english":"slices / pieces"},
+    {"id":"v0724","type":"word","jp":[{"text":"〜"},{"kanji":"匹","reading":"ひき"}],"romaji":"~hiki","english":"small animals"},
+    {"id":"v0725","type":"word","jp":[{"text":"〜"},{"kanji":"台","reading":"だい"}],"romaji":"~dai","english":"machines / vehicles"},
+    {"id":"v0726","type":"word","jp":[{"text":"〜"},{"kanji":"冊","reading":"さつ"}],"romaji":"~satsu","english":"books / notebooks"},
+    ]
+  },
+  {
+    id: 38,
+    title: "Counting Things",
+    category: "Numbers & Counting",
+    rows: [
     {"id":"v0708","type":"word","jp":[{"text":"〜"},{"text":"つ"}],"romaji":"~tsu","english":"general counter for things (1–9)"},
     {"id":"v0709","type":"word","jp":[{"kanji":"一","reading":"ひと"},{"text":"つ"}],"romaji":"hitotsu","english":"one (thing)"},
     {"id":"v0710","type":"word","jp":[{"kanji":"二","reading":"ふた"},{"text":"つ"}],"romaji":"futatsu","english":"two (things)"},
@@ -25,17 +35,28 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0717","type":"word","jp":[{"kanji":"九","reading":"ここの"},{"text":"つ"}],"romaji":"kokonotsu","english":"nine (things)"},
     {"id":"v0718","type":"word","jp":[{"kanji":"十","reading":"とお"}],"romaji":"tō","english":"ten (things)"},
     {"id":"v0719","type":"word","jp":[{"text":"いくつ"}],"romaji":"ikutsu","english":"how many (things) / how old"},
+    ]
+  },
+  {
+    id: 39,
+    title: "People & Age",
+    category: "Numbers & Counting",
+    rows: [
     {"id":"v0720","type":"word","jp":[{"text":"〜"},{"kanji":"人","reading":"にん"}],"romaji":"~nin","english":"people (3 and up)"},
     {"id":"v0721","type":"word","jp":[{"kanji":"一人","reading":"ひとり"}],"romaji":"hitori","english":"one person / alone"},
     {"id":"v0722","type":"word","jp":[{"kanji":"二人","reading":"ふたり"}],"romaji":"futari","english":"two people"},
-    {"id":"v0723","type":"word","jp":[{"text":"〜"},{"kanji":"円","reading":"えん"}],"romaji":"~en","english":"yen"},
-    {"id":"v0724","type":"word","jp":[{"text":"〜"},{"kanji":"匹","reading":"ひき"}],"romaji":"~hiki","english":"small animals"},
-    {"id":"v0725","type":"word","jp":[{"text":"〜"},{"kanji":"台","reading":"だい"}],"romaji":"~dai","english":"machines / vehicles"},
-    {"id":"v0726","type":"word","jp":[{"text":"〜"},{"kanji":"冊","reading":"さつ"}],"romaji":"~satsu","english":"books / notebooks"},
+    {"id":"v0729","type":"word","jp":[{"text":"〜"},{"kanji":"歳","reading":"さい"}],"romaji":"~sai","english":"years of age"},
+    ]
+  },
+  {
+    id: 40,
+    title: "Floors, Times, Order & Yen",
+    category: "Numbers & Counting",
+    rows: [
     {"id":"v0727","type":"word","jp":[{"text":"〜"},{"kanji":"階","reading":"かい"}],"romaji":"~kai","english":"floors of a building"},
     {"id":"v0728","type":"word","jp":[{"text":"〜"},{"kanji":"回","reading":"かい"}],"romaji":"~kai","english":"times / occurrences"},
-    {"id":"v0729","type":"word","jp":[{"text":"〜"},{"kanji":"歳","reading":"さい"}],"romaji":"~sai","english":"years of age"},
     {"id":"v0730","type":"word","jp":[{"text":"〜"},{"kanji":"番","reading":"ばん"}],"romaji":"~ban","english":"number (in a sequence)"},
+    {"id":"v0723","type":"word","jp":[{"text":"〜"},{"kanji":"円","reading":"えん"}],"romaji":"~en","english":"yen"},
     ]
   },
   {
