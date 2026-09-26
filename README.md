@@ -34,10 +34,10 @@ python3 -m http.server     # only needed to test the service worker / offline
 
 | Section        | What's in it |
 | -------------- | ------------ |
-| **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, Time & Calendar |
-| **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles |
+| **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
+| **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
 | **Phrases**    | Self-introduction Q&A — name, job, country, age, family, home — in question/answer order |
-| **Travel**     | Signs, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
+| **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
 | **Flashcards** | Review, manage and track progress — see [Flashcards](#flashcards) |
 
 On a phone the nav is a tab bar at the bottom; on a wider screen it's the top

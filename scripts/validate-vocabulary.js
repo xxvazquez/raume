@@ -8,8 +8,8 @@ vm.runInNewContext(source, sandbox);
 const tableList = (sandbox.window.RaumeStudy && sandbox.window.RaumeStudy.data.vocabularyTables) || [];
 const tableCount = tableList.length;
 const rowCount = tableList.reduce((total, t) => total + t.rows.length, 0);
-const expectedTables = 32;
-const expectedRows = 707;
+const expectedTables = 38;
+const expectedRows = 901;
 if (tableCount !== expectedTables || rowCount !== expectedRows) {
   console.error("Vocabulary validation failed: found " + rowCount + " rows across " + tableCount + " tables; expected " + expectedRows + " rows across " + expectedTables + " tables.");
   process.exit(1);

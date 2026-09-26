@@ -490,7 +490,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     12: 'cookie', 13: 'carrot', 14: 'signpost', 15: 'shopping-bag', 16: 'train',
     17: 'toilet', 18: 'washer', 19: 'bed', 20: 'tag', 21: 'recycle',
     22: 'utensils', 23: 'hand', 24: 'calendar', 25: 'moon', 26: 'grid',
-    27: 'sun', 28: 'hourglass', 29: 'alarm', 30: 'clock', 31: 'watch'
+    27: 'sun', 28: 'hourglass', 29: 'alarm', 30: 'clock', 31: 'watch',
+    32: 'help', 33: 'map-pin', 34: 'users', 35: 'user', 36: 'cloud', 37: 'building'
   };
   // The icon a table shows: the reader's pick, else the shipped default, else --
   // for a table of their own -- one suggested from its name (see icons.suggest),
@@ -515,7 +516,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // green, a plane table teal). "" means the plain section tone.
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
-    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Phrases': 'amber'
+    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Phrases': 'amber',
+    'People & Daily Life': 'clay'
   };
   function tableTile(id, category) {
     var tc = window.RaumeStudy.tableCustom, ic = window.RaumeStudy.icons;

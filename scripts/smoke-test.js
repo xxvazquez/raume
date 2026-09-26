@@ -150,9 +150,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 32 table sections", sections.length === 32);
+  check("renders 38 table sections", sections.length === 38);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 707 vocabulary rows", totalRows === 707);
+  check("renders 901 vocabulary rows", totalRows === 901);
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
@@ -291,7 +291,7 @@ async function main() {
       && !!ichidanRule && /var\(--verb-ichidan-ink\)/.test(ichidanRule.style.color)
       && !!irrRule && /var\(--irregular-ink\)/.test(irrRule.style.color);
   })());
-  check("every verb-pair row has one clickable verb-group badge in its English cell (not the Japanese cell), reading included; the three look-alike exceptions are outlined and carry their word-specific reason, every other 変格 row still explains why it's irregular (not just named), and godan/ichidan rows carry no reason at all", (() => {
+  check("every verb-pair row has one clickable verb-group badge in its English cell (not the Japanese cell), reading included; the six exceptions (look-alikes, ある, 来る) are outlined and carry their word-specific reason, every other 変格 row still explains why it's irregular (not just named), and godan/ichidan rows carry no reason at all", (() => {
     const verbsSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Verbs");
     const rows = [...verbsSection.querySelectorAll("tbody tr")];
@@ -302,8 +302,8 @@ async function main() {
     const godanIchidan = rows.filter(r => !r.cells[1].querySelector(".verb-badge-irregular"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
-    return badgeOk && rows.length === 38 && document.querySelectorAll(".vocab .adj-note").length === 0
-      && irr.length === 3 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
+    return badgeOk && rows.length === 79 && document.querySelectorAll(".vocab .adj-note").length === 0
+      && irr.length === 6 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
       && kuru.cells[1].querySelector(".verb-badge").dataset.reading === "へんかく"
@@ -831,7 +831,7 @@ async function main() {
 
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
-  check("a sub-heading per Vocabulary category (Food & Ingredients / Kitchen & Dining / Numbers & Counting / Time & Calendar)", catHeads.length === 4);
+  check("a sub-heading per Vocabulary category (Food & Ingredients / Kitchen & Dining / Numbers & Counting / People & Daily Life / Time & Calendar)", catHeads.length === 5);
   check("sub-headings are visible on the Vocabulary page", catHeads.every(h => !h.classList.contains("page-hidden")));
   check("the reading column and its category rules share one width cap", (() => {
     const mw = el => window.getComputedStyle(el).maxWidth;
@@ -885,7 +885,7 @@ async function main() {
     const tables = [...document.querySelectorAll('.table-section[data-section="vocabulary"]')];
     return links.length === tables.length && links.every(a => document.getElementById('table-' + a.dataset.target));
   })());
-  check("the Vocabulary panel groups links by category (4 groups, 4 labels)", vocPanel.querySelectorAll('.tindex-cat-group').length === 4 && vocPanel.querySelectorAll('.tindex-cat').length === 4);
+  check("the Vocabulary panel groups links by category (5 groups, 5 labels)", vocPanel.querySelectorAll('.tindex-cat-group').length === 5 && vocPanel.querySelectorAll('.tindex-cat').length === 5);
   check("category labels are plain text, not expand/collapse buttons", [...vocPanel.querySelectorAll('.tindex-cat')].every(c => c.tagName !== "BUTTON" && !c.hasAttribute("aria-expanded")));
   check("the Grammar panel is a single ungrouped list (no category label)", (() => {
     const g = document.querySelector('#tableIndex .tindex-panel[data-section="grammar"]');
@@ -1372,7 +1372,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 32 tables", czRows.length === 32);
+  check("it lists every one of the 38 tables", czRows.length === 38);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
