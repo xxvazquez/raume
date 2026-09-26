@@ -6,6 +6,8 @@ cooking or studying, and for printing clean A4 study sheets.
 
 **Live at [xxvazquez.github.io/raume](https://xxvazquez.github.io/raume/)**
 
+[![Support raume on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20raume-574d73?logo=ko-fi&logoColor=white)](https://ko-fi.com/raume)
+
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar, Phrases and Travel tables — furigana, search, audio, print |
