@@ -426,29 +426,64 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return Object.keys(COL_INDEX).filter(k => !isHidden(k));
     }
 
-    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and --
-    // on an adjective row -- a visually-hidden "(い-adjective)" note for
-    // assistive tech; strip both out so "Japanese" search covers just the
-    // kanji/kana without garbling in a reading or the adjective note. The
-    // romaji reveal doesn't need stripping here: it lives in a data-romaji
-    // attribute (css/site.css renders it via content: attr(...)), so it was
-    // never part of textContent to begin with.
-    function jpFields(td) {
-      const clone = td.cloneNode(true);
-      const furiganaEls = [...clone.querySelectorAll('.furigana')];
-      const furigana = furiganaEls.map(el => el.textContent).join('');
-      furiganaEls.forEach(el => el.remove());
-      const adjNote = clone.querySelector('.visually-hidden');
-      if (adjNote) adjNote.remove();
-      return { kanji: clone.textContent, furigana };
+    // What search reads off each row, taken once per row and kept (rows are
+    // only ever replaced wholesale -- renderAllTables -- never edited in
+    // place, so a fresh row is simply a new key). Walking and cloning every
+    // cell on every keystroke was most of a keystroke's cost on a phone.
+    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and
+    // visually-hidden notes for assistive tech ("(い-adjective)",
+    // "(ru-verb)"); the readings are kept apart and the notes left out, so
+    // "Japanese" search covers just the kanji/kana -- a hidden "(ru-verb)"
+    // used to make "ru" match every ru-verb. The romaji reveal lives in a
+    // data-romaji attribute (css/site.css renders it via content: attr(...)),
+    // so it was never part of the cell's text to begin with.
+    const rowInfo = new WeakMap();
+    function infoFor(row) {
+      let info = rowInfo.get(row);
+      if (info) return info;
+      const jpCell = row.cells[0], enCell = row.cells[1];
+      let kanji = '', furigana = '';
+      if (jpCell) {
+        const walker = document.createTreeWalker(jpCell, NodeFilter.SHOW_TEXT);
+        let n;
+        while ((n = walker.nextNode())) {
+          const p = n.parentElement;
+          if (p.closest('.furigana')) furigana += n.data;
+          else if (!p.closest('.visually-hidden')) kanji += n.data;
+        }
+      }
+      const jpword = jpCell && jpCell.querySelector('.jpword[data-romaji]');
+      // English: every row keeps it in cells[1] (.meaning-text, so the
+      // row-action icons never register) -- word and sentence rows alike.
+      const enEl = enCell && enCell.querySelector('.meaning-text');
+      info = {
+        jpCell, enCell, jpword,
+        kanji: kanji.toLocaleLowerCase(),
+        furigana: furigana.toLocaleLowerCase(),
+        romaji: jpword ? expandMacronsForSearch(jpword.dataset.romaji).toLocaleLowerCase() : '',
+        english: enEl ? enEl.textContent.toLocaleLowerCase() : '',
+        // A question and its answer (qa-q / qa-a rows) travel together.
+        pairKey: row.classList.contains('qa-q') ? row.dataset.vocabId
+          : row.classList.contains('qa-a') ? row.dataset.answers : null
+      };
+      rowInfo.set(row, info);
+      return info;
     }
+    // Taken ahead of time while the page is idle (and again on focus, for
+    // anything rendered since), so the first letter typed doesn't pay for it.
+    function warmIndex() {
+      vocabHost.querySelectorAll('.vocab tbody tr').forEach(infoFor);
+    }
+    if (window.requestIdleCallback) requestIdleCallback(warmIndex, { timeout: 3000 });
+    else setTimeout(warmIndex, 1500);
+    input.addEventListener('focus', warmIndex);
 
-    function rankOf(text, q) {
-      if (!text) return null;
-      const t = text.toLocaleLowerCase();
-      if (!t.includes(q)) return null;
+    // Text is already lower-cased in the index.
+    function rankOf(t, q, prefixOnly) {
+      if (!t) return null;
       if (t === q) return 0;
       if (t.startsWith(q)) return 1;
+      if (prefixOnly || !t.includes(q)) return null;
       if (t.endsWith(q)) return 2;
       return 3;
     }
@@ -470,31 +505,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         .replace(/[ēê]/g, "ee").replace(/[ōô]/g, "oo");
     }
 
-    function fieldsForRow(row) {
-      const fields = [];
-      if (!isHidden('japanese')) {
-        const jp = jpFields(row.cells[0]);
-        fields.push({ cell: row.cells[0], text: jp.kanji });
-        if (!isHidden('furigana')) fields.push({ cell: row.cells[0], text: jp.furigana });
-      }
-      // Romaji is never hidden by a toggle any more -- it's an always-
-      // searchable on-demand reveal living in the jp cell (row.cells[0]),
-      // not its own column, so it's unconditional here. Read straight off
-      // the data-romaji attribute (see jpCell in js/vocab/render.js) rather
-      // than an element's textContent -- css/site.css renders it via
-      // content: attr(...), so there's no text node to read.
-      const jpword = row.cells[0].querySelector('.jpword[data-romaji]');
-      if (jpword) fields.push({ cell: row.cells[0], text: jpword.dataset.romaji, romaji: true });
-      // English: every row now keeps it in cells[1] (.meaning-text, so the
-      // row-action icons never register) -- word and (since the Phrases
-      // redesign) sentence rows alike.
-      if (!isHidden('english')) {
-        const enEl = row.cells[1] && row.cells[1].querySelector('.meaning-text');
-        if (enEl) fields.push({ cell: row.cells[1], text: enEl.textContent });
-      }
-      return fields;
-    }
-
+    // Only rows highlighted by the last run need clearing -- not all ~900.
+    const highlighted = new Set();
     function clearHighlights(row) {
       row.querySelectorAll('mark.search-hit').forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent)));
       row.querySelectorAll('.kr.search-hit').forEach(el => el.classList.remove('search-hit'));
@@ -549,36 +561,52 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       }
     }
 
-    function evaluateRow(row, q) {
-      clearHighlights(row);
-      if (!q) return { match: true, rank: null };
-      const qExpanded = expandMacronsForSearch(q);
-      let best = null;
-      const matchedCells = new Set();
-      fieldsForRow(row).forEach(f => {
-        // Expanding is only meaningful for the romaji field (kanji/English
-        // never carry a macron) -- everything else compares as-is.
-        const r = f.romaji ? rankOf(expandMacronsForSearch(f.text), qExpanded) : rankOf(f.text, q);
-        if (r !== null) {
-          if (best === null || r < best) best = r;
-          // The romaji reveal has no text node to wrap in <mark> (it's
-          // content: attr(...) -- see css/site.css), so a match there
-          // auto-reveals and highlights the whole reading instead of just
-          // the matched run, the same degradation .kr.search-hit already
-          // accepts for the per-kana layer.
-          if (f.romaji) row.cells[0].querySelector('.jpword[data-romaji]').classList.add('jp-romaji-hit');
-          else matchedCells.add(f.cell);
-        }
-      });
-      matchedCells.forEach(cell => highlightCell(cell, q));
-      return { match: best !== null, rank: best };
+    // Ranks a row against the query using the indexed text -- no DOM work.
+    // `hide` is the current column visibility, read once per search.
+    function rankRow(info, q, qExpanded, prefixOnly, hide) {
+      let best = null, jpHit = false, enHit = false, romajiHit = false;
+      function take(r) { if (r !== null && (best === null || r < best)) best = r; return r !== null; }
+      if (!hide.japanese) {
+        if (take(rankOf(info.kanji, q, prefixOnly))) jpHit = true;
+        if (!hide.furigana && take(rankOf(info.furigana, q, prefixOnly))) jpHit = true;
+      }
+      // Romaji is never hidden by a toggle -- it's an always-searchable
+      // on-demand reveal in the jp cell, not its own column. Expanding is
+      // only meaningful here (kanji/English never carry a macron).
+      if (take(rankOf(info.romaji, qExpanded, prefixOnly))) romajiHit = true;
+      if (!hide.english && take(rankOf(info.english, q, prefixOnly))) enHit = true;
+      return { rank: best, jpHit, enHit, romajiHit };
+    }
+    function highlightRow(row, info, hit, q) {
+      highlighted.add(row);
+      if (hit.jpHit) highlightCell(info.jpCell, q);
+      if (hit.enHit) highlightCell(info.enCell, q);
+      // The romaji reveal has no text node to wrap in <mark> (it's
+      // content: attr(...) -- see css/site.css), so a match there
+      // auto-reveals and highlights the whole reading instead of just
+      // the matched run, the same degradation .kr.search-hit already
+      // accepts for the per-kana layer.
+      if (hit.romajiHit) info.jpword.classList.add('jp-romaji-hit');
     }
 
+    function byOriginalIndex(a, b) { return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex); }
+    // Moves nodes only when their order actually differs: re-appending
+    // hundreds of rows (and every section) on each keystroke forced the
+    // browser to redo the whole page's layout even when nothing moved.
+    function sameOrder(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+      return true;
+    }
+    function placeInOrder(parent, nodes, current) {
+      if (!sameOrder(current, nodes)) nodes.forEach(n => parent.appendChild(n));
+    }
     function restoreOrder(tbody) {
-      const rows = [...tbody.querySelectorAll('tr')].sort((a, b) => Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex));
-      rows.forEach(r => tbody.appendChild(r));
+      const now = [...tbody.rows];
+      placeInOrder(tbody, now.slice().sort(byOriginalIndex), now);
     }
 
+    let preSearch = null;
     function runSearch() {
       const q = input.value.trim().toLocaleLowerCase();
       box.classList.toggle('has-value', Boolean(q));
@@ -590,10 +618,27 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (q && !wasSearching) {
         const fcNs = window.RaumeStudy.flashcards;
         if (fcNs && fcNs.refreshRowToggleButtons) fcNs.refreshRowToggleButtons();
+        // Search opens every table it matches in; clearing it puts back the
+        // tables you had open -- leaving thirty tables open was both a
+        // different page from the one you left and a long one to lay out.
+        preSearch = {
+          open: new Set(sections.filter(s => !s.classList.contains('collapsed'))),
+          expandAll: document.body.classList.contains('expand-all-mode')
+        };
       }
       const activeSection = document.body.dataset.activeSection || 'vocabulary';
       let totalRows = 0, totalTables = 0;
       const sectionOrder = [];
+      const qExpanded = expandMacronsForSearch(q);
+      // A single Latin letter only matches words that start with it: "t"
+      // appearing anywhere matches most of the page, which is noise to read
+      // and hundreds of rows to lay out on a phone. One kana or kanji (水)
+      // still matches anywhere -- it's a real search on its own.
+      const prefixOnly = q.length === 1 && /[a-z0-9]/.test(q);
+      const hide = { japanese: isHidden('japanese'), furigana: isHidden('furigana'), english: isHidden('english') };
+
+      highlighted.forEach(clearHighlights);
+      highlighted.clear();
 
       // Category sub-headings + the per-section table-index dropdown are
       // noise while results span every section.
@@ -614,60 +659,70 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
       sections.forEach((section, originalIndex) => {
         const tbody = section.querySelector('tbody');
-        const ranked = [];
         let sectionRows = 0, sectionBest = null;
+        if (!q) {
+          [...tbody.rows].forEach(row => row.classList.remove('search-hidden'));
+          restoreOrder(tbody);
+          if (preSearch) {
+            if (preSearch.open.has(section)) expandSection(section); else collapseSection(section);
+          }
+          section.classList.remove('search-hidden');
+          section.classList.toggle('page-hidden', section.dataset.section !== activeSection);
+          sectionOrder.push({ section, rank: Infinity, originalIndex });
+          return;
+        }
         // A table the reader hid never turns up in results either.
         const userHidden = section.classList.contains('user-hidden');
-        // A question and its answer (qa-q / qa-a rows) travel together: a
-        // match on either line shows the whole exchange, question first,
-        // ranked by its better line -- an answer alone reads as a reply to
-        // nothing. The count stays the rows that actually matched.
-        const pairKey = row => row.classList.contains('qa-q') ? row.dataset.vocabId
-          : row.classList.contains('qa-a') ? row.dataset.answers : null;
-        const results = [...tbody.querySelectorAll('tr')]
-          .sort((a, b) => Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex))
-          .map(row => {
-            const { match: rowMatch, rank } = evaluateRow(row, q);
-            return { row, rank, match: rowMatch && !userHidden, key: pairKey(row) };
-          });
+        // A question and its answer travel together: a match on either line
+        // shows the whole exchange, question first, ranked by its better
+        // line -- an answer alone reads as a reply to nothing. The count
+        // stays the rows that actually matched.
+        const results = [...tbody.rows].sort(byOriginalIndex).map(row => {
+          const info = infoFor(row);
+          const hit = userHidden ? { rank: null } : rankRow(info, q, qExpanded, prefixOnly, hide);
+          return { row, info, hit, rank: hit.rank, match: hit.rank !== null, key: info.pairKey };
+        });
         const pairRank = {};
         results.forEach(r => {
           if (r.key && r.match && (pairRank[r.key] === undefined || r.rank < pairRank[r.key])) pairRank[r.key] = r.rank;
         });
+        const ranked = [];
         results.forEach(r => {
-          const inPair = Boolean(q) && r.key !== null && pairRank[r.key] !== undefined;
+          const inPair = r.key !== null && pairRank[r.key] !== undefined;
           const shown = r.match || inPair;
           r.row.classList.toggle('search-hidden', !shown);
           if (shown) ranked.push({ row: r.row, rank: inPair ? pairRank[r.key] : r.rank, index: Number(r.row.dataset.originalIndex) });
           if (r.match) {
+            highlightRow(r.row, r.info, r.hit, q);
             sectionRows++;
             if (sectionBest === null || r.rank < sectionBest) sectionBest = r.rank;
           }
         });
-        if (q) { ranked.sort((a, b) => a.rank - b.rank || a.index - b.index); ranked.forEach(r => tbody.appendChild(r.row)); }
-        else restoreOrder(tbody);
+        ranked.sort((a, b) => a.rank - b.rank || a.index - b.index);
+        placeInOrder(tbody, ranked.map(r => r.row), [...tbody.rows].filter(row => !row.classList.contains('search-hidden')));
 
-        if (q) {
-          section.classList.remove('page-hidden');
-          section.classList.toggle('search-hidden', sectionRows === 0);
-          if (sectionRows > 0) { totalTables++; totalRows += sectionRows; expandSection(section); }
-        } else {
-          section.classList.remove('search-hidden');
-          section.classList.toggle('page-hidden', section.dataset.section !== activeSection);
-        }
+        section.classList.remove('page-hidden');
+        section.classList.toggle('search-hidden', sectionRows === 0);
+        if (sectionRows > 0) { totalTables++; totalRows += sectionRows; expandSection(section); }
         sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex });
       });
+      if (!q && preSearch) {
+        document.body.classList.toggle('expand-all-mode', preSearch.expandAll);
+        syncExpandAllBtn();
+        preSearch = null;
+      }
       count.textContent = q ? totalRows + ' matching row' + (totalRows === 1 ? '' : 's') + ' · ' + totalTables + ' table' + (totalTables === 1 ? '' : 's') : '';
       if (vocab.updatePoliteVisibility) vocab.updatePoliteVisibility();
       if (q) { if (vocab.updateAdjLegend) vocab.updateAdjLegend(); }
       else if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
 
       // The best match overall should be first on the page; ties keep table order.
+      const children = [...vocabHost.children];
       if (q) {
         sectionOrder.sort((a, b) => a.rank - b.rank || a.originalIndex - b.originalIndex);
-        sectionOrder.forEach(s => vocabHost.appendChild(s.section));
+        placeInOrder(vocabHost, sectionOrder.map(s => s.section), children.filter(el => el.classList.contains('table-section')));
       } else {
-        vocabOrder.forEach(el => vocabHost.appendChild(el));
+        placeInOrder(vocabHost, vocabOrder, children);
       }
     }
     vocab.clearSearchQuery = function () {
@@ -681,12 +736,29 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       input.focus();
     };
 
-    input.addEventListener('input', runSearch);
+    // Typing: let the letter paint first, then search -- and when keys come
+    // faster than a search runs, only search for the latest text. A
+    // scripted input event (not typed) still searches at once. A hidden tab
+    // pauses animation frames, so a plain timer backs the frame up.
+    let searchQueued = false;
+    function queuedSearch() {
+      if (!searchQueued) return;
+      searchQueued = false;
+      runSearch();
+    }
+    input.addEventListener('input', function (event) {
+      if (!event.isTrusted) { runSearch(); return; }
+      if (searchQueued) return;
+      searchQueued = true;
+      requestAnimationFrame(function () { setTimeout(queuedSearch, 0); });
+      setTimeout(queuedSearch, 100);
+    });
     document.getElementById('clearSearch').addEventListener('click', function () {
       input.value = ''; runSearch(); input.focus();
     });
     input.addEventListener('keydown', function (event) {
       if (event.key === 'Enter') {
+        if (searchQueued) queuedSearch();
         const first = document.querySelector('.table-section:not(.search-hidden) tbody tr:not(.search-hidden)');
         if (first) first.scrollIntoView({ block: 'center' });
       } else if (event.key === 'Escape') {

@@ -172,9 +172,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // every word has a reading, so there's nothing for an icon to distinguish.
   // data-romaji feeds css/site.css's `content: attr(...)`, so the reading
   // never enters the DOM's textContent (search/sort read the cell expecting
-  // kana/kanji only -- see js/vocab/interactions.js jpFields) while still
-  // being readable straight off the attribute for search -- see
-  // js/vocab/interactions.js fieldsForRow.
+  // kana/kanji only -- see js/vocab/interactions.js infoFor) while still
+  // being readable straight off the attribute for search.
   function romajiAttr(romaji) {
     return romaji ? ' data-romaji="' + esc(romaji) + '"' : '';
   }

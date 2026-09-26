@@ -62,7 +62,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 
 | | |
 | --- | --- |
-| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
+| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted; a single letter only finds words that start with it (one kana or kanji still matches anywhere). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
 | **Tables** | The list button in the pinned search bar (named after the table you're reading, on desktop) lists every table in the section with its entry count. |
 | **Opening a table** | Keeps the row you tapped exactly where it was. While it's open, its title stays pinned under the search bar as you scroll, and closing it from there keeps it in place. |
 | **URL** | Follows the view (`#grammar`, `#table-15`, `#flashcards`), so any view can be bookmarked. |
