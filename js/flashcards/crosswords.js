@@ -14,7 +14,9 @@
 // Two layouts share one grid builder: a classic crossword (numbered
 // across/down clue list) or an arroword (the clue sits in a cell right
 // before the answer starts, an arrow pointing into it -- no separate list).
-// Every square is a live text field, so it plays on screen as well as
+// A third style, the word search, has its own builder (see "Word search"
+// below): the answers hidden in a block of letters, found by dragging.
+// Every crossword square is a live text field, so it plays on screen as well as
 // printing as a worksheet. Nothing here is scheduled, scored, or saved --
 // regenerating is free.
 window.RaumeStudy = window.RaumeStudy || {};
@@ -371,6 +373,277 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // -----------------------------------------------------------------------
+  // Word search -- the third style. Same word pool and scripts, but the
+  // answers hide in a square block of letters instead of crossing on an
+  // open grid. An easy word search teaches nothing, so every choice here
+  // leans hard: the list gives only the English clue (you have to know the
+  // reading to look for it), words run in all eight directions -- backwards
+  // and diagonally too -- each word prefers the spot where it shares the
+  // most letters with words already down (a dense tangle, not ten tidy
+  // lines), and the leftover squares are filled from the answers' own
+  // letters, so no stray alphabet makes the real words stand out.
+  // -----------------------------------------------------------------------
+  var WS_DIRS = [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1]];
+  function buildWordSearch(words, limit) {
+    if (!words.length) return { placements: [], rows: 0, cols: 0, letters: [] };
+    limit = limit || words.length;
+    var target = Math.min(limit, words.length);
+    // Sized so an average pick of answers would all but fill the square --
+    // overlaps free a little room back, the filler takes the rest. Grown a
+    // square at a time only if even the best attempt couldn't fit every word.
+    var avg = words.reduce(function (n, w) { return n + Array.from(w.answer).length; }, 0) / words.length;
+    var longest = words.reduce(function (n, w) { return Math.max(n, Array.from(w.answer).length); }, 0);
+    var side = Math.max(Math.min(longest, 8), Math.ceil(Math.sqrt(target * avg / 0.95)));
+    var best = null;
+    for (var grow = 0; grow < 4; grow++, side++) {
+      for (var a = 0; a < 8; a++) {
+        var attempt = buildWordSearchOnce(words, target, side);
+        if (!best || attempt.placements.length > best.placements.length ||
+          (attempt.placements.length === best.placements.length && attempt.overlaps > best.overlaps)) best = attempt;
+      }
+      if (best.placements.length >= target) break;
+    }
+    return best;
+  }
+  function buildWordSearchOnce(words, target, side) {
+    var cells = [], placements = [], overlaps = 0;
+    for (var r = 0; r < side; r++) cells.push(new Array(side).fill(null));
+    function spotScore(answer, row, col, d) {
+      var shared = 0;
+      for (var i = 0; i < answer.length; i++) {
+        var rr = row + d[0] * i, cc = col + d[1] * i;
+        if (rr < 0 || cc < 0 || rr >= side || cc >= side) return -1;
+        var have = cells[rr][cc];
+        if (have !== null && have !== answer[i]) return -1;
+        if (have !== null) shared++;
+      }
+      // A word lying wholly on letters already down isn't hidden anywhere of its own.
+      return shared === answer.length ? -1 : shared;
+    }
+    shuffle(words).some(function (w) {
+      if (placements.length >= target) return true;
+      var answer = Array.from(w.answer), bestSpot = null, bestScore = -1;
+      for (var r = 0; r < side; r++) {
+        for (var c = 0; c < side; c++) {
+          for (var k = 0; k < WS_DIRS.length; k++) {
+            var shared = spotScore(answer, r, c, WS_DIRS[k]);
+            if (shared < 0) continue;
+            // Shared letters count most; a slant or backwards run gets a
+            // nudge over plain across/down; the random share keeps equally
+            // good spots from always landing in the same corner.
+            var hard = k >= 2 ? 0.6 : 0;
+            var score = shared * 2 + hard + Math.random() * 1.2;
+            if (score > bestScore) { bestScore = score; bestSpot = { row: r, col: c, d: WS_DIRS[k], shared: shared }; }
+          }
+        }
+      }
+      if (!bestSpot) return false;
+      answer.forEach(function (ch, i) { cells[bestSpot.row + bestSpot.d[0] * i][bestSpot.col + bestSpot.d[1] * i] = ch; });
+      overlaps += bestSpot.shared;
+      placements.push({ id: w.id, clue: w.clue, answer: w.answer, row: bestSpot.row, col: bestSpot.col, dr: bestSpot.d[0], dc: bestSpot.d[1], length: answer.length });
+      return false;
+    });
+    var pool = [];
+    placements.forEach(function (p) { pool.push.apply(pool, Array.from(p.answer)); });
+    for (var fr = 0; fr < side; fr++) {
+      for (var fc = 0; fc < side; fc++) {
+        if (cells[fr][fc] === null) cells[fr][fc] = pool[Math.floor(Math.random() * pool.length)] || "";
+      }
+    }
+    placements.sort(function (a, b) { return a.clue.localeCompare(b.clue); });
+    return { placements: placements, rows: side, cols: side, letters: cells, overlaps: overlaps };
+  }
+
+  // Letters are plain text in rows, not inputs -- nothing is typed here. The
+  // found-word capsules are lines in one SVG under the letters, drawn in
+  // cell units (viewBox = the grid), so they need no inline style at all.
+  function wordSearchGridHtml(p, romajiMode) {
+    var rows = p.letters.map(function (row, r) {
+      return '<div class="fc-ws-row" role="row">' + row.map(function (ch, c) {
+        return '<span class="fc-ws-cell" role="gridcell" tabindex="' + (r === 0 && c === 0 ? "0" : "-1") + '" data-r="' + r + '" data-c="' + c + '">' + esc(ch) + "</span>";
+      }).join("") + "</div>";
+    }).join("");
+    return '<div class="fc-ws-grid' + (romajiMode ? " fc-ws-romaji" : "") + '" role="grid" aria-label="Word search"' + (romajiMode ? "" : ' lang="ja"') + ">" +
+      '<svg class="fc-ws-marks" viewBox="0 0 ' + p.cols + " " + p.rows + '" preserveAspectRatio="none" aria-hidden="true"></svg>' +
+      rows + "</div>";
+  }
+  var TICK_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  function wordSearchListHtml(p) {
+    return '<div class="fc-xw-clues fc-ws-list"><div class="fc-xw-cluegroup"><h4 class="fc-xw-cluehead">Find the Japanese for</h4><ol class="fc-xw-cluerows">' +
+      p.placements.map(function (pl, i) {
+        return '<li data-i="' + i + '"><span class="fc-ws-tick">' + TICK_ICON + '</span><span class="fc-ws-clue">' + esc(pl.clue) +
+          '</span><span class="fc-ws-answer"' + (/^[a-z]/.test(pl.answer) ? "" : ' lang="ja"') + " hidden>" + esc(pl.answer) + "</span></li>";
+      }).join("") + "</ol></div></div>";
+  }
+
+  // Marking a word: drag from its first letter to its last, or tap the two
+  // ends one after the other (Enter / Space on a focused letter does the
+  // same, arrow keys move). The line snaps to the nearest of the eight
+  // directions while dragging; a line that spells an unfound answer, either
+  // way round, marks it found. Matched on the letters, not on where the
+  // builder put the word -- if the filler happens to spell an answer again
+  // elsewhere, finding that copy counts too.
+  function wireWordSearch(gridEl, listEl, countEl, p) {
+    var SVGNS = "http://www.w3.org/2000/svg";
+    var svg = gridEl.querySelector(".fc-ws-marks");
+    var found = p.placements.map(function () { return false; });
+    var anchor = null, dragStart = null, dragEnd = null, moved = false, dragLine = null;
+
+    function cellEl(r, c) { return gridEl.querySelector('.fc-ws-cell[data-r="' + r + '"][data-c="' + c + '"]'); }
+    function pos(el) { return [+el.dataset.r, +el.dataset.c]; }
+    function makeLine(cls, a, b) {
+      var line = document.createElementNS(SVGNS, "line");
+      line.setAttribute("class", cls);
+      line.setAttribute("stroke-width", "0.74");
+      line.setAttribute("stroke-linecap", "round");
+      setLine(line, a, b);
+      svg.appendChild(line);
+      return line;
+    }
+    function setLine(line, a, b) {
+      line.setAttribute("x1", a[1] + 0.5); line.setAttribute("y1", a[0] + 0.5);
+      line.setAttribute("x2", b[1] + 0.5); line.setAttribute("y2", b[0] + 0.5);
+    }
+    // The end of a straight line from `a` toward `b`: the nearest of the
+    // eight directions, as far as the pointer reaches, clipped to the grid.
+    function snap(a, b) {
+      var dr = b[0] - a[0], dc = b[1] - a[1];
+      if (!dr && !dc) return a;
+      var oct = ((Math.round(Math.atan2(dr, dc) / (Math.PI / 4)) % 8) + 8) % 8;
+      var d = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]][oct];
+      var n = d[0] && d[1] ? Math.max(Math.abs(dr), Math.abs(dc)) : Math.abs(d[0] ? dr : dc);
+      while (n > 0) {
+        var r = a[0] + d[0] * n, c = a[1] + d[1] * n;
+        if (r >= 0 && c >= 0 && r < p.rows && c < p.cols) return [r, c];
+        n--;
+      }
+      return a;
+    }
+    function spell(a, b) {
+      var n = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+      var sr = Math.sign(b[0] - a[0]), sc = Math.sign(b[1] - a[1]), out = "";
+      for (var i = 0; i <= n; i++) out += p.letters[a[0] + sr * i][a[1] + sc * i];
+      return out;
+    }
+    function updateCount() {
+      var n = found.filter(Boolean).length;
+      countEl.textContent = n === found.length ? "All " + n + " found" : n + " of " + found.length + " found";
+      countEl.classList.toggle("fc-ws-count-done", n === found.length);
+    }
+    function markFound(i, a, b) {
+      found[i] = true;
+      makeLine("fc-ws-found", a, b);
+      var li = listEl.querySelector('li[data-i="' + i + '"]');
+      li.classList.add("fc-ws-done");
+      li.querySelector(".fc-ws-answer").hidden = false;
+      updateCount();
+    }
+    function placementEnds(pl) { return [[pl.row, pl.col], [pl.row + pl.dr * (pl.length - 1), pl.col + pl.dc * (pl.length - 1)]]; }
+    function tryLine(a, b) {
+      if (a[0] === b[0] && a[1] === b[1]) return false;
+      var text = spell(a, b), back = Array.from(text).reverse().join("");
+      var i = p.placements.findIndex(function (pl, j) { return !found[j] && (pl.answer === text || pl.answer === back); });
+      if (i === -1) return false;
+      markFound(i, a, b);
+      return true;
+    }
+    function setAnchor(a) {
+      gridEl.querySelectorAll(".fc-ws-anchor").forEach(function (el) { el.classList.remove("fc-ws-anchor"); });
+      anchor = a;
+      if (a) cellEl(a[0], a[1]).classList.add("fc-ws-anchor");
+    }
+    function clearDrag() {
+      if (dragLine) dragLine.remove();
+      dragLine = null; dragStart = dragEnd = null; moved = false;
+    }
+    // One tap (or Enter): the first sets the start, the second -- anywhere
+    // on a straight line from it -- tries that word; the same letter again
+    // lets go of the start.
+    function tap(at) {
+      if (!anchor) { setAnchor(at); return; }
+      var from = anchor;
+      setAnchor(null);
+      if (from[0] === at[0] && from[1] === at[1]) return;
+      var end = snap(from, at);
+      if (!tryLine(from, end)) flashMiss();
+    }
+    function flashMiss() {
+      gridEl.classList.remove("fc-ws-miss");
+      void gridEl.offsetWidth;
+      gridEl.classList.add("fc-ws-miss");
+    }
+
+    gridEl.addEventListener("pointerdown", function (e) {
+      var cell = e.target.closest(".fc-ws-cell");
+      if (!cell || e.button > 0) return;
+      e.preventDefault();
+      cell.focus({ preventScroll: true });
+      dragStart = dragEnd = pos(cell);
+      moved = false;
+      try { gridEl.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events have no capturable pointer */ }
+    });
+    gridEl.addEventListener("pointermove", function (e) {
+      if (!dragStart || !document.elementFromPoint) return;
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var cell = under && under.closest && under.closest(".fc-ws-cell");
+      if (!cell || !gridEl.contains(cell)) return;
+      var end = snap(dragStart, pos(cell));
+      if (end[0] === dragStart[0] && end[1] === dragStart[1] && !moved) return;
+      moved = true;
+      setAnchor(null);
+      dragEnd = end;
+      if (!dragLine) dragLine = makeLine("fc-ws-drag", dragStart, dragEnd);
+      else setLine(dragLine, dragStart, dragEnd);
+    });
+    gridEl.addEventListener("pointerup", function () {
+      if (!dragStart) return;
+      var a = dragStart, b = dragEnd, wasDrag = moved;
+      clearDrag();
+      if (wasDrag) { if (!tryLine(a, b)) flashMiss(); }
+      else tap(a);
+    });
+    gridEl.addEventListener("pointercancel", clearDrag);
+    gridEl.addEventListener("keydown", function (e) {
+      var cell = e.target.closest(".fc-ws-cell");
+      if (!cell) return;
+      var at = pos(cell), move = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+      if (move) {
+        var next = cellEl(at[0] + move[0], at[1] + move[1]);
+        if (next) { e.preventDefault(); cell.tabIndex = -1; next.tabIndex = 0; next.focus(); }
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        tap(at);
+      } else if (e.key === "Escape") setAnchor(null);
+    });
+    gridEl.addEventListener("focusin", function (e) {
+      var cell = e.target.closest(".fc-ws-cell");
+      if (!cell) return;
+      gridEl.querySelectorAll('.fc-ws-cell[tabindex="0"]').forEach(function (el) { if (el !== cell) el.tabIndex = -1; });
+      cell.tabIndex = 0;
+    });
+
+    updateCount();
+    return {
+      revealOne: function () {
+        var i = found.indexOf(false);
+        if (i === -1) return;
+        var ends = placementEnds(p.placements[i]);
+        markFound(i, ends[0], ends[1]);
+      },
+      revealAll: function () {
+        found.forEach(function (f, i) { if (!f) { var ends = placementEnds(p.placements[i]); markFound(i, ends[0], ends[1]); } });
+      },
+      reset: function () {
+        found = found.map(function () { return false; });
+        svg.querySelectorAll(".fc-ws-found").forEach(function (l) { l.remove(); });
+        listEl.querySelectorAll("li").forEach(function (li) { li.classList.remove("fc-ws-done"); li.querySelector(".fc-ws-answer").hidden = true; });
+        setAnchor(null);
+        updateCount();
+      }
+    };
+  }
+
+  // -----------------------------------------------------------------------
   // State + rendering. Purely a play/print utility -- nothing here persists
   // across a reload; regenerating is free. What's typed into the grid lives
   // only in the live <input> elements, not in this state object -- every
@@ -415,12 +688,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var answer = state.script === "romaji" ? w.romaji : scriptedAnswer(w.answer, state.script);
       return { id: w.id, clue: w.clue, answer: answer };
     }).filter(function (w) { if (seen[w.answer]) return false; seen[w.answer] = true; return true; });
+    // A two-letter romaji word turns up by chance all over a word search's
+    // filler -- finding "ki" there is luck, not recall.
+    if (state.mode === "wordsearch" && state.script === "romaji") candidates = candidates.filter(function (w) { return w.answer.length >= 3; });
     state.poolCount = candidates.length;
-    state.puzzle = buildGrid(candidates, state.mode === "arroword", state.size);
+    state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size) : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   var SIZE_OPTS = [10, 15, 20, 30, 40];
 
@@ -747,6 +1023,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // toolbar has no room for its own button (CSS swaps them).
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
   var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Print", PRINT_ICON]];
+  // A word search has no letters to type, so its menu reveals whole words.
+  var WS_MENU_LABELS = { hint: "Reveal a word", reset: "Clear found words" };
   function optionLabel(opts, value) {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
@@ -761,6 +1039,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function toolbarHtml() {
     var parts = optionsSummary();
+    var ws = state.mode === "wordsearch";
     return '<div class="fc-xw-actions">' +
       '<div class="fc-xw-options">' +
       '<button type="button" class="fc-xw-summary" id="fcXwOptions" aria-haspopup="dialog" aria-expanded="' + state.optionsOpen + '" aria-controls="fcXwSheet">' +
@@ -777,15 +1056,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<div class="fc-xw-actions-end">' +
       '<div class="fc-xw-tip">' +
       '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
-      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>Tap a square or a clue, then type. Tap a crossing square again to switch direction.</p>' +
+      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (ws
+        ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
+        : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
       "</div>" +
-      '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>' +
+      (ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
+        : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>') +
       '<div class="section-menu fc-xw-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More puzzle actions">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
       MENU_ACTIONS.map(function (a) {
         return '<button type="button" class="fc-xw-menu-item" role="menuitem" id="fcXw' + a[0].charAt(0).toUpperCase() + a[0].slice(1) + '" data-action="' + a[0] + '">' +
-          '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + a[1] + "</span></button>";
+          '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + ((ws && WS_MENU_LABELS[a[0]]) || a[1]) + "</span></button>";
       }).join("") +
       "</div></div></div></div>";
   }
@@ -887,6 +1169,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       return;
     }
     var arroword = state.mode === "arroword";
+    var wordsearch = state.mode === "wordsearch";
     var romajiMode = state.script === "romaji";
     var placedCount = p.placements.length;
     var wanted = Math.min(state.size, state.poolCount);
@@ -894,7 +1177,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // speaks for itself.
     var footnote = placedCount < wanted ? placedCount + " of " + wanted + " words fit — New puzzle tries another mix." : "";
     var titleLabel = state.source === "table" ? tablesSummary() : "Flashcards";
-    var printTitle = arroword ? "Arroword" : "Crossword";
+    var printTitle = optionLabel(MODE_OPTS, state.mode);
     var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
     var printMeta = titleLabel + " · " + placedCount + " words · " + scriptLabel;
 
@@ -907,26 +1190,38 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
-      '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite" hidden></p>' +
-      '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
-      gridHtml(p, arroword, romajiMode) + "</div></div>" +
-      (arroword ? "" : clueListHtml(p)) +
+      (wordsearch
+        ? '<div class="fc-xw-gridwrap">' + wordSearchGridHtml(p, romajiMode) + "</div>" + wordSearchListHtml(p)
+        : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite" hidden></p>' +
+          '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
+          gridHtml(p, arroword, romajiMode) + "</div></div>" +
+          (arroword ? "" : clueListHtml(p))) +
       "</div>";
 
     bindControls(panel);
+    document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+    if (wordsearch) {
+      var ws = wireWordSearch(panel.querySelector(".fc-ws-grid"), panel.querySelector(".fc-ws-list"), document.getElementById("fcWsCount"), p);
+      bindMenu(panel, { hint: ws.revealOne, reveal: ws.revealAll, reset: ws.reset });
+      return;
+    }
     var gridEl = panel.querySelector(".fc-xw-grid");
     var nav = wireGrid(gridEl, panel.querySelector(".fc-xw-clues"), panel.querySelector(".fc-xw-current"), p, arroword);
 
-    document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
     document.getElementById("fcXwCheck").addEventListener("click", function () { checkGrid(gridEl, p); });
-    var menu = panel.querySelector(".fc-xw-menu");
-    var actions = {
-      newMenu: function () { generate(); rerender(); },
+    bindMenu(panel, {
       hint: function () { hintGrid(gridEl, p, nav); },
       reveal: function () { revealGrid(gridEl, p); },
-      reset: function () { resetGridInputs(gridEl); },
-      print: function () { document.body.classList.add("print-only"); window.print(); }
-    };
+      reset: function () { resetGridInputs(gridEl); }
+    });
+  }
+
+  // The ⋯ menu's items: New puzzle and Print are the same for every style,
+  // the reveal / clear actions come from the style's own wiring.
+  function bindMenu(panel, actions) {
+    actions.newMenu = function () { generate(); rerender(); };
+    actions.print = function () { document.body.classList.add("print-only"); window.print(); };
+    var menu = panel.querySelector(".fc-xw-menu");
     menu.querySelectorAll(".fc-xw-menu-item").forEach(function (item) {
       item.addEventListener("click", function () {
         // The shared handler in interactions.js opens/closes on the ⋯ button
@@ -943,7 +1238,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS, state: state
     }
   };

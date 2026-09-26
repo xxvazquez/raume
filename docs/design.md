@@ -677,11 +677,23 @@ and Down are inset-grouped cards (side by side when there's room), compact rows
 with the number as a quiet right-aligned tabular column, the active clue
 tinted.
 
+A **word search** swaps Check for a quiet "3 of 15 found" count (sage once
+all are found) and draws no cell lines — a lined grid reads as a crossword.
+The letters sit in one white card (`--radius-card`), 34px squares shrinking
+with the row so a 40-word block fits a phone, romaji set in capitals. A found
+word is a soft `--accent` capsule under its letters (SVG lines in cell units,
+so no inline style); the line being dragged is the section tone, a tapped
+first letter a round section-tone fill, and a line that spells nothing gives
+a small shake (none under reduced motion). The list is one inset-grouped
+card headed "Find the Japanese for": the clue, and once found a sage tick
+before it and the reading in grey after it.
+
 Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
 line under it (source · N words · script), the grid centred at 9mm squares
 (smaller only when a big grid must fit the width), then Across and Down as
 two plain columns — a rule under each heading, no cards, no row rules, a grey
-tabular number column.
+tabular number column. A word search prints its letter block at 8mm squares
+with the clue list in two columns under it.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

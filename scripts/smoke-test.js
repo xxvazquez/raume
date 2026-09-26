@@ -2770,6 +2770,57 @@ async function main() {
     xwPick("script", "romaji");
     return k && h;
   })());
+  check("a word search hides every answer in a square of letters, filled only with the answers' own letters, in all directions", (() => {
+    const pool = xw.tableWordPool([xwOtherTable.id]).filter(w => w.romaji && w.romaji.length >= 3).map(w => ({ id: w.id, clue: w.clue, answer: w.romaji }));
+    let slanted = 0, backwards = 0;
+    for (let n = 0; n < 5; n++) {
+      const p = xw.buildWordSearch(pool, 15);
+      if (p.rows !== p.cols || p.letters.length !== p.rows || p.placements.length < 6) return false;
+      const own = new Set(p.placements.flatMap(pl => [...pl.answer]));
+      if (!p.letters.every(row => row.length === p.cols && row.every(ch => own.has(ch)))) return false;
+      const spelled = p.placements.every(pl => [...pl.answer].every((ch, i) => p.letters[pl.row + pl.dr * i][pl.col + pl.dc * i] === ch));
+      if (!spelled) return false;
+      slanted += p.placements.filter(pl => pl.dr && pl.dc).length;
+      backwards += p.placements.filter(pl => pl.dr < 0 || pl.dc < 0).length;
+    }
+    return slanted > 0 && backwards > 0;
+  })());
+  xwPick("mode", "wordsearch");
+  const wsCell = (r, c) => document.querySelector('#fcPanelCrosswords .fc-ws-cell[data-r="' + r + '"][data-c="' + c + '"]');
+  const wsKey = (el, key) => el.dispatchEvent(new window.KeyboardEvent("keydown", { key, bubbles: true }));
+  const wsCount = () => document.getElementById("fcWsCount").textContent;
+  check("Word search shows plain letters and a clue-only list, a found count where Check was, and word-sized ⋯ actions", (() => {
+    const p = xw.state.puzzle;
+    const items = [...document.querySelectorAll("#fcPanelCrosswords .fc-ws-list li")];
+    return !!document.querySelector("#fcPanelCrosswords .fc-ws-grid") && !document.querySelector("#fcPanelCrosswords .fc-xw-cell-input")
+      && !document.getElementById("fcXwCheck") && wsCount() === "0 of " + p.placements.length + " found"
+      && items.length === p.placements.length && items.every(li => li.querySelector(".fc-ws-answer").hidden)
+      && document.getElementById("fcXwHint").textContent.trim() === "Reveal a word"
+      && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent === "Word search"
+      && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
+  })());
+  check("picking a word's last letter then its first (Enter on each) marks it found -- either way round", (() => {
+    const pl = xw.state.puzzle.placements[0];
+    const end = wsCell(pl.row + pl.dr * (pl.length - 1), pl.col + pl.dc * (pl.length - 1));
+    end.focus(); wsKey(end, "Enter"); wsKey(wsCell(pl.row, pl.col), "Enter");
+    const li = document.querySelector('#fcPanelCrosswords .fc-ws-list li[data-i="0"]');
+    return wsCount().startsWith("1 of") && li.classList.contains("fc-ws-done") && !li.querySelector(".fc-ws-answer").hidden
+      && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === 1;
+  })());
+  check("a line that spells no answer marks nothing", (() => {
+    const pl = xw.state.puzzle.placements[1];
+    wsKey(wsCell(pl.row, pl.col), "Enter");
+    wsKey(wsCell(pl.row + pl.dr * (pl.length - 2), pl.col + pl.dc * (pl.length - 2)), "Enter");
+    return wsCount().startsWith("1 of") || xw.state.puzzle.placements.some((q, i) => i > 0 && q.length === pl.length - 1);
+  })());
+  document.getElementById("fcXwHint").click();
+  check("Reveal a word marks the next unfound word", wsCount().startsWith("2 of"));
+  document.getElementById("fcXwReset").click();
+  check("Clear found words starts the same grid over", wsCount().startsWith("0 of") && !document.querySelector("#fcPanelCrosswords .fc-ws-found"));
+  document.getElementById("fcXwReveal").click();
+  check("Reveal puzzle marks every word", /^All \d+ found$/.test(wsCount()) && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === xw.state.puzzle.placements.length);
+  xwPick("mode", "crossword");
+
   xwPick("source", "flashcards");
   check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));
 

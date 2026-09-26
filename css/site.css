@@ -2949,6 +2949,43 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-cluerows li:hover { background: color-mix(in srgb, var(--section) 7%, var(--paper)); }
 .fc-xw-cluerows li.fc-xw-clue-active { background: var(--accent-soft); }
 .fc-xw-cluerows li b { flex: none; width: 20px; text-align: right; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+/* Word search: a white card of plain letters, no cell lines -- a lined grid
+   would read as a crossword. Letters are 34px squares that shrink with the
+   row, so even a 40-word block fits a phone. The whole grid takes the
+   pointer (touch-action: none) so a drag marks a word instead of
+   scrolling. Found words are soft accent capsules in an SVG under the
+   letters; the line being dragged is the section tone. Cells get their
+   width outright -- a max-content grid ignores a flex basis. */
+.fc-ws-grid {
+  position: relative; display: flex; flex-direction: column; width: max-content; max-width: 100%;
+  margin: 0 auto; padding: 8px; box-sizing: border-box; background: var(--paper); border-radius: var(--radius-card);
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.fc-ws-marks { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); pointer-events: none; }
+.fc-ws-found { stroke: var(--accent); stroke-opacity: .32; }
+.fc-ws-drag { stroke: var(--section); stroke-opacity: .38; }
+.fc-ws-row { display: flex; position: relative; }
+.fc-ws-cell {
+  box-sizing: border-box; flex: 0 1 34px; width: 34px; min-width: 0; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  font: 400 15px/1 var(--font-ui); color: var(--ink); cursor: pointer;
+}
+.fc-ws-romaji .fc-ws-cell { text-transform: uppercase; font-size: 14px; }
+.fc-ws-cell:focus { outline: 0; }
+.fc-ws-cell:focus-visible { box-shadow: inset 0 0 0 2px var(--section); }
+.fc-ws-anchor { background: color-mix(in srgb, var(--section) 30%, transparent); }
+.fc-ws-miss { animation: fc-ws-miss .3s ease; }
+@keyframes fc-ws-miss { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@media (prefers-reduced-motion: reduce) { .fc-ws-miss { animation: none; } }
+.fc-ws-count { color: var(--muted); font-size: var(--fs-nav); font-variant-numeric: tabular-nums; white-space: nowrap; padding: 0 4px; }
+.fc-ws-count-done { color: var(--right-strong); }
+.fc-ws-list .fc-xw-cluerows li { cursor: default; }
+.fc-ws-list .fc-xw-cluerows li:hover { background: none; }
+.fc-ws-tick { flex: none; width: 20px; display: flex; align-items: center; justify-content: flex-end; color: transparent; }
+.fc-ws-clue { min-width: 0; }
+.fc-ws-answer { margin-left: auto; padding-left: 8px; color: var(--muted); }
+.fc-ws-done .fc-ws-tick { color: var(--right-strong); }
+.fc-ws-done .fc-ws-clue { color: var(--muted); }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across
    the full sheet. Manage keeps the full width (its rows are content-driven,
@@ -3972,6 +4009,15 @@ mark.fc-diff-co {
   body.print-only .fc-xw-print-head { display: block; margin: 0 0 8mm; }
   body.print-only .fc-xw-print-title { margin: 0; font: 700 20pt/1.15 var(--font-ui); letter-spacing: -.01em; color: #111 !important; }
   body.print-only .fc-xw-print-meta { margin: 1.5mm 0 0; font: 400 9.5pt/1.3 var(--font-ui); color: #777 !important; }
+  /* A word search prints as a plain letter block (8mm squares) with the
+     clue list in two columns under it; found words keep their capsule. */
+  body.print-only .fc-ws-grid { padding: 0; background: none !important; break-inside: avoid; page-break-inside: avoid; }
+  body.print-only .fc-ws-marks { inset: 0; width: 100%; height: 100%; }
+  body.print-only .fc-ws-cell { flex-basis: 8mm; width: 8mm; font-size: 13pt; color: #111 !important; }
+  body.print-only .fc-ws-anchor { background: none !important; }
+  body.print-only .fc-ws-list .fc-xw-cluerows { columns: 2; column-gap: 10mm; }
+  body.print-only .fc-ws-list { display: block; }
+  body.print-only .fc-ws-tick { width: 5mm; }
 }
 
 /* --- Touch targets and iOS text-size hygiene ---------------------------------

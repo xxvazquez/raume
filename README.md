@@ -11,7 +11,7 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Reference**   | Vocabulary, Grammar, Phrases and Travel tables — furigana, search, audio, print |
 | **Flashcards**  | FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
-| **Puzzles**     | Crosswords and arrowords built from your words                   |
+| **Puzzles**     | Crosswords, arrowords and word searches built from your words    |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -208,7 +208,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards (below) |
-| **Puzzles** | Crossword / arroword from your words (below) |
+| **Puzzles** | Crossword / arroword / word search from your words (below) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -230,7 +230,7 @@ settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, generated fresh each time — at least 6
+A fill-in crossword or arroword, or a word search, generated fresh each time — at least 6
 words, or it tells you why not. Clues that give the answer away are left
 out: the word written in its own clue ("Japanese sake" → *sake*), or a
 loanword that just echoes its English (*cola* → コーラ).
@@ -241,8 +241,8 @@ loanword that just echoes its English (*cola* → コーラ).
   window the clue you're on and the Across / Down lists sit beside the grid.
 - **Source** — *Flashcards* (added, unpaused words) or *Tables*: one or more
   vocabulary tables, whether or not they're in flashcards.
-- **Style** — *Crossword* (numbered clue list) or *Arroword* (each clue
-  in a square before its answer). **Script** — *Romaji* (default), *Japanese*,
+- **Style** — *Crossword* (numbered clue list), *Arroword* (each clue
+  in a square before its answer) or *Word search* (below). **Script** — *Romaji* (default), *Japanese*,
   *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) —
   a word is never forced into a script it isn't written in. **Words** — 10, 15, 20, 30 or 40. Answers are always readings — kanji is
   never shown or typed.
@@ -256,6 +256,15 @@ loanword that just echoes its English (*cola* → コーラ).
   and Down side by side).
 - Grids are built compact — each word goes where it crosses the most and
   grows the grid the least — so even 40 words stay a dense block.
+- **Word search** — the answers hidden in a square of letters, built to be
+  hard: the list gives only the English clue, words run in all eight
+  directions (backwards and diagonally too), each word sits where it shares
+  the most letters with the others, and the spare squares are filled with
+  the answers' own letters. In romaji, words shorter than three letters are
+  left out (they turn up by chance). Drag across a word, or tap its first
+  and last letter; a found word gets a capsule, a tick and its reading in
+  the list, and the toolbar counts how many are found. The **⋯** menu has
+  *Reveal a word*, *Reveal puzzle*, *Clear found words* and *Print*.
 - Nothing is saved or scheduled.
 
 ---
