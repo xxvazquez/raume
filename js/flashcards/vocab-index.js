@@ -39,13 +39,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     // answer is "Onamae wa?" / "What is your name?" has to accept the same
     // words typed without the mark. Kept for the expected-answer *display*
     // (that reads the raw field), stripped only here for the comparison.
-    v = v.replace(/[?!.,;:。、！？「」『』（）()]/g, "").replace(/\s+/g, " ").trim();
+    v = v.replace(/[?!.,;:…。、！？「」『』（）()]/g, "").replace(/\s+/g, " ").trim();
     if (romaji) {
       v = foldMacrons(v);
       v = foldLongVowels(v);
       v = v.replace(/^~/, "");
     }
     return v;
+  }
+
+  // An English answer's notes are there to read, not to type: "which ...
+  // (before a noun)" also accepts plain "which", "hot (weather)" plain
+  // "hot". The full wording (parentheses dropped) still counts too.
+  function englishAnswerVariants(alt) {
+    var full = normalizeAnswer(alt, false);
+    var bare = normalizeAnswer(alt.replace(/[（(][^)）]*[)）]/g, " ").replace(/\.\.\.|…/g, " "), false);
+    return bare && bare !== full ? [full, bare] : [full];
   }
 
   function splitAlternatives(s) {
@@ -138,7 +147,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiAnswerDisplays = entry.romajiUsable ? [row.romaji] : [];
         }
         entry.englishDisplay = row.english;
-        entry.englishAnswers = splitAlternatives(row.english).map(function (a) { return normalizeAnswer(a, false); });
+        entry.englishAnswers = splitAlternatives(row.english).reduce(function (all, a) { return all.concat(englishAnswerVariants(a)); }, []);
         index[row.id] = entry;
       });
     });

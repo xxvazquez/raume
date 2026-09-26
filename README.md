@@ -200,6 +200,8 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - Long vowels are ignored — `kōhī`, `koohii` and `kouhii` all match, and
   likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked letters treat them as the
   same sound too.
+- An English answer's notes are optional — for *which … (before a noun)*
+  plain `which` counts, and for *hot (weather)* plain `hot`.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
   for `ryōri shimasu`.
 - The right answer in the wrong language — the romaji on a card that asks for

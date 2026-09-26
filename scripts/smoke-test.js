@@ -2256,6 +2256,14 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
   })());
+  check("an English answer doesn't need its notes: parentheses and '...' are optional, the full wording still counts", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    const dono = Object.values(idx).find(e => e.vocabId === "v0825");
+    return !!dono && vi.checkAnswer(dono, "jp-en", "which") && vi.checkAnswer(dono, "jp-en", "which before a noun")
+      && vi.checkAnswer(idx.v0509, "jp-en", "hot") && vi.checkAnswer(idx.v0509, "jp-en", "hot (weather)")
+      && !vi.checkAnswer(idx.v0509, "jp-en", "weather");
+  })());
   check("a Romaji -> English card accepts any same-spelled word's meaning (atsui: 暑い / 熱い / 厚い), but no other direction does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
