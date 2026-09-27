@@ -3334,6 +3334,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-mt-done-time { margin: 0; font-size: 34px; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fc-mt-done-meta { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-nav); }
+/* Pace and rank as two quiet stat cells, then the last ten runs as a
+   sparkline in the section tint (higher = faster), this run the dot. */
+.fc-mt-stats { display: flex; gap: 28px; margin: 2px 0 6px; }
+.fc-mt-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.fc-mt-stat-val { font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fc-mt-stat-lbl { font-size: var(--fs-micro); color: var(--muted); }
+.fc-mt-spark { display: block; margin: 4px 0 0; overflow: visible; }
+.fc-mt-spark-lbl { margin: 0 0 12px; font-size: var(--fs-micro); color: var(--faint); }
+.fc-mt-spark polyline { fill: none; stroke: color-mix(in srgb, var(--section) 55%, var(--paper)); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.fc-mt-spark circle { fill: var(--section-strong, var(--section)); }
 /* Listening (js/flashcards/crosswords.js wireListening): one white card
    with a big round ▶ in the section tint, the word appearing under it once
    answered; four choices under it as Match's tiles (2x2, one column on a

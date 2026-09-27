@@ -752,7 +752,12 @@ tall, text wrapping) — the reading leading at 17px, the English trailing at
 and faint fill; a right pair washes sage and then goes invisible in place so
 nothing shifts; a wrong pair washes coral with the word search's small shake
 (none under reduced motion). The end is one white card: the time large, a
-grey line ("New best · 1 miss"), a filled Play again.
+grey line ("New best · 2.1s faster · 1 miss" / "0.8s off your best"), two
+quiet stat cells (pace "1.6s per pair", rank "3rd of 14 runs"), a 128px
+sparkline of the last ten runs on the same words in the section tint — higher
+is faster, this run the solid dot, "last 10 runs" under it — and a filled Play
+again. Listening's end card shares the stat cells (this game's accuracy, your
+average over all games).
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

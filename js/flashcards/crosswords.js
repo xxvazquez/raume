@@ -703,7 +703,47 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Every finished Match / Listening game goes to the Dashboard's log.
   function recordRun(run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
-    if (runs) runs.record(run);
+    return runs ? runs.record(run) : null;
+  }
+  // Under a finished Match: pace per pair and where this run ranks among
+  // every run of the same setup, then a sparkline of the last ten -- this
+  // one the highlighted dot. Faster is higher on the line.
+  function ordinal(n) {
+    var t = n % 100, u = n % 10;
+    return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th");
+  }
+  // Under a finished Listening game: this game's accuracy beside your
+  // average over every Listening game so far.
+  function listeningStatsHtml(right, n, run) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    var all = runs ? runs.all().filter(function (r) { return r.mode === "listening"; }) : [];
+    if (run && !all.some(function (r) { return r.id === run.id; })) all.push(run);
+    var asked = 0, got = 0;
+    all.forEach(function (r) { asked += r.n; got += r.right || 0; });
+    return '<div class="fc-mt-stats"><div class="fc-mt-stat"><span class="fc-mt-stat-val">' + Math.round(right / n * 100) + '%</span><span class="fc-mt-stat-lbl">this game</span></div>' +
+      (all.length > 1 ? '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + Math.round(got / asked * 100) + '%</span><span class="fc-mt-stat-lbl">over ' + all.length + " games</span></div>" : "") +
+      "</div>";
+  }
+  function matchStatsHtml(key, total, pairs, run) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    var same = runs ? runs.all().filter(function (r) { return r.mode === "match" && r.setup === key; }) : [];
+    if (run && !same.some(function (r) { return r.id === run.id; })) same.push(run);
+    var rank = 1 + same.filter(function (r) { return r.ms < total; }).length;
+    var cells = '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + (total / pairs / 1000).toFixed(1) + 's</span><span class="fc-mt-stat-lbl">per pair</span></div>' +
+      (same.length > 1 ? '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + ordinal(rank) + '</span><span class="fc-mt-stat-lbl">of ' + same.length + " runs</span></div>" : "");
+    var last = same.slice(-10), spark = "";
+    if (last.length > 1) {
+      var max = Math.max.apply(null, last.map(function (r) { return r.ms; }));
+      var min = Math.min.apply(null, last.map(function (r) { return r.ms; }));
+      var span = Math.max(1, max - min), w = 120, h = 32, step = w / (last.length - 1);
+      var pts = last.map(function (r, i) { return [Math.round(i * step * 10) / 10, Math.round((4 + (r.ms - min) / span * (h - 8)) * 10) / 10]; });
+      var end = pts[pts.length - 1];
+      spark = '<svg class="fc-mt-spark" viewBox="-4 0 128 32" width="128" height="32" role="img" aria-label="Your last ' + last.length + ' times on these words">' +
+        '<polyline points="' + pts.map(function (q) { return q.join(","); }).join(" ") + '"/>' +
+        '<circle cx="' + end[0] + '" cy="' + end[1] + '" r="3.2"/></svg>' +
+        '<span class="fc-mt-spark-lbl">last ' + last.length + " runs</span>";
+    }
+    return '<div class="fc-mt-stats">' + cells + "</div>" + spark;
   }
   var matchTimer = null;
   function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
@@ -740,11 +780,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var key = matchBestKey(p), best = readBest()[key];
       var isBest = typeof best !== "number" || total < best;
       if (isBest) saveBest(key, total);
-      recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key });
+      var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key });
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
+      var outcome = typeof best !== "number" ? "New best"
+        : isBest ? "New best · " + ((best - total) / 1000).toFixed(1) + "s faster"
+        : ((total - best) / 1000).toFixed(1) + "s off your best";
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
-        '<p class="fc-mt-done-meta">' + (isBest ? "New best" : "Best " + formatClock(best)) + " · " + missText + "</p>" +
+        '<p class="fc-mt-done-meta">' + outcome + " · " + missText + "</p>" +
+        matchStatsHtml(key, total, p.placements.length, run) +
         '<button type="button" class="fc-btn fc-btn-primary" id="fcMtAgain">Play again</button></div>';
       document.getElementById("fcMtAgain").addEventListener("click", function () { generate(); rerender(); });
     }
@@ -886,11 +930,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }
     }
     function finish() {
-      recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score });
+      var run = recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score });
       countEl.textContent = score + " / " + p.questions.length;
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + p.questions.length + "</p>" +
+        listeningStatsHtml(score, p.questions.length, run) +
         '<p class="fc-mt-done-meta">' + (missed.length ? "Words to listen to again:" : "Every word right") + "</p>" +
         (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w, i) {
           return '<li><button type="button" class="fc-ls-say" data-m="' + i + '" aria-label="Play">' + SPEAKER_ICON + "</button>" +

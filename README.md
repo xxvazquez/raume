@@ -335,7 +335,9 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   a second to your time.
 - The words come in even rounds of at most 6 pairs (15 words → three rounds
   of 5), so a round fits a phone. The clock starts on your first tap.
-- At the end: your time, *New best* or your best so far, and your misses.
+- At the end: your time, *New best* (and by how much) or how far off your
+  best you were, your misses, your pace per pair, where this run ranks among
+  your runs on the same words, and a small line of your last ten times.
   Best times are kept in this browser, one per source, script and word count.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same
@@ -356,7 +358,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 - Right: a ✓, the word appears as written with its kana and romaji, and the
   next word plays by itself. Wrong: a ✕ on your pick, a ✓ on the right one,
   the word shown, and **Next** when you're ready.
-- At the end: your score ("12 / 15") and the words you missed, each with a
+- At the end: your score ("12 / 15"), this game's accuracy beside your
+  average over all Listening games, and the words you missed, each with a
   speaker to hear it again. **Play again** for new words; the **⋯** menu's
   *Restart* asks the same ones again.
 - No Japanese voice and no recorded clips loaded (a first visit offline)? It
