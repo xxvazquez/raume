@@ -148,9 +148,16 @@ Tapping a tile opens the **kanji sheet** — an iOS sheet: a centred
 bar on a phone, at body level (never under a backdrop-filter). Its ground is
 `--group-ground`: the character in a white 76px tile beside the meaning as a
 title, then inset-grouped cards under list-header labels — Readings (On / Kun /
-Romaji rows, okurigana lighter), Example, *Words with 新* — and one full-width
-filled capsule, **Add to flashcards**, that turns white (secondary) once added.
-Example words use the reference tables' print-style furigana.
+Romaji rows, okurigana lighter), Writing (Strokes, Radical), Example, and In your
+tables: one *Words with 新 · 17* disclosure row that unfolds the whole list as
+compact rows — and one full-width filled capsule, **Add to flashcards**, that
+turns white (secondary) once added. Example words use the reference tables'
+print-style furigana.
+
+Every Readings / Writing row ends in a tinted ⓘ. It opens the tables' grammar
+popover (`.role-pop`), not a pushed page: a bold title, a one-line definition,
+a few hairline-separated label / value lines and an example on a grey chip —
+never a paragraph. N5 readers: every kanji in it carries furigana.
 
 ## Labels and measure
 

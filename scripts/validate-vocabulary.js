@@ -69,16 +69,19 @@ for (const table of tableList) {
 
     // A kanji row: one character (jp holds it with the reading the speaker
     // says), its N5 on (katakana) / kun (hiragana, "." before okurigana)
-    // readings, and an optional example word.
+    // readings, its stroke count and radical (the character, its Japanese
+    // name in hiragana, an English gloss), and an optional example word.
     if (row.type === "kanji") {
       const ch = row.jp && row.jp.length === 1 ? row.jp[0].kanji : "";
       const on = row.on || [], kun = row.kun || [];
       const bad = !ch || [...ch].length !== 1 || !/[一-龯]/.test(ch) || !row.jp[0].reading || !row.romaji || !row.english
         || !Array.isArray(on) || !Array.isArray(kun) || !on.concat(kun).length
         || on.some(r => !/^[ァ-ヺー]+$/.test(r)) || kun.some(r => !/^[ぁ-ゖ]+(\.[ぁ-ゖ]+)?$/.test(r))
+        || !Number.isInteger(row.strokes) || row.strokes < 1 || row.strokes > 30
+        || !row.radical || !row.radical.r || !/^[ぁ-ゖ]+$/.test(row.radical.name || "") || !row.radical.en
         || (row.example && (!Array.isArray(row.example.jp) || !row.example.english || !jpText(row.example.jp).includes(ch)));
       if (bad) {
-        console.error("Kanji validation failed: needs one kanji, its reading, romaji, English, katakana on / hiragana kun readings, and an example containing it (" + table.title + " " + row.id + ").");
+        console.error("Kanji validation failed: needs one kanji, its reading, romaji, English, katakana on / hiragana kun readings, strokes, a radical, and an example containing it (" + table.title + " " + row.id + ").");
         process.exit(1);
       }
       const key = "kanji|" + ch;

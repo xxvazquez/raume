@@ -63,7 +63,8 @@ row. Grammatical **particles are blue and bold** everywhere.
 | | |
 | --- | --- |
 | **Grid** | Each theme opens as a grid of tiles: the kanji large, its meaning under it. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
-| **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana), its romaji, an example word with furigana, **Words with** it — up to eight words from the other tables written with that kanji, shortest first — and **Add to flashcards**. |
+| **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana) and romaji, its stroke count and radical, an example word with furigana, **Words with** it — every word from the other tables written with that kanji, shortest first, folded away until you tap it — and **Add to flashcards**. |
+| **ⓘ** | Each row of the sheet has one: a short popover explaining it for an N5 learner — what on / kun readings are, strokes and stroke order, what a radical is (and when one is only there for dictionary sorting). Every kanji in them has furigana. |
 | **Flashcards** | A kanji gets two cards: meaning (山 → mountain) and reading (山 → any one of its readings in romaji, yama or san). Never English → kanji — that's writing, which typing can't check. Kanji stay out of Puzzles. |
 
 ### Finding things

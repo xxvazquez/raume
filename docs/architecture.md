@@ -374,12 +374,15 @@ A `kanji` row (the N5 Kanji tables, `tableClass: "vocab-kanji"`, the Kanji
 section) holds one character: `jp` is that kanji with the reading the speaker
 says, `romaji` every reading a learner might type (`"yama / san"` — any one
 counts), `english` its meaning, `on` (katakana) and `kun` (hiragana, a `.` before
-okurigana: `"み.る"`) the N5 readings, and an optional `example` word
-(`{ jp, english }`) that contains it. `validate` checks all of that and that no
-kanji appears twice. In Flashcards a kanji gets only jp-en and jp-ro, prompted by
+okurigana: `"み.る"`) the N5 readings, `strokes`, its `radical` (`{ r, name, en }` —
+the radical, its Japanese name in hiragana, an English gloss; `sortOnly: true` when
+it's only the dictionary's filing slot, like 乙 in 九), and an optional `example`
+word (`{ jp, english }`) that contains it. `validate` checks all of that and that
+no kanji appears twice. In Flashcards a kanji gets only jp-en and jp-ro, prompted by
 the bare character (`vocab-index.js` `entry.kanji`); Puzzles skips the kanji
 tables. The sheet's *Words with* list is computed, not stored
-(`render.js` `wordsWithKanji`).
+(`render.js` `wordsWithKanji`); its ⓘ explainers are copy in `render.js`
+`KANJI_HELP`, kanji marked `{漢字|かんじ}` for furigana.
 
 Every `verb-pair` row carries the same idea for its group: `verbClass` (`"godan"`
 / `"ichidan"` / `"irregular"`) drives the 五段/一段/変格 badge, and `verbNote` marks

@@ -165,14 +165,15 @@ async function main() {
       && yama.querySelector(".kanji-readings").textContent === "サン やま" && yama.querySelector(".jpword").dataset.romaji === "yama / san"
       && miru.querySelector(".kanji-okuri").textContent === "る" && yama.cells[1].querySelector(".meaning-text").textContent === "mountain";
   })());
-  check("tapping a kanji tile opens its sheet -- readings, an example with furigana, the reader's words that use it (not repeating the example), Add to flashcards -- and Escape closes it, back on the tile", (() => {
+  check("tapping a kanji tile opens its sheet -- readings, strokes and radical, an example with furigana, the reader's words that use it folded away (not repeating the example), Add to flashcards -- and Escape closes it, back on the tile", (() => {
     const sheet = document.getElementById("kanjiSheet"), scrim = document.getElementById("kanjiScrim");
     const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "新");
     const closedAtStart = sheet.hidden && scrim.hidden;
     tile.querySelector(".kanji-char").click();
     const opened = !sheet.hidden && !scrim.hidden && sheet.querySelector(".ks-char").textContent === "新"
       && sheet.querySelector(".ks-meaning").textContent === "new" && /シン/.test(sheet.textContent) && /あたらしい/.test(sheet.textContent)
-      && !!sheet.querySelector(".ks-example ruby rt") && sheet.querySelectorAll(".ks-words .ks-row").length >= 1
+      && !!sheet.querySelector(".ks-example ruby rt") && sheet.querySelectorAll(".ks-words .ks-example").length >= 1 && !sheet.querySelector(".ks-words").open
+      && /Strokes13/.test(sheet.textContent.replace(/\s/g, "")) && /斤おのづくり/.test(sheet.textContent.replace(/\s/g, ""))
       && [...sheet.querySelectorAll(".ks-words .ks-example-en")].some(e => e.textContent === "new")
       && ![...sheet.querySelectorAll(".ks-words .ks-example-jp")].some(e => e.textContent.includes("新幹線"))
       && sheet.querySelector(".ks-add").dataset.vocabId === tile.dataset.vocabId
@@ -180,9 +181,36 @@ async function main() {
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     return closedAtStart && opened && sheet.hidden && scrim.hidden && sheet.innerHTML === "" && document.activeElement === tile;
   })());
-  check("Words with ... draws on every other table, never the kanji or sentence tables, shortest first and at most eight", (() => {
+  check("each sheet row's ⓘ opens a popover explaining it -- every kanji in it with furigana, a sorting-only radical saying so -- tapping elsewhere or Escape closes it, Escape again closes the sheet", (() => {
+    const sheet = document.getElementById("kanjiSheet");
+    const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "九");
+    tile.click();
+    const infos = [...sheet.querySelectorAll(".ks-info")];
+    const rad = sheet.querySelector('.ks-info[data-help="radical"]');
+    rad.click();
+    let pop = document.querySelector(".kanji-help-pop");
+    const opened = infos.map(b => b.dataset.help).join(",") === "on,kun,romaji,strokes,radical" && !!pop
+      && infos.map(b => b.closest(".ks-row").querySelector(".ks-label").textContent).join(",") === "On,Kun,Romaji,Strokes,Radical"
+      && !!pop.querySelector(".kh-title") && pop.querySelectorAll(".kh-item").length >= 3
+      && /just for sorting/.test(pop.textContent) && rad.getAttribute("aria-expanded") === "true";
+    const allRuby = infos.every(b => {
+      b.click();
+      const p = document.querySelector(".kanji-help-pop");
+      const bare = p.cloneNode(true);
+      bare.querySelectorAll("ruby").forEach(r => r.remove());
+      return !/[一-龯]/.test(bare.textContent);
+    });
+    sheet.querySelector(".ks-meaning").click();
+    const tappedAway = !document.querySelector(".kanji-help-pop");
+    rad.click();
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const escPop = !document.querySelector(".kanji-help-pop") && !sheet.hidden;
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    return opened && allRuby && tappedAway && escPop && sheet.hidden;
+  })());
+  check("Words with ... draws on every other table, never the kanji or sentence tables, shortest first, all of them", (() => {
     const w = window.RaumeStudy.vocab.wordsWithKanji("日", "");
-    return w.length === 8 && w.every(x => x.text.includes("日")) && w.every((x, i) => !i || w[i - 1].text.length <= x.text.length)
+    return w.length > 8 && w.every(x => x.text.includes("日")) && w.every((x, i) => !i || w[i - 1].text.length <= x.text.length)
       && window.RaumeStudy.vocab.wordsWithKanji("新", "").some(x => x.english === "new");
   })());
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {

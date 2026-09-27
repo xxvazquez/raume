@@ -2444,6 +2444,43 @@ body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
 }
 .ks-example-jp rt { font-size: 11px; color: var(--furigana); }
 .ks-example-en { color: var(--muted); }
+/* Each row's trailing ⓘ, in the tint, opens a small popover with its
+   explainer -- the tables' grammar popover (.role-pop), set a touch wider,
+   its kanji with furigana (render.js kanjiHelpHtml). */
+.ks-val { margin-left: auto; }
+.ks-info {
+  appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; margin: -6px -8px -6px -6px; padding: 0; border: 0;
+  background: transparent; color: var(--section-strong); cursor: pointer;
+}
+.ks-info svg { width: 20px; height: 20px; }
+.ks-info:active { opacity: .5; }
+.role-pop.kanji-help-pop { z-index: 95; width: min(290px, calc(100vw - 16px)); max-width: none; padding: 12px 14px; white-space: normal; }
+.kanji-help-pop rt { font-size: 9.5px; font-weight: 400; color: var(--furigana); }
+.kh-title { font-size: 15px; font-weight: 600; line-height: 1.9; color: var(--ink); }
+.kh-lead { margin: 2px 0 8px; line-height: 1.4; color: var(--ink-2); }
+.kh-list { margin: 0; }
+.kh-item { display: flex; gap: 10px; padding: 5px 0; border-top: 1px solid var(--row-line); line-height: 1.9; }
+.kh-item dt { flex: 0 0 82px; color: var(--muted); }
+.kh-item dd { margin: 0; flex: 1 1 auto; color: var(--ink-2); line-height: 1.4; align-self: center; }
+.kh-ex {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-top: 8px; padding: 6px 10px 5px; border-radius: 10px; background: var(--group-ground);
+}
+.kh-ex-jp { flex: none; font-size: 17px; line-height: 1.9; color: var(--ink); white-space: nowrap; }
+.kh-ex-en { color: var(--muted); text-align: right; }
+.ks-rad { font-size: 17px; color: var(--ink-2); }
+/* Words with 月: every one from the reader's tables, folded into one
+   disclosure row until asked for; the rows are a compact list. */
+.ks-words summary { list-style: none; cursor: pointer; }
+.ks-words summary::-webkit-details-marker { display: none; }
+.ks-words summary .ks-val { margin-left: auto; }
+.ks-chev { display: inline-flex; color: var(--faint); transform: rotate(-90deg); transition: transform .15s ease; }
+.ks-words[open] .ks-chev { transform: none; }
+.ks-words .ks-example { min-height: 0; padding-top: 19px; padding-bottom: 6px; }
+.ks-words .ks-example-jp { font-size: 17px; }
+.ks-words .ks-example + .ks-example { background-size: calc(100% - 16px) 1px; }
+.ks-words .ks-example:last-child { padding-bottom: 9px; }
 /* Add to flashcards: a full-width filled capsule; once added, a white
    (secondary) one that says so. */
 .kanji-sheet .ks-add {

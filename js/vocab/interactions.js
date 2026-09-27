@@ -311,14 +311,53 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     sheet.hidden = true;
     if (scrim) scrim.hidden = true;
     sheet.innerHTML = '';
+    closeKanjiPop();
     if (kanjiOpener && kanjiOpener.isConnected && !kanjiOpener.closest('[hidden]')) kanjiOpener.focus();
     kanjiOpener = null;
   }
   vocab.closeKanjiSheet = closeKanjiSheet;
+  // The ⓘ popover: the tables' grammar-popover look (.role-pop), placed
+  // above the button (below if there's no room), its arrow on the ⓘ.
+  let kanjiPop = null, kanjiPopOwner = null;
+  function openKanjiPop(btn) {
+    closeKanjiPop();
+    const html = kanjiOpener && vocab.kanjiHelpHtml(kanjiOpener.dataset.vocabId, btn.dataset.help);
+    if (!html) return;
+    kanjiPop = document.createElement('div');
+    kanjiPop.className = 'role-pop kanji-help-pop';
+    kanjiPop.setAttribute('role', 'note');
+    kanjiPop.innerHTML = html;
+    document.body.appendChild(kanjiPop);
+    const r = btn.getBoundingClientRect();
+    const w = kanjiPop.offsetWidth, h = kanjiPop.offsetHeight;
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+    const above = r.top - h - 10 >= 8;
+    kanjiPop.style.left = left + 'px';
+    kanjiPop.style.top = (above ? r.top - h - 10 : r.bottom + 10) + 'px';
+    kanjiPop.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
+    kanjiPop.classList.toggle('role-pop-below', !above);
+    btn.setAttribute('aria-expanded', 'true');
+    kanjiPopOwner = btn;
+  }
+  function closeKanjiPop() {
+    if (!kanjiPop) return false;
+    kanjiPop.remove();
+    kanjiPop = null;
+    if (kanjiPopOwner) kanjiPopOwner.setAttribute('aria-expanded', 'false');
+    kanjiPopOwner = null;
+    return true;
+  }
+  document.addEventListener('scroll', closeKanjiPop, { passive: true, capture: true });
+  window.addEventListener('resize', closeKanjiPop);
   document.addEventListener('click', function (event) {
     const t = event.target;
     if (!t || !t.closest) return;
     if (t.closest('.ks-close, #kanjiScrim')) { closeKanjiSheet(); return; }
+    // A row's ⓘ opens its explainer in a popover (again: closes it); any
+    // other tap closes an open one.
+    const info = t.closest('#kanjiSheet .ks-info');
+    if (info) { if (kanjiPopOwner === info) closeKanjiPop(); else openKanjiPop(info); return; }
+    if (kanjiPop && !t.closest('.kanji-help-pop')) closeKanjiPop();
     if (t.closest('button, a, #kanjiSheet')) return;
     // Cover answers: a tap checks the tile's meaning instead (the handler
     // for that mode, below) -- the sheet would give it away.
@@ -327,7 +366,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   });
   document.addEventListener('keydown', function (event) {
     const sheet = document.getElementById('kanjiSheet');
-    if (event.key === 'Escape' && sheet && !sheet.hidden) { closeKanjiSheet(); return; }
+    if (event.key === 'Escape' && sheet && !sheet.hidden) { if (!closeKanjiPop()) closeKanjiSheet(); return; }
     const t = event.target;
     if ((event.key === 'Enter' || event.key === ' ') && t && t.matches && t.matches('#vocabulary .vocab-kanji tr.kanji-tile')) {
       event.preventDefault();
