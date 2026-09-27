@@ -4588,16 +4588,23 @@ mark.fc-diff-co {
 .fc-xw-actions, .fc-xw-current { max-width: none; }
 .fc-xw-actions { margin-bottom: 14px; }
 .fc-xw-options { position: relative; flex: 0 1 auto; min-width: 0; }
+/* An iOS menu button with a subtitle: the style as the title, source /
+   count / script as a quieter second line. */
 .fc-xw-summary {
   appearance: none; border: 0; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
-  height: 36px; padding: 0 14px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 14px; max-width: 100%;
+  min-width: 220px; min-height: 52px; padding: 8px 14px 8px 16px; border-radius: 16px;
   background: var(--paper); box-shadow: var(--control-lift);
-  color: var(--ink); font: 400 var(--fs-nav)/1 var(--font-ui);
+  color: var(--ink); font: 400 var(--fs-nav)/1 var(--font-ui); text-align: left;
 }
 .fc-xw-summary:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
-.fc-xw-summary-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fc-xw-summary-dot { color: var(--faint); margin: 0 6px; }
+.fc-xw-summary-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.fc-xw-summary-title { font-size: 15px; font-weight: 500; line-height: 1.25; }
+.fc-xw-summary-sub {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--muted); font-size: var(--fs-small); line-height: 1.3;
+}
+.fc-xw-summary-dot { color: var(--faint); margin: 0 5px; }
 .fc-xw-summary .fc-xw-chevron { color: var(--faint); }
 .fc-xw-summary[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
 .fc-xw-sheet {
@@ -4649,18 +4656,14 @@ mark.fc-diff-co {
   /* The whole summary always reads on a phone, never ellipsised: when it
      doesn't fit beside Check and ⋯ it takes the row to itself (they drop to
      the trailing edge of the next), and only if even the full row is too
-     narrow do its parts wrap -- whole, with a gap in place of the dots. */
+     narrow does its second line wrap -- between whole parts. */
   .fc-xw-actions { flex-wrap: wrap; row-gap: 8px; }
   .fc-xw-options { flex: 1 1 max-content; max-width: 100%; }
   .fc-xw-options ~ .fc-xw-actions-end { margin-left: auto; }
-  .fc-xw-summary {
-    width: 100%; justify-content: space-between;
-    height: auto; min-height: 36px; padding: 8px 14px; border-radius: 18px;
-    text-align: left; line-height: 1.3;
-  }
-  .fc-xw-summary-text { display: flex; flex-wrap: wrap; column-gap: 12px; white-space: normal; overflow: visible; }
-  .fc-xw-summary-part { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-  .fc-xw-summary-dot { display: none; }
+  .fc-xw-summary { width: 100%; min-width: 0; }
+  /* A long table list wraps rather than hiding the count behind an ellipsis. */
+  .fc-xw-summary-sub { white-space: normal; }
+  .fc-xw-summary-part { white-space: nowrap; }
   .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
   .fc-xw-sheet {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;

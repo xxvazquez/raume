@@ -696,14 +696,17 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
-**Puzzles** puts the puzzle first. One toolbar: a white capsule **summary
-button** ("Crossword · Flashcards · 15 words · Romaji ⌄") leading, then
+**Puzzles** puts the puzzle first. One toolbar: a white **summary button**
+leading — an iOS menu button with a subtitle: the style as a 15px medium
+title, "Flashcards · 15 words · Romaji" as a 13px muted line under it, ⌄
+trailing, 52px tall with a 16px radius (one dotted line of four equal parts
+read cramped) — then
 **New puzzle** (white) and filled **Check** trailing with the reference
 tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Print; on a
 phone New puzzle moves into it). The summary is never ellipsised: on a
-phone it drops its dots for a gap, takes the row to itself when it doesn't fit
-beside Check (which moves to the trailing edge below), and only wraps its parts
-— whole — if even the full row is too narrow. The summary opens the settings — Source,
+phone it takes the row to itself when it doesn't fit beside Check (which
+moves to the trailing edge below), and only wraps its second line — between
+whole parts — if even the full row is too narrow. The summary opens the settings — Source,
 Tables, Style, Script, Words as iOS pop-up rows (label left, value + ⌃⌄ right,
 an invisible native `<select>` over the row; the table list is checkmark rows)
 — in a glass popover under it (`.fc-xw-sheet`, the Options pattern), a bottom

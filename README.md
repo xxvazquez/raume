@@ -280,8 +280,8 @@ Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
 
-The puzzle comes first. Its settings sit behind one summary button
-("Crossword · Flashcards · 15 words · Romaji") that opens them as a popover
+The puzzle comes first. Its settings sit behind one summary button — the
+style as its title, "Flashcards · 15 words · Romaji" under it — that opens them as a popover
 (a bottom sheet on a phone); changing one makes a new puzzle. On a wide
 window the clue you're on and the Across / Down lists sit beside the grid.
 
@@ -290,7 +290,7 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 | **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
 | **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search*, *Match* or *Listening* |
 | **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
-| **Words** | 10, 15, 20, 30 or 40 |
+| **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The summary shows the real count when the pool holds fewer |
 
 <details>
 <summary><b>Solving a crossword / arroword</b></summary>

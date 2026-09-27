@@ -1022,7 +1022,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
   var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
-  var SIZE_OPTS = [10, 15, 20, 30, 40];
+  // A grid stops fitting (and building fast) past 40 words; Match and
+  // Listening are just longer games, so they go up to the whole pool.
+  var GRID_MAX_WORDS = 40;
+  var ALL_WORDS = 9999;
+  var GRID_SIZE_OPTS = [10, 15, 20, 30, 40];
+  var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, [String(ALL_WORDS), "All"]];
+  function isGame(mode) { return mode === "match" || mode === "listening"; }
+  function sizeOpts() { return isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS; }
+  // The count the game will really have: never more than the pool holds.
+  function sizeLabel() {
+    var n = Math.min(state.size, state.poolCount || state.size);
+    if (state.size === ALL_WORDS) return "All " + n + " words";
+    return n + (n === 1 ? " word" : " words");
+  }
 
   // An iOS pop-up button row: label left, the current value and a small
   // up/down chevron right, the whole 44px row the tap target. A real
@@ -1335,7 +1348,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
     // Listening has no script to choose -- you hear the word.
     if (state.mode !== "listening") rows += pickerRow("script", "Script", scriptOpts(), state.script);
-    rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
+    rows += pickerRow("size", "Words", sizeOpts(), state.size);
     return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
   }
 
@@ -1357,13 +1370,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
   }
-  // One summary button stands in for the four settings rows -- "Crossword ·
-  // Flashcards · 15 words · Romaji" -- and opens them as a sheet: a popover
-  // under it on a wide window, a bottom sheet on a phone (the reference
-  // pages' Options pattern). The puzzle itself comes first.
+  // One summary button stands in for the four settings rows and opens them
+  // as a sheet: a popover under it on a wide window, a bottom sheet on a
+  // phone (the reference pages' Options pattern). Like an iOS menu button
+  // with a subtitle: the style as its title, "Flashcards · 15 words ·
+  // Romaji" as a quieter second line -- one dotted line of four equal
+  // parts read as a cramped run-on. The puzzle itself comes first.
   function optionsSummary() {
     var src = state.source === "table" ? tablesSummary() : "Flashcards";
-    var parts = [optionLabel(MODE_OPTS, state.mode), src, state.size + " words"];
+    var parts = [src, sizeLabel()];
     return state.mode === "listening" ? parts : parts.concat(optionLabel(SCRIPT_OPTS, state.script));
   }
   function toolbarHtml() {
@@ -1377,9 +1392,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return '<div class="fc-xw-actions">' +
       '<div class="fc-xw-options">' +
       '<button type="button" class="fc-xw-summary" id="fcXwOptions" aria-haspopup="dialog" aria-expanded="' + state.optionsOpen + '" aria-controls="fcXwSheet">' +
-      '<span class="fc-xw-summary-text">' + parts.map(function (t, i) {
-        return '<span class="fc-xw-summary-part' + (i === 1 ? " fc-xw-summary-src" : "") + '">' + esc(t) + "</span>";
-      }).join('<span class="fc-xw-summary-dot" aria-hidden="true">·</span>') + "</span>" +
+      '<span class="fc-xw-summary-text">' +
+      '<span class="fc-xw-summary-title">' + esc(optionLabel(MODE_OPTS, state.mode)) + "</span>" +
+      '<span class="fc-xw-summary-sub">' + parts.map(function (t, i) {
+        return '<span class="fc-xw-summary-part' + (i === 0 ? " fc-xw-summary-src" : "") + '">' + esc(t) + "</span>";
+      }).join('<span class="fc-xw-summary-dot" aria-hidden="true">·</span>') + "</span></span>" +
       CHEVRON_ICON + "</button>" +
       '<div class="fc-xw-scrim"' + (state.optionsOpen ? "" : " hidden") + "></div>" +
       '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Puzzle options"' + (state.optionsOpen ? "" : " hidden") + ">" +
@@ -1466,6 +1483,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
         state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
+        if (key === "mode" && !isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
         generate();
         rerender();
       });
