@@ -1741,6 +1741,10 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .help-support::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
 .help-support:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
 .page-help .help-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
+/* The licence line: the smallest, quietest text on the page, its links
+   underlined rather than tinted. */
+.page-help .help-legal { margin-top: 18px; color: var(--faint); font-size: var(--fs-micro); }
+.page-help .help-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .help-group summary {
   position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none;
   padding: 10px 40px 10px 16px;

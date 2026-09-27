@@ -397,10 +397,13 @@ test can't reach Supabase, so check the signed-in path by hand.
 
 ## License
 
-Code and original content (the curated vocabulary and explanations) are under
-the [PolyForm Noncommercial License 1.0.0](LICENSE). You may use, study,
-self-host, modify and share them for any noncommercial purpose. The `raume`
-name, wordmark and logo are reserved — see [`NOTICE`](NOTICE).
+The **code** is under the [PolyForm Noncommercial License 1.0.0](LICENSE); the
+original **content** — the curated vocabulary and kanji tables and the
+explanations (Help, ⓘ notes, these docs) — is under
+[CC BY-NC-SA 4.0](LICENSE-CONTENT.md). Either way you may use, study, share and
+adapt it for any noncommercial purpose; shared content needs credit and the same
+licence. The `raume` name, wordmark and logo are reserved — see
+[`NOTICE`](NOTICE). The Help page says so in one line.
 
 Third-party parts keep their own licenses:
 

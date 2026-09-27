@@ -7,15 +7,19 @@ Required Notice: Copyright 2026 Laura Maestú Vázquez (https://github.com/xxvaz
 First-party code and content
 ----------------------------
 
-The source code in this repository is licensed under the PolyForm
+Code: the source code in this repository is licensed under the PolyForm
 Noncommercial License 1.0.0 — see LICENSE. In short: you may use, study,
 self-host, modify, and share it for any noncommercial purpose (personal
 study, research, teaching, hobby projects). Commercial use is not granted.
 
-The same terms cover the original written material in this repository as a
-curated compilation: the selection and arrangement of entries in
-data/vocabulary.js, and the prose in README.md and the in-app Help. The bare
-facts — individual Japanese words and their English glosses — are not claimed.
+Content: raume's original written material is licensed under Creative
+Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA
+4.0, https://creativecommons.org/licenses/by-nc-sa/4.0/) — see
+LICENSE-CONTENT.md. That is the curated compilation in data/vocabulary.js
+(the selection and arrangement of entries, their notes and tags, the N5
+kanji tables) and the prose in README.md, docs/, the in-app Help and the
+kanji explanations. The bare facts — individual Japanese words, readings and
+their English glosses — are not claimed.
 
 
 Name and marks
