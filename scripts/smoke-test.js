@@ -2481,6 +2481,25 @@ async function main() {
     window.RaumeStudy.flashcards.render();
   }
 
+  console.log("Flashcards: a restored session keeps its own cache");
+  {
+    const fcStore = window.RaumeStudy.flashcards.store;
+    const c = fcStore.getCache();
+    const saved = JSON.stringify(c);
+    c.userId = "user-a";
+    c.logsOutbox = [{ clientReviewId: "r1", cardId: "x" }];
+    fcStore.saveCache();
+    const cardCount = Object.keys(c.cards).length;
+    fcStore.resetCacheForUser("user-a");
+    const kept = Object.keys(fcStore.getCache().cards).length === cardCount && fcStore.getCache().logsOutbox.length === 1;
+    fcStore.resetCacheForUser("user-b");
+    const wiped = Object.keys(fcStore.getCache().cards).length === 0 && fcStore.getCache().userId === "user-b";
+    check("the same account coming back keeps its cards and offline outbox; another account starts empty", cardCount > 0 && kept && wiped);
+    Object.assign(fcStore.getCache(), JSON.parse(saved));
+    fcStore.saveCache();
+    window.RaumeStudy.flashcards.render();
+  }
+
   console.log("Flashcards: Kana tab");
   const kd = window.RaumeStudy.flashcards.kanaData;
   check("the kana tables expose the named groups per script with counts", (() => {

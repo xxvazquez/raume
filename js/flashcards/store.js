@@ -250,7 +250,13 @@ window.RaumeStudy.flashcards.store = (function () {
     saveCache();
     return list;
   }
+  // Only a *different* user (or none) starts from empty. The same account
+  // coming back -- every page load restores its session -- keeps its
+  // cached cards and offline outbox, so the dashboard isn't "No flashcards
+  // yet" until the server answers, works offline after a reload, and a
+  // review queued offline survives the reload to sync later.
   function resetCacheForUser(userId) {
+    if (userId && loadCache().userId === userId) return;
     cache = emptyCache(userId);
     cacheLoadedKey = cacheKey();
     saveCache();
@@ -328,6 +334,7 @@ window.RaumeStudy.flashcards.store = (function () {
     return kanaCache;
   }
   function resetKanaCacheForUser(userId) {
+    if (userId && loadKanaCache().userId === userId) return; // same account: keep it (see resetCacheForUser)
     kanaCache = emptyKanaCache(userId);
     kanaCacheLoadedKey = kanaCacheKey();
     saveKanaCache();

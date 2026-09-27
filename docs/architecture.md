@@ -60,7 +60,10 @@ flowchart LR
 - **Signed in** — Supabase Postgres is the sole authoritative store, scoped per
   account by Row Level Security. `localStorage` is a read-through cache plus an
   offline outbox: reviews made offline are computed locally, queued, and synced
-  on reconnect (`syncOutbox` / `syncKanaOutbox` in `data-ops.js`). Each queued
+  on reconnect (`syncOutbox` / `syncKanaOutbox` in `data-ops.js`). The cache
+  survives a reload: a restored session for the same account keeps it
+  (`store.resetCacheForUser` only empties it for a different user), so the
+  dashboard shows at once, works offline, and queued reviews still sync. Each queued
   review is synced under a 20s timeout so a half-open connection can't leave the
   flag stuck and block every future retry; a review whose card no longer exists
   on the server (FK violation) is dropped rather than wedging the queue. The two
