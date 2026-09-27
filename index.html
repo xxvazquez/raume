@@ -150,6 +150,7 @@
         <li><span class="help-term">Speaker</span><span class="help-desc">Plays the word aloud.</span></li>
         <li><span class="help-term">Particles</span><span class="help-desc">Blue and bold, like <span class="particle">は</span> — tap one to see how it reads.</span></li>
         <li><span class="help-term">Kanji</span><span class="help-desc">Tap a kanji for its readings, strokes and radical, an example, words that use it and Add to flashcards. Each ⓘ explains its row.</span></li>
+        <li><span class="help-term">Known</span><span class="help-desc">Mark as known in a kanji’s sheet turns its tile green.</span></li>
         <li><span class="help-term">Stroke order</span><span class="help-desc">A kanji draws itself stroke by stroke; Replay draws it again. Drawings adapted from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a> by Ulrich Apel, <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="noopener" target="_blank">CC BY-SA 3.0</a>.</span></li>
         <li><span class="help-term">ⓘ on a row</span><span class="help-desc">Its grammar in one place: い / な, 五段 / 一段 / 変格, and the particles it takes.</span></li>
       </ul>
@@ -221,6 +222,7 @@
                        this early despite flashcards loading much later.)
   5. js/vocab/kana-romaji.js  -> RaumeStudy.kanaRomaji (kana->romaji for the hover/tap reading layer)
      js/vocab/icons.js / table-custom.js / icon-picker.js -> per-table icon & name personalisation
+     js/vocab/kanji-known.js -> RaumeStudy.knownKanji (kanji marked Known in the Kanji sheet)
      js/vocab/custom-vocab.js -> RaumeStudy.customVocab (reader's own rows/tables, merged into the dataset)
   6. js/vocab/render.js       -> RaumeStudy.vocab  (tables + top-nav rendering, sorting)
   7. js/vocab/interactions.js -> RaumeStudy.vocab  (routing, search, view modes, menus, print, polite)
@@ -250,6 +252,7 @@
 <script src="js/vocab/kana-romaji.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/icons.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/table-custom.js?v=__CACHEBUST__"></script>
+<script src="js/vocab/kanji-known.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/icon-picker.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/custom-vocab.js?v=__CACHEBUST__"></script>
 <script src="js/vocab/render.js?v=__CACHEBUST__"></script>

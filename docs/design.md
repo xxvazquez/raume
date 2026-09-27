@@ -151,7 +151,10 @@ title, then inset-grouped cards under list-header labels — Readings (On / Kun 
 Romaji rows, okurigana lighter), Writing (Strokes, Radical), Example, and In your
 tables: one *Words with 新 · 17* disclosure row that unfolds the whole list as
 compact rows — and one full-width filled capsule, **Add to flashcards**, that
-turns white (secondary) once added. Example words use the reference tables'
+turns white (secondary) once added. Under the title sits a small white capsule,
+**Mark as known**; pressed, it reads "✓ Known" in the state sage
+(`--right-soft` wash, `--right-strong` ink), and the kanji's tile takes the
+same wash, sage character and meaning, and a small check badge in its corner. Example words use the reference tables'
 print-style furigana.
 
 Writing opens with the **stroke-order drawing**: a 156px `--group-ground`

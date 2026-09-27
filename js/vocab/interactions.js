@@ -316,6 +316,19 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     kanjiOpener = null;
   }
   vocab.closeKanjiSheet = closeKanjiSheet;
+  // A Known change -- here or synced from another device -- repaints the
+  // tiles and the open sheet's button in place.
+  if (window.RaumeStudy.knownKanji) {
+    window.RaumeStudy.knownKanji.onChange(function () {
+      const kk = window.RaumeStudy.knownKanji;
+      document.querySelectorAll('tr.kanji-tile[data-vocab-id]').forEach(function (tile) {
+        tile.classList.toggle('kanji-known', kk.isKnown(tile.dataset.vocabId));
+      });
+      document.querySelectorAll('#kanjiSheet .ks-known').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', String(kk.isKnown(btn.dataset.vocabId)));
+      });
+    });
+  }
   // The ⓘ popover: the tables' grammar-popover look (.role-pop), placed
   // above the button (below if there's no room), its arrow on the ⓘ.
   let kanjiPop = null, kanjiPopOwner = null;
@@ -360,6 +373,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (replay) {
       const svg = replay.parentNode.querySelector('.so-svg');
       if (svg) svg.replaceWith(svg.cloneNode(true));
+      return;
+    }
+    // Known: the tile turns green (and back); the store tells every tile.
+    const knownBtn = t.closest('#kanjiSheet .ks-known');
+    if (knownBtn && window.RaumeStudy.knownKanji) {
+      window.RaumeStudy.knownKanji.setKnown(knownBtn.dataset.vocabId, knownBtn.getAttribute('aria-pressed') !== 'true');
       return;
     }
     const info = t.closest('#kanjiSheet .ks-info');

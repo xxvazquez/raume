@@ -127,6 +127,12 @@ alter table public.flashcard_settings add column if not exists paused_tables jso
 -- "stop flagging this" mark -- it never touches a card. Shape: {"v0123": 9}.
 alter table public.flashcard_settings add column if not exists leech_kept jsonb not null default '{}'::jsonb;
 
+-- Kanji the reader marked Known in the Kanji section (their tiles turn
+-- green). A view preference, not a flashcards concept -- it rides along in
+-- this row like table_custom. Shape: { "<vocabId>": { "k": 1 | 0, "t": <ms> } },
+-- newest change per kanji wins on merge.
+alter table public.flashcard_settings add column if not exists known_kanji jsonb not null default '{}'::jsonb;
+
 -- Kana trainer cards + review history -- the exact parallel of flashcards /
 -- review_logs above, for the "Kana" tab's own hiragana/katakana drill.
 -- kana_id is the trainer's stable item id ("hira-gojuon:あ", ...); direction

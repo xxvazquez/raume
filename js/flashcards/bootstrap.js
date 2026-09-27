@@ -537,6 +537,12 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     });
   }
 
+  if (window.RaumeStudy.knownKanji) {
+    window.RaumeStudy.knownKanji.setRemotePush(function (obj) {
+      if (authState.session) dataOps.saveKnownKanjiRemote(obj);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     loadCache();
     loadKanaCache();

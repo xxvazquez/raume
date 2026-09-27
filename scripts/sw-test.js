@@ -145,6 +145,7 @@ const REFERENCE_SHELL = [
   "js/vocab/kana-romaji.js",
   "js/vocab/icons.js",
   "js/vocab/table-custom.js",
+  "js/vocab/kanji-known.js",
   "js/vocab/icon-picker.js",
   "js/vocab/custom-vocab.js",
   "js/vocab/render.js",

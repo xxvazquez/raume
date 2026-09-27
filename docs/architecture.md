@@ -70,7 +70,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below) and `leech_kept` (leeches marked Keep — see below). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below) and `known_kanji` (kanji marked Known). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
@@ -165,7 +165,12 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-match-best` —
 Puzzles › Match best times, one per source + script + pair count, also
-browser-local only). Installs from
+browser-local only), `raume-kanji-known` — kanji marked Known
+([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`):
+`{ vocabId: { k: 1|0, t: ms } }`, an un-mark kept as `k: 0` so a merge can tell
+it from never-marked; signed in, each change is pushed best-effort to
+`flashcard_settings.known_kanji` and `fetchAllFromServer()` merges per kanji,
+newest change winning). Installs from
 before the `sakura` → `raume` rename are migrated once by
 [`js/storage-migration.js`](../js/storage-migration.js), the first `<head>`
 script — it moves each key across and drops the old name.
@@ -238,6 +243,7 @@ js/
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
     table-custom.js      per-table names / icons / order
+    kanji-known.js       kanji marked Known (green tiles)
     custom-vocab.js      the reader's own rows / tables, merged into the dataset
     customize.js         the Customize page
     render.js            tables, nav, sorting

@@ -362,11 +362,19 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function kanjiRow(row) {
     var ch = row.jp[0].kanji;
     var readings = (row.on || []).concat(row.kun || []).map(kanjiReadingHtml).join(' ');
-    return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile" tabindex="0" aria-haspopup="dialog">' +
+    var known = window.RaumeStudy.knownKanji && window.RaumeStudy.knownKanji.isKnown(row.id);
+    return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
       '<td class="jp" lang="ja"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
       '<span class="kanji-readings furigana">' + readings + '</span></td>' +
       meaningCell(row.english, row.id, '', '') + '</tr>';
   }
+  var CHECK_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>';
+  function knownButtonHtml(id) {
+    var known = window.RaumeStudy.knownKanji && window.RaumeStudy.knownKanji.isKnown(id);
+    return '<button type="button" class="ks-known" data-vocab-id="' + esc(id) + '" aria-pressed="' + !!known + '">' +
+      '<span class="ks-known-off">Mark as known</span><span class="ks-known-on">' + CHECK_ICON + 'Known</span></button>';
+  }
+  vocab.knownButtonHtml = knownButtonHtml;
   function rawRow(vocabId) {
     var tables = window.RaumeStudy.data.vocabularyTables || [];
     for (var i = 0; i < tables.length; i++) {
@@ -510,7 +518,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<div class="ks-grab" aria-hidden="true"></div>' +
       '<div class="ks-top"><span class="ks-char" lang="ja">' + esc(ch) + '</span>' +
       '<div class="ks-title"><h2 class="ks-meaning" id="kanjiSheetTitle">' + esc(row.english) + '</h2>' +
-      (row.enNote ? '<p class="ks-note">' + esc(row.enNote) + '</p>' : '') + '</div>' +
+      (row.enNote ? '<p class="ks-note">' + esc(row.enNote) + '</p>' : '') + knownButtonHtml(row.id) + '</div>' +
       speakButton(jpReadingOf(row.jp)) +
       '<button type="button" class="ks-close" aria-label="Close">' + CLOSE_ICON + '</button></div>' +
       '<h3 class="ks-group-head">Readings</h3><div class="ks-card">' +
