@@ -130,7 +130,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (isGiveaway(reading, foldRomajiForGrid(entry.romajiDisplay), clue)) return;
       var romaji = entry.romajiUsable ? foldRomajiForGrid(entry.romajiDisplay) : "";
       if (romaji.length < MIN_LEN + 1 || romaji.length > MAX_LEN * 2) romaji = "";
-      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null });
+      // tableId: Listening draws its wrong choices from the same table first;
+      // speak: the exact reading the speaker buttons play (it keys the
+      // prerendered clip), 〜 and all.
+      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, tableId: entry.tableId, speak: entry.jpReading });
     });
     return pool;
   }
@@ -786,6 +789,137 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // -----------------------------------------------------------------------
+  // Listening -- the app says a word (RaumeStudy.shared.speech: the same
+  // prerendered clip or Japanese voice the speaker buttons use) and you pick
+  // its English from four. Nothing written shows until you answer; then the
+  // word appears as written, with its kana and romaji, so the sound gets
+  // tied to the word. A right answer moves on by itself; a wrong one waits
+  // for Next. Practice only, like Match -- never an FSRS review.
+  // -----------------------------------------------------------------------
+  var LISTEN_CHOICES = 4;
+  // Each question's wrong choices: other words from the same table first
+  // (a clue from another topic is too easy to rule out), never two with the
+  // same English -- the choices would be a coin toss.
+  function buildListening(words, limit) {
+    var picked = shuffle(words).slice(0, limit);
+    var questions = picked.map(function (w) {
+      var used = {};
+      used[w.clue.toLowerCase()] = true;
+      var others = shuffle(words.filter(function (o) { return o.id !== w.id; }));
+      var sameTable = others.filter(function (o) { return o.tableId === w.tableId; });
+      var rest = others.filter(function (o) { return o.tableId !== w.tableId; });
+      var wrong = [];
+      sameTable.concat(rest).some(function (o) {
+        var key = o.clue.toLowerCase();
+        if (used[key]) return false;
+        used[key] = true;
+        wrong.push(o);
+        return wrong.length === LISTEN_CHOICES - 1;
+      });
+      return { word: w, choices: shuffle([w].concat(wrong)) };
+    });
+    return { placements: picked, questions: questions };
+  }
+  var PLAY_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z"/></svg>';
+  var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
+  function speakWord(w) { window.RaumeStudy.shared.speech.speak(w.speak || w.answer); }
+  // Sound comes from a prerendered clip or the device's Japanese voice;
+  // js/shared.js marks the page once either is confirmed.
+  function canSpeak() { return document.body.classList.contains("ja-voice-ready"); }
+  // The word as written, its kana and its romaji -- shown once answered.
+  function spokenWordHtml(w) {
+    var entry = vocabIndex()[w.id] || {};
+    var written = String(entry.jpPlain || w.answer).replace(/^〜/, "");
+    var romaji = String(entry.romajiDisplay || "").split(" / ")[0];
+    return '<span class="fc-ls-written" lang="ja">' + esc(written) + "</span>" +
+      '<span class="fc-ls-sub"><span lang="ja">' + (written !== w.answer ? esc(w.answer) + " · " : "") + "</span>" + esc(romaji) + "</span>";
+  }
+  function wireListening(boardEl, countEl, p) {
+    var at, score, missed, game = 0, played;
+    function count() { countEl.textContent = Math.min(at + 1, p.questions.length) + " / " + p.questions.length; }
+    function renderQuestion() {
+      var q = p.questions[at];
+      count();
+      boardEl.innerHTML =
+        '<div class="fc-ls-card">' +
+        '<button type="button" class="fc-ls-play" aria-label="' + (played ? "Play the word again" : "Play the word") + '">' + PLAY_ICON + "</button>" +
+        '<p class="fc-ls-hint">' + (played ? "Tap to hear it again" : "Tap to listen") + "</p>" +
+        '<p class="fc-ls-word" aria-live="polite" hidden></p></div>' +
+        '<div class="fc-ls-choices">' + q.choices.map(function (c, i) {
+          return '<button type="button" class="fc-mt-tile fc-ls-choice" data-i="' + i + '">' + esc(c.clue) + "</button>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function next() {
+      at++;
+      if (at >= p.questions.length) { finish(); return; }
+      renderQuestion();
+      // Straight on to the next sound. A browser that wants a fresh tap for
+      // audio just stays quiet here -- the ▶ is right there.
+      speakWord(p.questions[at].word);
+    }
+    function answer(btn) {
+      var q = p.questions[at], chosen = q.choices[+btn.dataset.i], right = chosen === q.word, thisGame = game;
+      boardEl.querySelectorAll(".fc-ls-choice").forEach(function (b) {
+        b.disabled = true;
+        if (q.choices[+b.dataset.i] === q.word) b.classList.add("fc-mt-right");
+      });
+      if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      var word = boardEl.querySelector(".fc-ls-word");
+      word.innerHTML = spokenWordHtml(q.word);
+      word.hidden = false;
+      boardEl.querySelector(".fc-ls-hint").hidden = true;
+      if (right) {
+        score++;
+        setTimeout(function () { if (thisGame === game && boardEl.isConnected) next(); }, 1100);
+      } else {
+        missed.push(q.word);
+        var nextBtn = boardEl.querySelector(".fc-ls-next");
+        nextBtn.hidden = false;
+        nextBtn.focus();
+      }
+    }
+    function finish() {
+      countEl.textContent = score + " / " + p.questions.length;
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + p.questions.length + "</p>" +
+        '<p class="fc-mt-done-meta">' + (missed.length ? "Words to listen to again:" : "Every word right") + "</p>" +
+        (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w, i) {
+          return '<li><button type="button" class="fc-ls-say" data-m="' + i + '" aria-label="Play">' + SPEAKER_ICON + "</button>" +
+            '<span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
+        }).join("") + "</ul>" : "") +
+        '<button type="button" class="fc-btn fc-btn-primary" id="fcLsAgain">Play again</button></div>';
+      document.getElementById("fcLsAgain").addEventListener("click", function () { generate(); rerender(); });
+    }
+    boardEl.addEventListener("click", function (e) {
+      if (e.target.closest(".fc-ls-play")) {
+        speakWord(p.questions[at].word);
+        if (!played) {
+          played = true;
+          boardEl.querySelector(".fc-ls-hint").textContent = "Tap to hear it again";
+          boardEl.querySelector(".fc-ls-play").setAttribute("aria-label", "Play the word again");
+        }
+        return;
+      }
+      var choice = e.target.closest(".fc-ls-choice");
+      if (choice && !choice.disabled) { answer(choice); return; }
+      if (e.target.closest(".fc-ls-next")) { next(); return; }
+      var say = e.target.closest(".fc-ls-say");
+      if (say) speakWord(missed[+say.dataset.m]);
+    });
+    // Same words, same questions, from the top.
+    function restart() {
+      game++;
+      at = 0; score = 0; missed = []; played = false;
+      countEl.classList.remove("fc-ws-count-done");
+      renderQuestion();
+    }
+    restart();
+    return { restart: restart };
+  }
+
+  // -----------------------------------------------------------------------
   // State + rendering. Purely a play/print utility -- nothing here persists
   // across a reload; regenerating is free. What's typed into the grid lives
   // only in the live <input> elements, not in this state object -- every
@@ -824,6 +958,21 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (roomy) state.tables = [roomy.id];
     }
     var pool = wordPool();
+    // Listening: you hear the word, so the script doesn't narrow anything --
+    // every word in the pool, deduped on the English (a question can't have
+    // two right answers).
+    if (state.mode === "listening") {
+      var seenEn = {};
+      var heard = pool.filter(function (w) {
+        var key = w.clue.toLowerCase();
+        if (seenEn[key]) return false;
+        seenEn[key] = true;
+        return true;
+      });
+      state.poolCount = heard.length;
+      state.puzzle = buildListening(heard, state.size);
+      return;
+    }
     // Romaji mode only offers words with a usable romaji spelling (a
     // verb-pair's casual/polite split, say, still isn't one) -- filtered
     // before picking, not after, so "Words" still means what it says.
@@ -871,7 +1020,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   var SIZE_OPTS = [10, 15, 20, 30, 40];
 
@@ -1184,7 +1333,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var rows = pickerRow("source", "Source", SOURCE_OPTS, state.source);
     if (state.source === "table") rows += tableFieldRowHtml();
     rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
-    rows += pickerRow("script", "Script", scriptOpts(), state.script);
+    // Listening has no script to choose -- you hear the word.
+    if (state.mode !== "listening") rows += pickerRow("script", "Script", scriptOpts(), state.script);
     rows += pickerRow("size", "Words", SIZE_OPTS, state.size);
     return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
   }
@@ -1213,11 +1363,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // pages' Options pattern). The puzzle itself comes first.
   function optionsSummary() {
     var src = state.source === "table" ? tablesSummary() : "Flashcards";
-    return [optionLabel(MODE_OPTS, state.mode), src, state.size + " words", optionLabel(SCRIPT_OPTS, state.script)];
+    var parts = [optionLabel(MODE_OPTS, state.mode), src, state.size + " words"];
+    return state.mode === "listening" ? parts : parts.concat(optionLabel(SCRIPT_OPTS, state.script));
   }
   function toolbarHtml() {
     var parts = optionsSummary();
-    var ws = state.mode === "wordsearch", mt = state.mode === "match";
+    var ws = state.mode === "wordsearch", ls = state.mode === "listening";
+    // Listening is a game like Match: the same short menu, a counter
+    // instead of Check.
+    var mt = state.mode === "match" || ls;
     var labels = mt ? MT_MENU_LABELS : ws ? WS_MENU_LABELS : {};
     var actions = mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
     return '<div class="fc-xw-actions">' +
@@ -1236,13 +1390,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<div class="fc-xw-actions-end">' +
       '<div class="fc-xw-tip">' +
       '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
-      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (mt
+      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (ls
+        ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
+        : mt
         ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
         : ws
         ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
         : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
       "</div>" +
-      (mt ? '<span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
+      (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
+        : mt ? '<span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
         : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
         : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>') +
       '<div class="section-menu fc-xw-menu">' +
@@ -1365,6 +1522,24 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var scriptLabel = SCRIPT_OPTS.filter(function (o) { return o[0] === state.script; })[0][1];
     var printMeta = titleLabel + " · " + placedCount + " words · " + scriptLabel;
 
+    if (state.mode === "listening") {
+      panel.innerHTML = toolbarHtml() + '<div class="fc-ls"></div>';
+      bindControls(panel);
+      document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+      var board = panel.querySelector(".fc-ls");
+      // No sound at all -- say so plainly rather than show a silent game.
+      if (!canSpeak()) {
+        board.innerHTML = '<p class="fc-xw-footnote">Listening needs sound, and this device has no Japanese voice. ' +
+          "The app’s recorded words load the first time you’re online — try again in a moment.</p>" +
+          '<div class="fc-xw-actions"><button type="button" class="fc-btn" id="fcLsRetry">Try again</button></div>';
+        document.getElementById("fcLsRetry").addEventListener("click", rerender);
+        bindMenu(panel, { reset: rerender });
+        return;
+      }
+      var listen = wireListening(board, document.getElementById("fcLsCount"), p);
+      bindMenu(panel, { reset: listen.restart });
+      return;
+    }
     if (state.mode === "match") {
       panel.innerHTML = toolbarHtml() + '<div class="fc-mt"></div>';
       bindControls(panel);
@@ -1431,7 +1606,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS, state: state
     }
   };

@@ -3303,6 +3303,55 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-mt-done-time { margin: 0; font-size: 34px; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fc-mt-done-meta { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-nav); }
+/* Listening (js/flashcards/crosswords.js wireListening): one white card
+   with a big round ▶ in the section tint, the word appearing under it once
+   answered; four choices under it as Match's tiles (2x2, one column on a
+   narrow phone); Next only after a wrong answer. */
+.fc-ls { max-width: 640px; }
+.fc-ls-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 22px 16px 18px; border-radius: var(--radius-card); background: var(--paper);
+}
+.fc-ls-play {
+  appearance: none; display: flex; align-items: center; justify-content: center;
+  width: 76px; height: 76px; padding: 0 0 0 5px; border: 0; border-radius: 50%;
+  background: var(--section-strong); color: var(--paper); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform .12s ease;
+}
+.fc-ls-play:active { transform: scale(.94); }
+.fc-ls-play:focus-visible { outline: 2px solid var(--section); outline-offset: 3px; }
+.fc-ls-hint { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+.fc-ls-hint[hidden], .fc-ls-word[hidden], .fc-ls-next[hidden] { display: none; }
+.fc-ls-word { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0; }
+.fc-ls-written { font-size: 28px; line-height: 1.2; color: var(--ink); }
+.fc-ls-sub { color: var(--muted); font-size: var(--fs-small); }
+.fc-ls-choices { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.fc-ls-choice { text-align: center; }
+.fc-ls-choice:disabled { cursor: default; color: var(--ink); }
+/* Once answered: the right choice clearly green, a wrong pick clearly red,
+   the other two stepped back. */
+.fc-ls-choice.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); font-weight: 500; }
+.fc-ls-choice.fc-ls-chosen-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
+.fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong) { opacity: .5; }
+/* A mark as well as the colour, so right and wrong never rest on hue alone. */
+.fc-ls-choice.fc-mt-right::before { content: "✓ "; }
+.fc-ls-choice.fc-ls-chosen-wrong::before { content: "✕ "; }
+.fc-ls-next-row { display: flex; justify-content: center; margin-top: 14px; min-height: 36px; }
+@media (max-width: 380px) { .fc-ls-choices { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
+.fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
+.fc-ls-missed li {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 4px;
+  border-top: 1px solid var(--row-line);
+}
+.fc-ls-missed .fc-ls-written { font-size: 17px; }
+.fc-ls-missed-word { display: flex; flex-direction: column; min-width: 0; }
+.fc-ls-missed-en { margin-left: auto; color: var(--muted); text-align: right; font-size: var(--fs-small); }
+.fc-ls-say {
+  appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--group-ground); color: var(--section-strong); cursor: pointer;
+}
 .fc-ws-done .fc-ws-clue { color: var(--muted); }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
    measure (same as the masthead Help page) instead of ~130-char lines across

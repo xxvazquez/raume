@@ -2976,6 +2976,74 @@ async function main() {
   })());
   xwPick("script", "romaji");
 
+  // Listening: speech can't run in jsdom, so speak() is stubbed to record
+  // what it was asked to say; the choice logic is what's tested.
+  const speech = window.RaumeStudy.shared.speech, realSpeak = speech.speak, spoken = [];
+  speech.speak = t => spoken.push(t);
+  check("Listening questions: the right word plus 3 wrong choices, never two with the same English, from the same table first", (() => {
+    const pool = xw.tableWordPool(xw.state.tables.length ? xw.state.tables : [1]);
+    const p = xw.buildListening(pool, 10);
+    return p.questions.length === Math.min(10, pool.length) && p.questions.every(q => {
+      const en = q.choices.map(c => c.clue.toLowerCase());
+      return q.choices.length === 4 && q.choices.indexOf(q.word) !== -1 && new Set(en).size === 4
+        && q.choices.filter(c => c.tableId === q.word.tableId).length === Math.min(4, pool.filter(w => w.tableId === q.word.tableId).length);
+    });
+  })());
+  document.body.classList.remove("ja-voice-ready");
+  xwPick("mode", "listening");
+  check("with no Japanese voice or recorded audio, Listening says so instead of a silent game", /no Japanese voice/.test(document.querySelector("#fcPanelCrosswords .fc-ls").textContent)
+    && !document.querySelector("#fcPanelCrosswords .fc-ls-choice"));
+  document.body.classList.add("ja-voice-ready");
+  document.getElementById("fcLsRetry").click();
+  const lsQ = () => xw.state.puzzle.questions;
+  const lsChoices = () => [...document.querySelectorAll("#fcPanelCrosswords .fc-ls-choice")];
+  const lsCount = () => document.getElementById("fcLsCount").textContent;
+  check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / Restart in the ⋯ menu", (() => {
+    return !!document.querySelector("#fcPanelCrosswords .fc-ls-play") && lsChoices().length === 4
+      && !document.querySelector('#fcPanelCrosswords [data-pick="script"]') && lsCount() === "1 / " + lsQ().length
+      && !/Romaji/.test(document.getElementById("fcXwOptions").textContent)
+      && [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && document.querySelector("#fcPanelCrosswords .fc-ls-word").hidden
+      && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
+  })());
+  check("▶ says the word -- the exact reading the speaker buttons play", (() => {
+    document.querySelector("#fcPanelCrosswords .fc-ls-play").click();
+    return spoken[spoken.length - 1] === lsQ()[0].word.speak && !!lsQ()[0].word.speak;
+  })());
+  check("a wrong pick: ✕ on it, ✓ on the right one, the word shown as written, and it waits for Next", (() => {
+    const q = lsQ()[0];
+    const wrong = lsChoices()[q.choices.findIndex(c => c !== q.word)];
+    wrong.click();
+    const right = lsChoices()[q.choices.indexOf(q.word)];
+    const word = document.querySelector("#fcPanelCrosswords .fc-ls-word");
+    return wrong.classList.contains("fc-ls-chosen-wrong") && right.classList.contains("fc-mt-right") && lsChoices().every(b => b.disabled)
+      && !word.hidden && word.textContent.includes(String(xwIndex[q.word.id].jpPlain || q.word.answer).replace(/^〜/, ""))
+      && !document.querySelector("#fcPanelCrosswords .fc-ls-next").hidden;
+  })());
+  document.querySelector("#fcPanelCrosswords .fc-ls-next").click();
+  check("Next moves on and says the next word", lsCount() === "2 / " + lsQ().length && spoken[spoken.length - 1] === lsQ()[1].word.speak);
+  for (let i = 1; i < lsQ().length; i++) {
+    const q = lsQ()[i];
+    lsChoices()[q.choices.indexOf(q.word)].click();
+    for (let waited = 0; waited < 5000; waited += 25) {
+      if (document.querySelector("#fcPanelCrosswords .fc-mt-done") || lsCount().startsWith((i + 2) + " /")) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
+  }
+  check("a right pick moves on by itself; the end card scores it and lists the missed word with a speaker to hear it again", (() => {
+    const done = document.querySelector("#fcPanelCrosswords .fc-mt-done");
+    const missed = done ? [...done.querySelectorAll(".fc-ls-missed li")] : [];
+    if (!done || missed.length !== 1) return false;
+    const n = lsQ().length;
+    missed[0].querySelector(".fc-ls-say").click();
+    return done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
+      && missed[0].textContent.includes(lsQ()[0].word.clue) && spoken[spoken.length - 1] === lsQ()[0].word.speak;
+  })());
+  document.getElementById("fcXwReset").click();
+  check("Restart asks the same questions again from the first", lsCount() === "1 / " + lsQ().length && lsChoices().length === 4 && !document.querySelector("#fcPanelCrosswords .fc-mt-done"));
+  speech.speak = realSpeak;
+  xwPick("mode", "crossword");
+
   xwPick("source", "flashcards");
   check("switching back to Flashcards drops the table row entirely", !document.getElementById("fcXwTablesToggle"));
 

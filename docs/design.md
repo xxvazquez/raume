@@ -743,6 +743,17 @@ nothing shifts; a wrong pair washes coral with the word search's small shake
 (none under reduced motion). The end is one white card: the time large, a
 grey line ("New best · 1 miss"), a filled Play again.
 
+**Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
+clock was. One white card holds a 76px round ▶ filled in the section's strong
+tone (a press scales it to 94%), a grey "Tap to listen" under it until the
+first play, and — once answered — the word as written at 28px with its kana
+and romaji in grey. Under the card, the four choices are Match's white tiles in
+a 2x2 grid (one column under 380px), centred. After an answer the right one
+washes sage with a ✓, a wrong pick coral with a ✕ (the mark, not only the
+hue), the other two drop to half opacity; Next (filled) appears only after a
+wrong pick. The end card is Match's, with the missed words as hairline rows:
+a round grey speaker, the word and its reading, the English trailing.
+
 Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
 line under it (source · N words · script), the grid centred at 9mm squares
 (smaller only when a big grid must fit the width), then Across and Down as

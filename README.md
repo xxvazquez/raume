@@ -13,7 +13,7 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Reference**   | Vocabulary, Grammar, Kanji and Travel tables — furigana, search, audio, print |
 | **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
-| **Puzzles**     | Crosswords, arrowords, word searches and a timed Match game from your words |
+| **Puzzles**     | Crosswords, arrowords, word searches, a timed Match game and Listening from your words |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -249,7 +249,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
-| **Puzzles** | Crossword / arroword / word search / Match from your words ([below](#puzzles)) |
+| **Puzzles** | Crossword / arroword / word search / Match / Listening from your words ([below](#puzzles)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -272,8 +272,8 @@ settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, a word search, or a timed Match game,
-generated fresh each time — at least 6 words, or it tells you why not. Nothing
+A fill-in crossword or arroword, a word search, a timed Match game, or
+Listening, generated fresh each time — at least 6 words, or it tells you why not. Nothing
 is scheduled; the only thing kept is Match's best time.
 Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
@@ -287,8 +287,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 | Setting | Choices |
 | --- | --- |
 | **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
-| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search* or *Match* |
-| **Script** | *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
+| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search*, *Match* or *Listening* |
+| **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
 | **Words** | 10, 15, 20, 30 or 40 |
 
 <details>
@@ -338,6 +338,25 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same
   words again. Practice only — it never changes your flashcard schedule.
+
+</details>
+
+<details>
+<summary><b>Listening</b></summary>
+
+- Tap **▶** to hear a word — the same recorded clip (or the device's Japanese
+  voice) as the speaker buttons — and pick its English from four. Nothing
+  written shows until you answer.
+- The wrong choices come from the same table where there are enough, and two
+  choices never share an English meaning.
+- Right: a ✓, the word appears as written with its kana and romaji, and the
+  next word plays by itself. Wrong: a ✕ on your pick, a ✓ on the right one,
+  the word shown, and **Next** when you're ready.
+- At the end: your score ("12 / 15") and the words you missed, each with a
+  speaker to hear it again. **Play again** for new words; the **⋯** menu's
+  *Restart* asks the same ones again.
+- No Japanese voice and no recorded clips loaded (a first visit offline)? It
+  says so instead of playing silently. Practice only, like Match.
 
 </details>
 
