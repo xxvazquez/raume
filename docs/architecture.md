@@ -369,14 +369,6 @@ Flashcards, and in parentheses in lists and puzzle clues — it's never part of 
 right answer. Parentheses left in `english` are optional words inside the answer
 itself ("take (a day) off"); answer-checking accepts it with or without them.
 
-Sentence tables can pair rows as a short exchange: a question row carries
-`qa: "q"`, an answer row `qa: "a"` plus `answers: "<question id>"`. `validate`
-checks that every answer names a question in its table and sits right after it
-(or after another answer to the same question), and that every question has an
-answer. `render.js` tags the rows `qa-q` / `qa-a` (the answer also
-`data-answers`); search shows a pair whenever either line matches. Flashcards
-are unaffected — each row is still its own card.
-
 Every `verb-pair` row carries the same idea for its group: `verbClass` (`"godan"`
 / `"ichidan"` / `"irregular"`) drives the 五段/一段/変格 badge, and `verbNote` marks
 the handful worth a second look (切る/帰る — 五段 despite looking 一段; 来る — its

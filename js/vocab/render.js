@@ -262,16 +262,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
-  // The main study areas. Grammar, Phrases and Travel are promoted out of the
+  // The main study areas. Grammar and Travel are promoted out of the
   // general vocabulary list into their own top-level sections; everything
   // else lives under Vocabulary, still grouped by its content category.
   function sectionOf(category) {
     if (category === 'Grammar') return 'grammar';
-    if (category === 'Phrases') return 'phrases';
     if (category === 'Travel') return 'travel';
     return 'vocabulary';
   }
-  var SECTION_ORDER = ['vocabulary', 'grammar', 'phrases', 'travel'];
+  var SECTION_ORDER = ['vocabulary', 'grammar', 'travel'];
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row">' + EYE_ICON + '</button>';
@@ -334,16 +333,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return '<button type="button" class="particle-chip" data-badge="' + esc(tight(q.p)) + '" data-role="' + esc(q.role) + '" aria-label="' + esc('Particle ' + q.p + ': ' + q.role) + '" aria-expanded="false"></button>';
     }).join('');
   }
-  // Word rows and Phrases sentence rows share this now -- both render as
-  // Japanese (with a romaji reveal next to the speaker button) + English, two
-  // columns, no separate Romaji column. row.irregular is simply absent on a
-  // sentence row, so this needs no sentences-specific branch.
-  function wordRow(row, sentence) {
-    // Question / answer rows (sentence tables): qa-q / qa-a, so CSS can set
-    // each answer under its question as one pair. The data guarantees the
-    // answer follows its question (scripts/validate-vocabulary.js).
-    var cls = [row.irregular ? 'irregular-row' : '', row.qa === 'q' ? 'qa-q' : row.qa === 'a' ? 'qa-a' : ''].filter(Boolean).join(' ');
-    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.answers ? ' data-answers="' + esc(row.answers) + '"' : '') + (cls ? ' class="' + cls + '">' : '>');
+  // Word rows and sentence rows (a custom table of your own sentences) share
+  // this -- both render as Japanese (with a romaji reveal next to the speaker
+  // button) + English, two columns, no separate Romaji column.
+  function wordRow(row) {
+    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
     return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row), row.enNote) + '</tr>';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
@@ -373,9 +367,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function byEnglish(a, b) {
     return vocab.compareCellText(String(a.english || ''), String(b.english || ''), 'asc');
   }
-  function rowsHtmlFor(rows, sentence) {
+  function rowsHtmlFor(rows) {
     return rows.map(function (row) {
-      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row, sentence);
+      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row);
     }).join('\n    ');
   }
   // Column-visibility items for a table's ⋯ menu -- the same set as the
@@ -452,13 +446,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       o.rowsHtml + '\n  </tbody></table></section>';
   }
   function renderTable(t) {
-    // Sentence tables (Phrases) keep their authored order -- the rows are laid
-    // out as question/answer pairs, which an A-Z-by-English sort would scatter.
+    // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
+    // authored order -- a run of sentences reads in the order it was written.
     var sentences = t.tableClass === 'vocab-sentences';
     var rows = sentences ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
-      rowsHtml: rowsHtmlFor(rows, sentences),
+      rowsHtml: rowsHtmlFor(rows),
       controls: { addTable: true, print: true },
       sectionClass: 'page-hidden', collapsed: true, defaultSort: !sentences
     });
@@ -522,7 +516,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // green, a plane table teal). "" means the plain section tone.
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
-    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Phrases': 'amber',
+    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal',
     'People & Daily Life': 'clay'
   };
   function tableTile(id, category) {
@@ -619,7 +613,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function renderNav() {
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
-      '<a class="site-nav-link" href="#phrases" data-section="phrases">Phrases</a>' +
       '<a class="site-nav-link" href="#travel" data-section="travel">Travel</a>' +
       '<a class="site-nav-link" href="#flashcards" data-page="flashcards">Flashcards</a>';
   }
@@ -631,7 +624,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Panels with more than a handful of tables are marked --wide so CSS flows
   // them into two columns.
   function renderTableIndex(tables) {
-    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var panels = SECTION_ORDER.map(function (sec) {
       var groups = groupByCategory(bySection[sec], sec);
@@ -680,7 +673,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // page-hidden; routing (interactions.js -> showSection) reveals one section
   // at a time.
   function renderAll(tables) {
-    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var html = '';
     SECTION_ORDER.forEach(function (sec) {
@@ -760,7 +753,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.isUserHidden = isUserHidden;
   function reflowLayout() {
     if (!host || !vocabularyTables) return;
-    var bySection = { vocabulary: [], grammar: [], phrases: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], travel: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var ordered = [], parked = [];
     // Headings and sections are the host's direct children -- look them up

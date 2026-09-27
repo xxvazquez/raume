@@ -1,6 +1,6 @@
 // Vocabulary page -- interaction half of RaumeStudy.vocab.
 //
-// Section routing (Vocabulary / Grammar / Phrases / Travel / Flashcards), the
+// Section routing (Vocabulary / Grammar / Travel / Flashcards), the
 // per-table accordion and overflow menus, print, cross-section search, the
 // column-visibility filter, the top navigation and the casual/polite toggle.
 // Augments the RaumeStudy.vocab object that js/vocab/render.js creates. Loaded
@@ -198,7 +198,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
-  // #phrases / #travel / #flashcards / #table-N) so a section or a specific
+  // #travel / #flashcards / #table-N) so a section or a specific
   // table can be bookmarked, shared and survive a reload. `fromRoute` = we're
   // already responding to a hash, so don't push it again.
   function setHash(h, fromRoute) {
@@ -382,7 +382,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (h === 'customize') { vocab.showCustomizePage({ fromRoute: true }); return; }
     if (h === 'help') { vocab.showHelpPage({ fromRoute: true }); return; }
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }
-    if (h === 'grammar' || h === 'phrases' || h === 'travel') { showSection(h, { fromRoute: true }); return; }
+    if (h === 'grammar' || h === 'travel') { showSection(h, { fromRoute: true }); return; }
     showSection('vocabulary', { fromRoute: true });
   }
   vocab.routeFromHash = routeFromHash;
@@ -461,10 +461,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         kanji: kanji.toLocaleLowerCase(),
         furigana: furigana.toLocaleLowerCase(),
         romaji: jpword ? expandMacronsForSearch(jpword.dataset.romaji).toLocaleLowerCase() : '',
-        english: enEl ? enEl.textContent.toLocaleLowerCase() : '',
-        // A question and its answer (qa-q / qa-a rows) travel together.
-        pairKey: row.classList.contains('qa-q') ? row.dataset.vocabId
-          : row.classList.contains('qa-a') ? row.dataset.answers : null
+        english: enEl ? enEl.textContent.toLocaleLowerCase() : ''
       };
       rowInfo.set(row, info);
       return info;
@@ -673,26 +670,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         }
         // A table the reader hid never turns up in results either.
         const userHidden = section.classList.contains('user-hidden');
-        // A question and its answer travel together: a match on either line
-        // shows the whole exchange, question first, ranked by its better
-        // line -- an answer alone reads as a reply to nothing. The count
-        // stays the rows that actually matched.
-        const results = [...tbody.rows].sort(byOriginalIndex).map(row => {
+        const ranked = [];
+        [...tbody.rows].sort(byOriginalIndex).forEach(row => {
           const info = infoFor(row);
           const hit = userHidden ? { rank: null } : rankRow(info, q, qExpanded, prefixOnly, hide);
-          return { row, info, hit, rank: hit.rank, match: hit.rank !== null, key: info.pairKey };
-        });
-        const pairRank = {};
-        results.forEach(r => {
-          if (r.key && r.match && (pairRank[r.key] === undefined || r.rank < pairRank[r.key])) pairRank[r.key] = r.rank;
-        });
-        const ranked = [];
-        results.forEach(r => {
-          const inPair = r.key !== null && pairRank[r.key] !== undefined;
-          const shown = r.match || inPair;
-          r.row.classList.toggle('search-hidden', !shown);
-          if (shown) ranked.push({ row: r.row, rank: inPair ? pairRank[r.key] : r.rank, index: Number(r.row.dataset.originalIndex) });
+          const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
+          r.row.classList.toggle('search-hidden', !r.match);
           if (r.match) {
+            ranked.push({ row: r.row, rank: r.rank, index: Number(r.row.dataset.originalIndex) });
             highlightRow(r.row, r.info, r.hit, q);
             sectionRows++;
             if (sectionBest === null || r.rank < sectionBest) sectionBest = r.rank;

@@ -126,8 +126,6 @@ clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
 
 - `--sec-vocabulary` — slate-blue (`#4F7389`)
 - `--sec-grammar` — mauve (`#875A78`)
-- `--sec-phrases` — ochre (`#A5843F`) — the one warm hue; it's the only spot
-  left in the wheel ≥20° from the other four
 - `--sec-travel` — sage (`#5F8175`)
 - `--sec-flashcards` — lavender (`#82799B`), the same as the primary accent
 
@@ -152,7 +150,7 @@ and Help.
   square with a white glyph, filled in a soft, muted hue **per content category**
   (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
   `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
-  purple, Travel `#5fa0a2` teal, Phrases `#bd9a52` amber, People & Daily Life
+  purple, Travel `#5fa0a2` teal, People & Daily Life
   `#bb7f74` clay). The tile key is
   `data-tile` on the `.table-section` (and the Customize row), resolved in
   `render.js` `tableTile()`: the reader's pick, else the category's, else — a
@@ -217,17 +215,12 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
-- **Sentence tables** (`tableClass: "vocab-sentences"` — Phrases' Self-introduction,
-  and any future sentence table wherever it lives): stacked rows, not two columns —
+- **Sentence tables** (`tableClass: "vocab-sentences"` — a custom table of your
+  own sentences): stacked rows, not two columns —
   the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   secondary grey, romaji on tap between them, speaker and hide glyphs at the
   trailing edge of each line; no column headers (authored order, nothing to sort).
-  **Question / answer pairs** (`tr.qa-q` / `tr.qa-a`): no rule between a
-  question and its answer, which sits ~10px under it, indented 20px — the
-  indent alone marks the reply, as in Mail; no bar, no box. The one hairline
-  after each pair is the same full-width rule as every other row. Search keeps
-  a pair together.
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never
@@ -355,15 +348,15 @@ and Help.
   3px underline; the rest are plain secondary text. The capsule is the one place
   a section tone is spent on the chrome. That is the layout from 641px up.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS tab bar**, pinned to the
-  bottom edge (`position: fixed`, one hairline above it): five equal tabs, an
+  bottom edge (`position: fixed`, one hairline above it): four equal tabs, an
   icon over an 11.5px label, unselected in `--faint`, the selected one in its
   section tone at weight 500 on a square, full-height cell of neutral fill — no
   capsule, no rounded bubble. It deliberately stays this traditional, solid bar
   under iOS 26 (a floating glass capsule was tried and didn't sit well over
   scrolling content). Nothing is added or removed (same
-  five links, same taps); the icons are CSS masks on `.site-nav-link::before`
+  four links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
-  is untouched. All five are drawn from the same family as `js/vocab/icons.js`'s
+  is untouched. All four are drawn from the same family as `js/vocab/icons.js`'s
   own picker (24x24 grid, 1.7 stroke, round caps/joins) — a book, a bullet
   list, a speech bubble, a map pin, two stacked cards — so the row reads as
   one matched set rather than five icons with their own stroke weight and
@@ -381,7 +374,7 @@ and Help.
   (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (28px,
   weight 600) instead of `--fs-page-title`; the reference pages' own `<h1>`,
   `showSection()` keeps in step with the active section (Vocabulary / Grammar /
-  Phrases / Travel), as an iOS large title names each tab's screen. On screen at
+  Travel), as an iOS large title names each tab's screen. On screen at
   phone width only — the desktop top nav already names the section visually —
   but *visually-hidden*, not `display: none`, above 641px: `display: none`
   would drop it from the accessibility tree too, leaving desktop with no
@@ -422,7 +415,7 @@ and Help.
   under the sticky bar has that kind of badge (`updateAdjLegend()`); a screen
   reader gets each row's type from its visually-hidden note instead.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
-  column anywhere, including Phrases. Instead, the word/sentence itself
+  column anywhere. Instead, the word/sentence itself
   (`.jpword[data-romaji]`) reveals its romaji as a caption line underneath on
   click/tap (`.jp-romaji-on`), set in italic a step down in size from the
   English column so the two don't compete — deliberately no hover trigger, unlike the
@@ -454,12 +447,6 @@ and Help.
   the row downward without moving it. Checked by measuring every row
   (speaker, word and English first-line centres within 0.5px) at 375 /
   760 / 1200px, romaji shown and not.
-- **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
-  Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
-  size; they keep their authored question/answer order instead of sorting
-  A-Z. Otherwise they're the same Japanese+English shape as every other
-  table now — Phrases used to show romaji plainly and hide English behind a
-  translate icon; that's inverted, for consistency.
 - **The Customize page** stacks the table list, then a *Your vocabulary* block.
   Each table row ends in plain tint-text actions — **Hide** / **Show** always,
   **Reset** only when there's something to reset (a disabled Reset took width
@@ -485,12 +472,12 @@ and Help.
     on the page) — no coloured marker bars. A section with more than one category (Vocabulary's four)
     is itself collapsible — closing it hides all four at once — with its
     eyebrow above them; a section that's just one category sharing the
-    section's own name (Grammar, Phrases, Travel) skips the redundant
+    section's own name (Grammar, Travel) skips the redundant
     eyebrow-then-identical-row and renders as a single merged heading instead
     (`.cz-group-title-solo`), sized and weighted identically to the eyebrow
     (`--fs-subhead`/500) since both are playing the same "top of a section"
     role and need to read as one consistent level, not two different sizes.
-    The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) sit inside one
+    The 3 top-level rows (Vocabulary/Grammar/Travel) sit inside one
     shared card (`.cz-groups`), iOS Settings grouped-list style — each row's
     own bottom hairline is the only separator between rows (no divider after
     the last row). A name reads as the row's plain ink title (the shipped name

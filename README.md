@@ -10,7 +10,7 @@ cooking or studying, and for printing clean A4 study sheets.
 
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
-| **Reference**   | Vocabulary, Grammar, Phrases and Travel tables — furigana, search, audio, print |
+| **Reference**   | Vocabulary, Grammar and Travel tables — furigana, search, audio, print |
 | **Flashcards**  | FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords, word searches and a timed Match game from your words |
@@ -51,7 +51,6 @@ python3 -m http.server     # only needed to test the service worker / offline
 | -------------- | ------------ |
 | **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
-| **Phrases**    | Self-introduction Q&A — name, job, country, age, family, home — in question/answer order |
 | **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
 | **Flashcards** | Review, manage and track progress — see [Flashcards](#flashcards) |
 
@@ -74,7 +73,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 | --- | --- |
 | **Columns** | **Japanese** (with furigana) and **English**. Tap a word to show its **romaji** underneath; romaji is always searchable. Context for a meaning ("before a noun", "weather") is a small grey note under the English. |
 | **Furigana** | Always shown, 11px minimum. Each reading starts where its kanji start; consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and a long reading runs on over the following kana instead of pushing a gap into the word (料理する). |
-| **Sentence tables** | (Phrases) Japanese on its own line, English under it, romaji on tap. Answers are set in under their question, and search shows the whole pair when either line matches. |
+| **Sentence tables** | (A table of your own sentences) Japanese on its own line, English under it, romaji on tap. |
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
 | **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. |

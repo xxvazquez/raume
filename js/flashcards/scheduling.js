@@ -109,8 +109,10 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     var index = vidx.getVocabIndex();
     return activeCards().filter(function (card) {
       if (enabled[card.direction] === false) return false;
+      // A card whose word left the dataset (a removed table, or a custom
+      // word not loaded yet) has nothing to show -- skip it, don't jam the queue.
       var entry = index[card.vocabId];
-      return !(entry && store.isTablePaused(entry.tableId));
+      return !!entry && !store.isTablePaused(entry.tableId);
     });
   }
   // Leeches: words you keep forgetting. A card "lapses" each time a card you'd
