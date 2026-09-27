@@ -383,7 +383,7 @@ badge and shows in the ⓘ popover.
 small grey under the English in the tables, under an English prompt or answer in
 Flashcards, and in parentheses in lists and puzzle clues — it's never part of a
 right answer. Parentheses left in `english` are optional words inside the answer
-itself ("take (a day) off"); answer-checking accepts it with or without them.
+itself ("one pair (of shoes)"); answer-checking accepts it with or without them.
 
 A `kanji` row (the N5 Kanji tables, `tableClass: "vocab-kanji"`, the Kanji
 section) holds one character: `jp` is that kanji with the reading the speaker
