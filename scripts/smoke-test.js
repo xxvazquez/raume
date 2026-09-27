@@ -2909,7 +2909,12 @@ async function main() {
     for (let i = 0; i < xw.state.puzzle.rounds[round].length; i++) {
       if (!mtTile("l", i).disabled) { mtTile("l", i).click(); mtTile("r", i).click(); }
     }
-    await new Promise(r => setTimeout(r, 400));
+    // Wait for the next round to deal (or the finish card), not a fixed
+    // time -- under CPU load the 350ms round change can run late.
+    for (let waited = 0; waited < 5000; waited += 25) {
+      if (document.querySelector("#fcPanelCrosswords .fc-mt-done") || !mtTile("l", 0).disabled) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
   }
   check("clearing every round ends on the time, New best and the miss count, and keeps the best time", (() => {
     const done = document.querySelector("#fcPanelCrosswords .fc-mt-done");
