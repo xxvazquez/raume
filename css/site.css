@@ -403,6 +403,13 @@ body {
   border-radius: var(--radius-sheet);
 }
 
+/* The build stamp under every page: version + deploy date, one quiet line. */
+.site-footer {
+  padding: 20px 16px 24px; text-align: center;
+  color: var(--faint); font-size: var(--fs-micro); line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- Masthead: the header of a reference book, not a hero ---------- */
 .masthead {
   display: flex;
@@ -2822,7 +2829,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     --section: #555; --section-strong: #444;
     --particle: #1b1b1b; /* on paper a particle reads by its bold weight alone */
   }
-  .masthead, .site-nav, .vocab-toolbar, .cat-heading, .table-index { display: none !important; }
+  .masthead, .site-nav, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
   .page-title { display: none; }
@@ -3665,7 +3672,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    chrome hidden app-wide. */
 body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
   :is(.masthead, .site-nav, #flashcardsPage > .fc-titlebar, #flashcardsPage > .fc-back, #flashcardsPage > .fc-signed-in-as,
-      #flashcardsPage > .fc-sync-chip, #flashcardsPage > .fc-sync-detail, #flashcardsPage > .fc-tabs) {
+      #flashcardsPage > .fc-sync-chip, #flashcardsPage > .fc-sync-detail, #flashcardsPage > .fc-tabs, .site-footer) {
   display: none;
 }
 

@@ -25,6 +25,10 @@ jobs:
       - uses: actions/configure-pages@v5
       - name: Cache-bust static assets
         run: sed -i "s/__CACHEBUST__/${GITHUB_SHA}/g" index.html sw.js
+      - name: Stamp version and date in the footer
+        run: |
+          STAMP="Version ${GITHUB_SHA::7} · $(git log -1 --format=%cd --date=format:'%-d %b %Y')"
+          sed -i "s|<!--build-->[^<]*<!--/build-->|${STAMP}|" index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .

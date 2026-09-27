@@ -152,6 +152,7 @@ flashcard directions. Changes save immediately and sync when signed in.
 | **Print** | A4 at three scopes: one table (printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
 | **Theme** | Cycles **System → Light → Dark**, applied before first paint (on a phone: **Appearance** in the account button's menu). |
 | **Help** | The masthead **?**: four topics (Finding words, Reading, Options, Making it yours), each a short list of one-line rows, then a **Support raume** link to the Ko-fi page (`ko-fi.com/raume`). Flashcards has its own Help screen in the same style. |
+| **Version** | A quiet line at the foot of every page: the deployed commit's short SHA and date (**Local build** when run from a checkout). Hidden during a review and in print. |
 | **Sign-in dot** | On the person icon: **green** = everything synced; **amber** = offline or a change hasn't reached your account yet. Hover it for details. |
 
 **On a phone** there's no wordmark row: each screen starts with its large

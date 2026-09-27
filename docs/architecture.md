@@ -414,7 +414,9 @@ fails, since it would silently read as ichidan in the UI.
 
 Pushing `main` triggers the GitHub Pages workflow
 (`.github/workflows/pages.yml`), which swaps the cache-busting token for the
-commit SHA and deploys. Set the repo's Pages source to "GitHub Actions" once.
+commit SHA, stamps the footer's version line (the text between
+`<!--build-->` and `<!--/build-->` in `index.html` becomes
+"Version <short SHA> · <commit date>") and deploys. Set the repo's Pages source to "GitHub Actions" once.
 
 `.github/workflows/generate-audio.yml` is separate and manual-only
 (`workflow_dispatch`, not triggered by push) — see "Pronunciation audio"
