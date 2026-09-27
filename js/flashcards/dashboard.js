@@ -160,6 +160,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Due next 7 days</h3>' + dueForecastHtml(dueForecast(now)) + "</div>" +
+      puzzlesCardHtml(now) +
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
@@ -179,6 +180,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Day streak": '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/>',
     "Total cards": '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>',
     "Reviews completed": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
+    "Games played": '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>',
+    "Listening accuracy": '<path d="M3 7v4h2.5L9 14V4L5.5 7H3Z"/><path d="M12 6.5a3.2 3.2 0 0 1 0 5"/>',
+    "Best Match pace": '<circle cx="9" cy="10" r="6"/><path d="M9 10V7M7.5 2.5h3"/>',
+    "Pairs matched": '<path d="M3 6h6M3 12h6M9 6l6 6M9 12l6-6"/>',
     "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   function statTile(value, label, variant, pending) {
@@ -538,7 +543,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // shapes, no text) still gets CSP-safe proportional heights without
   // inline style="", but the count/day labels now size the same predictable
   // way as every other piece of text on the page.
-  function weeklyActivityChart(days) {
+  function weeklyActivityChart(days, ariaLabel, noneText) {
     var max = Math.max(1, Math.max.apply(null, days.map(function (d) { return d.count; })));
     var cols = days.map(function (d, i) {
       // A day with no reviews is a flat 2-unit baseline (reads as "nothing
@@ -558,8 +563,43 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // A week with no reviews at all: one line instead of an empty chart --
     // seven flat baselines under a tall blank space read as broken.
     var noneYet = days.every(function (d) { return !d.count; });
-    if (noneYet) return '<p class="fc-note fc-week-none">No reviews yet this week.</p>';
-    return '<div class="fc-week-chart" role="img" aria-label="Reviews per day over the last 7 days">' + cols + "</div>";
+    if (noneYet) return '<p class="fc-note fc-week-none">' + esc(noneText || "No reviews yet this week.") + "</p>";
+    return '<div class="fc-week-chart" role="img" aria-label="' + esc(ariaLabel || "Reviews per day over the last 7 days") + '">' + cols + "</div>";
+  }
+
+  // --- Dashboard: Puzzles ---
+  // Finished Match and Listening games (puzzle-runs.js): how many and when,
+  // how well you hear words, how fast you match them, and the last few
+  // games. Practice only -- none of it feeds FSRS or the tiles above.
+  function secs(ms) { return (ms / 1000).toFixed(1) + "s"; }
+  function clock(ms) {
+    var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
+  }
+  function puzzlesCardHtml(now) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    if (!runs) return "";
+    var sum = runs.summary(now);
+    var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card"><h3 class="fc-viz-title">Puzzles</h3>';
+    if (!sum.total) return head + '<p class="fc-note">Play Match or Listening in Puzzles — your games, accuracy and speed show up here.</p></div>';
+    var ls = sum.listening, mt = sum.match;
+    var tiles = statTile(sum.total, "Games played") +
+      statTile(ls.asked ? Math.round(ls.right / ls.asked * 100) + "%" : "—", "Listening accuracy") +
+      statTile(mt.bestPace === null ? "—" : secs(mt.bestPace) + " / pair", "Best Match pace") +
+      statTile(mt.pairs, "Pairs matched");
+    var recent = sum.recent.map(function (r) {
+      var what = r.mode === "match" ? "Match · " + r.n + " pairs" : "Listening · " + r.n + (r.n === 1 ? " word" : " words");
+      var how = r.mode === "match"
+        ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
+        : (r.right || 0) + " / " + r.n + " right";
+      var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(what) + '<span class="fc-pz-when">' + esc(when) + "</span></span>" +
+        '<span class="fc-pz-how">' + esc(how) + "</span></li>";
+    }).join("");
+    return head + '<div class="fc-stats-grid fc-pz-stats">' + tiles + "</div>" +
+      '<h4 class="fc-pz-sub">Games this week</h4>' +
+      weeklyActivityChart(sum.days, "Puzzle games per day over the last 7 days", "No games yet this week.") +
+      '<h4 class="fc-pz-sub">Recent games</h4><ul class="fc-pz-list">' + recent + "</ul></div>";
   }
 
   // --- Dashboard: due forecast ---

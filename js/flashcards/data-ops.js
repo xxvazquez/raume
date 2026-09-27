@@ -181,6 +181,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }
     // Kanji marked Known (js/vocab/kanji-known.js) ride in this row too.
     if (window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.applyRemote(settingsRow.known_kanji || {});
+    // So do finished Match / Listening games (puzzle-runs.js).
+    if (window.RaumeStudy.flashcards.puzzleRuns) window.RaumeStudy.flashcards.puzzleRuns.applyRemote(settingsRow.puzzle_runs || []);
     // The vocabulary page's per-table icons live in this same row -- hand
     // them to their own store so a header icon set on another device shows up.
     if (window.RaumeStudy.tableCustom) {
@@ -297,6 +299,12 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (!getClient() || !currentUser()) return Promise.resolve();
     return saveFsrsSettingsRemote({ known_kanji: obj || {} }).catch(function (e) {
       console.warn("Flashcards: could not sync known kanji", e);
+    });
+  }
+  function savePuzzleRunsRemote(arr) {
+    if (!getClient() || !currentUser()) return Promise.resolve();
+    return saveFsrsSettingsRemote({ puzzle_runs: arr || [] }).catch(function (e) {
+      console.warn("Flashcards: could not sync puzzle games", e);
     });
   }
   // Keep a leech (see scheduling.leechWords): local first, then the account.
@@ -912,7 +920,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused, keepLeech: keepLeech,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
-    saveTableCustomRemote: saveTableCustomRemote, saveKnownKanjiRemote: saveKnownKanjiRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
+    saveTableCustomRemote: saveTableCustomRemote, saveKnownKanjiRemote: saveKnownKanjiRemote, savePuzzleRunsRemote: savePuzzleRunsRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
     syncTableCustomIfDirty: syncTableCustomIfDirty,
     customVocabAddRows: customVocabAddRows, customVocabDeleteRows: customVocabDeleteRows,
     customVocabAddTable: customVocabAddTable, customVocabDeleteTable: customVocabDeleteTable,

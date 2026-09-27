@@ -70,7 +70,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below) and `known_kanji` (kanji marked Known). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known) and `puzzle_runs` (finished Match / Listening games). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
@@ -165,7 +165,11 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-match-best` —
 Puzzles › Match best times, one per source + script + pair count, also
-browser-local only), `raume-kanji-known` — kanji marked Known
+browser-local only), `raume-puzzle-runs` — finished Match / Listening games for the Dashboard's
+Puzzles card ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
+an array of `{ id, at, mode, n, ms, miss | right, setup }`, newest 500 kept;
+signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
+and merged back on sign-in by id), `raume-kanji-known` — kanji marked Known
 ([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`):
 `{ vocabId: { k: 1|0, t: ms } }`, an un-mark kept as `k: 0` so a merge can tell
 it from never-marked; signed in, each change is pushed best-effort to
@@ -254,6 +258,7 @@ js/
     scheduling.js        FSRS-6 + the session queue
     data-ops.js          auth, Supabase sync, guest store, streak
     backup.js            guest-mode export / import of the on-device data (JSON file)
+    puzzle-runs.js       finished Match / Listening games (the Dashboard's Puzzles card)
     dashboard.js         the Dashboard tab + the review session
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups

@@ -3449,6 +3449,21 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
 .fc-viz-title { margin: 0 0 14px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
+/* Puzzles (dashboard.js puzzlesCardHtml): four stat cells, the week's
+   games as the Reviews-this-week bars, then the last few games as hairline
+   rows -- what left, the result right, tabular. */
+.fc-pz-stats { margin-bottom: 16px; }
+@media (min-width: 641px) { .fc-pz-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fc-pz-sub { margin: 14px 0 8px; color: var(--muted); font-size: var(--fs-small); font-weight: 400; }
+.fc-pz-list { list-style: none; margin: 0; padding: 0; }
+.fc-pz-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 44px; border-top: 1px solid var(--row-line); font-size: var(--fs-small);
+}
+.fc-pz-row:first-child { border-top: 0; }
+.fc-pz-what { display: flex; flex-direction: column; gap: 2px; min-width: 0; color: var(--ink); }
+.fc-pz-when { color: var(--faint); font-size: var(--fs-micro); }
+.fc-pz-how { flex: none; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .fc-breakdown-bar-wrap { border-radius: 8px; overflow: hidden; background: var(--surface); }
 .fc-breakdown-bar { display: block; width: 100%; height: 16px; }

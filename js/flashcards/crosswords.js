@@ -700,6 +700,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // can't remember a best.
     try { var all = readBest(); all[key] = ms; localStorage.setItem(MATCH_BEST_KEY, JSON.stringify(all)); } catch (e) { /* ignore */ }
   }
+  // Every finished Match / Listening game goes to the Dashboard's log.
+  function recordRun(run) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    if (runs) runs.record(run);
+  }
   var matchTimer = null;
   function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
 
@@ -735,6 +740,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var key = matchBestKey(p), best = readBest()[key];
       var isBest = typeof best !== "number" || total < best;
       if (isBest) saveBest(key, total);
+      recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key });
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
@@ -835,7 +841,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<span class="fc-ls-sub"><span lang="ja">' + (written !== w.answer ? esc(w.answer) + " · " : "") + "</span>" + esc(romaji) + "</span>";
   }
   function wireListening(boardEl, countEl, p) {
-    var at, score, missed, game = 0, played;
+    var at, score, missed, game = 0, played, startedAt;
     function count() { countEl.textContent = Math.min(at + 1, p.questions.length) + " / " + p.questions.length; }
     function renderQuestion() {
       var q = p.questions[at];
@@ -880,6 +886,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }
     }
     function finish() {
+      recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score });
       countEl.textContent = score + " / " + p.questions.length;
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
@@ -911,7 +918,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Same words, same questions, from the top.
     function restart() {
       game++;
-      at = 0; score = 0; missed = []; played = false;
+      at = 0; score = 0; missed = []; played = false; startedAt = Date.now();
       countEl.classList.remove("fc-ws-count-done");
       renderQuestion();
     }

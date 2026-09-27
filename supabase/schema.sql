@@ -133,6 +133,12 @@ alter table public.flashcard_settings add column if not exists leech_kept jsonb 
 -- newest change per kanji wins on merge.
 alter table public.flashcard_settings add column if not exists known_kanji jsonb not null default '{}'::jsonb;
 
+-- Finished Puzzles games (Match and Listening) for the Dashboard's Puzzles
+-- card -- practice only, never FSRS. The client keeps the newest 500 and
+-- merges by id. Shape: [{ "id": "...", "at": "<ISO>", "mode": "match" |
+-- "listening", "n": 15, "ms": 23400, "miss": 1, "right": 8, "setup": "..." }].
+alter table public.flashcard_settings add column if not exists puzzle_runs jsonb not null default '[]'::jsonb;
+
 -- Kana trainer cards + review history -- the exact parallel of flashcards /
 -- review_logs above, for the "Kana" tab's own hiragana/katakana drill.
 -- kana_id is the trainer's stable item id ("hira-gojuon:あ", ...); direction

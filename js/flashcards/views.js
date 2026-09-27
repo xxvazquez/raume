@@ -111,6 +111,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Today</span><span class="help-desc">Reviews done against your daily new-card target.</span></li>' +
       '<li><span class="help-term">Next review</span><span class="help-desc">When the next card is due.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
+      '<li><span class="help-term">Puzzles</span><span class="help-desc">Your Match and Listening games: accuracy, best pace, games this week and the latest few.</span></li>' +
       '<li><span class="help-term">Missed today</span><span class="help-desc">Words you missed, most-missed first — tap one to practise it.</span></li>' +
       '<li><span class="help-term">Leeches</span><span class="help-desc">Words forgotten 8+ times after learning. Pause, or Keep studying.</span></li>' +
       '<li><span class="help-term">Words to review</span><span class="help-desc">Words you often miss, as a table you can sort and print; ⋯ hides a column.</span></li>' +

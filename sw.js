@@ -60,6 +60,7 @@ const VERSIONED = [
   'js/flashcards/scheduling.js',
   'js/flashcards/data-ops.js',
   'js/flashcards/backup.js',
+  'js/flashcards/puzzle-runs.js',
   'js/flashcards/dashboard.js',
   'js/flashcards/views.js',
   'js/flashcards/kana-data.js',

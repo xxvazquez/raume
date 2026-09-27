@@ -542,6 +542,11 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       if (authState.session) dataOps.saveKnownKanjiRemote(obj);
     });
   }
+  if (window.RaumeStudy.flashcards.puzzleRuns) {
+    window.RaumeStudy.flashcards.puzzleRuns.setRemotePush(function (arr) {
+      if (authState.session) dataOps.savePuzzleRunsRemote(arr);
+    });
+  }
 
   document.addEventListener("DOMContentLoaded", function () {
     loadCache();

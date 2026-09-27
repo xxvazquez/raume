@@ -248,7 +248,7 @@ sit at the top right, beside the title, and open as their own screen with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
+| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Puzzles** (every finished Match and Listening game: games played, Listening accuracy, best Match pace per pair, pairs matched, games per day this week and the last four games — synced to your account when signed in), missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search / Match / Listening from your words ([below](#puzzles)) |
@@ -340,6 +340,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same
   words again. Practice only — it never changes your flashcard schedule.
+- Every finished game is saved to the Dashboard's **Puzzles** card (time,
+  pairs, misses).
 
 </details>
 
@@ -359,6 +361,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   *Restart* asks the same ones again.
 - No Japanese voice and no recorded clips loaded (a first visit offline)? It
   says so instead of playing silently. Practice only, like Match.
+- Every finished game is saved to the Dashboard's **Puzzles** card (score and
+  time).
 
 </details>
 
