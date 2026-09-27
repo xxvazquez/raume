@@ -614,7 +614,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
       '<a class="site-nav-link" href="#travel" data-section="travel">Travel</a>' +
-      '<a class="site-nav-link" href="#flashcards" data-page="flashcards">Flashcards</a>';
+      '<a class="site-nav-link" href="#practice" data-page="flashcards">Practice</a>';
   }
   // The internal table index: a visual directory that stands in for a
   // redundant page heading. Closed, it's one small control (showing the

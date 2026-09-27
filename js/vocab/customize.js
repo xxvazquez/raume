@@ -281,7 +281,7 @@ window.RaumeStudy.customize = (function () {
       '<h2>Your vocabulary' + infoButtonHtml("vocab", cvInfoVocabOpen, "About your vocabulary") + "</h2>" +
       infoPanelHtml("vocab", cvInfoVocabOpen,
         '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
-        (signedIn ? " Saved to your account and synced to your other devices." : " Saved in this browser. Sign in on the Flashcards page to sync them and to create your own tables.") + "</p>") +
+        (signedIn ? " Saved to your account and synced to your other devices." : " Saved in this browser. Sign in on the Practice page to sync them and to create your own tables.") + "</p>") +
 
       '<details class="cv-card" data-open-key="add">' +
       '<summary class="cv-card-summary disclosure-caret">Add a word</summary>' +
@@ -390,7 +390,7 @@ window.RaumeStudy.customize = (function () {
           "<li><strong>Name</strong> — type in the field. Leave it empty to keep the original (shown in grey).</li>" +
           "<li><strong>Order</strong> — the ▲▼ buttons move a table within its category, or a category within its section.</li>" +
           "<li><strong>Reset</strong> puts a single table’s name and icon back to how it shipped.</li>" +
-          "<li>Signed in on the Flashcards page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
+          "<li>Signed in on the Practice page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
         "</ul>") +
       "</div>" + '<div class="cz-groups">' + groups + "</div>" + (cv() ? customVocabSection() : "");
   }

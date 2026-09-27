@@ -70,7 +70,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // stored on-device preference, not a session. Only fall through to
     // "is there an account session?" when guest mode hasn't been chosen.
     if (isGuestMode()) { renderShell(el); return; }
-    if (!authState.ready) { el.innerHTML = "<h1>Flashcards</h1><p class=\"fc-lede\">Loading…</p>"; return; }
+    if (!authState.ready) { el.innerHTML = "<h1>Practice</h1><p class=\"fc-lede\">Loading…</p>"; return; }
     if (authState.session) { renderShell(el); return; }
     renderEntryChoice(el);
   }
@@ -159,7 +159,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // the recovery session back out rather than leaving it live unintended.
   var recoveryError = "";
   function renderPasswordRecovery(el) {
-    el.innerHTML = "<h1>Flashcards</h1>" +
+    el.innerHTML = "<h1>Practice</h1>" +
       '<div class="fc-entry-card fc-recovery-card">' +
       "<h3>Set a new password</h3>" +
       '<p class="fc-note">You followed a password-reset link. Choose a new password to finish signing in.</p>' +
@@ -194,7 +194,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // cross-device sync. Guest mode works even without a Supabase project
   // configured; syncing obviously doesn't.
   function renderEntryChoice(el) {
-    el.innerHTML = "<h1>Flashcards</h1>" +
+    el.innerHTML = "<h1>Practice</h1>" +
       '<p class="fc-lede">Add vocabulary to your flashcards and track your reviews. Use it right here on this device, or sign in to keep it synced everywhere.</p>' +
       '<div class="fc-entry-grid">' +
       '<div class="fc-entry-card"><h3>This device only</h3>' +
@@ -268,9 +268,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       }).join("") +
       "</div>";
     var header = pushed
-      ? '<button type="button" class="fc-back" id="fcBack">' + BACK_ICON + "Flashcards</button>" +
+      ? '<button type="button" class="fc-back" id="fcBack">' + BACK_ICON + "Practice</button>" +
         '<div class="fc-titlebar fc-titlebar-pushed"><h1>' + pushed + "</h1></div>"
-      : '<div class="fc-titlebar"><h1>Flashcards</h1>' +
+      : '<div class="fc-titlebar"><h1>Practice</h1>' +
         tabsHtml +
         '<div class="fc-titlebar-actions">' +
         '<button type="button" class="fc-titlebar-btn" data-tab="settings">Settings</button>' +

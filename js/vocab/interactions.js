@@ -198,7 +198,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
-  // #travel / #flashcards / #table-N) so a section or a specific
+  // #travel / #practice / #table-N) so a section or a specific
   // table can be bookmarked, shared and survive a reload. `fromRoute` = we're
   // already responding to a hash, so don't push it again.
   function setHash(h, fromRoute) {
@@ -304,7 +304,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     document.body.dataset.activePage = 'flashcards';
     showStandalonePage('flashcards');
     markActiveNav(null);
-    setHash('flashcards', opts.fromRoute);
+    setHash('practice', opts.fromRoute);
     window.scrollTo({ top: 0 });
   };
 
@@ -378,7 +378,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function routeFromHash() {
     const h = (location.hash || '').replace(/^#/, '');
     const m = h.match(/^table-(.+)$/);
-    if (h === 'flashcards') { vocab.showFlashcardsPage({ fromRoute: true }); return; }
+    // #flashcards: the page's old name, so older bookmarks still land here.
+    if (h === 'practice' || h === 'flashcards') { vocab.showFlashcardsPage({ fromRoute: true }); return; }
     if (h === 'customize') { vocab.showCustomizePage({ fromRoute: true }); return; }
     if (h === 'help') { vocab.showHelpPage({ fromRoute: true }); return; }
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }

@@ -284,7 +284,7 @@ window.RaumeStudy.customVocab = (function () {
   function addRow(tableId, parsed) { return addRows(tableId, [parsed])[0]; }
 
   function createTable(title, category) {
-    if (!isSignedIn()) throw new Error("Sign in on the Flashcards page to create your own tables.");
+    if (!isSignedIn()) throw new Error("Sign in on the Practice page to create your own tables.");
     var t = {
       id: "ct-" + uuid(),
       title: String(title || "").trim().slice(0, 60) || "Untitled table",

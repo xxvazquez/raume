@@ -807,9 +807,9 @@ async function main() {
     const base = allCssRules.find(r => r.selectorText === ".screen-title");
     return !!t && t.tagName === "H1" && t.textContent === "Vocabulary" && !!base && base.style.display !== "none" && base.style.position === "absolute" && base.style.clip === "rect(0px, 0px, 0px, 0px)";
   })());
-  check("every other screen's own title is a real <h1> too (Flashcards, Customize tables, How this works)", (() => {
+  check("every other screen's own title is a real <h1> too (Practice, Customize tables, How this works)", (() => {
     const flashTitle = document.querySelector(".page-flashcards h1");
-    return !!flashTitle && flashTitle.textContent === "Flashcards"
+    return !!flashTitle && flashTitle.textContent === "Practice"
       && document.querySelector(".page-help h1").textContent === "How this works";
   })());
   check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
@@ -910,9 +910,9 @@ async function main() {
 
   console.log("Top navigation");
   const navLinks = [...document.querySelectorAll("#siteNav .site-nav-link")];
-  check("nav is Vocabulary / Grammar / Travel / Flashcards", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Travel Flashcards");
+  check("nav is Vocabulary / Grammar / Travel / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Travel Practice");
   check("the three reference sections carry data-section", navLinks.slice(0, 3).map(l => l.dataset.section).join(",") === "vocabulary,grammar,travel");
-  check("last nav item is Flashcards", navLinks[navLinks.length - 1].dataset.page === "flashcards");
+  check("last nav item is Practice, at #practice", navLinks[navLinks.length - 1].dataset.page === "flashcards" && navLinks[navLinks.length - 1].getAttribute("href") === "#practice");
   check("no category is a top-level nav item", !navLinks.some(l => l.dataset.category));
 
   console.log("Sections behave like separate pages");
@@ -1608,7 +1608,7 @@ async function main() {
   const flashcardsLink = document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]');
   check("Flashcards nav link exists", !!flashcardsLink);
   flashcardsLink.click();
-  check("clicking it reveals the Flashcards page", document.getElementById("flashcardsPage").hidden === false);
+  check("clicking it reveals the Practice page, and the URL says #practice", document.getElementById("flashcardsPage").hidden === false && window.location.hash === "#practice");
   check("clicking it hides the vocabulary view", document.getElementById("vocabPage").hidden === true);
   check("clicking it marks the Flashcards link active", flashcardsLink.classList.contains("active"));
   check("no vocabulary-section nav link stays active on Flashcards", !document.querySelector('#siteNav .site-nav-link[data-section].active'));
@@ -1625,6 +1625,13 @@ async function main() {
   })());
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
   check("Vocabulary still returns to the reference (unaffected by the Flashcards page)", document.getElementById("vocabPage").hidden === false);
+  check("an old #flashcards link still opens Practice", (() => {
+    window.location.hash = "#flashcards";
+    window.dispatchEvent(new window.Event("popstate"));
+    const ok = document.getElementById("flashcardsPage").hidden === false;
+    document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
+    return ok;
+  })());
 
   console.log("Flashcards: per-row add toggle appears only while searching");
   const drinksSectionFc = document.querySelector('.table-section[data-table="2"]');

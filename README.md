@@ -11,7 +11,7 @@ cooking or studying, and for printing clean A4 study sheets.
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar and Travel tables — furigana, search, audio, print |
-| **Flashcards**  | FSRS-6 spaced repetition, four directions per word, daily streak |
+| **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords, word searches and a timed Match game from your words |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
@@ -25,7 +25,7 @@ cooking or studying, and for printing clean A4 study sheets.
     [Reading the tables](#reading-the-tables) · [Options](#options) ·
     [Grammar notes](#grammar-notes) · [Customising](#customising) ·
     [Print, theme and navigation](#print-theme-and-navigation)
-- [Flashcards](#flashcards)
+- [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
     [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles)
 - [Accounts and storage](#accounts-and-storage)
@@ -52,7 +52,7 @@ python3 -m http.server     # only needed to test the service worker / offline
 | **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
 | **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
-| **Flashcards** | Review, manage and track progress — see [Flashcards](#flashcards) |
+| **Practice**   | Flashcards, the Kana drill and Puzzles — see [Practice](#practice) |
 
 On a phone the nav is a tab bar at the bottom; on a wider screen it's the top
 row. Grammatical **particles are blue and bold** everywhere.
@@ -64,7 +64,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 | **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted; a single letter only finds words that start with it (one kana or kanji still matches anywhere). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
 | **Tables** | The list button in the pinned search bar (named after the table you're reading, on desktop) lists every table in the section with its entry count. |
 | **Opening a table** | Keeps the row you tapped exactly where it was. While it's open, its title stays pinned under the search bar as you scroll, and closing it from there keeps it in place. |
-| **URL** | Follows the view (`#grammar`, `#table-15`, `#flashcards`), so any view can be bookmarked. |
+| **URL** | Follows the view (`#grammar`, `#table-15`, `#practice` — an old `#flashcards` link still opens Practice), so any view can be bookmarked. |
 | **Pinned bar** | The search field and **Options** stay pinned as you scroll. |
 
 ### Reading the tables
@@ -159,8 +159,9 @@ Manage's buttons keep a one-word label — nothing relies on hover.
 
 ---
 
-## Flashcards
+## Practice
 
+The Practice tab holds your flashcards, the Kana drill and Puzzles.
 Flashcards sit on top of the vocabulary without copying it — each card
 references a row's permanent id (`v0001`…). Add a whole table with **Add to
 flashcards**, or single words from **Manage** or a search result.
@@ -230,7 +231,7 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 
 Four segments — Dashboard, Manage, Kana, Puzzles. **Settings** and **Help**
 sit at the top right, beside the title, and open as their own screen with a
-**‹ Flashcards** back button.
+**‹ Practice** back button.
 
 | Screen | What it does |
 | --- | ------------ |
@@ -335,7 +336,7 @@ window the clue you're on and the Across / Down lists sit beside the grid.
 
 ## Accounts and storage
 
-The Flashcards page starts by asking you to pick one of two modes. The two
+The Practice page starts by asking you to pick one of two modes. The two
 never mix.
 
 |  | **Guest** | **Signed in** |

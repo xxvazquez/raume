@@ -594,7 +594,7 @@ library" below).
 
 ## The Flashcards dashboard
 
-The whole Flashcards page follows the iOS rules the reference pages do: it sits
+The whole Practice page follows the iOS rules the reference pages do: it sits
 on the grey ground (`.page-flashcards` → `--group-ground`, the same as
 `.page-vocab`), every group is a **white `--radius-card` card straight on the
 ground — no border, no shadow, no coloured edge bar**, and rows inside a card are
@@ -730,7 +730,7 @@ same markup — no session-state flag to keep in sync in JS.
 The sub-tabs are four segments (Dashboard / Manage / Kana / Puzzles) — iOS
 segmented controls stop reading at a glance past about five. Settings and Help
 are plain tint-text buttons at the title's trailing edge (an iOS navigation
-bar's right-hand items) and open as pushed screens: a "‹ Flashcards" back
+bar's right-hand items) and open as pushed screens: a "‹ Practice" back
 button above their own large title, no segmented control. The active sub-tab
 (`.fc-tab.active`) is the raised segment of a segmented control; the active nav link (`.site-nav-link.active`) is a soft capsule in the
 section tone — clearly the live one against the muted rest.
