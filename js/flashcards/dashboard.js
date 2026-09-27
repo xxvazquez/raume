@@ -84,7 +84,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "</div></div>" +
       // Puzzles work without flashcards (Tables as the source), so their
       // games still get their card.
-      '<div class="fc-viz-grid fc-dash-empty-puzzles">' + puzzlesCardHtml(new Date()) + kanjiCardHtml() + "</div>";
+      '<div class="fc-viz-grid fc-dash-empty-puzzles">' + kanaCardHtml(new Date()) + puzzlesCardHtml(new Date()) + kanjiCardHtml() + "</div>";
     bindDashGo(panel);
     var browse = document.getElementById("fcEmptyBrowse");
     if (browse) browse.addEventListener("click", function () {
@@ -164,6 +164,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Due next 7 days</h3>' + dueForecastHtml(dueForecast(now)) + "</div>" +
+      kanaCardHtml(now) +
       puzzlesCardHtml(now) +
       kanjiCardHtml() +
       (foldReview
@@ -648,11 +649,33 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<rect class="fc-kj-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
       (known ? '<rect class="fc-kj-fill" x="0" y="0" width="' + Math.max(pct, 2) + '" height="6" rx="3"></rect>' : "") + "</svg></div>";
   }
-  // The Puzzles / Kanji cards' buttons: to the Puzzles tab, or the Kanji section.
+  // --- Dashboard: Kana ---
+  // The Kana trainer's chosen groups: how many cards started (a sage bar,
+  // like Kanji) and how many a session would hold now.
+  function kanaCardHtml(now) {
+    var kana = window.RaumeStudy.flashcards.kana;
+    if (!kana || !kana.summary) return "";
+    var k = kana.summary(now);
+    if (!k.total) return "";
+    var pct = Math.round(k.started / k.total * 1000) / 10;
+    return '<div class="fc-viz-card fc-viz-wide fc-dash-kana"><h3 class="fc-viz-title">Kana</h3>' +
+      '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + k.started + "</b> of " + k.total + " started" +
+      (k.toStudy ? '<span class="fc-kj-sub">' + k.toStudy + " to study now</span>" : "") + "</span>" +
+      '<button type="button" class="fc-btn' + (k.toStudy ? " fc-btn-primary" : "") + '" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
+      '<svg class="fc-kj-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="' + k.started + " of " + k.total + ' kana cards started">' +
+      '<rect class="fc-kj-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
+      (k.started ? '<rect class="fc-kj-fill" x="0" y="0" width="' + Math.max(pct, 2) + '" height="6" rx="3"></rect>' : "") + "</svg></div>";
+  }
+  // The Puzzles / Kana / Kanji cards' buttons: to the Puzzles or Kana tab,
+  // or the Kanji section.
   function bindDashGo(panel) {
     panel.querySelectorAll("[data-dash-go]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        if (btn.dataset.dashGo === "puzzles") { window.RaumeStudy.flashcards.setActiveTab("crosswords"); rerender(); return; }
+        if (btn.dataset.dashGo === "puzzles" || btn.dataset.dashGo === "kana") {
+          window.RaumeStudy.flashcards.setActiveTab(btn.dataset.dashGo === "kana" ? "kana" : "crosswords");
+          rerender();
+          return;
+        }
         var v = window.RaumeStudy.vocab;
         if (v && v.showSection) v.showSection("kanji");
       });

@@ -3483,6 +3483,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    a thin sage bar under it -- the Known tiles' colour. */
 .fc-kj-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .fc-kj-count { color: var(--muted); font-size: var(--fs-small); }
+.fc-kj-sub { display: block; margin-top: 2px; font-size: var(--fs-micro); color: var(--faint); }
 .fc-kj-count b { color: var(--ink); font-size: var(--fs-section-title); font-weight: 500; margin-right: 2px; }
 .fc-kj-bar { display: block; width: 100%; height: 6px; }
 .fc-kj-track { fill: color-mix(in srgb, var(--ink) 7%, var(--paper)); }

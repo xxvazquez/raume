@@ -111,6 +111,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Today</span><span class="help-desc">Reviews done against your daily new-card target.</span></li>' +
       '<li><span class="help-term">Next review</span><span class="help-desc">When the next card is due.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
+      '<li><span class="help-term">Kana</span><span class="help-desc">Kana cards started, and how many to study now.</span></li>' +
       '<li><span class="help-term">Puzzles</span><span class="help-desc">Every game you finish or puzzle you solve: accuracy, best pace, games this week and the latest few.</span></li>' +
       '<li><span class="help-term">Kanji</span><span class="help-desc">How many kanji you’ve marked as known.</span></li>' +
       '<li><span class="help-term">Missed today</span><span class="help-desc">Words you missed, most-missed first — tap one to practise it.</span></li>' +

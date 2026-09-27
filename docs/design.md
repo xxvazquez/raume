@@ -650,7 +650,9 @@ be scannable at a glance:
 
 - **One card per group** — `.fc-dash-now` ("right now": next review + today +
   Study now), `.fc-dash-stats` (the 4 tiles) and then one `.fc-viz-card` each for
-  Card progress, Reviews this week, Due next 7 days, Puzzles (full width, always
+  Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
+  layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
+  — white Open Kana when nothing is due — and the sage bar), Puzzles (full width, always
   there: four stat cells — one row of four on a wide window — the week's games as
   the Reviews-this-week bars, then the last four games as 44px hairline rows,
   result right in tabular figures; with no games yet, one line "No games yet." and

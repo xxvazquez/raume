@@ -529,8 +529,15 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (btn) btn.click();
   });
 
+  // The Dashboard's Kana card: the chosen groups' progress and what a
+  // session would hold right now.
+  function summary(now) {
+    var p = progress(now || new Date());
+    p.toStudy = buildQueue(now || new Date()).length;
+    return p;
+  }
   return {
-    renderKana: renderKana, clearSession: clearSession,
+    renderKana: renderKana, clearSession: clearSession, summary: summary,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       checkKana: checkKana, checkR2k: checkR2k, buildQueue: buildQueue, selectedItems: selectedItems,
