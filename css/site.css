@@ -4003,10 +4003,15 @@ mark.fc-diff-co {
   float: left; width: 100%; padding: 0 0 6px 16px; margin: 0;
   font: 500 12px/1 var(--font-ui); color: var(--muted);
 }
-.fc-kana-card { background: var(--paper); border-radius: var(--radius-card); padding: 0 14px; }
+/* The Settings card model (.set-card / .set-row): no side padding, the
+   card's corners clip each row, so a row's highlight runs edge to edge and
+   rounds with the card; hairlines inset from the leading edge. */
+.fc-kana-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-kana-fieldset legend + * { clear: both; }
-.fc-kana-fieldset .fc-kana-group { border-radius: 0; padding: 11px 0; }
-.fc-kana-fieldset .fc-kana-group + .fc-kana-group { border-top: 1px solid var(--row-line); }
+.fc-kana-fieldset .fc-kana-group { position: relative; border-radius: 0; min-height: 44px; padding: 0 16px; box-sizing: border-box; }
+.fc-kana-fieldset .fc-kana-group + .fc-kana-group::before {
+  content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line);
+}
 @media (max-width: 560px) {
   .fc-kana-fieldset { flex: 1 1 100%; }
 }
@@ -4200,10 +4205,13 @@ mark.fc-diff-co {
   transition: background .12s ease;
 }
 .fc-kana-group { font-size: 15px; } /* an iOS list row, not a caption */
+/* Hover / press: the Settings rows' neutral fill, never a tinted block. */
 .fc-kana-group:hover,
 .fc-direction-check:hover {
-  background: color-mix(in srgb, var(--section) 7%, transparent);
+  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
 }
+.fc-kana-group:active,
+.fc-direction-check:active { background: color-mix(in srgb, var(--ink) 7%, var(--paper)); }
 .fc-kana-group input[type="checkbox"],
 .fc-direction-check input[type="checkbox"] {
   position: absolute;

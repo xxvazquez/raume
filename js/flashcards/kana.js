@@ -311,7 +311,6 @@ window.RaumeStudy.flashcards.kana = (function () {
       : p.due + " due · " + p.started + " started · " + p.unseen + " not started";
 
     panel.innerHTML =
-      '<p class="fc-note">Pick the groups to practise — Help explains the rest.</p>' +
       '<div class="fc-kana-groups">' +
       ["hiragana", "katakana"].map(function (script) {
         return '<fieldset class="fc-kana-fieldset"><legend>' + (script === "hiragana" ? "Hiragana" : "Katakana") + "</legend>" +

@@ -344,8 +344,11 @@ and Help.
   - **Menus** (the table ⋯ menu): a glass popover (`--radius-menu`), items
     15px in 12px×14px rows separated by hairlines, label first and its glyph
     trailing. The ⋯ trigger itself is a bare glyph.
-  - **Checkmark rows** (kana groups, study directions) are unchanged: the row is the
-    tap target and a tick appears at the trailing edge.
+  - **Checkmark rows** (kana groups, study directions): the row is the tap
+    target and a tick appears at the trailing edge. They sit in the Settings card
+    model — the card has no side padding and clips its rows, so a row's hover /
+    press fill (neutral `--ink` 3% / 7%, never a section tint) runs edge to edge
+    and rounds with the card; 44px rows, hairlines inset 16px from the leading edge.
 - **iOS 26 materials** (the "iOS 26 materials" block at the end of
   `css/site.css`): the sticky search bar, the Options / Tables sheets, popovers
   and ⋯ menus are translucent glass — `backdrop-filter` blur with the
