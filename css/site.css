@@ -155,12 +155,13 @@
   --field-fill: #eef0f3;
   --field-line: var(--line-strong);
   --card-line: #dbdfe6;
-  /* Controls library (iOS): a segmented control is a grey track with a raised
-     thumb on the selected segment; a switch is a grey track that fills with
+  /* Controls library (iOS 26): a segmented control is a solid white capsule
+     (--control-lift) whose selected segment takes the soft section-tone
+     wash -- the desktop nav capsule's look, no grey track; a switch is a
+     grey track that fills with
      the section tone (--switch-on, set on body below -- the section tones are
      only defined there). */
-  --seg-track: color-mix(in srgb, var(--ink) 6%, var(--group-ground)); /* faint: the white thumb does the work */
-  --seg-thumb: var(--paper);
+  --seg-track: var(--paper);
   --switch-off: color-mix(in srgb, var(--ink) 18%, var(--paper));
   --switch-thumb: #fff;
   --radius-button: 999px; /* iOS 26: every button is a capsule */
@@ -321,7 +322,6 @@
      border a clear step up from --line. */
   --field-fill: #131820;
   --field-line: #4b5563;
-  --seg-thumb: #3d424b;
   /* Hairline under the pull-to-refresh bar; cards themselves have no outline. */
   --card-line: #39414d;
   /* Table row rules had nearly vanished; give them a hair more. */
@@ -795,10 +795,11 @@ body {
 
 /* A switch is "on" in the deep section tone in light, and the mid tone in dark
    (the deep one is a pale tint there, which would wash out the white thumb). */
-body { --switch-on: var(--section-strong); }
+/* The selected segment: set on body, where the section tone is defined. */
+body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --seg-thumb-ink: var(--section-strong); }
 :root[data-theme="dark"] body { --switch-on: var(--section); }
-/* Segmented control (iOS): a grey track holding the segments, the selected
-   one raised on a thumb -- single-select only (Manage's .fc-manage-filters;
+/* Segmented control (iOS 26): a white capsule holding the segments, the
+   selected one on a soft section-tone wash -- single-select only (Manage's .fc-manage-filters;
    the Flashcards tabs and the Appearance picker share the look). Multi-select
    on/off sets are switches or checkmark menu items, never this. */
 .fc-manage-filters {
@@ -807,6 +808,7 @@ body { --switch-on: var(--section-strong); }
   gap: 2px;
   padding: 2px;
   background: var(--seg-track);
+  box-shadow: var(--control-lift);
   border-radius: 999px;
 }
 .fc-manage-filters button {
@@ -822,7 +824,8 @@ body { --switch-on: var(--section-strong); }
 }
 .fc-manage-filters button.active {
   background: var(--seg-thumb);
-  color: var(--ink);
+  color: var(--seg-thumb-ink);
+  font-weight: 500;
 }
 .fc-manage-filters button:hover { color: var(--ink); }
 /* --- Options sheet (search bar's trailing button) ----------------------
@@ -3103,7 +3106,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* The Flashcards sub-tabs are the shared segmented control (see .fc-manage-filters):
    a grey track, the selected tab raised on a thumb. Full width on a phone,
    sized to its content on a wide window. */
-.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
+.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); box-shadow: var(--control-lift); border-radius: 999px; }
 .fc-tab {
   flex: 1 1 auto;
   appearance: none; border: 0; background: transparent;
@@ -3112,7 +3115,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   cursor: pointer;
 }
 .fc-tab:hover { color: var(--ink); }
-.fc-tab.active { background: var(--seg-thumb); color: var(--ink); }
+.fc-tab.active { background: var(--seg-thumb); color: var(--seg-thumb-ink); font-weight: 500; }
 @media (min-width: 700px) {
   .fc-tabs { display: inline-flex; }
   .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
@@ -4551,12 +4554,10 @@ mark.fc-diff-co {
 }
 
 /* Controls that sit on the grey ground (the search field, the Tables |
-   Options capsule, a segmented control's selected segment): solid white, a
-   0.5px hairline and a very soft lift -- crisp, not grey. */
+   Options capsule, a segmented control's capsule): solid white, a 0.5px
+   hairline and a very soft lift -- crisp, not grey. */
 :root { --control-lift: 0 0 0 .5px rgba(24, 24, 40, .12), 0 1px 3px rgba(24, 24, 40, .07); }
 :root[data-theme="dark"] { --control-lift: 0 0 0 .5px rgba(255, 255, 255, .1), 0 1px 3px rgba(0, 0, 0, .4); }
-.fc-tab.active,
-.fc-manage-filters button.active { box-shadow: var(--control-lift); }
 
 /* --- Desktop / tablet frame: no sheet ---------------------------------
    Past phone width the page used to be a bordered white sheet floating on
@@ -4787,9 +4788,9 @@ mark.fc-diff-co {
 .account-menu-item:hover, .account-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
 .account-menu-sep { height: 1px; margin: 4px 8px; background: var(--row-line); }
 .account-menu-label { padding: 6px 12px 4px; color: var(--muted); font-size: var(--fs-small); }
-.account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); }
+.account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); box-shadow: var(--control-lift); }
 .account-menu-seg button {
   flex: 1; appearance: none; border: 0; background: transparent; cursor: pointer;
   padding: 7px 0; border-radius: 999px; color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
 }
-.account-menu-seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: var(--control-lift); }
+.account-menu-seg button[aria-pressed="true"] { background: var(--seg-thumb); color: var(--seg-thumb-ink); font-weight: 500; }

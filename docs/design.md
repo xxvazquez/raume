@@ -301,10 +301,14 @@ and Help.
   beside the hide eye opens a popover (`.role-pop-list`) with a line per note,
   each led by its own tinted glyph. The English keeps the row's full width.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
-  `--seg-thumb`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
+  `--seg-thumb`, `--seg-thumb-ink`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.fc-manage-filters`, the Flashcards tabs, the
-    Appearance picker): a grey track with 2px padding, the selected segment raised
-    on a thumb. Single-select only — never several segments raised at once. A
+    Appearance picker): a solid white capsule (`--seg-track` = paper, the
+    `--control-lift` hairline) with 2px padding, the selected segment on the soft
+    section-tone wash (`--seg-thumb` = `--section-soft`, label `--seg-thumb-ink` =
+    `--section-strong`, weight 500) — the desktop nav capsule's active item, so
+    every pill in the app reads the same. No grey track (iOS 26; Laura,
+    2026-09-27). Single-select only — never several segments raised at once. A
     multi-select on/off set is switches (the reference Options sheet's Japanese /
     Furigana / English) or checkmark items in a ⋯ menu (the dashboard's Words to
     review: `.col-menu-item`, `role="menuitemcheckbox"`, tick leading, a ground
