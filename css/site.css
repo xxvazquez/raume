@@ -1740,7 +1740,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 }
 .help-support::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
 .help-support:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
-.page-help .help-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
+.page-help .help-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; text-align: justify; }
 /* Licences, like iOS Settings › Legal: a list header, a card of 44px rows
    (what it covers left, the licence right, ↗ out) and a footnote. */
 .help-legal-head { margin: 26px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
