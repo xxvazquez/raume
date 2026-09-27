@@ -650,10 +650,12 @@ be scannable at a glance:
 
 - **One card per group** — `.fc-dash-now` ("right now": next review + today +
   Study now), `.fc-dash-stats` (the 4 tiles) and then one `.fc-viz-card` each for
-  Card progress, Reviews this week, Due next 7 days, Puzzles (full width: four
-  stat cells — one row of four on a wide window — the week's games as the
-  Reviews-this-week bars, then the last four games as 44px hairline rows,
-  result right in tabular figures), Missed today, Leeches
+  Card progress, Reviews this week, Due next 7 days, Puzzles (full width, always
+  there: four stat cells — one row of four on a wide window — the week's games as
+  the Reviews-this-week bars, then the last four games as 44px hairline rows,
+  result right in tabular figures; with no games yet, one line "No games yet." and
+  a white Play a puzzle button), Kanji ("12 of 102 known" beside a white button,
+  a thin 6px sage bar under it — the Known tiles' colour), Missed today, Leeches
   (only when there are any) and Words to review. The two small charts still pair
   side by side on a wide window;
 - **"Right now"** leads with the count: a large 44px ink figure with "cards to

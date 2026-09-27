@@ -64,7 +64,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 | --- | --- |
 | **Grid** | Each theme opens as a grid of tiles: the kanji large, its meaning under it. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
 | **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana) and romaji, its stroke count and radical, an example word with furigana, **Words with** it — every word from the other tables written with that kanji, shortest first, folded away until you tap it — and **Add to flashcards**. |
-| **Known** | **Mark as known** under the sheet's title turns that kanji's tile sage green with a check, so what's left to learn stays grey; tap **Known** to undo. Kept on the device and, signed in, synced to your account. |
+| **Known** | **Mark as known** under the sheet's title turns that kanji's tile sage green with a check, so what's left to learn stays grey; tap **Known** to undo. The Dashboard's Kanji card counts them. Kept on the device and, signed in, synced to your account. |
 | **Stroke order** | The sheet draws the kanji stroke by stroke over a faint outline, each stroke numbered as it starts; **Replay** draws it again (finished drawing, no animation, with reduced motion on). Drawings from [KanjiVG](http://kanjivg.tagaini.net), CC BY-SA 3.0. |
 | **ⓘ** | Each row of the sheet has one: a short popover explaining it for an N5 learner — what on / kun readings are, strokes and stroke order, what a radical is (and when one is only there for dictionary sorting). Every kanji in them has furigana. |
 | **Flashcards** | A kanji gets two cards: meaning (山 → mountain) and reading (山 → any one of its readings in romaji, yama or san). Never English → kanji — that's writing, which typing can't check. Kanji stay out of Puzzles. |
@@ -249,7 +249,7 @@ sit at the top right, beside the title, and open as their own screen with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Puzzles** (from your first finished Match or Listening game: games played, Listening accuracy, best Match pace per pair, pairs matched, games per day this week and the last four games — synced to your account when signed in), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
+| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Puzzles** (every finished Match and Listening game and every crossword, arroword and word search you solve — one revealed in full doesn't count: games played, puzzles solved, Listening accuracy, best Match pace per pair, games per day this week and the last four games; synced to your account when signed in), **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search / Match / Listening from your words ([below](#puzzles)) |
@@ -307,6 +307,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   and Down side by side).
 - Grids are built compact — each word goes where it crosses the most and
   grows the grid the least — so even 40 words stay a dense block.
+- When **Check** finds every square right, the solve goes to the Dashboard's
+  **Puzzles** card (time and letters revealed). *Reveal puzzle* doesn't count.
 
 </details>
 
@@ -324,6 +326,8 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   many are found.
 - The **⋯** menu has *Reveal a word*, *Reveal puzzle*, *Clear found words* and
   *Print*.
+- Finding them all goes to the Dashboard's **Puzzles** card (time and words
+  revealed) — unless every word was revealed.
 
 </details>
 

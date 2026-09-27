@@ -173,7 +173,9 @@ collapsible sections a reader has open, keyed per item, browser-local only
 Puzzles › Match best times, one per source + script + pair count, also
 browser-local only), `raume-puzzle-runs` — finished Match / Listening games for the Dashboard's
 Puzzles card ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
-an array of `{ id, at, mode, n, ms, miss | right, setup }`, newest 500 kept;
+an array of `{ id, at, mode, n, ms, miss | right | help, setup }` — `mode` is
+match / listening / crossword / arroword / wordsearch; a grid or word search is
+logged once when solved, never when revealed in full — newest 500 kept;
 signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
 and merged back on sign-in by id), `raume-kanji-known` — kanji marked Known
 ([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`):

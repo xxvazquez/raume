@@ -499,7 +499,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // way round, marks it found. Matched on the letters, not on where the
   // builder put the word -- if the filler happens to spell an answer again
   // elsewhere, finding that copy counts too.
-  function wireWordSearch(gridEl, listEl, countEl, p) {
+  function wireWordSearch(gridEl, listEl, countEl, p, onAllFound) {
     var SVGNS = "http://www.w3.org/2000/svg";
     var svg = gridEl.querySelector(".fc-ws-marks");
     var found = p.placements.map(function () { return false; });
@@ -545,6 +545,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var n = found.filter(Boolean).length;
       countEl.textContent = n === found.length ? "All " + n + " found" : n + " of " + found.length + " found";
       countEl.classList.toggle("fc-ws-count-done", n === found.length);
+      if (n === found.length && onAllFound) onAllFound();
     }
     function markFound(i, a, b) {
       found[i] = true;
@@ -1348,15 +1349,19 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     };
   }
 
+  // True when every square is filled in and right -- the puzzle is solved.
   function checkGrid(gridEl, p) {
+    var all = true;
     gridEl.querySelectorAll(".fc-xw-cell-input").forEach(function (input) {
       var v = input.value.trim();
       var cell = input.closest(".fc-xw-cell");
       cell.classList.remove("fc-xw-cell-correct", "fc-xw-cell-wrong");
-      if (!v) return;
+      if (!v) { all = false; return; }
       var correct = p.grid[input.dataset.r + "," + input.dataset.c];
       cell.classList.add(v === correct ? "fc-xw-cell-correct" : "fc-xw-cell-wrong");
+      if (v !== correct) all = false;
     });
+    return all;
   }
   function revealGrid(gridEl, p) {
     gridEl.querySelectorAll(".fc-xw-cell-input").forEach(function (input) {
@@ -1638,18 +1643,37 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
     bindControls(panel);
     document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+    // A solved grid or word search goes to the Dashboard's log, once per
+    // puzzle: the time from when it appeared and how many letters / words
+    // were revealed. Revealing the whole puzzle means it wasn't solved.
+    var solve = { start: Date.now(), help: 0, done: false };
+    // `pieces` is what a hint reveals one of (words in a word search,
+    // squares in a grid): all of them revealed isn't solving it either.
+    function solved(n, pieces) {
+      if (solve.done) return;
+      solve.done = true;
+      if (solve.help >= pieces) return;
+      recordRun({ mode: state.mode, n: n, ms: Date.now() - solve.start, help: solve.help });
+    }
     if (wordsearch) {
-      var ws = wireWordSearch(panel.querySelector(".fc-ws-grid"), panel.querySelector(".fc-ws-list"), document.getElementById("fcWsCount"), p);
-      bindMenu(panel, { hint: ws.revealOne, reveal: ws.revealAll, reset: ws.reset });
+      var ws = wireWordSearch(panel.querySelector(".fc-ws-grid"), panel.querySelector(".fc-ws-list"), document.getElementById("fcWsCount"), p,
+        function () { solved(p.placements.length, p.placements.length); });
+      bindMenu(panel, {
+        hint: function () { solve.help++; ws.revealOne(); },
+        reveal: function () { solve.done = true; ws.revealAll(); },
+        reset: ws.reset
+      });
       return;
     }
     var gridEl = panel.querySelector(".fc-xw-grid");
     var nav = wireGrid(gridEl, panel.querySelector(".fc-xw-clues"), panel.querySelector(".fc-xw-current"), p, arroword);
 
-    document.getElementById("fcXwCheck").addEventListener("click", function () { checkGrid(gridEl, p); });
+    document.getElementById("fcXwCheck").addEventListener("click", function () {
+      if (checkGrid(gridEl, p)) solved(p.placements.length, gridEl.querySelectorAll(".fc-xw-cell-input").length);
+    });
     bindMenu(panel, {
-      hint: function () { hintGrid(gridEl, p, nav); },
-      reveal: function () { revealGrid(gridEl, p); },
+      hint: function () { solve.help++; hintGrid(gridEl, p, nav); },
+      reveal: function () { solve.done = true; revealGrid(gridEl, p); },
       reset: function () { resetGridInputs(gridEl); }
     });
   }

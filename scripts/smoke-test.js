@@ -2800,6 +2800,8 @@ async function main() {
   document.getElementById("fcXwReveal").click();
   check("Reveal fills every cell with its correct letter and marks it right",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.value.length === 1 && i.closest(".fc-xw-cell").classList.contains("fc-xw-cell-correct")));
+  const xwAnswers = {};
+  document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input").forEach(i => { xwAnswers[i.dataset.r + "," + i.dataset.c] = i.value; });
 
   document.getElementById("fcXwReset").click();
   check("Reset clears every typed letter and verdict but keeps the same grid to try again", (() => {
@@ -2812,6 +2814,22 @@ async function main() {
     const cells = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-letter")];
     const filled = cells.filter(c => c.querySelector(".fc-xw-cell-input").value !== "");
     return filled.length === 1 && filled[0].classList.contains("fc-xw-cell-correct");
+  })());
+  check("a crossword solved by hand goes to the Dashboard's log once; a revealed one never does", (() => {
+    const runs = window.RaumeStudy.flashcards.puzzleRuns;
+    const before = runs.all().filter(r => r.mode === "crossword").length;
+    window.RaumeStudy.flashcards.render(); // same grid, a fresh attempt
+    const fill = () => document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input").forEach(i => { i.value = xwAnswers[i.dataset.r + "," + i.dataset.c]; });
+    fill();
+    document.getElementById("fcXwCheck").click();
+    document.getElementById("fcXwCheck").click();
+    const after = runs.all().filter(r => r.mode === "crossword");
+    window.RaumeStudy.flashcards.render();
+    document.getElementById("fcXwReveal").click();
+    document.getElementById("fcXwCheck").click();
+    const last = after[after.length - 1];
+    return after.length === before + 1 && last.help === 0 && last.n > 0
+      && runs.all().filter(r => r.mode === "crossword").length === before + 1;
   })());
 
   check("tapping a clue in the list tints it, spells it out in the clue bar, and typing then runs along that word's own direction", (() => {

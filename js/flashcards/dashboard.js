@@ -84,8 +84,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "</div></div>" +
       // Puzzles work without flashcards (Tables as the source), so their
       // games still get their card.
-      (window.RaumeStudy.flashcards.puzzleRuns && window.RaumeStudy.flashcards.puzzleRuns.all().length
-        ? '<div class="fc-viz-grid fc-dash-empty-puzzles">' + puzzlesCardHtml(new Date()) + "</div>" : "");
+      '<div class="fc-viz-grid fc-dash-empty-puzzles">' + puzzlesCardHtml(new Date()) + kanjiCardHtml() + "</div>";
+    bindDashGo(panel);
     var browse = document.getElementById("fcEmptyBrowse");
     if (browse) browse.addEventListener("click", function () {
       var v = window.RaumeStudy.vocab;
@@ -165,6 +165,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
       '<div class="fc-viz-card"><h3 class="fc-viz-title">Due next 7 days</h3>' + dueForecastHtml(dueForecast(now)) + "</div>" +
       puzzlesCardHtml(now) +
+      kanjiCardHtml() +
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         // Nothing missed today: no card at all -- an empty card saying so is
@@ -177,6 +178,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (foldReview ? "" : '<div id="fcWordsToReview"></div>');
     var btn = document.getElementById("fcStudyNow");
     if (btn) btn.addEventListener("click", startSession);
+    bindDashGo(panel);
     var info = panel.querySelector(".fc-stat-info"), note = document.getElementById("fcRetentionNote");
     if (info && note) info.addEventListener("click", function () {
       var open = info.getAttribute("aria-expanded") !== "true";
@@ -196,7 +198,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Games played": '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>',
     "Listening accuracy": '<path d="M3 7v4h2.5L9 14V4L5.5 7H3Z"/><path d="M12 6.5a3.2 3.2 0 0 1 0 5"/>',
     "Best Match pace": '<circle cx="9" cy="10" r="6"/><path d="M9 10V7M7.5 2.5h3"/>',
-    "Pairs matched": '<path d="M3 6h6M3 12h6M9 6l6 6M9 12l6-6"/>',
+    "Puzzles solved": '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>',
     "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
@@ -594,23 +596,28 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
     return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
   }
+  var MODE_NAMES = { match: "Match", listening: "Listening", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
   function puzzlesCardHtml(now) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     if (!runs) return "";
     var sum = runs.summary(now);
-    // No games yet: no card -- it appears with the first finished game.
-    if (!sum.total) return "";
     var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card"><h3 class="fc-viz-title">Puzzles</h3>';
+    // No games yet: one line and the way in, not a card of zeroes.
+    if (!sum.total) {
+      return head + '<div class="fc-pz-empty"><p class="fc-note">No games yet.</p>' +
+        '<button type="button" class="fc-btn" data-dash-go="puzzles">Play a puzzle</button></div></div>';
+    }
     var ls = sum.listening, mt = sum.match;
     var tiles = statTile(sum.total, "Games played") +
+      statTile(sum.solved, "Puzzles solved") +
       statTile(ls.asked ? Math.round(ls.right / ls.asked * 100) + "%" : "—", "Listening accuracy") +
-      statTile(mt.bestPace === null ? "—" : secs(mt.bestPace) + " / pair", "Best Match pace") +
-      statTile(mt.pairs, "Pairs matched");
+      statTile(mt.bestPace === null ? "—" : secs(mt.bestPace) + " / pair", "Best Match pace");
     var recent = sum.recent.map(function (r) {
-      var what = r.mode === "match" ? "Match · " + r.n + " pairs" : "Listening · " + r.n + (r.n === 1 ? " word" : " words");
-      var how = r.mode === "match"
-        ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
-        : (r.right || 0) + " / " + r.n + " right";
+      var unit = r.mode === "match" ? " pairs" : r.n === 1 ? " word" : " words";
+      var what = (MODE_NAMES[r.mode] || r.mode) + " · " + r.n + unit;
+      var how = r.mode === "match" ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
+        : r.mode === "listening" ? (r.right || 0) + " / " + r.n + " right"
+        : clock(r.ms) + " · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
       var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
       return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(what) + '<span class="fc-pz-when">' + esc(when) + "</span></span>" +
         '<span class="fc-pz-how">' + esc(how) + "</span></li>";
@@ -619,6 +626,37 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<h4 class="fc-pz-sub">Games this week</h4>' +
       weeklyActivityChart(sum.days, "Puzzle games per day over the last 7 days", "No games yet this week.") +
       '<h4 class="fc-pz-sub">Recent games</h4><ul class="fc-pz-list">' + recent + "</ul></div>";
+  }
+
+  // --- Dashboard: Kanji ---
+  // How many of the N5 kanji you've marked Known (js/vocab/kanji-known.js),
+  // as a count and a sage bar -- the tiles' own colour.
+  function kanjiCardHtml() {
+    var kk = window.RaumeStudy.knownKanji;
+    if (!kk) return "";
+    var ids = [];
+    (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
+      if (t.tableClass === "vocab-kanji") t.rows.forEach(function (r) { if (r.id) ids.push(r.id); });
+    });
+    if (!ids.length) return "";
+    var known = ids.filter(function (id) { return kk.isKnown(id); }).length;
+    var pct = Math.round(known / ids.length * 1000) / 10;
+    return '<div class="fc-viz-card fc-viz-wide fc-kanji-card"><h3 class="fc-viz-title">Kanji</h3>' +
+      '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + known + "</b> of " + ids.length + " known</span>" +
+      '<button type="button" class="fc-btn" data-dash-go="kanji">' + (known ? "Open Kanji" : "Mark kanji you know") + "</button></div>" +
+      '<svg class="fc-kj-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="' + known + " of " + ids.length + ' kanji known">' +
+      '<rect class="fc-kj-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
+      (known ? '<rect class="fc-kj-fill" x="0" y="0" width="' + Math.max(pct, 2) + '" height="6" rx="3"></rect>' : "") + "</svg></div>";
+  }
+  // The Puzzles / Kanji cards' buttons: to the Puzzles tab, or the Kanji section.
+  function bindDashGo(panel) {
+    panel.querySelectorAll("[data-dash-go]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (btn.dataset.dashGo === "puzzles") { window.RaumeStudy.flashcards.setActiveTab("crosswords"); rerender(); return; }
+        var v = window.RaumeStudy.vocab;
+        if (v && v.showSection) v.showSection("kanji");
+      });
+    });
   }
 
   // --- Dashboard: due forecast ---
