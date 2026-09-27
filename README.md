@@ -248,7 +248,7 @@ sit at the top right, beside the title, and open as their own screen with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Puzzles** (every finished Match and Listening game: games played, Listening accuracy, best Match pace per pair, pairs matched, games per day this week and the last four games — synced to your account when signed in), missed today, **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
+| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Puzzles** (from your first finished Match or Listening game: games played, Listening accuracy, best Match pace per pair, pairs matched, games per day this week and the last four games — synced to your account when signed in), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search / Match / Listening from your words ([below](#puzzles)) |

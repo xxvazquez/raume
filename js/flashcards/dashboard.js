@@ -167,6 +167,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       puzzlesCardHtml(now) +
       (foldReview
         ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
+        // Nothing missed today: no card at all -- an empty card saying so is
+        // a row of space for no news.
+        : reviewInsights && !reviewInsights.recentMistakes.length ? ""
         : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
       leechesHtml() +
       "</div>" +
@@ -329,7 +332,6 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   function missedTodayHtml() {
     if (!reviewInsights) return '<p class="fc-note">Loading…</p>';
     var list = reviewInsights.recentMistakes;
-    if (!list.length) return '<p class="fc-note">Nothing missed today.</p>';
     var idx = getVocabIndex();
     return '<ul class="fc-missed-list">' + list.map(function (m) {
       var e = idx[m.vocabId];
@@ -596,8 +598,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     if (!runs) return "";
     var sum = runs.summary(now);
+    // No games yet: no card -- it appears with the first finished game.
+    if (!sum.total) return "";
     var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card"><h3 class="fc-viz-title">Puzzles</h3>';
-    if (!sum.total) return head + '<p class="fc-note">Play Match or Listening in Puzzles — your games, accuracy and speed show up here.</p></div>';
     var ls = sum.listening, mt = sum.match;
     var tiles = statTile(sum.total, "Games played") +
       statTile(ls.asked ? Math.round(ls.right / ls.asked * 100) + "%" : "—", "Listening accuracy") +
