@@ -443,12 +443,17 @@ and Help.
   for reports of the reveal never opening on an iOS PWA. The katakana `.kr`
   layer itself renders as a dark, rounded callout with a small caret pointing
   at the kana — the iOS system-tooltip idiom, fixed dark fill in both themes
-  — instead of a bordered box sitting on the page. The English column is
-  top-anchored to the row (not centred) for exactly this reason: a table
-  row's top edge never moves when a sibling cell grows, only its bottom
-  does, so top-anchoring is what keeps English from shifting when a reveal
-  grows the Japanese cell underneath it. Its padding-top is tuned per
-  furigana/no-furigana case to land where the old centred layout put it.
+  — instead of a bordered box sitting on the page. Every word/verb row
+  has one first line that everything sits on: both cells are top-anchored
+  with the same room above (`--row-top`, where a furigana reading goes —
+  every row gets it, so rows stay one height), the word is set on a
+  `--l1` line box with the speaker exactly that tall, and the English (on
+  its own `--en-lh`) is pushed down by half the difference so its first
+  line and the row icons centre on the same line. The romaji caption, a
+  wrapped English line and an `enNote` all sit *below* that line and grow
+  the row downward without moving it. Checked by measuring every row
+  (speaker, word and English first-line centres within 0.5px) at 375 /
+  760 / 1200px, romaji shown and not.
 - **Phrases tables** (`.vocab-sentences`) hold whole sentences, so the
   Japanese cell wraps (`line-height: 2` for the furigana) and eases down a
   size; they keep their authored question/answer order instead of sorting
