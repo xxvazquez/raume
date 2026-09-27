@@ -10,7 +10,7 @@ cooking or studying, and for printing clean A4 study sheets.
 
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
-| **Reference**   | Vocabulary, Grammar and Travel tables — furigana, search, audio, print |
+| **Reference**   | Vocabulary, Grammar, Kanji and Travel tables — furigana, search, audio, print |
 | **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords, word searches and a timed Match game from your words |
@@ -51,11 +51,20 @@ python3 -m http.server     # only needed to test the service worker / offline
 | -------------- | ------------ |
 | **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
+| **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
 | **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
 | **Practice**   | Flashcards, the Kana drill and Puzzles — see [Practice](#practice) |
 
 On a phone the nav is a tab bar at the bottom; on a wider screen it's the top
 row. Grammatical **particles are blue and bold** everywhere.
+
+### Kanji
+
+| | |
+| --- | --- |
+| **Grid** | Each theme opens as a grid of tiles: the kanji large, its meaning under it. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
+| **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana), its romaji, an example word with furigana, **Words with** it — up to eight words from the other tables written with that kanji, shortest first — and **Add to flashcards**. |
+| **Flashcards** | A kanji gets two cards: meaning (山 → mountain) and reading (山 → any one of its readings in romaji, yama or san). Never English → kanji — that's writing, which typing can't check. Kanji stay out of Puzzles. |
 
 ### Finding things
 
@@ -64,7 +73,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 | **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted; a single letter only finds words that start with it (one kana or kanji still matches anywhere). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
 | **Tables** | The list button in the pinned search bar (named after the table you're reading, on desktop) lists every table in the section with its entry count. |
 | **Opening a table** | Keeps the row you tapped exactly where it was. While it's open, its title stays pinned under the search bar as you scroll, and closing it from there keeps it in place. |
-| **URL** | Follows the view (`#grammar`, `#table-15`, `#practice` — an old `#flashcards` link still opens Practice), so any view can be bookmarked. |
+| **URL** | Follows the view (`#grammar`, `#kanji`, `#table-15`, `#practice` — an old `#flashcards` link still opens Practice), so any view can be bookmarked. |
 | **Pinned bar** | The search field and **Options** stay pinned as you scroll. |
 
 ### Reading the tables

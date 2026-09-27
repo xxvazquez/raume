@@ -85,6 +85,7 @@
      --paper. */
   --sec-vocabulary: #4f7389;   --sec-vocabulary-soft: #e3ebef;   --sec-vocabulary-strong: #395767;
   --sec-grammar:    #875a78;   --sec-grammar-soft:    #f0e5ec;   --sec-grammar-strong:    #6a4460;
+  --sec-kanji:      #8d7550;   --sec-kanji-soft:      #efe9df;   --sec-kanji-strong:      #66522f;
   --sec-travel:     #5f8175;   --sec-travel-soft:     #e4ece8;   --sec-travel-strong:    #456056;
   --sec-flashcards: #82799b;   --sec-flashcards-soft: #e9e7f1;   --sec-flashcards-strong: #574d73;
   --section: var(--sec-vocabulary);
@@ -276,6 +277,7 @@
 
   --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
   --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
+  --sec-kanji:      #c2a87e;   --sec-kanji-soft:      #302a21;   --sec-kanji-strong:      #dbc6a2;
   --sec-travel:     #8bb0a4;   --sec-travel-soft:     #212f2b;   --sec-travel-strong:    #aed0c5;
   --sec-flashcards: #a99fc4;   --sec-flashcards-soft: #2b2937;   --sec-flashcards-strong: #c6bfda;
   --section: var(--sec-vocabulary);
@@ -329,6 +331,9 @@
 /* Which section's tone is live. */
 body[data-active-section="grammar"] {
   --section: var(--sec-grammar); --section-soft: var(--sec-grammar-soft); --section-strong: var(--sec-grammar-strong);
+}
+body[data-active-section="kanji"] {
+  --section: var(--sec-kanji); --section-soft: var(--sec-kanji-soft); --section-strong: var(--sec-kanji-strong);
 }
 body[data-active-section="travel"] {
   --section: var(--sec-travel); --section-soft: var(--sec-travel-soft); --section-strong: var(--sec-travel-strong);
@@ -520,6 +525,7 @@ body {
    the section colour is spent on the chrome. */
 .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
 .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
+.site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); }
 .site-nav-link[data-section="travel"]:hover { color: var(--sec-travel); }
 .site-nav-link[data-page="flashcards"]:hover { color: var(--sec-flashcards); }
 .site-nav-link.active {
@@ -2098,46 +2104,48 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
    pushed into the word (料理 する, 弟　と) and two readings never meet.
    js/vocab/render.js jpGroupedSegments groups consecutive kanji under one
    reading and tags each ruby with its counts; the arithmetic is here, in em,
-   so it holds at every table's size: reading width - kanji width - room. */
-.vocab .jpword ruby.rb {
+   so it holds at every table's size: reading width - kanji width - room.
+   The kanji sheet's example words (js/vocab/render.js kanjiSheetHtml) are
+   set the same way. */
+:is(.vocab, .kanji-sheet) .jpword ruby.rb {
   --rt: 1; --kb: 1; --rm: 0; --rt-w: max(11px, .58em);
   display: inline-block; position: relative; line-height: 1;
   margin-right: max(0px, calc(var(--rt) * var(--rt-w) - var(--kb) * 1em - max(0px, var(--rm) * 1em - 3px)));
 }
-.vocab .jpword ruby.rb rt.furigana {
+:is(.vocab, .kanji-sheet) .jpword ruby.rb rt.furigana {
   position: absolute; bottom: 100%; left: 0;
   margin-bottom: 1px; white-space: nowrap; line-height: 1;
 }
-.vocab .jpword ruby.rt-1 { --rt: 1; }
-.vocab .jpword ruby.rt-2 { --rt: 2; }
-.vocab .jpword ruby.rt-3 { --rt: 3; }
-.vocab .jpword ruby.rt-4 { --rt: 4; }
-.vocab .jpword ruby.rt-5 { --rt: 5; }
-.vocab .jpword ruby.rt-6 { --rt: 6; }
-.vocab .jpword ruby.rt-7 { --rt: 7; }
-.vocab .jpword ruby.rt-8 { --rt: 8; }
-.vocab .jpword ruby.rt-9 { --rt: 9; }
-.vocab .jpword ruby.rt-10 { --rt: 10; }
-.vocab .jpword ruby.rt-11 { --rt: 11; }
-.vocab .jpword ruby.rt-12 { --rt: 12; }
-.vocab .jpword ruby.kb-1 { --kb: 1; }
-.vocab .jpword ruby.kb-2 { --kb: 2; }
-.vocab .jpword ruby.kb-3 { --kb: 3; }
-.vocab .jpword ruby.kb-4 { --kb: 4; }
-.vocab .jpword ruby.kb-5 { --kb: 5; }
-.vocab .jpword ruby.kb-6 { --kb: 6; }
-.vocab .jpword ruby.kb-7 { --kb: 7; }
-.vocab .jpword ruby.kb-8 { --kb: 8; }
-.vocab .jpword ruby.rm-0 { --rm: 0; }
-.vocab .jpword ruby.rm-1 { --rm: 1; }
-.vocab .jpword ruby.rm-2 { --rm: 2; }
-.vocab .jpword ruby.rm-3 { --rm: 3; }
-.vocab .jpword ruby.rm-4 { --rm: 4; }
-.vocab .jpword ruby.rm-5 { --rm: 5; }
-.vocab .jpword ruby.rm-6 { --rm: 6; }
-.vocab .jpword ruby.rm-7 { --rm: 7; }
-.vocab .jpword ruby.rm-8 { --rm: 8; }
-.vocab .jpword ruby.rm-x { --rm: 99; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-1 { --rt: 1; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-2 { --rt: 2; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-3 { --rt: 3; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-4 { --rt: 4; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-5 { --rt: 5; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-6 { --rt: 6; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-7 { --rt: 7; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-8 { --rt: 8; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-9 { --rt: 9; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-10 { --rt: 10; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-11 { --rt: 11; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rt-12 { --rt: 12; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-1 { --kb: 1; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-2 { --kb: 2; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-3 { --kb: 3; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-4 { --kb: 4; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-5 { --kb: 5; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-6 { --kb: 6; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-7 { --kb: 7; }
+:is(.vocab, .kanji-sheet) .jpword ruby.kb-8 { --kb: 8; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-0 { --rm: 0; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-1 { --rm: 1; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-2 { --rm: 2; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-3 { --rm: 3; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-4 { --rm: 4; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-5 { --rm: 5; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-6 { --rm: 6; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-7 { --rm: 7; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-8 { --rm: 8; }
+:is(.vocab, .kanji-sheet) .jpword ruby.rm-x { --rm: 99; }
 
 /* Romaji reveal: click (or tap) the Japanese word/sentence itself -- not
    hover, unlike the per-kana reading layer below (.kr) -- to see its romaji
@@ -2329,6 +2337,135 @@ body.ja-voice-ready .jp-speak-btn {
 .vocab:not(.vocab-sentences) .jpword::after { margin-top: -3px; }
 body.ja-voice-ready .vocab:not(.vocab-sentences) .jp-speak-btn {
   height: var(--l1); align-items: center; padding-top: 0; padding-bottom: 0;
+}
+
+/* The Kanji section (tableClass "vocab-kanji", js/vocab/render.js kanjiRow):
+   each table opens as a grid of tiles -- the character large, its meaning
+   small under it -- like a Photos grid inside the table's card. The markup
+   stays a real table (search, hide, print and the Tables directory treat it
+   like any other); only its display turns into a grid. The readings ride
+   along hidden (search matches them); tapping a tile opens the detail sheet
+   below. In a search-results table a kanji row is an ordinary row: the
+   character, its readings under it, the English beside it. */
+.vocab .kanji-readings {
+  display: block; margin-top: 1px; font-size: 12.5px; line-height: 1.45; letter-spacing: .02em; color: var(--furigana);
+}
+.kanji-okuri, .kanji-sep { color: var(--faint); }
+body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
+.vocab.vocab-kanji, .vocab.vocab-kanji tbody { display: block; }
+.vocab.vocab-kanji thead { display: none; }
+.vocab.vocab-kanji tbody {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px; padding: 6px 12px 14px;
+}
+.vocab.vocab-kanji tbody tr.kanji-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 92px; padding: 8px 6px 10px;
+  border-radius: 14px; background: var(--group-ground);
+  cursor: pointer; transition: background .12s ease, transform .12s ease;
+}
+.vocab.vocab-kanji tbody tr.kanji-tile.row-hidden { display: none; }
+.vocab.vocab-kanji tbody tr.kanji-tile:hover { background: color-mix(in srgb, var(--section) 12%, var(--group-ground)); }
+.vocab.vocab-kanji tbody tr.kanji-tile:active { transform: scale(.97); }
+.vocab.vocab-kanji tbody tr.kanji-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+/* !important: the word tables' per-column insets (a left inset on the
+   Japanese, a trailing one on the English) would push the two apart. */
+.vocab.vocab-kanji tbody tr.kanji-tile td {
+  display: block; align-self: stretch; width: auto; padding: 0 !important; border: 0; background: transparent; text-align: center;
+}
+.vocab.vocab-kanji .kanji-char {
+  display: block; font-size: 34px; line-height: 44px; color: var(--ink);
+}
+.vocab.vocab-kanji .kanji-char::after,
+.vocab.vocab-kanji .kanji-readings,
+.vocab.vocab-kanji .row-actions { display: none; }
+.vocab.vocab-kanji .meaning-cell { display: block; }
+.vocab.vocab-kanji .meaning-text {
+  display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  margin-top: 2px; font-size: var(--fs-micro); line-height: 1.3; color: var(--muted);
+}
+.vocab.vocab-kanji .meaning-text mark.search-hit { color: var(--hl-ink); }
+
+/* The kanji detail sheet (#kanjiSheet, render.js kanjiSheetHtml): an iOS
+   sheet -- a centred card over a scrim on a wide screen, a bottom sheet on
+   a phone. Its ground is the grouped grey; readings and the example sit in
+   white inset cards with the list-header voice above them. */
+.kanji-scrim[hidden], .kanji-sheet[hidden] { display: none; }
+.kanji-scrim {
+  position: fixed; inset: 0; z-index: 90;
+  background: color-mix(in srgb, var(--ink) 38%, transparent);
+}
+.kanji-sheet {
+  position: fixed; z-index: 91; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 380px; max-width: calc(100vw - 32px); max-height: 85vh; max-height: 85dvh; overflow: auto;
+  padding: 18px 16px 18px;
+  background: var(--group-ground);
+  border-radius: var(--radius-sheet);
+  box-shadow: var(--shadow-menu);
+}
+.ks-grab { display: none; }
+.ks-top { display: flex; align-items: center; gap: 14px; padding: 0 4px 4px; }
+.ks-char {
+  flex: none; width: 76px; height: 76px; border-radius: 18px; background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", sans-serif;
+  font-size: 48px; line-height: 1; color: var(--ink);
+}
+.ks-title { flex: 1 1 auto; min-width: 0; }
+.ks-meaning { margin: 0; font: 600 20px/1.25 var(--font-ui); color: var(--ink); }
+.ks-note { margin: 2px 0 0; font-size: var(--fs-small); color: var(--muted); }
+.kanji-sheet .jp-speak-btn { flex: none; }
+.ks-close {
+  appearance: none; flex: none; align-self: flex-start;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--muted);
+  cursor: pointer;
+}
+.ks-close:hover { color: var(--ink); }
+.ks-group-head { margin: 0; padding: 14px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.ks-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+.ks-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 44px; padding: 8px 16px; font-size: 15px; color: var(--ink);
+}
+.ks-row + .ks-row {
+  background: linear-gradient(var(--row-line), var(--row-line)) no-repeat 16px 0 / calc(100% - 16px) 1px;
+}
+.ks-label { flex: none; }
+.ks-val { text-align: right; color: var(--muted); }
+.ks-val[lang="ja"] { font-size: 17px; color: var(--ink-2); }
+/* The reading sits over the word inside the card's padding, and the English
+   shares the word's baseline -- not the top of its ruby box. */
+.ks-example { flex-wrap: wrap; align-items: baseline; padding-top: 26px; padding-bottom: 14px; }
+.ks-example-jp {
+  font-family: "Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", sans-serif;
+  font-size: 20px; line-height: 1.3; color: var(--ink);
+}
+.ks-example-jp rt { font-size: 11px; color: var(--furigana); }
+.ks-example-en { color: var(--muted); }
+/* Add to flashcards: a full-width filled capsule; once added, a white
+   (secondary) one that says so. */
+.kanji-sheet .ks-add {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 44px; margin: 18px 0 0; padding: 0 16px;
+  border-radius: 999px; opacity: 1;
+  background: var(--section-strong) !important; color: var(--paper) !important;
+  font: 500 15px/1 var(--font-ui);
+}
+.kanji-sheet .ks-add[aria-pressed="true"] {
+  background: var(--paper) !important; color: var(--section-strong) !important; box-shadow: var(--control-lift);
+}
+.ks-add-on, .ks-add[aria-pressed="true"] .ks-add-off { display: none; }
+.ks-add[aria-pressed="true"] .ks-add-on { display: inline; }
+@media (max-width: 640px) {
+  .kanji-sheet {
+    left: 0; right: 0; top: auto; bottom: 0; transform: none;
+    width: auto; max-width: none; max-height: 86vh; max-height: 86dvh;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    padding: 10px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .ks-grab { display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 12px; }
 }
 
 /* Particles ({ p: … } segments) -- blue and bold everywhere they appear: the
@@ -2529,6 +2666,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      used to be, so the row reads as one icon set instead of a grab-bag. */
   .site-nav-link[data-section="vocabulary"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="grammar"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); }
+  .site-nav-link[data-section="kanji"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="travel"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { background: none; font-weight: 500; }

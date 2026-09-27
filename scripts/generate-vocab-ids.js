@@ -14,7 +14,7 @@ const fs = require("fs");
 const path = require("path");
 
 const FILE = path.join(__dirname, "..", "data", "vocabulary.js");
-const ROW_TYPES = ['"type":"word"', '"type":"verb-pair"'];
+const ROW_TYPES = ['"type":"word"', '"type":"verb-pair"', '"type":"kanji"'];
 
 function main() {
   const text = fs.readFileSync(FILE, "utf8");

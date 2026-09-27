@@ -8,8 +8,8 @@ vm.runInNewContext(source, sandbox);
 const tableList = (sandbox.window.RaumeStudy && sandbox.window.RaumeStudy.data.vocabularyTables) || [];
 const tableCount = tableList.length;
 const rowCount = tableList.reduce((total, t) => total + t.rows.length, 0);
-const expectedTables = 40;
-const expectedRows = 888;
+const expectedTables = 47;
+const expectedRows = 990;
 if (tableCount !== expectedTables || rowCount !== expectedRows) {
   console.error("Vocabulary validation failed: found " + rowCount + " rows across " + tableCount + " tables; expected " + expectedRows + " rows across " + expectedTables + " tables.");
   process.exit(1);
@@ -63,6 +63,26 @@ for (const table of tableList) {
       }
       const key = row.forms.map(f => jpText(f.jp)).join("/") + "|" + row.english;
       if (seenVocabulary.has(key)) { console.error("Vocabulary quality validation failed: duplicate entry: " + key); process.exit(1); }
+      seenVocabulary.add(key);
+      continue;
+    }
+
+    // A kanji row: one character (jp holds it with the reading the speaker
+    // says), its N5 on (katakana) / kun (hiragana, "." before okurigana)
+    // readings, and an optional example word.
+    if (row.type === "kanji") {
+      const ch = row.jp && row.jp.length === 1 ? row.jp[0].kanji : "";
+      const on = row.on || [], kun = row.kun || [];
+      const bad = !ch || [...ch].length !== 1 || !/[一-龯]/.test(ch) || !row.jp[0].reading || !row.romaji || !row.english
+        || !Array.isArray(on) || !Array.isArray(kun) || !on.concat(kun).length
+        || on.some(r => !/^[ァ-ヺー]+$/.test(r)) || kun.some(r => !/^[ぁ-ゖ]+(\.[ぁ-ゖ]+)?$/.test(r))
+        || (row.example && (!Array.isArray(row.example.jp) || !row.example.english || !jpText(row.example.jp).includes(ch)));
+      if (bad) {
+        console.error("Kanji validation failed: needs one kanji, its reading, romaji, English, katakana on / hiragana kun readings, and an example containing it (" + table.title + " " + row.id + ").");
+        process.exit(1);
+      }
+      const key = "kanji|" + ch;
+      if (seenVocabulary.has(key)) { console.error("Kanji validation failed: duplicate kanji " + ch); process.exit(1); }
       seenVocabulary.add(key);
       continue;
     }

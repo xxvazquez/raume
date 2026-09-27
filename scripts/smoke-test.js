@@ -150,9 +150,41 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 40 table sections", sections.length === 40);
+  check("renders 47 table sections", sections.length === 47);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 888 vocabulary rows", totalRows === 888);
+  check("renders 990 vocabulary rows", totalRows === 990);
+  check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character, its meaning, its readings along hidden for search", (() => {
+    const kanjiSecs = [...document.querySelectorAll('#vocabulary .table-section[data-category="N5 Kanji"]')];
+    const rows = kanjiSecs.flatMap(s => [...s.querySelectorAll("tbody tr")]);
+    const yama = rows.find(r => r.querySelector(".kanji-char").textContent === "山");
+    const miru = rows.find(r => r.querySelector(".kanji-char").textContent === "見");
+    return kanjiSecs.length === 7 && kanjiSecs.every(s => s.dataset.section === "kanji") && rows.length === 102
+      && kanjiSecs.map(s => s.querySelector(".section-title-text").textContent).join(",") === "Numbers & Money,Days & Time,People & Body,Places & Directions,Nature & Things,Verbs,Adjectives"
+      && kanjiSecs[0].querySelector("tbody tr .kanji-char").textContent === "一"
+      && rows.every(r => r.classList.contains("kanji-tile") && r.tabIndex === 0 && !r.cells[0].querySelector("ruby") && r.cells[0].querySelector(".kanji-readings.furigana"))
+      && yama.querySelector(".kanji-readings").textContent === "サン やま" && yama.querySelector(".jpword").dataset.romaji === "yama / san"
+      && miru.querySelector(".kanji-okuri").textContent === "る" && yama.cells[1].querySelector(".meaning-text").textContent === "mountain";
+  })());
+  check("tapping a kanji tile opens its sheet -- readings, an example with furigana, the reader's words that use it (not repeating the example), Add to flashcards -- and Escape closes it, back on the tile", (() => {
+    const sheet = document.getElementById("kanjiSheet"), scrim = document.getElementById("kanjiScrim");
+    const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "新");
+    const closedAtStart = sheet.hidden && scrim.hidden;
+    tile.querySelector(".kanji-char").click();
+    const opened = !sheet.hidden && !scrim.hidden && sheet.querySelector(".ks-char").textContent === "新"
+      && sheet.querySelector(".ks-meaning").textContent === "new" && /シン/.test(sheet.textContent) && /あたらしい/.test(sheet.textContent)
+      && !!sheet.querySelector(".ks-example ruby rt") && sheet.querySelectorAll(".ks-words .ks-row").length >= 1
+      && [...sheet.querySelectorAll(".ks-words .ks-example-en")].some(e => e.textContent === "new")
+      && ![...sheet.querySelectorAll(".ks-words .ks-example-jp")].some(e => e.textContent.includes("新幹線"))
+      && sheet.querySelector(".ks-add").dataset.vocabId === tile.dataset.vocabId
+      && document.activeElement === sheet.querySelector(".ks-close");
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    return closedAtStart && opened && sheet.hidden && scrim.hidden && sheet.innerHTML === "" && document.activeElement === tile;
+  })());
+  check("Words with ... draws on every other table, never the kanji or sentence tables, shortest first and at most eight", (() => {
+    const w = window.RaumeStudy.vocab.wordsWithKanji("日", "");
+    return w.length === 8 && w.every(x => x.text.includes("日")) && w.every((x, i) => !i || w[i - 1].text.length <= x.text.length)
+      && window.RaumeStudy.vocab.wordsWithKanji("新", "").some(x => x.english === "new");
+  })());
   check("adjective rows tint the Japanese text い-adj/な-adj, with a visually-hidden note, and only those rows do", (() => {
     const adjSection = [...document.querySelectorAll('.table-section[data-section="grammar"]')]
       .find(s => s.querySelector(".section-title-text").textContent === "Adjectives");
@@ -215,7 +247,8 @@ async function main() {
     return hits === 0;
   })());
   check("every Japanese cell is marked lang=\"ja\"", [...document.querySelectorAll("td.jp")].every(td => td.getAttribute("lang") === "ja"));
-  check("every Japanese cell has one speaker button per form, keyed to the kana reading (not the kanji)", [...document.querySelectorAll("td.jp")].every(td => {
+  // A kanji tile has none -- its sheet carries the speaker.
+  check("every Japanese cell has one speaker button per form, keyed to the kana reading (not the kanji)", [...document.querySelectorAll("tr:not(.kanji-tile) > td.jp")].every(td => {
     const forms = td.querySelectorAll(".verb-form").length || 1;
     const btns = [...td.querySelectorAll(".jp-speak-btn")];
     // The regression this guards: jpReadingOf must fall back to a segment's
@@ -824,16 +857,16 @@ async function main() {
       && [...r.cssRules].some(x => x.selectorText === ".site-nav-link::before"));
     if (!phone) return false;
     const rules = [...phone.cssRules].map(x => x.selectorText || "");
-    return ["vocabulary", "grammar", "travel"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
+    return ["vocabulary", "grammar", "kanji", "travel"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
       && rules.some(t => t.includes('data-page="flashcards"') && t.includes("::before"))
-      && document.querySelectorAll("#siteNav .site-nav-link").length === 4;
+      && document.querySelectorAll("#siteNav .site-nav-link").length === 5;
   })());
   check("the Vocabulary nav link starts active", document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
   check("Grammar tables belong to the grammar section", [...document.querySelectorAll('.table-section[data-category="Grammar"]')].every(s => s.dataset.section === "grammar"));
   check("Travel tables belong to the travel section", [...document.querySelectorAll('.table-section[data-category="Travel"]')].every(s => s.dataset.section === "travel"));
   check("there's no Phrases section any more", !document.querySelector('.table-section[data-category="Phrases"], .site-nav-link[data-section="phrases"]'));
-  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "Travel"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
+  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "N5 Kanji", "Travel"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
 
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
@@ -910,8 +943,8 @@ async function main() {
 
   console.log("Top navigation");
   const navLinks = [...document.querySelectorAll("#siteNav .site-nav-link")];
-  check("nav is Vocabulary / Grammar / Travel / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Travel Practice");
-  check("the three reference sections carry data-section", navLinks.slice(0, 3).map(l => l.dataset.section).join(",") === "vocabulary,grammar,travel");
+  check("nav is Vocabulary / Grammar / Kanji / Travel / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Kanji Travel Practice");
+  check("the four reference sections carry data-section", navLinks.slice(0, 4).map(l => l.dataset.section).join(",") === "vocabulary,grammar,kanji,travel");
   check("last nav item is Practice, at #practice", navLinks[navLinks.length - 1].dataset.page === "flashcards" && navLinks[navLinks.length - 1].getAttribute("href") === "#practice");
   check("no category is a top-level nav item", !navLinks.some(l => l.dataset.category));
 
@@ -1314,7 +1347,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 40 tables", czRows.length === 40);
+  check("it lists every one of the 47 tables", czRows.length === 47);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
@@ -1565,6 +1598,12 @@ async function main() {
     check("...answer checking accepts the romaji and the English", !!entry
       && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-ro", "nasu")
       && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-en", "eggplant"));
+    check("a kanji gets two cards -- meaning and a reading, from the bare character (no furigana to give the reading away); any one reading counts", (() => {
+      const vi = window.RaumeStudy.flashcards.vocabIndex;
+      const k = Object.values(idx).find(e => e.kanji && e.jpPlain === "山");
+      return !!k && vi.directionsForEntry(k).join(",") === "jp-en,jp-ro" && !/<ruby/.test(k.jpHtml)
+        && vi.checkAnswer(k, "jp-ro", "yama") && vi.checkAnswer(k, "jp-ro", "san") && vi.checkAnswer(k, "jp-en", "mountain");
+    })());
     check("...it renders on the vocabulary page with real furigana", (() => {
       const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
       return !!tr && !!tr.querySelector("ruby rt") && /eggplant/.test(tr.textContent);

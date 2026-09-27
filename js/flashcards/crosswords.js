@@ -116,7 +116,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function poolFromEntries(entries) {
     var seen = {}, pool = [];
     entries.forEach(function (entry) {
-      if (!entry) return;
+      // A single kanji isn't a word to spell out -- its words are in the
+      // vocabulary tables already.
+      if (!entry || entry.kanji) return;
       var reading = String(entry.jpReading || "").replace(/^〜/, "").trim();
       if (reading.length < MIN_LEN || reading.length > MAX_LEN) return;
       if (!KANA_ONLY.test(reading)) return;
@@ -162,7 +164,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function wordPool() {
     return state.source === "table" ? tableWordPool(state.tables) : flashcardsWordPool();
   }
-  function vocabTables() { return window.RaumeStudy.data.vocabularyTables || []; }
+  // The N5 Kanji tables hold single characters, not words to play with.
+  function vocabTables() {
+    return (window.RaumeStudy.data.vocabularyTables || []).filter(function (t) { return t.tableClass !== "vocab-kanji"; });
+  }
 
   // Hiragana and katakana are the same characters, a fixed 0x60 apart in
   // Unicode (see js/vocab/kana-romaji.js's own comment on the same fact) --

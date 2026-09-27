@@ -136,7 +136,12 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
             ? row.forms.map(function (f) { return f.romaji; })
             : [];
         } else {
-          entry.jpHtml = '<span class="jpword">' + jpHtmlFn(row.jp) + "</span>";
+          // A kanji row's prompt is the bare character: furigana over it
+          // would hand a jp-ro card its answer.
+          entry.kanji = row.type === "kanji";
+          entry.jpHtml = entry.kanji
+            ? '<span class="jpword">' + String(row.jp[0].kanji).replace(/[&<>"]/g, "") + "</span>"
+            : '<span class="jpword">' + jpHtmlFn(row.jp) + "</span>";
           entry.jpInlineHtml = entry.jpHtml;
           entry.jpPlain = jpPlainOf(row.jp);
           entry.jpPromptHtml = entry.jpHtml + speakBtnFn(jpReadingFn(row.jp));
@@ -189,7 +194,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // (js/vocab/custom-vocab.js merges its rows straight into
   // RaumeStudy.data.vocabularyTables, which this index is built from).
   function resetIndex() { vocabIndex = null; rawRowById = null; }
+  // A kanji is studied from the character: its meaning and its readings.
+  // Romaji or English -> kanji would be a vocabulary card, and "san" alone
+  // can't say which kanji it means.
   function directionsForEntry(entry) {
+    if (entry.kanji) return entry.romajiUsable ? ["jp-en", "jp-ro"] : ["jp-en"];
     return entry.romajiUsable ? DIRECTIONS.slice() : ["jp-en"];
   }
 

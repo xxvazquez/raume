@@ -126,11 +126,31 @@ clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
 
 - `--sec-vocabulary` — slate-blue (`#4F7389`)
 - `--sec-grammar` — mauve (`#875A78`)
+- `--sec-kanji` — ochre (`#8D7550`)
 - `--sec-travel` — sage (`#5F8175`)
 - `--sec-flashcards` — lavender (`#82799B`), the same as the primary accent
 
 The five hues sit well over 20° apart (the smoke test enforces it), light and
 dark, so moving between sections reads as a change of place.
+
+### Kanji grid and sheet
+
+A Kanji table opens as a grid of tiles inside its card, like a Photos grid:
+each tile a `--group-ground` rounded square (14px), the character at 34px in
+ink, its meaning at 11.5px muted under it (two lines at most), centred; hover
+washes it in the section tone, a press scales it to 97%. It is still a real
+table underneath (display swapped to grid), so search, hide, print and the
+Tables directory are unchanged; in a search-results table a kanji row is an
+ordinary row (character + readings, English beside it).
+
+Tapping a tile opens the **kanji sheet** — an iOS sheet: a centred
+`--radius-sheet` card over a scrim on a wide screen, a bottom sheet with a grab
+bar on a phone, at body level (never under a backdrop-filter). Its ground is
+`--group-ground`: the character in a white 76px tile beside the meaning as a
+title, then inset-grouped cards under list-header labels — Readings (On / Kun /
+Romaji rows, okurigana lighter), Example, *Words with 新* — and one full-width
+filled capsule, **Add to flashcards**, that turns white (secondary) once added.
+Example words use the reference tables' print-style furigana.
 
 ## Labels and measure
 
@@ -151,7 +171,7 @@ and Help.
   (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
   `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
   purple, Travel `#5fa0a2` teal, People & Daily Life
-  `#bb7f74` clay). The tile key is
+  `#bb7f74` clay, N5 Kanji `#8493a3` slate). The tile key is
   `data-tile` on the `.table-section` (and the Customize row), resolved in
   `render.js` `tableTile()`: the reader's pick, else the category's, else — a
   table of your own — the hue of its icon's group (Food & drink green, Travel
@@ -348,17 +368,17 @@ and Help.
   3px underline; the rest are plain secondary text. The capsule is the one place
   a section tone is spent on the chrome. That is the layout from 641px up.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS tab bar**, pinned to the
-  bottom edge (`position: fixed`, one hairline above it): four equal tabs, an
+  bottom edge (`position: fixed`, one hairline above it): five equal tabs, an
   icon over an 11.5px label, unselected in `--faint`, the selected one in its
   section tone at weight 500 on a square, full-height cell of neutral fill — no
   capsule, no rounded bubble. It deliberately stays this traditional, solid bar
   under iOS 26 (a floating glass capsule was tried and didn't sit well over
   scrolling content). Nothing is added or removed (same
-  four links, same taps); the icons are CSS masks on `.site-nav-link::before`
+  five links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
-  is untouched. All four are drawn from the same family as `js/vocab/icons.js`'s
+  is untouched. All five are drawn from the same family as `js/vocab/icons.js`'s
   own picker (24x24 grid, 1.7 stroke, round caps/joins) — a book, a bullet
-  list, a speech bubble, a map pin, two stacked cards — so the row reads as
+  list, the 文/A "languages" glyph, a map pin, two stacked cards — so the row reads as
   one matched set rather than five icons with their own stroke weight and
   visual density. `--nav-h` drops to ~0 so the sticky reference toolbar sits at
   the very top with nothing above it, `body` gets bottom padding for the bar plus

@@ -102,6 +102,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man.</span></li>' +
       '<li><span class="help-term">Same sound</span><span class="help-desc">Romaji like atsui can be several words — any of their meanings counts.</span></li>' +
       '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
+      '<li><span class="help-term">Kanji cards</span><span class="help-desc">A kanji asks only its meaning and one reading — yama or san both count.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns any of the four directions on or off — progress is kept.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +

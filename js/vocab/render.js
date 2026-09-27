@@ -262,15 +262,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
-  // The main study areas. Grammar and Travel are promoted out of the
-  // general vocabulary list into their own top-level sections; everything
-  // else lives under Vocabulary, still grouped by its content category.
+  // The main study areas. Grammar, the N5 kanji and Travel are promoted out
+  // of the general vocabulary list into their own top-level sections;
+  // everything else lives under Vocabulary, still grouped by its category.
   function sectionOf(category) {
     if (category === 'Grammar') return 'grammar';
+    if (category === 'N5 Kanji') return 'kanji';
     if (category === 'Travel') return 'travel';
     return 'vocabulary';
   }
-  var SECTION_ORDER = ['vocabulary', 'grammar', 'travel'];
+  var SECTION_ORDER = ['vocabulary', 'grammar', 'kanji', 'travel'];
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row">' + EYE_ICON + '</button>';
@@ -348,6 +349,92 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
     return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row), row.enNote) + '</tr>';
   }
+  // A kanji row (the Kanji section): drawn as a tile in a grid -- the
+  // character large, its meaning small under it (css/site.css .vocab-kanji).
+  // It stays a real table row so search, hide, print and the Tables
+  // directory treat it like any other; its readings ride along hidden, with
+  // the .furigana class so search counts them as readings. Tapping the tile
+  // opens the detail sheet (kanjiSheetHtml below, js/vocab/interactions.js).
+  function kanjiReadingHtml(r) {
+    var dot = r.indexOf('.');
+    return dot === -1 ? esc(r) : esc(r.slice(0, dot)) + '<span class="kanji-okuri">' + esc(r.slice(dot + 1)) + '</span>';
+  }
+  function kanjiRow(row) {
+    var ch = row.jp[0].kanji;
+    var readings = (row.on || []).concat(row.kun || []).map(kanjiReadingHtml).join(' ');
+    return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile" tabindex="0" aria-haspopup="dialog">' +
+      '<td class="jp" lang="ja"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
+      '<span class="kanji-readings furigana">' + readings + '</span></td>' +
+      meaningCell(row.english, row.id, '', '') + '</tr>';
+  }
+  function rawRow(vocabId) {
+    var tables = window.RaumeStudy.data.vocabularyTables || [];
+    for (var i = 0; i < tables.length; i++) {
+      for (var j = 0; j < tables[i].rows.length; j++) if (tables[i].rows[j].id === vocabId) return tables[i].rows[j];
+    }
+    return null;
+  }
+  // Words in the other tables written with this kanji -- how an N5 kanji
+  // actually sticks: through words the reader already knows. Shortest first
+  // (the plainest words), a handful at most, the sheet's example left out.
+  var WORDS_WITH_MAX = 8;
+  function wordsWithKanji(ch, skipText) {
+    var seen = {}, out = [];
+    seen[skipText] = true;
+    (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
+      if (t.tableClass === 'vocab-kanji' || t.tableClass === 'vocab-sentences') return;
+      t.rows.forEach(function (row) {
+        var jp = row.type === 'verb-pair' ? row.forms[0].jp : row.jp;
+        var text = jp ? jpPlain(jp) : '';
+        if (text.indexOf(ch) === -1 || seen[text]) return;
+        seen[text] = true;
+        out.push({ jp: jp, text: text, english: row.english });
+      });
+    });
+    return out.sort(function (a, b) { return a.text.length - b.text.length; }).slice(0, WORDS_WITH_MAX);
+  }
+  function jpPlain(segments) {
+    return segments.map(function (seg) { return seg.kanji || seg.text || seg.p || ''; }).join('');
+  }
+  vocab.wordsWithKanji = wordsWithKanji;
+  var CLOSE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
+  // The kanji detail sheet: the character and its meaning, then iOS-style
+  // grouped cards -- its readings (on in katakana, kun in hiragana with the
+  // okurigana lighter), an example word with furigana, the reader's words
+  // that use it (wordsWithKanji) -- and the same
+  // add-to-flashcards toggle a search result has (js/flashcards/views.js).
+  function kanjiSheetHtml(vocabId) {
+    var row = rawRow(vocabId);
+    if (!row || row.type !== 'kanji') return '';
+    var readRow = function (label, list) {
+      return list && list.length ? '<div class="ks-row"><span class="ks-label">' + label + '</span><span class="ks-val" lang="ja">' +
+        list.map(kanjiReadingHtml).join('<span class="kanji-sep">、</span>') + '</span></div>' : '';
+    };
+    var wordRowHtml = function (jp, english) {
+      return '<div class="ks-row ks-example"><span class="jpword ks-example-jp" lang="ja">' + jpGroupedSegments(jp) +
+        '</span><span class="ks-example-en">' + esc(english) + '</span></div>';
+    };
+    var example = row.example
+      ? '<h3 class="ks-group-head">Example</h3><div class="ks-card">' + wordRowHtml(row.example.jp, row.example.english) + '</div>'
+      : '';
+    var words = wordsWithKanji(row.jp[0].kanji, row.example ? jpPlain(row.example.jp) : '');
+    var wordsHtml = words.length
+      ? '<h3 class="ks-group-head">Words with ' + esc(row.jp[0].kanji) + '</h3><div class="ks-card ks-words">' +
+        words.map(function (w) { return wordRowHtml(w.jp, w.english); }).join('') + '</div>'
+      : '';
+    return '<div class="ks-grab" aria-hidden="true"></div>' +
+      '<div class="ks-top"><span class="ks-char" lang="ja">' + esc(row.jp[0].kanji) + '</span>' +
+      '<div class="ks-title"><h2 class="ks-meaning" id="kanjiSheetTitle">' + esc(row.english) + '</h2>' +
+      (row.enNote ? '<p class="ks-note">' + esc(row.enNote) + '</p>' : '') + '</div>' +
+      speakButton(jpReadingOf(row.jp)) +
+      '<button type="button" class="ks-close" aria-label="Close">' + CLOSE_ICON + '</button></div>' +
+      '<h3 class="ks-group-head">Readings</h3><div class="ks-card">' + readRow('On', row.on) + readRow('Kun', row.kun) +
+      '<div class="ks-row"><span class="ks-label">Romaji</span><span class="ks-val">' + esc(row.romaji) + '</span></div></div>' +
+      example + wordsHtml +
+      '<button type="button" class="fc-toggle-btn ks-add" data-vocab-id="' + esc(row.id) + '" aria-pressed="false">' +
+      '<span class="ks-add-off">Add to flashcards</span><span class="ks-add-on">In your flashcards</span></button>';
+  }
+  vocab.kanjiSheetHtml = kanjiSheetHtml;
   // isDefault marks the column the table renders sorted by (English) -- it
   // starts active and sorted A-Z; the others start neutral.
   function sortHeader(label, col, isDefault) {
@@ -369,7 +456,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   function rowsHtmlFor(rows) {
     return rows.map(function (row) {
-      return row.type === 'verb-pair' ? verbPairRow(row) : wordRow(row);
+      return row.type === 'verb-pair' ? verbPairRow(row) : row.type === 'kanji' ? kanjiRow(row) : wordRow(row);
     }).join('\n    ');
   }
   // Column-visibility items for a table's ⋯ menu -- the same set as the
@@ -448,13 +535,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function renderTable(t) {
     // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
     // authored order -- a run of sentences reads in the order it was written.
+    // Kanji tables keep theirs too: 一 二 三 in order, not eight, five, four.
     var sentences = t.tableClass === 'vocab-sentences';
-    var rows = sentences ? t.rows.slice() : t.rows.slice().sort(byEnglish);
+    var authored = sentences || t.tableClass === 'vocab-kanji';
+    var rows = authored ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
       rowsHtml: rowsHtmlFor(rows),
       controls: { addTable: true, print: true },
-      sectionClass: 'page-hidden', collapsed: true, defaultSort: !sentences
+      sectionClass: 'page-hidden', collapsed: true, defaultSort: !authored
     });
   }
   // Build a standard vocabulary table section from an arbitrary set of rows
@@ -491,7 +580,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     17: 'toilet', 18: 'washer', 19: 'bed', 20: 'tag', 21: 'recycle',
     22: 'utensils', 23: 'hand', 24: 'calendar', 25: 'moon', 26: 'grid',
     27: 'sun', 28: 'hourglass', 29: 'alarm', 30: 'clock', 31: 'watch',
-    32: 'help', 33: 'map-pin', 34: 'users', 35: 'user', 36: 'cloud', 37: 'building'
+    32: 'help', 33: 'map-pin', 34: 'users', 35: 'user', 36: 'cloud', 37: 'building',
+    41: 'hash', 42: 'calendar', 43: 'users', 44: 'compass', 45: 'mountain', 46: 'zap', 47: 'sparkles'
   };
   // The icon a table shows: the reader's pick, else the shipped default, else --
   // for a table of their own -- one suggested from its name (see icons.suggest),
@@ -517,7 +607,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
     'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal',
-    'People & Daily Life': 'clay'
+    'People & Daily Life': 'clay', 'N5 Kanji': 'slate'
   };
   function tableTile(id, category) {
     var tc = window.RaumeStudy.tableCustom, ic = window.RaumeStudy.icons;
@@ -584,10 +674,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // Tables within a category, A-Z by (display) title then shuffled by the
   // reader's custom table order for that category.
+  // The N5 Kanji themes keep their authored order (numbers, time, people,
+  // places, nature, verbs, adjectives) -- the order a learner meets them in.
   function orderTables(categoryName, tables) {
-    var sorted = tables.slice().sort(function (a, b) {
-      return tableTitle(a.id, a.title).localeCompare(tableTitle(b.id, b.title));
-    });
+    var sorted = tables.slice().sort(categoryName === 'N5 Kanji'
+      ? function (a, b) { return a.id - b.id; }
+      : function (a, b) { return tableTitle(a.id, a.title).localeCompare(tableTitle(b.id, b.title)); });
     var tc = window.RaumeStudy.tableCustom;
     var custom = tc ? tc.tableOrder(categoryName) : null;
     return applyCustomOrder(sorted, custom, function (t) { return String(t.id); });
@@ -608,11 +700,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return { name: name, tables: orderTables(name, byName[name]) };
     });
   }
-  // The four-item top navigation: the three vocabulary sections plus
-  // Flashcards. Fixed -- it never changes with the data.
+  // The five-item top navigation: the four reference sections plus
+  // Practice. Fixed -- it never changes with the data.
   function renderNav() {
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
+      '<a class="site-nav-link" href="#kanji" data-section="kanji">Kanji</a>' +
       '<a class="site-nav-link" href="#travel" data-section="travel">Travel</a>' +
       '<a class="site-nav-link" href="#practice" data-page="flashcards">Practice</a>';
   }
@@ -624,7 +717,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Panels with more than a handful of tables are marked --wide so CSS flows
   // them into two columns.
   function renderTableIndex(tables) {
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var panels = SECTION_ORDER.map(function (sec) {
       var groups = groupByCategory(bySection[sec], sec);
@@ -673,7 +766,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // page-hidden; routing (interactions.js -> showSection) reveals one section
   // at a time.
   function renderAll(tables) {
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var html = '';
     SECTION_ORDER.forEach(function (sec) {
@@ -753,7 +846,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.isUserHidden = isUserHidden;
   function reflowLayout() {
     if (!host || !vocabularyTables) return;
-    var bySection = { vocabulary: [], grammar: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var ordered = [], parked = [];
     // Headings and sections are the host's direct children -- look them up

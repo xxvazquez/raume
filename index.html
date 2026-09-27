@@ -130,7 +130,7 @@
 <section id="customizePage" class="page page-customize" hidden></section>
 <section id="helpPage" class="page page-help" hidden>
   <h1>How this works</h1>
-  <p class="help-lede">Three reference sections, plus Practice: flashcards, kana and puzzles. Tap a topic.</p>
+  <p class="help-lede">Four reference sections, plus Practice: flashcards, kana and puzzles. Tap a topic.</p>
   <div class="help-list">
     <details class="help-group">
       <summary><span class="help-tile" data-tile="blue" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg></span><span class="help-sum"><h3>Finding words</h3><span class="help-sub">Search, tables, sort</span></span></summary>
@@ -149,6 +149,7 @@
         <li><span class="help-term">Romaji</span><span class="help-desc">Tap a word for its romaji. Tap any katakana for that sound alone.</span></li>
         <li><span class="help-term">Speaker</span><span class="help-desc">Plays the word aloud.</span></li>
         <li><span class="help-term">Particles</span><span class="help-desc">Blue and bold, like <span class="particle">は</span> — tap one to see how it reads.</span></li>
+        <li><span class="help-term">Kanji</span><span class="help-desc">Tap a kanji for its readings, an example, words that use it and Add to flashcards.</span></li>
         <li><span class="help-term">ⓘ on a row</span><span class="help-desc">Its grammar in one place: い / な, 五段 / 一段 / 変格, and the particles it takes.</span></li>
       </ul>
     </details>
@@ -179,6 +180,11 @@
 </section>
 </main>
 </div>
+<!-- The Kanji section's detail sheet (js/vocab/interactions.js openKanjiSheet).
+     At body level on purpose: nothing above it may carry backdrop-filter, or
+     its position: fixed would be trapped. -->
+<div class="kanji-scrim" id="kanjiScrim" hidden></div>
+<div class="kanji-sheet" id="kanjiSheet" role="dialog" aria-modal="true" aria-labelledby="kanjiSheetTitle" hidden></div>
 <!--
   Classic scripts, loaded in a deliberate order. All first-party code communicates
   through one namespace, window.RaumeStudy (sub-namespaces: .data, .config,

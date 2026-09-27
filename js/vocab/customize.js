@@ -64,7 +64,7 @@ window.RaumeStudy.customize = (function () {
   }
   var czDetailsOpen = loadOpenState();
 
-  var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", travel: "Travel" };
+  var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", kanji: "Kanji", travel: "Travel" };
 
   // Words you've added: live search + sort, kept across a re-render the same
   // way cvTarget is (plain module vars, not one-shot).
@@ -92,10 +92,10 @@ window.RaumeStudy.customize = (function () {
   // then A-Z) > table (custom order, then A-Z) -- the exact sequence the
   // vocabulary page and the table directory now lay out in.
   function grouped() {
-    var bySec = { vocabulary: [], grammar: [], travel: [] };
+    var bySec = { vocabulary: [], grammar: [], kanji: [], travel: [] };
     tables().forEach(function (t) { bySec[V().sectionOf(t.category)].push(t); });
     var out = [];
-    ["vocabulary", "grammar", "travel"].forEach(function (sec) {
+    ["vocabulary", "grammar", "kanji", "travel"].forEach(function (sec) {
       var byCat = {};
       bySec[sec].forEach(function (t) {
         var c = t.category || "Tables";

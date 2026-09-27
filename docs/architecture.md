@@ -256,7 +256,8 @@ js/
     bootstrap.js         app shell + init
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
-                        verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular")
+                        verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
+                        kanji rows -- type:"kanji", the N5 Kanji tables -- see below)
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
 audio/                  prerendered pronunciation clips — see "Pronunciation audio" below
@@ -368,6 +369,17 @@ small grey under the English in the tables, under an English prompt or answer in
 Flashcards, and in parentheses in lists and puzzle clues — it's never part of a
 right answer. Parentheses left in `english` are optional words inside the answer
 itself ("take (a day) off"); answer-checking accepts it with or without them.
+
+A `kanji` row (the N5 Kanji tables, `tableClass: "vocab-kanji"`, the Kanji
+section) holds one character: `jp` is that kanji with the reading the speaker
+says, `romaji` every reading a learner might type (`"yama / san"` — any one
+counts), `english` its meaning, `on` (katakana) and `kun` (hiragana, a `.` before
+okurigana: `"み.る"`) the N5 readings, and an optional `example` word
+(`{ jp, english }`) that contains it. `validate` checks all of that and that no
+kanji appears twice. In Flashcards a kanji gets only jp-en and jp-ro, prompted by
+the bare character (`vocab-index.js` `entry.kanji`); Puzzles skips the kanji
+tables. The sheet's *Words with* list is computed, not stored
+(`render.js` `wordsWithKanji`).
 
 Every `verb-pair` row carries the same idea for its group: `verbClass` (`"godan"`
 / `"ichidan"` / `"irregular"`) drives the 五段/一段/変格 badge, and `verbNote` marks
