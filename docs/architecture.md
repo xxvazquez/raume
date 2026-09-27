@@ -258,6 +258,7 @@ data/vocabulary.js      the vocabulary as plain data; every row has a permanent 
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
                         verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
                         kanji rows -- type:"kanji", the N5 Kanji tables -- see below)
+data/kanji-strokes.js   N5 kanji stroke order from KanjiVG (CC BY-SA 3.0, see NOTICE)
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
 audio/                  prerendered pronunciation clips — see "Pronunciation audio" below
@@ -381,7 +382,12 @@ word (`{ jp, english }`) that contains it. `validate` checks all of that and tha
 no kanji appears twice. In Flashcards a kanji gets only jp-en and jp-ro, prompted by
 the bare character (`vocab-index.js` `entry.kanji`); Puzzles skips the kanji
 tables. The sheet's *Words with* list is computed, not stored
-(`render.js` `wordsWithKanji`); its ⓘ explainers are copy in `render.js`
+(`render.js` `wordsWithKanji`); its stroke-order drawing reads
+`data/kanji-strokes.js` (`RaumeStudy.data.kanjiStrokes`: per kanji, `p` the stroke
+paths in order on KanjiVG's 109x109 grid, `n` each stroke number's position). That
+file is KanjiVG's data, CC BY-SA 3.0 — the one file not under LICENSE (NOTICE);
+it loads right after `vocabulary.js` (which assigns `RaumeStudy.data`). The smoke
+test checks every kanji has as many strokes there as its row's `strokes`. Its ⓘ explainers are copy in `render.js`
 `KANJI_HELP`, kanji marked `{漢字|かんじ}` for furigana.
 
 Every `verb-pair` row carries the same idea for its group: `verbClass` (`"godan"`

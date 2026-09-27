@@ -418,7 +418,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         ['A box', 'sides, inside, then close the bottom — {日|ひ}']] },
     radical: { label: 'Radical', title: 'Radical · {部首|ぶしゅ}', lead: 'The part a dictionary files a kanji under — often a hint to its meaning.',
       points: [['〜へん', 'on the left'], ['〜かんむり', 'on top'], ['〜がまえ', 'around']],
-      examples: [['{亻|にんべん} → {休|やす}む', 'a person by a tree: rest']] },
+      examples: [['{亻|にんべん} → {休|やす}む', 'person + tree = rest']] },
     radicalSelf: 'a radical itself — you’ll spot it inside other kanji',
     radicalSort: 'just for sorting — no need to learn it'
   };
@@ -455,9 +455,28 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       kanjiFieldHtml(row, key) + '</span><button type="button" class="ks-info" data-help="' + key + '" aria-expanded="false" aria-label="' + esc('About ' + h.label) + '">' +
       INFO_ICON + '</button></div>';
   }
+  // Stroke order, drawn one stroke at a time (css/site.css .so-*): the
+  // kanji's outline faint underneath, each stroke drawn in order over it
+  // (pathLength=1 lets CSS animate any stroke the same way, no measuring),
+  // its number appearing as it starts. Data: data/kanji-strokes.js (KanjiVG).
+  function kanjiStrokesHtml(ch) {
+    var k = (window.RaumeStudy.data.kanjiStrokes || {})[ch];
+    if (!k) return '';
+    var guide = '', strokes = '', nums = '';
+    k.p.forEach(function (d, i) {
+      var n = Math.min(i + 1, 20);
+      guide += '<path d="' + esc(d) + '"/>';
+      strokes += '<path class="so-s so-' + n + '" pathLength="1" d="' + esc(d) + '"/>';
+      nums += '<text class="so-n so-' + n + '" x="' + k.n[i][0] + '" y="' + k.n[i][1] + '">' + (i + 1) + '</text>';
+    });
+    return '<svg class="so-svg" viewBox="0 0 109 109" role="img" aria-label="' + esc('Stroke order, ' + k.p.length + ' strokes') + '">' +
+      '<g class="so-guide">' + guide + '</g><g class="so-strokes">' + strokes + '</g><g class="so-nums">' + nums + '</g></svg>';
+  }
+  vocab.kanjiStrokesHtml = kanjiStrokesHtml;
   // The kanji detail sheet: the character and its meaning, then iOS-style
   // grouped cards -- its readings (on in katakana, kun in hiragana with the
-  // okurigana lighter), how it's written (strokes, its radical) -- each row
+  // okurigana lighter), how it's written (its stroke order drawn, strokes,
+  // its radical) -- each row
   // with its ⓘ explainer -- an example word with furigana, and the reader's words that
   // use it (wordsWithKanji, folded away until asked for) -- and the same
   // add-to-flashcards toggle a search result has (js/flashcards/views.js).
@@ -469,9 +488,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return '<div class="ks-row ks-example"><span class="jpword ks-example-jp" lang="ja">' + jpGroupedSegments(jp) +
         '</span><span class="ks-example-en">' + esc(english) + '</span></div>';
     };
-    var writing = row.strokes || row.radical
+    var drawing = kanjiStrokesHtml(ch);
+    var writing = row.strokes || row.radical || drawing
       ? '<h3 class="ks-group-head">Writing</h3><div class="ks-card">' +
-        (row.strokes ? kanjiRowHtml(row, 'strokes') : '') + (row.radical ? kanjiRowHtml(row, 'radical') : '') + '</div>'
+        (drawing ? '<div class="ks-row ks-so"><div class="ks-so-box">' + drawing + '</div>' +
+          '<button type="button" class="ks-replay">Replay</button></div>' : '') +
+        (row.strokes ? kanjiRowHtml(row, 'strokes') : '') + (row.radical ? kanjiRowHtml(row, 'radical') : '') + '</div>' +
+        (drawing ? '<p class="ks-credit">Stroke order from KanjiVG, CC BY-SA 3.0</p>' : '')
       : '';
     var example = row.example
       ? '<h3 class="ks-group-head">Example</h3><div class="ks-card">' + wordRowHtml(row.example.jp, row.example.english) + '</div>'

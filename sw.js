@@ -40,6 +40,7 @@ const VERSIONED = [
   'js/theme-init.js',
   'css/site.css',
   'data/vocabulary.js',
+  'data/kanji-strokes.js',
   'js/config.js',
   'js/shared.js',
   'js/pull-refresh.js',

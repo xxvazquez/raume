@@ -154,6 +154,15 @@ compact rows — and one full-width filled capsule, **Add to flashcards**, that
 turns white (secondary) once added. Example words use the reference tables'
 print-style furigana.
 
+Writing opens with the **stroke-order drawing**: a 156px `--group-ground`
+rounded square, the kanji's outline in `--row-line`, each stroke drawn over it
+(0.55s, the next 0.7s later) with its number fading in — stroke and number in the
+same colour, cycling through the category-tile hues deepened 22% toward the ink
+(the stroke-order chart convention, so a number matches its stroke at a glance);
+a white secondary **Replay** capsule beside it; a faint *Stroke order from
+KanjiVG* credit under the card. Reduced motion shows the finished, numbered
+drawing.
+
 Every Readings / Writing row ends in a tinted ⓘ. It opens the tables' grammar
 popover (`.role-pop`), not a pushed page: a bold title, a one-line definition,
 a few hairline-separated label / value lines and an example on a grey chip —

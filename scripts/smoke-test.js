@@ -208,6 +208,22 @@ async function main() {
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     return opened && allRuby && tappedAway && escPop && sheet.hidden;
   })());
+  check("every kanji has its KanjiVG stroke order, as many strokes as its row says; the sheet draws them in order -- faint outline, numbered strokes, a credit -- and Replay starts over", (() => {
+    const S = window.RaumeStudy.data.kanjiStrokes;
+    const rows = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass === "vocab-kanji").flatMap(t => t.rows);
+    const allData = rows.every(r => S[r.jp[0].kanji] && S[r.jp[0].kanji].p.length === r.strokes && S[r.jp[0].kanji].n.length === r.strokes);
+    const sheet = document.getElementById("kanjiSheet");
+    [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "休").click();
+    const svg = sheet.querySelector(".ks-so .so-svg");
+    const strokes = svg ? [...svg.querySelectorAll(".so-strokes path")] : [];
+    const drawn = strokes.length === 6 && strokes.every((p, i) => p.getAttribute("pathLength") === "1" && p.classList.contains("so-" + (i + 1)))
+      && svg.querySelectorAll(".so-guide path").length === 6 && [...svg.querySelectorAll(".so-nums text")].map(t => t.textContent).join("") === "123456"
+      && /KanjiVG/.test(sheet.querySelector(".ks-credit").textContent);
+    sheet.querySelector(".ks-replay").click();
+    const replayed = sheet.querySelector(".ks-so .so-svg") !== svg && sheet.querySelectorAll(".ks-so .so-svg").length === 1;
+    window.RaumeStudy.vocab.closeKanjiSheet();
+    return allData && drawn && replayed;
+  })());
   check("Words with ... draws on every other table, never the kanji or sentence tables, shortest first, all of them", (() => {
     const w = window.RaumeStudy.vocab.wordsWithKanji("日", "");
     return w.length > 8 && w.every(x => x.text.includes("日")) && w.every((x, i) => !i || w[i - 1].text.length <= x.text.length)

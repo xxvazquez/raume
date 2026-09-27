@@ -355,6 +355,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (t.closest('.ks-close, #kanjiScrim')) { closeKanjiSheet(); return; }
     // A row's ⓘ opens its explainer in a popover (again: closes it); any
     // other tap closes an open one.
+    // Replay: a fresh copy of the drawing restarts its CSS animation.
+    const replay = t.closest('#kanjiSheet .ks-replay');
+    if (replay) {
+      const svg = replay.parentNode.querySelector('.so-svg');
+      if (svg) svg.replaceWith(svg.cloneNode(true));
+      return;
+    }
     const info = t.closest('#kanjiSheet .ks-info');
     if (info) { if (kanjiPopOwner === info) closeKanjiPop(); else openKanjiPop(info); return; }
     if (kanjiPop && !t.closest('.kanji-help-pop')) closeKanjiPop();

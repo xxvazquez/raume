@@ -2468,7 +2468,74 @@ body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
   margin-top: 8px; padding: 6px 10px 5px; border-radius: 10px; background: var(--group-ground);
 }
 .kh-ex-jp { flex: none; font-size: 17px; line-height: 1.9; color: var(--ink); white-space: nowrap; }
-.kh-ex-en { color: var(--muted); text-align: right; }
+.kh-ex-en { color: var(--muted); text-align: right; white-space: nowrap; }
+/* Stroke order (render.js kanjiStrokesHtml): the kanji's outline faint,
+   each stroke drawn over it in turn -- 0.55s a stroke, the next starting
+   0.7s after -- its number fading in as it starts. Reduced motion: the
+   finished drawing with its numbers, no animation. */
+.ks-so { justify-content: center; gap: 16px; padding: 14px 16px; }
+.ks-so-box { width: 156px; height: 156px; border-radius: 14px; background: var(--group-ground); }
+.so-svg { display: block; width: 100%; height: 100%; }
+.so-svg path { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.so-guide path { stroke: var(--row-line); }
+.so-strokes path { stroke: var(--so, var(--ink)); stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: so-draw .55s ease-in-out forwards; }
+.so-nums text { font: 600 8.5px var(--font-ui); fill: var(--so, var(--section-strong)); opacity: 0; animation: so-num .2s ease forwards; }
+/* Hidden until its turn: a round cap would otherwise leave a dot where
+   each waiting stroke begins. */
+@keyframes so-draw { from { opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes so-num { to { opacity: 1; } }
+.so-svg .so-1 { animation-delay: 0.30s; }
+.so-svg .so-2 { animation-delay: 1.00s; }
+.so-svg .so-3 { animation-delay: 1.70s; }
+.so-svg .so-4 { animation-delay: 2.40s; }
+.so-svg .so-5 { animation-delay: 3.10s; }
+.so-svg .so-6 { animation-delay: 3.80s; }
+.so-svg .so-7 { animation-delay: 4.50s; }
+.so-svg .so-8 { animation-delay: 5.20s; }
+.so-svg .so-9 { animation-delay: 5.90s; }
+.so-svg .so-10 { animation-delay: 6.60s; }
+.so-svg .so-11 { animation-delay: 7.30s; }
+.so-svg .so-12 { animation-delay: 8.00s; }
+.so-svg .so-13 { animation-delay: 8.70s; }
+.so-svg .so-14 { animation-delay: 9.40s; }
+.so-svg .so-15 { animation-delay: 10.10s; }
+.so-svg .so-16 { animation-delay: 10.80s; }
+.so-svg .so-17 { animation-delay: 11.50s; }
+.so-svg .so-18 { animation-delay: 12.20s; }
+.so-svg .so-19 { animation-delay: 12.90s; }
+.so-svg .so-20 { animation-delay: 13.60s; }
+/* Each stroke in its own colour, its number in the same one -- the usual
+   stroke-order chart convention, so a number is easy to match to its
+   stroke. The category-tile hues, deepened toward the ink so they read as
+   lines and small numbers (and lighten the same way in dark mode). */
+.so-svg {
+  --so-blue: color-mix(in srgb, var(--tile-blue) 78%, var(--ink));
+  --so-orange: color-mix(in srgb, var(--tile-orange) 78%, var(--ink));
+  --so-green: color-mix(in srgb, var(--tile-green) 78%, var(--ink));
+  --so-purple: color-mix(in srgb, var(--tile-purple) 78%, var(--ink));
+  --so-clay: color-mix(in srgb, var(--tile-clay) 78%, var(--ink));
+  --so-teal: color-mix(in srgb, var(--tile-teal) 78%, var(--ink));
+  --so-amber: color-mix(in srgb, var(--tile-amber) 78%, var(--ink));
+  --so-indigo: color-mix(in srgb, var(--tile-indigo) 78%, var(--ink));
+}
+.so-svg .so-1, .so-svg .so-9, .so-svg .so-17 { --so: var(--so-blue); }
+.so-svg .so-2, .so-svg .so-10, .so-svg .so-18 { --so: var(--so-orange); }
+.so-svg .so-3, .so-svg .so-11, .so-svg .so-19 { --so: var(--so-green); }
+.so-svg .so-4, .so-svg .so-12, .so-svg .so-20 { --so: var(--so-purple); }
+.so-svg .so-5, .so-svg .so-13 { --so: var(--so-clay); }
+.so-svg .so-6, .so-svg .so-14 { --so: var(--so-teal); }
+.so-svg .so-7, .so-svg .so-15 { --so: var(--so-amber); }
+.so-svg .so-8, .so-svg .so-16 { --so: var(--so-indigo); }
+@media (prefers-reduced-motion: reduce) {
+  .so-strokes path { animation: none; stroke-dashoffset: 0; opacity: 1; }
+  .so-nums text { animation: none; opacity: 1; }
+}
+.ks-replay {
+  appearance: none; padding: 6px 14px; border: 0; border-radius: 999px;
+  background: var(--paper); box-shadow: var(--control-lift);
+  color: var(--section-strong); font: 500 14px/1.2 var(--font-ui); cursor: pointer;
+}
+.ks-credit { margin: 0; padding: 6px 16px 0; font-size: var(--fs-micro); color: var(--faint); }
 .ks-rad { font-size: 17px; color: var(--ink-2); }
 /* Words with 月: every one from the reader's tables, folded into one
    disclosure row until asked for; the rows are a compact list. */
