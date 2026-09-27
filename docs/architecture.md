@@ -385,7 +385,9 @@ tables. The sheet's *Words with* list is computed, not stored
 (`render.js` `wordsWithKanji`); its stroke-order drawing reads
 `data/kanji-strokes.js` (`RaumeStudy.data.kanjiStrokes`: per kanji, `p` the stroke
 paths in order on KanjiVG's 109x109 grid, `n` each stroke number's position). That
-file is KanjiVG's data, CC BY-SA 3.0 — the one file not under LICENSE (NOTICE);
+file is adapted from KanjiVG, CC BY-SA 3.0 — the one file not under LICENSE
+(`data/kanji-strokes.LICENSE.txt`, NOTICE; credited with links under the drawing,
+on the Help page and in README). Keep that attribution wherever the data is shown;
 it loads right after `vocabulary.js` (which assigns `RaumeStudy.data`). The smoke
 test checks every kanji has as many strokes there as its row's `strokes`. Its ⓘ explainers are copy in `render.js`
 `KANJI_HELP`, kanji marked `{漢字|かんじ}` for furigana.

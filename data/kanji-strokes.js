@@ -3,12 +3,15 @@
 // each stroke's SVG path on KanjiVG's 109x109 grid, and `n`, where its stroke
 // number sits.
 //
-// Stroke data from KanjiVG (http://kanjivg.tagaini.net), copyright (C) 2009-2011
-// Ulrich Apel, used under the Creative Commons Attribution-Share Alike 3.0
-// licence (http://creativecommons.org/licenses/by-sa/3.0/). This file -- and
-// only this file -- is distributed under that same licence; see NOTICE.
-// Regenerate from the KanjiVG kanji/<codepoint>.svg files (the stroke paths
-// in id order and the StrokeNumbers text positions), nothing else changed.
+// Adapted from KanjiVG (http://kanjivg.tagaini.net).
+// Copyright (C) 2009/2010/2011 Ulrich Apel.
+// Licensed under Creative Commons Attribution-Share Alike 3.0
+// (http://creativecommons.org/licenses/by-sa/3.0/). As an adaptation, this
+// file -- and only this file -- is distributed under that same licence; see
+// data/kanji-strokes.LICENSE.txt and NOTICE.
+// Changes: the stroke paths (in stroke order) and stroke-number positions
+// were extracted from KanjiVG's kanji/<codepoint>.svg files, unchanged; the
+// rest of the SVG markup and metadata was left out.
 window.RaumeStudy.data.kanjiStrokes = {
   "一": { p: ["M11,54.25c3.19,0.62,6.25,0.75,9.73,0.5c20.64-1.5,50.39-5.12,68.58-5.24c3.6-0.02,5.77,0.24,7.57,0.49"], n: [[4.25, 54.13]] },
   "二": { p: ["M25.25,32.4c1.77,0.37,4.78,0.56,6.55,0.37c10.82-1.15,28.82-3.4,41.24-3.76c2.95-0.09,4.73,0.18,6.21,0.36", "M12,80.75c2.37,0.5,6.73,0.67,9.09,0.5c23.79-1.75,45.04-4.12,67.49-4.74c3.95-0.11,6.32,0.24,8.3,0.49"], n: [[17.5, 33.13], [3.5, 81.5]] },

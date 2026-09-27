@@ -2536,6 +2536,7 @@ body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
   color: var(--section-strong); font: 500 14px/1.2 var(--font-ui); cursor: pointer;
 }
 .ks-credit { margin: 0; padding: 6px 16px 0; font-size: var(--fs-micro); color: var(--faint); }
+.ks-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .ks-rad { font-size: 17px; color: var(--ink-2); }
 /* Words with 月: every one from the reader's tables, folded into one
    disclosure row until asked for; the rows are a compact list. */

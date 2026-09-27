@@ -1,0 +1,19 @@
+data/kanji-strokes.js -- stroke order for the N5 kanji
+
+Adapted from KanjiVG (http://kanjivg.tagaini.net).
+Copyright (C) 2009/2010/2011 Ulrich Apel.
+
+KanjiVG is distributed under the Creative Commons Attribution-Share Alike 3.0
+Unported licence: http://creativecommons.org/licenses/by-sa/3.0/
+Full legal code: http://creativecommons.org/licenses/by-sa/3.0/legalcode
+
+Changes made: for each of the 102 kanji, the stroke paths (in stroke order)
+and the positions of the stroke numbers were extracted from KanjiVG's
+kanji/<codepoint>.svg files into one JavaScript data file. The paths and
+positions themselves are unchanged; the other SVG markup and metadata were
+left out.
+
+As an adaptation, data/kanji-strokes.js is distributed under the same
+Creative Commons Attribution-Share Alike 3.0 licence. It is the only file in
+this repository under that licence; everything else is covered by LICENSE
+and NOTICE.

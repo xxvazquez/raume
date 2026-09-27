@@ -409,4 +409,5 @@ Third-party parts keep their own licenses:
 | `ts-fsrs`, `supabase-js` | MIT (`vendor/*.LICENSE.txt`) |
 | Lucide-derived icons | ISC (`vendor/*.LICENSE.txt`) |
 | Inter, Space Grotesk | SIL Open Font License (`fonts/*.LICENSE.txt`) |
+| Kanji stroke order (`data/kanji-strokes.js`) | Adapted from [KanjiVG](http://kanjivg.tagaini.net), © Ulrich Apel — [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) (`data/kanji-strokes.LICENSE.txt`); that file stays under CC BY-SA |
 | Pronunciation audio (`audio/*.mp3`) | Generated with [VOICEVOX](https://voicevox.hiroshiba.jp/), voice VOICEVOX:四国めたん |

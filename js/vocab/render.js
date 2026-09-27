@@ -494,7 +494,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         (drawing ? '<div class="ks-row ks-so"><div class="ks-so-box">' + drawing + '</div>' +
           '<button type="button" class="ks-replay">Replay</button></div>' : '') +
         (row.strokes ? kanjiRowHtml(row, 'strokes') : '') + (row.radical ? kanjiRowHtml(row, 'radical') : '') + '</div>' +
-        (drawing ? '<p class="ks-credit">Stroke order from KanjiVG, CC BY-SA 3.0</p>' : '')
+        // KanjiVG's licence asks for its name, a link and the licence's.
+        (drawing ? '<p class="ks-credit">Stroke order from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a>, ' +
+          '<a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="noopener" target="_blank">CC BY-SA 3.0</a></p>' : '')
       : '';
     var example = row.example
       ? '<h3 class="ks-group-head">Example</h3><div class="ks-card">' + wordRowHtml(row.example.jp, row.example.english) + '</div>'

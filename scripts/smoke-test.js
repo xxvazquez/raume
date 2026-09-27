@@ -218,7 +218,8 @@ async function main() {
     const strokes = svg ? [...svg.querySelectorAll(".so-strokes path")] : [];
     const drawn = strokes.length === 6 && strokes.every((p, i) => p.getAttribute("pathLength") === "1" && p.classList.contains("so-" + (i + 1)))
       && svg.querySelectorAll(".so-guide path").length === 6 && [...svg.querySelectorAll(".so-nums text")].map(t => t.textContent).join("") === "123456"
-      && /KanjiVG/.test(sheet.querySelector(".ks-credit").textContent);
+      && /KanjiVG/.test(sheet.querySelector(".ks-credit").textContent)
+      && [...sheet.querySelectorAll(".ks-credit a")].map(a => a.getAttribute("href")).join(" ") === "http://kanjivg.tagaini.net http://creativecommons.org/licenses/by-sa/3.0/";
     sheet.querySelector(".ks-replay").click();
     const replayed = sheet.querySelector(".ks-so .so-svg") !== svg && sheet.querySelectorAll(".ks-so .so-svg").length === 1;
     window.RaumeStudy.vocab.closeKanjiSheet();
