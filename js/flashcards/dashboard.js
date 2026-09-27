@@ -266,12 +266,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (readyNow > 0) {
       variant = "due";
       title = readyNow === 1 ? "card to study" : "cards to study";
-      if (laterToday > 0) sub = laterToday + " more due later today";
-      else if (nextTs) sub = "Next review: " + friendlyWhen(now, nextTs);
-      // Fresh deck -- nothing scheduled to return yet. Describe the queue so
-      // the card carries a second line instead of just a bare count.
-      else if (ready.length > 0) sub = ready.length + " due now, " + newInSession + " new";
-      else sub = "All new so far";
+      // What the count is made of, then what's still coming today -- never
+      // "Next review: tomorrow" under a pile that's ready now, which read
+      // as a contradiction.
+      var parts = [];
+      if (ready.length && newInSession) parts.push(ready.length + " due", newInSession + " new");
+      else if (!ready.length) parts.push("All new");
+      if (laterToday > 0) parts.push(laterToday + " more later today");
+      sub = parts.join(" · ");
     } else if (laterToday > 0) {
       variant = "clear";
       title = "All caught up";
