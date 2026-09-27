@@ -8,7 +8,8 @@
 //
 // The file holds only the reader's own learning data: the flashcard cache
 // (cards, review history, settings, paused tables), the Kana trainer cache,
-// table names/icons/order, and the reader's own custom words. Built-in
+// table names/icons/order, the reader's own custom words, the kanji they
+// marked Known and their finished Match / Listening games. Built-in
 // vocabulary is never copied in -- cards reference it by vocab_id, so a backup
 // stays valid as the reference data grows.
 //
@@ -40,6 +41,19 @@ window.RaumeStudy.flashcards.backup = (function () {
     } catch (e) { return null; }
   }
 
+  // Kanji marked Known and finished puzzle games: device-wide stores (not
+  // split guest / signed-in), read through their own modules.
+  function knownKanji() {
+    var kk = window.RaumeStudy.knownKanji;
+    var all = kk ? kk.getAll() : {};
+    return Object.keys(all).length ? all : null;
+  }
+  function puzzleRuns() {
+    var pr = window.RaumeStudy.flashcards.puzzleRuns;
+    var all = pr ? pr.all() : [];
+    return all.length ? all : null;
+  }
+
   function buildBackup() {
     var cache = clone(store.getCache());
     var kana = clone(store.getKanaCache());
@@ -56,7 +70,9 @@ window.RaumeStudy.flashcards.backup = (function () {
         flashcards: cache,
         kana: kana,
         tableCustom: Object.keys(tableCustom).length ? tableCustom : null,
-        customVocab: readCustomVocab()
+        customVocab: readCustomVocab(),
+        knownKanji: knownKanji(),
+        puzzleRuns: puzzleRuns()
       }
     };
   }
@@ -103,7 +119,14 @@ window.RaumeStudy.flashcards.backup = (function () {
       var clean = cv.sanitize(d.customVocab);
       if (clean.tables.length || clean.rows.length) customVocab = clean;
     }
-    var backup = { flashcards: flashcards, kana: kana, tableCustom: tableCustom, customVocab: customVocab };
+    // Backups from before these two existed don't mention them -- leave the
+    // device's own untouched then (undefined) rather than clearing them.
+    var kk = window.RaumeStudy.knownKanji, pr = window.RaumeStudy.flashcards.puzzleRuns;
+    var known = !("knownKanji" in d) ? undefined : kk ? kk.sanitize(d.knownKanji) : null;
+    if (known && !Object.keys(known).length) known = null;
+    var runs = !("puzzleRuns" in d) ? undefined : pr ? pr.sanitize(d.puzzleRuns) : null;
+    if (runs && !runs.length) runs = null;
+    var backup = { flashcards: flashcards, kana: kana, tableCustom: tableCustom, customVocab: customVocab, knownKanji: known, puzzleRuns: runs };
     return { ok: true, backup: backup, summary: summarize(backup, raw.exportedAt) };
   }
 
@@ -117,7 +140,9 @@ window.RaumeStudy.flashcards.backup = (function () {
       cards: cards.length,
       kanaCards: b.kana ? Object.keys(b.kana.cards).length : 0,
       customWords: b.customVocab ? b.customVocab.rows.length : 0,
-      customisedTables: b.tableCustom ? Object.keys(b.tableCustom).length : 0
+      customisedTables: b.tableCustom ? Object.keys(b.tableCustom).length : 0,
+      knownKanji: b.knownKanji ? Object.keys(b.knownKanji).filter(function (id) { return b.knownKanji[id].k; }).length : 0,
+      puzzleGames: b.puzzleRuns ? b.puzzleRuns.length : 0
     };
   }
 
@@ -133,6 +158,8 @@ window.RaumeStudy.flashcards.backup = (function () {
       [window.RaumeStudy.tableCustom.STORAGE_KEY, b.tableCustom],
       [cv.GUEST_KEY, b.customVocab]
     ];
+    if (b.knownKanji !== undefined && window.RaumeStudy.knownKanji) plan.push([window.RaumeStudy.knownKanji.STORAGE_KEY, b.knownKanji]);
+    if (b.puzzleRuns !== undefined && window.RaumeStudy.flashcards.puzzleRuns) plan.push([window.RaumeStudy.flashcards.puzzleRuns.STORAGE_KEY, b.puzzleRuns]);
     var before = [];
     try {
       plan.forEach(function (step) { before.push([step[0], window.localStorage.getItem(step[0])]); });

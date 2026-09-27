@@ -620,6 +620,8 @@ window.RaumeStudy.flashcards.views = (function () {
         if (sm.kanaCards) parts.push(sm.kanaCards + " Kana cards");
         if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
         if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
+        if (sm.knownKanji) parts.push(sm.knownKanji + " known kanji");
+        if (sm.puzzleGames) parts.push(sm.puzzleGames + " puzzle game" + (sm.puzzleGames === 1 ? "" : "s"));
         if (!window.confirm("Restore the backup" + when + "?\n\nIt holds " + parts.join(", ") + ".\n\nThis replaces everything Practice currently has on this device. Anything you've done since the backup was made will be lost.")) return;
         var applied = backup.applyBackup(parsed.backup);
         if (!applied.ok) { showError(applied.error); return; }

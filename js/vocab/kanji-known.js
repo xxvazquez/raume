@@ -65,7 +65,7 @@ window.RaumeStudy.knownKanji = (function () {
   function setRemotePush(fn) { remotePush = fn; }
 
   return {
-    isKnown: isKnown, count: count, setKnown: setKnown, getAll: getAll,
+    isKnown: isKnown, count: count, setKnown: setKnown, getAll: getAll, sanitize: clean,
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush,
     STORAGE_KEY: KEY
   };

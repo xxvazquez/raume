@@ -2026,6 +2026,20 @@ async function main() {
     const failed = backupApi.applyBackup(parsedBackup.backup);
     check("a write that fails part-way rolls every section back and says nothing was changed", failed.ok === false && /Nothing was changed/.test(failed.error)
       && fakeMem["raume-flashcards-guest-v1"] === "OLD-FLASHCARDS" && fakeMem["raume-table-custom"] === JSON.stringify({ "1": { name: "Old" } }));
+    failOnWriteNo = 0;
+    const withExtras = JSON.parse(JSON.stringify(builtBackup));
+    withExtras.data.knownKanji = { v0901: { k: 1, t: 1 }, v0902: { k: 0, t: 2 }, junk: 5 };
+    withExtras.data.puzzleRuns = [{ id: "a", at: "2026-09-01T00:00:00Z", mode: "match", n: 10, ms: 20000, miss: 1 }, { id: "b" }];
+    const px = backupApi.parseBackup(JSON.stringify(withExtras));
+    backupApi.applyBackup(px.backup);
+    check("a backup carries Known kanji and puzzle games, cleaned, and counts them",
+      px.ok && px.summary.knownKanji === 1 && px.summary.puzzleGames === 1
+      && Object.keys(JSON.parse(fakeMem["raume-kanji-known"])).length === 2 && JSON.parse(fakeMem["raume-puzzle-runs"]).length === 1);
+    fakeMem["raume-kanji-known"] = "KEEP";
+    const older = JSON.parse(JSON.stringify(builtBackup));
+    delete older.data.knownKanji; delete older.data.puzzleRuns;
+    backupApi.applyBackup(backupApi.parseBackup(JSON.stringify(older)).backup);
+    check("...and a backup from before them leaves the device's own untouched", fakeMem["raume-kanji-known"] === "KEEP");
   } finally {
     if (realStorage) Object.defineProperty(window, "localStorage", realStorage); else delete window.localStorage;
   }

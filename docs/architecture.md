@@ -143,11 +143,14 @@ use the helper too.
 ### Guest backup
 
 `js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) is guest-only —
-signed-in data already lives in the account. `buildBackup()` snapshots four
+signed-in data already lives in the account. `buildBackup()` snapshots six
 things into `{format: "raume-backup", version: 1, exportedAt, data}`: the guest
 flashcard cache (`raume-flashcards-guest-v1`), the guest Kana cache
-(`raume-kana-v1`), table customisations (`raume-table-custom`) and the guest
-custom vocabulary (`raume-custom-vocab-guest-v1`). Built-in vocabulary is never
+(`raume-kana-v1`), table customisations (`raume-table-custom`), the guest
+custom vocabulary (`raume-custom-vocab-guest-v1`), Known kanji
+(`raume-kanji-known`) and finished puzzle games (`raume-puzzle-runs`). A backup
+made before those last two existed doesn't mention them, and restoring it leaves
+the device's own untouched rather than clearing them. Built-in vocabulary is never
 included (cards reference it by `vocab_id`). `parseBackup()` re-runs every
 section through the same validator the live app loads it with
 (`store.validateCache` / `validateKanaCache`, `customVocab.sanitize`), so a bad

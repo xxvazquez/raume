@@ -98,7 +98,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   function setRemotePush(fn) { remotePush = fn; }
 
   return {
-    record: record, all: all, summary: summary,
+    record: record, all: all, summary: summary, sanitize: function (arr) { return capped(clean(arr)); },
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush,
     STORAGE_KEY: KEY, MAX: MAX
   };
