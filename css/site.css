@@ -4630,6 +4630,9 @@ mark.fc-diff-co {
 .fc-titlebar:not(.fc-titlebar-pushed) { flex-wrap: wrap; row-gap: 10px; align-items: center; }
 .fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
 .fc-titlebar + .fc-signed-in-as { margin-top: 10px; }
+/* Phone: that status line is hidden (the account menu says it), so the
+   title bar itself keeps the tabs off the first card. */
+@media (max-width: 640px) { .fc-titlebar:not(.fc-titlebar-pushed) { margin-bottom: 16px; } }
 @media (min-width: 641px) {
   .fc-titlebar:not(.fc-titlebar-pushed) > h1 {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
