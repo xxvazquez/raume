@@ -2467,6 +2467,15 @@ async function main() {
       const tile = tiles.find(t => /Estimated retention/.test(t.querySelector(".fc-stat-label").textContent));
       return !!tile && tile.classList.contains("fc-stat-attention") && !tile.classList.contains("fc-stat-tile-pending");
     })());
+    check("what Estimated retention means waits behind its ⓘ, shown only on tap", (() => {
+      const info = document.querySelector("#fcPanelDashboard .fc-stat-info");
+      const note = document.getElementById("fcRetentionNote");
+      if (!info || !note || !note.hidden) return false;
+      info.click();
+      const shown = !note.hidden && info.getAttribute("aria-expanded") === "true";
+      info.click();
+      return shown && note.hidden;
+    })());
     c.cards = saved.cards;
     fcStore.saveCache();
     window.RaumeStudy.flashcards.render();

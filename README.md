@@ -387,7 +387,8 @@ never mix.
 - **Local-first** — reviews, customisations and custom words apply
   immediately. Anything that couldn't sync is queued, survives a reload and
   retries on its own.
-- **Sync status** — a chip under your name shows *Synced*, *Syncing N…*, or an
+- **Sync status** — all synced, the account button's dot is green and nothing
+  else shows; otherwise a chip under your name shows *Syncing N…* or an
   amber *Offline* / *couldn't sync* with **Sync now**. **What's pending?**
   lists exactly what hasn't reached your account yet.
 - **Nothing is hard-deleted**, except custom words and tables you delete

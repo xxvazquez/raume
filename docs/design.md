@@ -668,7 +668,9 @@ be scannable at a glance:
   Settings value rows carry no icon tiles — iOS puts tiles only on rows
   that open another screen. The one signal
   is **Estimated retention**'s figure turning coral once it drops under the
-  Settings target (`.fc-stat-attention`);
+  Settings target (`.fc-stat-attention`). What the figure means sits behind a
+  small ⓘ after its label, shown only when tapped — explanations never stand
+  on the screen taking space;
 - **Card progress** uses three distinct hues, not one hue at three lightnesses —
   neutral slate `--fc-state-new`, ochre `--fc-state-learning`, sage
   `--fc-state-review` (New → Learning → graduated-to-review). The legend labels

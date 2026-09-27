@@ -77,11 +77,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // icon on the Flashcards screens.
       '<svg class="fc-dash-empty-glyph" viewBox="0 0 18 18" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS["Total cards"] + "</svg>" +
       "<h3>No flashcards yet</h3>" +
-      "<p>Add words from the vocabulary tables and they’ll show up here to review on an FSRS schedule. Open a table, then use the card icon on any row — or add the whole table from its menu.</p>" +
+      "<p>Add words from the vocabulary tables to study them here.</p>" +
       '<div class="fc-cta-row fc-cta-row-primary">' +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcEmptyBrowse">Browse vocabulary</button>' +
       '<button type="button" class="fc-btn" id="fcEmptyManage">Choose tables in Manage</button>' +
-      "</div></div>";
+      "</div></div>" +
+      // Puzzles work without flashcards (Tables as the source), so their
+      // games still get their card.
+      (window.RaumeStudy.flashcards.puzzleRuns && window.RaumeStudy.flashcards.puzzleRuns.all().length
+        ? '<div class="fc-viz-grid fc-dash-empty-puzzles">' + puzzlesCardHtml(new Date()) + "</div>" : "");
     var browse = document.getElementById("fcEmptyBrowse");
     if (browse) browse.addEventListener("click", function () {
       var v = window.RaumeStudy.vocab;
@@ -150,10 +154,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       statTile(streak, "Day streak", "streak") +
       statTile(stats.total, "Total cards") +
       statTile(stats.reviewsCompleted, "Reviews completed") +
-      statTile(retentionText, "Estimated retention", retentionLow ? "attention" : null, retentionPending) +
+      statTile(retentionText, "Estimated retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null) +
       "</div>" +
       (settings.longest_streak > streak ? '<p class="fc-note fc-longest-streak">Longest streak: ' + settings.longest_streak + " day" + (settings.longest_streak === 1 ? "" : "s") + ".</p>" : "") +
-      (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note">"Estimated retention" is FSRS’s forecasted recall probability across your reviewed cards — not a directly measured pass rate.</p>') +
+      (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note" id="fcRetentionNote" hidden>FSRS’s forecast of how likely you are to recall your reviewed cards — not a measured pass rate.</p>') +
       "</div>" +
       '<div class="fc-dash-progress">' +
       '<div class="fc-viz-grid">' +
@@ -170,6 +174,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (foldReview ? "" : '<div id="fcWordsToReview"></div>');
     var btn = document.getElementById("fcStudyNow");
     if (btn) btn.addEventListener("click", startSession);
+    var info = panel.querySelector(".fc-stat-info"), note = document.getElementById("fcRetentionNote");
+    if (info && note) info.addEventListener("click", function () {
+      var open = info.getAttribute("aria-expanded") !== "true";
+      info.setAttribute("aria-expanded", String(open));
+      note.hidden = !open;
+    });
     renderWordsToReview();
     lastReadyCount = ready.length;
     startDashboardPoll();
@@ -186,12 +196,16 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Pairs matched": '<path d="M3 6h6M3 12h6M9 6l6 6M9 12l6-6"/>',
     "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
-  function statTile(value, label, variant, pending) {
+  var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
+  // `info`: an ⓘ after the label that shows the tile's explainer
+  // (#fcRetentionNote) -- hidden until asked for, never a standing footnote.
+  function statTile(value, label, variant, pending, info) {
     var cls = (variant ? " fc-stat-" + variant : "") + (pending ? " fc-stat-tile-pending" : "");
     var glyph = STAT_GLYPH_PATHS[label]
       ? '<svg class="fc-stat-glyph" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
       : "";
-    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + esc(label) + "</span></div>";
+    var infoBtn = info ? '<button type="button" class="fc-stat-info" aria-expanded="false" aria-controls="fcRetentionNote" aria-label="What is ' + esc(label) + '?">' + INFO_GLYPH + "</button>" : "";
+    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + esc(label) + infoBtn + "</span></div>";
   }
 
   // --- Dashboard: Today's progress, Next review, Missed today, Words to Review ---

@@ -3510,6 +3510,13 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    into a narrow block. (Genuine explanatory prose still gets a reading-width
    cap; a short note like this does not.) */
 .fc-retention-note { margin: 2px 0 16px; max-width: none; }
+.fc-retention-note[hidden] { display: none; }
+.fc-stat-info {
+  appearance: none; border: 0; background: none; padding: 0 2px; margin: -6px 0 -6px 2px; min-height: 28px;
+  display: inline-flex; align-items: center; color: var(--faint); cursor: pointer;
+}
+.fc-stat-info[aria-expanded="true"] { color: var(--section-strong, var(--accent-dark)); }
+.fc-dash-empty-puzzles { margin-top: 8px; }
 /* Buttons (iOS 26): the secondary button is a white capsule with accent
    text, a 0.5px hairline and a soft lift (--control-lift) -- the same crisp
    control as the search field, not a greyish tinted fill. .fc-btn-primary is

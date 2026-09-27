@@ -324,11 +324,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // customisations all fold into the same pending count (see
   // data-ops.js getSyncState()). When a sync has stopped draining on its
   // own, it turns amber and grows a "Sync now" button. Signed in with
-  // nothing queued, it settles on a quiet "Synced" state instead of
-  // disappearing -- there was previously no way to positively confirm the
-  // account *is* up to date, only signals that something was wrong. Guest
-  // mode has nothing to sync to, so it stays hidden there once the offline
-  // case doesn't apply.
+  // nothing queued it hides: the masthead account button's green dot (and
+  // its menu's "Synced" line) is the positive confirmation. Guest mode has
+  // nothing to sync to, so it stays hidden there once the offline case
+  // doesn't apply.
   function changeCount(n) { return n + (n === 1 ? " change" : " changes"); }
 
   // Describes one queued item in plain words for the detail list below the
@@ -382,10 +381,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
         cls = " fc-sync-chip-syncing";
         showBtn = true;
       }
-    } else if (!isGuestMode()) {
-      text = "Synced";
-      cls = " fc-sync-chip-synced";
     }
+    // All synced says nothing: the account button's green dot already
+    // does, and a standing "Synced" chip is a row spent on no news.
     chip.className = "fc-sync-chip" + cls;
     chip.hidden = !text;
     var span = chip.querySelector(".fc-sync-chip-text");
