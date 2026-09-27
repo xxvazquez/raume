@@ -1741,10 +1741,21 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .help-support::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
 .help-support:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
 .page-help .help-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
-/* The licence line: the smallest, quietest text on the page, its links
-   underlined rather than tinted. */
-.page-help .help-legal { margin-top: 18px; color: var(--faint); font-size: var(--fs-micro); }
-.page-help .help-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* Licences, like iOS Settings › Legal: a list header, a card of 44px rows
+   (what it covers left, the licence right, ↗ out) and a footnote. */
+.help-legal-head { margin: 26px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.help-legal { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+.help-legal-row {
+  position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 40px 0 16px;
+  color: var(--ink); font-size: 15px; text-decoration: none;
+}
+.help-legal-row + .help-legal-row {
+  background: linear-gradient(var(--row-line), var(--row-line)) no-repeat 16px 0 / calc(100% - 16px) 1px;
+}
+.help-legal-row::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
+.help-legal-row:hover { background-color: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.help-legal-val { margin-left: auto; color: var(--muted); text-align: right; }
+.page-help .help-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .help-group summary {
   position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none;
   padding: 10px 40px 10px 16px;

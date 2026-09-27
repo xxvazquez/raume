@@ -403,7 +403,7 @@ explanations (Help, ⓘ notes, these docs) — is under
 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md). Either way you may use, study, share and
 adapt it for any noncommercial purpose; shared content needs credit and the same
 licence. The `raume` name, wordmark and logo are reserved — see
-[`NOTICE`](NOTICE). The Help page says so in one line.
+[`NOTICE`](NOTICE). The Help page ends with a short Licences list.
 
 Third-party parts keep their own licenses:
 
