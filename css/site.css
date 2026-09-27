@@ -4065,6 +4065,9 @@ mark.fc-diff-co {
 /* One line, always: the status truncates before it ever wraps, and the
    action (Sign in / Sign out) keeps its place at the end. */
 .fc-signed-in-as { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--muted); font-size: var(--fs-small); }
+/* On a phone the account button's menu already says who you are, whether
+   it's synced, and has Sign in / Sign out -- this line would repeat it. */
+@media (max-width: 640px) { .fc-signed-in-as { display: none; } }
 .fc-signed-in-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fc-signed-in-as button { flex: 0 0 auto; appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; white-space: nowrap; }
 /* Offline / pending-sync status. The only signal that reviews aren't on the
@@ -4776,6 +4779,8 @@ mark.fc-diff-co {
   color: var(--ink); font: 400 var(--fs-body)/1.2 var(--font-ui); text-align: left; text-decoration: none;
 }
 .account-menu-item span { color: var(--faint); }
+.account-menu-item[hidden], .account-menu-sep[hidden] { display: none; }
+.account-menu-signout { color: var(--wrong-strong); }
 .account-menu-item:hover, .account-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
 .account-menu-sep { height: 1px; margin: 4px 8px; background: var(--row-line); }
 .account-menu-label { padding: 6px 12px 4px; color: var(--muted); font-size: var(--fs-small); }

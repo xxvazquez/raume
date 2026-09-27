@@ -373,7 +373,10 @@ and Help.
   menu of words: who you are + sync state, Account (reads "Sign in" for a guest
   and opens the sign-in screen, as the desktop glyph does) / Customize tables / Help,
   and Appearance as a System / Light / Dark segmented control that applies at
-  once. The button scrolls away with the title, as on iOS. **The rule app-wide: no
+  once, then — signed in — a separated **Sign out** row in the coral
+  `--wrong-strong`, iOS's destructive position at the bottom. Because the menu
+  says all of that, Practice's "Signed in as… Sign out" line is hidden on a
+  phone. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Manage's buttons keep a one-word label
   (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are

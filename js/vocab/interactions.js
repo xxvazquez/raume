@@ -1242,6 +1242,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (go.dataset.menuGo === 'account') openAccount();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
         else if (go.dataset.menuGo === 'help') { const h = document.getElementById('helpToggle'); if (h) h.click(); }
+        else if (go.dataset.menuGo === 'signout') { const fc = window.RaumeStudy.flashcards; if (fc && fc.signOut) fc.signOut(); }
       });
       document.addEventListener('click', function (e) {
         if (accountMenu.hidden || accountMenu.contains(e.target) || (accountToggle && accountToggle.contains(e.target))) return;

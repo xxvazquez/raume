@@ -1104,7 +1104,8 @@ async function main() {
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
   check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+    && acctMenu.querySelector('[data-menu-go="signout"]').hidden
     && acctMenu.querySelector('a[href="https://ko-fi.com/raume"]').rel === "noopener"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
   window.RaumeStudy.vocab.toggleAccountMenu();

@@ -163,6 +163,7 @@ title and one round **account button** beside it, which opens a menu —
 - **Account** (**Sign in** for a guest — straight to the sign-in screen)
 - **Customize tables** · **Help** · **Support raume** (Ko-fi, new tab)
 - **Appearance** (System / Light / Dark)
+- **Sign out** (signed in only — on a phone it lives here, not on the Practice screen)
 
 On a tablet the masthead icons carry captions (Account, Help, Customize, the
 current theme). The search bar's buttons read **Tables** and **Options**, and

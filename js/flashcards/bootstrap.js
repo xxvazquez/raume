@@ -455,6 +455,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (isGuestMode()) { setStoredMode(null); invalidateInsights(); refreshRowToggleButtons(); }
     render();
   };
+  S.signOut = function () { signOut(); };
   S.setActiveTab = function (t) { activeTab = t; };
   S.getActiveTab = function () { return activeTab; };
 
@@ -511,6 +512,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // The phone's account menu header says the same, in two lines.
     var name = document.getElementById("accountMenuName"), status = document.getElementById("accountMenuStatus");
     if (name) name.textContent = signedIn ? currentUser().email : "Guest";
+    // Sign out lives here on a phone (Flashcards' "Signed in as" line is
+    // hidden there -- this menu already says who and whether it's synced).
+    document.querySelectorAll("#accountMenu [data-signed-in-only]").forEach(function (el) { el.hidden = !signedIn; });
     var go = document.querySelector('#accountMenu [data-menu-go="account"]');
     if (go && go.firstChild) go.firstChild.textContent = signedIn ? "Account" : "Sign in";
     if (status) status.textContent = !signedIn ? "This device only · not backed up"
