@@ -2077,8 +2077,8 @@ async function main() {
     if (back) back.click();
     document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="' + t + '"]').click();
   };
-  check("the Flashcards sub-tabs are four segments -- Settings and Help moved to the title bar",
-    [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Manage|Kana|Puzzles"
+  check("the Flashcards sub-tabs are five segments -- Settings and Help moved to the title bar",
+    [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Manage|Kana|Puzzles|Games"
     && [...document.querySelectorAll("#flashcardsPage .fc-titlebar-btn")].map(b => b.textContent).join("|") === "Settings|Help");
   document.querySelector('.fc-tab[data-tab="manage"]').click();
   fcOpenPushed("settings");
@@ -2678,7 +2678,7 @@ async function main() {
   console.log("Flashcards: Crosswords (Puzzles) tab");
   const xw = window.RaumeStudy.flashcards.crosswords.__testHooks;
   const xwPick = (name, value) => {
-    const sel = document.querySelector('#fcPanelCrosswords [data-pick="' + name + '"]');
+    const sel = document.querySelector('#flashcardsPage .fc-tabpanel:not([hidden]) [data-pick="' + name + '"]');
     sel.value = value;
     sel.dispatchEvent(new window.Event("change", { bubbles: true }));
   };
@@ -2797,7 +2797,7 @@ async function main() {
     const chips = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-picks .fc-xw-chip")];
     const names = chips.map(c => c.querySelector("select").getAttribute("aria-label"));
     const src = document.querySelector('#fcPanelCrosswords [data-pick="source"]');
-    return names.join("|") === "Style|Words from|Words|Script"
+    return names.join("|") === "Puzzle|Words from|Words|Script"
       && /^(Crossword|Arroword)$/.test(chips[0].querySelector(".fc-xw-chip-text").textContent)
       && /\d+ words/.test(chips[2].textContent) && chips[1].querySelector(".fc-xw-chip-text").textContent === "Flashcards"
       && src.options[0].value === "flashcards" && src.querySelectorAll("optgroup option[value^='t:']").length === window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-kanji").length
@@ -3047,17 +3047,23 @@ async function main() {
       && forty.reduce((a, b) => a + b, 0) === 40 && forty.every(n => n <= 6 && n >= 5);
   })());
   try { window.localStorage.removeItem(xw.MATCH_BEST_KEY); } catch (e) { /* ignore */ }
-  xwPick("mode", "match");
-  const mtTile = (side, i) => document.querySelector('#fcPanelCrosswords .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
+  check("Puzzles offers only the grid styles; Match and Listening live in their own Games tab", (() => {
+    const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
+    const puzzles = opts("#fcPanelCrosswords");
+    document.querySelector('.fc-tab[data-tab="games"]').click();
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening"
+      && xw.state === xw.states.games && xw.state.mode === "match";
+  })());
+  const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
   const mtClock = () => document.getElementById("fcMtClock").textContent;
   check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / Restart in the ⋯ menu", (() => {
     const p = xw.state.puzzle;
     const clues = p.placements.map(w => w.clue.toLowerCase());
-    return document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile").length === p.rounds[0].length * 2
+    return document.querySelectorAll("#fcPanelGames .fc-mt-tile").length === p.rounds[0].length * 2
       && !document.getElementById("fcXwCheck") && !document.getElementById("fcXwHint") && mtClock() === "0:00.0"
-      && [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
       && new Set(clues).size === clues.length
-      && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
   check("a wrong pair adds a second and clears nothing", (() => {
     mtTile("l", 0).click(); mtTile("r", 1).click();
@@ -3074,20 +3080,20 @@ async function main() {
     // Wait for the next round to deal (or the finish card), not a fixed
     // time -- under CPU load the 350ms round change can run late.
     for (let waited = 0; waited < 5000; waited += 25) {
-      if (document.querySelector("#fcPanelCrosswords .fc-mt-done") || !mtTile("l", 0).disabled) break;
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || !mtTile("l", 0).disabled) break;
       await new Promise(r => setTimeout(r, 25));
     }
   }
   check("clearing every round ends on the time, New best and the miss count, and keeps the best time", (() => {
-    const done = document.querySelector("#fcPanelCrosswords .fc-mt-done");
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
     let saved = {};
     try { saved = JSON.parse(window.localStorage.getItem(xw.MATCH_BEST_KEY)) || {}; } catch (e) { /* ignore */ }
     // file:// jsdom may refuse localStorage (storageUsable) -- then only the card is checked.
     return !!done && /New best · 1 miss/.test(done.textContent) && (!storageUsable || Object.keys(saved).length === 1);
   })());
   document.getElementById("fcXwReset").click();
-  check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelCrosswords .fc-mt-done")
-    && document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile:not([disabled])").length === xw.state.puzzle.rounds[0].length * 2);
+  check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelGames .fc-mt-done")
+    && document.querySelectorAll("#fcPanelGames .fc-mt-tile:not([disabled])").length === xw.state.puzzle.rounds[0].length * 2);
   await (async () => {
     const rounds = xw.state.puzzle.rounds;
     const split = document.getElementById("fcMtSplit");
@@ -3105,8 +3111,10 @@ async function main() {
   check("Japanese in Match is the word as written -- kanji and all, not its reading", (() => {
     const ps = xw.state.puzzle.placements;
     return ps.length >= 6 && ps.every(w => w.answer === writtenOf(w.id))
-      && document.querySelector('#fcPanelCrosswords .fc-mt-tile[data-side="l"]').getAttribute("lang") === "ja";
+      && document.querySelector('#fcPanelGames .fc-mt-tile[data-side="l"]').getAttribute("lang") === "ja";
   })());
+  document.querySelector('.fc-tab[data-tab="crosswords"]').click();
+  xwPick("script", "native");
   xwPick("mode", "wordsearch");
   check("...and in a word search, leaving out one-kanji words, with a found word's reading shown beside its kanji", (() => {
     const ps = xw.state.puzzle.placements;
@@ -3136,24 +3144,25 @@ async function main() {
     });
   })());
   document.body.classList.remove("ja-voice-ready");
+  document.querySelector('.fc-tab[data-tab="games"]').click();
   xwPick("mode", "listening");
-  check("with no Japanese voice or recorded audio, Listening says so instead of a silent game", /no Japanese voice/.test(document.querySelector("#fcPanelCrosswords .fc-ls").textContent)
-    && !document.querySelector("#fcPanelCrosswords .fc-ls-choice"));
+  check("with no Japanese voice or recorded audio, Listening says so instead of a silent game", /no Japanese voice/.test(document.querySelector("#fcPanelGames .fc-ls").textContent)
+    && !document.querySelector("#fcPanelGames .fc-ls-choice"));
   document.body.classList.add("ja-voice-ready");
   document.getElementById("fcLsRetry").click();
   const lsQ = () => xw.state.puzzle.questions;
-  const lsChoices = () => [...document.querySelectorAll("#fcPanelCrosswords .fc-ls-choice")];
+  const lsChoices = () => [...document.querySelectorAll("#fcPanelGames .fc-ls-choice")];
   const lsCount = () => document.getElementById("fcLsCount").textContent;
   check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / Restart in the ⋯ menu", (() => {
-    return !!document.querySelector("#fcPanelCrosswords .fc-ls-play") && lsChoices().length === 4
-      && !document.querySelector('#fcPanelCrosswords [data-pick="script"]') && lsCount() === "1 / " + lsQ().length
-      && !/Romaji/.test(document.querySelector("#fcPanelCrosswords .fc-xw-picks").textContent)
-      && [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
-      && document.querySelector("#fcPanelCrosswords .fc-ls-word").hidden
-      && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
+    return !!document.querySelector("#fcPanelGames .fc-ls-play") && lsChoices().length === 4
+      && !document.querySelector('#fcPanelGames [data-pick="script"]') && lsCount() === "1 / " + lsQ().length
+      && !/Romaji/.test(document.querySelector("#fcPanelGames .fc-xw-picks").textContent)
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && document.querySelector("#fcPanelGames .fc-ls-word").hidden
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
   check("▶ says the word -- the exact reading the speaker buttons play", (() => {
-    document.querySelector("#fcPanelCrosswords .fc-ls-play").click();
+    document.querySelector("#fcPanelGames .fc-ls-play").click();
     return spoken[spoken.length - 1] === lsQ()[0].word.speak && !!lsQ()[0].word.speak;
   })());
   check("a wrong pick: ✕ on it, ✓ on the right one, the word shown as written, and it waits for Next", (() => {
@@ -3161,23 +3170,23 @@ async function main() {
     const wrong = lsChoices()[q.choices.findIndex(c => c !== q.word)];
     wrong.click();
     const right = lsChoices()[q.choices.indexOf(q.word)];
-    const word = document.querySelector("#fcPanelCrosswords .fc-ls-word");
+    const word = document.querySelector("#fcPanelGames .fc-ls-word");
     return wrong.classList.contains("fc-ls-chosen-wrong") && right.classList.contains("fc-mt-right") && lsChoices().every(b => b.disabled)
       && !word.hidden && word.textContent.includes(String(xwIndex[q.word.id].jpPlain || q.word.answer).replace(/^〜/, ""))
-      && !document.querySelector("#fcPanelCrosswords .fc-ls-next").hidden;
+      && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
   })());
-  document.querySelector("#fcPanelCrosswords .fc-ls-next").click();
+  document.querySelector("#fcPanelGames .fc-ls-next").click();
   check("Next moves on and says the next word", lsCount() === "2 / " + lsQ().length && spoken[spoken.length - 1] === lsQ()[1].word.speak);
   for (let i = 1; i < lsQ().length; i++) {
     const q = lsQ()[i];
     lsChoices()[q.choices.indexOf(q.word)].click();
     for (let waited = 0; waited < 5000; waited += 25) {
-      if (document.querySelector("#fcPanelCrosswords .fc-mt-done") || lsCount().startsWith((i + 2) + " /")) break;
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || lsCount().startsWith((i + 2) + " /")) break;
       await new Promise(r => setTimeout(r, 25));
     }
   }
   check("a right pick moves on by itself; the end card scores it and lists the missed word with a speaker to hear it again", (() => {
-    const done = document.querySelector("#fcPanelCrosswords .fc-mt-done");
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const missed = done ? [...done.querySelectorAll(".fc-ls-missed li")] : [];
     if (!done || missed.length !== 1) return false;
     const n = lsQ().length;
@@ -3186,9 +3195,9 @@ async function main() {
       && missed[0].textContent.includes(lsQ()[0].word.clue) && spoken[spoken.length - 1] === lsQ()[0].word.speak;
   })());
   document.getElementById("fcXwReset").click();
-  check("Restart asks the same questions again from the first", lsCount() === "1 / " + lsQ().length && lsChoices().length === 4 && !document.querySelector("#fcPanelCrosswords .fc-mt-done"));
+  check("Restart asks the same questions again from the first", lsCount() === "1 / " + lsQ().length && lsChoices().length === 4 && !document.querySelector("#fcPanelGames .fc-mt-done"));
   speech.speak = realSpeak;
-  xwPick("mode", "crossword");
+  document.querySelector('.fc-tab[data-tab="crosswords"]').click();
 
   xwPick("source", "flashcards");
   check("switching back to Flashcards empties the table pick", xw.state.tables.length === 0

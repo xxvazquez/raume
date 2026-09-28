@@ -127,12 +127,16 @@ window.RaumeStudy.flashcards.views = (function () {
       '<h3 class="help-head">Puzzles</h3>' +
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Source</span><span class="help-desc">Your flashcards or any table; Several tables… mixes them. At least 6 words; no clues that give the answer away.</span></li>' +
-      '<li><span class="help-term">Style · Script · Words</span><span class="help-desc">The buttons above the puzzle: crossword, arroword, word search, Match or Listening; how many words; romaji, Japanese (with kanji — Match and word search), hiragana or katakana words only.</span></li>' +
+      '<li><span class="help-term">Puzzle · Words · Script</span><span class="help-desc">The buttons above the puzzle: crossword, arroword or word search; how many words; romaji, Japanese (with kanji — word search), hiragana or katakana words only.</span></li>' +
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type. Tap a crossing square again to switch direction.</span></li>' +
-      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad beside the clues for readings or guesses. Blank again with each new puzzle.</span></li>' +
-      '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals the puzzle, clears or saves a PDF.</span></li>' +
       '<li><span class="help-term">Hint</span><span class="help-desc">Fills one square — or, in a word search, shows one word.</span></li>' +
+      '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals the puzzle, clears or saves a PDF.</span></li>' +
+      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad beside the clues for readings or guesses. Blank again with each new puzzle.</span></li>' +
       '<li><span class="help-term">Word search</span><span class="help-desc">Find the Japanese for each clue: drag across it, or tap its first and last letter. Any direction, backwards too.</span></li>' +
+      '</ul>' +
+      '<h3 class="help-head">Games</h3>' +
+      '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Game · Words · Script</span><span class="help-desc">Match or Listening, from your flashcards or tables, the same buttons as Puzzles.</span></li>' +
       '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second; your best time is kept.</span></li>' +
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
       '</ul>' +

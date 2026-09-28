@@ -665,13 +665,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<button type="button" class="fc-btn' + (k.toStudy ? " fc-btn-primary" : "") + '" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
       progressBarHtml(k.started, k.total, k.started + " of " + k.total + " kana cards started") + "</div>";
   }
-  // The Puzzles / Kana / Kanji cards' buttons: to the Puzzles or Kana tab,
-  // or the Kanji section.
+  // The Puzzles / Games / Kana / Kanji cards' buttons: to that tab, or the
+  // Kanji section.
   function bindDashGo(panel) {
     panel.querySelectorAll("[data-dash-go]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        if (btn.dataset.dashGo === "puzzles" || btn.dataset.dashGo === "kana") {
-          window.RaumeStudy.flashcards.setActiveTab(btn.dataset.dashGo === "kana" ? "kana" : "crosswords");
+        var tab = { puzzles: "crosswords", games: "games", kana: "kana" }[btn.dataset.dashGo];
+        if (tab) {
+          window.RaumeStudy.flashcards.setActiveTab(tab);
           rerender();
           return;
         }

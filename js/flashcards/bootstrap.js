@@ -52,7 +52,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // Settings and Help are screens you visit, not places you switch between
   // -- they open like a pushed iOS screen (a Back button, their own title)
   // instead of being two more segments. Back returns to whichever of the
-  // four segments you came from.
+  // five segments you came from.
   var PUSHED_TABS = { settings: "Settings", help: "Help" };
   var lastMainTab = "dashboard";
 
@@ -256,14 +256,14 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       : '<div class="fc-signed-in-as"><span class="fc-signed-in-text">Signed in as ' + esc(currentUser().email) + '</span> <button type="button" id="fcSignOut">Sign out</button></div>';
     var pushed = PUSHED_TABS[activeTab];
     if (!pushed) lastMainTab = activeTab;
-    // Four segments -- iOS's segmented control stops reading at a glance
-    // past about five, and six were squeezed into a phone's width.
+    // Five segments -- the most an iOS segmented control holds and still
+    // reads at a glance; nothing more joins without restructuring.
     // The tabs live in the title bar: on a phone they wrap to their own
     // full-width row under the large title; on a wider window the title is
     // visually hidden (the top bar already names the page, as on the
     // reference pages) and tabs + Settings / Help share one row.
     var tabsHtml = '<div class="fc-tabs" role="tablist">' +
-      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"]].map(function (t) {
+      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["games", "Games"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
       }).join("") +
       "</div>";
@@ -285,6 +285,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-tabpanel"' + (activeTab === "manage" ? "" : " hidden") + ' id="fcPanelManage"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "kana" ? "" : " hidden") + ' id="fcPanelKana"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "crosswords" ? "" : " hidden") + ' id="fcPanelCrosswords"></div>' +
+      '<div class="fc-tabpanel"' + (activeTab === "games" ? "" : " hidden") + ' id="fcPanelGames"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "settings" ? "" : " hidden") + ' id="fcPanelSettings"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "help" ? "" : " hidden") + ' id="fcPanelHelp"></div>';
 
@@ -311,6 +312,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     else if (activeTab === "manage") renderManage(document.getElementById("fcPanelManage"));
     else if (activeTab === "kana") kana.renderKana(document.getElementById("fcPanelKana"));
     else if (activeTab === "crosswords") crosswords.renderCrosswords(document.getElementById("fcPanelCrosswords"));
+    else if (activeTab === "games") crosswords.renderGames(document.getElementById("fcPanelGames"));
     else if (activeTab === "help") renderHelp(document.getElementById("fcPanelHelp"));
     else renderSettings(document.getElementById("fcPanelSettings"));
 

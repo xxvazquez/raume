@@ -1,4 +1,6 @@
-// Flashcards -- the Crosswords tab (RaumeStudy.flashcards.crosswords).
+// Flashcards -- the Puzzles and Games tabs (RaumeStudy.flashcards.crosswords):
+// Puzzles holds the crossword, arroword and word search, Games holds Match
+// and Listening; one module draws both, each tab with its own settings.
 //
 // A printable crossword / arroword generator, built from either of two word
 // sources: whatever's currently in flashcards (every added word, minus
@@ -1019,7 +1021,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
+  // Puzzles (grids to solve) and Games (timed / scored rounds) are two
+  // tabs drawn by this one module, each keeping its own settings and its
+  // current puzzle or game; `state` is whichever tab is showing.
+  function freshState(kind) {
+    return { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
+      script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
+  }
+  var states = { puzzles: freshState("puzzles"), games: freshState("games") };
+  var state = states.puzzles;
+  var currentPanel = null;
 
   function rerender() { S.render(); }
 
@@ -1124,6 +1135,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"]];
+  var PUZZLE_MODES = ["crossword", "arroword", "wordsearch"];
+  function modeOpts() {
+    return MODE_OPTS.filter(function (o) { return (PUZZLE_MODES.indexOf(o[0]) !== -1) === (state.kind === "puzzles"); });
+  }
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   // A grid stops fitting (and building fast) past 40 words; Match and
   // Listening are just longer games, so they go up to the whole pool.
@@ -1478,7 +1493,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Listening -- you hear the word). Changing one makes a new puzzle.
   function picksHtml() {
     return '<div class="fc-xw-picks">' +
-      pickChip("mode", "Style", MODE_OPTS, state.mode) +
+      pickChip("mode", state.kind === "games" ? "Game" : "Puzzle", modeOpts(), state.mode) +
       sourceChipHtml() +
       chipHtml("size", "Words", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
       (state.mode !== "listening" ? pickChip("script", "Script", scriptOpts(), state.script) : "") +
@@ -1563,10 +1578,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.addEventListener("click", function (e) {
       // A control inside the sheet can re-render the panel before this runs,
       // detaching the clicked node -- that was a click inside, not outside.
-      var tip = document.querySelector("#fcPanelCrosswords .fc-xw-tip");
+      var tip = currentPanel && currentPanel.querySelector(".fc-xw-tip");
       if (tip && !tip.contains(e.target)) setTipOpen(false);
       if (!state.tablesOpen || !e.target.isConnected) return;
-      var panel = document.getElementById("fcPanelCrosswords");
+      var panel = currentPanel;
       var box = panel && panel.querySelector(".fc-xw-source");
       if (!box || (box.contains(e.target) && !e.target.classList.contains("fc-xw-scrim"))) return;
       setTablesOpen(panel, false);
@@ -1574,7 +1589,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") setTipOpen(false);
       if (e.key !== "Escape" || !state.tablesOpen) return;
-      var panel = document.getElementById("fcPanelCrosswords");
+      var panel = currentPanel;
       if (panel) setTablesOpen(panel, false);
     });
   }
@@ -1620,8 +1635,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
-  function renderCrosswords(panel) {
+  function renderCrosswords(panel) { renderTab(panel, "puzzles"); }
+  function renderGames(panel) { renderTab(panel, "games"); }
+  function renderTab(panel, kind) {
     if (!panel) return;
+    state = states[kind];
+    currentPanel = panel;
     stopMatchTimer();
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
@@ -1779,11 +1798,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   return {
     renderCrosswords: renderCrosswords,
+    renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
       buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
-      foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS, state: state
+      foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
+      // the tab showing (or last shown): Puzzles' or Games' settings
+      get state() { return state; }, states: states
     }
   };
 })();

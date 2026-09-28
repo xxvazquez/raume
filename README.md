@@ -13,7 +13,8 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Reference**   | Vocabulary, Grammar, Kanji and Travel tables — furigana, search, audio, print |
 | **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
-| **Puzzles**     | Crosswords, arrowords, word searches, a timed Match game and Listening from your words |
+| **Puzzles**     | Crosswords, arrowords and word searches from your words |
+| **Games**       | A timed Match game and Listening from your words |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -27,7 +28,7 @@ cooking or studying, and for printing clean A4 study sheets.
     [Print, theme and navigation](#print-theme-and-navigation)
 - [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
-    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles)
+    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles) · [Games](#games)
 - [Accounts and storage](#accounts-and-storage)
 - [Development](#development)
 - [License](#license)
@@ -53,7 +54,7 @@ python3 -m http.server     # only needed to test the service worker / offline
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
 | **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
 | **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
-| **Practice**   | Flashcards, the Kana drill and Puzzles — see [Practice](#practice) |
+| **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
 On a phone the nav is a tab bar at the bottom; on a wider screen it's the top
 row. Grammatical **particles are blue and bold** everywhere.
@@ -176,7 +177,7 @@ Manage's buttons keep a one-word label — nothing relies on hover.
 
 ## Practice
 
-The Practice tab holds your flashcards, the Kana drill and Puzzles.
+The Practice tab holds your flashcards, the Kana drill, Puzzles and Games.
 Flashcards sit on top of the vocabulary without copying it — each card
 references a row's permanent id (`v0001`…). Add a whole table with **Add to
 flashcards**, or single words from **Manage** or a search result.
@@ -244,7 +245,7 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 
 ### Screens
 
-Four segments — Dashboard, Manage, Kana, Puzzles. **Settings** and **Help**
+Five segments — Dashboard, Manage, Kana, Puzzles, Games. **Settings** and **Help**
 sit at the top right, beside the title, and open as their own screen with a
 **‹ Practice** back button.
 
@@ -253,7 +254,8 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Kana** (how many of your chosen kana cards you've started, how many to study now, and a button straight to it), **Puzzles** (every finished Match and Listening game and every crossword, arroword and word search you solve — one revealed in full doesn't count: games played, puzzles solved, Listening accuracy, best Match pace per pair, games per day this week and the last four games; synced to your account when signed in), **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
-| **Puzzles** | Crossword / arroword / word search / Match / Listening from your words ([below](#puzzles)) |
+| **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
+| **Games** | Match / Listening from your words ([below](#games)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file — cards, kana, table customisations, your own words, Known kanji and puzzle games) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -277,9 +279,8 @@ settings.
 
 ### Puzzles
 
-A fill-in crossword or arroword, a word search, a timed Match game, or
-Listening, generated fresh each time — at least 6 words, or it tells you why not. Nothing
-is scheduled; the only thing kept is Match's best time.
+A fill-in crossword or arroword, or a word search, generated fresh each
+time — at least 6 words, or it tells you why not. Nothing is scheduled.
 Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
@@ -290,7 +291,6 @@ setting's menu, a second picks; changing one makes a new puzzle. Next to them:
 New puzzle, ⓘ (how to solve), **Hint** and **Check**; ⋯ holds the rarer
 Reveal puzzle, Clear and Save as PDF. On a phone the pull-downs are one row
 you can swipe sideways. On a wide
-window the clue you're onOn a wide
 window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
@@ -301,7 +301,7 @@ scrolls sideways.
 | Setting | Choices |
 | --- | --- |
 | **Source** | *Flashcards* (added, unpaused words) or any vocabulary table, whether or not it's in flashcards; *Several tables…* opens a checklist to mix tables into one puzzle |
-| **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search*, *Match* or *Listening* |
+| **Puzzle** / **Game** | Puzzles: *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer) or *Word search*. Games: *Match* or *Listening* |
 | **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
 | **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The button shows the real count when the pool holds fewer |
 
@@ -346,6 +346,14 @@ scrolls sideways.
   revealed) — unless every word was revealed.
 
 </details>
+
+### Games
+
+Timed and scored rounds: **Match** and **Listening**. Same toolbar as
+Puzzles — the pull-downs for game, words and script (none for Listening),
+then **New game** and ⋯ (*Restart*). Each tab keeps its own settings and its
+game in progress while you switch between them. Practice only — nothing is
+scheduled; every finished game goes to the Dashboard.
 
 <details>
 <summary><b>Match</b></summary>
