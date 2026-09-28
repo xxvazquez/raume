@@ -864,7 +864,10 @@ in line on white paper: the table's name at 15px with its glyph in grey,
 then one rounded (10px) mid-grey hairline frame, lighter hairlines between
 rows and between the two columns (writing lines on a Cover-answers sheet),
 small grey column labels, no card fill, and a 24px gap before the next
-table.
+table. Rows keep the screen's shared first line (the word and the English
+on one line, furigana or not) with a little more room above for the
+reading; the frame is drawn on the edge cells, so a table split across
+sheets closes at the foot of one and reopens under the repeated header.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

@@ -2971,29 +2971,35 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      as writing lines on a Cover-answers sheet), the column labels in the
      quiet list-header voice. Lighter inside than out, so the frame reads
      as the edge and the grid recedes. */
+  /* The frame is drawn on the edge cells, not the table box, so a table
+     split across sheets closes at the foot of the first (its last row's
+     rule) and reopens under the repeated header on the next -- a box
+     border would run open down the blank space a moved row leaves. */
   #vocabulary .table-section:not(.collapsed) .vocab,
-  .vocab {
-    margin: 0 !important; width: 100% !important;
-    border: .75pt solid #bdbdbd !important; border-radius: 10px !important; overflow: hidden;
-  }
+  .vocab { margin: 0 !important; width: 100% !important; border: 0 !important; border-radius: 0 !important; overflow: visible; }
   .vocab th, .vocab td { border: 0 !important; border-bottom: .5pt solid #dcdcdc !important; }
-  .vocab tbody tr:last-child td { border-bottom: 0 !important; }
   .vocab :is(th, td):not(:first-child) { border-left: .5pt solid #dcdcdc !important; }
+  .vocab th { border-top: .75pt solid #bdbdbd !important; }
+  .vocab :is(th, td):first-child { border-left: .75pt solid #bdbdbd !important; }
+  .vocab :is(th, td):last-child { border-right: .75pt solid #bdbdbd !important; }
+  .vocab tbody tr:last-child td { border-bottom: .75pt solid #bdbdbd !important; }
+  .vocab th:first-child { border-top-left-radius: 10px; }
+  .vocab th:last-child { border-top-right-radius: 10px; }
+  .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 10px; }
+  .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 10px; }
   .vocab th { font-size: 11px; color: var(--faint); padding: 7px 14px 6px !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }
-  .vocab td { padding: 7px 14px !important; }
+  /* Word and verb rows keep the screen's shared first-line geometry
+     (--row-top / --l1, above), so the word and the English's first line
+     sit on one line in every row, furigana or not -- only the side
+     insets change, and the room above the line grows so a reading never
+     crowds the rule over it. Sentence tables stack, so they just pad. */
+  html .vocab:not(.vocab-sentences) { --row-top: 17px; --row-bottom: 8px; }
+  .vocab td { padding-left: 14px !important; padding-right: 14px !important; }
+  .vocab.vocab-sentences td { padding-top: 8px !important; padding-bottom: 8px !important; }
   #vocabulary .table-section:not(.collapsed) .vocab :is(th, td):first-child,
   .vocab :is(th, td):first-child { padding-left: 14px !important; }
-  /* The uniform padding above wipes out the screen rule's extra top room for
-     the Japanese cell's furigana, so the reading would crowd the rule above.
-     Give just that cell its breathing room back. */
-  .vocab td.jp { padding-top: 10px !important; }
-  /* The screen rule top-anchors English so an on-screen romaji reveal can't
-     shift it (see css/site.css's .vocab td:nth-child(2) comment) -- print has
-     no such interaction to protect against, so keep its original centred
-     look instead of adopting that anchor. */
-  .vocab td:nth-child(2) { vertical-align: middle !important; }
   /* Drop the row actions in print. */
   .sort-button, .row-hide-btn, .row-info-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   /* A white glyph on an unprinted tile would vanish. */
