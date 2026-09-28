@@ -287,7 +287,9 @@ clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 The puzzle comes first. Its settings sit behind one summary button — the
 style as its title, "Flashcards · 15 words · Romaji" under it — that opens them as a popover
 (a bottom sheet on a phone); changing one makes a new puzzle. On a wide
-window the clue you're on and the Across / Down lists sit beside the grid.
+window the clue you're on and the Across / Down lists sit beside the grid —
+or below it, when the grid is too wide to share the row. The page itself
+never scrolls sideways.
 
 | Setting | Choices |
 | --- | --- |

@@ -4797,13 +4797,16 @@ mark.fc-diff-co {
 .fc-xw-puzzle > .fc-xw-gridwrap { grid-area: grid; }
 .fc-xw-puzzle > .fc-xw-clues { grid-area: clues; max-width: none; }
 @media (min-width: 760px) {
-  .fc-xw-puzzle {
-    grid-template-columns: max-content minmax(260px, 1fr);
+  /* The grid's column never grows past what's left beside the clues
+     (minmax(0, …)), so the page itself never scrolls sideways; a grid too
+     wide for that gets .fc-xw-puzzle-stack from fitPuzzle() instead. */
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) {
+    grid-template-columns: minmax(0, max-content) minmax(260px, 1fr);
     grid-template-rows: auto 1fr;
     grid-template-areas: "grid current" "grid clues";
     gap: 14px 24px;
   }
-  .fc-xw-puzzle > .fc-xw-gridwrap .fc-xw-grid { margin: 0; }
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) > .fc-xw-gridwrap .fc-xw-grid { margin: 0; }
   /* The grid's column sizes to its cells' intrinsic width, which ignores
      their 40px flex basis -- give them the width outright (they still shrink
      if a very wide grid needs it). */

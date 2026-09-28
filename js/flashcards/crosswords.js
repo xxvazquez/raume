@@ -1030,6 +1030,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // share one to cross on, so the grid styles offer the kana scripts only.
   // null when the row has no clean written form to show.
   function isGridMode() { return state.mode === "crossword" || state.mode === "arroword"; }
+
+  // A wide window puts the clues beside the grid -- but only when the grid
+  // fits there at full cell size. Otherwise the puzzle stacks (clues below,
+  // grid across the whole width) rather than pushing the page sideways.
+  // Sizes match .fc-xw-cell / .fc-ws-cell and the 260px + 24px clue column.
+  var GRID_CELL = 40, WS_CELL = 34, SIDE_COLUMN = 284;
+  function fitPuzzle() {
+    var el = document.querySelector(".fc-xw-puzzle[data-natural]");
+    if (!el || !el.clientWidth) return;
+    el.classList.toggle("fc-xw-puzzle-stack", Number(el.dataset.natural) + SIDE_COLUMN > el.clientWidth);
+  }
+  window.addEventListener("resize", fitPuzzle);
   function scriptOpts() {
     return isGridMode() ? SCRIPT_OPTS.filter(function (o) { return o[0] !== "native"; }) : SCRIPT_OPTS;
   }
@@ -1670,7 +1682,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     panel.innerHTML =
       toolbarHtml() +
       (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
-      '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + '">' +
+      '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") +
+      '" data-natural="' + (wordsearch ? p.cols * WS_CELL + 16 : p.cols * GRID_CELL) + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch
@@ -1681,6 +1694,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           (arroword ? "" : clueListHtml(p))) +
       "</div>";
 
+    fitPuzzle();
     bindControls(panel);
     document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
     // A solved grid or word search goes to the Dashboard's log, once per
