@@ -3234,7 +3234,7 @@ async function main() {
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
       && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening"
       && panel.querySelector(".fc-st-modes .active").textContent === "Listening"
-      && /Accuracy/.test(panel.textContent) && /Reset Listening stats/.test(panel.textContent);
+      && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());
   document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
   check("Match stats: best pace, a trend line once there are two games, a personal best per setup that opens its history, and Tricky words with Practise these", (() => {
@@ -3243,7 +3243,8 @@ async function main() {
     if (!best) return false;
     best.click();
     const hist = document.querySelectorAll("#fcPanelStats .fc-st-history li").length;
-    return /Best pace/.test(panel.textContent) && !!panel.querySelector(".fc-st-chart polyline")
+    return /best per pair/.test(panel.querySelector(".fc-st-hero").textContent) && panel.querySelectorAll(".fc-st-fig").length === 3
+      && !!panel.querySelector(".fc-st-chart polyline") && !!panel.querySelector(".fc-st-best .fc-st-chev")
       && hist >= 1 && document.querySelector("#fcPanelStats .fc-st-best").getAttribute("aria-expanded") === "true"
       && panel.querySelectorAll(".fc-st-word").length >= 1
       && document.querySelectorAll("#fcPanelStats [style]").length === 0;

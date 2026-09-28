@@ -21,6 +21,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   };
   var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana" };
   var PRACTISE_WORDS = 20;
+  var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
   function runs() { return S.puzzleRuns; }
@@ -86,19 +87,24 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function group(head, body, cls) {
     return '<h3 class="help-head">' + esc(head) + '</h3><div class="help-card set-card' + (cls ? " " + cls : "") + '">' + body + "</div>";
   }
+  // The headline first, as Fitness and Game Center do: the style's own
+  // measure, games played and the day streak as three big figures; the
+  // rest as ordinary rows under them.
+  function heroHtml(st) {
+    var mode = st.mode;
+    var lead = mode === "listening" ? [pct(st.right / (st.words || 1)), "accuracy"]
+      : [st.best.toFixed(1) + "s", mode === "match" ? "best per pair" : "best per word"];
+    function cell(v, l) { return '<div class="fc-st-fig"><span class="fc-st-fig-val">' + esc(v) + '</span><span class="fc-st-fig-lbl">' + esc(l) + "</span></div>"; }
+    return '<div class="help-card fc-st-hero">' + cell(lead[0], lead[1]) +
+      cell(String(st.played), runs().isGameMode(mode) ? "played" : "solved") +
+      cell(String(st.streak.current), st.streak.current === 1 ? "day streak" : "days streak") + "</div>";
+  }
   function overviewHtml(st) {
-    var mode = st.mode, rows = row(runs().isGameMode(mode) ? "Played" : "Solved", String(st.played)) +
-      row("Time played", duration(st.totalMs)) +
-      row("Day streak", days(st.streak.current)) +
+    var mode = st.mode, rows = row("Time played", duration(st.totalMs)) +
       row("Longest streak", days(st.streak.longest));
-    if (mode === "match") {
-      rows += row("Best pace", measureText(mode, st.best)) + row("Pairs matched", String(st.words)) +
-        row("Misses per game", (st.misses / st.played).toFixed(1));
-    } else if (mode === "listening") {
-      rows += row("Accuracy", pct(st.right / (st.words || 1))) + row("Words heard", String(st.words));
-    } else {
-      rows += row("Best", measureText(mode, st.best)) + row("Words", String(st.words)) + row("Hints used", String(st.help));
-    }
+    if (mode === "match") rows += row("Pairs matched", String(st.words)) + row("Misses per game", (st.misses / st.played).toFixed(1));
+    else if (mode === "listening") rows += row("Words heard", String(st.words));
+    else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);
   }
   // The last 30 games as one line in the accent tone, oldest to newest.
@@ -116,7 +122,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     });
     var bestV = up ? hi : lo, worstV = up ? lo : hi;
     var dots = xy.map(function (q, i) {
-      return '<circle class="fc-st-hit" cx="' + q[0] + '" cy="' + q[1] + '" r="9"><title>' + esc(dateText(pts[i].at) + " · " + measureText(mode, pts[i].value)) + "</title></circle>";
+      return '<circle class="fc-st-hit" data-i="' + i + '" cx="' + q[0] + '" cy="' + q[1] + '" r="9"><title>' + esc(dateText(pts[i].at) + " · " + measureText(mode, pts[i].value)) + "</title></circle>";
     }).join("");
     var end = xy[xy.length - 1];
     var svg = '<svg class="fc-st-chart" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="' +
@@ -132,7 +138,9 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       : Math.round(st.change * 100) + "% faster than your first 10 games") + "</p>";
     return group("Last " + pts.length + " games",
       '<div class="fc-st-trend">' + svg +
-      '<div class="fc-st-scale"><span>Best ' + esc(measureText(mode, bestV)) + "</span><span>" +
+      // Tap a point (there's no hover on a phone) and its date and value
+      // replace the best here, as Health shows a selected bar.
+      '<div class="fc-st-scale"><span class="fc-st-readout" id="fcStReadout" aria-live="polite">Best ' + esc(measureText(mode, bestV)) + "</span><span>" +
       (up ? "Higher is better" : "Higher is faster") + "</span></div>" + change + "</div>");
   }
   function bestsHtml(st) {
@@ -145,7 +153,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       return '<button type="button" class="set-row fc-st-best" data-setup="' + esc(b.setup) + '" aria-expanded="' + isOpen + '"' +
         (isOpen ? ' aria-controls="fcStHist' + i + '"' : "") + '>' +
         '<span class="set-label">' + esc(setupLabel(b.setup)) + '<span class="fc-st-count">' + b.runs.length + (b.runs.length === 1 ? " game" : " games") + "</span></span>" +
-        '<span class="set-value">' + esc(runValue(b.best)) + "</span></button>" + hist;
+        '<span class="set-value">' + esc(runValue(b.best)) + CHEVRON + "</span></button>" + hist;
     }).join(""), "fc-st-bests");
   }
   function trickyHtml() {
@@ -164,10 +172,11 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         '<span class="fc-st-en">' + esc(String(e.englishDisplay || "").split(" / ")[0]) + "</span></span>" +
         '<span class="set-value">' + t.count + "×</span></div>";
     }).join("");
-    return group("Tricky words", rows) +
+    // The action is the card's last row, tint text -- iOS Settings' way.
+    return group("Tricky words", rows +
       (practise.length >= 6
-        ? '<div class="fc-st-practise"><button type="button" class="fc-btn fc-btn-primary" id="fcStPractise">Practise these in ' + esc(modeName(view.mode)) + "</button></div>"
-        : "");
+        ? '<button type="button" class="set-row set-action" id="fcStPractise">Practise these in ' + esc(modeName(view.mode)) + "</button>"
+        : ""));
   }
 
   function render(panel) {
@@ -179,7 +188,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         return '<button type="button" role="tab" aria-selected="' + on + '" class="' + (on ? "active" : "") + '" data-mode="' + m[0] + '">' + m[1] + "</button>";
       }).join("") + "</div>" +
       (st.played
-        ? overviewHtml(st) + trendHtml(st) + bestsHtml(st)
+        ? heroHtml(st) + overviewHtml(st) + trendHtml(st) + bestsHtml(st)
         : '<p class="fc-st-empty">No ' + esc(modeName(view.mode)) + (view.kind === "games" ? " games" : " puzzles solved") + " yet.</p>") +
       trickyHtml() +
       '<div class="help-card set-card fc-st-reset-card"><button type="button" class="set-row set-action fc-st-reset" id="fcStReset">Reset ' +
@@ -190,6 +199,10 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     });
     panel.querySelectorAll(".fc-st-best").forEach(function (b) {
       b.addEventListener("click", function () { view.open = view.open === b.dataset.setup ? null : b.dataset.setup; render(panel); });
+    });
+    var readout = document.getElementById("fcStReadout");
+    panel.querySelectorAll(".fc-st-hit").forEach(function (c) {
+      c.addEventListener("click", function () { readout.textContent = c.querySelector("title").textContent; });
     });
     var practise = document.getElementById("fcStPractise");
     if (practise) practise.addEventListener("click", function () {

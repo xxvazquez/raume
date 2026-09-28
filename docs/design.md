@@ -852,17 +852,22 @@ same markup — no session-state flag to keep in sync in JS.
 
 **Stats** (`puzzle-stats.js`, `#fcPanelStats`) is a pushed screen like
 Settings — "‹ Practice", a large "Puzzle stats" / "Game stats" title — in the
-Settings model: the style as a segmented control, then grey-headed white
-cards of 44px rows (Overview; Personal bests, each a row that opens its
-history inline, a quiet "N games" under the setup; Tricky words in the Manage
-rows' voice — Japanese with small romaji beside it, English under, "3×"
-right), a filled Practise these capsule under them, and Reset as a lone
+Settings model: the style as a segmented control (full width on a phone),
+then the headline as Fitness / Game Center lead with it: one white card of
+three big figures (the style's measure — best per pair / word, or accuracy —
+played, day streak) split by hairlines; then grey-headed white cards of
+44px rows (Overview; Personal bests, each row a disclosure with a trailing
+chevron that turns, a quiet "N games" under the setup, its history opening
+inline; Tricky words in the Manage rows' voice — Japanese with small romaji
+beside it, English under, "3×" right — with Practise these as the card's
+last row in tint text, iOS Settings' action row), and Reset as a lone
 coral-text row in its own card at the foot (a native confirm first). The
 trend ("Last 30 games") is a dataviz single series: one 2px accent line on a
 hairline baseline, better always up, the newest game a dot ringed in paper,
-native tooltips per point, and two quiet captions under it (the best value,
-which way is better) — no gridlines, no axis numbers. A finished game's card
-puts a white Stats beside Play again.
+and two quiet captions under it (the best value, which way is better) — no
+gridlines, no axis numbers; tap a point (there's no hover on a phone) and
+its date and value replace the best, as Health shows a selected bar. A
+finished game's card puts a white Stats beside Play again.
 
 The sub-tabs are five segments (Dashboard / Manage / Kana / Puzzles / Games) —
 the most an iOS segmented control holds and still reads at a glance, so
