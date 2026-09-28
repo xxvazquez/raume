@@ -662,7 +662,11 @@ be scannable at a glance:
   the Reviews-this-week bars, then the last four games as 44px hairline rows,
   result right in tabular figures; with no games yet, one line "No games yet." and
   a white Play a puzzle button), Kanji ("12 of 102 known" beside a white button,
-  a thin 6px sage bar under it — the Known tiles' colour), Missed today, Leeches
+  a thin 6px sage bar under it — the Known tiles' colour), Missed today, Leeches.
+  Every progress bar is one component (`progressBarHtml`, tokens `--bar-h` /
+  `--bar-track` / `--bar-fill`: 6px, rounded, sage on a faint ink track) — the
+  now card's Today row, a session's bar, Kana and Kanji alike — and every card's
+  one action is Study now's size (40px capsule)
   (only when there are any) and Words to review. The two small charts still pair
   side by side on a wide window;
 - **"Right now"** leads with the count: a large 44px ink figure with "cards to

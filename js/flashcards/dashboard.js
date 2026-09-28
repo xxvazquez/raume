@@ -216,14 +216,19 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
   // --- Dashboard: Today's progress, Next review, Missed today, Words to Review ---
 
+  // The one progress bar (Today, Kana, Kanji): a 6px sage fill on a faint
+  // track, rounded ends -- tokens --bar-h / --bar-track / --bar-fill.
+  function progressBarHtml(done, total, label) {
+    var pct = total > 0 ? Math.min(100, Math.round(done / total * 1000) / 10) : (done > 0 ? 100 : 0);
+    return '<svg class="fc-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="' + esc(label) + '">' +
+      '<rect class="fc-bar-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
+      (pct > 0 ? '<rect class="fc-bar-fill" x="0" y="0" width="' + Math.max(pct, 3) + '" height="6" rx="3"></rect>' : "") + "</svg>";
+  }
   function todayProgressHtml() {
     var target = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
     var done = reviewInsights ? reviewInsights.reviewedToday : 0;
-    var pct = target > 0 ? Math.min(100, Math.round(done / target * 100)) : (done > 0 ? 100 : 0);
     return '<div class="fc-today"><span class="fc-today-label">Today</span>' +
-      '<div class="fc-progress"><svg viewBox="0 0 100 6" preserveAspectRatio="none" class="fc-progress-svg" aria-hidden="true">' +
-      '<rect class="fc-progress-track" x="0" y="0" width="100" height="6"></rect>' +
-      '<rect class="fc-progress-fill" x="0" y="0" width="' + pct + '" height="6"></rect></svg></div>' +
+      progressBarHtml(done, target, done + " of " + target + " today") +
       '<span class="fc-today-count">' + done + " of " + target + "</span></div>";
   }
 
@@ -641,13 +646,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     });
     if (!ids.length) return "";
     var known = ids.filter(function (id) { return kk.isKnown(id); }).length;
-    var pct = Math.round(known / ids.length * 1000) / 10;
     return '<div class="fc-viz-card fc-viz-wide fc-kanji-card"><h3 class="fc-viz-title">Kanji</h3>' +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + known + "</b> of " + ids.length + " known</span>" +
       '<button type="button" class="fc-btn" data-dash-go="kanji">' + (known ? "Open Kanji" : "Mark kanji you know") + "</button></div>" +
-      '<svg class="fc-kj-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="' + known + " of " + ids.length + ' kanji known">' +
-      '<rect class="fc-kj-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
-      (known ? '<rect class="fc-kj-fill" x="0" y="0" width="' + Math.max(pct, 2) + '" height="6" rx="3"></rect>' : "") + "</svg></div>";
+      progressBarHtml(known, ids.length, known + " of " + ids.length + " kanji known") + "</div>";
   }
   // --- Dashboard: Kana ---
   // The Kana trainer's chosen groups: how many cards started (a sage bar,
@@ -657,14 +659,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!kana || !kana.summary) return "";
     var k = kana.summary(now);
     if (!k.total) return "";
-    var pct = Math.round(k.started / k.total * 1000) / 10;
     return '<div class="fc-viz-card fc-viz-wide fc-dash-kana"><h3 class="fc-viz-title">Kana</h3>' +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + k.started + "</b> of " + k.total + " started" +
       (k.toStudy ? '<span class="fc-kj-sub">' + k.toStudy + " to study now</span>" : "") + "</span>" +
       '<button type="button" class="fc-btn' + (k.toStudy ? " fc-btn-primary" : "") + '" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
-      '<svg class="fc-kj-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="' + k.started + " of " + k.total + ' kana cards started">' +
-      '<rect class="fc-kj-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
-      (k.started ? '<rect class="fc-kj-fill" x="0" y="0" width="' + Math.max(pct, 2) + '" height="6" rx="3"></rect>' : "") + "</svg></div>";
+      progressBarHtml(k.started, k.total, k.started + " of " + k.total + " kana cards started") + "</div>";
   }
   // The Puzzles / Kana / Kanji cards' buttons: to the Puzzles or Kana tab,
   // or the Kanji section.
