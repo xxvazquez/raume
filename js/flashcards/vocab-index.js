@@ -214,7 +214,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // right inside the input itself -- the label can be easy to skim past,
   // and this is exactly where your eyes are when you start typing.
   function answerPlaceholderFor(direction) {
-    return direction === "jp-en" || direction === "ro-en" ? "English…" : "Romaji…";
+    return direction === "jp-en" || direction === "ro-en" ? "English" : "Romaji";
   }
   function expectedDisplayFor(entry, direction) {
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;

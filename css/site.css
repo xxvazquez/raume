@@ -4039,7 +4039,7 @@ mark.fc-diff-co {
 }
 .fc-kana-group { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink); cursor: pointer; }
 .fc-kana-group-n { color: var(--faint); font-variant-numeric: tabular-nums; font-size: var(--fs-micro); }
-.fc-kana-summary { margin: 12px 0 16px; font-size: var(--fs-small); color: var(--muted); }
+.fc-kana-now + .fc-kana-groups { margin-top: 20px; }
 
 /* Dashboard before anything is added -- a single next step, not a wall of
    zeroes. */

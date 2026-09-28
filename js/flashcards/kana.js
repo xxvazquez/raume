@@ -304,13 +304,21 @@ window.RaumeStudy.flashcards.kana = (function () {
     var byScript = { hiragana: [], katakana: [] };
     groups.forEach(function (g) { byScript[g.script].push(g); });
     var p = progress(new Date());
-    var canStudy = buildQueue(new Date()).length > 0;
+    var queued = buildQueue(new Date()).length, canStudy = queued > 0;
 
     var summary = !selected.length
       ? "Choose at least one group to practise."
-      : p.due + " due · " + p.started + " started · " + p.unseen + " not started";
+      : p.started + " started · " + p.unseen + " not started";
 
+    // What a session holds now, with Study now beside it -- the Dashboard's
+    // own "now" card, so both trainers open the same way.
     panel.innerHTML =
+      '<div class="fc-dash-now fc-kana-now"><div class="fc-now-row">' +
+      '<div class="fc-next-review fc-next-review-due"><span class="fc-next-review-count">' + queued + "</span>" +
+      '<span class="fc-next-review-title">' + "kana to study" + "</span>" +
+      '<span class="fc-next-review-sub" id="fcKanaSummary">' + esc(summary) + "</span></div>" +
+      '<button type="button" class="fc-btn fc-btn-primary fc-now-btn" id="fcKanaStart"' + (canStudy ? "" : " disabled") + ">Study now</button>" +
+      "</div></div>" +
       '<div class="fc-kana-groups">' +
       ["hiragana", "katakana"].map(function (script) {
         return '<fieldset class="fc-kana-fieldset"><legend>' + (script === "hiragana" ? "Hiragana" : "Katakana") + "</legend>" +
@@ -322,9 +330,7 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<div class="fc-kana-card">' +
       DIRECTIONS.map(function (d) { return dirCheckbox(d, dirs.indexOf(d) !== -1); }).join("") +
       "</div></fieldset>" +
-      "</div>" +
-      '<p class="fc-kana-summary" id="fcKanaSummary">' + esc(summary) + "</p>" +
-      '<button type="button" class="fc-btn fc-btn-primary" id="fcKanaStart"' + (canStudy ? "" : " disabled") + ">Study now</button>";
+      "</div>";
 
     panel.querySelectorAll(".fc-kana-group-cb").forEach(function (cb) {
       cb.addEventListener("change", function () { setGroup(cb.dataset.group, cb.checked); rerender(); });
@@ -370,8 +376,8 @@ window.RaumeStudy.flashcards.kana = (function () {
       // r2k wants kana in the field -- lang is set per card in syncReviewCard so
       // a system IME picks the right keyboard. No visible Check button -- Enter
       // (or a mobile keyboard's own Go/submit action) checks, same as the word
-      // card (js/flashcards/dashboard.js). The placeholder alone (Kana…/
-      // Romaji…) says what to type -- no separate direction label above it.
+      // card (js/flashcards/dashboard.js). The placeholder alone (Kana /
+      // Romaji) says what to type -- no separate direction label above it.
       '<form class="fc-answer-form" id="fcKanaForm">' +
       '<input id="fcKanaInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
       '</form>' +
@@ -413,8 +419,8 @@ window.RaumeStudy.flashcards.kana = (function () {
     }
 
     var input = shell.querySelector("#fcKanaInput");
-    if (r2k) { input.setAttribute("lang", "ja"); input.placeholder = "Kana…"; }
-    else { input.removeAttribute("lang"); input.placeholder = "Romaji…"; }
+    if (r2k) { input.setAttribute("lang", "ja"); input.placeholder = "Kana"; }
+    else { input.removeAttribute("lang"); input.placeholder = "Romaji"; }
     // Name the field with its prompt, so a screen-reader user dropped onto it
     // between cards knows what to type without hunting for the visual label.
     input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));

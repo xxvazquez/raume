@@ -851,7 +851,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // No visible Check button -- Enter (or a mobile keyboard's own Go/
       // submit action) checks, same as the keyboard shortcut comment below
       // documents. One quiet input is the whole "answering" screen. The
-      // placeholder alone (English…/Romaji…) says what to type -- no
+      // placeholder alone (English / Romaji) says what to type -- no
       // separate direction label needed above it.
       '<form class="fc-answer-form" id="fcAnswerForm">' +
       '<input id="fcAnswerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +

@@ -262,8 +262,9 @@ history are always kept.
 
 ### Kana trainer
 
-Choose groups (**gojūon, dakuten, handakuten, yōon, sokuon**, for each script)
-and directions:
+The tab opens on the same card as the Dashboard: how many kana a session holds
+now (started / not started under it) and **Study now**. Below it, choose groups
+(**gojūon, dakuten, handakuten, yōon, sokuon**, for each script) and directions:
 
 | Direction | You type |
 | --- | --- |
