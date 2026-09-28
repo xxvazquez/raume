@@ -561,7 +561,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     function updateCount() {
       var n = found.filter(Boolean).length;
-      countEl.textContent = n === found.length ? "All " + n + " found" : n + " of " + found.length + " found";
+      // "3 / 15", like Listening's counter -- short enough to sit where
+      // Check does on a phone; the words are for a screen reader.
+      countEl.textContent = n + " / " + found.length;
+      countEl.setAttribute("aria-label", n === found.length ? "All " + n + " words found" : n + " of " + found.length + " words found");
       countEl.classList.toggle("fc-ws-count-done", n === found.length);
       if (n === found.length && onAllFound) onAllFound();
     }
@@ -942,7 +945,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
     return { placements: picked, questions: questions };
   }
-  var PLAY_ICON = '<svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z"/></svg>';
+  // The triangle's box runs x 8-21; the viewBox shifts it so that box
+  // sits 1px right of centre -- a play glyph's optical centre, as SF
+  // Symbols' play.fill -- with no padding on the button to throw it off.
+  var PLAY_ICON = '<svg viewBox="1.5 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z"/></svg>';
   var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
   function speakWord(w) { window.RaumeStudy.shared.speech.speak(w.speak || w.answer); }
   // Sound comes from a prerendered clip or the device's Japanese voice;
@@ -1188,12 +1194,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return n + (n === 1 ? " word" : " words");
   }
 
-  // An iOS pull-down button (UIButton's menu as its primary action): a
-  // white capsule showing the current value and a small up/down chevron. A
-  // real <select> sits invisibly over it, so one tap opens the platform's
-  // own menu and a second picks -- no sheet to open first. The select is
-  // 16px so iOS never zooms in on it; its aria-label names the setting.
+  // A native <select> laid invisibly over a control, so a tap opens the
+  // platform's own picker (the wheel/menu on iOS). 16px so iOS never zooms.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
+  var TITLE_CHEVRON = '<svg class="fc-xw-title-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
   function optionsHtml(options, current) {
     return options.map(function (o) {
       var val = Array.isArray(o) ? o[0] : String(o);
@@ -1201,12 +1205,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       return '<option value="' + esc(val) + '"' + (String(current) === val ? " selected" : "") + ">" + esc(text) + "</option>";
     }).join("");
   }
-  function chipHtml(name, label, shown, optsHtml) {
-    return '<label class="fc-xw-chip"><span class="fc-xw-chip-text">' + esc(shown) + "</span>" + UPDOWN_ICON +
-      '<select class="fc-xw-pick-select" data-pick="' + name + '" aria-label="' + esc(label) + '">' + optsHtml + "</select></label>";
+  function selectHtml(name, label, optsHtml) {
+    return '<select class="fc-xw-pick-select" data-pick="' + name + '" aria-label="' + esc(label) + '">' + optsHtml + "</select>";
   }
-  function pickChip(name, label, options, current) {
-    return chipHtml(name, label, optionLabel(options, current), optionsHtml(options, current));
+  // The toolbar's title: the puzzle or game you're on, as an iOS title
+  // menu ("Word search ⌄") -- the one setting you switch often.
+  function titleMenuHtml() {
+    return '<label class="fc-xw-title"><span class="fc-xw-title-text">' + esc(optionLabel(MODE_OPTS, state.mode)) + "</span>" + TITLE_CHEVRON +
+      selectHtml("mode", state.kind === "games" ? "Game" : "Puzzle", optionsHtml(modeOpts(), state.mode)) + "</label>";
+  }
+  // A setting inside the ⋯ menu, iOS-style: its name, then its value and
+  // ⌃⌄ trailing; a tap opens the native picker (Photos' ⋯ › Sort By).
+  function menuPickHtml(name, label, shown, optsHtml) {
+    return '<label class="fc-xw-menu-pick"><span class="menu-item-tx">' + esc(label) + "</span>" +
+      '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" + selectHtml(name, label, optsHtml) + "</label>";
   }
 
   function selectedTables() {
@@ -1241,11 +1253,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }).join("");
     return '<div class="fc-xw-table-picker" id="fcXwTablePicker">' + groups + "</div>";
   }
-  // Source is one pull-down too: Flashcards, or any single table (grouped
-  // by category) -- the common case in two taps. "Several tables…" opens
-  // the checklist as a popover (a bottom sheet on a phone) to mix tables
-  // into one pool; while several are picked the button names them.
-  function sourceChipHtml() {
+  // Words from: Flashcards, or any single table (grouped by category) --
+  // the common case in two taps. "Several tables…" opens the checklist as
+  // a popover (a bottom sheet on a phone) to mix tables into one pool;
+  // while several are picked the row names them.
+  function sourcePickHtml() {
     var picked = state.source === "table" ? state.tables.map(String) : [];
     var several = picked.length > 1;
     var byCategory = {};
@@ -1261,12 +1273,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }).join("") +
       '<option value="several">Several tables…</option>';
     var shown = state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
-    return '<div class="fc-xw-source">' + chipHtml("source", "Words from", shown, opts) +
-      '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
+    return menuPickHtml("source", "Words from", shown, opts);
+  }
+  function tablesSheetHtml() {
+    return '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
       '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Tables"' + (state.tablesOpen ? "" : " hidden") + ">" +
       '<div class="fc-xw-sheet-head"><h4 class="fc-xw-sheet-title">Tables</h4>' +
       '<button type="button" class="fc-xw-sheet-done" id="fcXwTablesDone">Done</button></div>' +
-      tableChecklistHtml() + "</div></div>";
+      tableChecklistHtml() + "</div>";
+  }
+  // The settings you change now and then: a group at the top of ⋯.
+  function settingsMenuHtml() {
+    return sourcePickHtml() +
+      menuPickHtml("size", "Word count", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
+      (state.mode !== "listening" ? menuPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "");
   }
   function arrowIcon(dir) {
     return dir === "down"
@@ -1524,70 +1544,66 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
-  // The settings as a row of pull-down buttons, always in view: Style,
-  // where the words come from, how many, and the script (not for
-  // Listening -- you hear the word). Changing one makes a new puzzle.
-  function picksHtml() {
-    return '<div class="fc-xw-picks">' +
-      pickChip("mode", state.kind === "games" ? "Game" : "Puzzle", modeOpts(), state.mode) +
-      sourceChipHtml() +
-      chipHtml("size", "Words", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
-      (state.mode !== "listening" ? pickChip("script", "Script", scriptOpts(), state.script) : "") +
-      "</div>";
-  }
-
-  // The toolbar: the settings leading; trailing, New puzzle, the ⓘ how-to,
-  // Hint (the help you reach for mid-solve, so a labelled button of its own,
-  // not buried in a menu) and Check filled; the rarer Reveal puzzle / Clear /
-  // Save as PDF in a ⋯ menu. New puzzle is also in the menu, shown there
-  // only on a phone, where the toolbar has no room for its own button.
+  // The toolbar: one row, as an iOS game screen has it. Leading, the title
+  // menu (the puzzle or game); trailing, what you use mid-play -- Hint,
+  // Check (or the count / clock) -- and ⋯. Everything else is in ⋯: New
+  // puzzle (its own button too on a wide window), the settings as a group
+  // of value rows, How to play, Reveal / Clear / Save as PDF, and Stats.
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
   // A page with a folded corner and a down arrow: a file you keep.
   var PDF_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 16h8a1.5 1.5 0 0 0 1.5-1.5V6Z"/><path d="M10.5 2v4h4"/><path d="M9 8.5v4.5M7 11l2 2 2-2"/></svg>';
-  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON], ["stats", "Stats", STATS_ICON]];
+  var MENU_ACTIONS = [["howto", "How to play", INFO_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON], ["stats", "Stats", STATS_ICON]];
   // A word search has no letters to type, so its Hint reveals a whole word.
   var WS_MENU_LABELS = { reset: "Clear found words" };
   // Match has nothing to reveal or print mid-game (a reveal would make the
   // clock meaningless): just a new game, or the same words again.
-  var MT_MENU_LABELS = { newMenu: "New game", reset: "Restart", stats: "Stats" };
+  var MT_MENU_LABELS = { howto: "How to play", reset: "Restart", stats: "Stats" };
   function optionLabel(opts, value) {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
   }
-  function toolbarHtml() {
+  function howToText() {
+    var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
+    return ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
+      : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
+      : ws ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
+      : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.";
+  }
+  function menuItemHtml(a, label) {
+    return '<button type="button" class="fc-xw-menu-item" role="menuitem" id="fcXw' + a[0].charAt(0).toUpperCase() + a[0].slice(1) + '" data-action="' + a[0] + '">' +
+      '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + label + "</span></button>";
+  }
+  // `bare`: no puzzle to play (too few words) -- the title and a ⋯ of
+  // settings + Stats, so the fix is still at hand.
+  function toolbarHtml(bare) {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening";
     // Listening is a game like Match: the same short menu, a counter
     // instead of Check.
     var mt = state.mode === "match" || ls;
     var labels = mt ? MT_MENU_LABELS : ws ? WS_MENU_LABELS : {};
-    var actions = mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
-    return '<div class="fc-xw-actions">' + picksHtml() +
+    var actions = bare ? MENU_ACTIONS.filter(function (a) { return a[0] === "stats"; })
+      : mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
+    var newLabel = mt ? "New game" : "New puzzle";
+    return '<div class="fc-xw-actions">' + titleMenuHtml() +
       '<div class="fc-xw-actions-end">' +
-      '<button type="button" class="fc-btn" id="fcXwNew">' + (mt ? "New game" : "New puzzle") + "</button>" +
-      '<div class="fc-xw-tip">' +
-      '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
-      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (ls
-        ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
-        : mt
-        ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
-        : ws
-        ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
-        : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
-      "</div>" +
-      (mt ? "" : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
-      (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
-        : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
-        : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
-        : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>') +
+      (bare ? "" : '<button type="button" class="fc-btn fc-xw-new" id="fcXwNew">' + newLabel + "</button>" +
+        (mt ? "" : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
+        (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
+          : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
+          : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
+          : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>')) +
       '<div class="section-menu fc-xw-menu">' +
-      '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More puzzle actions">' + MENU_ICON + "</button>" +
-      '<div class="section-menu-list" role="menu" hidden>' +
-      actions.map(function (a) {
-        return '<button type="button" class="fc-xw-menu-item" role="menuitem" id="fcXw' + a[0].charAt(0).toUpperCase() + a[0].slice(1) + '" data-action="' + a[0] + '">' +
-          '<span class="menu-item-ic" aria-hidden="true">' + a[2] + '</span><span class="menu-item-tx">' + (labels[a[0]] || a[1]) + "</span></button>";
-      }).join("") +
-      "</div></div></div></div>";
+      '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More">' + MENU_ICON + "</button>" +
+      '<div class="section-menu-list fc-xw-menu-list" role="menu" hidden>' +
+      (bare ? "" : menuItemHtml(["newMenu", "", NEW_ICON], newLabel).replace('class="fc-xw-menu-item"', 'class="fc-xw-menu-item fc-xw-menu-new"')) +
+      '<div class="fc-xw-menu-group">' + settingsMenuHtml() + "</div>" +
+      actions.map(function (a) { return menuItemHtml(a, labels[a[0]] || a[1]); }).join("") +
+      "</div></div>" +
+      '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + howToText() + "</p>" +
+      tablesSheetHtml() +
+      "</div></div>";
   }
+
 
   // Wiring shared by the empty-state and full-puzzle renders below -- every
   // control has to work even when the current source/table pick has
@@ -1598,15 +1614,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (!sheet) return;
     sheet.hidden = !open;
     if (scrim) scrim.hidden = !open;
-    if (!open) panel.querySelector('[data-pick="source"]').focus();
+    if (!open) { var more = panel.querySelector(".fc-xw-menu .section-menu-btn"); if (more) more.focus(); }
   }
+  // How to play: a small glass note under the toolbar, from ⋯.
   function setTipOpen(open) {
-    var btn = document.getElementById("fcXwTip"), pop = document.getElementById("fcXwTipPop");
-    if (!btn || !pop) return;
-    btn.setAttribute("aria-expanded", String(open));
-    pop.hidden = !open;
+    var pop = currentPanel && currentPanel.querySelector("#fcXwTipPop");
+    if (pop) pop.hidden = !open;
   }
-  // Wired once per panel: outside clicks and Escape close the sheet (and the ⓘ tip).
+  // Wired once per panel: outside clicks and Escape close the sheet (and How to play).
   var optionsDocWired = false;
   function wireOptionsDismiss() {
     if (optionsDocWired) return;
@@ -1614,12 +1629,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.addEventListener("click", function (e) {
       // A control inside the sheet can re-render the panel before this runs,
       // detaching the clicked node -- that was a click inside, not outside.
-      var tip = currentPanel && currentPanel.querySelector(".fc-xw-tip");
-      if (tip && !tip.contains(e.target)) setTipOpen(false);
+      var tip = currentPanel && currentPanel.querySelector("#fcXwTipPop");
+      if (tip && !tip.hidden && !tip.contains(e.target) && !(e.target.closest && e.target.closest("#fcXwHowto"))) setTipOpen(false);
       if (!state.tablesOpen || !e.target.isConnected) return;
       var panel = currentPanel;
-      var box = panel && panel.querySelector(".fc-xw-source");
-      if (!box || (box.contains(e.target) && !e.target.classList.contains("fc-xw-scrim"))) return;
+      var box = panel && panel.querySelector(".fc-xw-sheet");
+      if (!box || box.contains(e.target) || (e.target.closest && e.target.closest(".fc-xw-menu"))) return;
       setTablesOpen(panel, false);
     });
     document.addEventListener("keydown", function (e) {
@@ -1631,8 +1646,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function bindControls(panel) {
     wireOptionsDismiss();
-    var tip = panel.querySelector("#fcXwTip");
-    if (tip) tip.addEventListener("click", function () { setTipOpen(this.getAttribute("aria-expanded") !== "true"); });
     var done = panel.querySelector("#fcXwTablesDone");
     if (done) done.addEventListener("click", function () { setTablesOpen(panel, false); });
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
@@ -1681,17 +1694,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
     function notEnough(msg, canRetry) {
-      panel.innerHTML = '<div class="fc-xw-actions">' + picksHtml() + "</div>" + '<p class="fc-xw-footnote">' + msg + "</p>" +
+      panel.innerHTML = toolbarHtml(true) + '<p class="fc-xw-footnote">' + msg + "</p>" +
         (canRetry ? '<div class="fc-xw-actions"><button type="button" class="fc-btn" id="fcXwNew">Try again</button></div>' : "");
       bindControls(panel);
+      bindMenu(panel, {});
       var retry = document.getElementById("fcXwNew");
       if (retry) retry.addEventListener("click", function () { generate(); rerender(); });
     }
-    var more = state.source === "table" ? "add another table" : "add more words to flashcards, or build one from a table";
+    var more = state.source === "table" ? "add another table (⋯ › Words from › Several tables…)" : "add more words to flashcards, or pick a table under ⋯ › Words from";
     if (!state.puzzle) generate();
     if (state.poolCount < MIN_WORDS) {
       notEnough(state.source === "table" && !state.tables.length
-        ? "Choose a table to build a puzzle from."
+        ? "Choose a table to build a puzzle from (⋯ › Words from)."
         : "A puzzle needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — this has " + state.poolCount : "") + ". To get more, " + more + ".", false);
       return;
     }
@@ -1830,6 +1844,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function bindMenu(panel, actions) {
     actions.newMenu = function () { generate(); rerender(); };
     actions.stats = openStats;
+    actions.howto = function () { setTipOpen(true); };
     var hint = panel.querySelector("#fcXwHint");
     if (hint && actions.hint) hint.addEventListener("click", actions.hint);
     var menu = panel.querySelector(".fc-xw-menu");

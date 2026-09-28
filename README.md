@@ -286,12 +286,15 @@ Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
 
-The puzzle comes first. Its settings sit above it as pull-down buttons —
-*Crossword ⌃⌄ · Flashcards ⌃⌄ · 15 words ⌃⌄ · Romaji ⌃⌄* — one tap opens a
-setting's menu, a second picks; changing one makes a new puzzle. Next to them:
-New puzzle, ⓘ (how to solve), **Hint** and **Check**; ⋯ holds the rarer
-Reveal puzzle, Clear, Save as PDF and [Stats](#stats). On a phone the pull-downs sit two by two. On a wide
-window the clue you're on and the Across / Down lists sit beside the grid —
+The puzzle comes first, under one toolbar row: the puzzle's name as a menu
+(*Word search ⌄* — tap to switch to a crossword or arroword), then **Hint**,
+**Check** (a word search shows "3 / 15" found instead) and **⋯**. The ⋯ menu
+holds the rest: **New puzzle** (its own button on a wide window), your
+settings — *Words from*, *Word count*, *Script*, each showing its value and
+opening the phone's own picker — then *How to play*, *Reveal puzzle*,
+*Clear*, *Save as PDF* and [*Stats*](#stats). Changing a setting makes a new
+puzzle. On a wide
+window the clue you're on and the Across / Down listswindow the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
 stays with the puzzle while you move between tabs and starts blank with the
@@ -350,8 +353,9 @@ scrolls sideways.
 ### Games
 
 Timed and scored rounds: **Match** and **Listening**. Same toolbar as
-Puzzles — the pull-downs for game, words and script (none for Listening),
-then **New game** and ⋯ (*Restart*, *Stats*). Each tab keeps its own settings and its
+Puzzles — the game's name as a menu, the clock (or "3 / 10"), and ⋯ with
+New game, Words from / Word count / Script (none for Listening), How to
+play, *Restart* and *Stats*. Each tab keeps its own settings and its
 game in progress while you switch between them. Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
 

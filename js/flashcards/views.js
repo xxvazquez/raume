@@ -126,8 +126,9 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Puzzles</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Source</span><span class="help-desc">Your flashcards or any table; Several tables… mixes them. At least 6 words; no clues that give the answer away.</span></li>' +
-      '<li><span class="help-term">Puzzle · Words · Script</span><span class="help-desc">The buttons above the puzzle: crossword, arroword or word search; how many words; romaji, Japanese (with kanji — word search), hiragana or katakana words only.</span></li>' +
+      '<li><span class="help-term">Puzzle</span><span class="help-desc">Tap its name above the grid to switch: crossword, arroword or word search.</span></li>' +
+      '<li><span class="help-term">⋯ menu</span><span class="help-desc">New puzzle; where the words come from, how many, and the script (romaji, Japanese, hiragana or katakana).</span></li>' +
+      '<li><span class="help-term">Words from</span><span class="help-desc">Your flashcards or any table; Several tables… mixes them. At least 6 words; no clues that give the answer away.</span></li>' +
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type. Tap a crossing square again to switch direction.</span></li>' +
       '<li><span class="help-term">Hint</span><span class="help-desc">Fills one square — or, in a word search, shows one word.</span></li>' +
       '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals the puzzle, clears or saves a PDF.</span></li>' +
@@ -136,7 +137,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Games</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Game · Words · Script</span><span class="help-desc">Match or Listening, from your flashcards or tables, the same buttons as Puzzles.</span></li>' +
+      '<li><span class="help-term">Game</span><span class="help-desc">Tap its name to switch between Match and Listening; ⋯ has New game and the same settings as Puzzles.</span></li>' +
       '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second; your best time is kept.</span></li>' +
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
       '<li><span class="help-term">Stats</span><span class="help-desc">⋯ › Stats, for puzzles too: your bests, a trend, and the words you miss most — Practise these plays just them.</span></li>' +

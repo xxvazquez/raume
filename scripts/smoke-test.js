@@ -2793,38 +2793,39 @@ async function main() {
   check("no element relies on an inline style=\"\" attribute here either (blocked by CSP style-src)", document.querySelectorAll("#fcPanelCrosswords [style]").length === 0);
   check("a fresh puzzle's cells are live, empty text inputs -- a fill-in grid, not a picture of one",
     [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.tagName === "INPUT" && i.value === ""));
-  check("the settings are pull-down buttons always in view -- Style, Source, Words, Script -- each naming its value over a native select: one tap to the menu, no sheet first", (() => {
-    const chips = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-picks .fc-xw-chip")];
-    const names = chips.map(c => c.querySelector("select").getAttribute("aria-label"));
-    const src = document.querySelector('#fcPanelCrosswords [data-pick="source"]');
-    return names.join("|") === "Puzzle|Words from|Words|Script"
-      && /^(Crossword|Arroword)$/.test(chips[0].querySelector(".fc-xw-chip-text").textContent)
-      && /\d+ words/.test(chips[2].textContent) && chips[1].querySelector(".fc-xw-chip-text").textContent === "Flashcards"
-      && src.options[0].value === "flashcards" && src.querySelectorAll("optgroup option[value^='t:']").length === window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-kanji").length
-      && src.options[src.options.length - 1].value === "several"
-      && !document.getElementById("fcXwOptions") && document.getElementById("fcXwSheet").hidden;
-  })());
-  check("the toolbar is New puzzle (tinted) + a labelled Hint + Check (filled) + a ⋯ menu holding only the rarer Reveal puzzle / Clear answers / Save as PDF / Stats (plus New puzzle, shown there on a phone)", (() => {
-    const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
-    const items = menu ? [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim()) : [];
+  check("one toolbar row: the puzzle as a title menu (a native select), then Hint, Check (filled) and ⋯ -- no row of setting pills", (() => {
+    const bar = document.querySelector("#fcPanelCrosswords .fc-xw-actions");
+    const title = bar.querySelector(".fc-xw-title");
     const hint = document.getElementById("fcXwHint");
-    return document.getElementById("fcXwNew").classList.contains("fc-btn") && !document.getElementById("fcXwNew").classList.contains("fc-btn-primary")
-      && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
+    return !!title && /^(Crossword|Arroword)$/.test(title.querySelector(".fc-xw-title-text").textContent)
+      && title.querySelector('select[data-pick="mode"]').getAttribute("aria-label") === "Puzzle"
+      && !document.querySelector("#fcPanelCrosswords .fc-xw-picks, #fcPanelCrosswords .fc-xw-chip")
       && hint && !hint.closest(".section-menu") && hint.textContent.trim() === "Hint" && hint.title === "Reveal a letter"
       && hint.nextElementSibling === document.getElementById("fcXwCheck")
-      && items.join("|") === "New puzzle|Reveal puzzle|Clear answers|Save as PDF|Stats"
-      && menu.querySelector(".section-menu-list").hidden
-      && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
+      && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
+      && document.getElementById("fcXwNew").classList.contains("fc-btn") && !document.getElementById("fcXwNew").classList.contains("fc-btn-primary")
+      && !document.getElementById("fcXwTip");
   })());
-  check("the clue bar stays hidden until a square is picked -- how to solve sits behind an ⓘ beside Check, opening and closing a tip", (() => {
+  check("⋯ holds New puzzle (a phone's way to it), the settings as a group of value rows over native selects -- Words from / Word count / Script -- then How to play, Reveal puzzle, Clear answers, Save as PDF, Stats", (() => {
+    const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
+    const items = [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim());
+    const picks = [...menu.querySelectorAll(".fc-xw-menu-group .fc-xw-menu-pick")];
+    const src = menu.querySelector('[data-pick="source"]');
+    return items.join("|") === "New puzzle|How to play|Reveal puzzle|Clear answers|Save as PDF|Stats"
+      && picks.map(p => p.querySelector(".menu-item-tx").textContent).join("|") === "Words from|Word count|Script"
+      && picks[0].querySelector(".fc-xw-menu-val").textContent === "Flashcards" && /\d+ words/.test(picks[1].textContent)
+      && src.options[0].value === "flashcards" && src.querySelectorAll("optgroup option[value^='t:']").length === window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-kanji").length
+      && src.options[src.options.length - 1].value === "several"
+      && menu.querySelector(".section-menu-list").hidden && document.getElementById("fcXwSheet").hidden;
+  })());
+  check("the clue bar stays hidden until a square is picked -- ⋯ › How to play opens a short note, Escape closes it", (() => {
     const bar = document.querySelector("#fcPanelCrosswords .fc-xw-current");
-    const tip = document.getElementById("fcXwTip"), pop = document.getElementById("fcXwTipPop");
-    if (!bar.hidden || bar.textContent || !tip || !pop.hidden || tip.nextElementSibling !== pop) return false;
-    tip.click();
-    const opened = !pop.hidden && tip.getAttribute("aria-expanded") === "true" && /Tap a square/.test(pop.textContent);
+    const pop = document.getElementById("fcXwTipPop");
+    if (!bar.hidden || bar.textContent || !pop.hidden) return false;
+    document.getElementById("fcXwHowto").click();
+    const opened = !pop.hidden && /Tap a square/.test(pop.textContent);
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
-    return opened && pop.hidden
-      && tip.closest(".fc-xw-actions-end").querySelector("#fcXwCheck") !== null;
+    return opened && pop.hidden;
   })());
   check("Romaji is the default script -- a beginner without kana memorized yet still gets a working puzzle -- and its cells skip the Japanese IME hint",
     document.querySelector('#fcPanelCrosswords [data-pick="script"]').value === "romaji"
@@ -2929,7 +2930,7 @@ async function main() {
     const sheet = document.getElementById("fcXwSheet");
     const src = document.querySelector('#fcPanelCrosswords [data-pick="source"]');
     return !!xwDefaultTable && xw.tableWordPool([xwDefaultTable.id]).length >= 10 && !sheet.hidden
-      && src.closest(".fc-xw-chip").querySelector(".fc-xw-chip-text").textContent === xwDefaultTable.title
+      && src.closest(".fc-xw-menu-pick").querySelector(".fc-xw-menu-val").textContent === xwDefaultTable.title
       && src.value === "t:" + xwDefaultTable.id && !!document.querySelector("#fcPanelCrosswords .fc-xw-grid");
   })());
   check("the printed sheet is headed by the puzzle style, with its source, word count and script on a quiet line under it",
@@ -2999,7 +3000,7 @@ async function main() {
     const p = xw.state.puzzle;
     const items = [...document.querySelectorAll("#fcPanelCrosswords .fc-ws-list li")];
     return !!document.querySelector("#fcPanelCrosswords .fc-ws-grid") && !document.querySelector("#fcPanelCrosswords .fc-xw-cell-input")
-      && !document.getElementById("fcXwCheck") && wsCount() === "0 of " + p.placements.length + " found"
+      && !document.getElementById("fcXwCheck") && wsCount() === "0 / " + p.placements.length
       && items.length === p.placements.length && items.every(li => li.querySelector(".fc-ws-answer").hidden)
       && document.getElementById("fcXwHint").title === "Reveal a word"
       && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent === "Word search"
@@ -3024,21 +3025,22 @@ async function main() {
     const end = wsCell(pl.row + pl.dr * (pl.length - 1), pl.col + pl.dc * (pl.length - 1));
     end.focus(); wsKey(end, "Enter"); wsKey(wsCell(pl.row, pl.col), "Enter");
     const li = document.querySelector('#fcPanelCrosswords .fc-ws-list li[data-i="0"]');
-    return wsCount().startsWith("1 of") && li.classList.contains("fc-ws-done") && !li.querySelector(".fc-ws-answer").hidden
+    return wsCount().startsWith("1 /") && li.classList.contains("fc-ws-done") && !li.querySelector(".fc-ws-answer").hidden
       && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === 1;
   })());
   check("a line that spells no answer marks nothing", (() => {
     const pl = xw.state.puzzle.placements[1];
     wsKey(wsCell(pl.row, pl.col), "Enter");
     wsKey(wsCell(pl.row + pl.dr * (pl.length - 2), pl.col + pl.dc * (pl.length - 2)), "Enter");
-    return wsCount().startsWith("1 of") || xw.state.puzzle.placements.some((q, i) => i > 0 && q.length === pl.length - 1);
+    return wsCount().startsWith("1 /") || xw.state.puzzle.placements.some((q, i) => i > 0 && q.length === pl.length - 1);
   })());
   document.getElementById("fcXwHint").click();
-  check("Reveal a word marks the next unfound word", wsCount().startsWith("2 of"));
+  check("Reveal a word marks the next unfound word", wsCount().startsWith("2 /"));
   document.getElementById("fcXwReset").click();
-  check("Clear found words starts the same grid over", wsCount().startsWith("0 of") && !document.querySelector("#fcPanelCrosswords .fc-ws-found"));
+  check("Clear found words starts the same grid over", wsCount().startsWith("0 /") && !document.querySelector("#fcPanelCrosswords .fc-ws-found"));
   document.getElementById("fcXwReveal").click();
-  check("Reveal puzzle marks every word", /^All \d+ found$/.test(wsCount()) && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === xw.state.puzzle.placements.length);
+  check("Reveal puzzle marks every word", wsCount() === xw.state.puzzle.placements.length + " / " + xw.state.puzzle.placements.length
+    && document.getElementById("fcWsCount").classList.contains("fc-ws-count-done") && document.querySelectorAll("#fcPanelCrosswords .fc-ws-found").length === xw.state.puzzle.placements.length);
 
   check("Match splits its words into even rounds of at most 6 pairs", (() => {
     const same = (a, b) => a.join() === b.join();
@@ -3056,12 +3058,12 @@ async function main() {
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
   const mtClock = () => document.getElementById("fcMtClock").textContent;
-  check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / Restart / Stats in the ⋯ menu", (() => {
+  check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / How to play / Restart / Stats in the ⋯ menu", (() => {
     const p = xw.state.puzzle;
     const clues = p.placements.map(w => w.clue.toLowerCase());
     return document.querySelectorAll("#fcPanelGames .fc-mt-tile").length === p.rounds[0].length * 2
       && !document.getElementById("fcXwCheck") && !document.getElementById("fcXwHint") && mtClock() === "0:00.0"
-      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart|Stats"
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|How to play|Restart|Stats"
       && new Set(clues).size === clues.length
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
@@ -3160,11 +3162,11 @@ async function main() {
   const lsQ = () => xw.state.puzzle.questions;
   const lsChoices = () => [...document.querySelectorAll("#fcPanelGames .fc-ls-choice")];
   const lsCount = () => document.getElementById("fcLsCount").textContent;
-  check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / Restart / Stats in the ⋯ menu", (() => {
+  check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / How to play / Restart / Stats in the ⋯ menu", (() => {
     return !!document.querySelector("#fcPanelGames .fc-ls-play") && lsChoices().length === 4
       && !document.querySelector('#fcPanelGames [data-pick="script"]') && lsCount() === "1 / " + lsQ().length
-      && !/Romaji/.test(document.querySelector("#fcPanelGames .fc-xw-picks").textContent)
-      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart|Stats"
+      && !/Romaji/.test(document.querySelector("#fcPanelGames .fc-xw-menu-group").textContent)
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|How to play|Restart|Stats"
       && document.querySelector("#fcPanelGames .fc-ls-word").hidden
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
@@ -3256,7 +3258,7 @@ async function main() {
       const ids = pr.trickyWords(20, 1).map(t => t.id);
       return !document.getElementById("fcPanelGames").hidden && xw.state.source === "tricky" && xw.state.mode === "match"
         && (!xw.state.puzzle.placements || xw.state.puzzle.placements.every(w => ids.includes(w.id)))
-        && document.querySelector('#fcPanelGames [data-pick="source"]').closest(".fc-xw-chip").textContent.startsWith("Tricky words");
+        && document.querySelector('#fcPanelGames [data-pick="source"]').closest(".fc-xw-menu-pick").querySelector(".fc-xw-menu-val").textContent === "Tricky words";
     })());
     xwPick("source", "flashcards");
   } else {
@@ -3295,7 +3297,7 @@ async function main() {
 
   xwPick("source", "flashcards");
   check("switching back to Flashcards empties the table pick", xw.state.tables.length === 0
-    && document.querySelector('#fcPanelCrosswords [data-pick="source"]').closest(".fc-xw-chip").textContent.startsWith("Flashcards"));
+    && document.querySelector('#fcPanelCrosswords [data-pick="source"]').closest(".fc-xw-menu-pick").querySelector(".fc-xw-menu-val").textContent === "Flashcards");
 
   // Undo the cards added above -- this section's only job was guaranteeing
   // a pool for the UI checks, not permanently growing the deck.

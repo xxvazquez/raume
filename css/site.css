@@ -3206,9 +3206,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Footnote under a group, iOS-style: secondary text, inset to the card's
    text edge. */
 .fc-xw-footnote { margin: 0 16px 14px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
-.fc-xw-actions { margin-top: 16px; }
 .fc-xw-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.fc-xw-actions-end { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.fc-xw-actions-end { position: relative; margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .fc-xw-actions .fc-btn { min-height: 34px; padding: 7px 16px; }
 /* The clue you're on, spelled out above the grid -- on a phone the clue
    list is a scroll away below it, and an arroword's in-cell clues are
@@ -3219,18 +3218,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   color: var(--ink); font-size: var(--fs-body); line-height: 1.35;
 }
 .fc-xw-current[hidden] { display: none; }
-/* How to solve lives behind an ⓘ beside Check, not as a standing line
-   over the grid: the clue bar only appears once there's a clue to show. */
-.fc-xw-tip { position: relative; }
-.fc-xw-tip-btn {
-  appearance: none; border: 0; padding: 0; position: relative;
-  display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border-radius: 50%;
-  background: transparent; color: var(--muted); cursor: pointer;
-}
-.fc-xw-tip-btn::after { content: ""; position: absolute; inset: -6px; }
-.fc-xw-tip-btn:hover { color: var(--ink); }
-.fc-xw-tip-btn[aria-expanded="true"] { color: var(--accent-strong); background: var(--accent-soft); }
+/* How to play is a ⋯ item opening a small glass note under the toolbar,
+   not a standing line over the grid: the clue bar only appears once
+   there's a clue to show. */
 .fc-xw-tip-pop {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
   width: max-content; max-width: min(260px, calc(100vw - 32px)); margin: 0; padding: 10px 14px;
@@ -3410,7 +3400,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-ls-play {
   appearance: none; display: flex; align-items: center; justify-content: center;
-  width: 76px; height: 76px; padding: 0 0 0 5px; border: 0; border-radius: 50%;
+  width: 76px; height: 76px; padding: 0; border: 0; border-radius: 50%;
   background: var(--section-strong); color: var(--paper); cursor: pointer;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform .12s ease;
 }
@@ -4729,30 +4719,47 @@ mark.fc-diff-co {
   .fc-titlebar + .fc-signed-in-as { margin-top: 8px; margin-bottom: 16px; }
 }
 
-/* --- Puzzles: the puzzle first ----------------------------------------
-   One toolbar, then the puzzle. Leading, the settings as iOS pull-down
-   buttons -- Style, Source, Words, Script -- each a white capsule naming
-   its current value, one tap to its menu; trailing, New puzzle, ⓘ, Hint,
-   Check and ⋯. The row wraps on a narrow window: the pull-downs first, the
-   actions at the trailing edge under them. */
+/* --- Puzzles / Games: the puzzle first --------------------------------
+   One toolbar row, as an iOS game screen: the title menu leading ("Word
+   search ⌄" -- the puzzle or game, the one setting you switch often), and
+   trailing only what you use mid-play: Hint, Check (or the count / clock)
+   and ⋯. The ⋯ menu holds the rest -- New puzzle on a phone, then a
+   group of settings as value rows (Words from / Word count / Script, each
+   opening the native picker), How to play, Reveal / Clear / Save as PDF,
+   Stats. */
 .fc-xw-actions, .fc-xw-current { max-width: none; }
-.fc-xw-actions { flex-wrap: wrap; row-gap: 10px; margin-bottom: 14px; }
-.fc-xw-picks { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.fc-xw-chip {
-  position: relative; display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
-  min-height: 34px; box-sizing: border-box; padding: 0 12px 0 14px; border-radius: 999px;
-  background: var(--paper); box-shadow: var(--control-lift); cursor: pointer;
-  color: var(--ink); font: 400 var(--fs-nav)/1.2 var(--font-ui);
+.fc-xw-actions { margin-bottom: 14px; }
+.fc-xw-title {
+  position: relative; display: inline-flex; align-items: center; gap: 5px; min-width: 0; min-height: 44px;
+  color: var(--ink); font: 500 17px/1.2 var(--font-ui); cursor: pointer;
 }
-.fc-xw-chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fc-xw-chip .fc-xw-updown { color: var(--faint); }
-.fc-xw-chip:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; }
+.fc-xw-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-xw-title-chev { flex: none; color: var(--section-strong); }
+.fc-xw-title:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
+.fc-xw-actions-end { flex: none; }
 .fc-xw-hint svg { margin: 0 5px 0 -3px; }
-/* "Several tables…": the checklist as a glass popover under Source (the
-   reference pages' Options pattern); on a phone, a bottom sheet. */
-.fc-xw-source { position: relative; display: flex; min-width: 0; max-width: 100%; }
+/* The ⋯ menu's settings: a group of value rows set off by a ground band,
+   as an iOS menu's inline section. */
+.fc-xw-menu-list { min-width: 250px; }
+.fc-xw-menu-group { display: flex; flex-direction: column; border-bottom: 8px solid var(--group-ground); }
+.section-menu-list > .fc-xw-menu-new + .fc-xw-menu-group { border-top: 8px solid var(--group-ground); }
+.fc-xw-menu-group + * { border-top: 0 !important; }
+.fc-xw-menu-pick {
+  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 14px; color: var(--ink); font: 400 var(--fs-subhead)/1.3 var(--font-ui); cursor: pointer; white-space: nowrap;
+}
+.fc-xw-menu-pick:hover { background: var(--accent-soft); }
+.fc-xw-menu-pick:has(.fc-xw-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
+.fc-xw-menu-val { display: inline-flex; align-items: center; gap: 5px; min-width: 0; max-width: 150px; color: var(--muted); }
+.fc-xw-menu-val { overflow: hidden; text-overflow: ellipsis; }
+.fc-xw-menu-val .fc-xw-updown { flex: none; color: var(--faint); }
+/* New puzzle is its own button on a wide window, the menu's first item on
+   a phone. */
+.section-menu-list .fc-xw-menu-new { display: none; }
+/* "Several tables…": the checklist as a glass popover under the toolbar
+   (the reference pages' Options pattern); on a phone, a bottom sheet. */
 .fc-xw-sheet {
-  position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
   width: 340px; max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
   padding: 10px; border-radius: var(--radius-menu);
   background: color-mix(in srgb, var(--group-ground) 82%, transparent);
@@ -4768,8 +4775,6 @@ mark.fc-diff-co {
 }
 .fc-xw-sheet .fc-xw-table-picker { max-height: none; margin: 0; }
 .fc-xw-scrim { display: none; }
-/* New puzzle has its own button on a wide window, a ⋯ item on a phone. */
-.section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: none; }
 .fc-xw-actions + .fc-xw-footnote { margin-top: -6px; }
 
 /* The puzzle: one DOM order (clue bar, grid, clue lists) laid out by grid
@@ -4817,13 +4822,8 @@ mark.fc-diff-co {
 }
 @media (max-width: 640px) {
   #fcXwNew { display: none; }
-  .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: flex; }
-  /* The pull-downs as a 2 × 2 grid of equal capsules, every one whole in
-     view (a sideways-scrolling row cut the last one off at the edge); a
-     long table name ellipsises inside its capsule, the ⌃⌄ at its end. */
-  .fc-xw-picks { flex: 1 1 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .fc-xw-picks .fc-xw-chip { width: 100%; justify-content: space-between; }
-  .fc-xw-picks > .fc-xw-source { max-width: none; }
+  .section-menu-list .fc-xw-menu-new { display: flex; }
+  .fc-xw-actions .fc-btn { padding: 7px 14px; }
   .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
   .fc-xw-sheet {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;
