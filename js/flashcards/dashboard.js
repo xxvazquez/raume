@@ -637,6 +637,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var how = r.mode === "match" ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
       : r.mode === "listening" ? (r.right || 0) + " / " + r.n + " right"
       : clock(r.ms) + " · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
+    if (r.ended) how += " · ended early";
     var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
     return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(what) + '<span class="fc-pz-when">' + esc(when) + "</span></span>" +
       '<span class="fc-pz-how">' + esc(how) + "</span></li>";

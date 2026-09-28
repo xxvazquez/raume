@@ -177,6 +177,9 @@ puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
 match / listening / crossword / arroword / wordsearch; `setup` is
 `source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`);
+`ended` marks a Match / Listening game stopped early (only its finished
+rounds / answered words, with `sizes` = those Match rounds' pair counts —
+it counts everywhere except personal bests and the finish card's rank);
 `missed` the vocab ids a game caught you on (a wrong pair, a wrong answer, a
 revealed word or letter, a square Check marked wrong — Tricky words); a grid or
 word search is logged once when solved, never when revealed in full. Reset stats

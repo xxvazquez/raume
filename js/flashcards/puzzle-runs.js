@@ -9,7 +9,10 @@
 //     (for comparing like with like), splits: time at each round's end
 //     (Match, for the live split against your best), missed: vocab ids
 //     the game caught you on -- a wrong pair, a wrong answer, a word or
-//     letter revealed, a square Check marked wrong (for Tricky words) }
+//     letter revealed, a square Check marked wrong (for Tricky words),
+//     ended: true for a Match / Listening game stopped early -- only its
+//     finished rounds / answered words, so it counts everywhere except
+//     personal bests; sizes: that Match game's round sizes }
 // Reset stats for one style adds a marker record { mode, reset: true }
 // rather than only deleting: the log syncs by union, so a plain delete
 // would come straight back from another device. Everything of that style
@@ -67,6 +70,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   function record(run) {
     var r = { id: newId(), at: new Date().toISOString(), mode: run.mode, n: run.n, ms: Math.round(run.ms) };
     if (run.setup) r.setup = run.setup;
+    if (run.ended) r.ended = true;
     if (run.missed && run.missed.length) {
       var seen = {};
       r.missed = run.missed.map(String).filter(function (id) { return !seen[id] && (seen[id] = true); }).slice(0, 40);
@@ -74,6 +78,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     if (run.mode === "match") {
       r.miss = run.miss || 0;
       if (run.splits && run.splits.length) r.splits = run.splits.map(Math.round);
+      if (run.sizes && run.sizes.length) r.sizes = run.sizes.slice();
     }
     else if (run.mode === "listening") r.right = run.right || 0;
     else r.help = run.help || 0;
@@ -176,7 +181,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     var out = [];
     runs.forEach(function (r) {
       if (!r.splits || !r.splits.length) return;
-      var sizes = roundSizes(r.n);
+      var sizes = r.sizes || roundSizes(r.n);
       if (sizes.length !== r.splits.length) return;
       r.splits.forEach(function (at, i) { out.push({ ms: at - (i ? r.splits[i - 1] : 0), pairs: sizes[i], at: r.at }); });
     });
@@ -218,13 +223,14 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     // Personal bests, one per setup (source · script · count) -- the
     // fastest time, or for Listening the most right, then the fastest.
     st.bests = Object.keys(bySetup).filter(Boolean).map(function (key) {
-      var list = bySetup[key], top = list[0];
-      list.forEach(function (r) {
+      var list = bySetup[key], whole = list.filter(function (r) { return !r.ended; }), top = whole[0];
+      if (!top) return null;
+      whole.forEach(function (r) {
         var a = higherIsBetter(mode) ? (r.right || 0) : -r.ms, b = higherIsBetter(mode) ? (top.right || 0) : -top.ms;
         if (a > b || (a === b && r.ms < top.ms)) top = r;
       });
       return { setup: key, best: top, runs: list.slice().reverse() };
-    }).sort(function (a, b) { return a.best.at < b.best.at ? 1 : -1; });
+    }).filter(Boolean).sort(function (a, b) { return a.best.at < b.best.at ? 1 : -1; });
     return st;
   }
   // The words that trip you up most, across every puzzle and game: each

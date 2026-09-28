@@ -755,7 +755,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function matchStatsHtml(key, total, pairs, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
-    var same = runs ? runs.live("match").filter(function (r) { return r.setup === key; }) : [];
+    var same = runs ? runs.live("match").filter(function (r) { return r.setup === key && !r.ended; }) : [];
     if (run && !same.some(function (r) { return r.id === run.id; })) same.push(run);
     var rank = 1 + same.filter(function (r) { return r.ms < total; }).length;
     var cells = '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + (total / pairs / 1000).toFixed(1) + 's</span><span class="fc-mt-stat-lbl">per pair</span></div>' +
@@ -798,7 +798,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     var best = null;
     (runs ? runs.live("match") : []).forEach(function (r) {
-      if (r.setup === key && r.splits && r.splits.length === rounds && (!best || r.ms < best.ms)) best = r;
+      if (r.setup === key && !r.ended && r.splits && r.splits.length === rounds && (!best || r.ms < best.ms)) best = r;
     });
     return best ? best.splits : null;
   }
@@ -925,12 +925,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped before the last round: what you played, but not logged -- a
-    // part game can't set a best or tilt your stats.
+    // Stopped before the last round: the rounds you finished count -- their
+    // pairs, time, misses, their place in Fastest round -- logged as ended,
+    // so they never set a best time (that takes the whole game).
     function endEarly() {
       setPhase("done");
       halt();
       var total = elapsed(), done = splits.length;
+      var sizes = p.rounds.slice(0, done).map(function (r) { return r.length; });
+      var pairs = sizes.reduce(function (a, b) { return a + b; }, 0);
+      if (done) recordRun({ mode: "match", n: pairs, ms: splits[done - 1], miss: misses, setup: matchBestKey(p),
+        splits: splits, sizes: sizes, missed: Object.keys(missedIds), ended: true });
       if (splitEl) splitEl.hidden = true;
       clockEl.classList.add("fc-ws-count-done");
       boardEl.classList.remove("fc-mt-paused");
@@ -938,7 +943,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
         '<p class="fc-mt-done-meta">Ended after ' + done + " of " + p.rounds.length + (p.rounds.length === 1 ? " round" : " rounds") +
         " · " + (misses === 1 ? "1 miss" : misses + " misses") + "</p>" +
-        '<p class="fc-mt-done-note">A game you end early isn’t counted in your stats.</p>' +
+        '<p class="fc-mt-done-note">' + (done ? "The " + pairs + " pairs you finished count in your stats; a best time needs the whole game."
+          : "No round finished, so nothing is counted.") + "</p>" +
         doneActionsHtml("fcMtAgain") + "</div>";
       bindDoneActions("fcMtAgain");
     }
@@ -1138,17 +1144,21 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the score so far, not logged (see Match's).
+    // Stopped part-way: the words you answered count (logged as ended, so
+    // never a best -- see Match's).
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
       var answered = at + (boardEl.querySelector(".fc-ls-choice:disabled") ? 1 : 0);
+      if (answered) recordRun({ mode: "listening", n: answered, ms: (pausedAt || Date.now()) - startedAt - pausedMs, right: score,
+        setup: setupKey(p.questions.length), missed: missed.map(function (w) { return w.id; }), ended: true });
       countEl.classList.add("fc-ws-count-done");
       boardEl.classList.remove("fc-mt-paused");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + answered + "</p>" +
         '<p class="fc-mt-done-meta">Ended after ' + answered + " of " + p.questions.length + " words</p>" +
-        '<p class="fc-mt-done-note">A game you end early isn’t counted in your stats.</p>' +
+        '<p class="fc-mt-done-note">' + (answered ? "The " + answered + (answered === 1 ? " word" : " words") + " you answered count in your stats."
+          : "No word answered, so nothing is counted.") + "</p>" +
         doneActionsHtml("fcLsAgain") + "</div>";
       bindDoneActions("fcLsAgain");
     }

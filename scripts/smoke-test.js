@@ -3148,10 +3148,27 @@ async function main() {
     document.getElementById("fcMtPause").click();
     document.getElementById("fcPauseEnd").click();
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
-    check("End game shows what you played -- ended after N rounds -- and doesn't count it in your stats",
-      !!done && /Ended after 0 of \d+ round/.test(done.textContent) && /isn’t counted/.test(done.textContent)
+    check("End game before any round is finished shows what you played and logs nothing",
+      !!done && /Ended after 0 of \d+ round/.test(done.textContent) && /nothing is counted/.test(done.textContent)
       && window.RaumeStudy.flashcards.puzzleRuns.live("match").length === before && !!document.getElementById("fcDoneStats"));
     document.getElementById("fcXwReset").click();
+    if (xw.state.puzzle.rounds.length > 1) {
+      const pr = window.RaumeStudy.flashcards.puzzleRuns, r0 = xw.state.puzzle.rounds[0];
+      const bestsBefore = JSON.stringify(pr.styleStats("match").bests.map(b => [b.setup, b.best.id]));
+      for (let i = 0; i < r0.length; i++) { mtTile("l", i).click(); mtTile("r", i).click(); }
+      for (let waited = 0; waited < 5000 && !document.querySelector("#fcPanelGames .fc-mt-break"); waited += 25) await new Promise(r => setTimeout(r, 25));
+      // End from the round break: ⏸ is dimmed there, so end straight from a fresh pause of round 2.
+      document.getElementById("fcMtNextRound").click();
+      document.getElementById("fcMtPause").click();
+      document.getElementById("fcPauseEnd").click();
+      const last = pr.live("match").pop();
+      const card = document.querySelector("#fcPanelGames .fc-mt-done").textContent;
+      check("End game after finished rounds counts those rounds (pairs, time, fastest round) as an ended game -- never a best",
+        last.ended === true && last.n === r0.length && last.splits.length === 1 && last.sizes.join() === String(r0.length)
+        && /Ended after 1 of/.test(card) && new RegExp("The " + r0.length + " pairs you finished count").test(card)
+        && JSON.stringify(pr.styleStats("match").bests.map(b => [b.setup, b.best.id])) === bestsBefore);
+      document.getElementById("fcXwReset").click();
+    }
   })();
 
   const xwIndex = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
@@ -3256,7 +3273,7 @@ async function main() {
     const paused = board.classList.contains("fc-mt-paused") && !!board.querySelector(".fc-mt-pause");
     document.getElementById("fcPauseEnd").click();
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
-    const ok = paused && !!done && /Ended after 0 of \d+ words/.test(done.textContent)
+    const ok = paused && !!done && /Ended after 0 of \d+ words/.test(done.textContent) && /nothing is counted/.test(done.textContent)
       && window.RaumeStudy.flashcards.puzzleRuns.live("listening").length === before;
     document.getElementById("fcXwReset").click();
     return ok;

@@ -373,8 +373,9 @@ scheduled; every finished game goes to the Dashboard.
   when it is), with the clock stopped until you tap **Next round**.
 - **⏸** beside the clock pauses: the clock stops and the tiles are hidden
   behind a card with **Resume**, **Restart** and **End game**. Leaving the
-  app mid-game pauses it too. **End game** shows what you played but doesn't
-  count it in your stats.
+  app mid-game pauses it too. **End game** shows what you played; the rounds
+  you finished count in your stats (pairs, time, misses, fastest round) —
+  only a best time needs the whole game.
 - Once you have a best on the same words, a small chip beside the clock after
   each round says how far ahead (sage, "−1.4s") or behind (coral, "+0.9s") of
   that best you are at that point.
@@ -405,7 +406,8 @@ scheduled; every finished game goes to the Dashboard.
   average over all Listening games, and the words you missed, each with a
   speaker to hear it again. **Play again** for new words; the **⋯** menu's
   *Restart* asks the same ones again. **⏸** pauses (the choices hidden);
-  *End game* shows the score so far, not counted in your stats.
+  *End game* shows the score so far; the words you answered count toward
+  your accuracy (never a best).
 - No Japanese voice and no recorded clips loaded (a first visit offline)? It
   says so instead of playing silently. Practice only, like Match.
 - Every finished game is saved to the Dashboard's **Games** card and [Stats](#stats) (score and

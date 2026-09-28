@@ -832,8 +832,9 @@ rather than dimmed so a stopped clock isn't study time; between rounds,
 "Round 1 of 3 done" with that round's time large, its misses and the split
 against your best on one grey line, "Your fastest round yet" in sage when it
 is, and a filled Next round — the clock stopped. A game ended early shows its
-card with "Ended after 1 of 3 rounds" and a faint "A game you end early isn’t
-counted in your stats."
+card with "Ended after 1 of 3 rounds" and a faint line saying what counts
+("The 5 pairs you finished count in your stats; a best time needs the whole
+game.").
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

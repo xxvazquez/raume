@@ -154,7 +154,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     return group("Personal bests", st.bests.map(function (b, i) {
       var isOpen = view.open === b.setup;
       var hist = isOpen ? '<ul class="fc-st-history" id="fcStHist' + i + '">' + b.runs.slice(0, 10).map(function (r) {
-        return '<li><span>' + esc(dateText(r.at)) + "</span><span>" + esc(runValue(r)) + "</span></li>";
+        return '<li><span>' + esc(dateText(r.at)) + (r.ended ? " · ended early" : "") + "</span><span>" + esc(runValue(r)) + "</span></li>";
       }).join("") + "</ul>" : "";
       return '<button type="button" class="set-row fc-st-best" data-setup="' + esc(b.setup) + '" aria-expanded="' + isOpen + '"' +
         (isOpen ? ' aria-controls="fcStHist' + i + '"' : "") + '>' +
