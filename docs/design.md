@@ -849,7 +849,11 @@ tabular number column — flowing onto more pages as needed. Portrait unless
 landscape buys clearly bigger squares. The last page is **Answers**: the
 filled grid, or the letter block with each word ringed in sage and the words
 with their answers. The browser-print rules (`body.print-only`) still cover
-the reference tables.
+the reference tables. A printed reference table is set like an iOS list on white
+paper: the table's name at 15px with its glyph in grey, then small grey
+column labels and one light hairline under the header and between rows — no
+box, no vertical rules, no card fill — the Japanese flush with the title and
+a 24px gap before the next table.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

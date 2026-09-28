@@ -2926,18 +2926,18 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   #vocabulary .table-section > .section-head {
     position: static !important; top: auto !important;
     display: flex !important; align-items: center; gap: 8px;
-    margin: 0 !important; padding: 0 0 8px !important; background: none !important;
+    margin: 0 !important; padding: 0 0 12px !important; background: none !important;
   }
   #vocabulary .table-section > .section-head::after { display: none !important; }
   /* Always print light, whatever the on-screen theme. */
   :root, :root[data-theme="dark"] {
-    --paper: #fff; --page-bg: #fff;
+    --paper: #fff; --page-bg: #fff; --group-ground: #fff;
     --ink: #1b1b1b; --ink-2: #333; --muted: #444; --romaji: #555; --faint: #666; --furigana: #767676;
     --line: #cfcfcf; --line-strong: #9a9a9a;
     --section: #555; --section-strong: #444;
     --particle: #1b1b1b; /* on paper a particle reads by its bold weight alone */
   }
-  .masthead, .site-nav, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
+  .masthead, .site-nav, .screen-title, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
   .page-title { display: none; }
@@ -2946,32 +2946,43 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      sheet with blank space above it. */
   #vocabulary { display: block; min-height: 0; }
 
-  .table-section { margin: 0 0 12px; max-width: none; }
-  #vocabulary .table-section { padding-left: 0; }
+  .table-section { margin: 0 0 24px; max-width: none; }
+  /* Open or closed, a printed table drops its on-screen card: no fill, no
+     inset, no corners, no joining hairline -- and a clear gap before the
+     next table's title. */
+  #vocabulary .table-section {
+    margin: 0 0 24px !important; padding: 0 !important;
+    background: none !important; border-radius: 0 !important; box-shadow: none !important;
+  }
   .page-vocab { background: none; }
-  #vocabulary .table-section.collapsed { background: none; padding: 0; border-radius: 0; }
-  #vocabulary .table-section:not(.collapsed) .vocab { border-radius: 4px; }
   .table-section .controls { display: none !important; }
   .section-head { display: block !important; padding: 0 0 8px !important; margin: 0 !important; border: 0 !important; }
   .section-head::before { display: none !important; }
   .section-toggle { display: block !important; cursor: auto; }
   .section-toggle-icon { display: none !important; }
-  .section-title-text { font-size: var(--fs-small); font-weight: 500; white-space: normal; }
+  /* The table's name is the sheet's heading: a size step up in ink, its
+     glyph beside it in grey. */
+  .section-title-text,
+  #vocabulary .table-section .section-title-text { font-size: 15px; font-weight: 500; color: var(--ink); white-space: normal; }
 
-  .vocab { border: 1px solid var(--line-strong) !important; border-radius: 4px; }
-  .vocab th { border-top: 0 !important; border-bottom: 1px solid var(--line-strong) !important; }
-  /* Vertical column separators, print only -- a page meant to be written on
-     by hand wants its columns visually divided; on screen the table stays
-     hairline-rows-only, no verticals. */
-  .vocab :is(th, td):not(:first-child) { border-left: 1px solid var(--line-strong) !important; }
+  /* On paper the table is an iOS list, not a spreadsheet: no box, no
+     vertical rules -- one hairline under the header and between rows (they
+     double as writing lines on a Cover-answers sheet), the column labels in
+     the quiet list-header voice, and the Japanese flush with the title
+     above it. */
+  #vocabulary .table-section:not(.collapsed) .vocab,
+  .vocab { margin: 0 !important; width: 100% !important; border: 0 !important; border-radius: 0 !important; }
+  .vocab th, .vocab td { border: 0 !important; border-bottom: .75pt solid #d6d6d6 !important; }
+  .vocab th { font-size: 11px; color: var(--faint); padding: 0 16px 5px 0 !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }
-  .vocab td, .vocab th { padding: 6px 10px !important; }
-  .vocab td:first-child, .vocab th:first-child { padding-left: 13px !important; }
+  .vocab td { padding: 7px 16px 7px 0 !important; }
+  #vocabulary .table-section:not(.collapsed) .vocab :is(th, td):first-child,
+  .vocab :is(th, td):first-child { padding-left: 0 !important; }
   /* The uniform padding above wipes out the screen rule's extra top room for
-     the Japanese cell's furigana (css/site.css:1116), so the reading crowds
-     the row's top border. Give just that cell its breathing room back. */
-  .vocab td.jp { padding-top: 9px !important; }
+     the Japanese cell's furigana, so the reading would crowd the rule above.
+     Give just that cell its breathing room back. */
+  .vocab td.jp { padding-top: 10px !important; }
   /* The screen rule top-anchors English so an on-screen romaji reveal can't
      shift it (see css/site.css's .vocab td:nth-child(2) comment) -- print has
      no such interaction to protect against, so keep its original centred
