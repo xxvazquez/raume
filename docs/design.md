@@ -152,6 +152,21 @@ Romaji rows, okurigana lighter), Writing (Strokes, Radical), Example, and In you
 tables: one *Words with 新 · 17* disclosure row that unfolds the whole list as
 compact rows — and one full-width filled capsule, **Add to flashcards**, that
 turns white (secondary) once added. Under the title sits a small white capsule,
+**Write it** sits under Replay in the Writing card (same white capsule). It
+turns the sheet into a pushed view — "‹ Back" (section tint) leading, "Write 三"
+centred, the ✕ trailing — over one card holding a square pad (up to 300px,
+`--group-ground`, 18px corners, KanjiVG's 109 grid with a faint dashed centre
+cross, the kanji's faint outline when Outline is on), the stroke count under it
+in the list's grey ("Stroke 2 of 6 · 1 miss", the misses coral), then an Outline
+switch row in its own card (20px gap, as any two back-to-back cards in the sheet)
+and Undo / Clear as white capsules. Drawn ink is `--ink`; a right stroke becomes
+its clean KanjiVG line in its stroke-order colour (the animation's `--so-*`); a
+miss shakes the pad (none under reduced motion); three misses on a stroke draw it
+faintly as a hint. The finish replaces the count: "3 / 3 strokes" 20px semibold,
+"Clean run — no misses" or the miss count, Again (white) and Next kanji (filled).
+Every secondary `.fc-btn` takes the screen's section tint, like the filled primary
+beside it.
+
 **Mark as known**; pressed, it reads "✓ Known" in the state sage
 (`--right-soft` wash, `--right-strong` ink), and the kanji's tile takes the
 same wash, sage character and meaning, and a small check badge in its corner. Example words use the reference tables'

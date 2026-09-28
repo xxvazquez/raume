@@ -311,6 +311,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     sheet.hidden = true;
     if (scrim) scrim.hidden = true;
     sheet.innerHTML = '';
+    if (window.RaumeStudy.kanjiWrite) window.RaumeStudy.kanjiWrite.close();
     closeKanjiPop();
     if (kanjiOpener && kanjiOpener.isConnected && !kanjiOpener.closest('[hidden]')) kanjiOpener.focus();
     kanjiOpener = null;
@@ -369,9 +370,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // A row's ⓘ opens its explainer in a popover (again: closes it); any
     // other tap closes an open one.
     // Replay: a fresh copy of the drawing restarts its CSS animation.
+    // Write it: the sheet turns into the writing pad (js/vocab/kanji-write.js);
+    // its Back puts this kanji's sheet back.
+    const write = t.closest('#kanjiSheet .ks-write');
+    if (write && window.RaumeStudy.kanjiWrite && kanjiOpener) {
+      closeKanjiPop();
+      const sheet = document.getElementById('kanjiSheet');
+      window.RaumeStudy.kanjiWrite.open(sheet, kanjiOpener.dataset.vocabId, function (id) {
+        sheet.innerHTML = vocab.kanjiSheetHtml(id);
+        const views = window.RaumeStudy.flashcards && window.RaumeStudy.flashcards.views;
+        if (views && views.refreshRowToggleButtons) views.refreshRowToggleButtons();
+        const w = sheet.querySelector('.ks-write');
+        if (w) w.focus();
+      });
+      return;
+    }
     const replay = t.closest('#kanjiSheet .ks-replay');
     if (replay) {
-      const svg = replay.parentNode.querySelector('.so-svg');
+      const svg = replay.closest('.ks-so').querySelector('.so-svg');
       if (svg) svg.replaceWith(svg.cloneNode(true));
       return;
     }

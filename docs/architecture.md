@@ -177,7 +177,8 @@ an array of `{ id, at, mode, n, ms, miss | right | help, setup }` — `mode` is
 match / listening / crossword / arroword / wordsearch; a grid or word search is
 logged once when solved, never when revealed in full — newest 500 kept;
 signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
-and merged back on sign-in by id), `raume-kanji-known` — kanji marked Known
+and merged back on sign-in by id), `raume-kanji-write-outline` — Write it's Outline switch (browser-local),
+`raume-kanji-known` — kanji marked Known
 ([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`):
 `{ vocabId: { k: 1|0, t: ms } }`, an un-mark kept as `k: 0` so a merge can tell
 it from never-marked; signed in, each change is pushed best-effort to
@@ -257,6 +258,7 @@ js/
     table-custom.js      per-table names / icons / order
     kanji-known.js       kanji marked Known (green tiles)
     custom-vocab.js      the reader's own rows / tables, merged into the dataset
+    kanji-write.js       the kanji sheet's Write it pad (stroke-order practice + judge)
     customize.js         the Customize page
     render.js            tables, nav, sorting
     interactions.js      routing, search, view modes, print, theme

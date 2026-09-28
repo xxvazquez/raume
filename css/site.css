@@ -2483,6 +2483,8 @@ body.ja-voice-ready .kanji-sheet .jp-speak-btn {
 .ks-close:hover { color: var(--ink); }
 .ks-group-head { margin: 0; padding: 14px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .ks-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+/* Two cards back to back (no group header between) keep the grouped-list gap. */
+.ks-card + .ks-card { margin-top: 20px; }
 .ks-row {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   min-height: 44px; padding: 8px 16px; font-size: 15px; color: var(--ink);
@@ -2566,7 +2568,7 @@ body.ja-voice-ready .kanji-sheet .jp-speak-btn {
    stroke-order chart convention, so a number is easy to match to its
    stroke. The category-tile hues, deepened toward the ink so they read as
    lines and small numbers (and lighten the same way in dark mode). */
-.so-svg {
+.so-svg, .kw-pad {
   --so-blue: color-mix(in srgb, var(--tile-blue) 78%, var(--ink));
   --so-orange: color-mix(in srgb, var(--tile-orange) 78%, var(--ink));
   --so-green: color-mix(in srgb, var(--tile-green) 78%, var(--ink));
@@ -2576,22 +2578,60 @@ body.ja-voice-ready .kanji-sheet .jp-speak-btn {
   --so-amber: color-mix(in srgb, var(--tile-amber) 78%, var(--ink));
   --so-indigo: color-mix(in srgb, var(--tile-indigo) 78%, var(--ink));
 }
-.so-svg .so-1, .so-svg .so-9, .so-svg .so-17 { --so: var(--so-blue); }
-.so-svg .so-2, .so-svg .so-10, .so-svg .so-18 { --so: var(--so-orange); }
-.so-svg .so-3, .so-svg .so-11, .so-svg .so-19 { --so: var(--so-green); }
-.so-svg .so-4, .so-svg .so-12, .so-svg .so-20 { --so: var(--so-purple); }
-.so-svg .so-5, .so-svg .so-13 { --so: var(--so-clay); }
-.so-svg .so-6, .so-svg .so-14 { --so: var(--so-teal); }
-.so-svg .so-7, .so-svg .so-15 { --so: var(--so-amber); }
-.so-svg .so-8, .so-svg .so-16 { --so: var(--so-indigo); }
+:is(.so-svg, .kw-pad) .so-1, :is(.so-svg, .kw-pad) .so-9, :is(.so-svg, .kw-pad) .so-17 { --so: var(--so-blue); }
+:is(.so-svg, .kw-pad) .so-2, :is(.so-svg, .kw-pad) .so-10, :is(.so-svg, .kw-pad) .so-18 { --so: var(--so-orange); }
+:is(.so-svg, .kw-pad) .so-3, :is(.so-svg, .kw-pad) .so-11, :is(.so-svg, .kw-pad) .so-19 { --so: var(--so-green); }
+:is(.so-svg, .kw-pad) .so-4, :is(.so-svg, .kw-pad) .so-12, :is(.so-svg, .kw-pad) .so-20 { --so: var(--so-purple); }
+:is(.so-svg, .kw-pad) .so-5, :is(.so-svg, .kw-pad) .so-13 { --so: var(--so-clay); }
+:is(.so-svg, .kw-pad) .so-6, :is(.so-svg, .kw-pad) .so-14 { --so: var(--so-teal); }
+:is(.so-svg, .kw-pad) .so-7, :is(.so-svg, .kw-pad) .so-15 { --so: var(--so-amber); }
+:is(.so-svg, .kw-pad) .so-8, :is(.so-svg, .kw-pad) .so-16 { --so: var(--so-indigo); }
 @media (prefers-reduced-motion: reduce) {
   .so-strokes path { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .so-nums text { animation: none; opacity: 1; }
 }
-.ks-replay {
+.ks-so-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.ks-replay, .ks-write {
   appearance: none; padding: 6px 14px; border: 0; border-radius: 999px;
   background: var(--paper); box-shadow: var(--control-lift);
   color: var(--section-strong); font: 500 14px/1.2 var(--font-ui); cursor: pointer;
+}
+/* Write it (js/vocab/kanji-write.js): the sheet as a pushed view -- ‹ Back,
+   the title, ✕ -- then one card holding the square pad (KanjiVG's 109 grid,
+   a faint centre cross, the Outline to trace when on), the stroke count under
+   it, an Outline switch row, and Undo / Clear. A right stroke snaps to its
+   clean line in its stroke-order colour; a wrong one shakes the pad. */
+.kw-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 0 4px 12px; }
+.kw-back {
+  justify-self: start; appearance: none; border: 0; background: none; padding: 6px 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 2px;
+  color: var(--section-strong); font: 400 15px/1.2 var(--font-ui);
+}
+.kw-title { margin: 0; font: 600 17px/1.25 var(--font-ui); color: var(--ink); }
+.kw-top .ks-close { justify-self: end; }
+.kw-card { padding: 16px 16px 12px; }
+.kw-pad-wrap { width: min(300px, 100%); aspect-ratio: 1; margin: 0 auto; border-radius: 18px; background: var(--group-ground); }
+.kw-pad-wrap.kw-miss { animation: fc-ws-miss .3s ease; }
+.kw-pad { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.kw-pad path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.kw-grid path { stroke: var(--row-line); stroke-width: .5; stroke-dasharray: 2 2; }
+.kw-guide path { stroke: transparent; stroke-width: 4; }
+.kw-pad.kw-outline .kw-guide path { stroke: color-mix(in srgb, var(--ink) 11%, transparent); }
+.kw-stroke { stroke: var(--so, var(--ink)); stroke-width: 4.5; }
+.kw-live { stroke: var(--ink); stroke-width: 4.5; }
+.kw-hint-stroke { stroke: var(--so, var(--ink)); stroke-width: 4.5; opacity: .45; stroke-dasharray: 1; stroke-dashoffset: 1; animation: so-draw .7s ease-in-out forwards; }
+.kw-status { margin: 10px 0 0; text-align: center; font-size: var(--fs-small); color: var(--muted); font-variant-numeric: tabular-nums; }
+.kw-misses { color: var(--wrong-strong); }
+.kw-finish { margin: 12px 0 2px; text-align: center; }
+.kw-finish-big { margin: 0; font: 600 20px/1.2 var(--font-ui); color: var(--ink); font-variant-numeric: tabular-nums; }
+.kw-finish-meta { margin: 4px 0 12px; font-size: var(--fs-small); color: var(--muted); }
+.kw-finish-actions, .kw-actions { display: flex; justify-content: center; gap: 10px; }
+.kw-actions { margin-top: 14px; }
+.kw-finish-actions .fc-btn, .kw-actions .fc-btn { min-height: 40px; padding: 8px 20px; }
+.kw-switch-row { cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  .kw-pad-wrap.kw-miss { animation: none; }
+  .kw-hint-stroke { animation: none; stroke-dashoffset: 0; }
 }
 .ks-credit { margin: 0; padding: 6px 16px 0; font-size: var(--fs-micro); color: var(--faint); }
 .ks-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -3577,8 +3617,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    the one filled button; per-row actions (.fc-btn-vocabaction) drop to plain
    text so a long list isn't a wall of capsules. */
 .fc-btn {
-  appearance: none; border: 0; background: var(--paper); color: var(--accent-strong); box-shadow: var(--control-lift);
-  font: 400 var(--fs-small)/1 var(--font-ui);
+  /* The section tone, like the filled primary beside it -- one tint per
+     screen, never a lavender button next to a brown one. */
+  appearance: none; border: 0; background: var(--paper); color: var(--section-strong); box-shadow: var(--control-lift);
+  font: 500 var(--fs-small)/1 var(--font-ui);
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
 }

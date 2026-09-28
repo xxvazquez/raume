@@ -500,7 +500,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var writing = row.strokes || row.radical || drawing
       ? '<h3 class="ks-group-head">Writing</h3><div class="ks-card">' +
         (drawing ? '<div class="ks-row ks-so"><div class="ks-so-box">' + drawing + '</div>' +
-          '<button type="button" class="ks-replay">Replay</button></div>' : '') +
+          '<div class="ks-so-actions"><button type="button" class="ks-replay">Replay</button>' +
+          (window.RaumeStudy.kanjiWrite ? '<button type="button" class="ks-write">Write it</button>' : '') + '</div></div>' : '') +
         (row.strokes ? kanjiRowHtml(row, 'strokes') : '') + (row.radical ? kanjiRowHtml(row, 'radical') : '') + '</div>' +
         // KanjiVG's licence asks for its name, a link and the licence's.
         (drawing ? '<p class="ks-credit">Stroke order from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a>, ' +

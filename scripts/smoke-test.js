@@ -225,6 +225,33 @@ async function main() {
     window.RaumeStudy.vocab.closeKanjiSheet();
     return allData && drawn && replayed;
   })());
+  check("Write it judges strokes: every kanji's own KanjiVG strokes pass; a reversed stroke, a stroke in the wrong place and the right shape out of order fail", (() => {
+    const kw = window.RaumeStudy.kanjiWrite, S = window.RaumeStudy.data.kanjiStrokes;
+    const own = Object.keys(S).every(ch => S[ch].p.every(d => kw.judge(kw.parsePath(d), d).ok));
+    const one = kw.parsePath(S["一"].p[0]);
+    const reversed = !kw.judge(one.slice().reverse(), S["一"].p[0]).ok;
+    const moved = !kw.judge(one.map(q => [q[0], q[1] - 35]), S["一"].p[0]).ok;
+    const outOfOrder = !kw.judge(kw.parsePath(S["三"].p[2]), S["三"].p[0]).ok; // 三's bottom stroke drawn first
+    return own && reversed && moved && outOfOrder;
+  })());
+  check("Write it opens a pad from the kanji sheet, counts strokes and misses, finishes, and Back returns to the sheet", (() => {
+    const kw = window.RaumeStudy.kanjiWrite, S = window.RaumeStudy.data.kanjiStrokes;
+    const sheet = document.getElementById("kanjiSheet");
+    [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "三").click();
+    sheet.querySelector(".ks-write").click();
+    const opened = !!sheet.querySelector(".kw-pad") && /Stroke 1 of 3/.test(sheet.querySelector(".kw-status").textContent)
+      && sheet.querySelector(".kw-pad").classList.contains("kw-outline");
+    kw.submit(kw.parsePath(S["三"].p[2])); // wrong stroke first
+    const missed = /1 miss/.test(sheet.querySelector(".kw-status").textContent);
+    S["三"].p.forEach(d => kw.submit(kw.parsePath(d)));
+    const fin = sheet.querySelector(".kw-finish");
+    const finished = !!fin && /3 \/ 3 strokes/.test(fin.textContent) && /1 miss/.test(fin.textContent)
+      && sheet.querySelectorAll(".kw-done .kw-stroke").length === 3 && !!sheet.querySelector(".kw-next");
+    sheet.querySelector(".kw-back").click();
+    const back = !!sheet.querySelector(".ks-write") && !sheet.querySelector(".kw-pad");
+    window.RaumeStudy.vocab.closeKanjiSheet();
+    return opened && missed && finished && back && !kw.isOpen();
+  })());
   check("Words with ... draws on every other table, never the kanji or sentence tables, shortest first, all of them", (() => {
     const w = window.RaumeStudy.vocab.wordsWithKanji("日", "");
     return w.length > 8 && w.every(x => x.text.includes("日")) && w.every((x, i) => !i || w[i - 1].text.length <= x.text.length)

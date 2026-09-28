@@ -52,6 +52,7 @@ const VERSIONED = [
   'js/vocab/custom-vocab.js',
   'js/vocab/render.js',
   'js/vocab/interactions.js',
+  'js/vocab/kanji-write.js',
   'js/vocab/customize.js',
   'vendor/ts-fsrs.js',
   'vendor/supabase.js',
