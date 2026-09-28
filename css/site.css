@@ -5074,3 +5074,38 @@ mark.fc-diff-co {
 .fc-st-word .set-value { font-variant-numeric: tabular-nums; }
 .fc-st-reset-card { margin-top: 28px; }
 .fc-st-reset { color: var(--wrong-strong); }
+.fc-st-best-title { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-st-best .set-label { min-width: 0; }
+
+/* iOS confirmation (puzzle-stats.js confirmSheet): an action sheet up from
+   the bottom on a phone -- a glass group holding the grey message and the
+   red destructive button, and Cancel as its own solid group under it; a
+   centred alert of the same parts on a wide window. The page dims behind. */
+.ios-confirm { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; justify-content: flex-end; }
+.ios-confirm-scrim { position: absolute; inset: 0; background: rgba(12, 14, 20, .32); }
+.ios-confirm-sheet {
+  position: relative; display: flex; flex-direction: column; gap: 8px;
+  padding: 0 8px calc(8px + env(safe-area-inset-bottom)); animation: ios-sheet-up .22s ease-out;
+}
+.ios-confirm-group {
+  border-radius: var(--radius-menu); overflow: hidden; text-align: center;
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .ios-confirm-group { background: var(--paper); } }
+.ios-confirm-msg { margin: 0; padding: 14px 20px; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; border-bottom: 1px solid var(--row-line); }
+.ios-confirm-destroy, .ios-confirm-cancel {
+  appearance: none; border: 0; width: 100%; min-height: 56px; cursor: pointer;
+  font: 400 17px/1.2 var(--font-ui); background: transparent;
+}
+.ios-confirm-destroy { color: var(--wrong-strong); }
+.ios-confirm-cancel { border-radius: var(--radius-menu); background: var(--paper); color: var(--accent-strong); font-weight: 600; }
+.ios-confirm-destroy:active, .ios-confirm-cancel:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ios-confirm-destroy:focus-visible, .ios-confirm-cancel:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
+@keyframes ios-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ios-confirm-sheet { animation: none; } }
+@media (min-width: 641px) {
+  .ios-confirm { justify-content: center; align-items: center; }
+  .ios-confirm-sheet { width: 320px; padding: 0; animation: none; }
+}

@@ -70,8 +70,9 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     return v.toFixed(1) + "s / " + (mode === "match" ? "pair" : "word");
   }
   function dateText(at) { return new Date(at).toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
-  // "flashcards|romaji|15" -> "Flashcards · Romaji · 15 words".
-  function setupLabel(key) {
+  // "flashcards|romaji|15" -> { title: "Flashcards", detail: "Romaji ·
+  // 15 words" } -- a list row's title and its grey second line.
+  function setupParts(key) {
     var parts = String(key).split("|"), src = parts[0];
     var name = src === "flashcards" ? "Flashcards" : src === "tricky" ? "Tricky words" : "";
     if (!name && src.indexOf("tables:") === 0) {
@@ -80,8 +81,9 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         .filter(function (t) { return ids.indexOf(String(t.id)) !== -1; }).map(function (t) { return t.title; });
       name = titles.length && titles.length <= 2 ? titles.join(", ") : ids.length + " tables";
     }
-    return [name || src, SCRIPTS[parts[1]] || parts[1], parts[2] + " words"].join(" · ");
+    return { title: name || src, detail: (SCRIPTS[parts[1]] || parts[1]) + " · " + parts[2] + " words" };
   }
+  function setupLabel(key) { var sp = setupParts(key); return sp.title + " · " + sp.detail; }
 
   // --- pieces ---
   function row(label, value, extraCls) {
@@ -161,7 +163,10 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       }).join("") + "</ul>" : "";
       return '<button type="button" class="set-row fc-st-best" data-setup="' + esc(b.setup) + '" aria-expanded="' + isOpen + '"' +
         (isOpen ? ' aria-controls="fcStHist' + i + '"' : "") + '>' +
-        '<span class="set-label">' + esc(setupLabel(b.setup)) + '<span class="fc-st-count">' + b.runs.length + (b.runs.length === 1 ? " game" : " games") + "</span></span>" +
+        // iOS subtitle cell: the source as a one-line title, the script,
+        // word count and games on the grey line under it.
+        '<span class="set-label"><span class="fc-st-best-title">' + esc(setupParts(b.setup).title) + "</span>" +
+        '<span class="fc-st-count">' + esc(setupParts(b.setup).detail) + " · " + b.runs.length + (b.runs.length === 1 ? " game" : " games") + "</span></span>" +
         '<span class="set-value">' + esc(runValue(b.best)) + CHEVRON + "</span></button>" + hist;
     }).join(""), "fc-st-bests");
   }
@@ -186,6 +191,35 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       (practise.length >= 6
         ? '<button type="button" class="set-row set-action" id="fcStPractise">Practise these in ' + esc(modeName(view.mode)) + "</button>"
         : ""));
+  }
+
+  // An iOS confirmation: an action sheet up from the bottom on a phone (a
+  // centred alert on a wide window) -- the message in grey, the red
+  // destructive button, and Cancel on its own. A tap on the dimmed page,
+  // Escape or Cancel backs out; nothing happens until the red button.
+  function confirmSheet(o) {
+    var old = document.querySelector(".ios-confirm");
+    if (old) old.remove();
+    var host = document.createElement("div");
+    host.className = "ios-confirm";
+    host.innerHTML = '<div class="ios-confirm-scrim"></div>' +
+      '<div class="ios-confirm-sheet" role="alertdialog" aria-modal="true" aria-labelledby="iosConfirmMsg">' +
+      '<div class="ios-confirm-group"><p class="ios-confirm-msg" id="iosConfirmMsg">' + esc(o.message) + "</p>" +
+      '<button type="button" class="ios-confirm-destroy" id="iosConfirmGo">' + esc(o.confirm) + "</button></div>" +
+      '<button type="button" class="ios-confirm-cancel" id="iosConfirmCancel">Cancel</button></div>';
+    document.body.appendChild(host);
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      host.remove();
+      var back = document.getElementById("fcStReset");
+      if (back) back.focus();
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
+    document.getElementById("iosConfirmCancel").addEventListener("click", close);
+    document.getElementById("iosConfirmGo").addEventListener("click", function () { close(); o.onConfirm(); });
+    document.getElementById("iosConfirmCancel").focus();
   }
 
   function render(panel) {
@@ -223,11 +257,16 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       window.scrollTo(0, 0);
     });
     document.getElementById("fcStReset").addEventListener("click", function () {
-      var name = modeName(view.mode);
-      if (!window.confirm("Reset " + name + " stats?\n\nEvery " + name + " game so far is cleared from your stats and bests, on every device. This can’t be undone.")) return;
-      runs().reset(view.mode);
-      if (view.mode === "match" && S.crosswords.clearMatchBests) S.crosswords.clearMatchBests();
-      render(panel);
+      var name = modeName(view.mode), mode = view.mode;
+      confirmSheet({
+        message: "Every " + name + " game so far is cleared from your stats and bests, on every device. This can’t be undone.",
+        confirm: "Reset Stats",
+        onConfirm: function () {
+          runs().reset(mode);
+          if (mode === "match" && S.crosswords.clearMatchBests) S.crosswords.clearMatchBests();
+          render(panel);
+        }
+      });
     });
   }
 

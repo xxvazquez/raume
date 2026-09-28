@@ -3437,6 +3437,8 @@ async function main() {
     const hist = document.querySelectorAll("#fcPanelStats .fc-st-history li").length;
     return /best per pair/.test(panel.querySelector(".fc-st-hero").textContent) && panel.querySelectorAll(".fc-st-fig").length === 3
       && !!panel.querySelector(".fc-st-chart polyline") && !!panel.querySelector(".fc-st-best .fc-st-chev")
+      && panel.querySelector(".fc-st-best-title").textContent === "Flashcards"
+      && /^Romaji · \d+ words · \d+ games?$/.test(panel.querySelector(".fc-st-best .fc-st-count").textContent)
       && hist >= 1 && document.querySelector("#fcPanelStats .fc-st-best").getAttribute("aria-expanded") === "true"
       && panel.querySelectorAll(".fc-st-word").length >= 1
       && document.querySelectorAll("#fcPanelStats [style]").length === 0;
@@ -3457,10 +3459,17 @@ async function main() {
   }
   document.getElementById("fcXwStats").click();
   document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
-  const realConfirm = window.confirm;
-  window.confirm = () => true;
+  const mtBefore = pr.live("match").length;
   document.getElementById("fcStReset").click();
-  window.confirm = realConfirm;
+  check("Reset asks first, iOS-style: an action sheet with the message, a red Reset Stats and Cancel -- Cancel changes nothing", (() => {
+    const sheet = document.querySelector(".ios-confirm");
+    const ok = !!sheet && sheet.querySelector('[role="alertdialog"]') && /can’t be undone/.test(sheet.textContent)
+      && document.getElementById("iosConfirmGo").textContent === "Reset Stats" && /Every Match game/.test(sheet.textContent) && document.activeElement === document.getElementById("iosConfirmCancel");
+    document.getElementById("iosConfirmCancel").click();
+    return ok && !document.querySelector(".ios-confirm") && pr.live("match").length === mtBefore && mtBefore > 0;
+  })());
+  document.getElementById("fcStReset").click();
+  document.getElementById("iosConfirmGo").click();
   check("Reset Match stats (after a confirm) clears Match's numbers and bests but leaves Listening's -- a marker in the log keeps them cleared across a sync merge", (() => {
     const markers = pr.all().filter(r => r.reset && r.mode === "match");
     pr.applyRemote(pr.all().concat([{ id: "old-remote", at: "2020-01-01T00:00:00Z", mode: "match", n: 6, ms: 9000, miss: 0 }]));

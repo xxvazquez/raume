@@ -468,7 +468,8 @@ style, opening on the one you were playing:
   every puzzle and game (a wrong pair, a wrong answer, a letter or word
   revealed, a square Check marked wrong). **Practise these** starts the style
   you're looking at from just those words (Source reads *Tricky words*).
-- **Reset** clears that style's stats and bests, on every device (it asks first).
+- **Reset** clears that style's stats and bests, on every device — an iOS
+  action sheet asks first (**Reset Stats** or **Cancel**).
 
 Practice only — nothing here touches your flashcard schedule.
 

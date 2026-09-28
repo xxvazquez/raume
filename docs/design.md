@@ -911,7 +911,14 @@ chevron that turns, a quiet "N games" under the setup, its history opening
 inline; Tricky words in the Manage rows' voice — Japanese with small romaji
 beside it, English under, "3×" right — with Practise these as the card's
 last row in tint text, iOS Settings' action row), and Reset as a lone
-coral-text row in its own card at the foot (a native confirm first). The
+coral-text row in its own card at the foot. Reset asks first with an iOS
+**action sheet** (`.ios-confirm`, `confirmSheet`): up from the bottom on a
+phone over a dimmed page — a glass group holding the grey message ("Every
+Match game so far is cleared…") and a red **Reset Stats**, then **Cancel**
+as its own solid white group (focused, so Return backs out); a centred
+320px alert of the same parts on a wide window. Personal-best rows are
+subtitle cells: the source as a one-line title, "Hiragana · 10 words · 3
+games" on the grey line under it. The
 trend ("Last 30 games") is a dataviz single series: one 2px accent line on a
 hairline baseline, better always up, the newest game a dot ringed in paper,
 and two quiet captions under it (the best value, which way is better) — no
