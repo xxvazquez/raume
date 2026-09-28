@@ -3629,6 +3629,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    wrap onto a second line on desktop. On a phone the row restacks: name on
    top, the two buttons sharing a full-width row beneath. */
 .fc-manage-table-head {
+  cursor: pointer;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: "toggle label actions";
@@ -3702,11 +3703,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    (no ruby -- see views.js) keeps every row the same height, so the status
    glyphs and the action buttons line up in clean columns down the list. */
 .fc-manage-row {
-  display: flex; align-items: center; gap: 10px;
+  position: relative; display: flex; align-items: center; gap: 10px;
   min-height: 52px; padding: 6px 14px;
-  border-top: 1px solid var(--row-line);
 }
-.fc-manage-row:first-child { border-top: 0; }
+/* Hairlines inset to where the word starts (past the status dot), as in
+   every other iOS list here. */
+.fc-manage-row + .fc-manage-row::before {
+  content: ""; position: absolute; top: 0; left: 42px; right: 0; border-top: 1px solid var(--row-line);
+}
 /* Two lines, so you can see what you're adding: the Japanese with its romaji
    right after it (small, faint -- the reading, not a second answer), then the
    English under them. */

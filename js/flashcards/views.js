@@ -334,8 +334,14 @@ window.RaumeStudy.flashcards.views = (function () {
     panel.querySelectorAll("[data-cat-action]").forEach(function (btn) {
       btn.addEventListener("click", function () { runCategoryAdd(btn.dataset.cat, btn); });
     });
-    panel.querySelectorAll(".fc-manage-table-toggle").forEach(function (btn) {
-      btn.addEventListener("click", function () {
+    // The whole row opens its table, as an iOS disclosure row does -- not
+    // just the small chevron. Its own buttons (Add / Pause…) still act.
+    panel.querySelectorAll(".fc-manage-table-head").forEach(function (head) {
+      var btn = head.querySelector(".fc-manage-table-toggle");
+      if (!btn) return;
+      head.addEventListener("click", function (e) {
+        var hit = e.target.closest("button, a, input");
+        if (hit && hit !== btn) return;
         var id = btn.dataset.tableId;
         manageExpandedTables[id] = !manageExpandedTables[id];
         rerender();
