@@ -28,7 +28,7 @@ cooking or studying, and for printing clean A4 study sheets.
     [Print, theme and navigation](#print-theme-and-navigation)
 - [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
-    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles) · [Games](#games)
+    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles) · [Games](#games) · [Stats](#stats)
 - [Accounts and storage](#accounts-and-storage)
 - [Development](#development)
 - [License](#license)
@@ -251,11 +251,12 @@ sit at the top right, beside the title, and open as their own screen with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Kana** (how many of your chosen kana cards you've started, how many to study now, and a button straight to it), **Puzzles** (every finished Match and Listening game and every crossword, arroword and word search you solve — one revealed in full doesn't count: games played, puzzles solved, Listening accuracy, best Match pace per pair, games per day this week and the last four games; synced to your account when signed in), **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
+| **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Kana** (how many of your chosen kana cards you've started, how many to study now, and a button straight to it), **Puzzles** (every crossword, arroword and word search you solve — one revealed in full doesn't count: puzzles solved, solved this week, the last three) and **Games** (every finished Match and Listening game: games played, Listening accuracy, best Match pace per pair, games per day this week, the last three) — each with **See stats**, and synced to your account when signed in, **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
 | **Games** | Match / Listening from your words ([below](#games)) |
+| **Stats** | Per puzzle or game style — opened from ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file — cards, kana, table customisations, your own words, Known kanji and puzzle games) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
 
@@ -289,7 +290,7 @@ The puzzle comes first. Its settings sit above it as pull-down buttons —
 *Crossword ⌃⌄ · Flashcards ⌃⌄ · 15 words ⌃⌄ · Romaji ⌃⌄* — one tap opens a
 setting's menu, a second picks; changing one makes a new puzzle. Next to them:
 New puzzle, ⓘ (how to solve), **Hint** and **Check**; ⋯ holds the rarer
-Reveal puzzle, Clear and Save as PDF. On a phone the pull-downs sit two by two. On a wide
+Reveal puzzle, Clear, Save as PDF and [Stats](#stats). On a phone the pull-downs sit two by two. On a wide
 window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
@@ -350,7 +351,7 @@ scrolls sideways.
 
 Timed and scored rounds: **Match** and **Listening**. Same toolbar as
 Puzzles — the pull-downs for game, words and script (none for Listening),
-then **New game** and ⋯ (*Restart*). Each tab keeps its own settings and its
+then **New game** and ⋯ (*Restart*, *Stats*). Each tab keeps its own settings and its
 game in progress while you switch between them. Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
 
@@ -373,7 +374,7 @@ scheduled; every finished game goes to the Dashboard.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same
   words again. Practice only — it never changes your flashcard schedule.
-- Every finished game is saved to the Dashboard's **Puzzles** card (time,
+- Every finished game is saved to the Dashboard's **Games** card and [Stats](#stats) (time,
   pairs, misses).
 
 </details>
@@ -395,10 +396,31 @@ scheduled; every finished game goes to the Dashboard.
   *Restart* asks the same ones again.
 - No Japanese voice and no recorded clips loaded (a first visit offline)? It
   says so instead of playing silently. Practice only, like Match.
-- Every finished game is saved to the Dashboard's **Puzzles** card (score and
+- Every finished game is saved to the Dashboard's **Games** card and [Stats](#stats) (score and
   time).
 
 </details>
+
+### Stats
+
+One screen per tab — **Puzzle stats** (Crossword / Arroword / Word search)
+and **Game stats** (Match / Listening) — with a segmented control for the
+style, opening on the one you were playing:
+
+- **Overview** — played / solved, time played, your day streak and longest,
+  and the style's own measure: best pace per pair (Match), accuracy
+  (Listening), best time per word and hints used (puzzles).
+- **Last 30 games** — one line, better always up, and "18% faster than your
+  first 10 games" once there are 20 and it's true.
+- **Personal bests** — one per setup (source · script · word count); tap one
+  for its last ten games.
+- **Tricky words** — the words you've missed in two or more games, across
+  every puzzle and game (a wrong pair, a wrong answer, a letter or word
+  revealed, a square Check marked wrong). **Practise these** starts the style
+  you're looking at from just those words (Source reads *Tricky words*).
+- **Reset** clears that style's stats and bests, on every device (it asks first).
+
+Practice only — nothing here touches your flashcard schedule.
 
 <sub>[↑ Contents](#contents)</sub>
 

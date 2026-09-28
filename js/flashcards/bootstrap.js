@@ -53,7 +53,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // -- they open like a pushed iOS screen (a Back button, their own title)
   // instead of being two more segments. Back returns to whichever of the
   // five segments you came from.
-  var PUSHED_TABS = { settings: "Settings", help: "Help" };
+  // The Stats screen (puzzle-stats.js) is pushed too, from Puzzles, Games
+  // or the Dashboard; its title names which.
+  var PUSHED_TABS = { settings: "Settings", help: "Help", stats: "Stats" };
   var lastMainTab = "dashboard";
 
   function root() { return document.getElementById("flashcardsPage"); }
@@ -254,7 +256,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     var identityHtml = isGuestMode()
       ? '<div class="fc-signed-in-as"><span class="fc-signed-in-text">This device only · not backed up</span> <button type="button" id="fcGoAccount">Sign in</button></div>'
       : '<div class="fc-signed-in-as"><span class="fc-signed-in-text">Signed in as ' + esc(currentUser().email) + '</span> <button type="button" id="fcSignOut">Sign out</button></div>';
-    var pushed = PUSHED_TABS[activeTab];
+    var pushed = activeTab === "stats" ? S.puzzleStats.title() : PUSHED_TABS[activeTab];
     if (!pushed) lastMainTab = activeTab;
     // Five segments -- the most an iOS segmented control holds and still
     // reads at a glance; nothing more joins without restructuring.
@@ -287,7 +289,8 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-tabpanel"' + (activeTab === "crosswords" ? "" : " hidden") + ' id="fcPanelCrosswords"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "games" ? "" : " hidden") + ' id="fcPanelGames"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "settings" ? "" : " hidden") + ' id="fcPanelSettings"></div>' +
-      '<div class="fc-tabpanel"' + (activeTab === "help" ? "" : " hidden") + ' id="fcPanelHelp"></div>';
+      '<div class="fc-tabpanel"' + (activeTab === "help" ? "" : " hidden") + ' id="fcPanelHelp"></div>' +
+      '<div class="fc-tabpanel"' + (activeTab === "stats" ? "" : " hidden") + ' id="fcPanelStats"></div>';
 
     if (isGuestMode()) {
       // Leaves the guest cache exactly as it is (own localStorage key) --
@@ -314,6 +317,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     else if (activeTab === "crosswords") crosswords.renderCrosswords(document.getElementById("fcPanelCrosswords"));
     else if (activeTab === "games") crosswords.renderGames(document.getElementById("fcPanelGames"));
     else if (activeTab === "help") renderHelp(document.getElementById("fcPanelHelp"));
+    else if (activeTab === "stats") S.puzzleStats.render(document.getElementById("fcPanelStats"));
     else renderSettings(document.getElementById("fcPanelSettings"));
 
     updateSyncChip();

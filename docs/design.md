@@ -677,11 +677,12 @@ be scannable at a glance:
   Study now), `.fc-dash-stats` (the 4 tiles) and then one `.fc-viz-card` each for
   Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
   layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
-  — white Open Kana when nothing is due — and the sage bar), Puzzles (full width, always
-  there: four stat cells — one row of four on a wide window — the week's games as
-  the Reviews-this-week bars, then the last four games as 44px hairline rows,
-  result right in tabular figures; with no games yet, one line "No games yet." and
-  a white Play a puzzle button), Kanji ("12 of 102 known" beside a white button,
+  — white Open Kana when nothing is due — and the sage bar), Puzzles and Games (full
+  width, always there, one card each: stat cells — Games' three in one row on a
+  wide window — Games' week as the Reviews-this-week bars, then the last three as
+  44px hairline rows, result right in tabular figures; at the foot a white Play a
+  puzzle / Play a game and a plain tint-text See stats; with nothing played yet,
+  one line and those two buttons), Kanji ("12 of 102 known" beside a white button,
   a thin 6px sage bar under it — the Known tiles' colour), Missed today, Leeches.
   Every progress bar is one component (`progressBarHtml`, tokens `--bar-h` /
   `--bar-track` / `--bar-fill`: 6px, rounded, sage on a faint ink track) — the
@@ -848,6 +849,20 @@ viewport-relative `min-height` so the card centres in what that frees up
 instead of sitting pinned under a stack of chrome it doesn't need. One CSS
 rule covers both the vocabulary and Kana review cards, since they share the
 same markup — no session-state flag to keep in sync in JS.
+
+**Stats** (`puzzle-stats.js`, `#fcPanelStats`) is a pushed screen like
+Settings — "‹ Practice", a large "Puzzle stats" / "Game stats" title — in the
+Settings model: the style as a segmented control, then grey-headed white
+cards of 44px rows (Overview; Personal bests, each a row that opens its
+history inline, a quiet "N games" under the setup; Tricky words in the Manage
+rows' voice — Japanese with small romaji beside it, English under, "3×"
+right), a filled Practise these capsule under them, and Reset as a lone
+coral-text row in its own card at the foot (a native confirm first). The
+trend ("Last 30 games") is a dataviz single series: one 2px accent line on a
+hairline baseline, better always up, the newest game a dot ringed in paper,
+native tooltips per point, and two quiet captions under it (the best value,
+which way is better) — no gridlines, no axis numbers. A finished game's card
+puts a white Stats beside Play again.
 
 The sub-tabs are five segments (Dashboard / Manage / Kana / Puzzles / Games) —
 the most an iOS segmented control holds and still reads at a glance, so

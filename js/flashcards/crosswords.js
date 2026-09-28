@@ -48,6 +48,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Same ⋯ glyph as a reference table's overflow menu (js/vocab/render.js's
   // MENU_ICON) -- the menu itself reuses that one's markup, so the delegated
   // open/close/Escape handling in js/vocab/interactions.js covers it too.
+  // Three rising bars: the Stats screen.
+  var STATS_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 15V10M9 15V4M14 15V7.5"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
   // Same ⓘ glyph as a reference row's grammar notes (js/vocab/render.js's
   // INFO_ICON), at the ⋯ menu's size.
@@ -165,8 +167,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       .filter(function (entry) { return ids.indexOf(String(entry.tableId)) !== -1; });
     return poolFromEntries(entries);
   }
+  // Source 3: a fixed list -- the Stats screen's Tricky words, whatever
+  // table or flashcard status they have.
+  function idsWordPool(ids) {
+    var index = vocabIndex();
+    return poolFromEntries((ids || []).map(function (id) { return index[id]; }).filter(Boolean));
+  }
   function wordPool() {
-    return state.source === "table" ? tableWordPool(state.tables) : flashcardsWordPool();
+    return state.source === "table" ? tableWordPool(state.tables)
+      : state.source === "tricky" ? idsWordPool(state.trickyIds) : flashcardsWordPool();
   }
   // The N5 Kanji tables hold single characters, not words to play with.
   function vocabTables() {
@@ -650,11 +659,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
     updateCount();
     return {
+      // Returns the word it revealed (or null when all are found).
       revealOne: function () {
         var i = found.indexOf(false);
-        if (i === -1) return;
+        if (i === -1) return null;
         var ends = placementEnds(p.placements[i]);
         markFound(i, ends[0], ends[1]);
+        return p.placements[i];
       },
       revealAll: function () {
         found.forEach(function (f, i) { if (!f) { var ends = placementEnds(p.placements[i]); markFound(i, ends[0], ends[1]); } });
@@ -698,10 +709,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
     return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
   }
-  function matchBestKey(p) {
-    var src = state.source === "table" ? "tables:" + state.tables.map(String).sort().join(",") : "flashcards";
-    return src + "|" + state.script + "|" + p.placements.length;
+  // A game's setup -- source, script and word count -- so a best or a
+  // history only ever compares like with like.
+  function setupKey(n) {
+    var src = state.source === "table" ? "tables:" + state.tables.map(String).sort().join(",") : state.source;
+    return src + "|" + state.script + "|" + n;
   }
+  function matchBestKey(p) { return setupKey(p.placements.length); }
   function readBest() {
     try { return JSON.parse(localStorage.getItem(MATCH_BEST_KEY)) || {}; } catch (e) { return {}; }
   }
@@ -726,7 +740,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // average over every Listening game so far.
   function listeningStatsHtml(right, n, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
-    var all = runs ? runs.all().filter(function (r) { return r.mode === "listening"; }) : [];
+    var all = runs ? runs.live("listening") : [];
     if (run && !all.some(function (r) { return r.id === run.id; })) all.push(run);
     var asked = 0, got = 0;
     all.forEach(function (r) { asked += r.n; got += r.right || 0; });
@@ -736,7 +750,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function matchStatsHtml(key, total, pairs, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
-    var same = runs ? runs.all().filter(function (r) { return r.mode === "match" && r.setup === key; }) : [];
+    var same = runs ? runs.live("match").filter(function (r) { return r.setup === key; }) : [];
     if (run && !same.some(function (r) { return r.id === run.id; })) same.push(run);
     var rank = 1 + same.filter(function (r) { return r.ms < total; }).length;
     var cells = '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + (total / pairs / 1000).toFixed(1) + 's</span><span class="fc-mt-stat-lbl">per pair</span></div>' +
@@ -755,6 +769,19 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     return '<div class="fc-mt-stats">' + cells + "</div>" + spark;
   }
+  // A finished game's buttons: Play again (new words), and Stats.
+  function doneActionsHtml(againId) {
+    return '<div class="fc-mt-done-actions"><button type="button" class="fc-btn fc-btn-primary" id="' + againId + '">Play again</button>' +
+      '<button type="button" class="fc-btn" id="fcDoneStats">Stats</button></div>';
+  }
+  function bindDoneActions(againId) {
+    document.getElementById(againId).addEventListener("click", function () { generate(); rerender(); });
+    document.getElementById("fcDoneStats").addEventListener("click", openStats);
+  }
+  function openStats() {
+    var stats = window.RaumeStudy.flashcards.puzzleStats;
+    if (stats) stats.open(state.kind, state.mode);
+  }
   var matchTimer = null;
   function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
 
@@ -765,13 +792,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function bestSplits(key, rounds) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     var best = null;
-    (runs ? runs.all() : []).forEach(function (r) {
-      if (r.mode === "match" && r.setup === key && r.splits && r.splits.length === rounds && (!best || r.ms < best.ms)) best = r;
+    (runs ? runs.live("match") : []).forEach(function (r) {
+      if (r.setup === key && r.splits && r.splits.length === rounds && (!best || r.ms < best.ms)) best = r;
     });
     return best ? best.splits : null;
   }
   function wireMatch(boardEl, clockEl, p, romajiMode) {
-    var round, start, penalty, misses, selected, left, game = 0, splits, pb;
+    var round, start, penalty, misses, selected, left, game = 0, splits, pb, missedIds;
     var splitEl = document.getElementById("fcMtSplit");
     function showSplit(i, at) {
       if (!splitEl || !pb || pb[i] == null) return;
@@ -814,7 +841,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var key = matchBestKey(p), best = readBest()[key];
       var isBest = typeof best !== "number" || total < best;
       if (isBest) saveBest(key, total);
-      var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key, splits: splits });
+      var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key, splits: splits, missed: Object.keys(missedIds) });
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
       var outcome = typeof best !== "number" ? "New best"
         : isBest ? "New best · " + ((best - total) / 1000).toFixed(1) + "s faster"
@@ -823,8 +850,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
         '<p class="fc-mt-done-meta">' + outcome + " · " + missText + "</p>" +
         matchStatsHtml(key, total, p.placements.length, run) +
-        '<button type="button" class="fc-btn fc-btn-primary" id="fcMtAgain">Play again</button></div>';
-      document.getElementById("fcMtAgain").addEventListener("click", function () { generate(); rerender(); });
+        doneActionsHtml("fcMtAgain") + "</div>";
+      bindDoneActions("fcMtAgain");
     }
     function select(tile) {
       if (selected) selected.setAttribute("aria-pressed", "false");
@@ -860,6 +887,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       } else {
         penalty += MATCH_PENALTY_MS;
         misses++;
+        // Both words of a wrong pair count as missed: the reading you
+        // didn't know, and the meaning you took it for.
+        pair.forEach(function (t) { missedIds[p.rounds[round][+t.dataset.i].id] = true; });
         tick();
         pair.forEach(function (t) { t.classList.remove("fc-mt-wrong"); void t.offsetWidth; t.classList.add("fc-mt-wrong"); });
         setTimeout(function () { pair.forEach(function (t) { t.classList.remove("fc-mt-wrong"); }); }, 450);
@@ -869,7 +899,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     function restart() {
       stopMatchTimer();
       game++;
-      round = 0; start = null; penalty = 0; misses = 0; splits = [];
+      round = 0; start = null; penalty = 0; misses = 0; splits = []; missedIds = {};
       pb = bestSplits(matchBestKey(p), p.rounds.length);
       if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(0);
@@ -972,7 +1002,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }
     }
     function finish() {
-      var run = recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score });
+      var run = recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score,
+        setup: setupKey(p.questions.length), missed: missed.map(function (w) { return w.id; }) });
       countEl.textContent = score + " / " + p.questions.length;
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
@@ -983,8 +1014,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           return '<li><button type="button" class="fc-ls-say" data-m="' + i + '" aria-label="Play">' + SPEAKER_ICON + "</button>" +
             '<span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
         }).join("") + "</ul>" : "") +
-        '<button type="button" class="fc-btn fc-btn-primary" id="fcLsAgain">Play again</button></div>';
-      document.getElementById("fcLsAgain").addEventListener("click", function () { generate(); rerender(); });
+        doneActionsHtml("fcLsAgain") + "</div>";
+      bindDoneActions("fcLsAgain");
     }
     boardEl.addEventListener("click", function (e) {
       if (e.target.closest(".fc-ls-play")) {
@@ -1220,6 +1251,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var byCategory = {};
     vocabTables().forEach(function (t) { (byCategory[t.category || "Tables"] = byCategory[t.category || "Tables"] || []).push(t); });
     var opts = '<option value="flashcards"' + (state.source === "flashcards" ? " selected" : "") + ">Flashcards</option>" +
+      (state.source === "tricky" ? '<option value="tricky" selected>Tricky words</option>' : "") +
       (several ? '<option value="multi" selected>' + esc(tablesSummary()) + "</option>" : "") +
       Object.keys(byCategory).sort(function (a, b) { return a.localeCompare(b); }).map(function (cat) {
         return '<optgroup label="' + esc(cat) + '">' + byCategory[cat].slice().sort(function (a, b) { return a.title.localeCompare(b.title); }).map(function (t) {
@@ -1228,7 +1260,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         }).join("") + "</optgroup>";
       }).join("") +
       '<option value="several">Several tables…</option>';
-    var shown = state.source === "table" ? tablesSummary() : "Flashcards";
+    var shown = state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
     return '<div class="fc-xw-source">' + chipHtml("source", "Words from", shown, opts) +
       '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
       '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Tables"' + (state.tablesOpen ? "" : " hidden") + ">" +
@@ -1444,7 +1476,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // True when every square is filled in and right -- the puzzle is solved.
-  function checkGrid(gridEl, p) {
+  // `wrong` (optional) collects the "r,c" of every square marked wrong.
+  function checkGrid(gridEl, p, wrong) {
     var all = true;
     gridEl.querySelectorAll(".fc-xw-cell-input").forEach(function (input) {
       var v = input.value.trim();
@@ -1453,7 +1486,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (!v) { all = false; return; }
       var correct = p.grid[input.dataset.r + "," + input.dataset.c];
       cell.classList.add(v === correct ? "fc-xw-cell-correct" : "fc-xw-cell-wrong");
-      if (v !== correct) all = false;
+      if (v !== correct) { all = false; if (wrong) wrong.push(input.dataset.r + "," + input.dataset.c); }
     });
     return all;
   }
@@ -1474,12 +1507,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var target = last && !last.value ? last : null;
     if (!target) target = nav.activeCells().map(inputFor).filter(function (el) { return el && !el.value; })[0] || null;
     if (!target) target = [].filter.call(gridEl.querySelectorAll(".fc-xw-cell-input"), function (el) { return !el.value; })[0] || null;
-    if (!target) return; // every cell already filled
+    if (!target) return null; // every cell already filled
     target.value = p.grid[target.dataset.r + "," + target.dataset.c];
     var cell = target.closest(".fc-xw-cell");
     cell.classList.remove("fc-xw-cell-wrong");
     cell.classList.add("fc-xw-cell-correct");
     target.focus();
+    return target.dataset.r + "," + target.dataset.c;
   }
   // Clears every typed letter and verdict but keeps the same grid -- for
   // trying the same puzzle again, as opposed to New puzzle's fresh layout.
@@ -1510,12 +1544,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
   // A page with a folded corner and a down arrow: a file you keep.
   var PDF_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 16h8a1.5 1.5 0 0 0 1.5-1.5V6Z"/><path d="M10.5 2v4h4"/><path d="M9 8.5v4.5M7 11l2 2 2-2"/></svg>';
-  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON]];
+  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON], ["stats", "Stats", STATS_ICON]];
   // A word search has no letters to type, so its Hint reveals a whole word.
   var WS_MENU_LABELS = { reset: "Clear found words" };
   // Match has nothing to reveal or print mid-game (a reveal would make the
   // clock meaningless): just a new game, or the same words again.
-  var MT_MENU_LABELS = { newMenu: "New game", reset: "Restart" };
+  var MT_MENU_LABELS = { newMenu: "New game", reset: "Restart", stats: "Stats" };
   function optionLabel(opts, value) {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
@@ -1605,7 +1639,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
         if (key === "source") {
-          if (sel.value === "multi") return;
+          if (sel.value === "multi" || sel.value === "tricky") return;
           if (sel.value === "several") {
             // Opens the checklist on what's picked now (the first roomy
             // table, coming from Flashcards).
@@ -1733,14 +1767,22 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // A solved grid or word search goes to the Dashboard's log, once per
     // puzzle: the time from when it appeared and how many letters / words
     // were revealed. Revealing the whole puzzle means it wasn't solved.
-    var solve = { start: Date.now(), help: 0, done: false };
+    var solve = { start: Date.now(), help: 0, done: false, missed: {} };
+    // A word you needed a letter of, or got a square of wrong, is missed.
+    function missCells(keys) {
+      p.placements.forEach(function (pl) {
+        var cells = cellsForPlacement(pl);
+        if (keys.some(function (k) { return cells.indexOf(k) !== -1; })) solve.missed[pl.id] = true;
+      });
+    }
     // `pieces` is what a hint reveals one of (words in a word search,
     // squares in a grid): all of them revealed isn't solving it either.
     function solved(n, pieces) {
       if (solve.done) return;
       solve.done = true;
       if (solve.help >= pieces) return;
-      recordRun({ mode: state.mode, n: n, ms: Date.now() - solve.start, help: solve.help });
+      recordRun({ mode: state.mode, n: n, ms: Date.now() - solve.start, help: solve.help,
+        setup: setupKey(p.placements.length), missed: Object.keys(solve.missed) });
     }
     // Save as PDF: the sheet drawn by puzzle-pdf.js, answer key last.
     function savePdf() {
@@ -1759,7 +1801,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var ws = wireWordSearch(panel.querySelector(".fc-ws-grid"), panel.querySelector(".fc-ws-list"), document.getElementById("fcWsCount"), p,
         function () { solved(p.placements.length, p.placements.length); });
       bindMenu(panel, {
-        hint: function () { solve.help++; ws.revealOne(); },
+        hint: function () { solve.help++; var pl = ws.revealOne(); if (pl) solve.missed[pl.id] = true; },
         reveal: function () { solve.done = true; ws.revealAll(); },
         reset: ws.reset,
         print: savePdf
@@ -1770,10 +1812,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var nav = wireGrid(gridEl, panel.querySelector(".fc-xw-clues"), panel.querySelector(".fc-xw-current"), p, arroword);
 
     document.getElementById("fcXwCheck").addEventListener("click", function () {
-      if (checkGrid(gridEl, p)) solved(p.placements.length, gridEl.querySelectorAll(".fc-xw-cell-input").length);
+      var wrong = [];
+      var all = checkGrid(gridEl, p, wrong);
+      missCells(wrong);
+      if (all) solved(p.placements.length, gridEl.querySelectorAll(".fc-xw-cell-input").length);
     });
     bindMenu(panel, {
-      hint: function () { solve.help++; hintGrid(gridEl, p, nav); },
+      hint: function () { solve.help++; var k = hintGrid(gridEl, p, nav); if (k) missCells([k]); },
       reveal: function () { solve.done = true; revealGrid(gridEl, p); },
       reset: function () { resetGridInputs(gridEl); },
       print: savePdf
@@ -1784,6 +1829,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // the reveal / clear actions come from the style's own wiring.
   function bindMenu(panel, actions) {
     actions.newMenu = function () { generate(); rerender(); };
+    actions.stats = openStats;
     var hint = panel.querySelector("#fcXwHint");
     if (hint && actions.hint) hint.addEventListener("click", actions.hint);
     var menu = panel.querySelector(".fc-xw-menu");
@@ -1798,7 +1844,21 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
+  // Stats' "Practise these": the chosen style, from just these words.
+  function playWords(kind, mode, ids) {
+    var st = states[kind];
+    st.mode = mode; st.source = "tricky"; st.trickyIds = ids.slice(); st.tables = []; st.tablesOpen = false;
+    st.puzzle = null;
+    state = st;
+    generate();
+  }
+
+  // Reset Match stats also forgets the per-setup best times.
+  function clearMatchBests() { try { localStorage.removeItem(MATCH_BEST_KEY); } catch (e) { /* ignore */ } }
+
   return {
+    playWords: playWords,
+    clearMatchBests: clearMatchBests,
     renderCrosswords: renderCrosswords,
     renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js

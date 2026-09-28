@@ -139,6 +139,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Game · Words · Script</span><span class="help-desc">Match or Listening, from your flashcards or tables, the same buttons as Puzzles.</span></li>' +
       '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second; your best time is kept.</span></li>' +
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
+      '<li><span class="help-term">Stats</span><span class="help-desc">⋯ › Stats, for puzzles too: your bests, a trend, and the words you miss most — Practise these plays just them.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Syncing</h3>' +
       '<ul class="help-rows help-card">' +

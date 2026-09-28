@@ -73,7 +73,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known) and `puzzle_runs` (finished Match / Listening games). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known) and `puzzle_runs` (every finished puzzle and game). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
@@ -171,11 +171,19 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-match-best` —
 Puzzles › Match best times, one per source + script + pair count, also
-browser-local only), `raume-puzzle-runs` — finished Match / Listening games for the Dashboard's
-Puzzles card ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
-an array of `{ id, at, mode, n, ms, miss | right | help, setup }` — `mode` is
-match / listening / crossword / arroword / wordsearch; a grid or word search is
-logged once when solved, never when revealed in full — newest 500 kept;
+browser-local only; Reset Match stats clears it), `raume-puzzle-runs` — every finished
+puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
+([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
+an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
+match / listening / crossword / arroword / wordsearch; `setup` is
+`source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`);
+`missed` the vocab ids a game caught you on (a wrong pair, a wrong answer, a
+revealed word or letter, a square Check marked wrong — Tricky words); a grid or
+word search is logged once when solved, never when revealed in full. Reset stats
+for a style adds a marker `{ mode, reset: true }` and drops that style's older
+games — the marker survives the union merge, so a reset stays reset on every
+device, and every count ignores that style's games up to its latest marker.
+Newest 500 kept;
 signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
 and merged back on sign-in by id), `raume-kanji-write-outline` — Write it's Outline switch (browser-local),
 `raume-kanji-known` — kanji marked Known
@@ -268,8 +276,9 @@ js/
     scheduling.js        FSRS-6 + the session queue
     data-ops.js          auth, Supabase sync, guest store, streak
     backup.js            guest-mode export / import of the on-device data (JSON file)
-    puzzle-runs.js       finished Match / Listening games (the Dashboard's Puzzles card)
+    puzzle-runs.js       every finished puzzle and game: the log, its numbers, Tricky words, reset
     puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
+    puzzle-stats.js      the Stats screen for Puzzles and Games (a pushed screen)
     dashboard.js         the Dashboard tab + the review session
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups

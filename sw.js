@@ -68,6 +68,7 @@ const VERSIONED = [
   'js/flashcards/kana.js',
   'js/flashcards/crosswords.js',
   'js/flashcards/puzzle-pdf.js',
+  'js/flashcards/puzzle-stats.js',
   'js/flashcards/bootstrap.js',
   'js/sw-register.js',
 ];

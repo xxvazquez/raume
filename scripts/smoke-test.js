@@ -2804,7 +2804,7 @@ async function main() {
       && src.options[src.options.length - 1].value === "several"
       && !document.getElementById("fcXwOptions") && document.getElementById("fcXwSheet").hidden;
   })());
-  check("the toolbar is New puzzle (tinted) + a labelled Hint + Check (filled) + a ⋯ menu holding only the rarer Reveal puzzle / Clear answers / Save as PDF (plus New puzzle, shown there on a phone)", (() => {
+  check("the toolbar is New puzzle (tinted) + a labelled Hint + Check (filled) + a ⋯ menu holding only the rarer Reveal puzzle / Clear answers / Save as PDF / Stats (plus New puzzle, shown there on a phone)", (() => {
     const menu = document.querySelector("#fcPanelCrosswords .fc-xw-menu");
     const items = menu ? [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim()) : [];
     const hint = document.getElementById("fcXwHint");
@@ -2812,7 +2812,7 @@ async function main() {
       && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
       && hint && !hint.closest(".section-menu") && hint.textContent.trim() === "Hint" && hint.title === "Reveal a letter"
       && hint.nextElementSibling === document.getElementById("fcXwCheck")
-      && items.join("|") === "New puzzle|Reveal puzzle|Clear answers|Save as PDF"
+      && items.join("|") === "New puzzle|Reveal puzzle|Clear answers|Save as PDF|Stats"
       && menu.querySelector(".section-menu-list").hidden
       && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
   })());
@@ -3056,12 +3056,12 @@ async function main() {
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
   const mtClock = () => document.getElementById("fcMtClock").textContent;
-  check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / Restart in the ⋯ menu", (() => {
+  check("Match lays a round out as two columns of tiles, a clock where Check was, and only New game / Restart / Stats in the ⋯ menu", (() => {
     const p = xw.state.puzzle;
     const clues = p.placements.map(w => w.clue.toLowerCase());
     return document.querySelectorAll("#fcPanelGames .fc-mt-tile").length === p.rounds[0].length * 2
       && !document.getElementById("fcXwCheck") && !document.getElementById("fcXwHint") && mtClock() === "0:00.0"
-      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart|Stats"
       && new Set(clues).size === clues.length
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
@@ -3090,6 +3090,13 @@ async function main() {
     try { saved = JSON.parse(window.localStorage.getItem(xw.MATCH_BEST_KEY)) || {}; } catch (e) { /* ignore */ }
     // file:// jsdom may refuse localStorage (storageUsable) -- then only the card is checked.
     return !!done && /New best · 1 miss/.test(done.textContent) && (!storageUsable || Object.keys(saved).length === 1);
+  })());
+  check("the finished Match is logged with its setup and both words of the wrong pair as missed, and its card offers Stats beside Play again", (() => {
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("match").pop();
+    const r0 = xw.state.puzzle.rounds[0];
+    return last.setup === "flashcards|romaji|" + xw.state.puzzle.placements.length
+      && last.missed.length === 2 && last.missed.includes(r0[0].id) && last.missed.includes(r0[1].id)
+      && !!document.querySelector("#fcPanelGames .fc-mt-done-actions #fcDoneStats");
   })());
   document.getElementById("fcXwReset").click();
   check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelGames .fc-mt-done")
@@ -3153,11 +3160,11 @@ async function main() {
   const lsQ = () => xw.state.puzzle.questions;
   const lsChoices = () => [...document.querySelectorAll("#fcPanelGames .fc-ls-choice")];
   const lsCount = () => document.getElementById("fcLsCount").textContent;
-  check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / Restart in the ⋯ menu", (() => {
+  check("Listening: a big ▶, four English choices, no Script row, a question counter and only New game / Restart / Stats in the ⋯ menu", (() => {
     return !!document.querySelector("#fcPanelGames .fc-ls-play") && lsChoices().length === 4
       && !document.querySelector('#fcPanelGames [data-pick="script"]') && lsCount() === "1 / " + lsQ().length
       && !/Romaji/.test(document.querySelector("#fcPanelGames .fc-xw-picks").textContent)
-      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart"
+      && [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|") === "New game|Restart|Stats"
       && document.querySelector("#fcPanelGames .fc-ls-word").hidden
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
@@ -3185,6 +3192,10 @@ async function main() {
       await new Promise(r => setTimeout(r, 25));
     }
   }
+  check("a finished Listening game keeps the word you got wrong as missed", (() => {
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("listening").pop();
+    return !!last && last.missed.join() === String(lsQ()[0].word.id) && /\|\d+$/.test(last.setup);
+  })());
   check("a right pick moves on by itself; the end card scores it and lists the missed word with a speaker to hear it again", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const missed = done ? [...done.querySelectorAll(".fc-ls-missed li")] : [];
@@ -3197,6 +3208,88 @@ async function main() {
   document.getElementById("fcXwReset").click();
   check("Restart asks the same questions again from the first", lsCount() === "1 / " + lsQ().length && lsChoices().length === 4 && !document.querySelector("#fcPanelGames .fc-mt-done"));
   speech.speak = realSpeak;
+
+  console.log("Flashcards: Puzzle and game stats");
+  const pr = window.RaumeStudy.flashcards.puzzleRuns;
+  check("stats count each style on its own: played, a day streak, and a best measured per pair / word or as accuracy", (() => {
+    const mt = pr.styleStats("match"), ls = pr.styleStats("listening");
+    return mt.played === pr.live("match").length && mt.played >= 1 && mt.streak.current === 1 && mt.best > 0
+      && ls.played >= 1 && ls.best > 0 && ls.best <= 1 && mt.bests.length >= 1 && mt.trend.length === Math.min(30, mt.played);
+  })());
+  check("Tricky words are the words missed in two or more games, most-missed first", (() => {
+    // The Match above missed two words once each; one more game missing
+    // the first makes it tricky, the second stays out.
+    const once = pr.live("match").filter(r => r.missed).pop().missed;
+    const before = pr.trickyWords(50).map(w => w.id);
+    pr.record({ mode: "match", n: 6, ms: 9000, miss: 1, missed: [once[0]] });
+    const t = pr.trickyWords(50);
+    const at = id => t.findIndex(w => w.id === id);
+    return at(once[0]) !== -1 && t[at(once[0])].count >= 2
+      && (at(once[1]) === -1) === !before.includes(once[1]) && t.every((w, i) => i === 0 || t[i - 1].count >= w.count);
+  })());
+  document.getElementById("fcXwStats").click();
+  check("⋯ › Stats opens Game stats as a pushed screen: Match / Listening segments, the style you were on, Overview rows and a Reset row", (() => {
+    const panel = document.getElementById("fcPanelStats");
+    const segs = [...panel.querySelectorAll(".fc-st-modes button")].map(b => b.textContent);
+    return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening"
+      && panel.querySelector(".fc-st-modes .active").textContent === "Listening"
+      && /Accuracy/.test(panel.textContent) && /Reset Listening stats/.test(panel.textContent);
+  })());
+  document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
+  check("Match stats: best pace, a trend line once there are two games, a personal best per setup that opens its history, and Tricky words with Practise these", (() => {
+    const panel = document.getElementById("fcPanelStats");
+    const best = panel.querySelector(".fc-st-best");
+    if (!best) return false;
+    best.click();
+    const hist = document.querySelectorAll("#fcPanelStats .fc-st-history li").length;
+    return /Best pace/.test(panel.textContent) && !!panel.querySelector(".fc-st-chart polyline")
+      && hist >= 1 && document.querySelector("#fcPanelStats .fc-st-best").getAttribute("aria-expanded") === "true"
+      && panel.querySelectorAll(".fc-st-word").length >= 1
+      && document.querySelectorAll("#fcPanelStats [style]").length === 0;
+  })());
+  const practiseBtn = document.getElementById("fcStPractise");
+  if (practiseBtn) {
+    practiseBtn.click();
+    check("Practise these starts the style from just the missed words, on its own tab, the Source reading Tricky words", (() => {
+      const ids = pr.trickyWords(20, 1).map(t => t.id);
+      return !document.getElementById("fcPanelGames").hidden && xw.state.source === "tricky" && xw.state.mode === "match"
+        && (!xw.state.puzzle.placements || xw.state.puzzle.placements.every(w => ids.includes(w.id)))
+        && document.querySelector('#fcPanelGames [data-pick="source"]').closest(".fc-xw-chip").textContent.startsWith("Tricky words");
+    })());
+    xwPick("source", "flashcards");
+  } else {
+    check("Practise these appears once six words have been missed", pr.trickyWords(20, 1).length < 6);
+    document.getElementById("fcBack").click();
+  }
+  document.getElementById("fcXwStats").click();
+  document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
+  const realConfirm = window.confirm;
+  window.confirm = () => true;
+  document.getElementById("fcStReset").click();
+  window.confirm = realConfirm;
+  check("Reset Match stats (after a confirm) clears Match's numbers and bests but leaves Listening's -- a marker in the log keeps them cleared across a sync merge", (() => {
+    const markers = pr.all().filter(r => r.reset && r.mode === "match");
+    pr.applyRemote(pr.all().concat([{ id: "old-remote", at: "2020-01-01T00:00:00Z", mode: "match", n: 6, ms: 9000, miss: 0 }]));
+    let bests = null;
+    try { bests = window.localStorage.getItem(xw.MATCH_BEST_KEY); } catch (e) { /* ignore */ }
+    return pr.live("match").length === 0 && pr.live("listening").length >= 1 && markers.length === 1
+      && /No Match games yet/.test(document.getElementById("fcPanelStats").textContent)
+      && (!storageUsable || bests === null);
+  })());
+  document.getElementById("fcBack").click();
+  check("Back returns to Games", !document.getElementById("fcPanelGames").hidden);
+  document.querySelector('.fc-tab[data-tab="dashboard"]').click();
+  check("the Dashboard has a Puzzles card and a Games card, each with a way in and See stats", (() => {
+    const p = document.querySelector("#fcPanelDashboard .fc-puzzles-card"), g = document.querySelector("#fcPanelDashboard .fc-games-card");
+    return !!p && !!g && !!p.querySelector('[data-dash-go="puzzles"]') && !!p.querySelector('[data-dash-go="stats-puzzles"]')
+      && !!g.querySelector('[data-dash-go="games"]') && !!g.querySelector('[data-dash-go="stats-games"]')
+      && /Games played/.test(g.textContent) && !/Games played/.test(p.textContent);
+  })());
+  document.querySelector('#fcPanelDashboard [data-dash-go="stats-puzzles"]').click();
+  check("See stats on the Puzzles card opens Puzzle stats with the three grid styles", document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Puzzle stats"
+    && [...document.querySelectorAll("#fcPanelStats .fc-st-modes button")].map(b => b.textContent).join("|") === "Crossword|Arroword|Word search");
+  document.getElementById("fcBack").click();
   document.querySelector('.fc-tab[data-tab="crosswords"]').click();
 
   xwPick("source", "flashcards");
