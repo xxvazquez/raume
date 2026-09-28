@@ -368,6 +368,13 @@ scheduled; every finished game goes to the Dashboard.
   a second to your time.
 - The words come in even rounds of at most 6 pairs (15 words → three rounds
   of 5), so a round fits a phone. The clock starts on your first tap.
+- Between rounds there's a break: how that round went (its time, misses, how
+  far ahead of or behind your best you are, and "Your fastest round yet"
+  when it is), with the clock stopped until you tap **Next round**.
+- **⏸** beside the clock pauses: the clock stops and the tiles are hidden
+  behind a card with **Resume**, **Restart** and **End game**. Leaving the
+  app mid-game pauses it too. **End game** shows what you played but doesn't
+  count it in your stats.
 - Once you have a best on the same words, a small chip beside the clock after
   each round says how far ahead (sage, "−1.4s") or behind (coral, "+0.9s") of
   that best you are at that point.
@@ -397,7 +404,8 @@ scheduled; every finished game goes to the Dashboard.
 - At the end: your score ("12 / 15"), this game's accuracy beside your
   average over all Listening games, and the words you missed, each with a
   speaker to hear it again. **Play again** for new words; the **⋯** menu's
-  *Restart* asks the same ones again.
+  *Restart* asks the same ones again. **⏸** pauses (the choices hidden);
+  *End game* shows the score so far, not counted in your stats.
 - No Japanese voice and no recorded clips loaded (a first visit offline)? It
   says so instead of playing silently. Practice only, like Match.
 - Every finished game is saved to the Dashboard's **Games** card and [Stats](#stats) (score and
@@ -412,7 +420,7 @@ and **Game stats** (Match / Listening) — with a segmented control for the
 style, opening on the one you were playing:
 
 - **Overview** — played / solved, time played, your day streak and longest,
-  and the style's own measure: best pace per pair (Match), accuracy
+  and the style's own measure: best pace per pair and fastest round (Match), accuracy
   (Listening), best time per word and hints used (puzzles).
 - **Last 30 games** — one line, better always up, and "18% faster than your
   first 10 games" once there are 20 and it's true.

@@ -812,7 +812,8 @@ before it and the reading in grey after it.
 with, after each round once a best on the same words exists, a small tabular
 split capsule before it ("−1.4s" on `--right-soft`, "+0.9s" on `--wrong-soft`),
 the clock itself never changing size —
-and trims the ⋯ menu to New game / Restart. The board is two columns of solid
+a bare ⏸ glyph (32px, like ⋯; dimmed on a break or at the end) before it,
+and ⋯ holding New game / How to play / Restart / Stats. The board is two columns of solid
 white tiles on the ground (`--control-lift`, 14px corners, at least 52px
 tall, text wrapping) — the reading leading at 17px, the English trailing at
 14px — under a quiet "Round 1 of 3". A picked tile takes a section-tone ring
@@ -824,7 +825,15 @@ quiet stat cells (pace "1.6s per pair", rank "3rd of 14 runs"), a 128px
 sparkline of the last ten runs on the same words in the section tint — higher
 is faster, this run the solid dot, "last 10 runs" under it — and a filled Play
 again. Listening's end card shares the stat cells (this game's accuracy, your
-average over all games).
+average over all games). **Pause and breaks** use that same white card over
+the board: *Paused* (a small grey title, the clock large, "Round 2 of 3",
+a filled Resume, then white Restart and End game), the board's tiles hidden
+rather than dimmed so a stopped clock isn't study time; between rounds,
+"Round 1 of 3 done" with that round's time large, its misses and the split
+against your best on one grey line, "Your fastest round yet" in sage when it
+is, and a filled Next round — the clock stopped. A game ended early shows its
+card with "Ended after 1 of 3 rounds" and a faint "A game you end early isn’t
+counted in your stats."
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

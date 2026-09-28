@@ -105,7 +105,10 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function overviewHtml(st) {
     var mode = st.mode, rows = row("Time played", duration(st.totalMs)) +
       row("Longest streak", days(st.streak.longest));
-    if (mode === "match") rows += row("Pairs matched", String(st.words)) + row("Misses per game", (st.misses / st.played).toFixed(1));
+    if (mode === "match") {
+      rows += (st.bestRound ? row("Fastest round", clock(st.bestRound.ms) + " · " + st.bestRound.pairs + " pairs") : "") +
+        row("Pairs matched", String(st.words)) + row("Misses per game", (st.misses / st.played).toFixed(1));
+    }
     else if (mode === "listening") rows += row("Words heard", String(st.words));
     else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);

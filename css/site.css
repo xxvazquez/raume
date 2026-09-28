@@ -3417,6 +3417,25 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-mt-stat-val { font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
 .fc-mt-stat-lbl { font-size: var(--fs-micro); color: var(--muted); }
 .fc-mt-done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+/* Pause: a bare glyph beside the clock (like ⋯); the card covers the
+   board -- its tiles hidden, not dimmed, so a stopped clock isn't study
+   time -- and a round break is the same card between rounds. */
+.fc-mt-pause-btn {
+  appearance: none; border: 0; padding: 0; position: relative; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.fc-mt-pause-btn::after { content: ""; position: absolute; inset: -6px; }
+.fc-mt-pause-btn:hover { color: var(--ink); }
+.fc-mt-pause-btn[hidden] { display: none; }
+.fc-mt-pause-btn:disabled { opacity: .35; cursor: default; }
+.fc-mt-paused > :not(.fc-mt-pause) { display: none; }
+.fc-mt-pause-title { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+.fc-mt-pause-actions { margin-bottom: 2px; }
+.fc-mt-pause-actions .fc-btn { min-width: 160px; }
+.fc-mt-best-round { margin: -6px 0 12px; color: var(--right-strong); font-size: var(--fs-small); font-weight: 500; }
+.fc-mt-done-note { margin: -6px 0 12px; color: var(--faint); font-size: var(--fs-micro); }
 .fc-mt-spark { display: block; margin: 4px 0 0; overflow: visible; }
 .fc-mt-spark-lbl { margin: 0 0 12px; font-size: var(--fs-micro); color: var(--faint); }
 .fc-mt-spark polyline { fill: none; stroke: color-mix(in srgb, var(--section) 55%, var(--paper)); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }

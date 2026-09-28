@@ -43,6 +43,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // never a bare text button.
   var PRINT_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6V2.5h8V6"/><rect x="2.5" y="6" width="13" height="7" rx="1.2"/><path d="M5 11.5h8V15.5H5Z"/></svg>';
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 9S4.5 3.5 9 3.5 16.5 9 16.5 9 13.5 14.5 9 14.5 1.5 9 1.5 9Z"/><circle cx="9" cy="9" r="2.3"/></svg>';
+  // Two bars: pause. A bare 32px glyph beside the clock, like ⋯.
+  var PAUSE_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="4.5" y="3.5" width="3" height="11" rx="1"/><rect x="10.5" y="3.5" width="3" height="11" rx="1"/></svg>';
   var HINT_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5a4.5 4.5 0 0 0-2.5 8.25c.4.28.6.7.6 1.15v.6h4v-.6c0-.45.2-.87.6-1.15A4.5 4.5 0 0 0 9 2.5Z"/><path d="M7 15h4M7.5 13.4h3"/></svg>';
   var RESET_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 9A5.5 5.5 0 1 1 12.9 5.1"/><path d="M14.5 3v4h-4"/></svg>';
   // Same ⋯ glyph as a reference table's overflow menu (js/vocab/render.js's
@@ -800,8 +802,44 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
     return best ? best.splits : null;
   }
+  // The pause card and a stopped game's card share one look: the finish
+  // card's white panel, the time big, one quiet line, then the buttons.
+  function pauseCardHtml(big, line) {
+    return '<div class="fc-mt-done fc-mt-pause" role="dialog" aria-label="Paused">' +
+      '<p class="fc-mt-pause-title">Paused</p>' +
+      '<p class="fc-mt-done-time">' + esc(big) + "</p>" +
+      (line ? '<p class="fc-mt-done-meta">' + esc(line) + "</p>" : "") +
+      '<div class="fc-mt-done-actions fc-mt-pause-actions"><button type="button" class="fc-btn fc-btn-primary" id="fcPauseResume">Resume</button></div>' +
+      '<div class="fc-mt-done-actions"><button type="button" class="fc-btn" id="fcPauseRestart">Restart</button>' +
+      '<button type="button" class="fc-btn" id="fcPauseEnd">End game</button></div></div>';
+  }
+  // Pausing covers the board (no studying the tiles on a stopped clock)
+  // and brings the card; Resume takes it away with the board as it was.
+  function showPauseCard(boardEl, big, line, handlers) {
+    boardEl.classList.add("fc-mt-paused");
+    boardEl.insertAdjacentHTML("beforeend", pauseCardHtml(big, line));
+    document.getElementById("fcPauseResume").addEventListener("click", handlers.resume);
+    document.getElementById("fcPauseRestart").addEventListener("click", handlers.restart);
+    document.getElementById("fcPauseEnd").addEventListener("click", handlers.end);
+    document.getElementById("fcPauseResume").focus();
+  }
+  function hidePauseCard(boardEl) {
+    boardEl.classList.remove("fc-mt-paused");
+    var card = boardEl.querySelector(".fc-mt-pause");
+    if (card) card.remove();
+  }
+  // Leaving the app mid-game (another tab, the home screen) pauses it, as
+  // an iOS game does; `activeGame` is whichever game is on screen.
+  var activeGame = null;
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && activeGame && activeGame.pause) activeGame.pause();
+  });
+
   function wireMatch(boardEl, clockEl, p, romajiMode) {
-    var round, start, penalty, misses, selected, left, game = 0, splits, pb, missedIds;
+    // The clock only runs while you play: `acc` holds the time banked
+    // before the last stop, `runAt` when it last started (null = stopped
+    // -- before the first tap, during a round break, paused, finished).
+    var round, acc, runAt, started, penalty, misses, roundMisses, selected, left, game = 0, splits, pb, missedIds, phase;
     var splitEl = document.getElementById("fcMtSplit");
     function showSplit(i, at) {
       if (!splitEl || !pb || pb[i] == null) return;
@@ -811,7 +849,23 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       splitEl.setAttribute("aria-label", (Math.abs(d) / 1000).toFixed(1) + " seconds " + (ahead ? "ahead of" : "behind") + " your best");
       splitEl.hidden = false;
     }
-    function elapsed() { return start === null ? 0 : Date.now() - start + penalty; }
+    // Pause only means something mid-round: dimmed on a break or at the end.
+    function setPhase(ph) {
+      phase = ph;
+      var btn = document.getElementById("fcMtPause");
+      if (btn) btn.disabled = ph !== "play";
+    }
+    function elapsed() { return acc + (runAt === null ? 0 : Date.now() - runAt) + penalty; }
+    function run() {
+      if (runAt !== null) return;
+      runAt = Date.now();
+      if (!matchTimer) matchTimer = setInterval(tick, 100);
+    }
+    function halt() {
+      if (runAt !== null) { acc += Date.now() - runAt; runAt = null; }
+      stopMatchTimer();
+      tick();
+    }
     function tick() {
       if (!clockEl.isConnected) { stopMatchTimer(); return; }
       clockEl.textContent = formatClock(elapsed());
@@ -828,6 +882,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var order = words.map(function (w, i) { return i; });
       left = words.length;
       selected = null;
+      roundMisses = 0;
+      setPhase("play");
       boardEl.innerHTML =
         (p.rounds.length > 1 ? '<p class="fc-mt-round">Round ' + (round + 1) + " of " + p.rounds.length + "</p>" : "") +
         '<div class="fc-mt-cols">' +
@@ -835,8 +891,60 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-mt-col">' + shuffle(order).map(function (i) { return tileHtml("r", i, words[i].clue); }).join("") + "</div>" +
         "</div>";
     }
+    // Between rounds: a breather, Duolingo-style, the clock stopped -- how
+    // that round went and where you stand against your best so far.
+    function roundBreak() {
+      setPhase("break");
+      var at = splits[round], prev = round ? splits[round - 1] : 0;
+      var vs = pb && pb[round] != null ? pb[round] - at : null;
+      // Fastest round yet (against rounds of the same size, from games
+      // already finished) earns its own line.
+      var runs = window.RaumeStudy.flashcards.puzzleRuns;
+      var prevBest = runs ? runs.bestRound(p.rounds[round].length) : null;
+      var fastest = prevBest && at - prev < prevBest.ms;
+      boardEl.innerHTML = '<div class="fc-mt-done fc-mt-break" role="status">' +
+        '<p class="fc-mt-pause-title">Round ' + (round + 1) + " of " + p.rounds.length + " done</p>" +
+        '<p class="fc-mt-done-time">' + formatClock(at - prev) + "</p>" +
+        '<p class="fc-mt-done-meta">' + (roundMisses ? roundMisses + (roundMisses === 1 ? " miss" : " misses") : "No misses") +
+        (vs === null ? "" : " · " + (Math.abs(vs) / 1000).toFixed(1) + "s " + (vs >= 0 ? "ahead of" : "behind") + " your best") + "</p>" +
+        (fastest ? '<p class="fc-mt-best-round">Your fastest round yet</p>' : "") +
+        '<div class="fc-mt-done-actions"><button type="button" class="fc-btn fc-btn-primary" id="fcMtNextRound">Next round</button></div></div>';
+      var next = document.getElementById("fcMtNextRound");
+      next.addEventListener("click", function () { round++; renderRound(); run(); });
+      next.focus();
+    }
+    function pause() {
+      if (phase !== "play" || !boardEl.isConnected) return;
+      setPhase("paused");
+      halt();
+      select(null);
+      showPauseCard(boardEl, formatClock(elapsed()),
+        p.rounds.length > 1 ? "Round " + (round + 1) + " of " + p.rounds.length : "", {
+        resume: function () { hidePauseCard(boardEl); setPhase("play"); if (started) run(); },
+        restart: restart,
+        end: endEarly
+      });
+    }
+    // Stopped before the last round: what you played, but not logged -- a
+    // part game can't set a best or tilt your stats.
+    function endEarly() {
+      setPhase("done");
+      halt();
+      var total = elapsed(), done = splits.length;
+      if (splitEl) splitEl.hidden = true;
+      clockEl.classList.add("fc-ws-count-done");
+      boardEl.classList.remove("fc-mt-paused");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + done + " of " + p.rounds.length + (p.rounds.length === 1 ? " round" : " rounds") +
+        " · " + (misses === 1 ? "1 miss" : misses + " misses") + "</p>" +
+        '<p class="fc-mt-done-note">A game you end early isn’t counted in your stats.</p>' +
+        doneActionsHtml("fcMtAgain") + "</div>";
+      bindDoneActions("fcMtAgain");
+    }
     function finish() {
-      stopMatchTimer();
+      setPhase("done");
+      halt();
       var total = splits.length ? splits[splits.length - 1] : elapsed();
       if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(total);
@@ -863,8 +971,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     boardEl.addEventListener("click", function (e) {
       var tile = e.target.closest(".fc-mt-tile");
-      if (!tile || tile.disabled) return;
-      if (start === null) { start = Date.now(); matchTimer = setInterval(tick, 100); }
+      if (!tile || tile.disabled || phase !== "play") return;
+      if (runAt === null) { started = true; run(); }
       // Nothing picked yet, or another tile on the same side: (re)pick it.
       // Tapping the picked tile again lets it go.
       if (!selected || selected.dataset.side === tile.dataset.side) {
@@ -881,15 +989,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         // short pause before the next round appears.
         var at = elapsed();
         splits.push(at);
+        halt();
+        setPhase("between");
         if (round + 1 < p.rounds.length) showSplit(round, at);
-        else stopMatchTimer();
         setTimeout(function () {
           if (thisGame !== game || !boardEl.isConnected) return;
-          if (round + 1 < p.rounds.length) { round++; renderRound(); } else finish();
+          if (round + 1 < p.rounds.length) roundBreak(); else finish();
         }, 350);
       } else {
         penalty += MATCH_PENALTY_MS;
         misses++;
+        roundMisses++;
         // Both words of a wrong pair count as missed: the reading you
         // didn't know, and the meaning you took it for.
         pair.forEach(function (t) { missedIds[p.rounds[round][+t.dataset.i].id] = true; });
@@ -902,7 +1012,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     function restart() {
       stopMatchTimer();
       game++;
-      round = 0; start = null; penalty = 0; misses = 0; splits = []; missedIds = {};
+      hidePauseCard(boardEl);
+      round = 0; acc = 0; runAt = null; started = false; penalty = 0; misses = 0; splits = []; missedIds = {};
       pb = bestSplits(matchBestKey(p), p.rounds.length);
       if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(0);
@@ -910,7 +1021,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       renderRound();
     }
     restart();
-    return { restart: restart };
+    var api = { restart: restart, pause: pause };
+    activeGame = api;
+    return api;
   }
 
   // -----------------------------------------------------------------------
@@ -963,7 +1076,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<span class="fc-ls-sub"><span lang="ja">' + (written !== w.answer ? esc(w.answer) + " · " : "") + "</span>" + esc(romaji) + "</span>";
   }
   function wireListening(boardEl, countEl, p) {
-    var at, score, missed, game = 0, played, startedAt;
+    // `pausedMs`: time spent on the pause card, left out of the game's time.
+    var at, score, missed, game = 0, played, startedAt, pausedMs, pausedAt, done, pendingNext;
     function count() { countEl.textContent = Math.min(at + 1, p.questions.length) + " / " + p.questions.length; }
     function renderQuestion() {
       var q = p.questions[at];
@@ -999,7 +1113,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       boardEl.querySelector(".fc-ls-hint").hidden = true;
       if (right) {
         score++;
-        setTimeout(function () { if (thisGame === game && boardEl.isConnected) next(); }, 1100);
+        // Paused in the moment before it moves on: it moves on at Resume.
+        setTimeout(function () {
+          if (thisGame !== game || !boardEl.isConnected) return;
+          if (pausedAt !== null) pendingNext = true; else next();
+        }, 1100);
       } else {
         missed.push(q.word);
         var nextBtn = boardEl.querySelector(".fc-ls-next");
@@ -1007,8 +1125,37 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         nextBtn.focus();
       }
     }
+    function pause() {
+      if (done || pausedAt !== null || !boardEl.isConnected) return;
+      pausedAt = Date.now();
+      showPauseCard(boardEl, Math.min(at + 1, p.questions.length) + " / " + p.questions.length,
+        score + " right so far", {
+        resume: function () {
+          pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl);
+          if (pendingNext) { pendingNext = false; next(); }
+        },
+        restart: restart,
+        end: endEarly
+      });
+    }
+    // Stopped part-way: the score so far, not logged (see Match's).
+    function endEarly() {
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var answered = at + (boardEl.querySelector(".fc-ls-choice:disabled") ? 1 : 0);
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.classList.remove("fc-mt-paused");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + answered + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + answered + " of " + p.questions.length + " words</p>" +
+        '<p class="fc-mt-done-note">A game you end early isn’t counted in your stats.</p>' +
+        doneActionsHtml("fcLsAgain") + "</div>";
+      bindDoneActions("fcLsAgain");
+    }
     function finish() {
-      var run = recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt, right: score,
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var run = recordRun({ mode: "listening", n: p.questions.length, ms: Date.now() - startedAt - pausedMs, right: score,
         setup: setupKey(p.questions.length), missed: missed.map(function (w) { return w.id; }) });
       countEl.textContent = score + " / " + p.questions.length;
       countEl.classList.add("fc-ws-count-done");
@@ -1042,12 +1189,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Same words, same questions, from the top.
     function restart() {
       game++;
-      at = 0; score = 0; missed = []; played = false; startedAt = Date.now();
+      hidePauseCard(boardEl);
+      at = 0; score = 0; missed = []; played = false; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      var pb = document.getElementById("fcMtPause");
+      if (pb) pb.disabled = false;
       countEl.classList.remove("fc-ws-count-done");
       renderQuestion();
     }
     restart();
-    return { restart: restart };
+    var api = { restart: restart, pause: pause };
+    activeGame = api;
+    return api;
   }
 
   // -----------------------------------------------------------------------
@@ -1587,7 +1739,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return '<div class="fc-xw-actions">' + titleMenuHtml() +
       '<div class="fc-xw-actions-end">' +
       (bare ? "" : '<button type="button" class="fc-btn fc-xw-new" id="fcXwNew">' + newLabel + "</button>" +
-        (mt ? "" : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
+        (mt ? '<button type="button" class="fc-mt-pause-btn" id="fcMtPause" aria-label="Pause">' + PAUSE_ICON + "</button>"
+          : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
         (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
           : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
           : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
@@ -1691,6 +1844,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     state = states[kind];
     currentPanel = panel;
     stopMatchTimer();
+    activeGame = null;
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
     function notEnough(msg, canRetry) {
@@ -1738,10 +1892,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           "The app’s recorded words load the first time you’re online — try again in a moment.</p>" +
           '<div class="fc-xw-actions"><button type="button" class="fc-btn" id="fcLsRetry">Try again</button></div>';
         document.getElementById("fcLsRetry").addEventListener("click", rerender);
+        document.getElementById("fcMtPause").hidden = true;
         bindMenu(panel, { reset: rerender });
         return;
       }
       var listen = wireListening(board, document.getElementById("fcLsCount"), p);
+      document.getElementById("fcMtPause").addEventListener("click", listen.pause);
       bindMenu(panel, { reset: listen.restart });
       return;
     }
@@ -1750,6 +1906,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       bindControls(panel);
       document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
       var game = wireMatch(panel.querySelector(".fc-mt"), document.getElementById("fcMtClock"), p, romajiMode);
+      document.getElementById("fcMtPause").addEventListener("click", game.pause);
       bindMenu(panel, { reset: game.restart });
       return;
     }

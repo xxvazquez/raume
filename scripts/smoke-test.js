@@ -3075,16 +3075,28 @@ async function main() {
     mtTile("r", 0).click(); mtTile("l", 0).click();
     return mtTile("l", 0).disabled && mtTile("r", 0).disabled && mtTile("r", 0).classList.contains("fc-mt-right");
   })());
+  let mtBreakSeen = null;
   for (let round = 0; round < xw.state.puzzle.rounds.length; round++) {
     for (let i = 0; i < xw.state.puzzle.rounds[round].length; i++) {
       if (!mtTile("l", i).disabled) { mtTile("l", i).click(); mtTile("r", i).click(); }
     }
-    // Wait for the next round to deal (or the finish card), not a fixed
-    // time -- under CPU load the 350ms round change can run late.
+    // Wait for the round break (or the finish card), not a fixed time --
+    // under CPU load the 350ms round change can run late.
     for (let waited = 0; waited < 5000; waited += 25) {
-      if (document.querySelector("#fcPanelGames .fc-mt-done") || !mtTile("l", 0).disabled) break;
+      if (document.querySelector("#fcPanelGames .fc-mt-done")) break;
       await new Promise(r => setTimeout(r, 25));
     }
+    const brk = document.querySelector("#fcPanelGames .fc-mt-break");
+    if (brk) {
+      const c1 = mtClock();
+      await new Promise(r => setTimeout(r, 250));
+      if (!mtBreakSeen) mtBreakSeen = { text: brk.textContent, still: mtClock() === c1, pauseOff: document.getElementById("fcMtPause").disabled };
+      document.getElementById("fcMtNextRound").click();
+    }
+  }
+  if (xw.state.puzzle.rounds.length > 1) {
+    check("between rounds a break card says how the round went, the clock stopped and ⏸ dimmed, until Next round",
+      !!mtBreakSeen && /Round 1 of \d+ done/.test(mtBreakSeen.text) && /1 miss/.test(mtBreakSeen.text) && mtBreakSeen.still && mtBreakSeen.pauseOff);
   }
   check("clearing every round ends on the time, New best and the miss count, and keeps the best time", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
@@ -3111,6 +3123,34 @@ async function main() {
     check("after a round, a split chip beside the clock says how far ahead of or behind your best you are",
       hiddenAtStart && (rounds.length < 2 || (!split.hidden && /^[−+]\d+\.\ds$/.test(split.textContent)
         && /fc-mt-split-(ahead|behind)/.test(split.className))));
+    document.getElementById("fcXwReset").click();
+  })();
+
+  check("Match stats keep the fastest round -- its time and how many pairs it had", (() => {
+    const best = window.RaumeStudy.flashcards.puzzleRuns.bestRound();
+    return !!best && best.ms > 0 && best.pairs >= 5 && best.pairs <= 6;
+  })());
+  await (async () => {
+    mtTile("l", 0).click(); mtTile("r", 0).click();
+    await new Promise(r => setTimeout(r, 120));
+    document.getElementById("fcMtPause").click();
+    const board = document.querySelector("#fcPanelGames .fc-mt");
+    const c1 = mtClock();
+    await new Promise(r => setTimeout(r, 250));
+    check("⏸ stops the clock and covers the tiles with a Paused card: Resume, Restart, End game",
+      mtClock() === c1 && board.classList.contains("fc-mt-paused") && !!board.querySelector(".fc-mt-pause")
+      && window.getComputedStyle(board.querySelector(".fc-mt-cols")).display === "none"
+      && !!document.getElementById("fcPauseResume") && !!document.getElementById("fcPauseRestart") && !!document.getElementById("fcPauseEnd"));
+    document.getElementById("fcPauseResume").click();
+    check("Resume brings the same board back, the pair already cleared still cleared",
+      !board.classList.contains("fc-mt-paused") && !board.querySelector(".fc-mt-pause") && mtTile("l", 0).disabled);
+    const before = window.RaumeStudy.flashcards.puzzleRuns.live("match").length;
+    document.getElementById("fcMtPause").click();
+    document.getElementById("fcPauseEnd").click();
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    check("End game shows what you played -- ended after N rounds -- and doesn't count it in your stats",
+      !!done && /Ended after 0 of \d+ round/.test(done.textContent) && /isn’t counted/.test(done.textContent)
+      && window.RaumeStudy.flashcards.puzzleRuns.live("match").length === before && !!document.getElementById("fcDoneStats"));
     document.getElementById("fcXwReset").click();
   })();
 
@@ -3209,6 +3249,18 @@ async function main() {
   })());
   document.getElementById("fcXwReset").click();
   check("Restart asks the same questions again from the first", lsCount() === "1 / " + lsQ().length && lsChoices().length === 4 && !document.querySelector("#fcPanelGames .fc-mt-done"));
+  check("Listening pauses too: the choices hidden behind the Paused card, End game shows the score so far and logs nothing", (() => {
+    const before = window.RaumeStudy.flashcards.puzzleRuns.live("listening").length;
+    document.getElementById("fcMtPause").click();
+    const board = document.querySelector("#fcPanelGames .fc-ls");
+    const paused = board.classList.contains("fc-mt-paused") && !!board.querySelector(".fc-mt-pause");
+    document.getElementById("fcPauseEnd").click();
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const ok = paused && !!done && /Ended after 0 of \d+ words/.test(done.textContent)
+      && window.RaumeStudy.flashcards.puzzleRuns.live("listening").length === before;
+    document.getElementById("fcXwReset").click();
+    return ok;
+  })());
   speech.speak = realSpeak;
 
   console.log("Flashcards: Puzzle and game stats");

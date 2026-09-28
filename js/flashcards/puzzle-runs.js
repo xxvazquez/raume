@@ -163,6 +163,33 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     if (r.mode === "listening") return r.n ? (r.right || 0) / r.n : 0;
     return r.n ? r.ms / r.n / 1000 : 0;
   }
+  // Match's rounds: even groups of at most 6 pairs (crosswords.js
+  // matchRounds -- this file loads first, so the rule is repeated here).
+  function roundSizes(n) {
+    var count = Math.ceil(n / 6), sizes = [];
+    for (var i = 0; i < count; i++) sizes.push(Math.floor(n / count) + (i < n % count ? 1 : 0));
+    return sizes;
+  }
+  // Every Match round ever cleared: its time (the gap between splits) and
+  // how many pairs it had -- a 5-pair round only races other 5-pair rounds.
+  function matchRoundTimes(runs) {
+    var out = [];
+    runs.forEach(function (r) {
+      if (!r.splits || !r.splits.length) return;
+      var sizes = roundSizes(r.n);
+      if (sizes.length !== r.splits.length) return;
+      r.splits.forEach(function (at, i) { out.push({ ms: at - (i ? r.splits[i - 1] : 0), pairs: sizes[i], at: r.at }); });
+    });
+    return out;
+  }
+  // The fastest round of `pairs` pairs so far (any size when omitted).
+  function bestRound(pairs) {
+    var best = null;
+    matchRoundTimes(live("match")).forEach(function (t) {
+      if ((pairs == null || t.pairs === pairs) && (!best || t.ms < best.ms)) best = t;
+    });
+    return best;
+  }
   function higherIsBetter(mode) { return mode === "listening"; }
   function better(mode, a, b) { return higherIsBetter(mode) ? a > b : a < b; }
   function average(xs) { return xs.reduce(function (a, b) { return a + b; }, 0) / (xs.length || 1); }
@@ -180,6 +207,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
       var key = r.setup || "";
       (bySetup[key] = bySetup[key] || []).push(r);
     });
+    if (mode === "match") st.bestRound = bestRound();
     st.trend = runs.slice(-30).map(function (r) { return { at: r.at, value: measure(r) }; });
     // "Faster / more accurate than your first 10": only once there are 20
     // games, so the two tens don't overlap, and only when it's true.
@@ -218,7 +246,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
 
   return {
     record: record, all: all, live: live, reset: reset, summary: summary,
-    styleStats: styleStats, trickyWords: trickyWords, isGameMode: isGameMode, GAME_MODES: GAME_MODES, sanitize: function (arr) { return capped(clean(arr)); },
+    styleStats: styleStats, trickyWords: trickyWords, bestRound: bestRound, isGameMode: isGameMode, GAME_MODES: GAME_MODES, sanitize: function (arr) { return capped(clean(arr)); },
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush,
     STORAGE_KEY: KEY, MAX: MAX
   };
