@@ -2766,7 +2766,7 @@ async function main() {
     const items = menu ? [...menu.querySelectorAll(".fc-xw-menu-item")].map(b => b.textContent.trim()) : [];
     return document.getElementById("fcXwNew").classList.contains("fc-btn") && !document.getElementById("fcXwNew").classList.contains("fc-btn-primary")
       && document.getElementById("fcXwCheck").classList.contains("fc-btn-primary")
-      && items.join("|") === "New puzzle|Reveal a letter|Reveal puzzle|Clear answers|Print"
+      && items.join("|") === "New puzzle|Reveal a letter|Reveal puzzle|Clear answers|Save as PDF"
       && menu.querySelector(".section-menu-list").hidden
       && !document.querySelector("#fcPanelCrosswords .fc-xw-icon-btn");
   })());
@@ -2814,6 +2814,11 @@ async function main() {
     const cells = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-letter")];
     const filled = cells.filter(c => c.querySelector(".fc-xw-cell-input").value !== "");
     return filled.length === 1 && filled[0].classList.contains("fc-xw-cell-correct");
+  })());
+  check("Save as PDF packs its pages into a real PDF (one A4 page per image, landscape when wider)", (() => {
+    const pdf = window.RaumeStudy.flashcards.puzzlePdf;
+    const blob = pdf.pdfFromJpegs([{ bytes: new Uint8Array([255, 216, 255, 217]), width: 1680, height: 2376 }, { bytes: new Uint8Array([255, 216, 255, 217]), width: 2376, height: 1680 }]);
+    return blob.type === "application/pdf" && blob.size > 400;
   })());
   check("a crossword solved by hand goes to the Dashboard's log once; a revealed one never does", (() => {
     const runs = window.RaumeStudy.flashcards.puzzleRuns;

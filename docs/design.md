@@ -724,7 +724,7 @@ title, "Flashcards · 15 words · Romaji" as a 13px muted line under it, ⌄
 trailing, 52px tall with a 16px radius (one dotted line of four equal parts
 read cramped) — then
 **New puzzle** (white) and filled **Check** trailing with the reference
-tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Print; on a
+tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Save as PDF; on a
 phone New puzzle moves into it). The summary is never ellipsised: on a
 phone it takes the row to itself when it doesn't fit beside Check (which
 moves to the trailing edge below), and only wraps its second line — between
@@ -784,12 +784,19 @@ hue), the other two drop to half opacity; Next (filled) appears only after a
 wrong pick. The end card is Match's, with the missed words as hairline rows:
 a round grey speaker, the word and its reading, the English trailing.
 
-Printed, a puzzle is a worksheet: a 20pt bold title (the style), one grey
-line under it (source · N words · script), the grid centred at 9mm squares
-(smaller only when a big grid must fit the width), then Across and Down as
+Saved as a PDF (`js/flashcards/puzzle-pdf.js`), a puzzle is a worksheet drawn
+on A4 canvases at ~200 dpi — never the browser's print engine, which laid the
+grid out differently per browser: a 20pt bold title (the style), one grey line
+under it (source · N words · script), the grid centred with every edge one
+shared hairline (squares up to 10mm for a crossword, 13mm for an arroword —
+its clue text shrinks 5.5→3.6pt to fit whole words in up to three lines, never
+breaking a word — 12mm for a word search's letters), then Across and Down as
 two plain columns — a rule under each heading, no cards, no row rules, a grey
-tabular number column. A word search prints its letter block at 8mm squares
-with the clue list in two columns under it.
+tabular number column — flowing onto more pages as needed. Portrait unless
+landscape buys clearly bigger squares. The last page is **Answers**: the
+filled grid, or the letter block with each word ringed in sage and the words
+with their answers. The browser-print rules (`body.print-only`) still cover
+the reference tables.
 
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the

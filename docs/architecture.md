@@ -267,6 +267,7 @@ js/
     data-ops.js          auth, Supabase sync, guest store, streak
     backup.js            guest-mode export / import of the on-device data (JSON file)
     puzzle-runs.js       finished Match / Listening games (the Dashboard's Puzzles card)
+    puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
     dashboard.js         the Dashboard tab + the review session
     views.js             the Manage / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups

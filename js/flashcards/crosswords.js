@@ -1417,7 +1417,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // New puzzle is also in the menu, shown there only on a phone, where the
   // toolbar has no room for its own button (CSS swaps them).
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
-  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Print", PRINT_ICON]];
+  // A page with a folded corner and a down arrow: a file you keep.
+  var PDF_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 16h8a1.5 1.5 0 0 0 1.5-1.5V6Z"/><path d="M10.5 2v4h4"/><path d="M9 8.5v4.5M7 11l2 2 2-2"/></svg>';
+  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON]];
   // A word search has no letters to type, so its menu reveals whole words.
   var WS_MENU_LABELS = { hint: "Reveal a word", reset: "Clear found words" };
   // Match has nothing to reveal or print mid-game (a reveal would make the
@@ -1655,13 +1657,27 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (solve.help >= pieces) return;
       recordRun({ mode: state.mode, n: n, ms: Date.now() - solve.start, help: solve.help });
     }
+    // Save as PDF: the sheet drawn by puzzle-pdf.js, answer key last.
+    function savePdf() {
+      var pdf = window.RaumeStudy.flashcards.puzzlePdf;
+      if (!pdf) return;
+      var wsAnswers = wordsearch ? p.placements.map(function (pl) {
+        var entry = vocabIndex()[pl.id];
+        var reading = entry ? String(entry.jpReading || "").replace(/^〜/, "").trim() : "";
+        return /[一-龯々]/.test(pl.answer) && reading ? pl.answer + "（" + reading + "）" : pl.answer;
+      }) : null;
+      pdf.save({ mode: state.mode, puzzle: p, title: printTitle, meta: printMeta, wsAnswers: wsAnswers },
+        "raume-" + state.mode + "-" + window.RaumeStudy.flashcards.store.localDateStr(new Date()) + ".pdf")
+        .catch(function (e) { console.error("Puzzles: could not make the PDF", e); });
+    }
     if (wordsearch) {
       var ws = wireWordSearch(panel.querySelector(".fc-ws-grid"), panel.querySelector(".fc-ws-list"), document.getElementById("fcWsCount"), p,
         function () { solved(p.placements.length, p.placements.length); });
       bindMenu(panel, {
         hint: function () { solve.help++; ws.revealOne(); },
         reveal: function () { solve.done = true; ws.revealAll(); },
-        reset: ws.reset
+        reset: ws.reset,
+        print: savePdf
       });
       return;
     }
@@ -1674,7 +1690,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     bindMenu(panel, {
       hint: function () { solve.help++; hintGrid(gridEl, p, nav); },
       reveal: function () { solve.done = true; revealGrid(gridEl, p); },
-      reset: function () { resetGridInputs(gridEl); }
+      reset: function () { resetGridInputs(gridEl); },
+      print: savePdf
     });
   }
 
@@ -1682,7 +1699,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // the reveal / clear actions come from the style's own wiring.
   function bindMenu(panel, actions) {
     actions.newMenu = function () { generate(); rerender(); };
-    actions.print = function () { document.body.classList.add("print-only"); window.print(); };
     var menu = panel.querySelector(".fc-xw-menu");
     menu.querySelectorAll(".fc-xw-menu-item").forEach(function (item) {
       item.addEventListener("click", function () {
