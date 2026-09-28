@@ -2733,6 +2733,26 @@ async function main() {
   check("every placed word reads back off the grid exactly as its own answer -- a crossing never corrupts a letter",
     xwGrid.placements.every(p => readPlacement(xwGrid, p) === p.answer));
   check("crossword mode numbers every word's own start cell", xwGrid.placements.every(p => typeof p.number === "number" && p.number >= 1));
+  // さん is the start of さんびゃく: it may only cross it, never lie along it
+  // (that gave two Down clues one start square).
+  const xwPrefix = [
+    { id: "p1", clue: "300", answer: "SANBYAKU" }, { id: "p2", clue: "3", answer: "SAN" },
+    { id: "p3", clue: "hundred", answer: "HYAKU" }, { id: "p4", clue: "new", answer: "ATARASHII" }
+  ];
+  check("a word never shares squares with another word running the same way (no word inside another)", [0, 1, 2, 3, 4, 5, 6, 7].every(() => {
+    return [false, true].every(arro => {
+      const seen = {};
+      return xw.buildGrid(xwPrefix, arro).placements.every(p => {
+        const dr = p.dir === "down" ? 1 : 0, dc = p.dir === "across" ? 1 : 0;
+        for (let i = 0; i < p.answer.length; i++) {
+          const k = p.dir + ":" + (p.row + dr * i) + "," + (p.col + dc * i);
+          if (seen[k]) return false;
+          seen[k] = true;
+        }
+        return true;
+      });
+    });
+  }));
   const xwArro = xw.buildGrid(xwWords, true);
   check("arroword mode reserves a clue cell right before every word -- never a letter, never shared", (() => {
     return xwArro.placements.every(p => {

@@ -242,6 +242,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     head.forEach(function (w, i) { if (w.answer.length > head[longest].answer.length) longest = i; });
     list.unshift(list.splice(longest, 1)[0]);
     var grid = {}, clueCells = {}, placements = [];
+    // Which directions already run through each square: a word may only
+    // share a square with a word going the other way, never lie along one
+    // (さん inside さんびゃく would give two clues one start square).
+    var dirsAt = {};
     function key(r, c) { return r + "," + c; }
 
     // Returns the number of crossing letters (>=1) if `answer` fits at
@@ -258,7 +262,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (clueCells[k]) return -1;
         var existing = grid[k];
         if (existing !== undefined) {
-          if (existing !== answer[i]) return -1;
+          if (existing !== answer[i] || dirsAt[k][dir]) return -1;
           crosses++;
         } else if (grid[key(r + dc, c + dr)] !== undefined || grid[key(r - dc, c - dr)] !== undefined) {
           return -1; // would run flush alongside another word with no crossing
@@ -269,7 +273,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
     function place(word, row, col, dir) {
       var dr = dir === "down" ? 1 : 0, dc = dir === "across" ? 1 : 0;
-      for (var i = 0; i < word.answer.length; i++) grid[key(row + dr * i, col + dc * i)] = word.answer[i];
+      for (var i = 0; i < word.answer.length; i++) {
+        var k = key(row + dr * i, col + dc * i);
+        grid[k] = word.answer[i];
+        (dirsAt[k] = dirsAt[k] || {})[dir] = true;
+      }
       if (arroword) clueCells[key(row - dr, col - dc)] = { dir: dir, clue: word.clue };
       placements.push({ id: word.id, clue: word.clue, answer: word.answer, row: row, col: col, dir: dir });
     }
