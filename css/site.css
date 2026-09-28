@@ -2965,20 +2965,26 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .section-title-text,
   #vocabulary .table-section .section-title-text { font-size: 15px; font-weight: 500; color: var(--ink); white-space: normal; }
 
-  /* On paper the table is an iOS list, not a spreadsheet: no box, no
-     vertical rules -- one hairline under the header and between rows (they
-     double as writing lines on a Cover-answers sheet), the column labels in
-     the quiet list-header voice, and the Japanese flush with the title
-     above it. */
+  /* On paper the table is an iOS inset-grouped card drawn in line: one
+     rounded hairline frame, light hairlines between rows and one between
+     the two columns (a worksheet wants its columns divided -- they double
+     as writing lines on a Cover-answers sheet), the column labels in the
+     quiet list-header voice. Lighter inside than out, so the frame reads
+     as the edge and the grid recedes. */
   #vocabulary .table-section:not(.collapsed) .vocab,
-  .vocab { margin: 0 !important; width: 100% !important; border: 0 !important; border-radius: 0 !important; }
-  .vocab th, .vocab td { border: 0 !important; border-bottom: .75pt solid #d6d6d6 !important; }
-  .vocab th { font-size: 11px; color: var(--faint); padding: 0 16px 5px 0 !important; }
+  .vocab {
+    margin: 0 !important; width: 100% !important;
+    border: .75pt solid #bdbdbd !important; border-radius: 10px !important; overflow: hidden;
+  }
+  .vocab th, .vocab td { border: 0 !important; border-bottom: .5pt solid #dcdcdc !important; }
+  .vocab tbody tr:last-child td { border-bottom: 0 !important; }
+  .vocab :is(th, td):not(:first-child) { border-left: .5pt solid #dcdcdc !important; }
+  .vocab th { font-size: 11px; color: var(--faint); padding: 7px 14px 6px !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }
-  .vocab td { padding: 7px 16px 7px 0 !important; }
+  .vocab td { padding: 7px 14px !important; }
   #vocabulary .table-section:not(.collapsed) .vocab :is(th, td):first-child,
-  .vocab :is(th, td):first-child { padding-left: 0 !important; }
+  .vocab :is(th, td):first-child { padding-left: 14px !important; }
   /* The uniform padding above wipes out the screen rule's extra top room for
      the Japanese cell's furigana, so the reading would crowd the rule above.
      Give just that cell its breathing room back. */
