@@ -760,9 +760,10 @@ button, not a menu item; "Reveal a letter" / "Reveal a word" as its title)
 and filled **Check**, then the reference tables' ⋯ menu for the rarer
 Reveal puzzle / Clear answers / Save as PDF (on a phone New puzzle moves into
 it). A wide window keeps it one row; narrower, the actions wrap to the
-trailing edge under the pull-downs, and on a phone the pull-downs are one
-edge-to-edge row that scrolls sideways (Maps / App Store filter chips) rather
-than three wrapped rows. The puzzle is one grid-areas layout:
+trailing edge under the pull-downs, and on a phone the pull-downs are a 2 × 2
+grid of equal capsules (value leading, ⌃⌄ at the trailing end, a long table
+name ellipsised) — every one whole in view; a sideways-scrolling row cut the
+last one off at the edge (Laura, 2026-09-28). The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
 watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid

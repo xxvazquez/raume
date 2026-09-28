@@ -4809,15 +4809,12 @@ mark.fc-diff-co {
 @media (max-width: 640px) {
   #fcXwNew { display: none; }
   .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: flex; }
-  /* One row of pull-downs that scrolls sideways under the thumb (Maps /
-     App Store filter chips), edge to edge, rather than three wrapped rows
-     pushing the puzzle down; the padding keeps their soft shadow unclipped. */
-  .fc-xw-picks {
-    flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
-    margin: -4px -16px; padding: 4px 16px;
-  }
-  .fc-xw-picks::-webkit-scrollbar { display: none; }
-  .fc-xw-picks > .fc-xw-chip, .fc-xw-picks > .fc-xw-source { flex: none; max-width: none; }
+  /* The pull-downs as a 2 × 2 grid of equal capsules, every one whole in
+     view (a sideways-scrolling row cut the last one off at the edge); a
+     long table name ellipsises inside its capsule, the ⌃⌄ at its end. */
+  .fc-xw-picks { flex: 1 1 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fc-xw-picks .fc-xw-chip { width: 100%; justify-content: space-between; }
+  .fc-xw-picks > .fc-xw-source { max-width: none; }
   .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
   .fc-xw-sheet {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;

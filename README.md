@@ -289,8 +289,7 @@ The puzzle comes first. Its settings sit above it as pull-down buttons —
 *Crossword ⌃⌄ · Flashcards ⌃⌄ · 15 words ⌃⌄ · Romaji ⌃⌄* — one tap opens a
 setting's menu, a second picks; changing one makes a new puzzle. Next to them:
 New puzzle, ⓘ (how to solve), **Hint** and **Check**; ⋯ holds the rarer
-Reveal puzzle, Clear and Save as PDF. On a phone the pull-downs are one row
-you can swipe sideways. On a wide
+Reveal puzzle, Clear and Save as PDF. On a phone the pull-downs sit two by two. On a wide
 window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
