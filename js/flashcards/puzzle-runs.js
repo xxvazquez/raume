@@ -6,7 +6,8 @@
 //     "arroword" | "wordsearch", n: pairs / questions / words, ms: time
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
 //     help: letters / words revealed (grids), setup: source|script|count
-//     (Match, for comparing like with like) }
+//     (Match, for comparing like with like), splits: time at each round's
+//     end (Match, for the live split against your best) }
 // localStorage is the immediate source of truth (capped at MAX, newest
 // kept); while signed in the whole log is pushed best-effort to
 // flashcard_settings.puzzle_runs (js/flashcards/data-ops.js + bootstrap.js)
@@ -50,7 +51,11 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   }
   function record(run) {
     var r = { id: newId(), at: new Date().toISOString(), mode: run.mode, n: run.n, ms: Math.round(run.ms) };
-    if (run.mode === "match") { r.miss = run.miss || 0; if (run.setup) r.setup = run.setup; }
+    if (run.mode === "match") {
+      r.miss = run.miss || 0;
+      if (run.setup) r.setup = run.setup;
+      if (run.splits && run.splits.length) r.splits = run.splits.map(Math.round);
+    }
     else if (run.mode === "listening") r.right = run.right || 0;
     else r.help = run.help || 0;
     cache = capped(load().concat([r]));

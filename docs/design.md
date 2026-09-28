@@ -760,7 +760,10 @@ a small shake (none under reduced motion). The list is one inset-grouped
 card headed "Find the Japanese for": the clue, and once found a sage tick
 before it and the reading in grey after it.
 
-**Match** swaps Check for a quiet tabular clock ("0:12.3", sage when done)
+**Match** swaps Check for a quiet tabular clock ("0:12.3", sage when done) —
+with, after each round once a best on the same words exists, a small tabular
+split capsule before it ("−1.4s" on `--right-soft`, "+0.9s" on `--wrong-soft`),
+the clock itself never changing size —
 and trims the ⋯ menu to New game / Restart. The board is two columns of solid
 white tiles on the ground (`--control-lift`, 14px corners, at least 52px
 tall, text wrapping) — the reading leading at 17px, the English trailing at

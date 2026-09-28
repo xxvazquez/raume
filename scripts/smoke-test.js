@@ -3018,6 +3018,16 @@ async function main() {
   document.getElementById("fcXwReset").click();
   check("Restart plays the same words again from zero", mtClock() === "0:00.0" && !document.querySelector("#fcPanelCrosswords .fc-mt-done")
     && document.querySelectorAll("#fcPanelCrosswords .fc-mt-tile:not([disabled])").length === xw.state.puzzle.rounds[0].length * 2);
+  await (async () => {
+    const rounds = xw.state.puzzle.rounds;
+    const split = document.getElementById("fcMtSplit");
+    const hiddenAtStart = !!split && split.hidden;
+    for (let i = 0; i < rounds[0].length; i++) { mtTile("l", i).click(); mtTile("r", i).click(); }
+    check("after a round, a split chip beside the clock says how far ahead of or behind your best you are",
+      hiddenAtStart && (rounds.length < 2 || (!split.hidden && /^[−+]\d+\.\ds$/.test(split.textContent)
+        && /fc-mt-split-(ahead|behind)/.test(split.className))));
+    document.getElementById("fcXwReset").click();
+  })();
 
   const xwIndex = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
   const writtenOf = id => String(xwIndex[id].jpPlain || xwIndex[id].jpReading).replace(/^〜/, "");

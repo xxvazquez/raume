@@ -345,6 +345,9 @@ window the clue you're on and the Across / Down lists sit beside the grid.
   a second to your time.
 - The words come in even rounds of at most 6 pairs (15 words → three rounds
   of 5), so a round fits a phone. The clock starts on your first tap.
+- Once you have a best on the same words, a small chip beside the clock after
+  each round says how far ahead (sage, "−1.4s") or behind (coral, "+0.9s") of
+  that best you are at that point.
 - At the end: your time, *New best* (and by how much) or how far off your
   best you were, your misses, your pace per pair, where this run ranks among
   your runs on the same words, and a small line of your last ten times.

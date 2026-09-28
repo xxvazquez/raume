@@ -749,8 +749,29 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var matchTimer = null;
   function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
 
+  // The split chip: at each round's end, how far ahead of (−) or behind (+)
+  // your best run on these same words you were at that point -- a speedrun
+  // split. Only once a best with splits exists; the clock itself never
+  // jumps or grows.
+  function bestSplits(key, rounds) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    var best = null;
+    (runs ? runs.all() : []).forEach(function (r) {
+      if (r.mode === "match" && r.setup === key && r.splits && r.splits.length === rounds && (!best || r.ms < best.ms)) best = r;
+    });
+    return best ? best.splits : null;
+  }
   function wireMatch(boardEl, clockEl, p, romajiMode) {
-    var round, start, penalty, misses, selected, left, game = 0;
+    var round, start, penalty, misses, selected, left, game = 0, splits, pb;
+    var splitEl = document.getElementById("fcMtSplit");
+    function showSplit(i, at) {
+      if (!splitEl || !pb || pb[i] == null) return;
+      var d = at - pb[i], ahead = d <= 0;
+      splitEl.textContent = (ahead ? "−" : "+") + (Math.abs(d) / 1000).toFixed(1) + "s";
+      splitEl.className = "fc-mt-split " + (ahead ? "fc-mt-split-ahead" : "fc-mt-split-behind");
+      splitEl.setAttribute("aria-label", (Math.abs(d) / 1000).toFixed(1) + " seconds " + (ahead ? "ahead of" : "behind") + " your best");
+      splitEl.hidden = false;
+    }
     function elapsed() { return start === null ? 0 : Date.now() - start + penalty; }
     function tick() {
       if (!clockEl.isConnected) { stopMatchTimer(); return; }
@@ -775,13 +796,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     function finish() {
       stopMatchTimer();
-      var total = elapsed();
+      var total = splits.length ? splits[splits.length - 1] : elapsed();
+      if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(total);
       clockEl.classList.add("fc-ws-count-done");
       var key = matchBestKey(p), best = readBest()[key];
       var isBest = typeof best !== "number" || total < best;
       if (isBest) saveBest(key, total);
-      var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key });
+      var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key, splits: splits });
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
       var outcome = typeof best !== "number" ? "New best"
         : isBest ? "New best · " + ((best - total) / 1000).toFixed(1) + "s faster"
@@ -814,6 +836,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         pair.forEach(function (t) { t.classList.add("fc-mt-right"); t.disabled = true; });
         setTimeout(function () { pair.forEach(function (t) { t.classList.add("fc-mt-gone"); }); }, 250);
         if (--left) return;
+        // The round's split is when its last pair cleared, not after the
+        // short pause before the next round appears.
+        var at = elapsed();
+        splits.push(at);
+        if (round + 1 < p.rounds.length) showSplit(round, at);
+        else stopMatchTimer();
         setTimeout(function () {
           if (thisGame !== game || !boardEl.isConnected) return;
           if (round + 1 < p.rounds.length) { round++; renderRound(); } else finish();
@@ -830,7 +858,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     function restart() {
       stopMatchTimer();
       game++;
-      round = 0; start = null; penalty = 0; misses = 0;
+      round = 0; start = null; penalty = 0; misses = 0; splits = [];
+      pb = bestSplits(matchBestKey(p), p.rounds.length);
+      if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(0);
       clockEl.classList.remove("fc-ws-count-done");
       renderRound();
@@ -1475,7 +1505,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
       "</div>" +
       (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
-        : mt ? '<span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
+        : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
         : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
         : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>') +
       '<div class="section-menu fc-xw-menu">' +

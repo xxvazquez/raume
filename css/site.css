@@ -3349,6 +3349,15 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-mt-wrong { background: color-mix(in srgb, var(--wrong) 14%, var(--paper)); animation: fc-ws-miss .3s ease; }
 @media (prefers-reduced-motion: reduce) { .fc-mt-wrong { animation: none; } .fc-mt-tile { transition: none; } }
 .fc-mt-clock { min-width: 4.5ch; text-align: right; }
+/* The live split beside the clock: a small tabular capsule, sage when
+   ahead of your best at this round, coral when behind. */
+.fc-mt-split {
+  display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px;
+  font: 500 var(--fs-micro)/1.2 var(--font-ui); font-variant-numeric: tabular-nums;
+}
+.fc-mt-split[hidden] { display: none; }
+.fc-mt-split-ahead { background: var(--right-soft); color: var(--right-strong); }
+.fc-mt-split-behind { background: var(--wrong-soft); color: var(--wrong-strong); }
 .fc-mt-done {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: 28px 20px 24px; border-radius: var(--radius-card); background: var(--paper);
