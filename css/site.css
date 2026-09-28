@@ -3185,39 +3185,18 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-tabpanel[hidden] { display: none; }
 
-/* --- Puzzles tab: settings card, toolbar, clue bar, grid, clue list ------
-   Settings are one inset-grouped card reusing the Settings tab's row style
-   (fc-settings-field), label left / control right, 44px rows. The toolbar
-   is the controls library as-is: tinted New puzzle, filled Check, and the
-   reference tables' own ⋯ menu for the occasional actions -- no icon-only
-   circles. */
-.fc-xw-config { padding: 2px 16px; margin-bottom: 8px; }
-/* One readable column on a wide screen -- a 1000px-wide settings row puts
-   the label a mile from its control. The puzzle below takes what it needs. */
-.fc-xw-config, .fc-xw-actions, .fc-xw-current { max-width: 680px; }
-.fc-settings-field.fc-xw-field { min-height: 44px; padding: 0; display: flex; flex-direction: column; justify-content: center; }
-/* Picker rows (Source / Style / Script / Words) and the two disclosure rows
-   (Tables, More options) share one shape: a 14px regular label, the value
-   in secondary grey at the trailing edge, 44px tall. */
-.fc-settings-field .fc-xw-pick, .fc-xw-field-btn {
-  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  width: 100%; min-height: 44px; cursor: pointer;
-  color: var(--ink); font: 400 var(--fs-nav)/1.3 var(--font-ui);
-}
-.fc-xw-field-btn { appearance: none; border: 0; background: transparent; padding: 0; text-align: left; }
+/* --- Puzzles tab: toolbar, clue bar, grid, clue list -------------------
+   The toolbar is the controls library as-is: pull-down buttons for the
+   settings, tinted New puzzle and Hint, filled Check, and the reference
+   tables' own ⋯ menu for the occasional actions -- no icon-only circles. */
+.fc-xw-actions, .fc-xw-current { max-width: 680px; }
+/* The native select laid invisibly over a pull-down button: the tap opens
+   the platform's own menu. */
 .fc-xw-pick-select {
   position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
   opacity: 0; appearance: none; border: 0; font-size: 16px; cursor: pointer;
 }
-.fc-xw-pick:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 6px; }
 .fc-xw-updown { flex: none; }
-/* One line each: the label never wraps, a long value ("Kitchen Tools &
-   Appliances, Drinks") truncates instead of stacking. */
-.fc-xw-pick-label { flex: none; white-space: nowrap; }
-.fc-xw-value-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fc-xw-field-value { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-nav); min-width: 0; text-align: right; }
-.fc-xw-chevron { flex: none; transition: transform .15s ease; }
-.fc-xw-field-btn[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
 /* The table list: category captions over checkmark rows (.fc-direction-check,
    the Settings tab's own), capped so 30-odd tables don't shove the puzzle
    off the screen. */
@@ -3227,7 +3206,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Footnote under a group, iOS-style: secondary text, inset to the card's
    text edge. */
 .fc-xw-footnote { margin: 0 16px 14px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
-.fc-xw-config + .fc-xw-actions { margin-top: 16px; }
+.fc-xw-actions { margin-top: 16px; }
 .fc-xw-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .fc-xw-actions-end { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .fc-xw-actions .fc-btn { min-height: 34px; padding: 7px 16px; }
@@ -4742,32 +4721,27 @@ mark.fc-diff-co {
 }
 
 /* --- Puzzles: the puzzle first ----------------------------------------
-   One toolbar -- a summary button for the settings ("Crossword · Flashcards
-   · 15 words · Romaji ⌄"), New puzzle, Check, ⋯ -- then the puzzle. The
-   settings open as a glass popover under the summary (the reference pages'
-   Options pattern); on a phone, a bottom sheet over a scrim. */
+   One toolbar, then the puzzle. Leading, the settings as iOS pull-down
+   buttons -- Style, Source, Words, Script -- each a white capsule naming
+   its current value, one tap to its menu; trailing, New puzzle, ⓘ, Hint,
+   Check and ⋯. The row wraps on a narrow window: the pull-downs first, the
+   actions at the trailing edge under them. */
 .fc-xw-actions, .fc-xw-current { max-width: none; }
-.fc-xw-actions { margin-bottom: 14px; }
-.fc-xw-options { position: relative; flex: 0 1 auto; min-width: 0; }
-/* An iOS menu button with a subtitle: the style as the title, source /
-   count / script as a quieter second line. */
-.fc-xw-summary {
-  appearance: none; border: 0; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 14px; max-width: 100%;
-  min-width: 220px; min-height: 52px; padding: 8px 14px 8px 16px; border-radius: 16px;
-  background: var(--paper); box-shadow: var(--control-lift);
-  color: var(--ink); font: 400 var(--fs-nav)/1 var(--font-ui); text-align: left;
+.fc-xw-actions { flex-wrap: wrap; row-gap: 10px; margin-bottom: 14px; }
+.fc-xw-picks { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.fc-xw-chip {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  min-height: 34px; box-sizing: border-box; padding: 0 12px 0 14px; border-radius: 999px;
+  background: var(--paper); box-shadow: var(--control-lift); cursor: pointer;
+  color: var(--ink); font: 400 var(--fs-nav)/1.2 var(--font-ui);
 }
-.fc-xw-summary:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
-.fc-xw-summary-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.fc-xw-summary-title { font-size: 15px; font-weight: 500; line-height: 1.25; }
-.fc-xw-summary-sub {
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--muted); font-size: var(--fs-small); line-height: 1.3;
-}
-.fc-xw-summary-dot { color: var(--faint); margin: 0 5px; }
-.fc-xw-summary .fc-xw-chevron { color: var(--faint); }
-.fc-xw-summary[aria-expanded="true"] .fc-xw-chevron { transform: rotate(180deg); }
+.fc-xw-chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-xw-chip .fc-xw-updown { color: var(--faint); }
+.fc-xw-chip:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; }
+.fc-xw-hint svg { margin: 0 5px 0 -3px; }
+/* "Several tables…": the checklist as a glass popover under Source (the
+   reference pages' Options pattern); on a phone, a bottom sheet. */
+.fc-xw-source { position: relative; display: flex; min-width: 0; max-width: 100%; }
 .fc-xw-sheet {
   position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
   width: 340px; max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
@@ -4777,15 +4751,17 @@ mark.fc-diff-co {
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
 }
 .fc-xw-sheet[hidden], .fc-xw-scrim[hidden] { display: none; }
-.fc-xw-sheet .fc-xw-config { margin: 0; max-width: none; }
-.fc-xw-sheet-foot { margin: 8px 8px 2px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
+.fc-xw-sheet-head { display: flex; align-items: center; justify-content: space-between; margin: 0 6px 6px; }
+.fc-xw-sheet-title { margin: 0; font: 600 var(--fs-body)/1.3 var(--font-ui); color: var(--ink); }
+.fc-xw-sheet-done {
+  appearance: none; border: 0; background: none; padding: 6px 2px; cursor: pointer;
+  color: var(--accent-strong); font: 600 var(--fs-nav)/1 var(--font-ui);
+}
+.fc-xw-sheet .fc-xw-table-picker { max-height: none; margin: 0; }
 .fc-xw-scrim { display: none; }
 /* New puzzle has its own button on a wide window, a ⋯ item on a phone. */
 .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: none; }
 .fc-xw-actions + .fc-xw-footnote { margin-top: -6px; }
-/* New puzzle joins Check at the trailing edge. */
-.fc-xw-options + #fcXwNew { margin-left: auto; }
-.fc-xw-options ~ .fc-xw-actions-end { margin-left: 0; }
 
 /* The puzzle: one DOM order (clue bar, grid, clue lists) laid out by grid
    areas -- stacked on a phone (clue bar above the grid, lists below), the
@@ -4833,17 +4809,15 @@ mark.fc-diff-co {
 @media (max-width: 640px) {
   #fcXwNew { display: none; }
   .section-menu-list .fc-xw-menu-item[data-action="newMenu"] { display: flex; }
-  /* The whole summary always reads on a phone, never ellipsised: when it
-     doesn't fit beside Check and ⋯ it takes the row to itself (they drop to
-     the trailing edge of the next), and only if even the full row is too
-     narrow does its second line wrap -- between whole parts. */
-  .fc-xw-actions { flex-wrap: wrap; row-gap: 8px; }
-  .fc-xw-options { flex: 1 1 max-content; max-width: 100%; }
-  .fc-xw-options ~ .fc-xw-actions-end { margin-left: auto; }
-  .fc-xw-summary { width: 100%; min-width: 0; }
-  /* A long table list wraps rather than hiding the count behind an ellipsis. */
-  .fc-xw-summary-sub { white-space: normal; }
-  .fc-xw-summary-part { white-space: nowrap; }
+  /* One row of pull-downs that scrolls sideways under the thumb (Maps /
+     App Store filter chips), edge to edge, rather than three wrapped rows
+     pushing the puzzle down; the padding keeps their soft shadow unclipped. */
+  .fc-xw-picks {
+    flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
+    margin: -4px -16px; padding: 4px 16px;
+  }
+  .fc-xw-picks::-webkit-scrollbar { display: none; }
+  .fc-xw-picks > .fc-xw-chip, .fc-xw-picks > .fc-xw-source { flex: none; max-width: none; }
   .fc-xw-scrim { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(12, 14, 20, .28); }
   .fc-xw-sheet {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;

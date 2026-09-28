@@ -284,9 +284,13 @@ Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
 
-The puzzle comes first. Its settings sit behind one summary button — the
-style as its title, "Flashcards · 15 words · Romaji" under it — that opens them as a popover
-(a bottom sheet on a phone); changing one makes a new puzzle. On a wide
+The puzzle comes first. Its settings sit above it as pull-down buttons —
+*Crossword ⌃⌄ · Flashcards ⌃⌄ · 15 words ⌃⌄ · Romaji ⌃⌄* — one tap opens a
+setting's menu, a second picks; changing one makes a new puzzle. Next to them:
+New puzzle, ⓘ (how to solve), **Hint** and **Check**; ⋯ holds the rarer
+Reveal puzzle, Clear and Save as PDF. On a phone the pull-downs are one row
+you can swipe sideways. On a wide
+window the clue you're onOn a wide
 window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
@@ -296,10 +300,10 @@ scrolls sideways.
 
 | Setting | Choices |
 | --- | --- |
-| **Source** | *Flashcards* (added, unpaused words) or *Tables*: one or more vocabulary tables, whether or not they're in flashcards |
+| **Source** | *Flashcards* (added, unpaused words) or any vocabulary table, whether or not it's in flashcards; *Several tables…* opens a checklist to mix tables into one puzzle |
 | **Style** | *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer), *Word search*, *Match* or *Listening* |
 | **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
-| **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The summary shows the real count when the pool holds fewer |
+| **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The button shows the real count when the pool holds fewer |
 
 <details>
 <summary><b>Solving a crossword / arroword</b></summary>
@@ -308,8 +312,9 @@ scrolls sideways.
   crossing square again to switch. The bar above the grid shows the clue
   you're on (it appears once you pick a square; the ⓘ beside Check has the
   how-to). Backspace steps back, arrow keys move.
-- **Check** marks filled squares right or wrong. The **⋯** menu has *Reveal a
-  letter*, *Reveal puzzle*, *Clear answers* and *Save as PDF* — an A4
+- **Hint** fills one square (the one you're on if it's empty, else the next
+  empty one in your word). **Check** marks filled squares right or wrong. The
+  **⋯** menu has *Reveal puzzle*, *Clear answers* and *Save as PDF* — an A4
   worksheet the app draws itself, so it looks the same from any browser: the
   title, one line like "Drinks · 20 words · Romaji", the grid, Across and Down
   side by side, and an **Answers** page last. A wide grid turns the page to
@@ -334,7 +339,7 @@ scrolls sideways.
 - Drag across a word, or tap its first and last letter; a found word gets a
   capsule, a tick and its reading in the list, and the toolbar counts how
   many are found.
-- The **⋯** menu has *Reveal a word*, *Reveal puzzle*, *Clear found words* and
+- **Hint** reveals one word. The **⋯** menu has *Reveal puzzle*, *Clear found words* and
   *Save as PDF* (the letter block, the clues in two columns, and an Answers page
   with every word ringed).
 - Finding them all goes to the Dashboard's **Puzzles** card (time and words

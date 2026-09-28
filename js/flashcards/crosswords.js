@@ -50,7 +50,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Same ⓘ glyph as a reference row's grammar notes (js/vocab/render.js's
   // INFO_ICON), at the ⋯ menu's size.
   var INFO_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg>';
-  var CHEVRON_ICON = '<svg class="fc-xw-chevron" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
 
   function vocabIndex() { return S.vocabIndex.getVocabIndex(); }
 
@@ -1020,7 +1019,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], tablesOpen: false, optionsOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
+  var state = { source: "flashcards", tables: [], tablesOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
 
   function rerender() { S.render(); }
 
@@ -1124,7 +1123,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
-  var SOURCE_OPTS = [["flashcards", "Flashcards"], ["table", "Tables"]];
   var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"]];
   var SCRIPT_OPTS = [["romaji", "Romaji"], ["native", "Japanese"], ["hiragana", "Hiragana"], ["katakana", "Katakana"]];
   // A grid stops fitting (and building fast) past 40 words; Match and
@@ -1142,24 +1140,25 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return n + (n === 1 ? " word" : " words");
   }
 
-  // An iOS pop-up button row: label left, the current value and a small
-  // up/down chevron right, the whole 44px row the tap target. A real
-  // <select> sits invisibly over the row, so a tap opens the platform's own
-  // picker (the wheel/menu on iOS) -- no oversized segmented control per
-  // setting. The select is 16px so iOS never zooms in on it.
+  // An iOS pull-down button (UIButton's menu as its primary action): a
+  // white capsule showing the current value and a small up/down chevron. A
+  // real <select> sits invisibly over it, so one tap opens the platform's
+  // own menu and a second picks -- no sheet to open first. The select is
+  // 16px so iOS never zooms in on it; its aria-label names the setting.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
-  function pickerRow(name, label, options, current) {
-    var currentText = "";
-    var opts = options.map(function (o) {
+  function optionsHtml(options, current) {
+    return options.map(function (o) {
       var val = Array.isArray(o) ? o[0] : String(o);
       var text = Array.isArray(o) ? o[1] : String(o);
-      if (String(current) === val) currentText = text;
-      return '<option value="' + val + '"' + (String(current) === val ? " selected" : "") + ">" + esc(text) + "</option>";
+      return '<option value="' + esc(val) + '"' + (String(current) === val ? " selected" : "") + ">" + esc(text) + "</option>";
     }).join("");
-    return '<div class="fc-settings-field fc-xw-field"><label class="fc-xw-pick">' +
-      '<span class="fc-xw-pick-label">' + esc(label) + "</span>" +
-      '<span class="fc-xw-field-value"><span class="fc-xw-value-text">' + esc(currentText) + "</span>" + UPDOWN_ICON + "</span>" +
-      '<select class="fc-xw-pick-select" data-pick="' + name + '">' + opts + "</select></label></div>";
+  }
+  function chipHtml(name, label, shown, optsHtml) {
+    return '<label class="fc-xw-chip"><span class="fc-xw-chip-text">' + esc(shown) + "</span>" + UPDOWN_ICON +
+      '<select class="fc-xw-pick-select" data-pick="' + name + '" aria-label="' + esc(label) + '">' + optsHtml + "</select></label>";
+  }
+  function pickChip(name, label, options, current) {
+    return chipHtml(name, label, optionLabel(options, current), optionsHtml(options, current));
   }
 
   function selectedTables() {
@@ -1175,8 +1174,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Checkmark rows grouped by category (the Settings tab's study-direction
   // rows), not a giant segmented control --
   // more than one table can feed a single puzzle (mix "Numbers" + "Time"
-  // for a bigger pool). Collapsed behind the Table row until tapped, since
-  // 30+ options shown open by default is its own kind of clutter.
+  // for a bigger pool). Shown in the "Several tables…" popover.
   function tableChecklistHtml() {
     var byCategory = {};
     vocabTables().forEach(function (t) {
@@ -1195,12 +1193,31 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }).join("");
     return '<div class="fc-xw-table-picker" id="fcXwTablePicker">' + groups + "</div>";
   }
-  function tableFieldRowHtml() {
-    return '<div class="fc-settings-field fc-xw-field">' +
-      '<button type="button" class="fc-settings-field-row fc-xw-field-row fc-xw-field-btn" id="fcXwTablesToggle" aria-expanded="' + state.tablesOpen + '" aria-controls="fcXwTablePicker">' +
-      '<span class="fc-xw-pick-label">Tables</span><span class="fc-xw-field-value"><span class="fc-xw-value-text">' + esc(tablesSummary()) + "</span>" + CHEVRON_ICON + "</span></button>" +
-      (state.tablesOpen ? tableChecklistHtml() : "") +
-      "</div>";
+  // Source is one pull-down too: Flashcards, or any single table (grouped
+  // by category) -- the common case in two taps. "Several tables…" opens
+  // the checklist as a popover (a bottom sheet on a phone) to mix tables
+  // into one pool; while several are picked the button names them.
+  function sourceChipHtml() {
+    var picked = state.source === "table" ? state.tables.map(String) : [];
+    var several = picked.length > 1;
+    var byCategory = {};
+    vocabTables().forEach(function (t) { (byCategory[t.category || "Tables"] = byCategory[t.category || "Tables"] || []).push(t); });
+    var opts = '<option value="flashcards"' + (state.source === "flashcards" ? " selected" : "") + ">Flashcards</option>" +
+      (several ? '<option value="multi" selected>' + esc(tablesSummary()) + "</option>" : "") +
+      Object.keys(byCategory).sort(function (a, b) { return a.localeCompare(b); }).map(function (cat) {
+        return '<optgroup label="' + esc(cat) + '">' + byCategory[cat].slice().sort(function (a, b) { return a.title.localeCompare(b.title); }).map(function (t) {
+          var on = !several && picked[0] === String(t.id);
+          return '<option value="t:' + esc(String(t.id)) + '"' + (on ? " selected" : "") + ">" + esc(t.title) + "</option>";
+        }).join("") + "</optgroup>";
+      }).join("") +
+      '<option value="several">Several tables…</option>';
+    var shown = state.source === "table" ? tablesSummary() : "Flashcards";
+    return '<div class="fc-xw-source">' + chipHtml("source", "Words from", shown, opts) +
+      '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
+      '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Tables"' + (state.tablesOpen ? "" : " hidden") + ">" +
+      '<div class="fc-xw-sheet-head"><h4 class="fc-xw-sheet-title">Tables</h4>' +
+      '<button type="button" class="fc-xw-sheet-done" id="fcXwTablesDone">Done</button></div>' +
+      tableChecklistHtml() + "</div></div>";
   }
   function arrowIcon(dir) {
     return dir === "down"
@@ -1456,32 +1473,29 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
-  // One inset-grouped card of 44px rows, iOS Settings-style: Source (and
-  // Tables, when it applies), Style, Script, Words -- all in view; at 44px a
-  // row is cheaper than a "More options" disclosure hiding three of them.
-  function configCardHtml() {
-    var rows = pickerRow("source", "Source", SOURCE_OPTS, state.source);
-    if (state.source === "table") rows += tableFieldRowHtml();
-    rows += pickerRow("mode", "Style", MODE_OPTS, state.mode);
-    // Listening has no script to choose -- you hear the word.
-    if (state.mode !== "listening") rows += pickerRow("script", "Script", scriptOpts(), state.script);
-    rows += pickerRow("size", "Words", sizeOpts(), state.size);
-    return '<div class="fc-settings-section fc-xw-config">' + rows + "</div>";
+  // The settings as a row of pull-down buttons, always in view: Style,
+  // where the words come from, how many, and the script (not for
+  // Listening -- you hear the word). Changing one makes a new puzzle.
+  function picksHtml() {
+    return '<div class="fc-xw-picks">' +
+      pickChip("mode", "Style", MODE_OPTS, state.mode) +
+      sourceChipHtml() +
+      chipHtml("size", "Words", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
+      (state.mode !== "listening" ? pickChip("script", "Script", scriptOpts(), state.script) : "") +
+      "</div>";
   }
 
-  // The toolbar: one tinted New puzzle on the leading edge, the one action
-  // you reach for while solving -- Check -- filled on the trailing edge, and
-  // everything occasional (Hint, Reveal, Clear, Print) in a ⋯ menu beside
-  // it. A row of unlabeled icon circles made every action look equally
-  // important and none of them recognisable.
-  // New puzzle is also in the menu, shown there only on a phone, where the
-  // toolbar has no room for its own button (CSS swaps them).
+  // The toolbar: the settings leading; trailing, New puzzle, the ⓘ how-to,
+  // Hint (the help you reach for mid-solve, so a labelled button of its own,
+  // not buried in a menu) and Check filled; the rarer Reveal puzzle / Clear /
+  // Save as PDF in a ⋯ menu. New puzzle is also in the menu, shown there
+  // only on a phone, where the toolbar has no room for its own button.
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
   // A page with a folded corner and a down arrow: a file you keep.
   var PDF_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 16h8a1.5 1.5 0 0 0 1.5-1.5V6Z"/><path d="M10.5 2v4h4"/><path d="M9 8.5v4.5M7 11l2 2 2-2"/></svg>';
-  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["hint", "Reveal a letter", HINT_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON]];
-  // A word search has no letters to type, so its menu reveals whole words.
-  var WS_MENU_LABELS = { hint: "Reveal a word", reset: "Clear found words" };
+  var MENU_ACTIONS = [["newMenu", "New puzzle", NEW_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON]];
+  // A word search has no letters to type, so its Hint reveals a whole word.
+  var WS_MENU_LABELS = { reset: "Clear found words" };
   // Match has nothing to reveal or print mid-game (a reveal would make the
   // clock meaningless): just a new game, or the same words again.
   var MT_MENU_LABELS = { newMenu: "New game", reset: "Restart" };
@@ -1489,41 +1503,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var hit = opts.filter(function (o) { return String(Array.isArray(o) ? o[0] : o) === String(value); })[0];
     return hit ? (Array.isArray(hit) ? hit[1] : String(hit)) : "";
   }
-  // One summary button stands in for the four settings rows and opens them
-  // as a sheet: a popover under it on a wide window, a bottom sheet on a
-  // phone (the reference pages' Options pattern). Like an iOS menu button
-  // with a subtitle: the style as its title, "Flashcards · 15 words ·
-  // Romaji" as a quieter second line -- one dotted line of four equal
-  // parts read as a cramped run-on. The puzzle itself comes first.
-  function optionsSummary() {
-    var src = state.source === "table" ? tablesSummary() : "Flashcards";
-    var parts = [src, sizeLabel()];
-    return state.mode === "listening" ? parts : parts.concat(optionLabel(SCRIPT_OPTS, state.script));
-  }
   function toolbarHtml() {
-    var parts = optionsSummary();
     var ws = state.mode === "wordsearch", ls = state.mode === "listening";
     // Listening is a game like Match: the same short menu, a counter
     // instead of Check.
     var mt = state.mode === "match" || ls;
     var labels = mt ? MT_MENU_LABELS : ws ? WS_MENU_LABELS : {};
     var actions = mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
-    return '<div class="fc-xw-actions">' +
-      '<div class="fc-xw-options">' +
-      '<button type="button" class="fc-xw-summary" id="fcXwOptions" aria-haspopup="dialog" aria-expanded="' + state.optionsOpen + '" aria-controls="fcXwSheet">' +
-      '<span class="fc-xw-summary-text">' +
-      '<span class="fc-xw-summary-title">' + esc(optionLabel(MODE_OPTS, state.mode)) + "</span>" +
-      '<span class="fc-xw-summary-sub">' + parts.map(function (t, i) {
-        return '<span class="fc-xw-summary-part' + (i === 0 ? " fc-xw-summary-src" : "") + '">' + esc(t) + "</span>";
-      }).join('<span class="fc-xw-summary-dot" aria-hidden="true">·</span>') + "</span></span>" +
-      CHEVRON_ICON + "</button>" +
-      '<div class="fc-xw-scrim"' + (state.optionsOpen ? "" : " hidden") + "></div>" +
-      '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Puzzle options"' + (state.optionsOpen ? "" : " hidden") + ">" +
-      configCardHtml() +
-      '<p class="fc-xw-sheet-foot">Changing any of these makes a new puzzle.</p>' +
-      "</div></div>" +
-      '<button type="button" class="fc-btn" id="fcXwNew">' + (mt ? "New game" : "New puzzle") + "</button>" +
+    return '<div class="fc-xw-actions">' + picksHtml() +
       '<div class="fc-xw-actions-end">' +
+      '<button type="button" class="fc-btn" id="fcXwNew">' + (mt ? "New game" : "New puzzle") + "</button>" +
       '<div class="fc-xw-tip">' +
       '<button type="button" class="fc-xw-tip-btn" id="fcXwTip" aria-expanded="false" aria-controls="fcXwTipPop" aria-label="How to solve">' + INFO_ICON + "</button>" +
       '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + (ls
@@ -1534,6 +1523,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
         : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.") + "</p>" +
       "</div>" +
+      (mt ? "" : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
       (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
         : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
         : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
@@ -1551,14 +1541,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Wiring shared by the empty-state and full-puzzle renders below -- every
   // control has to work even when the current source/table pick has
   // nothing yet to build a grid from.
-  function setOptionsOpen(panel, open) {
-    state.optionsOpen = open;
-    var btn = panel.querySelector("#fcXwOptions"), sheet = panel.querySelector(".fc-xw-sheet"), scrim = panel.querySelector(".fc-xw-scrim");
-    if (!btn || !sheet) return;
-    btn.setAttribute("aria-expanded", String(open));
+  function setTablesOpen(panel, open) {
+    state.tablesOpen = open;
+    var sheet = panel.querySelector(".fc-xw-sheet"), scrim = panel.querySelector(".fc-xw-scrim");
+    if (!sheet) return;
     sheet.hidden = !open;
     if (scrim) scrim.hidden = !open;
-    if (!open) btn.focus();
+    if (!open) panel.querySelector('[data-pick="source"]').focus();
   }
   function setTipOpen(open) {
     var btn = document.getElementById("fcXwTip"), pop = document.getElementById("fcXwTipPop");
@@ -1576,39 +1565,49 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // detaching the clicked node -- that was a click inside, not outside.
       var tip = document.querySelector("#fcPanelCrosswords .fc-xw-tip");
       if (tip && !tip.contains(e.target)) setTipOpen(false);
-      if (!state.optionsOpen || !e.target.isConnected) return;
+      if (!state.tablesOpen || !e.target.isConnected) return;
       var panel = document.getElementById("fcPanelCrosswords");
-      var box = panel && panel.querySelector(".fc-xw-options");
+      var box = panel && panel.querySelector(".fc-xw-source");
       if (!box || (box.contains(e.target) && !e.target.classList.contains("fc-xw-scrim"))) return;
-      setOptionsOpen(panel, false);
+      setTablesOpen(panel, false);
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") setTipOpen(false);
-      if (e.key !== "Escape" || !state.optionsOpen) return;
+      if (e.key !== "Escape" || !state.tablesOpen) return;
       var panel = document.getElementById("fcPanelCrosswords");
-      if (panel) setOptionsOpen(panel, false);
+      if (panel) setTablesOpen(panel, false);
     });
   }
   function bindControls(panel) {
-    var optionsBtn = panel.querySelector("#fcXwOptions");
-    if (optionsBtn) {
-      wireOptionsDismiss();
-      panel.querySelector("#fcXwTip").addEventListener("click", function () {
-        setTipOpen(this.getAttribute("aria-expanded") !== "true");
-      });
-      optionsBtn.addEventListener("click", function () { setOptionsOpen(panel, !state.optionsOpen); });
-    }
+    wireOptionsDismiss();
+    var tip = panel.querySelector("#fcXwTip");
+    if (tip) tip.addEventListener("click", function () { setTipOpen(this.getAttribute("aria-expanded") !== "true"); });
+    var done = panel.querySelector("#fcXwTablesDone");
+    if (done) done.addEventListener("click", function () { setTablesOpen(panel, false); });
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
-        state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
+        if (key === "source") {
+          if (sel.value === "multi") return;
+          if (sel.value === "several") {
+            // Opens the checklist on what's picked now (the first roomy
+            // table, coming from Flashcards).
+            if (state.source !== "table") { state.source = "table"; state.tables = []; generate(); }
+            state.tablesOpen = true;
+            rerender();
+            return;
+          }
+          state.source = sel.value === "flashcards" ? "flashcards" : "table";
+          state.tables = sel.value === "flashcards" ? [] : [sel.value.slice(2)];
+          state.tablesOpen = false;
+        } else {
+          state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
+        }
         if (key === "mode" && !isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
         generate();
         rerender();
       });
     });
-    var tablesToggle = document.getElementById("fcXwTablesToggle");
-    if (tablesToggle) tablesToggle.addEventListener("click", function () { state.tablesOpen = !state.tablesOpen; rerender(); });
     panel.querySelectorAll("#fcXwTablePicker input[type=checkbox]").forEach(function (cb) {
       cb.addEventListener("change", function () {
         var id = cb.dataset.tableId;
@@ -1627,7 +1626,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
     function notEnough(msg, canRetry) {
-      panel.innerHTML = configCardHtml() + '<p class="fc-xw-footnote">' + msg + "</p>" +
+      panel.innerHTML = '<div class="fc-xw-actions">' + picksHtml() + "</div>" + '<p class="fc-xw-footnote">' + msg + "</p>" +
         (canRetry ? '<div class="fc-xw-actions"><button type="button" class="fc-btn" id="fcXwNew">Try again</button></div>' : "");
       bindControls(panel);
       var retry = document.getElementById("fcXwNew");
@@ -1764,6 +1763,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // the reveal / clear actions come from the style's own wiring.
   function bindMenu(panel, actions) {
     actions.newMenu = function () { generate(); rerender(); };
+    var hint = panel.querySelector("#fcXwHint");
+    if (hint && actions.hint) hint.addEventListener("click", actions.hint);
     var menu = panel.querySelector(".fc-xw-menu");
     menu.querySelectorAll(".fc-xw-menu-item").forEach(function (item) {
       item.addEventListener("click", function () {

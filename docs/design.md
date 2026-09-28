@@ -342,6 +342,11 @@ and Help.
     no border — never a grey tint) and *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
     all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
     instead of an underline).
+  - **Pull-down button** (`.fc-xw-chip`, Puzzles' settings): a white capsule
+    on `--control-lift` naming the current value, a faint ⌃⌄ after it, a
+    native `<select>` laid invisibly over it — one tap to the menu. For a
+    handful of settings that should stay in view; a longer form belongs in
+    pop-up rows.
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
     (Show / Study), white `--radius-card` cards of 44px rows with inset hairlines, switches
@@ -739,22 +744,25 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
-**Puzzles** puts the puzzle first. One toolbar: a white **summary button**
-leading — an iOS menu button with a subtitle: the style as a 15px medium
-title, "Flashcards · 15 words · Romaji" as a 13px muted line under it, ⌄
-trailing, 52px tall with a 16px radius (one dotted line of four equal parts
-read cramped) — then
-**New puzzle** (white) and filled **Check** trailing with the reference
-tables' ⋯ menu (Reveal a letter / Reveal puzzle / Clear answers / Save as PDF; on a
-phone New puzzle moves into it). The summary is never ellipsised: on a
-phone it takes the row to itself when it doesn't fit beside Check (which
-moves to the trailing edge below), and only wraps its second line — between
-whole parts — if even the full row is too narrow. The summary opens the settings — Source,
-Tables, Style, Script, Words as iOS pop-up rows (label left, value + ⌃⌄ right,
-an invisible native `<select>` over the row; the table list is checkmark rows)
-— in a glass popover under it (`.fc-xw-sheet`, the Options pattern), a bottom
-sheet over a scrim on a phone; it stays open while you change things and
-closes on an outside tap or Escape. The puzzle is one grid-areas layout:
+**Puzzles** puts the puzzle first. One toolbar: the settings leading as
+**pull-down buttons** (`.fc-xw-chip`) — Style, Source, Words, Script (none
+for Listening), each a white 34px capsule naming its current value with a
+faint ⌃⌄, an invisible native `<select>` over it, so one tap opens the
+platform's menu and a second picks (UIKit's menu-as-primary-action button;
+no summary button and sheet in between). Source lists Flashcards, every
+table grouped by category (`<optgroup>`), and **Several tables…**, which opens
+the table checklist (checkmark rows, a "Tables" title and a Done button) in a
+glass popover under it (`.fc-xw-sheet`, the Options pattern) — a bottom sheet
+over a scrim on a phone — staying open while you tick and closing on Done, an
+outside tap or Escape. Trailing: **New puzzle** (white), the ⓘ, **Hint**
+(white, lightbulb + word — the help you reach for mid-solve is a labelled
+button, not a menu item; "Reveal a letter" / "Reveal a word" as its title)
+and filled **Check**, then the reference tables' ⋯ menu for the rarer
+Reveal puzzle / Clear answers / Save as PDF (on a phone New puzzle moves into
+it). A wide window keeps it one row; narrower, the actions wrap to the
+trailing edge under the pull-downs, and on a phone the pull-downs are one
+edge-to-edge row that scrolls sideways (Maps / App Store filter chips) rather
+than three wrapped rows. The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
 watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid
