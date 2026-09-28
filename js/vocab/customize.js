@@ -382,7 +382,6 @@ window.RaumeStudy.customize = (function () {
     var canResetOrder = tc() && tc().hasCustomOrder();
     return '<div class="cz-intro">' +
       "<h1>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") + "</h1>" +
-      (canResetOrder ? '<button type="button" class="cz-reset-order" data-reset-order>Reset order</button>' : "") +
       infoPanelHtml("main", czInfoMainOpen,
         '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +
         "<ul class=\"cz-tips\">" +
@@ -392,7 +391,11 @@ window.RaumeStudy.customize = (function () {
           "<li><strong>Reset</strong> puts a single table’s name and icon back to how it shipped.</li>" +
           "<li>Signed in on the Practice page? Your changes sync to your other devices. As a guest they’re saved in this browser only.</li>" +
         "</ul>") +
-      "</div>" + '<div class="cz-groups">' + groups + "</div>" + (cv() ? customVocabSection() : "");
+      "</div>" + '<div class="cz-groups">' + groups + "</div>" +
+      // Reset order: an iOS Settings action row under the list it resets,
+      // in the tint -- not a grey line under the title.
+      (canResetOrder ? '<div class="help-card set-card-actions cz-reset-card"><button type="button" class="set-row set-action cz-reset-order" data-reset-order>Reset order</button></div>' : "") +
+      (cv() ? customVocabSection() : "");
   }
 
   // ---- moves --------------------------------------------------------------

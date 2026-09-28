@@ -885,10 +885,10 @@ async function main() {
     const base = allCssRules.find(r => r.selectorText === ".screen-title");
     return !!t && t.tagName === "H1" && t.textContent === "Vocabulary" && !!base && base.style.display !== "none" && base.style.position === "absolute" && base.style.clip === "rect(0px, 0px, 0px, 0px)";
   })());
-  check("every other screen's own title is a real <h1> too (Practice, Customize tables, How this works)", (() => {
+  check("every other screen's own title is a real <h1> too (Practice, Customize tables, Help)", (() => {
     const flashTitle = document.querySelector(".page-flashcards h1");
     return !!flashTitle && flashTitle.textContent === "Practice"
-      && document.querySelector(".page-help h1").textContent === "How this works";
+      && document.querySelector(".page-help h1").textContent === "Help";
   })());
   check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
     const base = allCssRules.find(r => r.selectorText === ".site-nav");

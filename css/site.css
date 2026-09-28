@@ -1107,9 +1107,16 @@ body.selftest-mode .selftest-hint { display: block; }
 
 /* Decorative empty-icon "+" placeholder reads as an add button; drop it. */
 #vocabulary .section-head > .section-icon-empty { display: none; }
-/* Disclosure chevron on the right of the title, as in an iOS list. */
+/* Disclosure chevron at the row's trailing edge, after its ⋯ and print
+   buttons -- where iOS always puts it. It stays inside the title button (so
+   the whole title still toggles), pinned to the row's end; the row keeps
+   room for it. */
 #vocabulary .section-title { flex: 1 1 auto; }
-#vocabulary .section-toggle { width: 100%; flex-direction: row-reverse; justify-content: space-between; }
+#vocabulary .section-toggle { width: 100%; }
+#vocabulary .section-head { --chev-right: 0px; padding-right: 22px; }
+#vocabulary .section-head .section-toggle-icon {
+  position: absolute; top: 50%; right: var(--chev-right); transform: translateY(-50%);
+}
 #vocabulary .section-head::before { display: none; }
 
 /* Every table is a row of one grouped white card, open or closed -- iOS's
@@ -1132,7 +1139,7 @@ body.selftest-mode .selftest-hint { display: block; }
    under the title, as in an iOS list; the last closed row has none. An open
    row keeps it (it divides the row from its table), and the row after an
    open table gets a full-width one. */
-#vocabulary .table-section .section-head { position: relative; padding: 9px 0; margin-bottom: 0; border-bottom: 0; }
+#vocabulary .table-section .section-head { position: relative; padding: 9px 22px 9px 0; margin-bottom: 0; border-bottom: 0; }
 #vocabulary .table-section .section-head::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0;
   border-bottom: 1px solid var(--row-line);
@@ -1148,7 +1155,7 @@ body.selftest-mode .selftest-hint { display: block; }
      scrolling under the pinned title don't peek out beside it -- and takes
      the card's own top corners, so a table opened first in its card keeps
      them round. */
-  margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;
+  margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 38px; --chev-right: 16px;
   border-top-left-radius: inherit; border-top-right-radius: inherit;
   background: var(--paper);
 }
@@ -1389,6 +1396,8 @@ body.icon-picker-open { overflow: hidden; }
 /* The ground spans the whole sheet; the content keeps its reading width. */
 .page-customize > * { max-width: 720px; }
 .cz-intro h1 { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+/* The first card sits a clear step below the title, like every screen. */
+.cz-intro { margin-bottom: 8px; }
 .info-panel p:not(.cv-hint) { margin: 0 0 12px; color: var(--muted); font-size: var(--fs-small); line-height: 1.55; }
 .cz-tips { margin: 0 0 8px; padding-left: 18px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6; }
 .cz-tips li { margin: 2px 0; }
@@ -1475,12 +1484,7 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
 /* The count is the row's trailing value, just before the chevron. */
 .cz-group-count { margin-left: auto; font-weight: 400; color: var(--faint); }
 .cz-section-label::after, .cz-group-title::after { margin-left: 10px; }
-.cz-reset-order {
-  display: inline-block; margin: 0 0 14px;
-  appearance: none; border: 0; background: transparent; padding: 0;
-  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--accent-dark); cursor: pointer;
-}
-.cz-reset-order:hover { text-decoration: underline; }
+.cz-reset-card { margin-top: 12px; }
 .cz-list { list-style: none; margin: 0; padding: 0; }
 .cz-row {
   display: flex; align-items: center; gap: 10px;
@@ -1742,9 +1746,6 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .page-help > * { max-width: 680px; }
 .page-help h1 {
   font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink);
-}
-.page-help .help-lede {
-  margin: 0 0 4px; color: var(--muted); font-size: var(--fs-small); line-height: 1.6;
 }
 /* Topics are iOS-style disclosure rows in one inset-grouped card: a title with a
    one-line gist under it and a chevron, closed until tapped, so the page is a

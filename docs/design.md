@@ -182,8 +182,9 @@ and Help.
   (`--group-ground`) behind the page and white `--radius-card` cards sitting
   directly on it — no borders, no coloured
   bars, no rules under headings, no box inside a box. A run of collapsed tables
-  is ONE card of list cells (inset hairline between them, disclosure chevron on
-  the right, the per-table ⋯ menu / print kept on the cell as bare glyphs; the
+  is ONE card of list cells (inset hairline between them, the per-table ⋯ menu /
+  print kept on the cell as bare glyphs and the disclosure chevron trailing
+  after them at the row's very end, as iOS places it; the
   hairline is inset to start under the title, and cells only group with
   neighbours that are on screen); every table has a 28px **icon tile** — an 8px-radius
   square with a white glyph, filled in a soft, muted hue **per content category**
@@ -416,7 +417,7 @@ and Help.
   running study session hides the bar and gives the space back like the rest of the
   chrome. The table-index sheet (`z-index` 60) and its scrim (59) cover the bar.
 - **Large screen titles, and every screen's `<h1>`** — every screen names itself
-  with a real `<h1>` now (Flashcards, Customize tables, How this works, and the
+  with a real `<h1>` now (Flashcards, Customize tables, Help — named as the menu names it — and the
   reference pages' `<h2 class="screen-title" id="screenTitle">` promoted to
   `<h1>`) — one entry point per screen for a screen reader, matched by the
   `hidden` attribute keeping the other screens' `<h1>`s out of the tree so only
