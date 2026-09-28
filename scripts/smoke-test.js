@@ -1357,22 +1357,27 @@ async function main() {
   check("no hide-section button", !document.querySelector(".hide-section"));
   check("no table-pick checkboxes", !document.querySelector(".table-pick"));
 
-  check("print gives the Japanese cell's furigana room, not the uniform row padding", (() => {
-    // The uniform print padding (.vocab td, .vocab th) would otherwise crowd
-    // the ruby reading against the row's top border -- .vocab td.jp needs its
-    // own, taller padding-top inside the same @media print block.
+  check("print gives furigana room by raising the shared first-line geometry (--row-top), not a padding that would break the one-line row", (() => {
+    // Word rows keep the screen's --row-top / --l1 geometry in print so the
+    // word and the English's first line stay on one line; print only grows
+    // the room above that line. A uniform padding-top on .vocab td (or a
+    // .vocab td.jp override) would pull the two apart.
     const printMedia = allCssRules.find(r => r.media && /^print$/.test(r.media.mediaText));
     if (!printMedia) return false;
     const printRules = [...printMedia.cssRules];
-    const uniform = printRules.find(r => r.selectorText === ".vocab td, .vocab th");
-    const jp = printRules.find(r => r.selectorText === ".vocab td.jp");
-    return !!uniform && !!jp && parseInt(jp.style.paddingTop, 10) > parseInt(uniform.style.padding, 10);
+    const screenBase = allCssRules.find(r => !((r.parentRule || {}).media) && r.selectorText === ".vocab:not(.vocab-sentences)");
+    const printBase = printRules.find(r => r.selectorText === "html .vocab:not(.vocab-sentences)");
+    const td = printRules.find(r => r.selectorText === ".vocab td");
+    return !!screenBase && !!printBase && !!td
+      && parseFloat(printBase.style.getPropertyValue("--row-top")) > parseFloat(screenBase.style.getPropertyValue("--row-top"))
+      && !td.style.paddingTop && !td.style.padding
+      && !printRules.some(r => r.selectorText === ".vocab td.jp");
   })());
-  check("print adds a vertical rule between columns (not on screen)", (() => {
+  check("print adds a vertical hairline between columns (not on screen)", (() => {
     const printMedia = allCssRules.find(r => r.media && /^print$/.test(r.media.mediaText));
     const printRule = printMedia && [...printMedia.cssRules].find(r => r.selectorText === ".vocab :is(th, td):not(:first-child)");
     const screenRule = allCssRules.find(r => !((r.parentRule || {}).media) && r.selectorText === ".vocab :is(th, td):not(:first-child)");
-    return !!printRule && printRule.style.borderLeft.includes("1px") && !screenRule;
+    return !!printRule && parseFloat(printRule.style.borderLeft) > 0 && /solid/.test(printRule.style.borderLeft) && !screenRule;
   })());
 
   console.log("Print this table (icon button)");
