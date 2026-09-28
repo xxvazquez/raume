@@ -2919,7 +2919,16 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
 /* --- Print: a clean A4 reference sheet ------------------------- */
 @media print {
-  #vocabulary .table-section > .section-head { position: relative !important; top: auto; }
+  /* An open table's title row is sticky on screen, offset by the nav +
+     search bar and bled over the card's side padding. On paper it must sit
+     in flow at its own place -- a leftover `top` pushed it down over the
+     first rows -- with no bleed and no row hairline. */
+  #vocabulary .table-section > .section-head {
+    position: static !important; top: auto !important;
+    display: flex !important; align-items: center; gap: 8px;
+    margin: 0 !important; padding: 0 0 8px !important; background: none !important;
+  }
+  #vocabulary .table-section > .section-head::after { display: none !important; }
   /* Always print light, whatever the on-screen theme. */
   :root, :root[data-theme="dark"] {
     --paper: #fff; --page-bg: #fff;
@@ -2971,7 +2980,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   /* Drop the row actions in print. */
   .sort-button, .row-hide-btn, .row-info-btn, .fc-toggle-btn, .jp-speak-btn { display: none !important; }
   /* A white glyph on an unprinted tile would vanish. */
-  #vocabulary .section-head > .section-icon:not(.section-icon-empty) { background: none !important; color: var(--muted) !important; }
+  #vocabulary .section-head > .section-icon:not(.section-icon-empty) {
+    width: 16px; height: 16px; padding: 0;
+    background: none !important; color: var(--muted) !important;
+  }
   /* No override needed for the romaji reveal: it's already an in-flow
      caption line, not a floating popover, so a row pinned open
      (.jp-romaji-on) just prints in place as-is, and an un-clicked row's
