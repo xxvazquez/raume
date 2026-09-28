@@ -3479,12 +3479,12 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-choice:disabled { cursor: default; color: var(--ink); }
 /* Once answered: the right choice clearly green, a wrong pick clearly red,
    the other two stepped back. */
-.fc-ls-choice.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); font-weight: 500; }
-.fc-ls-choice.fc-ls-chosen-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
+.fc-ls-choice.fc-mt-right, .fc-oo-word.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); font-weight: 500; }
+.fc-ls-choice.fc-ls-chosen-wrong, .fc-oo-word.fc-ls-chosen-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
 .fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong) { opacity: .5; }
 /* A mark as well as the colour, so right and wrong never rest on hue alone. */
-.fc-ls-choice.fc-mt-right::before { content: "✓ "; }
-.fc-ls-choice.fc-ls-chosen-wrong::before { content: "✕ "; }
+.fc-ls-choice.fc-mt-right::before, .fc-oo-word.fc-mt-right .fc-oo-w::before { content: "✓ "; }
+.fc-ls-choice.fc-ls-chosen-wrong::before, .fc-oo-word.fc-ls-chosen-wrong .fc-oo-w::before { content: "✕ "; }
 .fc-ls-next-row { display: flex; justify-content: center; margin-top: 14px; min-height: 36px; }
 @media (max-width: 380px) { .fc-ls-choices { grid-template-columns: minmax(0, 1fr); } }
 /* Kana tiles: Listening's white card holding the English, a small speaker
@@ -3531,6 +3531,21 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-kt-tile:disabled { opacity: .3; cursor: default; }
 .fc-kt-tile:focus-visible, .fc-kt-slot:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .fc-kt-wrong { animation: none; } .fc-kt-tile { transition: none; } }
+/* Odd one out: a quiet question over a 2 × 2 of Match's white tiles, the
+   word centred and large; answering drops each word's English under it,
+   washes the odd one sage (your wrong pick coral, with ✕), and one grey
+   line under the grid names the tables. */
+.fc-oo-ask { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-small); text-align: center; }
+.fc-oo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fc-oo-word {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 84px; text-align: center;
+}
+.fc-oo-w { font-size: 20px; line-height: 1.25; }
+.fc-oo-en { color: var(--muted); font-size: var(--fs-small); font-weight: 400; }
+.fc-oo-en[hidden] { display: none; }
+.fc-oo-reveal { margin: 14px 0 0; color: var(--ink); font-size: var(--fs-nav); line-height: 1.4; text-align: center; }
+.fc-oo-reveal[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 .fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
 .fc-ls-missed li {

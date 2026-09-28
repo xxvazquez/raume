@@ -2,7 +2,7 @@
 // and word search solved -- so the Dashboard can show them: games per day,
 // Listening accuracy, Match pace, puzzles solved. Practice only -- nothing
 // here touches FSRS. One record per game:
-//   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" |
+//   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" | "oddone" |
 //     "crossword" | "arroword" | "wordsearch", n: pairs / questions / words, ms: time
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
 //     help: letters / words revealed (grids), setup: source|script|count
@@ -28,7 +28,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
 
   var KEY = "raume-puzzle-runs";
   var MAX = 500;
-  var MODES = ["match", "listening", "kanatiles", "crossword", "arroword", "wordsearch"];
+  var MODES = ["match", "listening", "kanatiles", "oddone", "crossword", "arroword", "wordsearch"];
   var cache = null;
   var listeners = [];
   var remotePush = null;
@@ -80,7 +80,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
       if (run.splits && run.splits.length) r.splits = run.splits.map(Math.round);
       if (run.sizes && run.sizes.length) r.sizes = run.sizes.slice();
     }
-    else if (run.mode === "listening" || run.mode === "kanatiles") r.right = run.right || 0;
+    else if (isScored(run.mode)) r.right = run.right || 0;
     else r.help = run.help || 0;
     save(load().concat([r]));
     return r;
@@ -126,7 +126,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
       var idx = dayIndex[new Date(r.at).toDateString()];
       if (idx !== undefined) days[idx].count++;
       if (r.mode === "listening") { ls.games++; ls.right += r.right || 0; ls.asked += r.n; }
-      else if (r.mode === "kanatiles") { /* a game, counted in total only */ }
+      else if (r.mode === "kanatiles" || r.mode === "oddone") { /* a game, counted in total only */ }
       else if (r.mode !== "match") solved++;
       else if (r.n) {
         mt.games++; mt.pairs += r.n; mt.ms += r.ms; mt.misses += r.miss || 0;
@@ -141,7 +141,9 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   }
 
   // --- Stats (js/flashcards/puzzle-stats.js) ---
-  var GAME_MODES = ["match", "listening", "kanatiles"];
+  var GAME_MODES = ["match", "listening", "kanatiles", "oddone"];
+  // Games scored right / asked (the rest are timed).
+  function isScored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone"; }
   function isGameMode(mode) { return GAME_MODES.indexOf(mode) !== -1; }
   function dayKey(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
   // Days in a row with at least one game: the run ending today (or
@@ -166,7 +168,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   // A game's one comparable number, whatever its size: seconds per pair
   // (Match), share right (Listening), seconds per word (grids).
   function measure(r) {
-    if (r.mode === "listening" || r.mode === "kanatiles") return r.n ? (r.right || 0) / r.n : 0;
+    if (isScored(r.mode)) return r.n ? (r.right || 0) / r.n : 0;
     return r.n ? r.ms / r.n / 1000 : 0;
   }
   // Match's rounds: even groups of at most 6 pairs (crosswords.js
@@ -196,7 +198,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     });
     return best;
   }
-  function higherIsBetter(mode) { return mode === "listening" || mode === "kanatiles"; }
+  function higherIsBetter(mode) { return isScored(mode); }
   function better(mode, a, b) { return higherIsBetter(mode) ? a > b : a < b; }
   function average(xs) { return xs.reduce(function (a, b) { return a + b; }, 0) / (xs.length || 1); }
   function styleStats(mode, now) {

@@ -17,13 +17,13 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   var esc = window.RaumeStudy.shared.escapeHtml;
   var MODES = {
     puzzles: [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]],
-    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"]]
+    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"]]
   };
   var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana" };
   var PRACTISE_WORDS = 20;
   // Each style's own hue (the --tile palette), as Fitness gives each ring
   // one: its headline figures and its trend line wear it.
-  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green" };
+  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green", oddone: "amber" };
   var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
@@ -63,7 +63,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function days(n) { return n + (n === 1 ? " day" : " days"); }
   function pct(x) { return Math.round(x * 100) + "%"; }
   // One game's headline: its time, or for Listening its score.
-  function scored(mode) { return mode === "listening" || mode === "kanatiles"; }
+  function scored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone"; }
   function runValue(r) { return scored(r.mode) ? (r.right || 0) + " / " + r.n : clock(r.ms); }
   function measureText(mode, v) {
     if (scored(mode)) return pct(v);
@@ -112,6 +112,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     }
     else if (mode === "listening") rows += row("Words heard", String(st.words));
     else if (mode === "kanatiles") rows += row("Words spelled", String(st.words));
+    else if (mode === "oddone") rows += row("Sets played", String(st.words));
     else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);
   }

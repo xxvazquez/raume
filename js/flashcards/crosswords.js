@@ -1416,6 +1416,174 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // -----------------------------------------------------------------------
+  // Odd one out -- four words, three from one table and one from another:
+  // tap the one that doesn't belong. Words only (in the chosen script) --
+  // knowing what they mean is the game. The answer shows every English and
+  // names the tables ("くつ is Clothes -- the rest are Fruits"). The odd
+  // word comes from another category where there is one (Clothes among
+  // Fruits, not Vegetables), and a word that sits in more than one table,
+  // or shares its English with another table's word, never plays -- a set
+  // must have one right answer. Practice only, like Match.
+  // -----------------------------------------------------------------------
+  function tableInfo(id) {
+    var t = (window.RaumeStudy.data.vocabularyTables || []).filter(function (x) { return String(x.id) === String(id); })[0];
+    var custom = window.RaumeStudy.tableCustom && window.RaumeStudy.tableCustom.nameOf(id);
+    return { name: custom || (t && t.title) || "another table", category: (t && t.category) || "" };
+  }
+  function buildOddOne(words, limit) {
+    // Anything that turns up in two tables (by English or by spelling) is
+    // ambiguous -- which table is it "from"? -- so it sits out.
+    var tablesOf = {};
+    words.forEach(function (w) {
+      [w.clue.toLowerCase(), w.answer].forEach(function (k) {
+        (tablesOf[k] = tablesOf[k] || {})[w.tableId] = true;
+      });
+    });
+    var clean = words.filter(function (w) {
+      return Object.keys(tablesOf[w.clue.toLowerCase()]).length === 1 && Object.keys(tablesOf[w.answer]).length === 1;
+    });
+    var byTable = {};
+    clean.forEach(function (w) { (byTable[w.tableId] = byTable[w.tableId] || []).push(w); });
+    var tableIds = Object.keys(byTable);
+    var bases = tableIds.filter(function (id) { return byTable[id].length >= 3; });
+    if (!bases.length || tableIds.length < 2) return { placements: [], questions: [], clean: clean.length };
+    var questions = [], usedOdd = {};
+    for (var n = 0; n < limit; n++) {
+      var base = bases[Math.floor(Math.random() * bases.length)];
+      var others = tableIds.filter(function (id) { return id !== base; });
+      var baseCat = tableInfo(base).category;
+      var farther = others.filter(function (id) { return tableInfo(id).category !== baseCat; });
+      var oddTable = shuffle(farther.length ? farther : others)[0];
+      // A fresh odd word each set while there are any left.
+      var oddPool = byTable[oddTable].filter(function (w) { return !usedOdd[w.id]; });
+      var odd = shuffle(oddPool.length ? oddPool : byTable[oddTable])[0];
+      usedOdd[odd.id] = true;
+      var three = shuffle(byTable[base]).slice(0, 3);
+      var set = shuffle(three.concat([odd]));
+      questions.push({ words: set, odd: set.indexOf(odd), baseTable: base, oddTable: oddTable });
+    }
+    return { placements: questions.map(function (q) { return q.words[q.odd]; }), questions: questions, clean: clean.length };
+  }
+  function wireOddOne(boardEl, countEl, p, romajiMode) {
+    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext;
+    var total = p.questions.length;
+    function count() { countEl.textContent = Math.min(at + 1, total) + " / " + total; }
+    function render() {
+      var q = p.questions[at];
+      count();
+      answered = false;
+      boardEl.innerHTML =
+        '<p class="fc-oo-ask">Which one doesn’t belong?</p>' +
+        '<div class="fc-oo-grid">' + q.words.map(function (w, i) {
+          return '<button type="button" class="fc-mt-tile fc-oo-word" data-i="' + i + '">' +
+            '<span class="fc-oo-w"' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(w.answer) + "</span>" +
+            '<span class="fc-oo-en" hidden>' + esc(w.clue) + "</span></button>";
+        }).join("") + "</div>" +
+        '<p class="fc-oo-reveal" aria-live="polite" hidden></p>' +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function answer(btn) {
+      var q = p.questions[at], i = +btn.dataset.i, right = i === q.odd, thisGame = game;
+      answered = true;
+      boardEl.querySelectorAll(".fc-oo-word").forEach(function (b) {
+        b.disabled = true;
+        b.querySelector(".fc-oo-en").hidden = false;
+        if (+b.dataset.i === q.odd) b.classList.add("fc-mt-right");
+      });
+      if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      var oddWord = q.words[q.odd];
+      var reveal = boardEl.querySelector(".fc-oo-reveal");
+      reveal.innerHTML = '<span' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(oddWord.answer) + "</span> is " +
+        esc(tableInfo(q.oddTable).name) + " — the rest are " + esc(tableInfo(q.baseTable).name) + ".";
+      reveal.hidden = false;
+      if (right) {
+        score++;
+        setTimeout(function () {
+          if (thisGame !== game || !boardEl.isConnected) return;
+          if (pausedAt !== null) pendingNext = true; else next();
+        }, 1600);
+      } else {
+        missed.push(oddWord);
+        var nextBtn = boardEl.querySelector(".fc-ls-next");
+        nextBtn.hidden = false;
+        nextBtn.focus();
+      }
+    }
+    function next() {
+      at++;
+      if (at >= total) { finish(); return; }
+      render();
+    }
+    boardEl.addEventListener("click", function (e) {
+      if (done) return;
+      if (e.target.closest(".fc-ls-next")) { next(); return; }
+      var btn = e.target.closest(".fc-oo-word");
+      if (btn && !btn.disabled && !answered) answer(btn);
+    });
+    function missedHtml() {
+      return missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
+        return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
+      }).join("") + "</ul>" : "";
+    }
+    function finish() {
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var run = recordRun({ mode: "oddone", n: total, ms: Date.now() - startedAt - pausedMs, right: score,
+        setup: setupKey(total), missed: missed.map(function (w) { return w.id; }) });
+      countEl.textContent = score + " / " + total;
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + total + "</p>" +
+        accuracyStatsHtml("oddone", score, total, run) +
+        '<p class="fc-mt-done-meta">' + (missed.length ? "Odd ones you missed:" : "Every set right") + "</p>" +
+        missedHtml() + doneActionsHtml("fcOoAgain") + "</div>";
+      bindDoneActions("fcOoAgain");
+    }
+    function pause() {
+      if (done || pausedAt !== null || !boardEl.isConnected) return;
+      pausedAt = Date.now();
+      showPauseCard(boardEl, Math.min(at + 1, total) + " / " + total, score + " right so far", {
+        resume: function () {
+          pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl);
+          if (pendingNext) { pendingNext = false; next(); }
+        },
+        restart: restart,
+        end: endEarly
+      });
+    }
+    // Stopped part-way: the sets you answered count (see Listening's).
+    function endEarly() {
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var played = Math.min(at + (answered ? 1 : 0), total);
+      if (played) recordRun({ mode: "oddone", n: played, ms: (pausedAt || Date.now()) - startedAt - pausedMs, right: score,
+        setup: setupKey(total), missed: missed.map(function (w) { return w.id; }), ended: true });
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.classList.remove("fc-mt-paused");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + played + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + played + " of " + total + " sets</p>" +
+        '<p class="fc-mt-done-note">' + (played ? "The " + played + (played === 1 ? " set" : " sets") + " you answered count in your stats."
+          : "No set answered, so nothing is counted.") + "</p>" +
+        doneActionsHtml("fcOoAgain") + "</div>";
+      bindDoneActions("fcOoAgain");
+    }
+    function restart() {
+      game++;
+      hidePauseCard(boardEl);
+      at = 0; score = 0; missed = []; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      var pb = document.getElementById("fcMtPause");
+      if (pb) pb.disabled = false;
+      countEl.classList.remove("fc-ws-count-done");
+      render();
+    }
+    restart();
+    var api = { restart: restart, pause: pause };
+    activeGame = api;
+    return api;
+  }
+
+  // -----------------------------------------------------------------------
   // State + rendering. Purely a play/print utility -- nothing here persists
   // across a reload; regenerating is free. What's typed into the grid lives
   // only in the live <input> elements, not in this state object -- every
@@ -1518,7 +1686,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var answer = state.script === "romaji" ? w.romaji
         : state.script === "native" ? writtenForm(w)
         : scriptedAnswer(w.answer, state.script);
-      return { id: w.id, clue: w.clue, answer: answer };
+      return { id: w.id, clue: w.clue, answer: answer, tableId: w.tableId };
     }).filter(function (w) { if (seen[w.answer]) return false; seen[w.answer] = true; return true; });
     // A two-letter romaji word turns up by chance all over a word search's
     // filler -- finding "ki" there is luck, not recall.
@@ -1541,10 +1709,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size)
       : state.mode === "match" ? buildMatch(candidates, state.size)
       : state.mode === "kanatiles" ? buildKanaTiles(candidates, state.size, state.script)
+      : state.mode === "oddone" ? buildOddOne(candidates, state.size)
       : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"]];
   var PUZZLE_MODES = ["crossword", "arroword", "wordsearch"];
   function modeOpts() {
     return MODE_OPTS.filter(function (o) { return (PUZZLE_MODES.indexOf(o[0]) !== -1) === (state.kind === "puzzles"); });
@@ -1556,7 +1725,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var ALL_WORDS = 9999;
   var GRID_SIZE_OPTS = [10, 15, 20, 30, 40];
   var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, [String(ALL_WORDS), "All"]];
-  function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles"; }
+  function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles" || mode === "oddone"; }
   function sizeOpts() { return isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS; }
   // The count the game will really have: never more than the pool holds.
   function sizeLabel() {
@@ -1935,7 +2104,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
+    return state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
+      : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
       : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
       : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
       : ws ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
@@ -1948,7 +2118,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // `bare`: no puzzle to play (too few words) -- the title and a ⋯ of
   // settings + Stats, so the fix is still at hand.
   function toolbarHtml(bare) {
-    var ws = state.mode === "wordsearch", ls = state.mode === "listening" || state.mode === "kanatiles";
+    var ws = state.mode === "wordsearch", ls = state.mode === "listening" || state.mode === "kanatiles" || state.mode === "oddone";
     // Listening and Kana tiles are games like Match: the same short menu,
     // a counter instead of Check.
     var mt = isGame(state.mode);
@@ -2084,7 +2254,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       return;
     }
     var p = state.puzzle;
-    if (p.placements.length < MIN_WORDS) {
+    // Odd one out: enough words, but not from two tables (three or more
+    // from one of them) -- say what would make a set.
+    if (state.mode === "oddone" && !p.questions.length) {
+      notEnough("Odd one out needs words from at least two tables, with three or more from one of them. " +
+        "Pick them under ⋯ › Words from › Several tables…", false);
+      return;
+    }
+    if (p.placements.length < MIN_WORDS && state.mode !== "oddone") {
       notEnough("These words don’t cross each other enough for a " + MIN_WORDS + "-word puzzle. Try again, or " + more + ".", true);
       return;
     }
@@ -2119,6 +2296,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var listen = wireListening(board, document.getElementById("fcLsCount"), p);
       document.getElementById("fcMtPause").addEventListener("click", listen.pause);
       bindMenu(panel, { reset: listen.restart });
+      return;
+    }
+    if (state.mode === "oddone") {
+      panel.innerHTML = toolbarHtml() + '<div class="fc-ls fc-oo"></div>';
+      bindControls(panel);
+      document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+      var odd = wireOddOne(panel.querySelector(".fc-oo"), document.getElementById("fcLsCount"), p, romajiMode);
+      document.getElementById("fcMtPause").addEventListener("click", odd.pause);
+      bindMenu(panel, { reset: odd.restart });
       return;
     }
     if (state.mode === "kanatiles") {
@@ -2265,7 +2451,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

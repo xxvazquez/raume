@@ -3058,7 +3058,7 @@ async function main() {
     const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
     const puzzles = opts("#fcPanelCrosswords");
     document.querySelector('.fc-tab[data-tab="games"]').click();
-    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles"
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone"
       && xw.state === xw.states.games && xw.state.mode === "match";
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
@@ -3345,6 +3345,62 @@ async function main() {
   })());
   xwPick("mode", "listening");
 
+  console.log("Flashcards: Odd one out");
+  check("Odd one out sets are three words from one table and one from another -- and a word in two tables (or sharing its English with one) never plays", (() => {
+    const w = (id, clue, answer, tableId) => ({ id, clue, answer, tableId });
+    const words = [w("a1", "apple", "ringo", "A"), w("a2", "peach", "momo", "A"), w("a3", "grapes", "budo", "A"), w("a4", "tea", "cha", "A"),
+      w("b1", "shoe", "kutsu", "B"), w("b2", "hat", "boshi", "B"), w("b3", "tea", "ocha", "B")];
+    const p = xw.buildOddOne(words, 20);
+    const single = xw.buildOddOne(words.filter(x => x.tableId === "A"), 5);
+    return p.questions.length === 20 && p.questions.every(q => {
+      const odd = q.words[q.odd], rest = q.words.filter((x, i) => i !== q.odd);
+      return q.words.length === 4 && rest.every(x => x.tableId === q.baseTable) && odd.tableId === q.oddTable && q.oddTable !== q.baseTable
+        && q.words.every(x => x.clue !== "tea");
+    }) && single.questions.length === 0;
+  })());
+  xwPick("mode", "oddone");
+  const ooTables = ["Fruits", "Vegetables", "Drinks", "Family"].map(n => window.RaumeStudy.data.vocabularyTables.find(t => t.title === n).id);
+  xw.state.source = "table"; xw.state.tables = ooTables.slice(); xw.state.puzzle = null;
+  window.RaumeStudy.flashcards.render();
+  const ooQ = () => xw.state.puzzle.questions[xw.state.puzzle.questions.findIndex((q, i) => i === Number(document.getElementById("fcLsCount").textContent.split(" / ")[0]) - 1)];
+  check("an Odd one out set: the question, four word tiles with their English hidden, a counter", (() => {
+    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
+    return tiles.length === 4 && tiles.every(t => t.querySelector(".fc-oo-en").hidden)
+      && /doesn’t belong/.test(document.querySelector("#fcPanelGames .fc-oo-ask").textContent)
+      && document.getElementById("fcLsCount").textContent === "1 / " + xw.state.puzzle.questions.length
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const ooFirst = ooQ();
+  check("a wrong pick: ✕ on it, ✓ on the odd one, every English shown, the tables named, and Next waits", (() => {
+    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + ((ooFirst.odd + 1) % 4) + '"]').click();
+    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
+    const reveal = document.querySelector("#fcPanelGames .fc-oo-reveal").textContent;
+    return tiles[ooFirst.odd].classList.contains("fc-mt-right") && tiles[(ooFirst.odd + 1) % 4].classList.contains("fc-ls-chosen-wrong")
+      && tiles.every(t => !t.querySelector(".fc-oo-en").hidden && t.disabled)
+      && / is .+ — the rest are .+\./.test(reveal) && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+  })());
+  document.querySelector("#fcPanelGames .fc-ls-next").click();
+  for (let k = 0; k < 40 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    const before = document.getElementById("fcLsCount").textContent;
+    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + ooQ().odd + '"]').click();
+    for (let waited = 0; waited < 4000; waited += 25) {
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || document.getElementById("fcLsCount").textContent !== before) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
+  }
+  check("a right pick moves on by itself; the end scores it, lists the odd one you missed, and logs an oddone game", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("oddone").pop();
+    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
+      && !!last && last.right === n - 1 && last.missed.join() === String(ooFirst.words[ooFirst.odd].id);
+  })());
+  xwPick("source", "t:" + ooTables[0]);
+  check("from a single table it says what a set needs instead of a game", /at least two tables/.test(document.querySelector("#fcPanelGames .fc-xw-footnote").textContent)
+    && !document.querySelector("#fcPanelGames .fc-oo-word"));
+  xwPick("source", "flashcards");
+  xwPick("mode", "listening");
+
   console.log("Flashcards: Puzzle and game stats");
   const pr = window.RaumeStudy.flashcards.puzzleRuns;
   check("stats count each style on its own: played, a day streak, and a best measured per pair / word or as accuracy", (() => {
@@ -3368,7 +3424,7 @@ async function main() {
     const panel = document.getElementById("fcPanelStats");
     const segs = [...panel.querySelectorAll(".fc-st-modes button")].map(b => b.textContent);
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
-      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out"
       && panel.querySelector(".fc-st-modes .active").textContent === "Listening"
       && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());

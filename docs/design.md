@@ -836,6 +836,13 @@ card with "Ended after 1 of 3 rounds" and a faint line saying what counts
 ("The 5 pairs you finished count in your stats; a best time needs the whole
 game.").
 
+**Odd one out** keeps Listening's toolbar: a quiet "Which one doesn’t
+belong?" over a 2 × 2 of Match's white tiles, each word centred at 20px;
+answering drops each word's English under it (13px grey) and marks the
+tiles as Listening's choices do — the odd one sage with ✓, a wrong pick
+coral with ✕ — then one line under the grid names the tables. Its Stats
+hue is amber.
+
 **Kana tiles** keeps Listening's toolbar and card: the English at 20px, a
 20px tint speaker under it, then one slot per kana — empty slots a soft
 `--group-ground` square (10px corners, up to 44px, shrinking together on a
