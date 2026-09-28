@@ -1839,6 +1839,15 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .set-card-actions > .set-row + .set-row::before {
   content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line);
 }
+/* A tiled row (iOS Settings): 28px tile, the label beside it, the hairline
+   above the next tiled row inset to the text rather than the tile. */
+.set-tile {
+  flex: none; width: 28px; height: 28px; border-radius: 7px; margin-right: 14px;
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
+}
+.set-row-tiled .set-label { display: inline-flex; align-items: center; }
+.set-card > .set-row-tiled + .set-row-tiled::before { left: 58px; }
 .set-card .set-row.fc-direction-check { border-radius: 0; padding: 0 16px; border-top: 0; font-size: 15px; }
 .set-card .set-row.fc-direction-check:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
 .set-value { display: inline-flex; align-items: baseline; gap: 4px; color: var(--muted); }
@@ -3483,6 +3492,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
 .fc-stat-label { display: flex; align-items: center; gap: 4px; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
 .fc-stat-glyph { flex: none; color: var(--faint); }
+.fc-stat-glyph[data-tile] { color: var(--tile); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
 .fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
 .fc-longest-streak { margin-top: -10px; margin-bottom: 16px; }
@@ -3503,7 +3513,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
    regardless of how many columns are live -- narrow or wide. */
 .fc-viz-card.fc-viz-wide { grid-column: 1 / -1; }
-.fc-viz-title { margin: 0 0 14px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
+.fc-viz-title { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; color: var(--ink); font-size: var(--fs-subhead); font-weight: 500; }
+/* A card's category tile: the Help / table-row tile at 24px -- a white
+   glyph (or kana / kanji) on the card's own hue. */
+.fc-title-tile {
+  flex: none; width: 24px; height: 24px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
+  font: 500 13px/1 var(--font-ui);
+}
+.fc-title-tile svg { display: block; }
 /* Puzzles and Games (dashboard.js puzzlesCardHtml / gamesCardHtml): stat
    cells, the week's games as the Reviews-this-week bars (Games), then the
    last few as hairline rows -- what left, the result right, tabular -- and
@@ -3514,7 +3533,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-pz-empty .fc-pz-actions { margin-top: 0; }
 .fc-pz-link {
   appearance: none; border: 0; background: none; padding: 8px 2px; cursor: pointer;
-  color: var(--section-strong); font: 400 var(--fs-nav)/1 var(--font-ui);
+  color: var(--section-strong); font: 400 var(--fs-nav)/1 var(--font-ui); white-space: nowrap;
 }
 .fc-pz-link:hover { opacity: .7; }
 .fc-pz-sub { margin: 14px 0 8px; color: var(--muted); font-size: var(--fs-small); font-weight: 400; }
@@ -4904,7 +4923,10 @@ mark.fc-diff-co {
 .fc-st-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 16px 8px; }
 .fc-st-fig { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; }
 .fc-st-fig + .fc-st-fig { border-left: 1px solid var(--row-line); }
-.fc-st-fig-val { font-size: 24px; font-weight: 500; line-height: 1.2; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* The figures and the trend wear the style's hue, deepened toward --ink so
+   the numbers keep text contrast in both themes. */
+#fcPanelStats { --st-hue: var(--tile, var(--section)); --st-hue-ink: color-mix(in srgb, var(--st-hue) 72%, var(--ink)); }
+.fc-st-fig-val { font-size: 24px; font-weight: 500; line-height: 1.2; color: var(--st-hue-ink); font-variant-numeric: tabular-nums; }
 .fc-st-fig-lbl { color: var(--muted); font-size: var(--fs-micro); }
 .fc-st-chev { margin-left: 8px; color: var(--faint); transition: transform .15s ease; flex: none; }
 .fc-st-best[aria-expanded="true"] .fc-st-chev { transform: rotate(180deg); }
@@ -4914,11 +4936,11 @@ mark.fc-diff-co {
 .fc-st-note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .fc-st-trend { padding: 14px 16px 12px; }
 .fc-st-chart { display: block; width: 100%; height: 88px; overflow: visible; }
-.fc-st-chart polyline { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.fc-st-chart polyline { fill: none; stroke: var(--st-hue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .fc-st-chart .fc-st-base { stroke: var(--row-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .fc-st-chart .fc-st-end, .fc-st-chart .fc-st-end-ring { stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .fc-st-chart .fc-st-end-ring { stroke: var(--paper); stroke-width: 12; }
-.fc-st-chart .fc-st-end { stroke: var(--accent); stroke-width: 8; }
+.fc-st-chart .fc-st-end { stroke: var(--st-hue); stroke-width: 8; }
 .fc-st-chart .fc-st-hit { fill: transparent; }
 .fc-st-scale { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--faint); font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
 .fc-st-change { margin: 8px 0 0; color: var(--right-strong); font-size: var(--fs-small); }

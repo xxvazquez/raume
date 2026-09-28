@@ -161,19 +161,19 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "</div>" +
       '<div class="fc-dash-progress">' +
       '<div class="fc-viz-grid">' +
-      '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Card progress</h3>' + stateBreakdownChart(stats) + "</div>" +
-      '<div class="fc-viz-card"><h3 class="fc-viz-title">Reviews this week</h3>' + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
-      '<div class="fc-viz-card"><h3 class="fc-viz-title">Due next 7 days</h3>' + dueForecastHtml(dueForecast(now)) + "</div>" +
+      '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Card progress") + stateBreakdownChart(stats) + "</div>" +
+      '<div class="fc-viz-card">' + vizTitle("Reviews this week") + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
+      '<div class="fc-viz-card">' + vizTitle("Due next 7 days") + dueForecastHtml(dueForecast(now)) + "</div>" +
       kanaCardHtml(now) +
       puzzlesCardHtml(now) +
       gamesCardHtml(now) +
       kanjiCardHtml() +
       (foldReview
-        ? '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Words to review</h3><p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
+        ? '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Words to review") + '<p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
         // Nothing missed today: no card at all -- an empty card saying so is
         // a row of space for no news.
         : reviewInsights && !reviewInsights.recentMistakes.length ? ""
-        : '<div class="fc-viz-card fc-viz-wide"><h3 class="fc-viz-title">Missed today</h3>' + missedTodayHtml() + "</div>") +
+        : '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Missed today") + missedTodayHtml() + "</div>") +
       leechesHtml() +
       "</div>" +
       "</div>" +
@@ -191,8 +191,30 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     lastReadyCount = ready.length;
     startDashboardPoll();
   }
-  // A small muted glyph before each stat's label, as iOS Health marks its
-  // summary cards -- a quick "which one is this" cue, never coloured.
+  // Each card's title leads with an iOS-style tile -- a white glyph on its
+  // own hue (the table rows' --tile palette), as Health and Settings mark
+  // their categories. Kana and Kanji wear a character, not a drawing.
+  var TITLE_TILES = {
+    "Card progress": ["slate", '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>'],
+    "Reviews this week": ["blue", '<path d="M4 15V9M9 15V4M14 15v-4"/>'],
+    "Due next 7 days": ["indigo", '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>'],
+    "Kana": ["orange", "あ"],
+    "Puzzles": ["teal", '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>'],
+    "Games": ["purple", '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>'],
+    "Kanji": ["amber", "字"],
+    "Missed today": ["clay", '<circle cx="9" cy="9" r="6.5"/><path d="M6.8 6.8l4.4 4.4M11.2 6.8l-4.4 4.4"/>'],
+    "Leeches": ["clay", '<path d="M9 3.2 15.8 15H2.2Z"/><path d="M9 7.6v3.2"/><circle cx="9" cy="12.9" r=".4" fill="currentColor"/>'],
+    "Words to review": ["green", '<path d="M6.5 5h8M6.5 9h8M6.5 13h8"/><circle cx="3.5" cy="5" r=".5" fill="currentColor"/><circle cx="3.5" cy="9" r=".5" fill="currentColor"/><circle cx="3.5" cy="13" r=".5" fill="currentColor"/>']
+  };
+  function vizTitle(name) {
+    var t = TITLE_TILES[name];
+    var mark = !t ? "" : t[1].charAt(0) === "<"
+      ? '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + t[1] + "</svg>"
+      : '<span lang="ja" aria-hidden="true">' + t[1] + "</span>";
+    return '<h3 class="fc-viz-title">' + (t ? '<span class="fc-title-tile" data-tile="' + t[0] + '">' + mark + "</span>" : "") + esc(name) + "</h3>";
+  }
+  // A small glyph before each stat's label, as iOS Health marks its
+  // summary cards -- in the stat's own hue (the streak's flame orange).
   var STAT_GLYPH_PATHS = {
     "Day streak": '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/>',
     "Total cards": '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>',
@@ -201,15 +223,21 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Listening accuracy": '<path d="M3 7v4h2.5L9 14V4L5.5 7H3Z"/><path d="M12 6.5a3.2 3.2 0 0 1 0 5"/>',
     "Best Match pace": '<circle cx="9" cy="10" r="6"/><path d="M9 10V7M7.5 2.5h3"/>',
     "Puzzles solved": '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>',
+    "Solved this week": '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>',
     "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
   // `info`: an ⓘ after the label that shows the tile's explainer
   // (#fcRetentionNote) -- hidden until asked for, never a standing footnote.
+  var STAT_HUES = {
+    "Day streak": "orange", "Total cards": "blue", "Reviews completed": "green", "Estimated retention": "indigo",
+    "Games played": "purple", "Listening accuracy": "orange", "Best Match pace": "purple",
+    "Puzzles solved": "teal", "Solved this week": "teal"
+  };
   function statTile(value, label, variant, pending, info) {
     var cls = (variant ? " fc-stat-" + variant : "") + (pending ? " fc-stat-tile-pending" : "");
     var glyph = STAT_GLYPH_PATHS[label]
-      ? '<svg class="fc-stat-glyph" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
+      ? '<svg class="fc-stat-glyph"' + (STAT_HUES[label] ? ' data-tile="' + STAT_HUES[label] + '"' : "") + ' viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
       : "";
     var infoBtn = info ? '<button type="button" class="fc-stat-info" aria-expanded="false" aria-controls="fcRetentionNote" aria-label="What is ' + esc(label) + '?">' + INFO_GLYPH + "</button>" : "";
     return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + esc(label) + infoBtn + "</span></div>";
@@ -316,7 +344,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var idx = getVocabIndex();
     var rows = list.filter(function (w) { return idx[w.vocabId]; });
     if (!rows.length) return "";
-    return '<div class="fc-viz-card fc-viz-wide fc-leech-card"><h3 class="fc-viz-title">Leeches</h3>' +
+    return '<div class="fc-viz-card fc-viz-wide fc-leech-card">' + vizTitle("Leeches") +
       '<p class="fc-note">Words that keep slipping out of memory. Pausing takes one out of review — its progress is kept, and you can resume it any time in Manage. Keep leaves it studied and stops flagging it for now.</p>' +
       '<ul class="fc-leech-list">' + rows.slice(0, LEECH_SHOWN).map(function (w) {
         var e = idx[w.vocabId];
@@ -370,7 +398,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!reviewInsights) { host.innerHTML = '<p class="fc-note">Loading…</p>'; return; }
     var rows = reviewInsights.wordsToReview.map(function (m) { return getRawVocabRow(m.vocabId); }).filter(Boolean);
     if (!rows.length || !window.RaumeStudy.vocab.buildVocabSection) {
-      host.innerHTML = '<div class="fc-viz-card"><h3 class="fc-viz-title">Words to review</h3>' +
+      host.innerHTML = '<div class="fc-viz-card">' + vizTitle("Words to review") +
         '<p class="fc-note">Nothing stands out yet — words you miss more than once collect here so you can drill and print them.</p></div>';
       return;
     }
@@ -613,19 +641,20 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(what) + '<span class="fc-pz-when">' + esc(when) + "</span></span>" +
       '<span class="fc-pz-how">' + esc(how) + "</span></li>";
   }
-  // Play (white) and See stats (plain) at the foot of each card.
-  function pzActionsHtml(kind) {
+  // Play (white) and See stats (plain) at the foot of each card -- See
+  // stats only once there's something to see.
+  function pzActionsHtml(kind, empty) {
     return '<div class="fc-pz-actions"><button type="button" class="fc-btn" data-dash-go="' + kind + '">' + (kind === "games" ? "Play a game" : "Play a puzzle") + "</button>" +
-      '<button type="button" class="fc-pz-link" data-dash-go="stats-' + kind + '">See stats</button></div>';
+      (empty ? "" : '<button type="button" class="fc-pz-link" data-dash-go="stats-' + kind + '">See stats</button>') + "</div>";
   }
   // Puzzles: grids and word searches solved, and the last few.
   function puzzlesCardHtml(now) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     if (!runs) return "";
     var sum = runs.summary(now, "puzzles");
-    var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card"><h3 class="fc-viz-title">Puzzles</h3>';
+    var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card">' + vizTitle("Puzzles");
     // Nothing solved yet: one line and the way in, not a card of zeroes.
-    if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No puzzles solved yet.</p>' + pzActionsHtml("puzzles") + "</div></div>";
+    if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No puzzles solved yet.</p>' + pzActionsHtml("puzzles", true) + "</div></div>";
     var week = sum.days.reduce(function (a, d) { return a + d.count; }, 0);
     return head + '<div class="fc-stats-grid fc-pz-stats">' + statTile(sum.total, "Puzzles solved") + statTile(week, "Solved this week") + "</div>" +
       '<h4 class="fc-pz-sub">Recent puzzles</h4><ul class="fc-pz-list">' + sum.recent.slice(0, 3).map(runRowHtml).join("") + "</ul>" +
@@ -637,8 +666,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     if (!runs) return "";
     var sum = runs.summary(now, "games");
-    var head = '<div class="fc-viz-card fc-viz-wide fc-games-card"><h3 class="fc-viz-title">Games</h3>';
-    if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No games yet.</p>' + pzActionsHtml("games") + "</div></div>";
+    var head = '<div class="fc-viz-card fc-viz-wide fc-games-card">' + vizTitle("Games");
+    if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No games yet.</p>' + pzActionsHtml("games", true) + "</div></div>";
     var ls = sum.listening, mt = sum.match;
     var tiles = statTile(sum.total, "Games played") +
       statTile(ls.asked ? Math.round(ls.right / ls.asked * 100) + "%" : "—", "Listening accuracy") +
@@ -662,7 +691,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     });
     if (!ids.length) return "";
     var known = ids.filter(function (id) { return kk.isKnown(id); }).length;
-    return '<div class="fc-viz-card fc-viz-wide fc-kanji-card"><h3 class="fc-viz-title">Kanji</h3>' +
+    return '<div class="fc-viz-card fc-viz-wide fc-kanji-card">' + vizTitle("Kanji") +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + known + "</b> of " + ids.length + " known</span>" +
       '<button type="button" class="fc-btn" data-dash-go="kanji">' + (known ? "Open Kanji" : "Mark kanji you know") + "</button></div>" +
       progressBarHtml(known, ids.length, known + " of " + ids.length + " kanji known") + "</div>";
@@ -675,7 +704,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!kana || !kana.summary) return "";
     var k = kana.summary(now);
     if (!k.total) return "";
-    return '<div class="fc-viz-card fc-viz-wide fc-dash-kana"><h3 class="fc-viz-title">Kana</h3>' +
+    return '<div class="fc-viz-card fc-viz-wide fc-dash-kana">' + vizTitle("Kana") +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + k.started + "</b> of " + k.total + " started" +
       (k.toStudy ? '<span class="fc-kj-sub">' + k.toStudy + " to study now</span>" : "") + "</span>" +
       '<button type="button" class="fc-btn' + (k.toStudy ? " fc-btn-primary" : "") + '" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +

@@ -21,6 +21,9 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   };
   var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana" };
   var PRACTISE_WORDS = 20;
+  // Each style's own hue (the --tile palette), as Fitness gives each ring
+  // one: its headline figures and its trend line wear it.
+  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange" };
   var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
@@ -182,6 +185,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function render(panel) {
     if (!panel) return;
     var st = runs().styleStats(view.mode, new Date());
+    panel.dataset.tile = HUES[view.mode] || "";
     panel.innerHTML =
       '<div class="fc-manage-filters fc-st-modes" role="tablist" aria-label="Style">' + MODES[view.kind].map(function (m) {
         var on = m[0] === view.mode;

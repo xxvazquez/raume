@@ -214,7 +214,21 @@ and Help.
   picker's nine swatches add clay `#bb7f74` and slate `#8493a3`; the hues are
   `--tile-<key>` tokens, dark mode dims the fill to 80%, print drops the tile).
   These dusty mid-tones are the only colour in a row and say which group a
-  table is in; the rest of the row stays neutral. **List type scale** (phone and
+  table is in; the rest of the row stays neutral. **The same `--tile` hues
+  are raume's iOS-style accent family elsewhere** (Laura, 2026-09-28: iOS
+  uses colour with purpose, raume read too white), always as identity, never
+  decoration: each Dashboard card title leads with a 24px tile
+  (`.fc-title-tile` — Card progress slate, Reviews this week blue, Due next 7
+  days indigo, Kana orange あ, Puzzles teal, Games purple, Kanji amber 字,
+  Missed today and Leeches clay, Words to review green); a stat's small
+  label glyph takes its hue (`.fc-stat-glyph[data-tile]` — the streak's
+  flame orange, as Health does); Settings' FSRS rows lead with a 28px tile
+  (`.set-tile`, iOS Settings — retention indigo, interval blue, per day
+  green, fuzz slate), their hairlines inset to the text; and each puzzle /
+  game style owns a hue on its Stats screen (crossword blue, arroword
+  indigo, word search teal, Match purple, Listening orange) for its headline
+  figures (deepened 72% toward `--ink` to keep text contrast) and its trend
+  line. Surfaces stay white; no gradients, no pink. **List type scale** (phone and
   desktop): a category header is 12px / 500 in secondary grey (`--muted`), inset
   16px to line up with the row content; a collapsed row title is 14px / 400 in
   `--ink` — the same size once the table is open; the phone's large screen title 28px.

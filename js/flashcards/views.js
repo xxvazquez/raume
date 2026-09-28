@@ -492,13 +492,25 @@ window.RaumeStudy.flashcards.views = (function () {
   // under the card -- instead of a paragraph under every field. Changes save
   // as you make them (a number when you leave its field, a switch or tick at
   // once); there's no Save button, same as iOS.
-  function setNum(id, label, value, min, max, unit) {
-    return '<label class="set-row"><span class="set-label">' + esc(label) + '</span><span class="set-value">' +
+  // iOS Settings marks each row with a tile: a white glyph on its own hue
+  // (the table rows' --tile palette), the row's hairline inset to its text.
+  var SET_TILES = {
+    retention: ["indigo", '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.2"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'],
+    interval: ["blue", '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>'],
+    perDay: ["green", '<path d="M9 4.5v9M4.5 9h9"/>'],
+    fuzz: ["slate", '<path d="M3 5.5h2.5c3.5 0 3.5 7 7 7H15M3 12.5h2.5c1.4 0 2.2-1.1 2.8-2.4M10.2 7.9c.6-1.3 1.4-2.4 2.8-2.4H15M13 3.5l2 2-2 2M13 10.5l2 2-2 2"/>']
+  };
+  function setTile(key) {
+    var t = SET_TILES[key];
+    return t ? '<span class="set-tile" data-tile="' + t[0] + '"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + t[1] + "</svg></span>" : "";
+  }
+  function setNum(id, label, value, min, max, unit, tile) {
+    return '<label class="set-row' + (tile ? " set-row-tiled" : "") + '"><span class="set-label">' + setTile(tile) + esc(label) + '</span><span class="set-value">' +
       '<input type="number" class="set-num" id="' + id + '" min="' + min + '" max="' + max + '" value="' + value + '" inputmode="numeric">' +
       (unit ? '<span class="set-unit' + (unit === "%" ? " set-unit-tight" : "") + '">' + unit + "</span>" : "") + "</span></label>";
   }
-  function setSwitch(id, label, on) {
-    return '<label class="set-row"><span class="set-label">' + esc(label) + '</span>' +
+  function setSwitch(id, label, on, tile) {
+    return '<label class="set-row' + (tile ? " set-row-tiled" : "") + '"><span class="set-label">' + setTile(tile) + esc(label) + '</span>' +
       '<input type="checkbox" class="set-switch" id="' + id + '"' + (on ? " checked" : "") + "></label>";
   }
   // A group's explainer waits behind an ⓘ on its header (the Dashboard's
@@ -521,16 +533,16 @@ window.RaumeStudy.flashcards.views = (function () {
       }).join(""), "Study now only draws from the ticked directions. Turning one off keeps its cards and progress.") +
       '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div>' +
       setGroup("Word cards",
-        setNum("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), 70, 99, "%") +
-        setNum("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, 30, 36500, "days") +
-        setNum("fcNewPerDay", "New cards per day", s.queue_new_cards_per_day, 0, 200, "") +
-        setSwitch("fcFuzz", "Fuzz intervals", s.fsrs_enable_fuzz),
+        setNum("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), 70, 99, "%", "retention") +
+        setNum("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, 30, 36500, "days", "interval") +
+        setNum("fcNewPerDay", "New cards per day", s.queue_new_cards_per_day, 0, 200, "", "perDay") +
+        setSwitch("fcFuzz", "Fuzz intervals", s.fsrs_enable_fuzz, "fuzz"),
         "FSRS-6 brings a card back when your recall is expected to fall to this level — 90% is its default. 36,500 days means no cap. Fuzz spreads out cards added on the same day.") +
       setGroup("Kana cards",
-        setNum("fcKanaRetention", "Desired retention", Math.round(k.fsrs_request_retention * 100), 70, 99, "%") +
-        setNum("fcKanaMaxInterval", "Maximum interval", k.fsrs_maximum_interval, 30, 36500, "days") +
-        setNum("fcKanaNewPerDay", "New kana per day", k.new_per_day, 0, 200, "") +
-        setSwitch("fcKanaFuzz", "Fuzz intervals", k.fsrs_enable_fuzz),
+        setNum("fcKanaRetention", "Desired retention", Math.round(k.fsrs_request_retention * 100), 70, 99, "%", "retention") +
+        setNum("fcKanaMaxInterval", "Maximum interval", k.fsrs_maximum_interval, 30, 36500, "days", "interval") +
+        setNum("fcKanaNewPerDay", "New kana per day", k.new_per_day, 0, 200, "", "perDay") +
+        setSwitch("fcKanaFuzz", "Fuzz intervals", k.fsrs_enable_fuzz, "fuzz"),
         "Its own schedule, separate from word cards.") +
       '<p class="set-status" id="fcSettingsSaved" role="status" aria-live="polite"></p>' +
       backupSectionHtml();
