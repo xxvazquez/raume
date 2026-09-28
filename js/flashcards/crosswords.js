@@ -1020,7 +1020,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Romaji is the default script -- a beginner without kana memorized yet
   // still gets a working puzzle; switching to Japanese/Hiragana/Katakana is
   // one tap away once they're ready for it.
-  var state = { source: "flashcards", tables: [], tablesOpen: false, optionsOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0 };
+  var state = { source: "flashcards", tables: [], tablesOpen: false, optionsOpen: false, mode: "crossword", script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
 
   function rerender() { S.render(); }
 
@@ -1052,6 +1052,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   function generate() {
+    // The notes pad belongs to one puzzle: a new one starts it blank.
+    state.notes = "";
     if (state.script === "native" && isGridMode()) state.script = "hiragana";
     // First pick of "A table": the first one with enough words for a real
     // grid (the very first table can be a handful of counters).
@@ -1240,6 +1242,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       rows.push('<div class="fc-xw-row">' + cells.join("") + "</div>");
     }
     return rows.join("");
+  }
+
+  // A scratch pad beside the clues on a wide window -- readings, guesses,
+  // kana while solving. Kept for the puzzle it was written on (across tab
+  // switches), blank again with the next one; a phone has no room for it.
+  function notesHtml() {
+    return '<div class="fc-xw-notes"><h4 class="fc-xw-cluehead"><label for="fcXwNotes">Notes</label></h4>' +
+      '<textarea id="fcXwNotes" class="fc-xw-notes-pad" placeholder="Readings, guesses, kana…" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>';
   }
 
   function clueListHtml(p) {
@@ -1687,15 +1697,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch
-        ? '<div class="fc-xw-gridwrap">' + wordSearchGridHtml(p, romajiMode) + "</div>" + wordSearchListHtml(p)
+        ? '<div class="fc-xw-gridwrap">' + wordSearchGridHtml(p, romajiMode) + "</div>"
         : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite" hidden></p>' +
           '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
-          gridHtml(p, arroword, romajiMode) + "</div></div>" +
-          (arroword ? "" : clueListHtml(p))) +
+          gridHtml(p, arroword, romajiMode) + "</div></div>") +
+      '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : arroword ? "" : clueListHtml(p)) + notesHtml() + "</div>" +
       "</div>";
 
     fitPuzzle();
     bindControls(panel);
+    var notes = document.getElementById("fcXwNotes");
+    notes.value = state.notes;
+    notes.addEventListener("input", function () { state.notes = notes.value; });
     document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
     // A solved grid or word search goes to the Dashboard's log, once per
     // puzzle: the time from when it appeared and how many letters / words

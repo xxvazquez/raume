@@ -129,6 +129,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Source</span><span class="help-desc">Your flashcards or any tables. At least 6 words; no clues that give the answer away.</span></li>' +
       '<li><span class="help-term">Style · Script · Words</span><span class="help-desc">Crossword, arroword, word search, Match or Listening; romaji, Japanese (with kanji — Match and word search), hiragana words only or katakana words only; and how many words.</span></li>' +
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type. Tap a crossing square again to switch direction.</span></li>' +
+      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad beside the clues for readings or guesses. Blank again with each new puzzle.</span></li>' +
       '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals, clears or prints.</span></li>' +
       '<li><span class="help-term">Word search</span><span class="help-desc">Find the Japanese for each clue: drag across it, or tap its first and last letter. Any direction, backwards too.</span></li>' +
       '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second; your best time is kept.</span></li>' +

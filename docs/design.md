@@ -758,7 +758,12 @@ closes on an outside tap or Escape. The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
 watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid
-and the lists below. The clue bar only shows once a square is picked — the
+and the lists below. Wide, the lists share their row with a **notes pad**
+(`.fc-xw-notes`): a "Notes" list header over a plain white `--radius-card`
+textarea as tall as the list, no border, no Save, section-tone caret — the
+free space beside a short word list rather than an over-wide one (a word
+search's list is held to 300px). It belongs to the puzzle (blank on New
+puzzle) and isn't on a phone or in print. The clue bar only shows once a square is picked — the
 how-to lives behind a bare ⓘ beside Check (a small glass popover), not as a
 standing line. The grid draws only the letter squares — white with a
 hairline, blanks are the page ground — shrinking to a 24px floor before it

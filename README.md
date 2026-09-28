@@ -288,8 +288,11 @@ The puzzle comes first. Its settings sit behind one summary button — the
 style as its title, "Flashcards · 15 words · Romaji" under it — that opens them as a popover
 (a bottom sheet on a phone); changing one makes a new puzzle. On a wide
 window the clue you're on and the Across / Down lists sit beside the grid —
-or below it, when the grid is too wide to share the row. The page itself
-never scrolls sideways.
+or below it, when the grid is too wide to share the row. Beside the lists
+there's a **Notes** pad for readings, guesses or kana while you solve; it
+stays with the puzzle while you move between tabs and starts blank with the
+next one (not on a phone, not saved or synced). The page itself never
+scrolls sideways.
 
 | Setting | Choices |
 | --- | --- |

@@ -2996,6 +2996,20 @@ async function main() {
       && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent === "Word search"
       && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
   })());
+  check("a notes pad sits beside the word list, keeps its text across a re-render of the same puzzle, and starts blank with a new one", (() => {
+    const pad = document.querySelector("#fcPanelCrosswords .fc-xw-side > .fc-xw-notes #fcXwNotes");
+    if (!pad || pad.tagName !== "TEXTAREA") return false;
+    pad.value = "みず = water";
+    pad.dispatchEvent(new window.Event("input"));
+    window.RaumeStudy.flashcards.crosswords.renderCrosswords(document.getElementById("fcPanelCrosswords"));
+    const kept = document.getElementById("fcXwNotes").value === "みず = water";
+    const puzzle = xw.state.puzzle;
+    document.getElementById("fcXwNew").click();
+    const blank = document.getElementById("fcXwNotes").value === "";
+    xw.state.puzzle = puzzle;
+    window.RaumeStudy.flashcards.crosswords.renderCrosswords(document.getElementById("fcPanelCrosswords"));
+    return kept && blank;
+  })());
   check("picking a word's last letter then its first (Enter on each) marks it found -- either way round", (() => {
     const pl = xw.state.puzzle.placements[0];
     const end = wsCell(pl.row + pl.dr * (pl.length - 1), pl.col + pl.dc * (pl.length - 1));
