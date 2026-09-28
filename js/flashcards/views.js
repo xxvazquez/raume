@@ -487,9 +487,16 @@ window.RaumeStudy.flashcards.views = (function () {
     return '<label class="set-row"><span class="set-label">' + esc(label) + '</span>' +
       '<input type="checkbox" class="set-switch" id="' + id + '"' + (on ? " checked" : "") + "></label>";
   }
+  // A group's explainer waits behind an ⓘ on its header (the Dashboard's
+  // retention ⓘ, same look) instead of standing under the card.
+  var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
+  var setFootN = 0;
   function setGroup(head, rowsHtml, foot) {
-    return '<h3 class="help-head">' + head + '</h3><div class="help-card set-card">' + rowsHtml + "</div>" +
-      (foot ? '<p class="set-foot">' + foot + "</p>" : "");
+    var id = "fcSetFoot" + (++setFootN);
+    return '<h3 class="help-head set-head">' + head +
+      (foot ? '<button type="button" class="fc-stat-info set-info" aria-expanded="false" aria-controls="' + id + '" aria-label="About ' + head + '">' + INFO_GLYPH + "</button>" : "") +
+      '</h3><div class="help-card set-card">' + rowsHtml + "</div>" +
+      (foot ? '<p class="set-foot" id="' + id + '" hidden>' + foot + "</p>" : "");
   }
   function renderSettings(panel) {
     var s = getCache().settings;
@@ -514,6 +521,14 @@ window.RaumeStudy.flashcards.views = (function () {
       '<p class="set-status" id="fcSettingsSaved" role="status" aria-live="polite"></p>' +
       backupSectionHtml();
     wireBackup();
+    panel.querySelectorAll(".set-info").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var foot = document.getElementById(btn.getAttribute("aria-controls"));
+        var open = btn.getAttribute("aria-expanded") !== "true";
+        btn.setAttribute("aria-expanded", String(open));
+        if (foot) foot.hidden = !open;
+      });
+    });
 
     // Every setting is written to the local cache before the remote call even
     // goes out (see saveFsrsSettings/saveDirectionSettings), so a failed sync

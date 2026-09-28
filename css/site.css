@@ -1144,10 +1144,16 @@ body.selftest-mode .selftest-hint { display: block; }
    from anywhere. --vocab-toolbar-h is the search bar's fixed height. */
 #vocabulary .table-section:not(.collapsed) > .section-head {
   position: sticky; top: calc(var(--nav-h) - 1px + var(--vocab-toolbar-h)); z-index: 40;
-  /* The shadows paint the card's 16px side padding too, so rows scrolling
-     under the pinned title don't peek out beside it. */
-  background: var(--paper); box-shadow: -16px 0 0 var(--paper), 16px 0 0 var(--paper);
+  /* It spans the card's full width (over its 16px side padding), so rows
+     scrolling under the pinned title don't peek out beside it -- and takes
+     the card's own top corners, so a table opened first in its card keeps
+     them round. */
+  margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;
+  border-top-left-radius: inherit; border-top-right-radius: inherit;
+  background: var(--paper);
 }
+#vocabulary .table-section:not(.collapsed) > .section-head::after { left: 16px; right: 16px; }
+#vocabulary .table-section:not(.collapsed) > .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 53px; }
 #vocabulary .table-section.menu-open:not(.collapsed) > .section-head { z-index: 44; }
 /* Open or closed, the row's title is the same 14px -- growing it on open
    would move the row you just tapped. */
@@ -1853,6 +1859,8 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 }
 .set-action:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
+.set-foot[hidden] { display: none; }
+.set-head { display: flex; align-items: center; gap: 2px; }
 .set-foot-alone { margin-top: 0; }
 /* The save is silent, as on iOS -- this only speaks to a screen reader. */
 .set-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
@@ -2449,7 +2457,13 @@ body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
 .ks-title { flex: 1 1 auto; min-width: 0; }
 .ks-meaning { margin: 0; font: 600 20px/1.25 var(--font-ui); color: var(--ink); }
 .ks-note { margin: 2px 0 0; font-size: var(--fs-small); color: var(--muted); }
-.kanji-sheet .jp-speak-btn { flex: none; }
+/* The sheet's speaker is its main "hear it" action: a round tinted 30px
+   button beside the ✕, not the tables' faint row glyph. */
+body.ja-voice-ready .kanji-sheet .jp-speak-btn {
+  flex: none; align-self: flex-start; width: 30px; height: 30px; margin: 0; padding: 0;
+  align-items: center; justify-content: center; border-radius: 50%; opacity: 1;
+  background: color-mix(in srgb, var(--section) 14%, transparent); color: var(--section-strong);
+}
 .ks-close {
   appearance: none; flex: none; align-self: flex-start;
   display: inline-flex; align-items: center; justify-content: center;

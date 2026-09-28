@@ -288,8 +288,9 @@ and Help.
   icon tile; Flashcards Help puts a 13px grey header over each card. Keep a
   row to one idea and one line of explanation; keys are `kbd` chips.
 - **Settings** (Flashcards › Settings) follows iOS Settings: a 13px grey header
-  over each white card of 44px rows (label left, value or control right), a
-  short grey footnote under the card. Numbers are plain right-aligned values
+  over each white card of 44px rows (label left, value or control right); the
+  card's explainer sits behind a small ⓘ after its header (`.set-info`, the
+  Dashboard's retention ⓘ) and shows as a grey footnote only when tapped. Numbers are plain right-aligned values
   you tap to edit (no grey box), on/off is a 51×31 iOS switch (`.set-switch`),
   study directions are checkmark rows, Back up & restore is two tint-text action
   rows. Changes save as you make them — a number when you leave its field, a

@@ -316,7 +316,7 @@ window.RaumeStudy.customize = (function () {
       '<div class="cv-card cv-owned"><h3>Words you’ve added</h3>' +
       '<div class="cv-owned-controls">' +
       '<label class="cv-owned-search-field"><span class="visually-hidden">Search your words</span>' +
-      '<input type="search" class="cv-owned-search" placeholder="Search your words…" value="' + esc(cvOwnedQuery) + '"></label>' +
+      '<input type="search" class="cv-owned-search" placeholder="Search your words" aria-label="Search your words" value="' + esc(cvOwnedQuery) + '"></label>' +
       '<label class="cv-owned-sort-field"><span class="visually-hidden">Sort</span>' +
       '<select class="cv-owned-sort-select">' +
       '<option value="recent"' + (cvOwnedSort === "recent" ? " selected" : "") + '>Recently added</option>' +

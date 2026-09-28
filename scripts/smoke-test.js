@@ -3131,11 +3131,17 @@ async function main() {
       && /#fcPanelHelp/.test(r.selectorText) && /#fcPanelSettings/.test(r.selectorText));
     return !!rule && parseInt(rule.style.maxWidth, 10) > 0 && parseInt(rule.style.maxWidth, 10) <= 720;
   })());
-  check("Settings is iOS rows: label left, value right, a short footnote under each card -- no paragraph per field", (() => {
+  check("Settings is iOS rows: label left, value right, each card's explainer behind an ⓘ on its header -- hidden until tapped", (() => {
     const row = document.getElementById("fcRetention").closest(".set-row");
-    return !!row && window.getComputedStyle(row).justifyContent === "space-between"
+    const info = document.querySelector("#fcPanelSettings .set-info");
+    const foot = info && document.getElementById(info.getAttribute("aria-controls"));
+    if (!row || !foot || !foot.hidden) return false;
+    info.click();
+    const shown = !foot.hidden;
+    info.click();
+    return window.getComputedStyle(row).justifyContent === "space-between"
       && !document.querySelector("#fcPanelSettings .fc-settings-help")
-      && document.querySelectorAll("#fcPanelSettings .set-foot").length >= 3;
+      && document.querySelectorAll("#fcPanelSettings .set-info").length >= 3 && shown && foot.hidden;
   })());
   const dirChecks = [...document.querySelectorAll(".fc-dir-checkbox")];
   check("all 4 directions are offered as a setting", dirChecks.length === 4);
