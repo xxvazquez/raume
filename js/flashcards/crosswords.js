@@ -786,10 +786,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (!clockEl.isConnected) { stopMatchTimer(); return; }
       clockEl.textContent = formatClock(elapsed());
     }
+    // Kana and kanji set a size up (17px) to read as clearly as the English
+    // beside them; romaji is Latin text and matches the English's 14px.
     function tileHtml(side, i, text) {
-      var jp = side === "l";
+      var jp = side === "l" && !romajiMode;
       return '<button type="button" class="fc-mt-tile' + (jp ? " fc-mt-jp" : "") + '" data-side="' + side + '" data-i="' + i + '" aria-pressed="false"' +
-        (jp && !romajiMode ? ' lang="ja"' : "") + ">" + esc(text) + "</button>";
+        (jp ? ' lang="ja"' : "") + ">" + esc(text) + "</button>";
     }
     function renderRound() {
       var words = p.rounds[round];
