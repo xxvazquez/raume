@@ -630,12 +630,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
     return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
   }
-  var MODE_NAMES = { match: "Match", listening: "Listening", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
+  var MODE_NAMES = { match: "Match", listening: "Listening", kanatiles: "Kana tiles", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
   function runRowHtml(r) {
     var unit = r.mode === "match" ? " pairs" : r.n === 1 ? " word" : " words";
     var what = (MODE_NAMES[r.mode] || r.mode) + " · " + r.n + unit;
     var how = r.mode === "match" ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
-      : r.mode === "listening" ? (r.right || 0) + " / " + r.n + " right"
+      : r.mode === "listening" || r.mode === "kanatiles" ? (r.right || 0) + " / " + r.n + " right"
       : clock(r.ms) + " · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
     if (r.ended) how += " · ended early";
     var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });

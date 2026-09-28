@@ -17,13 +17,13 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   var esc = window.RaumeStudy.shared.escapeHtml;
   var MODES = {
     puzzles: [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]],
-    games: [["match", "Match"], ["listening", "Listening"]]
+    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"]]
   };
   var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana" };
   var PRACTISE_WORDS = 20;
   // Each style's own hue (the --tile palette), as Fitness gives each ring
   // one: its headline figures and its trend line wear it.
-  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange" };
+  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green" };
   var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
@@ -63,9 +63,10 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function days(n) { return n + (n === 1 ? " day" : " days"); }
   function pct(x) { return Math.round(x * 100) + "%"; }
   // One game's headline: its time, or for Listening its score.
-  function runValue(r) { return r.mode === "listening" ? (r.right || 0) + " / " + r.n : clock(r.ms); }
+  function scored(mode) { return mode === "listening" || mode === "kanatiles"; }
+  function runValue(r) { return scored(r.mode) ? (r.right || 0) + " / " + r.n : clock(r.ms); }
   function measureText(mode, v) {
-    if (mode === "listening") return pct(v);
+    if (scored(mode)) return pct(v);
     return v.toFixed(1) + "s / " + (mode === "match" ? "pair" : "word");
   }
   function dateText(at) { return new Date(at).toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
@@ -95,7 +96,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   // rest as ordinary rows under them.
   function heroHtml(st) {
     var mode = st.mode;
-    var lead = mode === "listening" ? [pct(st.right / (st.words || 1)), "accuracy"]
+    var lead = scored(mode) ? [pct(st.right / (st.words || 1)), "accuracy"]
       : [st.best.toFixed(1) + "s", mode === "match" ? "best per pair" : "best per word"];
     function cell(v, l) { return '<div class="fc-st-fig"><span class="fc-st-fig-val">' + esc(v) + '</span><span class="fc-st-fig-lbl">' + esc(l) + "</span></div>"; }
     return '<div class="help-card fc-st-hero">' + cell(lead[0], lead[1]) +
@@ -110,6 +111,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         row("Pairs matched", String(st.words)) + row("Misses per game", (st.misses / st.played).toFixed(1));
     }
     else if (mode === "listening") rows += row("Words heard", String(st.words));
+    else if (mode === "kanatiles") rows += row("Words spelled", String(st.words));
     else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);
   }
@@ -121,7 +123,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     var vals = pts.map(function (p) { return p.value; });
     var hi = Math.max.apply(null, vals), lo = Math.min.apply(null, vals), span = hi - lo || 1;
     var W = 300, H = 88, pad = 8, step = (W - pad * 2) / (pts.length - 1);
-    var up = mode === "listening";
+    var up = scored(mode);
     var xy = pts.map(function (p, i) {
       var t = (p.value - lo) / span;
       return [Math.round((pad + i * step) * 10) / 10, Math.round((pad + (up ? 1 - t : t) * (H - pad * 2)) * 10) / 10];

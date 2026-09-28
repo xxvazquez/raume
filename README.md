@@ -14,7 +14,7 @@ cooking or studying, and for printing clean A4 study sheets.
 | **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords and word searches from your words |
-| **Games**       | A timed Match game and Listening from your words |
+| **Games**       | A timed Match game, Listening and Kana tiles from your words |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -255,7 +255,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
-| **Games** | Match / Listening from your words ([below](#games)) |
+| **Games** | Match / Listening / Kana tiles from your words ([below](#games)) |
 | **Stats** | Per puzzle or game style — opened from ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file — cards, kana, table customisations, your own words, Known kanji and puzzle games) |
 | **Help** | Pausing, the Manage icons, keyboard shortcuts |
@@ -352,7 +352,7 @@ scrolls sideways.
 
 ### Games
 
-Timed and scored rounds: **Match** and **Listening**. Same toolbar as
+Timed and scored rounds: **Match**, **Listening** and **Kana tiles**. Same toolbar as
 Puzzles — the game's name as a menu, the clock (or "3 / 10"), and ⋯ with
 New game, Words from / Word count / Script (none for Listening), How to
 play, *Restart* and *Stats*. Each tab keeps its own settings and its
@@ -415,15 +415,32 @@ scheduled; every finished game goes to the Dashboard.
 
 </details>
 
+<details>
+<summary><b>Kana tiles</b></summary>
+
+- Spell the word: the English (with ▶ to hear it) on top, one slot per kana,
+  and a bank of tiles under it — the word's own kana shuffled with 3 decoys
+  that look or sound close (ぬ/め, シ/ツ, か/が). Small ゃゅょっ and ー are
+  tiles of their own. The bank sits in balanced rows, never one tile alone.
+- Tap tiles in order; tap a placed tile to take it (and those after it)
+  back. Filling the last slot checks it: right moves on by itself; wrong
+  shows the spelling, waits for **Next**, and the word comes back once at
+  the end of the game.
+- *Script* is *Hiragana* or *Katakana* only — words really written that way.
+  The score counts words right first time; the end card lists the ones to
+  spell again. ⏸ and End game work as in Listening.
+
+</details>
+
 ### Stats
 
 One screen per tab — **Puzzle stats** (Crossword / Arroword / Word search)
-and **Game stats** (Match / Listening) — with a segmented control for the
+and **Game stats** (Match / Listening / Kana tiles) — with a segmented control for the
 style, opening on the one you were playing:
 
 - **Overview** — played / solved, time played, your day streak and longest,
   and the style's own measure: best pace per pair and fastest round (Match), accuracy
-  (Listening), best time per word and hints used (puzzles).
+  (Listening, Kana tiles), best time per word and hints used (puzzles).
 - **Last 30 games** — one line, better always up, and "18% faster than your
   first 10 games" once there are 20 and it's true.
 - **Personal bests** — one per setup (source · script · word count); tap one

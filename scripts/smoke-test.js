@@ -3053,7 +3053,7 @@ async function main() {
     const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
     const puzzles = opts("#fcPanelCrosswords");
     document.querySelector('.fc-tab[data-tab="games"]').click();
-    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening"
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles"
       && xw.state === xw.states.games && xw.state.mode === "match";
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
@@ -3280,6 +3280,66 @@ async function main() {
   })());
   speech.speak = realSpeak;
 
+  console.log("Flashcards: Kana tiles");
+  check("Kana tiles' bank is the word's own kana (small ゃゅょっ and ー as tiles of their own) plus 3 decoys the word doesn't use", (() => {
+    const p = xw.buildKanaTiles([{ id: "a", clue: "tea", answer: "おちゃ" }, { id: "b", clue: "coffee", answer: "コーヒー" }], 10, "hiragana");
+    const q = p.questions.find(x => x.word.id === "a");
+    const decoys = q.tiles.filter(c => !q.chars.includes(c));
+    const kd = xw.kanaDecoys(Array.from("コーヒー"), "katakana");
+    return q.chars.join("|") === "お|ち|ゃ" && q.tiles.length === 6 && decoys.length === 3
+      && [...q.chars].sort().join() === q.tiles.filter(c => q.chars.includes(c)).sort().join()
+      && kd.length === 3 && kd.every(c => /^[ァ-ヶ]$/.test(c) && !"コーヒ".includes(c));
+  })());
+  xwPick("mode", "kanatiles");
+  check("Kana tiles offers only Hiragana / Katakana (it spells in kana), falling back to Hiragana, and only words really written that way", (() => {
+    const opts = [...document.querySelectorAll('#fcPanelGames [data-pick="script"] option')].map(o => o.value).join("|");
+    return opts === "hiragana|katakana" && xw.state.script === "hiragana"
+      && xw.state.puzzle.questions.every(q => /^[ぁ-ゖー]+$/.test(q.word.answer));
+  })());
+  const ktQ = () => document.querySelector("#fcPanelGames .fc-kt-clue").textContent;
+  const ktCur = () => xw.state.puzzle.questions.find(q => q.word.clue === ktQ());
+  const ktTap = c => [...document.querySelectorAll("#fcPanelGames .fc-kt-tile:not(:disabled)")].find(t => t.textContent === c).click();
+  check("a Kana tiles question: the English, one empty slot per kana, the bank, a question counter", (() => {
+    const q = ktCur();
+    return !!q && document.querySelectorAll("#fcPanelGames .fc-kt-slot").length === q.chars.length
+      && document.querySelectorAll("#fcPanelGames .fc-kt-tile").length === q.tiles.length
+      && document.getElementById("fcLsCount").textContent === "1 / " + xw.state.puzzle.questions.length
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const ktFirst = ktCur();
+  check("tapping a placed tile takes it (and any after it) back to the bank", (() => {
+    ktTap(ktFirst.chars[0]);
+    const placed = document.querySelector("#fcPanelGames .fc-kt-slot.fc-kt-filled");
+    placed.click();
+    return !document.querySelector("#fcPanelGames .fc-kt-slot.fc-kt-filled")
+      && [...document.querySelectorAll("#fcPanelGames .fc-kt-tile")].every(t => !t.disabled);
+  })());
+  check("a wrong spelling: the slots wash coral, the right spelling shows, Next waits -- and the word comes back at the end", (() => {
+    const wrongLast = ktFirst.tiles.find(c => c !== ktFirst.chars[ktFirst.chars.length - 1] && !ktFirst.chars.slice(0, -1).includes(c)) || ktFirst.tiles.find(c => !ktFirst.chars.includes(c));
+    ktFirst.chars.slice(0, -1).forEach(ktTap);
+    ktTap(wrongLast);
+    const ok = document.querySelector("#fcPanelGames .fc-kt-slots").classList.contains("fc-kt-wrong")
+      && !document.querySelector("#fcPanelGames .fc-kt-answer").hidden && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok && ktQ() !== ktFirst.word.clue;
+  })());
+  for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    ktCur().chars.forEach(ktTap);
+    for (let waited = 0; waited < 3000; waited += 25) {
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || !document.querySelector("#fcPanelGames .fc-kt-right")) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
+  }
+  check("a right spelling moves on by itself; the end scores first-time words, lists the one to spell again, and logs a kanatiles game", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("kanatiles").pop();
+    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
+      && done.textContent.includes(ktFirst.word.clue) && !!last && last.right === n - 1 && last.n === n
+      && last.missed.join() === String(ktFirst.word.id) && last.setup === "flashcards|hiragana|" + n;
+  })());
+  xwPick("mode", "listening");
+
   console.log("Flashcards: Puzzle and game stats");
   const pr = window.RaumeStudy.flashcards.puzzleRuns;
   check("stats count each style on its own: played, a day streak, and a best measured per pair / word or as accuracy", (() => {
@@ -3303,7 +3363,7 @@ async function main() {
     const panel = document.getElementById("fcPanelStats");
     const segs = [...panel.querySelectorAll(".fc-st-modes button")].map(b => b.textContent);
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
-      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles"
       && panel.querySelector(".fc-st-modes .active").textContent === "Listening"
       && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());

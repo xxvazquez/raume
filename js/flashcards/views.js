@@ -137,9 +137,10 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Games</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Game</span><span class="help-desc">Tap its name to switch between Match and Listening; ⋯ has New game and the same settings as Puzzles.</span></li>' +
+      '<li><span class="help-term">Game</span><span class="help-desc">Tap its name to switch between Match, Listening and Kana tiles; ⋯ has New game and the same settings as Puzzles.</span></li>' +
       '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second. ⏸ pauses; there’s a break between rounds.</span></li>' +
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
+      '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order. A few tiles are look-alikes; a missed word comes back at the end.</span></li>' +
       '<li><span class="help-term">Stats</span><span class="help-desc">⋯ › Stats, for puzzles too: your bests, a trend, and the words you miss most — Practise these plays just them.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Syncing</h3>' +

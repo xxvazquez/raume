@@ -3487,6 +3487,50 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-choice.fc-ls-chosen-wrong::before { content: "✕ "; }
 .fc-ls-next-row { display: flex; justify-content: center; margin-top: 14px; min-height: 36px; }
 @media (max-width: 380px) { .fc-ls-choices { grid-template-columns: minmax(0, 1fr); } }
+/* Kana tiles: Listening's white card holding the English, a small speaker
+   and one slot per kana -- empty slots a soft ground-grey square, filled
+   ones the picked-tile wash; right washes the row sage, wrong coral with
+   Match's shake. Under the card the bank: Match's white tiles, square,
+   the kana large, a used tile dimmed in place so nothing shifts. Slots
+   and tiles shrink together on a long word rather than wrapping. */
+.fc-kt-card { gap: 12px; }
+.fc-kt-clue { margin: 0; color: var(--ink); font-size: 20px; line-height: 1.3; text-align: center; }
+.fc-kt-say {
+  appearance: none; border: 0; padding: 0; position: relative; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; margin-top: -6px; border-radius: 50%; background: transparent; color: var(--section-strong); cursor: pointer;
+}
+.fc-kt-say::after { content: ""; position: absolute; inset: -6px; }
+.fc-kt-say svg { width: 20px; height: 20px; }
+.fc-kt-slots { display: flex; justify-content: center; gap: 6px; width: 100%; }
+.fc-kt-slot {
+  appearance: none; border: 0; margin: 0; padding: 0; flex: 0 1 44px; min-width: 0; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center; border-radius: 10px;
+  background: var(--group-ground); color: var(--ink); font: 400 22px/1 var(--font-ui); cursor: default;
+}
+.fc-kt-slot.fc-kt-filled { background: color-mix(in srgb, var(--section) 12%, var(--paper)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--section) 30%, transparent); cursor: pointer; }
+.fc-kt-right .fc-kt-slot { background: color-mix(in srgb, var(--right) 18%, var(--paper)); box-shadow: none; color: var(--right-strong); }
+.fc-kt-wrong .fc-kt-slot { background: color-mix(in srgb, var(--wrong) 16%, var(--paper)); box-shadow: none; }
+.fc-kt-wrong { animation: fc-ws-miss .3s ease; }
+.fc-kt-answer { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0; }
+.fc-kt-answer[hidden] { display: none; }
+.fc-kt-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px auto 0; }
+/* Row width = its column count of 52px tiles + 8px gaps (set per
+   question from the tile count), so the rows come out balanced. */
+.fc-kt-bank[data-cols="2"] { max-width: 112px; }
+.fc-kt-bank[data-cols="3"] { max-width: 172px; }
+.fc-kt-bank[data-cols="4"] { max-width: 232px; }
+.fc-kt-bank[data-cols="5"] { max-width: 292px; }
+.fc-kt-tile {
+  appearance: none; border: 0; margin: 0; padding: 0; width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper); color: var(--ink); box-shadow: var(--control-lift);
+  font: 400 24px/1 var(--font-ui); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: opacity .15s ease, transform .1s ease;
+}
+.fc-kt-tile:active { transform: scale(.94); }
+.fc-kt-tile:disabled { opacity: .3; cursor: default; }
+.fc-kt-tile:focus-visible, .fc-kt-slot:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .fc-kt-wrong { animation: none; } .fc-kt-tile { transition: none; } }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 .fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
 .fc-ls-missed li {

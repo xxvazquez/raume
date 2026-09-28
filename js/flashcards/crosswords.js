@@ -741,11 +741,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var t = n % 100, u = n % 10;
     return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th");
   }
-  // Under a finished Listening game: this game's accuracy beside your
-  // average over every Listening game so far.
-  function listeningStatsHtml(right, n, run) {
+  // Under a finished Listening or Kana tiles game: this game's accuracy
+  // beside your average over every game of that style so far.
+  function accuracyStatsHtml(mode, right, n, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
-    var all = runs ? runs.live("listening") : [];
+    var all = runs ? runs.live(mode) : [];
     if (run && !all.some(function (r) { return r.id === run.id; })) all.push(run);
     var asked = 0, got = 0;
     all.forEach(function (r) { asked += r.n; got += r.right || 0; });
@@ -1171,7 +1171,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + p.questions.length + "</p>" +
-        listeningStatsHtml(score, p.questions.length, run) +
+        accuracyStatsHtml("listening", score, p.questions.length, run) +
         '<p class="fc-mt-done-meta">' + (missed.length ? "Words to listen to again:" : "Every word right") + "</p>" +
         (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w, i) {
           return '<li><button type="button" class="fc-ls-say" data-m="' + i + '" aria-label="Play">' + SPEAKER_ICON + "</button>" +
@@ -1205,6 +1205,209 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (pb) pb.disabled = false;
       countEl.classList.remove("fc-ws-count-done");
       renderQuestion();
+    }
+    restart();
+    var api = { restart: restart, pause: pause };
+    activeGame = api;
+    return api;
+  }
+
+  // -----------------------------------------------------------------------
+  // Kana tiles -- spell the word. The English (and ▶ to hear it) on top;
+  // under it one slot per kana, and a bank of tiles: the word's own kana,
+  // shuffled, plus a few decoys that look or sound close (ぬ/め, シ/ツ, a
+  // dakuten pair). Tap tiles in order; tap a placed one to take it back.
+  // The last slot filled checks it: right moves on by itself; wrong shakes,
+  // shows the spelling, waits for Next and brings the word back once at the
+  // end of the round. Small ゃゅょっ and ー are tiles of their own. Only
+  // words really written in the script (as the grids' Hiragana/Katakana).
+  // Practice only -- never an FSRS review.
+  // -----------------------------------------------------------------------
+  var KT_DECOYS = 3;
+  // Look- and sound-alikes, per script (katakana's shapes aren't
+  // hiragana's), then the voiced / small pairs every script shares.
+  var KT_LOOKALIKE = {
+    hiragana: ["ぬめ", "ねれわ", "るろ", "はほけ", "さちき", "いり", "こに", "あおめ", "くへ", "しつ", "そろ", "たな", "まも", "うつ"],
+    katakana: ["シツ", "ソン", "クタケ", "ウワフ", "コユロ", "ナメ", "マアム", "チテ", "ヌス", "ヲラ", "セヤ", "ホネ", "ノメ", "レル"]
+  };
+  var KT_PAIRS = ["かが", "きぎ", "くぐ", "けげ", "こご", "さざ", "しじ", "すず", "せぜ", "そぞ", "ただ", "ちぢ", "つづっ", "てで", "とど",
+    "はばぱ", "ひびぴ", "ふぶぷ", "へべぺ", "ほぼぽ", "やゃ", "ゆゅ", "よょ", "おを", "ずづ", "じぢ"];
+  var KT_FILL = { hiragana: "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん",
+    katakana: "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン" };
+  function kanaDecoys(chars, script) {
+    var inWord = {}, near = {};
+    chars.forEach(function (c) { inWord[c] = true; });
+    var groups = KT_LOOKALIKE[script].concat(KT_PAIRS.map(function (g) { return scriptedAnswer(g, script); }));
+    chars.forEach(function (c) {
+      groups.forEach(function (g) { if (g.indexOf(c) !== -1) Array.from(g).forEach(function (o) { if (!inWord[o]) near[o] = true; }); });
+    });
+    var picks = shuffle(Object.keys(near)).slice(0, KT_DECOYS);
+    // Too few near ones (a word of ー and ん): top up from the plain row.
+    shuffle(Array.from(KT_FILL[script])).some(function (c) {
+      if (picks.length >= KT_DECOYS) return true;
+      if (!inWord[c] && picks.indexOf(c) === -1) picks.push(c);
+      return false;
+    });
+    return picks;
+  }
+  function buildKanaTiles(words, limit, script) {
+    var picked = shuffle(words).slice(0, limit);
+    return {
+      placements: picked,
+      questions: picked.map(function (w) {
+        var chars = Array.from(w.answer);
+        return { word: w, chars: chars, tiles: shuffle(chars.concat(kanaDecoys(chars, script))) };
+      })
+    };
+  }
+  function wireKanaTiles(boardEl, countEl, p) {
+    // `queue`: the questions still to go -- a missed word goes back on the
+    // end, once. `placed`: the bank indexes in the slots, in order.
+    var queue, at, score, missed, retried, placed, game = 0, startedAt, pausedMs, pausedAt, done, locked;
+    var total = p.questions.length;
+    function count() { countEl.textContent = Math.min(at + 1, total) + " / " + total; }
+    function q() { return queue[0]; }
+    function render() {
+      var cur = q();
+      count();
+      placed = [];
+      locked = false;
+      boardEl.innerHTML =
+        '<div class="fc-ls-card fc-kt-card">' +
+        '<p class="fc-kt-clue">' + esc(cur.word.clue) + "</p>" +
+        (canSpeak() ? '<button type="button" class="fc-kt-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "") +
+        '<div class="fc-kt-slots" aria-label="Your spelling">' + cur.chars.map(function (c, i) {
+          return '<button type="button" class="fc-kt-slot" data-slot="' + i + '" lang="ja" aria-label="Empty"></button>';
+        }).join("") + "</div>" +
+        '<p class="fc-kt-answer" aria-live="polite" hidden></p></div>' +
+        // Balanced rows, at most 5 tiles each (a phone's width): 6 tiles
+        // sit 3 + 3 and 7 sit 4 + 3, never one left alone on a row.
+        '<div class="fc-kt-bank" data-cols="' + Math.ceil(cur.tiles.length / Math.ceil(cur.tiles.length / 5)) + '">' + cur.tiles.map(function (c, i) {
+          return '<button type="button" class="fc-kt-tile" data-t="' + i + '" lang="ja">' + esc(c) + "</button>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function drawSlots() {
+      var cur = q();
+      boardEl.querySelectorAll(".fc-kt-slot").forEach(function (slot, i) {
+        var t = placed[i];
+        slot.textContent = t === undefined ? "" : cur.tiles[t];
+        slot.classList.toggle("fc-kt-filled", t !== undefined);
+        slot.setAttribute("aria-label", t === undefined ? "Empty" : cur.tiles[t]);
+      });
+      boardEl.querySelectorAll(".fc-kt-tile").forEach(function (tile) {
+        tile.disabled = placed.indexOf(+tile.dataset.t) !== -1;
+      });
+    }
+    function check() {
+      var cur = q(), spelled = placed.map(function (t) { return cur.tiles[t]; }).join("");
+      var right = spelled === cur.word.answer, thisGame = game;
+      locked = true;
+      var slots = boardEl.querySelector(".fc-kt-slots");
+      if (right) {
+        slots.classList.add("fc-kt-right");
+        if (!retried[cur.word.id]) score++;
+        setTimeout(function () {
+          if (thisGame !== game || !boardEl.isConnected) return;
+          if (pausedAt !== null) { pendingNext = true; return; }
+          next();
+        }, 900);
+        return;
+      }
+      slots.classList.add("fc-kt-wrong");
+      if (!retried[cur.word.id]) {
+        missed.push(cur.word);
+        retried[cur.word.id] = true;
+        queue.push(cur);
+      }
+      var ans = boardEl.querySelector(".fc-kt-answer");
+      ans.innerHTML = spokenWordHtml(cur.word);
+      ans.hidden = false;
+      boardEl.querySelectorAll(".fc-kt-tile").forEach(function (t) { t.disabled = true; });
+      var nextBtn = boardEl.querySelector(".fc-ls-next");
+      nextBtn.hidden = false;
+      nextBtn.focus();
+    }
+    var pendingNext = false;
+    function next() {
+      queue.shift();
+      at++;
+      if (!queue.length) { finish(); return; }
+      render();
+    }
+    boardEl.addEventListener("click", function (e) {
+      if (done) return;
+      if (e.target.closest(".fc-ls-next")) { next(); return; }
+      if (e.target.closest(".fc-kt-say")) { speakWord(q().word); return; }
+      if (locked) return;
+      var tile = e.target.closest(".fc-kt-tile");
+      if (tile && !tile.disabled) {
+        placed.push(+tile.dataset.t);
+        drawSlots();
+        if (placed.length === q().chars.length) check();
+        return;
+      }
+      // A placed tile goes back to the bank, and so does every one after
+      // it -- a spelling is a sequence, not loose letters.
+      var slot = e.target.closest(".fc-kt-slot.fc-kt-filled");
+      if (slot) { placed = placed.slice(0, +slot.dataset.slot); drawSlots(); }
+    });
+    function stats(right, n, run) { return accuracyStatsHtml("kanatiles", right, n, run); }
+    function finish() {
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var run = recordRun({ mode: "kanatiles", n: total, ms: Date.now() - startedAt - pausedMs, right: score,
+        setup: setupKey(total), missed: missed.map(function (w) { return w.id; }) });
+      countEl.textContent = score + " / " + total;
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + total + "</p>" +
+        stats(score, total, run) +
+        '<p class="fc-mt-done-meta">' + (missed.length ? "Words to spell again:" : "Every word right first time") + "</p>" +
+        (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
+          return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
+        }).join("") + "</ul>" : "") +
+        doneActionsHtml("fcKtAgain") + "</div>";
+      bindDoneActions("fcKtAgain");
+    }
+    function pause() {
+      if (done || pausedAt !== null || !boardEl.isConnected) return;
+      pausedAt = Date.now();
+      showPauseCard(boardEl, Math.min(at + 1, total) + " / " + total, score + " right so far", {
+        resume: function () {
+          pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl);
+          if (pendingNext) { pendingNext = false; next(); }
+        },
+        restart: restart,
+        end: endEarly
+      });
+    }
+    // Stopped part-way: the words you finished count (see Listening's).
+    function endEarly() {
+      done = true;
+      document.getElementById("fcMtPause").disabled = true;
+      var answered = Math.min(at + (locked ? 1 : 0), total);
+      if (answered) recordRun({ mode: "kanatiles", n: answered, ms: (pausedAt || Date.now()) - startedAt - pausedMs, right: score,
+        setup: setupKey(total), missed: missed.map(function (w) { return w.id; }), ended: true });
+      countEl.classList.add("fc-ws-count-done");
+      boardEl.classList.remove("fc-mt-paused");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + score + " / " + answered + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + answered + " of " + total + " words</p>" +
+        '<p class="fc-mt-done-note">' + (answered ? "The " + answered + (answered === 1 ? " word" : " words") + " you finished count in your stats."
+          : "No word finished, so nothing is counted.") + "</p>" +
+        doneActionsHtml("fcKtAgain") + "</div>";
+      bindDoneActions("fcKtAgain");
+    }
+    function restart() {
+      game++;
+      hidePauseCard(boardEl);
+      queue = p.questions.slice(); at = 0; score = 0; missed = []; retried = {};
+      startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      var pb = document.getElementById("fcMtPause");
+      if (pb) pb.disabled = false;
+      countEl.classList.remove("fc-ws-count-done");
+      render();
     }
     restart();
     var api = { restart: restart, pause: pause };
@@ -1254,6 +1457,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   window.addEventListener("resize", fitPuzzle);
   function scriptOpts() {
+    if (state.mode === "kanatiles") return SCRIPT_OPTS.filter(function (o) { return o[0] === "hiragana" || o[0] === "katakana"; });
     return isGridMode() ? SCRIPT_OPTS.filter(function (o) { return o[0] !== "native"; }) : SCRIPT_OPTS;
   }
   function writtenForm(w) {
@@ -1266,6 +1470,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // The notes pad belongs to one puzzle: a new one starts it blank.
     state.notes = "";
     if (state.script === "native" && isGridMode()) state.script = "hiragana";
+    // Kana tiles spells in kana: romaji or the written form (kanji) aren't
+    // on offer, so either falls back to Hiragana.
+    if (state.mode === "kanatiles" && state.script !== "hiragana" && state.script !== "katakana") state.script = "hiragana";
     // First pick of "A table": the first one with enough words for a real
     // grid (the very first table can be a handful of counters).
     if (state.source === "table" && !state.tables.length) {
@@ -1318,9 +1525,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (state.mode === "wordsearch" && state.script === "romaji") candidates = candidates.filter(function (w) { return w.answer.length >= 3; });
     // Likewise a one-kanji word (水) is a single square to spot.
     if (state.mode === "wordsearch" && state.script === "native") candidates = candidates.filter(function (w) { return w.answer.length >= 2; });
-    // Match shows clues side by side: two words that share an English
-    // meaning would be a coin toss, so keep only the first of them.
-    if (state.mode === "match") {
+    // Match shows clues side by side, and Kana tiles asks you to spell the
+    // English: two words that share a meaning would be a coin toss, so
+    // keep only the first of them.
+    if (state.mode === "match" || state.mode === "kanatiles") {
       var seenClue = {};
       candidates = candidates.filter(function (w) {
         var key = w.clue.toLowerCase();
@@ -1332,10 +1540,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     state.poolCount = candidates.length;
     state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size)
       : state.mode === "match" ? buildMatch(candidates, state.size)
+      : state.mode === "kanatiles" ? buildKanaTiles(candidates, state.size, state.script)
       : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"]];
   var PUZZLE_MODES = ["crossword", "arroword", "wordsearch"];
   function modeOpts() {
     return MODE_OPTS.filter(function (o) { return (PUZZLE_MODES.indexOf(o[0]) !== -1) === (state.kind === "puzzles"); });
@@ -1347,7 +1556,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var ALL_WORDS = 9999;
   var GRID_SIZE_OPTS = [10, 15, 20, 30, 40];
   var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, [String(ALL_WORDS), "All"]];
-  function isGame(mode) { return mode === "match" || mode === "listening"; }
+  function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles"; }
   function sizeOpts() { return isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS; }
   // The count the game will really have: never more than the pool holds.
   function sizeLabel() {
@@ -1726,7 +1935,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
+    return state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
+      : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
       : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
       : ws ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
       : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.";
@@ -1738,10 +1948,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // `bare`: no puzzle to play (too few words) -- the title and a ⋯ of
   // settings + Stats, so the fix is still at hand.
   function toolbarHtml(bare) {
-    var ws = state.mode === "wordsearch", ls = state.mode === "listening";
-    // Listening is a game like Match: the same short menu, a counter
-    // instead of Check.
-    var mt = state.mode === "match" || ls;
+    var ws = state.mode === "wordsearch", ls = state.mode === "listening" || state.mode === "kanatiles";
+    // Listening and Kana tiles are games like Match: the same short menu,
+    // a counter instead of Check.
+    var mt = isGame(state.mode);
     var labels = mt ? MT_MENU_LABELS : ws ? WS_MENU_LABELS : {};
     var actions = bare ? MENU_ACTIONS.filter(function (a) { return a[0] === "stats"; })
       : mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
@@ -1911,6 +2121,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       bindMenu(panel, { reset: listen.restart });
       return;
     }
+    if (state.mode === "kanatiles") {
+      panel.innerHTML = toolbarHtml() + '<div class="fc-ls fc-kt"></div>';
+      bindControls(panel);
+      document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+      var tiles = wireKanaTiles(panel.querySelector(".fc-kt"), document.getElementById("fcLsCount"), p);
+      document.getElementById("fcMtPause").addEventListener("click", tiles.pause);
+      bindMenu(panel, { reset: tiles.restart });
+      return;
+    }
     if (state.mode === "match") {
       panel.innerHTML = toolbarHtml() + '<div class="fc-mt"></div>';
       bindControls(panel);
@@ -2046,7 +2265,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

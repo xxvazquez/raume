@@ -836,6 +836,17 @@ card with "Ended after 1 of 3 rounds" and a faint line saying what counts
 ("The 5 pairs you finished count in your stats; a best time needs the whole
 game.").
 
+**Kana tiles** keeps Listening's toolbar and card: the English at 20px, a
+20px tint speaker under it, then one slot per kana — empty slots a soft
+`--group-ground` square (10px corners, up to 44px, shrinking together on a
+long word), filled ones the picked-tile section wash; right washes the row
+sage, wrong coral with Match's shake and the spelling shown under it. The
+bank below the card is Match's white tiles made square (52px, 14px corners,
+the kana at 24px), a used tile dimmed in place so nothing shifts, laid out in
+**balanced rows** of at most five (6 → 3 + 3, 7 → 4 + 3; `data-cols` sets the
+row width) — never one tile left alone on a row (Laura, 2026-09-28). Its
+Stats hue is green.
+
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong
 tone (a press scales it to 94%), a grey "Tap to listen" under it until the
