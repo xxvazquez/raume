@@ -843,6 +843,14 @@ card with "Ended after 1 of 3 rounds" and a faint line saying what counts
 ("The 5 pairs you finished count in your stats; a best time needs the whole
 game.").
 
+**Speed sort** keeps Match's toolbar (the clock, ⏸) and Listening's card:
+"7 of 20" small over the word at 30px, then the buckets as a row of Match's
+white tiles, 64px tall, 2 or 3 across. The bucket you tap washes sage
+(right) or coral with the shake (wrong), and on a miss the right one takes a
+2px sage ring for a moment before the next word. *Sort by* is a ⋯ value row
+offered only for this game, listing only the sorts the words can fill. Its
+Stats hue is clay.
+
 **Odd one out** keeps Listening's toolbar: a quiet "Which one doesn’t
 belong?" over a 2 × 2 of Match's white tiles, each word centred at 20px;
 answering drops each word's English under it (13px grey) and marks the
@@ -909,7 +917,7 @@ same markup — no session-state flag to keep in sync in JS.
 
 **Stats** (`puzzle-stats.js`, `#fcPanelStats`) is a pushed screen like
 Settings — "‹ Practice", a large "Puzzle stats" / "Game stats" title — in the
-Settings model: the style as a segmented control (full width on a phone),
+Settings model: the style as a title menu ("Speed sort ⌄", the game screens' control — five game names were past a phone's segmented control),
 then the headline as Fitness / Game Center lead with it: one white card of
 three big figures (the style's measure — best per pair / word, or accuracy —
 played, day streak) split by hairlines; then grey-headed white cards of

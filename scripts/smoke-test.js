@@ -3073,7 +3073,7 @@ async function main() {
     const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
     const puzzles = opts("#fcPanelCrosswords");
     document.querySelector('.fc-tab[data-tab="games"]').click();
-    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone"
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone|speedsort"
       && xw.state === xw.states.games && xw.state.mode === "match";
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
@@ -3416,6 +3416,62 @@ async function main() {
   xwSource("flashcards");
   xwPick("mode", "listening");
 
+  console.log("Flashcards: Speed sort");
+  check("Speed sort offers only the sorts the words can fill -- tables from two or three tables, い / な, u / ru (+ irregular) -- in English names", (() => {
+    const w = (id, tableId) => ({ id, clue: id, answer: id, tableId });
+    const tables = xw.sortBuckets([w("a1", "A"), w("a2", "A"), w("a3", "A"), w("b1", "B"), w("b2", "B"), w("b3", "B")], "tables");
+    const oneTable = xw.sortBuckets([w("a1", "A"), w("a2", "A"), w("a3", "A")], "tables");
+    const T = window.RaumeStudy.data.vocabularyTables;
+    const adjPool = xw.tableWordPool([T.find(t => t.title === "Adjectives").id]);
+    const verbPool = xw.tableWordPool([T.find(t => t.title === "Verbs").id]);
+    const adj = xw.sortBuckets(adjPool, "adj"), verb = xw.sortBuckets(verbPool, "verb");
+    const T2 = window.RaumeStudy.data.vocabularyTables;
+    const famFruit = xw.tableWordPool([T2.find(t => t.title === "Family").id, T2.find(t => t.title === "Fruits").id]);
+    const built = xw.buildSpeedSort(famFruit, 200, "tables");
+    const noGiveaway = built.items.every(it => !/^(family|fruits?)$/i.test(it.word.clue));
+    return noGiveaway && !!tables && tables.length === 2 && oneTable === null
+      && !!adj && adj.map(b => b.label).join("|") === "い-adjective|な-adjective"
+      && !!verb && verb.map(b => b.label).slice(0, 2).join("|") === "u-verb|ru-verb" && xw.sortBuckets(adjPool, "verb") === null;
+  })());
+  xwPick("mode", "speedsort");
+  const ssT = window.RaumeStudy.data.vocabularyTables;
+  xwSource([ssT.find(t => t.title === "Fruits").id, ssT.find(t => t.title === "Family").id]);
+  check("a Speed sort round: the word, \"1 of N\", a bucket per kind, the clock running and a Sort by row in ⋯", (() => {
+    const buckets = [...document.querySelectorAll("#fcPanelGames .fc-ss-bucket")];
+    return buckets.length === xw.state.puzzle.buckets.length && buckets.length >= 2
+      && /^1 of \d+$/.test(document.querySelector("#fcPanelGames .fc-ss-count").textContent)
+      && !!document.querySelector('#fcPanelGames [data-pick="sortBy"]') && xw.state.sortBy === "tables"
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const ssItem = () => xw.state.puzzle.items[Number(document.querySelector("#fcPanelGames .fc-ss-count").textContent.split(" of ")[0]) - 1];
+  const ssFirst = ssItem();
+  check("a wrong bucket: it washes coral, the right one takes a ring, and a second goes on the clock", (() => {
+    const wrong = [...document.querySelectorAll("#fcPanelGames .fc-ss-bucket")].find(b => +b.dataset.b !== ssFirst.bucket);
+    wrong.click();
+    return wrong.classList.contains("fc-mt-wrong") && document.querySelector('#fcPanelGames .fc-ss-bucket[data-b="' + ssFirst.bucket + '"]').classList.contains("fc-ss-was")
+      && document.getElementById("fcMtClock").textContent >= "0:01.0";
+  })());
+  for (let k = 0; k < 120 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    const before = document.querySelector("#fcPanelGames .fc-ss-count") && document.querySelector("#fcPanelGames .fc-ss-count").textContent;
+    for (let waited = 0; waited < 3000; waited += 25) {
+      const b = document.querySelector("#fcPanelGames .fc-ss-bucket:not(.fc-mt-wrong):not(.fc-mt-right)");
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || (b && !document.querySelector("#fcPanelGames .fc-ss-was, #fcPanelGames .fc-ss-bucket.fc-mt-right"))) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
+    if (document.querySelector("#fcPanelGames .fc-mt-done")) break;
+    document.querySelector('#fcPanelGames .fc-ss-bucket[data-b="' + ssItem().bucket + '"]').click();
+  }
+  check("the end: the time, N-1 right with the one mistake listed as \"Right, not Wrong\", and a logged speedsort game", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const n = xw.state.puzzle.items.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("speedsort").pop();
+    return !!done && new RegExp((n - 1) + " / " + n + " right · 1 mistake").test(done.textContent)
+      && /, not /.test(done.textContent) && !!last && last.right === n - 1 && last.missed.join() === String(ssFirst.word.id)
+      && /\|tables$/.test(last.setup);
+  })());
+  xwSource("flashcards");
+  xwPick("mode", "listening");
+
   console.log("Flashcards: Puzzle and game stats");
   const pr = window.RaumeStudy.flashcards.puzzleRuns;
   check("stats count each style on its own: played, a day streak, and a best measured per pair / word or as accuracy", (() => {
@@ -3435,15 +3491,16 @@ async function main() {
       && (at(once[1]) === -1) === !before.includes(once[1]) && t.every((w, i) => i === 0 || t[i - 1].count >= w.count);
   })());
   document.getElementById("fcXwStats").click();
-  check("⋯ › Stats opens Game stats as a pushed screen: Match / Listening segments, the style you were on, Overview rows and a Reset row", (() => {
+  check("⋯ › Stats opens Game stats as a pushed screen: the game as a title menu (every game), the one you were on, Overview rows and a Reset row", (() => {
     const panel = document.getElementById("fcPanelStats");
-    const segs = [...panel.querySelectorAll(".fc-st-modes button")].map(b => b.textContent);
+    const sel = document.getElementById("fcStMode");
+    const segs = [...sel.options].map(o => o.textContent);
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
-      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out"
-      && panel.querySelector(".fc-st-modes .active").textContent === "Listening"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out|Speed sort"
+      && sel.value === "listening" && panel.querySelector(".fc-st-modes .fc-xw-title-text").textContent === "Listening"
       && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());
-  document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
+  (sel => { sel.value = "match"; sel.dispatchEvent(new window.Event("change")); })(document.getElementById("fcStMode"));
   check("Match stats: best pace, a trend line once there are two games, a personal best per setup that opens its history, and Tricky words with Practise these", (() => {
     const panel = document.getElementById("fcPanelStats");
     const best = panel.querySelector(".fc-st-best");
@@ -3473,7 +3530,7 @@ async function main() {
     document.getElementById("fcBack").click();
   }
   document.getElementById("fcXwStats").click();
-  document.querySelector('#fcPanelStats .fc-st-modes button[data-mode="match"]').click();
+  (sel => { sel.value = "match"; sel.dispatchEvent(new window.Event("change")); })(document.getElementById("fcStMode"));
   const mtBefore = pr.live("match").length;
   document.getElementById("fcStReset").click();
   check("Reset asks first, iOS-style: an action sheet with the message, a red Reset Stats and Cancel -- Cancel changes nothing", (() => {
@@ -3508,13 +3565,13 @@ async function main() {
     const labels = [...g.querySelectorAll(".fc-stat-label")].map(l => l.textContent);
     const row = g.querySelector(".fc-pz-row");
     const name = row.querySelector(".fc-pz-what").firstChild.textContent;
-    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out)$/.test(name)
+    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out|Speed sort)$/.test(name)
       && /^(\d+ \/ \d+|\d+:\d\d\.\d)$/.test(row.querySelector(".fc-pz-how").textContent)
       && !/ words?$/.test(row.querySelector(".fc-pz-when").textContent.split(" · ").pop() || "") ;
   })());
   document.querySelector('#fcPanelDashboard [data-dash-go="stats-puzzles"]').click();
   check("See stats on the Puzzles card opens Puzzle stats with the three grid styles", document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Puzzle stats"
-    && [...document.querySelectorAll("#fcPanelStats .fc-st-modes button")].map(b => b.textContent).join("|") === "Crossword|Arroword|Word search");
+    && [...document.getElementById("fcStMode").options].map(o => o.textContent).join("|") === "Crossword|Arroword|Word search");
   document.getElementById("fcBack").click();
   document.querySelector('.fc-tab[data-tab="crosswords"]').click();
 

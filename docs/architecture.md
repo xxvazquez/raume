@@ -175,7 +175,7 @@ browser-local only; Reset Match stats clears it), `raume-puzzle-runs` — every 
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
-match / listening / kanatiles / oddone / crossword / arroword / wordsearch; `setup` is
+match / listening / kanatiles / oddone / speedsort / crossword / arroword / wordsearch; `setup` is
 `source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`);
 `ended` marks a Match / Listening game stopped early (only its finished
 rounds / answered words, with `sizes` = those Match rounds' pair counts —

@@ -3546,6 +3546,19 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-oo-en[hidden] { display: none; }
 .fc-oo-reveal { margin: 14px 0 0; color: var(--ink); font-size: var(--fs-nav); line-height: 1.4; text-align: center; }
 .fc-oo-reveal[hidden] { display: none; }
+/* Speed sort: Listening's white card with "7 of 20" and the word large,
+   then the buckets as a row of Match's white tiles (2 or 3 across). The
+   bucket you tapped washes sage (right) or coral with a shake (wrong); on a
+   miss the right one takes a sage ring for a moment before the next word. */
+.fc-ss-card { gap: 6px; padding: 18px 16px 22px; }
+.fc-ss-count { margin: 0; color: var(--muted); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.fc-ss-word { margin: 0; color: var(--ink); font-size: 30px; line-height: 1.25; text-align: center; }
+.fc-ss-buckets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.fc-ss-buckets[data-n="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fc-ss-bucket { min-height: 64px; justify-content: center; text-align: center; font-size: var(--fs-nav); }
+.fc-ss-bucket.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); }
+.fc-ss-bucket.fc-mt-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
+.fc-ss-bucket.fc-ss-was { box-shadow: 0 0 0 2px var(--right); color: var(--right-strong); }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 .fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
 .fc-ls-missed li {
@@ -5034,8 +5047,7 @@ mark.fc-diff-co {
    always up -- with the best value and the reading direction as two quiet
    captions under it; each point has a native tooltip. A personal best
    opens its history inline; Tricky words are the Manage rows' voice. */
-.fc-st-modes { margin-bottom: 16px; }
-@media (max-width: 640px) { .fc-st-modes { display: flex; } .fc-st-modes button { flex: 1 1 0; } }
+.fc-st-modes { margin-bottom: 8px; }
 .fc-st-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 16px 8px; }
 .fc-st-fig { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; }
 .fc-st-fig + .fc-st-fig { border-left: 1px solid var(--row-line); }

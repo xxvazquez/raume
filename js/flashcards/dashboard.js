@@ -625,13 +625,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
     return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
   }
-  var MODE_NAMES = { match: "Match", listening: "Listening", kanatiles: "Kana tiles", oddone: "Odd one out", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
+  var MODE_NAMES = { match: "Match", listening: "Listening", kanatiles: "Kana tiles", oddone: "Odd one out", speedsort: "Speed sort", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
   // A recent game as an iOS subtitle cell: its name, the date and what's
   // not in the result on the grey line, the result trailing -- each fact
   // once ("9 / 10" already says ten words).
   function runRowHtml(r) {
-    var scored = r.mode === "listening" || r.mode === "kanatiles" || r.mode === "oddone";
-    var detail = r.mode === "match" ? r.n + " pairs · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
+    var scored = r.mode === "listening" || r.mode === "kanatiles" || r.mode === "oddone" || r.mode === "speedsort";
+    var detail = r.mode === "speedsort" ? clock(r.ms)
+      : r.mode === "match" ? r.n + " pairs · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
       : scored ? ""
       : r.n + " words · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
     var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });

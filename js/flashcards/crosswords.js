@@ -1584,6 +1584,185 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // -----------------------------------------------------------------------
+  // Speed sort -- words one at a time, each tapped into its bucket against
+  // the clock: by table (Fruits / Clothes / Time), い- or な-adjective, or
+  // u-verb / ru-verb / irregular verb (English names -- the kanji terms are
+  // the reference tables' badges, not a game's labels). A wrong bucket adds
+  // a second, as in Match, shakes, and shows the right one for a moment.
+  // A sort is only offered when the words hold enough of each kind.
+  // Practice only.
+  // -----------------------------------------------------------------------
+  var SORT_OPTS = [["tables", "Tables"], ["adj", "Adjectives"], ["verb", "Verbs"]];
+  var SORT_MIN = 3;
+  function rawRow(id) { return S.vocabIndex.getRawVocabRow ? S.vocabIndex.getRawVocabRow(id) : null; }
+  // The buckets a sort would use for these words, or null when it can't
+  // be played from them.
+  function sortBuckets(words, by) {
+    var groups = {};
+    words.forEach(function (w) {
+      var key = null;
+      if (by === "tables") key = String(w.tableId);
+      else {
+        var row = rawRow(w.id) || {};
+        key = by === "adj" ? (row.adj === "i" || row.adj === "na" ? row.adj : null)
+          : (row.verbClass === "godan" || row.verbClass === "ichidan" || row.verbClass === "irregular" ? row.verbClass : null);
+      }
+      if (key !== null) (groups[key] = groups[key] || []).push(w);
+    });
+    var keys;
+    if (by === "tables") {
+      // Two or three tables with enough words, from different categories
+      // where they can be (Clothes and Time, not Fruits and Vegetables).
+      var roomy = shuffle(Object.keys(groups).filter(function (k) { return groups[k].length >= SORT_MIN; }));
+      keys = [];
+      roomy.forEach(function (k) {
+        if (keys.length >= 3) return;
+        var cat = tableInfo(k).category;
+        if (keys.every(function (o) { return tableInfo(o).category !== cat; })) keys.push(k);
+      });
+      roomy.forEach(function (k) { if (keys.length < 2 && keys.indexOf(k) === -1) keys.push(k); });
+      if (keys.length < 2) return null;
+    } else if (by === "adj") {
+      keys = ["i", "na"];
+      if (keys.some(function (k) { return !groups[k] || groups[k].length < SORT_MIN; })) return null;
+    } else {
+      if (!groups.godan || !groups.ichidan || groups.godan.length < SORT_MIN || groups.ichidan.length < SORT_MIN) return null;
+      // Only a couple of verbs are irregular; a third bucket once there are two.
+      keys = ["godan", "ichidan"].concat(groups.irregular && groups.irregular.length >= 2 ? ["irregular"] : []);
+    }
+    var LABELS = { i: "い-adjective", na: "な-adjective", godan: "u-verb", ichidan: "ru-verb", irregular: "irregular verb" };
+    return keys.map(function (k) { return { key: k, label: by === "tables" ? tableInfo(k).name : LABELS[k], words: groups[k] }; });
+  }
+  function sortOpts(words) { return SORT_OPTS.filter(function (o) { return !!sortBuckets(words, o[0]); }); }
+  function buildSpeedSort(words, limit, by) {
+    var buckets = sortBuckets(words, by);
+    if (!buckets) return { placements: [], items: [], buckets: [] };
+    // A word whose English is its table's own name (かぞく "family" into
+    // Family, くだもの "fruit" into Fruits) sorts itself -- it sits out.
+    function stem(t) { return String(t).toLowerCase().replace(/\s*\(.*\)$/, "").replace(/s$/, "").trim(); }
+    var pool = [];
+    buckets.forEach(function (b, bi) {
+      b.words.forEach(function (w) { if (by !== "tables" || stem(w.clue) !== stem(b.label)) pool.push({ word: w, bucket: bi }); });
+    });
+    var items = shuffle(pool).slice(0, limit);
+    return { placements: items.map(function (it) { return it.word; }), items: items, buckets: buckets.map(function (b) { return { key: b.key, label: b.label }; }) };
+  }
+  function wireSpeedSort(boardEl, clockEl, p, romajiMode) {
+    var at, acc, runAt, penalty, score, mistakes, game = 0, phase, pendingNext;
+    var total = p.items.length;
+    function elapsed() { return acc + (runAt === null ? 0 : Date.now() - runAt) + penalty; }
+    function tick() { if (!clockEl.isConnected) { stopMatchTimer(); return; } clockEl.textContent = formatClock(elapsed()); }
+    function run() { if (runAt !== null) return; runAt = Date.now(); if (!matchTimer) matchTimer = setInterval(tick, 100); }
+    function halt() { if (runAt !== null) { acc += Date.now() - runAt; runAt = null; } stopMatchTimer(); tick(); }
+    function setPhase(ph) {
+      phase = ph;
+      var btn = document.getElementById("fcMtPause");
+      if (btn) btn.disabled = ph === "done";
+    }
+    function render() {
+      var it = p.items[at];
+      setPhase("play");
+      boardEl.innerHTML =
+        '<div class="fc-ls-card fc-ss-card"><p class="fc-ss-count">' + (at + 1) + " of " + total + "</p>" +
+        '<p class="fc-ss-word"' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(it.word.answer) + "</p></div>" +
+        '<div class="fc-ss-buckets" data-n="' + p.buckets.length + '">' + p.buckets.map(function (b, i) {
+          return '<button type="button" class="fc-mt-tile fc-ss-bucket" data-b="' + i + '">' + esc(b.label) + "</button>";
+        }).join("") + "</div>";
+    }
+    function next() {
+      at++;
+      if (at >= total) { finish(); return; }
+      render();
+    }
+    boardEl.addEventListener("click", function (e) {
+      var btn = e.target.closest(".fc-ss-bucket");
+      if (!btn || phase !== "play") return;
+      var it = p.items[at], chosen = +btn.dataset.b, thisGame = game;
+      setPhase("between");
+      if (chosen === it.bucket) {
+        score++;
+        btn.classList.add("fc-mt-right");
+        setTimeout(function () { if (thisGame === game && boardEl.isConnected) next(); }, 220);
+        return;
+      }
+      penalty += MATCH_PENALTY_MS;
+      tick();
+      mistakes.push({ word: it.word, chosen: chosen, right: it.bucket });
+      btn.classList.add("fc-mt-wrong");
+      boardEl.querySelector('.fc-ss-bucket[data-b="' + it.bucket + '"]').classList.add("fc-ss-was");
+      setTimeout(function () {
+        if (thisGame !== game || !boardEl.isConnected) return;
+        if (phase === "paused") pendingNext = true; else next();
+      }, 900);
+    });
+    function mistakesHtml() {
+      return mistakes.length ? '<ul class="fc-ls-missed">' + mistakes.map(function (m) {
+        return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(m.word) + '</span><span class="fc-ls-missed-en">' +
+          esc(p.buckets[m.right].label) + ", not " + esc(p.buckets[m.chosen].label) + "</span></li>";
+      }).join("") + "</ul>" : "";
+    }
+    function finish() {
+      setPhase("done");
+      halt();
+      var total_ms = elapsed();
+      clockEl.classList.add("fc-ws-count-done");
+      var run = recordRun({ mode: "speedsort", n: total, ms: total_ms, right: score, setup: setupKey(total) + "|" + state.sortBy,
+        missed: mistakes.map(function (m) { return m.word.id; }) });
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + formatClock(total_ms) + "</p>" +
+        '<p class="fc-mt-done-meta">' + score + " / " + total + " right · " + (mistakes.length === 1 ? "1 mistake" : mistakes.length + " mistakes") + "</p>" +
+        accuracyStatsHtml("speedsort", score, total, run) +
+        (mistakes.length ? '<p class="fc-mt-done-meta">Sorted the wrong way:</p>' : "") + mistakesHtml() +
+        doneActionsHtml("fcSsAgain") + "</div>";
+      bindDoneActions("fcSsAgain");
+    }
+    function pause() {
+      if (phase === "done" || phase === "paused" || !boardEl.isConnected) return;
+      var was = phase;
+      setPhase("paused");
+      halt();
+      showPauseCard(boardEl, formatClock(elapsed()), (at + 1) + " of " + total, {
+        resume: function () {
+          hidePauseCard(boardEl); setPhase(was === "between" ? "between" : "play"); run();
+          if (pendingNext) { pendingNext = false; next(); }
+        },
+        restart: restart,
+        end: endEarly
+      });
+    }
+    // Stopped part-way: the words you sorted count (see Listening's).
+    function endEarly() {
+      setPhase("done");
+      halt();
+      var sorted = score + mistakes.length;
+      if (sorted) recordRun({ mode: "speedsort", n: sorted, ms: elapsed(), right: score, setup: setupKey(total) + "|" + state.sortBy,
+        missed: mistakes.map(function (m) { return m.word.id; }), ended: true });
+      clockEl.classList.add("fc-ws-count-done");
+      boardEl.classList.remove("fc-mt-paused");
+      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+        '<p class="fc-mt-done-time">' + formatClock(elapsed()) + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + sorted + " of " + total + " words · " + score + " right</p>" +
+        '<p class="fc-mt-done-note">' + (sorted ? "The " + sorted + (sorted === 1 ? " word" : " words") + " you sorted count in your stats."
+          : "No word sorted, so nothing is counted.") + "</p>" +
+        doneActionsHtml("fcSsAgain") + "</div>";
+      bindDoneActions("fcSsAgain");
+    }
+    function restart() {
+      stopMatchTimer();
+      game++;
+      hidePauseCard(boardEl);
+      at = 0; acc = 0; runAt = null; penalty = 0; score = 0; mistakes = []; pendingNext = false;
+      clockEl.classList.remove("fc-ws-count-done");
+      render();
+      run();
+    }
+    restart();
+    var api = { restart: restart, pause: pause };
+    activeGame = api;
+    return api;
+  }
+
+  // -----------------------------------------------------------------------
   // State + rendering. Purely a play/print utility -- nothing here persists
   // across a reload; regenerating is free. What's typed into the grid lives
   // only in the live <input> elements, not in this state object -- every
@@ -1598,7 +1777,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // current puzzle or game; `state` is whichever tab is showing.
   function freshState(kind) {
     return { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
-      script: "romaji", size: 15, puzzle: null, poolCount: 0, notes: "" };
+      script: "romaji", size: 15, sortBy: "tables", puzzle: null, poolCount: 0, notes: "" };
   }
   var states = { puzzles: freshState("puzzles"), games: freshState("games") };
   var state = states.puzzles;
@@ -1706,14 +1885,21 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       });
     }
     state.poolCount = candidates.length;
+    // Speed sort: only the sorts these words can fill; keep the pick if it
+    // still works, else the first that does.
+    if (state.mode === "speedsort") {
+      state.sortAvail = sortOpts(candidates);
+      if (!state.sortAvail.some(function (o) { return o[0] === state.sortBy; }) && state.sortAvail.length) state.sortBy = state.sortAvail[0][0];
+    }
     state.puzzle = state.mode === "wordsearch" ? buildWordSearch(candidates, state.size)
       : state.mode === "match" ? buildMatch(candidates, state.size)
       : state.mode === "kanatiles" ? buildKanaTiles(candidates, state.size, state.script)
       : state.mode === "oddone" ? buildOddOne(candidates, state.size)
+      : state.mode === "speedsort" ? buildSpeedSort(candidates, state.size, state.sortBy)
       : buildGrid(candidates, state.mode === "arroword", state.size);
   }
 
-  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"]];
+  var MODE_OPTS = [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"], ["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"], ["speedsort", "Speed sort"]];
   var PUZZLE_MODES = ["crossword", "arroword", "wordsearch"];
   function modeOpts() {
     return MODE_OPTS.filter(function (o) { return (PUZZLE_MODES.indexOf(o[0]) !== -1) === (state.kind === "puzzles"); });
@@ -1725,7 +1911,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var ALL_WORDS = 9999;
   var GRID_SIZE_OPTS = [10, 15, 20, 30, 40];
   var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, [String(ALL_WORDS), "All"]];
-  function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles" || mode === "oddone"; }
+  function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort"; }
   function sizeOpts() { return isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS; }
   // The count the game will really have: never more than the pool holds.
   function sizeLabel() {
@@ -1819,7 +2005,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function settingsMenuHtml() {
     return sourcePickHtml() +
       menuPickHtml("size", "Word count", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
-      (state.mode !== "listening" ? menuPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "");
+      (state.mode !== "listening" ? menuPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "") +
+      (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length
+        ? menuPickHtml("sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), optionsHtml(state.sortAvail, state.sortBy)) : "");
   }
   function arrowIcon(dir) {
     return dir === "down"
@@ -2097,7 +2285,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
+    return state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
+      : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
       : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
       : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
@@ -2257,7 +2446,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         "Tick them under ⋯ › Words from.", false);
       return;
     }
-    if (p.placements.length < MIN_WORDS && state.mode !== "oddone") {
+    if (state.mode === "speedsort" && !p.items.length) {
+      notEnough("Speed sort needs at least 3 words of each kind: from two tables, い- and な-adjectives, or u- and ru-verbs. " +
+        "Tick more tables under ⋯ › Words from.", false);
+      return;
+    }
+    if (p.placements.length < MIN_WORDS && state.mode !== "oddone" && state.mode !== "speedsort") {
       notEnough("These words don’t cross each other enough for a " + MIN_WORDS + "-word puzzle. Try again, or " + more + ".", true);
       return;
     }
@@ -2292,6 +2486,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var listen = wireListening(board, document.getElementById("fcLsCount"), p);
       document.getElementById("fcMtPause").addEventListener("click", listen.pause);
       bindMenu(panel, { reset: listen.restart });
+      return;
+    }
+    if (state.mode === "speedsort") {
+      panel.innerHTML = toolbarHtml() + '<div class="fc-ls fc-ss"></div>';
+      bindControls(panel);
+      document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
+      var sorter = wireSpeedSort(panel.querySelector(".fc-ss"), document.getElementById("fcMtClock"), p, romajiMode);
+      document.getElementById("fcMtPause").addEventListener("click", sorter.pause);
+      bindMenu(panel, { reset: sorter.restart });
       return;
     }
     if (state.mode === "oddone") {
@@ -2447,7 +2650,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states
