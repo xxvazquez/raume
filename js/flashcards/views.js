@@ -1,4 +1,4 @@
-// Flashcards -- Manage / Settings / Help tabs (RaumeStudy.flashcards.views).
+// Flashcards -- the Library tab (key "manage"), Settings and Help (RaumeStudy.flashcards.views).
 //
 // Manage: browse every vocab entry by category > table, add / pause / restore
 // individually or a whole table at once. Settings: Study Directions, the FSRS
@@ -79,13 +79,13 @@ window.RaumeStudy.flashcards.views = (function () {
     panel.innerHTML =
       '<h3 class="help-head">Adding &amp; pausing</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Add</span><span class="help-desc">A single word, or a whole table from Manage or a search result.</span></li>' +
+      '<li><span class="help-term">Add</span><span class="help-desc">A single word, or a whole table from Library or a search result.</span></li>' +
       '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps every bit of progress. Paused words collect under Archived.</span></li>' +
       '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back exactly as it was.</span></li>' +
       '<li><span class="help-term">Nothing is deleted</span><span class="help-desc">Scheduling and review history are kept for good.</span></li>' +
       '<li><span class="help-term">Your own words</span><span class="help-desc">Add them under Customize › Your vocabulary, then study them like any other.</span></li>' +
       '</ul>' +
-      '<h3 class="help-head">Manage icons</h3>' +
+      '<h3 class="help-head">Library icons</h3>' +
       '<ul class="help-rows help-card fc-help-status">' +
       '<li><span class="fc-status fc-status-none">' + STATUS_META.none.glyph + '</span> Not added</li>' +
       '<li><span class="fc-status fc-status-active">' + STATUS_META.active.glyph + '</span> In flashcards</li>' +

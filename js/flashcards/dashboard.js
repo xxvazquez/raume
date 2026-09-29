@@ -80,7 +80,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       "<p>Add words from the vocabulary tables to study them here.</p>" +
       '<div class="fc-cta-row fc-cta-row-primary">' +
       '<button type="button" class="fc-btn fc-btn-primary" id="fcEmptyBrowse">Browse vocabulary</button>' +
-      '<button type="button" class="fc-btn" id="fcEmptyManage">Choose tables in Manage</button>' +
+      '<button type="button" class="fc-btn" id="fcEmptyManage">Choose tables in Library</button>' +
       "</div></div>" +
       // Puzzles work without flashcards (Tables as the source), so their
       // games still get their card.
@@ -341,7 +341,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var rows = list.filter(function (w) { return idx[w.vocabId]; });
     if (!rows.length) return "";
     return '<div class="fc-viz-card fc-viz-wide fc-leech-card">' + vizTitle("Leeches") +
-      '<p class="fc-note">Words that keep slipping out of memory. Pausing takes one out of review — its progress is kept, and you can resume it any time in Manage. Keep leaves it studied and stops flagging it for now.</p>' +
+      '<p class="fc-note">Words that keep slipping out of memory. Pausing takes one out of review — its progress is kept, and you can resume it any time in Library. Keep leaves it studied and stops flagging it for now.</p>' +
       '<ul class="fc-leech-list">' + rows.slice(0, LEECH_SHOWN).map(function (w) {
         var e = idx[w.vocabId];
         var what = e.englishFull;

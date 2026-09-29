@@ -120,11 +120,11 @@ flowchart LR
   jp-ro, ro-en, en-ro), never Japanese-to-type. Rows whose romaji is still kana
   get jp-en only. Pausing a word ("archive") keeps the FSRS state and full
   history forever; there is no hard delete.
-- **Pausing a whole table** ("Pause table" in Manage) is an *overlay*, not a
+- **Pausing a whole table** ("Pause table" in Library) is an *overlay*, not a
   state on the cards: a flat list of table ids in `getCache().pausedTables`
   (synced to the `paused_tables` column). `studyableCards()` (scheduling.js)
   filters out any card whose table is in that list, so the queue and every stat
-  tile skip it; the Manage filters hide it from "My flashcards" / "Archived".
+  tile skip it; the Library filters hide it from "My flashcards" / "Archived".
   Each card's own `active` flag is untouched, so **Resume table** is a clean
   revert — a word paused individually before the table pause is still paused
   individually after. Sign-in unions the two lists (a device's pauses aren't
@@ -283,7 +283,7 @@ js/
     puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
     puzzle-stats.js      the Stats screen for Puzzles and Games (a pushed screen)
     dashboard.js         the Dashboard tab + the review session
-    views.js             the Manage / Settings / Help tabs
+    views.js             the Library (key "manage") / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups
     kana.js              the Kana tab
     crosswords.js        the Puzzles + Games tabs: crossword/arroword/word search generator, play + print; Match, Listening

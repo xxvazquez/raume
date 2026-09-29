@@ -265,7 +265,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // visually hidden (the top bar already names the page, as on the
     // reference pages) and tabs + Settings / Help share one row.
     var tabsHtml = '<div class="fc-tabs" role="tablist">' +
-      [["dashboard", "Dashboard"], ["manage", "Manage"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["games", "Games"]].map(function (t) {
+      // What you do first, your collection last: Library (every table, what's
+      // in your flashcards, what's archived) is the Music / Books tab's name
+      // for it -- "Manage" read as a settings verb. Its key stays "manage".
+      [["dashboard", "Dashboard"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["games", "Games"], ["manage", "Library"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
       }).join("") +
       "</div>";

@@ -103,7 +103,7 @@ the ground is *darker* than the card). All CSS custom properties in
 Functional roles, each one job — all muted:
 
 - **sage green** (`--right` / `-soft` / `-strong`) — right answer, and everywhere
-  "done / on schedule / progressing": the Manage "in your deck" glyph, the
+  "done / on schedule / progressing": the Library "in your deck" glyph, the
   in-flashcards row toggle, the Reviews-completed stat rule, a cleared queue;
 - **coral** (`--warn` / `-soft` / `-strong`, the same values as `--wrong`) — one
   warm attention family: cards due, words missed, retention slipping, the sync
@@ -189,8 +189,8 @@ never a paragraph. N5 readers: every kanji in it carries furigana.
 ## Labels and measure
 
 One label, one style: a category name reads the same Title-Case-in-the-section-
-tone wherever it appears (a vocab heading, the *Jump to a table* list, Flashcards
-› Manage, the Customize page). Card titles are sentence case throughout Settings
+tone wherever it appears (a vocab heading, the *Jump to a table* list, Practice
+› Library, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
 - **The reference pages are an iOS inset-grouped list.** One grey ground
@@ -242,7 +242,7 @@ and Help.
   one centred axis. Only kicks in above ~700px (a phone or a split-screen
   window never reaches the cap); the top bar stays full width.
   A header is always one step below the rows it labels, as in iOS / macOS lists.
-  The same voice runs through the rest of the app: Flashcards › Manage (a table
+  The same voice runs through the rest of the app: Practice › Library (a table
   row is the 28px tile + a 14px title + its progress, its category header the
   12px grey label), the Customize page (category titles 12px grey, name fields
   14px, the tile on each row) and the Kana picker (each script's name is the grey
@@ -424,7 +424,7 @@ and Help.
   says all of that, Practice's "Signed in as… Sign out" line is hidden on a
   phone. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
-  become text bar buttons on a phone; Manage's buttons keep a one-word label
+  become text bar buttons on a phone; Library's buttons keep a one-word label
   (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are
   spelled out in the Options sheet's **Row icons** group. Standard iOS glyphs
   (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
@@ -543,7 +543,7 @@ and Help.
   Everything collapsible on it shares one disclosure mechanic — a native
   `<details>`/`<summary>` with a shared `.disclosure-caret` mixin (hidden
   native marker, one iOS chevron that turns from right to down on `[open]`),
-  the same disclosure language as Flashcards › Manage and the masthead Help. Every open/close is persisted
+  the same disclosure language as Practice › Library and the masthead Help. Every open/close is persisted
   (`localStorage`, `raume-customize-open-v1`, keyed per item) via a `toggle`
   listener attached to each `<details>` in `applyDetailsState()`, not just
   held in memory — so what a reader leaves open survives an actual reload,
@@ -622,7 +622,7 @@ and Help.
     word swaps its row for a single text field (same line format as adding
     one) with Save/Cancel, reusing the trash icon's stroke style for a
     matching pencil icon. Deleting a word asks for confirmation first, same
-    as deleting a table. A word's row is a list row, as in Flashcards › Manage:
+    as deleting a table. A word's row is a list row, as in Practice › Library:
     the Japanese plain (no furigana) in ink with its romaji small and grey
     beside it, the English under, the pencil / trash centred on the row
     (44pt-ish targets). Sentences wrap only at the spaces between phrases
@@ -651,12 +651,12 @@ and Help.
   status line, tabs and every panel on the same edges (padding on
   `#flashcardsPage`, so the inline-flex tabs line up too). Customize (720px)
   and Help (680px) centre on their own widths the same way, so no page hugs
-  the left edge of a wide window. **Manage** fills
+  the left edge of a wide window. **Library** fills
   that column — its rows are content-driven, not a proportional grid. A
   category's tables are one inset-grouped card (rows back to back, an inset
   hairline from the title, corners on the first and last row only), as on
   the reference pages — not a stack of separate cards. Its word rows show the plain kanji, not the furigana ruby
-  the reference tables use: Manage is a deck-management checklist, and ruby made
+  the reference tables use: Library is a deck-management checklist, and ruby made
   every row a different height so the status glyphs and action buttons never
   lined up. The reading stays one column over (romaji, hidden on a phone).
 - **The Dashboard** gets its own wider cap (900px). Uncapped, its tiles and
@@ -747,12 +747,12 @@ be scannable at a glance:
 - **Leeches** (`.fc-leech-card`, only when there is one) is a full-width card of
   hairline-separated rows — word, gloss and a muted "Forgotten N× · direction"
   line on the left, tinted **Pause** / **Keep** buttons on the right (under the
-  word on a phone). Manage's matching *Leech* tag uses `--warn-strong`.
+  word on a phone). Library's matching *Leech* tag uses `--warn-strong`.
 - **Words to review** is the standard vocabulary table in its own card
   (`#fcWordsToReview:has(> .table-section)`), with the segmented column toggle in
   its header.
 
-**Manage**: the category name is a quiet label on the ground above its cards
+**Library**: the category name is a quiet label on the ground above its cards
 (section tone, no rule beneath, disclosure caret at the end); each table is one
 white card — a header row (chevron, icon tile, the name over a quiet "N / M"
 subtitle, table actions; the name wraps rather than truncating) over its words
@@ -915,7 +915,7 @@ three big figures (the style's measure — best per pair / word, or accuracy —
 played, day streak) split by hairlines; then grey-headed white cards of
 44px rows (Overview; Personal bests, each row a disclosure with a trailing
 chevron that turns, a quiet "N games" under the setup, its history opening
-inline; Tricky words in the Manage rows' voice — Japanese with small romaji
+inline; Tricky words in the Library rows' voice — Japanese with small romaji
 beside it, English under, "3×" right — with Practise these as the card's
 last row in tint text, iOS Settings' action row), and Reset as a lone
 coral-text row in its own card at the foot. Reset asks first with an iOS
@@ -933,7 +933,9 @@ gridlines, no axis numbers; tap a point (there's no hover on a phone) and
 its date and value replace the best, as Health shows a selected bar. A
 finished game's card puts a white Stats beside Play again.
 
-The sub-tabs are five segments (Dashboard / Manage / Kana / Puzzles / Games) —
+The sub-tabs are five segments (Dashboard / Kana / Puzzles / Games / Library —
+what you do first, your collection last; Library is the Music / Books tab's
+name for it, "Manage" read as a settings verb — Laura, 2026-09-29) —
 the most an iOS segmented control holds and still reads at a glance, so
 nothing more joins without restructuring. Settings and Help
 are plain tint-text buttons at the title's trailing edge (an iOS navigation

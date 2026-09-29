@@ -383,7 +383,7 @@ window.RaumeStudy.customize = (function () {
     return '<div class="cz-intro">' +
       "<h1>Customize tables" + infoButtonHtml("main", czInfoMainOpen, "What this page does") + "</h1>" +
       infoPanelHtml("main", czInfoMainOpen,
-        '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Flashcards › Manage.</p>' +
+        '<p>Give any vocabulary table your own name and icon, and put the tables and categories in the order you want. Changes save as you make them and show up everywhere the table appears — its section header, the “Jump to a table” list, and Practice › Library.</p>' +
         "<ul class=\"cz-tips\">" +
           "<li><strong>Icon</strong> — click the icon on a row to open the picker (~165 line icons, plus “Upload image…” for your own).</li>" +
           "<li><strong>Name</strong> — type in the field. Leave it empty to keep the original (shown in grey).</li>" +

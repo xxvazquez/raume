@@ -169,7 +169,7 @@ title and one round **account button** beside it, which opens a menu —
 
 On a tablet the masthead icons carry captions (Account, Help, Customize, the
 current theme). The search bar's buttons read **Tables** and **Options**, and
-Manage's buttons keep a one-word label — nothing relies on hover.
+Library's buttons keep a one-word label — nothing relies on hover.
 
 <sub>[↑ Contents](#contents)</sub>
 
@@ -180,7 +180,7 @@ Manage's buttons keep a one-word label — nothing relies on hover.
 The Practice tab holds your flashcards, the Kana drill, Puzzles and Games.
 Flashcards sit on top of the vocabulary without copying it — each card
 references a row's permanent id (`v0001`…). Add a whole table with **Add to
-flashcards**, or single words from **Manage** or a search result.
+flashcards**, or single words from **Library** or a search result.
 
 ### How cards work
 
@@ -245,20 +245,20 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 
 ### Screens
 
-Five segments — Dashboard, Manage, Kana, Puzzles, Games. **Settings** and **Help**
+Five segments — Dashboard, Kana, Puzzles, Games, Library. **Settings** and **Help**
 sit at the top right, beside the title, and open as their own screen with a
 **‹ Practice** back button.
 
 | Screen | What it does |
 | --- | ------------ |
 | **Dashboard** | Today, next review, streak / total / reviews / estimated retention, card progress, this week's reviews, a 7-day due forecast, **Kana** (how many of your chosen kana cards you've started, how many to study now, and a button straight to it), **Puzzles** (every crossword, arroword and word search you solve — one revealed in full doesn't count: puzzles solved and your day streak, the last three) and **Games** (every finished game: games played and your day streak, games per day this week, the last three — each game named once, its result on the right, "9 / 10" or a time) — each with **See stats**, and synced to your account when signed in, **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
-| **Manage** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
 | **Games** | Match / Listening / Kana tiles / Odd one out from your words ([below](#games)) |
 | **Stats** | Per puzzle or game style — opened from ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
+| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file — cards, kana, table customisations, your own words, Known kanji and puzzle games) |
-| **Help** | Pausing, the Manage icons, keyboard shortcuts |
+| **Help** | Pausing, the Library icons, keyboard shortcuts |
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused
 table just stops appearing in reviews until you resume it. FSRS state and

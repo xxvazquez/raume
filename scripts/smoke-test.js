@@ -2083,7 +2083,7 @@ async function main() {
     document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="' + t + '"]').click();
   };
   check("the Flashcards sub-tabs are five segments -- Settings and Help moved to the title bar",
-    [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Manage|Kana|Puzzles|Games"
+    [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Kana|Puzzles|Games|Library"
     && [...document.querySelectorAll("#flashcardsPage .fc-titlebar-btn")].map(b => b.textContent).join("|") === "Settings|Help");
   document.querySelector('.fc-tab[data-tab="manage"]').click();
   fcOpenPushed("settings");
