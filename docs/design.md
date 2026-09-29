@@ -695,9 +695,12 @@ be scannable at a glance:
   Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
   layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
   — white Open Kana when nothing is due — and the sage bar), Puzzles and Games (full
-  width, always there, one card each: stat cells — Games' three in one row on a
-  wide window — Games' week as the Reviews-this-week bars, then the last three as
-  44px hairline rows, result right in tabular figures; at the foot a white Play a
+  width, always there, one card each: two stat cells that hold for every game —
+  solved / played and the day streak (each game's own measure is in its
+  Stats) — Games' week as the Reviews-this-week bars, then the last three as
+  44px subtitle cells: the game's name, the date and whatever the result
+  doesn't already say ("10 pairs · 2 misses") on the grey line, the result
+  right in tabular figures ("9 / 10", "0:21.4") — each fact once; at the foot a white Play a
   puzzle / Play a game and a plain tint-text See stats; with nothing played yet,
   one line and those two buttons), Kanji ("12 of 102 known" beside a white button,
   a thin 6px sage bar under it — the Known tiles' colour), Missed today, Leeches.

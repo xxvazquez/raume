@@ -3641,7 +3641,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    last few as hairline rows -- what left, the result right, tabular -- and
    Play (white) + See stats (plain tint text) at the foot. */
 .fc-pz-stats { margin-bottom: 16px; }
-@media (min-width: 641px) { .fc-games-card .fc-pz-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .fc-pz-actions { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
 .fc-pz-empty .fc-pz-actions { margin-top: 0; }
 .fc-pz-link {

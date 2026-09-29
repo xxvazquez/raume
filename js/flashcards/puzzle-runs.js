@@ -1,7 +1,7 @@
-// Finished Puzzles games -- Match, Listening, and every crossword, arroword
-// and word search solved -- so the Dashboard can show them: games per day,
-// Listening accuracy, Match pace, puzzles solved. Practice only -- nothing
-// here touches FSRS. One record per game:
+// Every finished game (Match, Listening, Kana tiles, Odd one out) and every
+// crossword, arroword and word search solved -- for the Dashboard's Puzzles
+// and Games cards (counts, day streaks, games per day) and the Stats
+// screen. Practice only -- nothing here touches FSRS. One record per game:
 //   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" | "oddone" |
 //     "crossword" | "arroword" | "wordsearch", n: pairs / questions / words, ms: time
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
@@ -135,7 +135,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
       }
     });
     return {
-      total: runs.length, days: days, listening: ls, match: mt, solved: solved,
+      total: runs.length, days: days, listening: ls, match: mt, solved: solved, streak: streaks(runs, now).current,
       recent: runs.slice(-4).reverse()
     };
   }

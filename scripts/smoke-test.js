@@ -3503,6 +3503,15 @@ async function main() {
       && !!g.querySelector('[data-dash-go="games"]') && !!g.querySelector('[data-dash-go="stats-games"]')
       && /Games played/.test(g.textContent) && !/Games played/.test(p.textContent);
   })());
+  check("the cards show two figures that hold for every game (count, day streak) and recent rows that say each fact once -- the game's name, the date under it, the result trailing", (() => {
+    const g = document.querySelector("#fcPanelDashboard .fc-games-card");
+    const labels = [...g.querySelectorAll(".fc-stat-label")].map(l => l.textContent);
+    const row = g.querySelector(".fc-pz-row");
+    const name = row.querySelector(".fc-pz-what").firstChild.textContent;
+    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out)$/.test(name)
+      && /^(\d+ \/ \d+|\d+:\d\d\.\d)$/.test(row.querySelector(".fc-pz-how").textContent)
+      && !/ words?$/.test(row.querySelector(".fc-pz-when").textContent.split(" · ").pop() || "") ;
+  })());
   document.querySelector('#fcPanelDashboard [data-dash-go="stats-puzzles"]').click();
   check("See stats on the Puzzles card opens Puzzle stats with the three grid styles", document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Puzzle stats"
     && [...document.querySelectorAll("#fcPanelStats .fc-st-modes button")].map(b => b.textContent).join("|") === "Crossword|Arroword|Word search");

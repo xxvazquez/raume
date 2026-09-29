@@ -220,10 +220,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Total cards": '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>',
     "Reviews completed": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
     "Games played": '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>',
-    "Listening accuracy": '<path d="M3 7v4h2.5L9 14V4L5.5 7H3Z"/><path d="M12 6.5a3.2 3.2 0 0 1 0 5"/>',
-    "Best Match pace": '<circle cx="9" cy="10" r="6"/><path d="M9 10V7M7.5 2.5h3"/>',
     "Puzzles solved": '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>',
-    "Solved this week": '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>',
     "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
@@ -231,8 +228,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // (#fcRetentionNote) -- hidden until asked for, never a standing footnote.
   var STAT_HUES = {
     "Day streak": "orange", "Total cards": "blue", "Reviews completed": "green", "Estimated retention": "indigo",
-    "Games played": "purple", "Listening accuracy": "orange", "Best Match pace": "purple",
-    "Puzzles solved": "teal", "Solved this week": "teal"
+    "Games played": "purple", "Puzzles solved": "teal"
   };
   function statTile(value, label, variant, pending, info) {
     var cls = (variant ? " fc-stat-" + variant : "") + (pending ? " fc-stat-tile-pending" : "");
@@ -625,23 +621,26 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // --- Dashboard: Puzzles and Games ---
   // Finished puzzles and games (puzzle-runs.js), one card each. Practice
   // only -- none of it feeds FSRS or the tiles above.
-  function secs(ms) { return (ms / 1000).toFixed(1) + "s"; }
   function clock(ms) {
     var tenths = Math.floor(ms / 100), s = Math.floor(tenths / 10);
     return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + (tenths % 10);
   }
   var MODE_NAMES = { match: "Match", listening: "Listening", kanatiles: "Kana tiles", oddone: "Odd one out", crossword: "Crossword", arroword: "Arroword", wordsearch: "Word search" };
+  // A recent game as an iOS subtitle cell: its name, the date and what's
+  // not in the result on the grey line, the result trailing -- each fact
+  // once ("9 / 10" already says ten words).
   function runRowHtml(r) {
-    var unit = r.mode === "match" ? " pairs" : r.mode === "oddone" ? (r.n === 1 ? " set" : " sets") : r.n === 1 ? " word" : " words";
-    var what = (MODE_NAMES[r.mode] || r.mode) + " · " + r.n + unit;
-    var how = r.mode === "match" ? clock(r.ms) + " · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
-      : r.mode === "listening" || r.mode === "kanatiles" || r.mode === "oddone" ? (r.right || 0) + " / " + r.n + " right"
-      : clock(r.ms) + " · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
-    if (r.ended) how += " · ended early";
+    var scored = r.mode === "listening" || r.mode === "kanatiles" || r.mode === "oddone";
+    var detail = r.mode === "match" ? r.n + " pairs · " + (r.miss ? r.miss + (r.miss === 1 ? " miss" : " misses") : "no misses")
+      : scored ? ""
+      : r.n + " words · " + (r.help ? r.help + (r.help === 1 ? " hint" : " hints") : "no hints");
     var when = new Date(r.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-    return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(what) + '<span class="fc-pz-when">' + esc(when) + "</span></span>" +
-      '<span class="fc-pz-how">' + esc(how) + "</span></li>";
+    var sub = [when, detail, r.ended ? "ended early" : ""].filter(Boolean).join(" · ");
+    var result = scored ? (r.right || 0) + " / " + r.n : clock(r.ms);
+    return '<li class="fc-pz-row"><span class="fc-pz-what">' + esc(MODE_NAMES[r.mode] || r.mode) + '<span class="fc-pz-when">' + esc(sub) + "</span></span>" +
+      '<span class="fc-pz-how">' + esc(result) + "</span></li>";
   }
+
   // Play (white) and See stats (plain) at the foot of each card -- See
   // stats only once there's something to see.
   function pzActionsHtml(kind, empty) {
@@ -656,8 +655,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card">' + vizTitle("Puzzles");
     // Nothing solved yet: one line and the way in, not a card of zeroes.
     if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No puzzles solved yet.</p>' + pzActionsHtml("puzzles", true) + "</div></div>";
-    var week = sum.days.reduce(function (a, d) { return a + d.count; }, 0);
-    return head + '<div class="fc-stats-grid fc-pz-stats">' + statTile(sum.total, "Puzzles solved") + statTile(week, "Solved this week") + "</div>" +
+    return head + '<div class="fc-stats-grid fc-pz-stats">' + statTile(sum.total, "Puzzles solved") + statTile(sum.streak, "Day streak") + "</div>" +
       '<h4 class="fc-pz-sub">Recent puzzles</h4><ul class="fc-pz-list">' + sum.recent.slice(0, 3).map(runRowHtml).join("") + "</ul>" +
       pzActionsHtml("puzzles") + "</div>";
   }
@@ -669,10 +667,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var sum = runs.summary(now, "games");
     var head = '<div class="fc-viz-card fc-viz-wide fc-games-card">' + vizTitle("Games");
     if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No games yet.</p>' + pzActionsHtml("games", true) + "</div></div>";
-    var ls = sum.listening, mt = sum.match;
-    var tiles = statTile(sum.total, "Games played") +
-      statTile(ls.asked ? Math.round(ls.right / ls.asked * 100) + "%" : "—", "Listening accuracy") +
-      statTile(mt.bestPace === null ? "—" : secs(mt.bestPace) + " / pair", "Best Match pace");
+    // Two figures that hold for every game; each game's own measure
+    // (accuracy, pace, fastest round) lives in its Stats.
+    var tiles = statTile(sum.total, "Games played") + statTile(sum.streak, "Day streak");
     return head + '<div class="fc-stats-grid fc-pz-stats">' + tiles + "</div>" +
       '<h4 class="fc-pz-sub">Games this week</h4>' +
       weeklyActivityChart(sum.days, "Games per day over the last 7 days", "No games yet this week.") +
