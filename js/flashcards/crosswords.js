@@ -1766,7 +1766,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return vocabTables().filter(function (t) { return ids.indexOf(String(t.id)) !== -1; });
   }
   function tablesSummary() {
-    var titles = selectedTables().map(function (t) { return t.title; });
+    var titles = selectedTables().map(function (t) { return tableInfo(t.id).name; });
     if (!titles.length) return "Choose tables";
     if (titles.length <= 2) return titles.join(", ");
     return titles.length + " tables";
@@ -1774,7 +1774,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Checkmark rows grouped by category (the Settings tab's study-direction
   // rows), not a giant segmented control --
   // more than one table can feed a single puzzle (mix "Numbers" + "Time"
-  // for a bigger pool). Shown in the "Several tables…" popover.
+  // for a bigger pool). The Words from sheet.
   function tableChecklistHtml() {
     var byCategory = {};
     vocabTables().forEach(function (t) {
@@ -1782,43 +1782,36 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       (byCategory[cat] = byCategory[cat] || []).push(t);
     });
     var cats = Object.keys(byCategory).sort(function (a, b) { return a.localeCompare(b); });
-    var selected = state.tables.map(String);
-    var groups = cats.map(function (cat) {
+    var selected = state.source === "table" ? state.tables.map(String) : [];
+    // Where the words come from: your flashcards (or, after Stats' Practise
+    // these, your tricky words) on top, then any number of tables.
+    var top = '<div class="fc-xw-table-cat">' +
+      '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-source="flashcards"' + (state.source === "flashcards" ? " checked" : "") + ">Flashcards</label>" +
+      (state.source === "tricky" ? '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-source="tricky" checked>Tricky words</label>' : "") +
+      "</div>";
+    var groups = top + cats.map(function (cat) {
       var items = byCategory[cat].slice().sort(function (a, b) { return a.title.localeCompare(b.title); })
         .map(function (t) {
           var on = selected.indexOf(String(t.id)) !== -1;
-          return '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-table-id="' + t.id + '"' + (on ? " checked" : "") + ">" + esc(t.title) + "</label>";
+          return '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-table-id="' + t.id + '"' + (on ? " checked" : "") + ">" + esc(tableInfo(t.id).name) + "</label>";
         }).join("");
       return '<div class="fc-xw-table-cat"><div class="fc-xw-table-cat-name">' + esc(cat) + "</div>" + items + "</div>";
     }).join("");
     return '<div class="fc-xw-table-picker" id="fcXwTablePicker">' + groups + "</div>";
   }
-  // Words from: Flashcards, or any single table (grouped by category) --
-  // the common case in two taps. "Several tables…" opens the checklist as
-  // a popover (a bottom sheet on a phone) to mix tables into one pool;
-  // while several are picked the row names them.
+  // Words from: a row that opens the checklist sheet -- Flashcards, or any
+  // number of tables ticked at once (Mail's mailbox picker, not a menu of
+  // one); the row names what's picked.
+  var ROW_CHEVRON = '<svg class="fc-xw-row-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5 11.5 9 7 13.5"/></svg>';
   function sourcePickHtml() {
-    var picked = state.source === "table" ? state.tables.map(String) : [];
-    var several = picked.length > 1;
-    var byCategory = {};
-    vocabTables().forEach(function (t) { (byCategory[t.category || "Tables"] = byCategory[t.category || "Tables"] || []).push(t); });
-    var opts = '<option value="flashcards"' + (state.source === "flashcards" ? " selected" : "") + ">Flashcards</option>" +
-      (state.source === "tricky" ? '<option value="tricky" selected>Tricky words</option>' : "") +
-      (several ? '<option value="multi" selected>' + esc(tablesSummary()) + "</option>" : "") +
-      Object.keys(byCategory).sort(function (a, b) { return a.localeCompare(b); }).map(function (cat) {
-        return '<optgroup label="' + esc(cat) + '">' + byCategory[cat].slice().sort(function (a, b) { return a.title.localeCompare(b.title); }).map(function (t) {
-          var on = !several && picked[0] === String(t.id);
-          return '<option value="t:' + esc(String(t.id)) + '"' + (on ? " selected" : "") + ">" + esc(t.title) + "</option>";
-        }).join("") + "</optgroup>";
-      }).join("") +
-      '<option value="several">Several tables…</option>';
     var shown = state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
-    return menuPickHtml("source", "Words from", shown, opts);
+    return '<button type="button" class="fc-xw-menu-pick fc-xw-menu-src" id="fcXwSource" aria-haspopup="dialog" aria-controls="fcXwSheet">' +
+      '<span class="menu-item-tx">Words from</span><span class="fc-xw-menu-val">' + esc(shown) + ROW_CHEVRON + "</span></button>";
   }
   function tablesSheetHtml() {
     return '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
-      '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Tables"' + (state.tablesOpen ? "" : " hidden") + ">" +
-      '<div class="fc-xw-sheet-head"><h4 class="fc-xw-sheet-title">Tables</h4>' +
+      '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Words from"' + (state.tablesOpen ? "" : " hidden") + ">" +
+      '<div class="fc-xw-sheet-head"><h4 class="fc-xw-sheet-title">Words from</h4>' +
       '<button type="button" class="fc-xw-sheet-done" id="fcXwTablesDone">Done</button></div>' +
       tableChecklistHtml() + "</div>";
   }
@@ -2194,33 +2187,36 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
-        if (key === "source") {
-          if (sel.value === "multi" || sel.value === "tricky") return;
-          if (sel.value === "several") {
-            // Opens the checklist on what's picked now (the first roomy
-            // table, coming from Flashcards).
-            if (state.source !== "table") { state.source = "table"; state.tables = []; generate(); }
-            state.tablesOpen = true;
-            rerender();
-            return;
-          }
-          state.source = sel.value === "flashcards" ? "flashcards" : "table";
-          state.tables = sel.value === "flashcards" ? [] : [sel.value.slice(2)];
-          state.tablesOpen = false;
-        } else {
-          state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
-        }
+        state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
         if (key === "mode" && !isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
         generate();
         rerender();
       });
     });
+    var src = panel.querySelector("#fcXwSource");
+    if (src) src.addEventListener("click", function () {
+      var menu = src.closest(".fc-xw-menu");
+      menu.querySelector(".section-menu-list").hidden = true;
+      menu.querySelector(".section-menu-btn").setAttribute("aria-expanded", "false");
+      setTablesOpen(panel, true);
+    });
+    // Ticking a table switches to tables and adds it; Flashcards (or
+    // Tricky words) and tables don't mix -- ticking Flashcards clears the
+    // tables, unticking the last table goes back to Flashcards. The game
+    // rebuilds as you tick; the sheet stays open until Done.
     panel.querySelectorAll("#fcXwTablePicker input[type=checkbox]").forEach(function (cb) {
       cb.addEventListener("change", function () {
-        var id = cb.dataset.tableId;
-        var i = state.tables.map(String).indexOf(id);
-        if (cb.checked && i === -1) state.tables.push(id);
-        else if (!cb.checked && i !== -1) state.tables.splice(i, 1);
+        if (cb.dataset.source) {
+          if (!cb.checked) { cb.checked = true; return; }
+          state.source = cb.dataset.source; state.tables = [];
+        } else {
+          var id = cb.dataset.tableId;
+          if (state.source !== "table") { state.source = "table"; state.tables = []; }
+          var i = state.tables.map(String).indexOf(id);
+          if (cb.checked && i === -1) state.tables.push(id);
+          else if (!cb.checked && i !== -1) state.tables.splice(i, 1);
+          if (!state.tables.length) state.source = "flashcards";
+        }
         generate();
         rerender();
       });
@@ -2245,7 +2241,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var retry = document.getElementById("fcXwNew");
       if (retry) retry.addEventListener("click", function () { generate(); rerender(); });
     }
-    var more = state.source === "table" ? "add another table (⋯ › Words from › Several tables…)" : "add more words to flashcards, or pick a table under ⋯ › Words from";
+    var more = state.source === "table" ? "tick another table under ⋯ › Words from" : "add more words to flashcards, or pick a table under ⋯ › Words from";
     if (!state.puzzle) generate();
     if (state.poolCount < MIN_WORDS) {
       notEnough(state.source === "table" && !state.tables.length
@@ -2258,7 +2254,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // from one of them) -- say what would make a set.
     if (state.mode === "oddone" && !p.questions.length) {
       notEnough("Odd one out needs words from at least two tables, with three or more from one of them. " +
-        "Pick them under ⋯ › Words from › Several tables…", false);
+        "Tick them under ⋯ › Words from.", false);
       return;
     }
     if (p.placements.length < MIN_WORDS && state.mode !== "oddone") {

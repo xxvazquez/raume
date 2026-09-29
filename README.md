@@ -290,8 +290,8 @@ The puzzle comes first, under one toolbar row: the puzzle's name as a menu
 (*Word search ⌄* — tap to switch to a crossword or arroword), then **Hint**,
 **Check** (a word search shows "3 / 15" found instead) and **⋯**. The ⋯ menu
 holds the rest: **New puzzle** (its own button on a wide window), your
-settings — *Words from*, *Word count*, *Script*, each showing its value and
-opening the phone's own picker — then *How to play*, *Reveal puzzle*,
+settings — *Words from* (a checklist: Flashcards, or as many tables as you
+like), *Word count* and *Script* (each opening the phone's own picker) — then *How to play*, *Reveal puzzle*,
 *Clear*, *Save as PDF* and [*Stats*](#stats). Changing a setting makes a new
 puzzle. On a wide
 window the clue you're on and the Across / Down listswindow the clue you're on and the Across / Down lists sit beside the grid —
@@ -303,7 +303,7 @@ scrolls sideways.
 
 | Setting | Choices |
 | --- | --- |
-| **Source** | *Flashcards* (added, unpaused words) or any vocabulary table, whether or not it's in flashcards; *Several tables…* opens a checklist to mix tables into one puzzle |
+| **Words from** | *Flashcards* (added, unpaused words) or any number of vocabulary tables, whether or not they're in flashcards — one checklist: tick Flashcards, or tick as many tables as you like to mix them into one puzzle or game |
 | **Puzzle** / **Game** | Puzzles: *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer) or *Word search*. Games: *Match* or *Listening* |
 | **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
 | **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The button shows the real count when the pool holds fewer |

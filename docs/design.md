@@ -768,11 +768,15 @@ only what you use mid-play — **Hint** (white, lightbulb + word; "Reveal a
 letter" / "Reveal a word" as its title), filled **Check** (or the quiet
 count / clock) — then ⋯. A wide window adds a white **New puzzle** before
 Hint. The ⋯ menu: New puzzle (phone only), a band, the settings as menu
-value rows (Words from — Flashcards, every table by category in
-`<optgroup>`s, **Several tables…** — Word count, Script), a band, then How to
-play (a small glass note under the toolbar), Reveal puzzle / Clear / Save as
-PDF, Stats. Several tables… opens the table checklist (checkmark rows, a
-"Tables" title and a Done button) in a glass popover under the toolbar
+value rows (Words from, with a › — it opens a sheet, not a picker — then
+Word count and Script over native pickers), a band, then How to play (a
+small glass note under the toolbar), Reveal puzzle / Clear / Save as PDF,
+Stats. **Words from** is one multi-select checklist (Mail's mailbox picker,
+not a menu of one): Flashcards ticked on top, then every table by category
+as checkmark rows under a "Words from" title and a Done button — tick as
+many tables as you like; ticking one leaves Flashcards, ticking Flashcards
+clears the tables, unticking the last table goes back to Flashcards — in a
+glass popover under the toolbar
 (`.fc-xw-sheet`, the Options pattern) — a bottom sheet over a scrim on a
 phone — staying open while you tick, closing on Done, an outside tap or
 Escape. No pills over the content: an earlier row of four setting pills
