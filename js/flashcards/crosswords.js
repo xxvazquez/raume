@@ -1885,7 +1885,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var answer = state.script === "romaji" ? w.romaji
         : state.script === "native" ? writtenForm(w)
         : scriptedAnswer(w.answer, state.script);
-      return { id: w.id, clue: w.clue, answer: answer, tableId: w.tableId };
+      return { id: w.id, clue: w.clue, answer: answer, tableId: w.tableId, weight: w.weight };
     }).filter(function (w) { if (seen[w.answer]) return false; seen[w.answer] = true; return true; });
     // A two-letter romaji word turns up by chance all over a word search's
     // filler -- finding "ki" there is luck, not recall.
@@ -2669,7 +2669,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
-      wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder,
+      wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
       buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings

@@ -2775,10 +2775,16 @@ async function main() {
     const weightsOk = pool.length === 20 && pool.every(w => w.weight === (ids.indexOf(w.id) < 10 ? 3 : 1));
     let fresh = 0, mastered = 0;
     for (let n = 0; n < 400; n++) xw.weightedOrder(pool).slice(0, 5).forEach(w => { if (w.weight === 3) fresh++; else mastered++; });
+    // ...and the weights survive into what the game builders are given.
+    const st = xw.state, was = { source: st.source, mode: st.mode, script: st.script, size: st.size, puzzle: st.puzzle, poolCount: st.poolCount, notes: st.notes };
+    Object.assign(st, { source: "flashcards", mode: "match", script: "native", size: 20 });
+    xw.generate();
+    const carried = st.puzzle.placements.length > 0 && st.puzzle.placements.every(w => w.weight === 3 || w.weight === 1);
+    Object.assign(st, was);
     Object.keys(cards).forEach(k => { delete cards[k]; });
     Object.assign(cards, saved);
     const tableUnweighted = xw.tableWordPool([biggest.id]).every(w => w.weight === undefined);
-    return weightsOk && fresh > mastered * 2 && mastered > 100 && tableUnweighted;
+    return weightsOk && carried && fresh > mastered * 2 && mastered > 100 && tableUnweighted;
   })());
 
   // Three short words, each sharing a letter directly with the longest (so
