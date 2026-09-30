@@ -851,6 +851,13 @@ white tiles, 64px tall, 2 or 3 across. The bucket you tap washes sage
 offered only for this game, listing only the sorts the words can fill. Its
 Stats hue is clay.
 
+**Word chain** keeps Listening's toolbar ("3 / 10", ⏸): Speed sort's
+card with a quiet "What comes after" over the word at 30px and its English
+as a grey line, then Odd one out's 2 × 2 of white tiles (kana at 20px,
+English dropping in once answered) and its one-line reveal naming the
+ending. The finish card sets the whole chain as one centred, wrapping line
+("りんご → ごま → まど …"). Its Stats hue is slate.
+
 **Odd one out** keeps Listening's toolbar: a quiet "Which one doesn’t
 belong?" over a 2 × 2 of Match's white tiles, each word centred at 20px;
 answering drops each word's English under it (13px grey) and marks the

@@ -17,14 +17,14 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   var esc = window.RaumeStudy.shared.escapeHtml;
   var MODES = {
     puzzles: [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]],
-    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"], ["speedsort", "Speed sort"]]
+    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"], ["speedsort", "Speed sort"], ["wordchain", "Word chain"]]
   };
-  var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana" };
+  var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana", kana: "Kana" };
   var PRACTISE_WORDS = 20;
   var TITLE_CHEVRON = '<svg class="fc-xw-title-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
   // Each style's own hue (the --tile palette), as Fitness gives each ring
   // one: its headline figures and its trend line wear it.
-  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green", oddone: "amber", speedsort: "clay" };
+  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green", oddone: "amber", speedsort: "clay", wordchain: "slate" };
   var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
@@ -64,7 +64,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function days(n) { return n + (n === 1 ? " day" : " days"); }
   function pct(x) { return Math.round(x * 100) + "%"; }
   // One game's headline: its time, or for Listening its score.
-  function scored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort"; }
+  function scored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort" || mode === "wordchain"; }
   function runValue(r) { return scored(r.mode) ? (r.right || 0) + " / " + r.n : clock(r.ms); }
   function measureText(mode, v) {
     if (scored(mode)) return pct(v);
@@ -117,6 +117,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     else if (mode === "kanatiles") rows += row("Words spelled", String(st.words));
     else if (mode === "oddone") rows += row("Sets played", String(st.words));
     else if (mode === "speedsort") rows += row("Words sorted", String(st.words));
+    else if (mode === "wordchain") rows += row("Links made", String(st.words));
     else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);
   }

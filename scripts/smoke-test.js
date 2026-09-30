@@ -3124,7 +3124,7 @@ async function main() {
     const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
     const puzzles = opts("#fcPanelCrosswords");
     document.querySelector('.fc-tab[data-tab="games"]').click();
-    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone|speedsort"
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone|speedsort|wordchain"
       && xw.state === xw.states.games && xw.state.mode === "match";
   })());
   const mtTile = (side, i) => document.querySelector('#fcPanelGames .fc-mt-tile[data-side="' + side + '"][data-i="' + i + '"]');
@@ -3523,6 +3523,64 @@ async function main() {
   xwSource("flashcards");
   xwPick("mode", "listening");
 
+  console.log("Flashcards: Word chain");
+  check("Word chain reads the end of a word by the usual rules: ー doesn't count, a small ゃ counts as や, katakana reads as hiragana",
+    xw.chainTail("コーヒー") === "ひ" && xw.chainTail("でんしゃ") === "や" && xw.chainTail("りんご") === "ご"
+    && xw.chainTail("ほん") === "ん" && xw.chainHead("ビール") === "び" && xw.chainHead("ーあ") === null);
+  check("a built chain links every word to the next, never repeats one, never plays a word ending in ん, and each question has exactly one word that carries on", (() => {
+    const w = (id, answer) => ({ id, clue: id, answer, tableId: "A" });
+    const words = [w("1", "りんご"), w("2", "ごはん"), w("3", "ごま"), w("4", "まど"), w("5", "どうぶつ"), w("6", "つくえ"),
+      w("7", "えき"), w("8", "きしゃ"), w("9", "やま"), w("10", "まくら"), w("11", "らいねん"), w("12", "かさ"), w("13", "がっこう")];
+    const tooShort = xw.buildWordChain(words.slice(0, 3), 10);
+    const p = xw.buildWordChain(words, 30);
+    const chain = [p.start].concat(p.placements);
+    return tooShort.questions.length === 0 && p.questions.length >= 5
+      && chain.every((x, i) => i === 0 || xw.chainHead(x.answer) === xw.chainTail(chain[i - 1].answer))
+      && new Set(chain.map(x => x.answer)).size === chain.length && chain.every(x => xw.chainTail(x.answer) !== "ん")
+      && p.questions.every(q => q.choices.filter(c => xw.chainHead(c.answer) === xw.chainTail(q.prev.answer)).length === 1
+        && q.choices[q.right] === q.word);
+  })());
+  xwPick("mode", "wordchain");
+  const wcTables = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-kanji").map(t => t.id);
+  xw.state.source = "table"; xw.state.tables = wcTables.slice(); xw.state.puzzle = null;
+  window.RaumeStudy.flashcards.render();
+  const wcQ = () => xw.state.puzzle.questions[Number(document.getElementById("fcLsCount").textContent.split(" / ")[0]) - 1];
+  check("a Word chain question: the word to follow and its English, four kana tiles, a counter, and no Script row in ⋯", (() => {
+    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
+    return tiles.length === 4 && tiles.every(t => t.querySelector(".fc-oo-en").hidden)
+      && document.querySelector("#fcPanelGames .fc-ss-word").textContent === wcQ().prev.answer
+      && document.getElementById("fcLsCount").textContent === "1 / " + xw.state.puzzle.questions.length
+      && !document.querySelector('#fcPanelGames [data-pick="script"]')
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const wcFirst = wcQ();
+  check("a wrong pick: ✕ on it, ✓ on the word that carries on, the ending explained, and Next waits", (() => {
+    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + ((wcFirst.right + 1) % wcFirst.choices.length) + '"]').click();
+    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
+    const reveal = document.querySelector("#fcPanelGames .fc-oo-reveal").textContent;
+    return tiles[wcFirst.right].classList.contains("fc-mt-right") && reveal.indexOf(wcFirst.prev.answer + " ends on " + xw.chainTail(wcFirst.prev.answer)) === 0
+      && / carries on\.$/.test(reveal) && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+  })());
+  document.querySelector("#fcPanelGames .fc-ls-next").click();
+  for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    const before = document.getElementById("fcLsCount").textContent;
+    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + wcQ().right + '"]').click();
+    for (let waited = 0; waited < 4000; waited += 25) {
+      if (document.querySelector("#fcPanelGames .fc-mt-done") || document.getElementById("fcLsCount").textContent !== before) break;
+      await new Promise(r => setTimeout(r, 25));
+    }
+  }
+  check("the end: N-1 right, the whole chain on one line, the missed link listed, and a logged wordchain game", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const p = xw.state.puzzle, n = p.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("wordchain").pop();
+    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
+      && done.querySelector(".fc-wc-chain").textContent.split(" → ").length === n + 1
+      && !!last && last.right === n - 1 && last.missed.join() === String(wcFirst.word.id) && /\|kana\|/.test(last.setup);
+  })());
+  xwSource("flashcards");
+  xwPick("mode", "listening");
+
   console.log("Flashcards: Puzzle and game stats");
   const pr = window.RaumeStudy.flashcards.puzzleRuns;
   check("stats count each style on its own: played, a day streak, and a best measured per pair / word or as accuracy", (() => {
@@ -3547,7 +3605,7 @@ async function main() {
     const sel = document.getElementById("fcStMode");
     const segs = [...sel.options].map(o => o.textContent);
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
-      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out|Speed sort"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain"
       && sel.value === "listening" && panel.querySelector(".fc-st-modes .fc-xw-title-text").textContent === "Listening"
       && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());
@@ -3616,7 +3674,7 @@ async function main() {
     const labels = [...g.querySelectorAll(".fc-stat-label")].map(l => l.textContent);
     const row = g.querySelector(".fc-pz-row");
     const name = row.querySelector(".fc-pz-what").firstChild.textContent;
-    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out|Speed sort)$/.test(name)
+    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain)$/.test(name)
       && /^(\d+ \/ \d+|\d+:\d\d\.\d)$/.test(row.querySelector(".fc-pz-how").textContent)
       && !/ words?$/.test(row.querySelector(".fc-pz-when").textContent.split(" · ").pop() || "") ;
   })());

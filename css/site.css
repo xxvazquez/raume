@@ -3559,6 +3559,12 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ss-bucket.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); }
 .fc-ss-bucket.fc-mt-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
 .fc-ss-bucket.fc-ss-was { box-shadow: 0 0 0 2px var(--right); color: var(--right-strong); }
+/* Word chain: Speed sort's card holding the word to follow (its English a
+   quiet line under it), then Odd one out's 2 x 2 of choices and reveal;
+   the finish card sets the whole chain as one wrapping line. */
+.fc-wc-en { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
+.fc-wc-grid { margin-top: 12px; }
+.fc-wc-chain { margin: 4px 0 12px; color: var(--ink); font-size: var(--fs-nav); line-height: 1.6; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 .fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
 .fc-ls-missed li {
