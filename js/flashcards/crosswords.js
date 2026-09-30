@@ -145,18 +145,29 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Source 1: every word currently added and not dormant (paused itself, or
   // its whole table paused) -- read straight off the cards, same "active"
   // flag scheduling.js's activeCards() checks.
+  // Each word also gets a `weight` from its weakest active card, so games
+  // lean toward what you're still learning: new / learning / relearning 3,
+  // review under three weeks' stability 2, mastered 1 -- plus 1 for a
+  // Tricky word. Mastered words still come up, about one pick in six.
+  var MASTERED_DAYS = 21;
+  function cardWeight(card) {
+    if (card.state !== 2) return 3;
+    return (card.stability || 0) < MASTERED_DAYS ? 2 : 1;
+  }
   function flashcardsWordPool() {
     var index = vocabIndex();
     var cards = store.getCache().cards;
-    var vocabIds = {};
+    var weights = {};
     Object.keys(cards).forEach(function (key) {
       var card = cards[key];
-      if (card.active) vocabIds[card.vocabId] = true;
+      if (card.active) weights[card.vocabId] = Math.max(weights[card.vocabId] || 0, cardWeight(card));
     });
-    var entries = Object.keys(vocabIds)
+    var runs = window.RaumeStudy.flashcards.puzzleRuns;
+    if (runs) runs.trickyWords(Infinity).forEach(function (t) { if (weights[t.id]) weights[t.id] += 1; });
+    var entries = Object.keys(weights)
       .map(function (id) { return index[id]; })
       .filter(function (entry) { return entry && !store.isTablePaused(entry.tableId); });
-    return poolFromEntries(entries);
+    return poolFromEntries(entries).map(function (w) { w.weight = weights[w.id]; return w; });
   }
   // Source 2: every word across one or more vocabulary tables, regardless
   // of flashcards status -- a themed puzzle doesn't need the tables added
@@ -208,6 +219,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     return a;
   }
+  // The pool in a random order that favours heavier words (Efraimidis-
+  // Spirakis keys, no repeats); unweighted words -- table and Tricky-words
+  // sources -- come out as a plain shuffle.
+  function weightedOrder(arr, weightOf) {
+    weightOf = weightOf || function (w) { return w.weight || 1; };
+    return arr.map(function (w) { return { w: w, k: Math.pow(Math.random(), 1 / weightOf(w)) }; })
+      .sort(function (a, b) { return b.k - a.k; })
+      .map(function (x) { return x.w; });
+  }
 
   // -----------------------------------------------------------------------
   // Grid construction -- shared by both layouts. Longest word first (a
@@ -249,7 +269,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Shuffled, with the longest of the first `limit` moved to the front as
     // the backbone -- the rest stay in random order, so a big pool doesn't
     // always yield the same handful of long words.
-    var list = shuffle(words);
+    var list = weightedOrder(words);
     var head = list.slice(0, limit), longest = 0;
     head.forEach(function (w, i) { if (w.answer.length > head[longest].answer.length) longest = i; });
     list.unshift(list.splice(longest, 1)[0]);
@@ -452,7 +472,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // A word lying wholly on letters already down isn't hidden anywhere of its own.
       return shared === answer.length ? -1 : shared;
     }
-    shuffle(words).some(function (w) {
+    weightedOrder(words).some(function (w) {
       if (placements.length >= target) return true;
       var answer = Array.from(w.answer), bestSpot = null, bestScore = -1;
       for (var r = 0; r < side; r++) {
@@ -705,7 +725,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return sizes;
   }
   function buildMatch(words, limit) {
-    var picked = shuffle(words).slice(0, limit);
+    var picked = weightedOrder(words).slice(0, limit);
     var rounds = [], at = 0;
     matchRounds(picked.length).forEach(function (size) { rounds.push(picked.slice(at, at + size)); at += size; });
     return { placements: picked, rounds: rounds };
@@ -1045,7 +1065,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // (a clue from another topic is too easy to rule out), never two with the
   // same English -- the choices would be a coin toss.
   function buildListening(words, limit) {
-    var picked = shuffle(words).slice(0, limit);
+    var picked = weightedOrder(words).slice(0, limit);
     var questions = picked.map(function (w) {
       var used = {};
       used[w.clue.toLowerCase()] = true;
@@ -1251,7 +1271,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return picks;
   }
   function buildKanaTiles(words, limit, script) {
-    var picked = shuffle(words).slice(0, limit);
+    var picked = weightedOrder(words).slice(0, limit);
     return {
       placements: picked,
       questions: picked.map(function (w) {
@@ -1644,7 +1664,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     buckets.forEach(function (b, bi) {
       b.words.forEach(function (w) { if (by !== "tables" || stem(w.clue) !== stem(b.label)) pool.push({ word: w, bucket: bi }); });
     });
-    var items = shuffle(pool).slice(0, limit);
+    var items = weightedOrder(pool, function (it) { return it.word.weight || 1; }).slice(0, limit);
     return { placements: items.map(function (it) { return it.word; }), items: items, buckets: buckets.map(function (b) { return { key: b.key, label: b.label }; }) };
   }
   function wireSpeedSort(boardEl, clockEl, p, romajiMode) {
@@ -2649,7 +2669,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
-      wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool,
+      wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder,
       buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings

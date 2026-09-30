@@ -303,7 +303,7 @@ scrolls sideways.
 
 | Setting | Choices |
 | --- | --- |
-| **Words from** | *Flashcards* (added, unpaused words) or any number of vocabulary tables, whether or not they're in flashcards — one checklist: tick Flashcards, or tick as many tables as you like to mix them into one puzzle or game |
+| **Words from** | *Flashcards* (added, unpaused words — leans toward words you're still learning, so new and shaky words come up more often than mastered ones) or any number of vocabulary tables, whether or not they're in flashcards — one checklist: tick Flashcards, or tick as many tables as you like to mix them into one puzzle or game |
 | **Puzzle** / **Game** | Puzzles: *Crossword* (numbered clue list), *Arroword* (each clue in a square before its answer) or *Word search*. Games: *Match* or *Listening* |
 | **Script** | Not for Listening (you hear the word). *Romaji* (default), *Japanese* (the word as written, kanji and all — Match and Word search only), *Hiragana* (native words, read in hiragana) or *Katakana* (loanwords only) — a word is never forced into a script it isn't written in. Crosswords and arrowords always use readings (a square can't take a whole kanji); a word search that uses kanji shows each found word's reading beside it, and leaves out one-kanji words |
 | **Words** | 10, 15, 20, 30 or 40; Match and Listening also 60, 80, 100 or *All*. The button shows the real count when the pool holds fewer |

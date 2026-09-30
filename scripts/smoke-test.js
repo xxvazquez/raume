@@ -2761,6 +2761,26 @@ async function main() {
     });
   })());
 
+  check("Flashcards-sourced games lean toward words you're still learning: new words come up clearly more often, mastered ones still do", (() => {
+    const cards = window.RaumeStudy.flashcards.store.getCache().cards;
+    const saved = Object.assign({}, cards);
+    Object.keys(cards).forEach(k => { delete cards[k]; });
+    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    const ids = xw.tableWordPool([biggest.id]).slice(0, 20).map(w => w.id);
+    ids.forEach((id, i) => {
+      cards[id + ":jp-en"] = { id: id + ":jp-en", vocabId: id, direction: "jp-en", active: true,
+        state: i < 10 ? 0 : 2, stability: i < 10 ? 0 : 60 };
+    });
+    const pool = xw.flashcardsWordPool();
+    const weightsOk = pool.length === 20 && pool.every(w => w.weight === (ids.indexOf(w.id) < 10 ? 3 : 1));
+    let fresh = 0, mastered = 0;
+    for (let n = 0; n < 400; n++) xw.weightedOrder(pool).slice(0, 5).forEach(w => { if (w.weight === 3) fresh++; else mastered++; });
+    Object.keys(cards).forEach(k => { delete cards[k]; });
+    Object.assign(cards, saved);
+    const tableUnweighted = xw.tableWordPool([biggest.id]).every(w => w.weight === undefined);
+    return weightsOk && fresh > mastered * 2 && mastered > 100 && tableUnweighted;
+  })());
+
   // Three short words, each sharing a letter directly with the longest (so
   // every one connects to the backbone regardless of placement order) --
   // enough to check the grid builder never corrupts a letter at a crossing.
