@@ -260,7 +260,7 @@ js/
   storage-migration.js  moves old sakura- localStorage keys to raume- (<head>)
   theme-init.js         sets the theme in <head>, before first paint
   config.js             Supabase URL + anon key
-  shared.js             cross-feature helpers (HTML escape, pronunciation playback)
+  shared.js             cross-feature helpers (HTML escape, pronunciation playback, the iOS confirm sheet)
   sw-register.js        service-worker registration
   vocab/                the reference page
     kana-romaji.js       kana → romaji converter (the reading layer)

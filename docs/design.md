@@ -621,8 +621,8 @@ and Help.
     collapsing what you just searched for would defeat the point. Editing a
     word swaps its row for a single text field (same line format as adding
     one) with Save/Cancel, reusing the trash icon's stroke style for a
-    matching pencil icon. Deleting a word asks for confirmation first, same
-    as deleting a table. A word's row is a list row, as in Practice › Library:
+    matching pencil icon. Deleting a word asks first with the iOS action
+    sheet (**Delete Word**), as deleting a table does (**Delete Table**). A word's row is a list row, as in Practice › Library:
     the Japanese plain (no furigana) in ink with its romaji small and grey
     beside it, the English under, the pencil / trash centred on the row
     (44pt-ish targets). Sentences wrap only at the spaces between phrases
@@ -931,7 +931,11 @@ coral-text row in its own card at the foot. Reset asks first with an iOS
 phone over a dimmed page — a glass group holding the grey message ("Every
 Match game so far is cleared…") and a red **Reset Stats**, then **Cancel**
 as its own solid white group (focused, so Return backs out); a centred
-320px alert of the same parts on a wide window. Personal-best rows are
+320px alert of the same parts on a wide window. It's the one confirmation
+in the app (`RaumeStudy.shared.confirmSheet`, optional semibold title over
+the message) — Restore a backup (**Restore**) and deleting your own words
+and tables (**Delete Word** / **Delete Table**) use it too; never the
+browser's `window.confirm`. Personal-best rows are
 subtitle cells: the source as a one-line title, "Hiragana · 10 words · 3
 games" on the grey line under it. The
 trend ("Last 30 games") is a dataviz single series: one 2px accent line on a

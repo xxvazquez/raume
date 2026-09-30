@@ -190,5 +190,39 @@ window.RaumeStudy.shared = (function () {
   speech.onJapaneseVoiceReady(markSpeechReady);
   speech.loadAudioManifest().then(function (hasAny) { if (hasAny) markSpeechReady(); });
 
-  return { escapeHtml: escapeHtml, speech: speech };
+  // An iOS confirmation for anything that can't be undone: an action sheet up
+  // from the bottom on a phone (a centred alert on a wide window) -- an
+  // optional title, the message in grey, the red destructive button, and
+  // Cancel on its own (focused, so Return backs out). A tap on the dimmed
+  // page, Escape or Cancel backs out; nothing happens until the red button.
+  // o: { title?, message, confirm, onConfirm }. Focus goes back to whatever
+  // opened it, if that's still on the page.
+  function confirmSheet(o) {
+    var old = document.querySelector(".ios-confirm");
+    if (old) old.remove();
+    var opener = document.activeElement;
+    var host = document.createElement("div");
+    host.className = "ios-confirm";
+    host.innerHTML = '<div class="ios-confirm-scrim"></div>' +
+      '<div class="ios-confirm-sheet" role="alertdialog" aria-modal="true" aria-labelledby="iosConfirmMsg">' +
+      '<div class="ios-confirm-group"><div class="ios-confirm-msg" id="iosConfirmMsg">' +
+      (o.title ? '<p class="ios-confirm-title">' + escapeHtml(o.title) + "</p>" : "") +
+      "<p>" + escapeHtml(o.message) + "</p></div>" +
+      '<button type="button" class="ios-confirm-destroy" id="iosConfirmGo">' + escapeHtml(o.confirm) + "</button></div>" +
+      '<button type="button" class="ios-confirm-cancel" id="iosConfirmCancel">Cancel</button></div>';
+    document.body.appendChild(host);
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      host.remove();
+      if (opener && opener.focus && document.contains(opener)) opener.focus();
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
+    document.getElementById("iosConfirmCancel").addEventListener("click", close);
+    document.getElementById("iosConfirmGo").addEventListener("click", function () { close(); o.onConfirm(); });
+    document.getElementById("iosConfirmCancel").focus();
+  }
+
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet };
 })();

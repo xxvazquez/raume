@@ -1686,8 +1686,18 @@ async function main() {
       const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
       return !!tr && !!tr.querySelector("ruby rt") && /eggplant/.test(tr.textContent);
     })());
-    cvNs.deleteRow(made.id);
-    check("deleteRow removes it again, restoring the dataset", vegTable.rows.length === before
+    const delBtn = () => document.querySelector('#customizePage .cv-del-row[data-row="' + made.id + '"]');
+    check("deleting your own word asks first with the iOS action sheet, not the browser's confirm -- Cancel keeps it", (() => {
+      if (!delBtn()) return false;
+      delBtn().click();
+      const sheet = document.querySelector(".ios-confirm");
+      const ok = !!sheet && /Delete this word\?/.test(sheet.textContent) && document.getElementById("iosConfirmGo").textContent === "Delete Word"
+        && document.activeElement === document.getElementById("iosConfirmCancel");
+      document.getElementById("iosConfirmCancel").click();
+      return ok && !document.querySelector(".ios-confirm") && vegTable.rows.some(r => r.id === made.id);
+    })());
+    if (delBtn()) { delBtn().click(); document.getElementById("iosConfirmGo").click(); } else cvNs.deleteRow(made.id);
+    check("Delete Word removes it again, restoring the dataset", vegTable.rows.length === before
       && !window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[made.id]);
   }
   check("the Customize page has a Your vocabulary block", !!document.querySelector("#customizePage .cv-section"));
@@ -2091,6 +2101,21 @@ async function main() {
     document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Settings"
     && !!document.getElementById("fcBack") && !document.querySelector("#flashcardsPage .fc-tabs"));
   check("Settings offers Download backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  {
+    const fileInput = document.getElementById("fcBackupFile");
+    const cardsBefore = JSON.stringify(window.RaumeStudy.flashcards.store.getCache().cards);
+    Object.defineProperty(fileInput, "files", { configurable: true, value: [{ text: () => Promise.resolve(JSON.stringify(builtBackup)) }] });
+    fileInput.dispatchEvent(new window.Event("change"));
+    await flush();
+    check("choosing a backup asks with the iOS action sheet (what it holds, a red Restore) -- Cancel changes nothing", (() => {
+      const sheet = document.querySelector(".ios-confirm");
+      const ok = !!sheet && /Restore the backup/.test(sheet.querySelector(".ios-confirm-title").textContent) && /It holds/.test(sheet.textContent)
+        && document.getElementById("iosConfirmGo").textContent === "Restore";
+      if (sheet) document.getElementById("iosConfirmCancel").click();
+      return ok && !document.querySelector(".ios-confirm") && JSON.stringify(window.RaumeStudy.flashcards.store.getCache().cards) === cardsBefore;
+    })());
+    delete fileInput.files;
+  }
   document.getElementById("fcBack").click();
   check("Back returns to the segment you came from", document.querySelector("#flashcardsPage .fc-tab.active").dataset.tab === "manage");
   document.querySelector('.fc-tab[data-tab="dashboard"]').click();

@@ -668,10 +668,16 @@ window.RaumeStudy.flashcards.views = (function () {
         if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
         if (sm.knownKanji) parts.push(sm.knownKanji + " known kanji");
         if (sm.puzzleGames) parts.push(sm.puzzleGames + " puzzle game" + (sm.puzzleGames === 1 ? "" : "s"));
-        if (!window.confirm("Restore the backup" + when + "?\n\nIt holds " + parts.join(", ") + ".\n\nThis replaces everything Practice currently has on this device. Anything you've done since the backup was made will be lost.")) return;
-        var applied = backup.applyBackup(parsed.backup);
-        if (!applied.ok) { showError(applied.error); return; }
-        window.location.reload();
+        window.RaumeStudy.shared.confirmSheet({
+          title: "Restore the backup" + when + "?",
+          message: "It holds " + parts.join(", ") + ". This replaces everything Practice has on this device — anything since the backup is lost.",
+          confirm: "Restore",
+          onConfirm: function () {
+            var applied = backup.applyBackup(parsed.backup);
+            if (!applied.ok) { showError(applied.error); return; }
+            window.location.reload();
+          }
+        });
       }, function () { showError("Couldn't read that file."); });
     });
   }

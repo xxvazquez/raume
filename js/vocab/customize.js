@@ -623,13 +623,25 @@ window.RaumeStudy.customize = (function () {
       if (e.target.closest && e.target.closest(".cv-import-btn")) { runImport(host); return; }
       var delRow = e.target.closest && e.target.closest(".cv-del-row");
       if (delRow && cv()) {
-        if (window.confirm("Delete this word? This can’t be undone.")) cv().deleteRow(delRow.dataset.row);
+        var rowId = delRow.dataset.row;
+        window.RaumeStudy.shared.confirmSheet({
+          title: "Delete this word?",
+          message: "This can’t be undone.",
+          confirm: "Delete Word",
+          onConfirm: function () { cv().deleteRow(rowId); }
+        });
         return;
       }
       var delTable = e.target.closest && e.target.closest(".cv-del-table");
       if (delTable && cv()) {
         e.preventDefault(); // sits inside its table's <summary> -- don't also toggle it
-        if (window.confirm("Delete this table and every word in it? This can’t be undone.")) cv().deleteTable(delTable.dataset.table);
+        var tableId = delTable.dataset.table;
+        window.RaumeStudy.shared.confirmSheet({
+          title: "Delete this table?",
+          message: "Every word in it goes too. This can’t be undone.",
+          confirm: "Delete Table",
+          onConfirm: function () { cv().deleteTable(tableId); }
+        });
         return;
       }
       var editRow = e.target.closest && e.target.closest(".cv-edit-row");

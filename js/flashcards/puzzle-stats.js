@@ -195,35 +195,6 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         : ""));
   }
 
-  // An iOS confirmation: an action sheet up from the bottom on a phone (a
-  // centred alert on a wide window) -- the message in grey, the red
-  // destructive button, and Cancel on its own. A tap on the dimmed page,
-  // Escape or Cancel backs out; nothing happens until the red button.
-  function confirmSheet(o) {
-    var old = document.querySelector(".ios-confirm");
-    if (old) old.remove();
-    var host = document.createElement("div");
-    host.className = "ios-confirm";
-    host.innerHTML = '<div class="ios-confirm-scrim"></div>' +
-      '<div class="ios-confirm-sheet" role="alertdialog" aria-modal="true" aria-labelledby="iosConfirmMsg">' +
-      '<div class="ios-confirm-group"><p class="ios-confirm-msg" id="iosConfirmMsg">' + esc(o.message) + "</p>" +
-      '<button type="button" class="ios-confirm-destroy" id="iosConfirmGo">' + esc(o.confirm) + "</button></div>" +
-      '<button type="button" class="ios-confirm-cancel" id="iosConfirmCancel">Cancel</button></div>';
-    document.body.appendChild(host);
-    function close() {
-      document.removeEventListener("keydown", onKey);
-      host.remove();
-      var back = document.getElementById("fcStReset");
-      if (back) back.focus();
-    }
-    function onKey(e) { if (e.key === "Escape") close(); }
-    document.addEventListener("keydown", onKey);
-    host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
-    document.getElementById("iosConfirmCancel").addEventListener("click", close);
-    document.getElementById("iosConfirmGo").addEventListener("click", function () { close(); o.onConfirm(); });
-    document.getElementById("iosConfirmCancel").focus();
-  }
-
   function render(panel) {
     if (!panel) return;
     var st = runs().styleStats(view.mode, new Date());
@@ -263,7 +234,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     });
     document.getElementById("fcStReset").addEventListener("click", function () {
       var name = modeName(view.mode), mode = view.mode;
-      confirmSheet({
+      window.RaumeStudy.shared.confirmSheet({
         message: "Every " + name + " game so far is cleared from your stats and bests, on every device. This can’t be undone.",
         confirm: "Reset Stats",
         onConfirm: function () {

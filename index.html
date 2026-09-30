@@ -217,7 +217,7 @@
      data/kanji-strokes.js -> RaumeStudy.data.kanjiStrokes (N5 kanji stroke order, from
                        KanjiVG, CC BY-SA 3.0; must follow vocabulary.js, which sets .data)
   2. js/config.js         -> RaumeStudy.config     (Supabase connection config)
-  3. js/shared.js         -> RaumeStudy.shared     (cross-feature helpers)
+  3. js/shared.js         -> RaumeStudy.shared     (cross-feature helpers: escape, speech, confirm sheet)
   4. js/pull-refresh.js   (no namespace; global touch pull-to-refresh gesture,
                        live on every page. Only reaches into RaumeStudy.flashcards
                        at gesture-release time, never at load time, so it can sit
