@@ -403,7 +403,8 @@ with reduced motion on, it's all a plain change of state.
   colour — **gold** under 2s a pair, **silver** under 3s, **bronze** under 4s —
   with what the next tier needs. Under it your last ten games on the same
   words draw themselves as a line (this one the dot), and where this run ranks.
-  Best times are kept in this browser, one per source, script and word count.
+  Best times come from your game log, one per source, script and word count,
+  so they follow your account when signed in.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same
   words again. Practice only — it never changes your flashcard schedule.

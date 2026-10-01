@@ -240,7 +240,6 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         confirm: "Reset Stats",
         onConfirm: function () {
           runs().reset(mode);
-          if (mode === "match" && S.crosswords.clearMatchBests) S.crosswords.clearMatchBests();
           render(panel);
         }
       });

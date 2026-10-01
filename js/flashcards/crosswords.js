@@ -715,12 +715,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // then its partner, from either side: a right pair clears (its tiles keep
   // their place, so nothing under your finger moves), a wrong one costs a
   // second. The clock starts on the first tap, not on render. The best time
-  // per word set (source + script + pair count) is the one thing this tab
-  // keeps -- practice only, never an FSRS review.
+  // per word set (source + script + pair count) comes from the game log --
+  // practice only, never an FSRS review.
   // -----------------------------------------------------------------------
   var MATCH_ROUND = 6;
   var MATCH_PENALTY_MS = 1000;
-  var MATCH_BEST_KEY = "raume-match-best";
+  // Best times used to sit in their own key; they're read from the log now
+  // (it syncs, and Reset stats already clears it), so the old key goes.
+  // Safe to delete a few releases after 2026-10.
+  try { localStorage.removeItem("raume-match-best"); } catch (e) { /* ignore */ }
   function matchRounds(n) {
     var count = Math.ceil(n / MATCH_ROUND), sizes = [];
     for (var i = 0; i < count; i++) sizes.push(Math.floor(n / count) + (i < n % count ? 1 : 0));
@@ -743,13 +746,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return src + "|" + (script || state.script) + "|" + n;
   }
   function matchBestKey(p) { return setupKey(p.placements.length); }
-  function readBest() {
-    try { return JSON.parse(localStorage.getItem(MATCH_BEST_KEY)) || {}; } catch (e) { return {}; }
-  }
-  function saveBest(key, ms) {
-    // A private window can refuse storage -- the game still plays, it just
-    // can't remember a best.
-    try { var all = readBest(); all[key] = ms; localStorage.setItem(MATCH_BEST_KEY, JSON.stringify(all)); } catch (e) { /* ignore */ }
+  // The fastest whole game logged on these words (a game ended early never
+  // counts), or null.
+  function bestTime(key) {
+    var runs = window.RaumeStudy.flashcards.puzzleRuns, best = null;
+    (runs ? runs.live("match") : []).forEach(function (r) {
+      if (r.setup === key && !r.ended && (best === null || r.ms < best)) best = r.ms;
+    });
+    return best;
   }
   // Every finished Match / Listening game goes to the Dashboard's log.
   function recordRun(run) {
@@ -1069,9 +1073,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (splitEl) splitEl.hidden = true;
       clockEl.textContent = formatClock(total);
       clockEl.classList.add("fc-ws-count-done");
-      var key = matchBestKey(p), best = readBest()[key];
+      var key = matchBestKey(p), best = bestTime(key);
       var isBest = typeof best !== "number" || total < best;
-      if (isBest) saveBest(key, total);
       var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key, splits: splits, missed: Object.keys(missedIds) });
       var pairs = p.placements.length;
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
@@ -3083,18 +3086,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     generate();
   }
 
-  // Reset Match stats also forgets the per-setup best times.
-  function clearMatchBests() { try { localStorage.removeItem(MATCH_BEST_KEY); } catch (e) { /* ignore */ } }
-
   return {
     playWords: playWords,
-    clearMatchBests: clearMatchBests,
     renderCrosswords: renderCrosswords,
     renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

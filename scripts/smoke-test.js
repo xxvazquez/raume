@@ -3241,7 +3241,6 @@ async function main() {
     return same(xw.matchRounds(10), [5, 5]) && same(xw.matchRounds(15), [5, 5, 5]) && same(xw.matchRounds(6), [6])
       && forty.reduce((a, b) => a + b, 0) === 40 && forty.every(n => n <= 6 && n >= 5);
   })());
-  try { window.localStorage.removeItem(xw.MATCH_BEST_KEY); } catch (e) { /* ignore */ }
   check("Puzzles offers only the grid styles; Match and Listening live in their own Games tab", (() => {
     const opts = sel => [...document.querySelectorAll(sel + ' [data-pick="mode"] option')].map(o => o.value).join("|");
     const puzzles = opts("#fcPanelCrosswords");
@@ -3291,13 +3290,12 @@ async function main() {
     check("between rounds a break card says how the round went, the clock stopped and ⏸ dimmed, until Next round",
       !!mtBreakSeen && /Round 1 of \d+ done/.test(mtBreakSeen.text) && /1 miss/.test(mtBreakSeen.text) && mtBreakSeen.still && mtBreakSeen.pauseOff);
   }
-  check("clearing every round ends on the time, New best and the miss count, and keeps the best time", (() => {
+  check("clearing every round ends on the time, New best and the miss count, and the best time is read back from the log", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
-    let saved = {};
-    try { saved = JSON.parse(window.localStorage.getItem(xw.MATCH_BEST_KEY)) || {}; } catch (e) { /* ignore */ }
-    // file:// jsdom may refuse localStorage (storageUsable) -- then only the card is checked.
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("match").pop();
     return !!done && /New best/.test(done.querySelector(".fc-mt-badge").textContent)
-      && /^\d+ pairs · 1 miss$/.test(done.querySelector(".fc-mt-delta").textContent) && (!storageUsable || Object.keys(saved).length === 1);
+      && /^\d+ pairs · 1 miss$/.test(done.querySelector(".fc-mt-delta").textContent)
+      && xw.bestTime(last.setup) === last.ms;
   })());
   check("the finish card rings your pace per pair in its medal's colour and names the next tier", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
@@ -3849,11 +3847,9 @@ async function main() {
   check("Reset Match stats (after a confirm) clears Match's numbers and bests but leaves Listening's -- a marker in the log keeps them cleared across a sync merge", (() => {
     const markers = pr.all().filter(r => r.reset && r.mode === "match");
     pr.applyRemote(pr.all().concat([{ id: "old-remote", at: "2020-01-01T00:00:00Z", mode: "match", n: 6, ms: 9000, miss: 0 }]));
-    let bests = null;
-    try { bests = window.localStorage.getItem(xw.MATCH_BEST_KEY); } catch (e) { /* ignore */ }
     return pr.live("match").length === 0 && pr.live("listening").length >= 1 && markers.length === 1
       && /No Match games yet/.test(document.getElementById("fcPanelStats").textContent)
-      && (!storageUsable || bests === null);
+      && pr.all().filter(r => r.mode === "match" && r.setup).every(r => xw.bestTime(r.setup) === null);
   })());
   document.getElementById("fcBack").click();
   check("Back returns to Games", !document.getElementById("fcPanelGames").hidden);

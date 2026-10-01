@@ -177,9 +177,7 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 `raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-rings-shown` — the date
-the Dashboard's rings last drew up from nothing (once a day; browser-local), `raume-match-best` —
-Puzzles › Match best times, one per source + script + pair count, also
-browser-local only; Reset Match stats clears it), `raume-puzzle-runs` — every finished
+the Dashboard's rings last drew up from nothing (once a day; browser-local)), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
