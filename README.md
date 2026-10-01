@@ -354,7 +354,8 @@ scrolls sideways.
 
 Timed and scored rounds: **Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort** and **Word chain**. Same toolbar as
 Puzzles — the game's name as a menu, the clock (or "3 / 10"), and ⋯ with
-New game, Words from / Word count / Script (none for Listening or Word chain), How to
+New game, Words from / Word count / Script (none for Listening or Word chain), Skip
+(Word chain), How to
 play, *Restart* and *Stats*. Each tab keeps its own settings and its
 game in progress while you switch between them. Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
@@ -482,21 +483,32 @@ with reduced motion on, it's all a plain change of state.
 <details>
 <summary><b>Word chain</b></summary>
 
-- しりとり: each word starts with the kana the one before it ends on. You
-  see a word and its English; pick which of four words carries on (only
-  one does — the others start on a near miss where there is one, like が
-  for か). Words count as their reading, so it's always kana, whatever the
-  Script.
-- The rules are the usual children's-game ones: a final ー doesn't count
-  (コーヒー ends on ひ), a final small ゃゅょ counts as its big kana
-  (でんしゃ ends on や), and か and が are different kana. A word ending in
-  ん can't be followed, so it only turns up as a wrong choice.
-- The chain is worked out before the game from the words you picked, so
-  every step has an answer; *Words* is the number of links. If your words
-  don't link into at least five, it says so — tick more tables.
-- An answer names the ending ("でんしゃ ends on や (a small ゃ counts as
-  や)"). A right pick moves on by itself; a wrong one waits for Next. At the
-  end: the score, the whole chain on one line, and the links you missed.
+- しりとり: each word starts with the kana the one before it ends on, and
+  you **type** it — nothing to pick from, so you have to recall a word.
+  The chain so far runs along the top (each word as it's written, its
+  reading under kanji, the kana it links on underlined); under it, "Starts
+  with や" in large kana, with the last word and its English.
+- Type in romaji and it turns into kana as you go, like a Japanese
+  keyboard: `ya` → や, `shi` / `si` → し, a doubled consonant → っ
+  (`kitte`), `n'` or `nn` → ん (`onna` → おんな), `-` → ー. Kana or kanji
+  typed with a real Japanese keyboard work too. Return or ↑ answers.
+- Any word in the whole vocabulary counts, not just *Words from* — a few
+  tables rarely have a word for every kana. *Words from* picks the first
+  word and the hints. Readings are compared in hiragana, and ー as the vowel
+  it stretches, so `koohii` is コーヒー. A good word joins the chain as it's
+  written (ごま油, not ごまあぶら).
+- The rules are the usual children's-game ones (also behind the ⓘ on the
+  card): a final ー doesn't count (コーヒー ends on ひ), a final small ゃゅょ
+  counts as its big kana (でんしゃ ends on や), and か and が are different
+  kana. A word ending in ん would end the chain, so it isn't accepted.
+- A miss gets one line under the field and a shake: "Needs to start with
+  や", "Not one of your words", "Already in the chain", "本 ends on ん — the
+  chain can't go on", or that no word starts where it ends.
+- **Hint** (beside ⏸) shows the English of one word that would work; ⋯ ›
+  *Skip this link* plays one for you. *Words* is the number of links; a link
+  counts as right only with no miss, hint or skip. At the end: the score,
+  the whole chain on one line, and the links you missed. Hints show in its
+  Stats.
 
 </details>
 

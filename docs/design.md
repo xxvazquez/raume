@@ -873,11 +873,19 @@ white tiles, 64px tall, 2 or 3 across. The bucket you tap washes sage
 offered only for this game, listing only the sorts the words can fill. Its
 Stats hue is clay.
 
-**Word chain** keeps Listening's toolbar ("3 / 10", ⏸): Speed sort's
-card with a quiet "What comes after" over the word at 30px and its English
-as a grey line, then Odd one out's 2 × 2 of white tiles (kana at 20px,
-English dropping in once answered) and its one-line reveal naming the
-ending. The finish card sets the whole chain as one centred, wrapping line
+**Word chain** keeps Listening's toolbar ("3 / 10", ⏸) plus a white Hint
+capsule before ⏸, and *Skip this link* first in ⋯. Typed, never tapped:
+the chain so far is a sideways-scrolling row of white chips
+(`--control-lift`, 14px corners) — the written form at 17px, its reading at
+11px grey under kanji, the kana it links on underlined 2px in the section
+tint — the newest sliding in from the right. Under it Speed sort's card:
+a quiet "Starts with", the kana at 44px in `--section-strong`, the last
+word and its English as one grey line, and a bare ⓘ in its corner opening
+the rules as a glass note. Then the field: a 44px white capsule like the
+search field (15px text, a section ring on focus) with a 36px filled ↑
+circle inside its trailing end; romaji turns into kana in it as you type.
+One line under it (kept tall enough not to jump) says what went wrong in
+coral, with Speed sort's shake on the field, or shows a hint. The finish card sets the whole chain as one centred, wrapping line
 ("りんご → ごま → まど …"). Its Stats hue is slate.
 
 **Odd one out** keeps Listening's toolbar: a quiet "Which one doesn’t

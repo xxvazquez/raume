@@ -51,6 +51,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // MENU_ICON) -- the menu itself reuses that one's markup, so the delegated
   // open/close/Escape handling in js/vocab/interactions.js covers it too.
   // Three rising bars: the Stats screen.
+  var SKIP_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5 9.5 9 4 13.5M10 4.5 15.5 9 10 13.5"/></svg>';
   var STAR_ICON = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5l2 4.3 4.6.5-3.4 3.1 1 4.6L9 12.6 4.8 15l1-4.6-3.4-3.1 4.6-.5z"/></svg>';
   var STATS_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 15V10M9 15V4M14 15V7.5"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
@@ -829,8 +830,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     window.requestAnimationFrame(step);
   }
-  // Answer feel, shared by the pick-one games (Listening, Odd one out, Word
-  // chain, Speed sort): the right tile washes sage from the middle out and
+  // Answer feel, shared by the pick-one games (Listening, Odd one out,
+  // Speed sort): the right tile washes sage from the middle out and
   // a ✓ draws itself in its corner -- with a small springy press if it was
   // your pick, or a sage ring if you picked another; a wrong pick washes
   // coral with a shake and a ✕. Colours and marks come from the existing
@@ -1892,21 +1893,21 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   // -----------------------------------------------------------------------
   // Word chain (しりとり) -- each word starts with the kana the one before
-  // it ends on: pick the next link from four words, one of which carries
-  // on. By reading, in hiragana (ビール and ひる chain the same). The
-  // usual children's-game rules: a final ー doesn't count (コーヒー ends
-  // on ひ), a final small ゃゅょ counts as its big kana (でんしゃ ends on
-  // や), and dakuten matter (か is not が). A word ending in ん can't be
-  // followed, so it never sits in the chain -- only among the wrong
-  // choices. The chain is found before the game starts (a walk over the
-  // first-kana -> last-kana graph), so every question has an answer.
-  // Practice only.
+  // it ends on, and you type it: recall, not recognition. Romaji turns into
+  // kana as you go (kanaRomaji.toKana, a Japanese keyboard's romaji input);
+  // kana or kanji from a real Japanese keyboard work too. Any word in the
+  // whole vocabulary counts, matched on its reading (katakana folded to
+  // hiragana, ー read as the vowel it lengthens, so koohii is コーヒー) --
+  // a small Words from pool rarely has a word for every kana; Words from
+  // still picks the first word and the hints. The usual children's-game
+  // rules: a final ー doesn't count (コーヒー ends on ひ), a final small
+  // ゃゅょ counts as its big kana (でんしゃ ends on や), dakuten matter (か
+  // is not が), and a word ending in ん can't be followed, so it can't be
+  // played. A link is right made with no miss; a wrong try, a Hint or a
+  // Skip makes it missed. Practice only.
   // -----------------------------------------------------------------------
   var CHAIN_MIN = 5;
-  var CHAIN_BUDGET = 4000;
   var SMALL_KANA = { "ぁ": "あ", "ぃ": "い", "ぅ": "う", "ぇ": "え", "ぉ": "お", "ゃ": "や", "ゅ": "ゆ", "ょ": "よ", "ゎ": "わ", "ゕ": "か", "ゖ": "け" };
-  var DAKUTEN_SETS = ["かが", "きぎ", "くぐ", "けげ", "こご", "さざ", "しじ", "すず", "せぜ", "そぞ", "ただ", "ちぢ", "つづ", "てで", "とど",
-    "はばぱ", "ひびぴ", "ふぶぷ", "へべぺ", "ほぼぽ"];
   var VOWEL_ROWS = { "あ": "あかさたなはまやらわがざだばぱ", "い": "いきしちにひみりぎじぢびぴ", "う": "うくすつぬふむゆるぐずづぶぷ",
     "え": "えけせてねへめれげぜでべぺ", "お": "おこそとのほもよろをごぞどぼぽ" };
   function chainHead(reading) {
@@ -1918,156 +1919,219 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var c = h.charAt(h.length - 1);
     return !c || c === "っ" ? null : SMALL_KANA[c] || c;
   }
-  // Why a word ends where it does, when a rule is at work -- the reveal's
-  // one extra clause.
-  function chainRule(reading) {
-    var h = toHiragana(reading);
-    if (/ー$/.test(h)) return "ー doesn’t count";
-    var c = h.charAt(h.length - 1);
-    return SMALL_KANA[c] ? "a small " + c + " counts as " + SMALL_KANA[c] : "";
-  }
-  // The kana a learner might wrongly carry on from: the same kana with or
-  // without dakuten, the long vowel a final ー sounds like, or the kana in
-  // front of a final small one (し in でんしゃ).
-  function chainTraps(reading) {
-    var tail = chainTail(reading), h = toHiragana(reading), traps = {};
-    DAKUTEN_SETS.forEach(function (set) { if (set.indexOf(tail) !== -1) Array.from(set).forEach(function (c) { traps[c] = true; }); });
-    if (/ー$/.test(h)) Object.keys(VOWEL_ROWS).forEach(function (v) { if (VOWEL_ROWS[v].indexOf(tail) !== -1) traps[v] = true; });
-    var last = h.replace(/ー+$/, "");
-    if (SMALL_KANA[last.charAt(last.length - 1)]) traps[last.charAt(last.length - 2)] = true;
-    delete traps[tail];
-    return traps;
-  }
-  // The longest chain up to `links` links found within a fixed budget,
-  // starts and next words tried in weighted order (see weightedOrder).
-  function findChain(words, links) {
-    var byHead = {};
-    words.forEach(function (w) { if (w.tail !== "ん") (byHead[w.head] = byHead[w.head] || []).push(w); });
-    var best = [], budget = CHAIN_BUDGET, path = [], used = {};
-    function extend() {
-      if (path.length > best.length) best = path.slice();
-      if (path.length > links || --budget < 0) return path.length > links;
-      var next = weightedOrder(byHead[path[path.length - 1].tail] || []);
-      for (var i = 0; i < next.length; i++) {
-        var w = next[i];
-        if (used[w.answer]) continue;
-        used[w.answer] = true; path.push(w);
-        if (extend()) return true;
-        path.pop(); delete used[w.answer];
-      }
-      return false;
+  // A reading as one comparable key: hiragana, ー spelled out as its vowel.
+  function chainKey(s) {
+    var h = toHiragana(String(s || "")), out = "";
+    for (var i = 0; i < h.length; i++) {
+      var c = h[i];
+      if (c !== "ー") { out += c; continue; }
+      var prev = out.charAt(out.length - 1);
+      prev = SMALL_KANA[prev] || prev;
+      out += Object.keys(VOWEL_ROWS).filter(function (v) { return VOWEL_ROWS[v].indexOf(prev) !== -1; })[0] || "";
     }
-    weightedOrder(words.filter(function (w) { return w.tail !== "ん" && byHead[w.tail]; })).some(function (w) {
-      path = [w]; used = {}; used[w.answer] = true;
-      return extend() || budget < 0;
-    });
-    return best.slice(0, links + 1);
+    return out;
   }
-  function buildWordChain(words, limit) {
-    var usable = words.map(function (w) {
-      return { id: w.id, clue: w.clue, answer: w.answer, tableId: w.tableId, weight: w.weight, speak: w.speak,
-        head: chainHead(w.answer), tail: chainTail(w.answer) };
-    }).filter(function (w) { return w.head && w.tail; });
-    var chain = findChain(usable, limit);
-    if (chain.length - 1 < CHAIN_MIN) return { placements: [], questions: [], start: null };
-    var inChain = {};
-    chain.forEach(function (w) { inChain[w.answer] = true; });
-    var questions = chain.slice(1).map(function (right, i) {
-      var prev = chain[i], traps = chainTraps(prev.answer), taken = {};
-      taken[right.answer] = true;
-      // Wrong choices: never one that would also carry on, trap kana first.
-      var wrong = usable.filter(function (w) { return w.head !== prev.tail && !inChain[w.answer]; });
-      var picks = [];
-      [shuffle(wrong.filter(function (w) { return traps[w.head]; })).slice(0, 2), shuffle(wrong)].forEach(function (list) {
-        list.forEach(function (w) {
-          if (picks.length < 3 && !taken[w.answer] && picks.every(function (o) { return o.head !== w.head; })) { taken[w.answer] = true; picks.push(w); }
-        });
-      });
-      var choices = shuffle([right].concat(picks));
-      return { prev: prev, word: right, choices: choices, right: choices.indexOf(right) };
+  // Every word a typed link can be, by key, by written form and by first
+  // kana; rebuilt whenever the vocabulary index is.
+  var chainDict = null;
+  function chainDictionary() {
+    var index = vocabIndex();
+    if (chainDict && chainDict.index === index) return chainDict;
+    var d = { index: index, all: [], byKey: {}, byWritten: {}, byHead: {}, byId: {} };
+    Object.keys(index).forEach(function (id) {
+      var e = index[id];
+      if (!e || e.kanji) return;
+      var reading = String(e.jpReading || "").replace(/^〜/, "").trim();
+      if (!KANA_ONLY.test(reading)) return;
+      var head = chainHead(reading), tail = chainTail(reading);
+      var clue = String(e.englishDisplay || "").split(" / ")[0].trim();
+      if (!head || !tail || !clue) return;
+      var written = String(e.jpPlain || "").replace(/^〜/, "").trim();
+      if (!/^[ぁ-ゖァ-ヶー一-龯々]+$/.test(written)) written = reading;
+      var key = chainKey(reading);
+      if ((d.byKey[key] || []).some(function (o) { return o.written === written; })) return;
+      var w = { id: e.vocabId, answer: reading, written: written, clue: clue, head: head, tail: tail, key: key, speak: e.jpReading };
+      d.all.push(w);
+      d.byId[w.id] = w;
+      (d.byKey[key] = d.byKey[key] || []).push(w);
+      if (!d.byWritten[written]) d.byWritten[written] = w;
+      (d.byHead[head] = d.byHead[head] || []).push(w);
     });
-    return { placements: chain.slice(1), questions: questions, start: chain[0] };
+    chainDict = d;
+    return d;
   }
-  function wireWordChain(boardEl, countEl, p) {
-    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext, streak = streakMeter();
-    var total = p.questions.length;
+  // A word that can carry on: not ending in ん, and something unused
+  // starts where it ends (else the chain would be stuck after it).
+  function canFollow(d, w, used) {
+    return w.tail !== "ん" && (d.byHead[w.tail] || []).some(function (o) { return o.key !== w.key && !used[o.key] && o.tail !== "ん"; });
+  }
+  function buildTypedChain(pool, limit) {
+    var d = chainDictionary(), none = {}, weights = {};
+    pool.forEach(function (w) { weights[w.id] = w.weight || 1; });
+    var starts = weightedOrder(pool.map(function (w) { return d.byId[w.id]; }).filter(function (w) { return w && canFollow(d, w, none); }),
+      function (w) { return weights[w.id]; });
+    if (!starts.length) return { start: null, placements: [] };
+    var poolIds = {};
+    pool.forEach(function (w) { poolIds[w.id] = true; });
+    return { start: starts[0], links: Math.min(limit, Math.max(CHAIN_MIN, pool.length)), poolIds: poolIds, placements: [] };
+  }
+  // One chip of the trail: the word as written and, under it when that's
+  // kanji, its reading -- the kana the chain runs on underlined (its first
+  // where it carries on from the word before, the one it ends on).
+  function chainChipHtml(w, first, isNew) {
+    var chars = Array.from(w.answer), end = Array.from(w.answer.replace(/ー+$/, "")).length - 1;
+    var marked = chars.map(function (c, i) { return (i === 0 && !first) || i === end ? "<u>" + esc(c) + "</u>" : esc(c); }).join("");
+    var kanji = w.written !== w.answer;
+    return '<span class="fc-wc-chip' + (isNew ? " fc-wc-chip-new" : "") + '">' +
+      '<span class="fc-wc-chip-w" lang="ja">' + (kanji ? esc(w.written) : marked) + "</span>" +
+      (kanji ? '<span class="fc-wc-chip-r" lang="ja">' + marked + "</span>" : "") + "</span>";
+  }
+  var SEND_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14.5v-11M4.5 8 9 3.5 13.5 8"/></svg>';
+  var WC_RULES = "A word ending in ー counts its kana before it (コーヒー → ひ), a final small ゃゅょ counts as its big kana (でんしゃ → や), and か is not が. A word ending in ん ends the chain, so it can’t be played.";
+  function wireTypedChain(boardEl, countEl, p) {
+    var d = chainDictionary(), kr = window.RaumeStudy.kanaRomaji;
+    var at, trail, used, score, missed, help, linkMissed, hinted, game = 0, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
+    var total = p.links;
+    var field, msg, needEl, enEl, trailEl;
+    function last() { return trail[trail.length - 1]; }
     function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function render() {
-      var q = p.questions[at];
-      count();
-      answered = false;
       boardEl.innerHTML =
-        '<div class="fc-ls-card fc-ss-card"><p class="fc-ss-count">What comes after</p>' +
-        '<p class="fc-ss-word" lang="ja">' + esc(q.prev.answer) + "</p>" +
-        '<p class="fc-wc-en">' + esc(q.prev.clue) + "</p></div>" +
-        '<div class="fc-oo-grid fc-wc-grid">' + q.choices.map(function (w, i) {
-          return '<button type="button" class="fc-mt-tile fc-oo-word" data-i="' + i + '">' +
-            '<span class="fc-oo-w" lang="ja">' + esc(w.answer) + "</span>" +
-            '<span class="fc-oo-en" hidden>' + esc(w.clue) + "</span></button>";
-        }).join("") + "</div>" +
-        '<p class="fc-oo-reveal" aria-live="polite" hidden></p>' +
-        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+        '<div class="fc-wc-trail" aria-label="The chain so far">' + chainChipHtml(trail[0], true, false) + "</div>" +
+        '<div class="fc-ls-card fc-ss-card fc-wc-need">' +
+        '<button type="button" class="fc-wc-info" aria-label="Word chain rules" aria-expanded="false">' + INFO_ICON + "</button>" +
+        '<p class="fc-xw-tip-pop fc-wc-rules" role="note" hidden>' + WC_RULES + "</p>" +
+        '<p class="fc-ss-count">Starts with</p><p class="fc-wc-kana" lang="ja"></p><p class="fc-wc-en"></p></div>' +
+        '<form class="fc-wc-form" autocomplete="off"><input class="fc-wc-field" type="text" lang="ja" aria-label="The next word, in romaji or kana"' +
+        ' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">' +
+        '<button type="submit" class="fc-wc-go" aria-label="Answer">' + SEND_ICON + "</button></form>" +
+        '<p class="fc-wc-msg" aria-live="polite"></p>';
+      field = boardEl.querySelector(".fc-wc-field");
+      msg = boardEl.querySelector(".fc-wc-msg");
+      needEl = boardEl.querySelector(".fc-wc-kana");
+      enEl = boardEl.querySelector(".fc-wc-en");
+      trailEl = boardEl.querySelector(".fc-wc-trail");
+      showNeed();
     }
-    function answer(btn) {
-      var q = p.questions[at], i = +btn.dataset.i, right = i === q.right, thisGame = game;
-      answered = true;
-      boardEl.querySelectorAll(".fc-oo-word").forEach(function (b) {
-        b.disabled = true;
-        b.querySelector(".fc-oo-en").hidden = false;
-        if (+b.dataset.i === q.right) b.classList.add("fc-mt-right");
-      });
-      if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
-      answerFeel(boardEl.querySelector('.fc-oo-word[data-i="' + q.right + '"]'), btn);
-      streak.hit(right);
-      var rule = chainRule(q.prev.answer);
-      var reveal = boardEl.querySelector(".fc-oo-reveal");
-      reveal.innerHTML = '<span lang="ja">' + esc(q.prev.answer) + "</span> ends on <span lang=\"ja\">" + esc(q.prev.tail) + "</span>" +
-        (rule ? " (" + esc(rule) + ")" : "") + ' — <span lang="ja">' + esc(q.word.answer) + "</span> carries on.";
-      reveal.hidden = false;
-      if (right) {
-        score++;
-        setTimeout(function () {
-          if (thisGame !== game || !boardEl.isConnected) return;
-          if (pausedAt !== null) pendingNext = true; else next();
-        }, 1600);
-      } else {
-        missed.push(q.word);
-        var nextBtn = boardEl.querySelector(".fc-ls-next");
-        nextBtn.hidden = false;
-        nextBtn.focus();
+    function showNeed() {
+      var w = last();
+      count();
+      needEl.textContent = w.tail;
+      enEl.innerHTML = '<span lang="ja">' + esc(w.written) + "</span> · " + esc(w.clue);
+      trailEl.scrollLeft = trailEl.scrollWidth;
+    }
+    function say(text, cls) {
+      msg.className = "fc-wc-msg" + (cls ? " " + cls : "");
+      msg.innerHTML = text;
+    }
+    function typedKana(final) { return kr.toKana(field.value.trim(), final); }
+    function miss(text) {
+      say(text, "fc-wc-msg-bad");
+      linkMissed = true;
+      streak.hit(false);
+      var form = field.parentNode;
+      form.classList.remove("fc-wc-shake");
+      void form.offsetWidth;
+      form.classList.add("fc-wc-shake");
+    }
+    // Answer with what's typed: its reading, or a written form typed with
+    // a Japanese keyboard's own conversion. The trail shows the word as
+    // it's written (kanji and all).
+    function answer() {
+      if (locked || done) return;
+      var need = last().tail, typed = field.value.trim();
+      if (!typed) return;
+      var kana = typedKana(true);
+      var list = d.byWritten[typed] ? [d.byWritten[typed]] : (d.byKey[chainKey(kana)] || []);
+      var head = list.length ? list[0].head : chainHead(kana);
+      if (head !== need) { miss("Needs to start with <span lang=\"ja\">" + esc(need) + "</span>"); return; }
+      if (!list.length) { miss("Not one of your words"); return; }
+      var word = list.filter(function (w) { return !used[w.key]; })[0] || list[0];
+      if (used[word.key]) { miss("Already in the chain"); return; }
+      if (word.tail === "ん") { miss('<span lang="ja">' + esc(word.written) + "</span> ends on ん — the chain can’t go on"); return; }
+      if (at + 1 < total && !canFollow(d, word, used)) {
+        miss("No word starts with <span lang=\"ja\">" + esc(word.tail) + "</span> after it — try another"); return;
       }
+      link(word, false);
     }
-    function next() {
+    function link(word, skipped) {
+      used[word.key] = true;
+      trail.push(word);
+      trailEl.insertAdjacentHTML("beforeend", chainChipHtml(word, false, true));
       at++;
-      if (at >= total) { finish(); return; }
-      render();
+      if (!linkMissed && !skipped) { score++; streak.hit(true); }
+      else { missed.push(word); if (skipped) streak.hit(false); }
+      // The card under the trail now shows the word and its English; the
+      // line only says when it was a skip.
+      say(skipped ? "Skipped" : "");
+      linkMissed = false; hinted = null;
+      field.value = "";
+      var stuck = !(d.byHead[word.tail] || []).some(function (o) { return !used[o.key] && o.tail !== "ん"; });
+      if (at >= total || stuck) {
+        locked = true;
+        var thisGame = game;
+        setTimeout(function () { if (thisGame === game && boardEl.isConnected) finish(); }, 900);
+        return;
+      }
+      showNeed();
+      field.focus();
     }
-    boardEl.addEventListener("click", function (e) {
-      if (done) return;
-      if (e.target.closest(".fc-ls-next")) { next(); return; }
-      var btn = e.target.closest(".fc-oo-word");
-      if (btn && !btn.disabled && !answered) answer(btn);
+    // One word that would carry on, Words from's first.
+    function validWord() {
+      var need = last().tail, rest = at + 1 < total;
+      var ok = (d.byHead[need] || []).filter(function (w) { return !used[w.key] && w.tail !== "ん"; });
+      var going = ok.filter(function (w) { return !rest || canFollow(d, w, used); });
+      if (going.length) ok = going;
+      var mine = ok.filter(function (w) { return p.poolIds[w.id]; });
+      return shuffle(mine.length ? mine : ok)[0] || null;
+    }
+    function hint() {
+      if (locked || done || pausedAt !== null) return;
+      if (!hinted) {
+        hinted = validWord();
+        if (!hinted) return;
+        help++;
+        linkMissed = true;
+        streak.hit(false);
+      }
+      say("Hint: " + esc(hinted.clue));
+      field.focus();
+    }
+    function skip() {
+      if (locked || done || pausedAt !== null) return;
+      var w = hinted || validWord();
+      if (w) link(w, true);
+    }
+    boardEl.addEventListener("input", function (e) {
+      if (!e.target.classList.contains("fc-wc-field") || e.isComposing) return;
+      var conv = typedKana(false);
+      if (conv !== field.value) field.value = conv;
     });
-    // The whole chain, start to finish, as the finish card's one line.
-    function chainHtml() {
-      return '<p class="fc-wc-chain" lang="ja">' + [p.start].concat(p.placements).map(function (w) { return esc(w.answer); }).join(" → ") + "</p>";
+    boardEl.addEventListener("submit", function (e) { e.preventDefault(); answer(); field.focus(); });
+    boardEl.addEventListener("click", function (e) {
+      var info = e.target.closest(".fc-wc-info"), pop = boardEl.querySelector(".fc-wc-rules");
+      if (info) { pop.hidden = !pop.hidden; info.setAttribute("aria-expanded", String(!pop.hidden)); return; }
+      if (pop && !pop.hidden) { pop.hidden = true; boardEl.querySelector(".fc-wc-info").setAttribute("aria-expanded", "false"); }
+    });
+    function setup() { return setupKey(total, "kana|type"); }
+    function chainLineHtml() {
+      return '<p class="fc-wc-chain" lang="ja">' + trail.map(function (w) { return esc(w.written); }).join(" → ") + "</p>";
     }
     function missedHtml() {
       return missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
         return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
       }).join("") + "</ul>" : "";
     }
-    function setup() { return setupKey(total, "kana"); }
     function finish() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
-      var run = recordRun({ mode: "wordchain", n: total, ms: Date.now() - startedAt - pausedMs, right: score,
+      var run = recordRun({ mode: "wordchain", n: at, ms: Date.now() - startedAt - pausedMs, right: score, help: help,
         setup: setup(), missed: missed.map(function (w) { return w.id; }) });
-      countEl.textContent = score + " / " + total;
+      countEl.textContent = score + " / " + at;
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
-        '<p class="fc-mt-done-time">' + score + " / " + total + "</p>" +
-        accuracyStatsHtml("wordchain", score, total, run) + chainHtml() +
+        '<p class="fc-mt-done-time">' + score + " / " + at + "</p>" +
+        accuracyStatsHtml("wordchain", score, at, run) + chainLineHtml() +
         '<p class="fc-mt-done-meta">' + (missed.length ? "Links you missed:" : "Every link right") + "</p>" +
         missedHtml() + doneActionsHtml("fcWcAgain") + "</div>";
       bindDoneActions("fcWcAgain");
@@ -2076,35 +2140,33 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (done || pausedAt !== null || !boardEl.isConnected) return;
       pausedAt = Date.now();
       showPauseCard(boardEl, Math.min(at + 1, total) + " / " + total, score + " right so far", {
-        resume: function () {
-          pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl);
-          if (pendingNext) { pendingNext = false; next(); }
-        },
+        resume: function () { pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl); if (field) field.focus(); },
         restart: restart,
         end: endEarly
       });
     }
-    // Stopped part-way: the links you answered count (see Listening's).
+    // Stopped part-way: the links you made count (see Listening's).
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
-      var played = Math.min(at + (answered ? 1 : 0), total);
-      if (played) recordRun({ mode: "wordchain", n: played, ms: (pausedAt || Date.now()) - startedAt - pausedMs, right: score,
+      if (at) recordRun({ mode: "wordchain", n: at, ms: (pausedAt || Date.now()) - startedAt - pausedMs, right: score, help: help,
         setup: setup(), missed: missed.map(function (w) { return w.id; }), ended: true });
       countEl.classList.add("fc-ws-count-done");
       boardEl.classList.remove("fc-mt-paused");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
-        '<p class="fc-mt-done-time">' + score + " / " + played + "</p>" +
-        '<p class="fc-mt-done-meta">Ended after ' + played + " of " + total + " links</p>" +
-        '<p class="fc-mt-done-note">' + (played ? "The " + played + (played === 1 ? " link" : " links") + " you answered count in your stats."
-          : "No link answered, so nothing is counted.") + "</p>" +
+        '<p class="fc-mt-done-time">' + score + " / " + at + "</p>" +
+        '<p class="fc-mt-done-meta">Ended after ' + at + " of " + total + " links</p>" +
+        '<p class="fc-mt-done-note">' + (at ? "The " + at + (at === 1 ? " link" : " links") + " you made count in your stats."
+          : "No link made, so nothing is counted.") + "</p>" +
         doneActionsHtml("fcWcAgain") + "</div>";
       bindDoneActions("fcWcAgain");
     }
+    // The same first word, from the top.
     function restart() {
       game++;
       hidePauseCard(boardEl);
-      at = 0; score = 0; missed = []; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      at = 0; trail = [p.start]; used = {}; used[p.start.key] = true; score = 0; missed = []; help = 0;
+      linkMissed = false; hinted = null; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; locked = false;
       streak.reset();
       var pb = document.getElementById("fcMtPause");
       if (pb) pb.disabled = false;
@@ -2112,7 +2174,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       render();
     }
     restart();
-    var api = { restart: restart, pause: pause };
+    var api = { restart: restart, pause: pause, hint: hint, skip: skip };
     activeGame = api;
     return api;
   }
@@ -2202,7 +2264,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // in the kana.
     if (state.mode === "wordchain") {
       state.poolCount = pool.length;
-      state.puzzle = buildWordChain(pool, state.size);
+      state.puzzle = buildTypedChain(pool, state.size);
       return;
     }
     // Romaji mode only offers words with a usable romaji spelling (a
@@ -2647,7 +2709,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return state.mode === "wordchain" ? "Each word starts with the kana the one before ends on — pick the one that carries on. A final ー doesn’t count, and a small ゃ counts as や."
+    return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type. Any word in the vocabulary counts. Hint shows one that would work; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
@@ -2671,9 +2733,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var actions = bare ? MENU_ACTIONS.filter(function (a) { return a[0] === "stats"; })
       : mt ? MENU_ACTIONS.filter(function (a) { return MT_MENU_LABELS[a[0]]; }) : MENU_ACTIONS;
     var newLabel = mt ? "New game" : "New puzzle";
+    // Word chain: a Hint (a word that would work, in English) beside ⏸,
+    // and Skip -- give up on this link -- first in ⋯.
+    var typed = !bare && state.mode === "wordchain";
+    if (typed) actions = [["skip", "Skip this link", SKIP_ICON]].concat(actions);
     return '<div class="fc-xw-actions">' + titleMenuHtml() +
       '<div class="fc-xw-actions-end">' +
       (bare ? "" : '<button type="button" class="fc-btn fc-xw-new" id="fcXwNew">' + newLabel + "</button>" +
+        (typed ? '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="A word that would work">' + HINT_ICON + "Hint</button>" : "") +
         (mt ? '<button type="button" class="fc-mt-pause-btn" id="fcMtPause" aria-label="Pause">' + PAUSE_ICON + "</button>"
           : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
         (ls ? streakHtml() + '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
@@ -2814,8 +2881,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         "Tick more tables under ⋯ › Words from.", false);
       return;
     }
-    if (state.mode === "wordchain" && !p.questions.length) {
-      notEnough("These words don’t link into a chain of " + CHAIN_MIN + " — too few start with the kana others end on. " +
+    if (state.mode === "wordchain" && !p.start) {
+      notEnough("None of these words can start a chain — each ends on ん or on a kana no other word starts with. " +
         "Tick more tables under ⋯ › Words from.", false);
       return;
     }
@@ -2869,9 +2936,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       panel.innerHTML = toolbarHtml() + '<div class="fc-ls fc-wc"></div>';
       bindControls(panel);
       document.getElementById("fcXwNew").addEventListener("click", function () { generate(); rerender(); });
-      var chain = wireWordChain(panel.querySelector(".fc-wc"), document.getElementById("fcLsCount"), p);
+      var chain = wireTypedChain(panel.querySelector(".fc-wc"), document.getElementById("fcLsCount"), p);
       document.getElementById("fcMtPause").addEventListener("click", chain.pause);
-      bindMenu(panel, { reset: chain.restart });
+      bindMenu(panel, { reset: chain.restart, hint: chain.hint, skip: chain.skip });
       return;
     }
     if (state.mode === "oddone") {
@@ -3027,7 +3094,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildWordChain: buildWordChain, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, MATCH_BEST_KEY: MATCH_BEST_KEY, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

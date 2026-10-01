@@ -1111,6 +1111,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // pick a rating before the answer has been checked, or skip the check.
   document.addEventListener("keydown", function (event) {
     if (!session || document.body.dataset.activePage !== "flashcards") return;
+    // A review left open under another tab mustn't take that tab's keys
+    // (Word chain's field, say).
+    var fc = window.RaumeStudy.flashcards;
+    if (fc.getActiveTab && fc.getActiveTab() !== "dashboard") return;
     var isSubmitKey = event.key === "Enter" || event.key === " ";
 
     var backBtn = document.getElementById("fcBackToDashboard");

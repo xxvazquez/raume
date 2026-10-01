@@ -117,7 +117,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     else if (mode === "kanatiles") rows += row("Words spelled", String(st.words));
     else if (mode === "oddone") rows += row("Sets played", String(st.words));
     else if (mode === "speedsort") rows += row("Words sorted", String(st.words));
-    else if (mode === "wordchain") rows += row("Links made", String(st.words));
+    else if (mode === "wordchain") rows += row("Links made", String(st.words)) + (st.help ? row("Hints used", String(st.help)) : "");
     else rows += row("Words", String(st.words)) + row("Hints used", String(st.help));
     return group("Overview", rows);
   }

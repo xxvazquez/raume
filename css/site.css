@@ -3606,12 +3606,54 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ss-bucket.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); }
 .fc-ss-bucket.fc-mt-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
 .fc-ss-bucket.fc-ss-was { box-shadow: 0 0 0 2px var(--right); color: var(--right-strong); }
-/* Word chain: Speed sort's card holding the word to follow (its English a
-   quiet line under it), then Odd one out's 2 x 2 of choices and reveal;
-   the finish card sets the whole chain as one wrapping line. */
+/* Word chain's finish card sets the whole chain as one wrapping line. */
 .fc-wc-en { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
-.fc-wc-grid { margin-top: 12px; }
 .fc-wc-chain { margin: 4px 0 12px; color: var(--ink); font-size: var(--fs-nav); line-height: 1.6; text-align: center; }
+/* Word chain: the chain so far as a row of white chips (written
+   form, its reading small under kanji; the kana the chain runs on
+   underlined in the section tint), scrolling sideways, the newest sliding
+   in at the end. Then the card: "Starts with", the kana large in the
+   section tint, the last word and its English quiet under it, an ⓘ in its
+   corner for the rules (a glass note, never standing text). Then the
+   field -- a white capsule like the search field, its ↑ a filled circle --
+   and one line under it: what went wrong (coral, the field shakes), a
+   hint, or "Skipped" -- a good word just joins the trail and the card. */
+.fc-wc-trail {
+  display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px 10px; padding: 2px 2px 4px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.fc-wc-trail::-webkit-scrollbar { display: none; }
+.fc-wc-chip {
+  flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 12px; border-radius: 14px; background: var(--paper); box-shadow: var(--control-lift);
+}
+.fc-wc-chip-w { font-size: 17px; line-height: 1.25; color: var(--ink); }
+.fc-wc-chip-r { font-size: 11px; color: var(--muted); }
+.fc-wc-chip u { text-decoration: underline 2px var(--section); text-underline-offset: 3px; }
+.fc-wc-chip-new { animation: fc-wc-in .3s cubic-bezier(.2, .8, .2, 1); }
+@keyframes fc-wc-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+.fc-wc-need { position: relative; }
+.fc-wc-kana { margin: 0; font-size: 44px; line-height: 1.15; color: var(--section-strong); }
+.fc-wc-info {
+  appearance: none; border: 0; padding: 0; position: absolute; top: 8px; right: 8px;
+  display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.fc-wc-info:hover, .fc-wc-info[aria-expanded="true"] { color: var(--section-strong); }
+.fc-xw-tip-pop.fc-wc-rules { top: 44px; right: 8px; text-align: left; }
+.fc-wc-form { display: flex; align-items: center; gap: 8px; height: 44px; margin-top: 14px; padding: 0 4px 0 16px; border-radius: 22px; background: var(--paper); box-shadow: var(--control-lift); }
+.fc-wc-form:focus-within { box-shadow: var(--control-lift), 0 0 0 2px var(--section); }
+.fc-wc-field {
+  flex: 1 1 auto; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent;
+  font: 400 15px/1 var(--font-ui); color: var(--ink); outline: none;
+}
+.fc-wc-go {
+  appearance: none; border: 0; padding: 0; flex: none; display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; background: var(--section); color: #fff; cursor: pointer;
+}
+.fc-wc-shake { animation: fc-fb-shake .34s ease-out; }
+.fc-wc-msg { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font-size: var(--fs-nav); line-height: 1.45; text-align: center; }
+.fc-wc-msg-bad { color: var(--wrong-strong); }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 /* Answer feel (crosswords.js answerFeel), shared by the pick-one games: a
    tile squeezes a little under a finger; once answered, the right tile's

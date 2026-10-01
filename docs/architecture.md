@@ -176,7 +176,9 @@ puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
 match / listening / kanatiles / oddone / speedsort / wordchain / crossword / arroword / wordsearch; `setup` is
-`source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana` for Word chain);
+`source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana|type` for Word chain,
+typed since 2026-10 — older `kana` runs were the pick-from-four version); a Word chain run also keeps
+`help` (hints) when it used any;
 `ended` marks a Match / Listening game stopped early (only its finished
 rounds / answered words, with `sizes` = those Match rounds' pair counts —
 it counts everywhere except personal bests and the finish card's rank);
@@ -263,7 +265,8 @@ js/
   shared.js             cross-feature helpers (HTML escape, pronunciation playback, the iOS confirm sheet)
   sw-register.js        service-worker registration
   vocab/                the reference page
-    kana-romaji.js       kana → romaji converter (the reading layer)
+    kana-romaji.js       kana → romaji converter (the reading layer), and
+                         romaji → kana (toKana: typed Word chain answers)
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
     table-custom.js      per-table names / icons / order

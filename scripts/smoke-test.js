@@ -3557,57 +3557,100 @@ async function main() {
   check("Word chain reads the end of a word by the usual rules: ー doesn't count, a small ゃ counts as や, katakana reads as hiragana",
     xw.chainTail("コーヒー") === "ひ" && xw.chainTail("でんしゃ") === "や" && xw.chainTail("りんご") === "ご"
     && xw.chainTail("ほん") === "ん" && xw.chainHead("ビール") === "び" && xw.chainHead("ーあ") === null);
-  check("a built chain links every word to the next, never repeats one, never plays a word ending in ん, and each question has exactly one word that carries on", (() => {
-    const w = (id, answer) => ({ id, clue: id, answer, tableId: "A" });
-    const words = [w("1", "りんご"), w("2", "ごはん"), w("3", "ごま"), w("4", "まど"), w("5", "どうぶつ"), w("6", "つくえ"),
-      w("7", "えき"), w("8", "きしゃ"), w("9", "やま"), w("10", "まくら"), w("11", "らいねん"), w("12", "かさ"), w("13", "がっこう")];
-    const tooShort = xw.buildWordChain(words.slice(0, 3), 10);
-    const p = xw.buildWordChain(words, 30);
-    const chain = [p.start].concat(p.placements);
-    return tooShort.questions.length === 0 && p.questions.length >= 5
-      && chain.every((x, i) => i === 0 || xw.chainHead(x.answer) === xw.chainTail(chain[i - 1].answer))
-      && new Set(chain.map(x => x.answer)).size === chain.length && chain.every(x => xw.chainTail(x.answer) !== "ん")
-      && p.questions.every(q => q.choices.filter(c => xw.chainHead(c.answer) === xw.chainTail(q.prev.answer)).length === 1
-        && q.choices[q.right] === q.word);
-  })());
+  check("romaji turns into kana like a Japanese keyboard: shi/chi/tsu/fu/ji, the kya row, っ, ん by n' / nn / n before a consonant",
+    (() => {
+      const k = window.RaumeStudy.kanaRomaji.toKana;
+      const cases = [["shinbun", "しんぶん"], ["shimbun", "しんぶん"], ["onna", "おんな"], ["kin'en", "きんえん"], ["honn", "ほん"],
+        ["matcha", "まっちゃ"], ["kitte", "きって"], ["kyou", "きょう"], ["densha", "でんしゃ"], ["tsukue", "つくえ"], ["tukue", "つくえ"],
+        ["fuji", "ふじ"], ["huzi", "ふじ"], ["chichi", "ちち"], ["ko-hi-", "こーひー"], ["jagaimo", "じゃがいも"], ["zyagaimo", "じゃがいも"],
+        ["SUSHI", "すし"], ["やさい", "やさい"], ["山", "山"]];
+      return cases.every(([a, b]) => k(a, true) === b)
+        && k("ky", false) === "ky" && k("hon", false) === "ほn" && k("konn", false) === "こnn" && k("konni", false) === "こんに";
+    })());
   xwPick("mode", "wordchain");
   const wcTables = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-kanji").map(t => t.id);
   xw.state.source = "table"; xw.state.tables = wcTables.slice(); xw.state.puzzle = null;
   window.RaumeStudy.flashcards.render();
-  const wcQ = () => xw.state.puzzle.questions[Number(document.getElementById("fcLsCount").textContent.split(" / ")[0]) - 1];
-  check("a Word chain question: the word to follow and its English, four kana tiles, a counter, and no Script row in ⋯", (() => {
-    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
-    return tiles.length === 4 && tiles.every(t => t.querySelector(".fc-oo-en").hidden)
-      && document.querySelector("#fcPanelGames .fc-ss-word").textContent === wcQ().prev.answer
-      && document.getElementById("fcLsCount").textContent === "1 / " + xw.state.puzzle.questions.length
-      && !document.querySelector('#fcPanelGames [data-pick="script"]')
+  const wcDict = xw.chainDictionary();
+  const wcEl = sel => document.querySelector("#fcPanelGames " + sel);
+  const wcType = text => {
+    const f = wcEl(".fc-wc-field");
+    f.value = text;
+    f.dispatchEvent(new window.Event("input", { bubbles: true }));
+  };
+  const wcSubmit = () => wcEl(".fc-wc-form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+  const wcMsg = () => wcEl(".fc-wc-msg").textContent;
+  check("Word chain: the first word in the trail, \"Starts with\" its last kana, a field to type in, Hint, and Skip in ⋯ -- nothing to tap instead", (() => {
+    const p = xw.state.puzzle;
+    const menu = [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|");
+    return !!p.start && wcEl(".fc-wc-kana").textContent === p.start.tail && !document.querySelector("#fcPanelGames .fc-oo-word")
+      && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 1 && !!wcEl(".fc-wc-field") && !!document.getElementById("fcXwHint")
+      && !document.querySelector('#fcPanelGames [data-pick="script"]') && /^New game\|Skip this link\|How to play/.test(menu)
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());
-  const wcFirst = wcQ();
-  check("a wrong pick: ✕ on it, ✓ on the word that carries on, the ending explained, and Next waits", (() => {
-    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + ((wcFirst.right + 1) % wcFirst.choices.length) + '"]').click();
-    const tiles = [...document.querySelectorAll("#fcPanelGames .fc-oo-word")];
-    const reveal = document.querySelector("#fcPanelGames .fc-oo-reveal").textContent;
-    return tiles[wcFirst.right].classList.contains("fc-mt-right") && reveal.indexOf(wcFirst.prev.answer + " ends on " + xw.chainTail(wcFirst.prev.answer)) === 0
-      && / carries on\.$/.test(reveal) && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+  // A small game we can steer: a first word whose last kana starts both a
+  // word ending in ん and one that carries on.
+  const wcCarries = (w, used) => w.tail !== "ん" && (wcDict.byHead[w.tail] || []).some(o => o.key !== w.key && !used[o.key] && o.tail !== "ん");
+  const wcStart = wcDict.all.find(s => wcCarries(s, {}) && (wcDict.byHead[s.tail] || []).some(o => o.tail === "ん")
+    && (wcDict.byHead[s.tail] || []).some(o => o.key !== s.key && o.written !== o.answer && !/[んン][あいうえおやゆよアイウエオヤユヨ]/.test(o.answer)
+      && wcCarries(o, { [s.key]: true })));
+  xw.state.puzzle = { start: wcStart, links: 3, poolIds: {}, placements: [] };
+  window.RaumeStudy.flashcards.render();
+  check("typing romaji shows it as kana as you go", (() => {
+    wcType("yasa");
+    const ok = wcEl(".fc-wc-field").value === "やさ";
+    wcType("");
+    return ok;
   })());
-  document.querySelector("#fcPanelGames .fc-ls-next").click();
-  for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
-    const before = document.getElementById("fcLsCount").textContent;
-    document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + wcQ().right + '"]').click();
-    for (let waited = 0; waited < 4000; waited += 25) {
-      if (document.querySelector("#fcPanelGames .fc-mt-done") || document.getElementById("fcLsCount").textContent !== before) break;
-      await new Promise(r => setTimeout(r, 25));
-    }
-  }
-  check("the end: N-1 right, the whole chain on one line, the missed link listed, and a logged wordchain game", (() => {
-    const done = document.querySelector("#fcPanelGames .fc-mt-done");
-    const p = xw.state.puzzle, n = p.questions.length;
+  check("a word with the wrong first kana: \"Needs to start with …\", the field shakes", (() => {
+    const wrong = wcDict.all.find(w => w.head !== wcStart.tail && /^[ぁ-ゖ]+$/.test(w.answer));
+    wcType(window.RaumeStudy.kanaRomaji.toRomaji(wrong.answer));
+    wcSubmit();
+    return wcMsg() === "Needs to start with " + wcStart.tail && wcEl(".fc-wc-form").classList.contains("fc-wc-shake")
+      && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 1;
+  })());
+  check("a word that isn't in the vocabulary: \"Not one of your words\"", (() => {
+    wcType(wcStart.tail + "ぬぬぬぬ");
+    wcSubmit();
+    return wcMsg() === "Not one of your words";
+  })());
+  check("a word ending in ん: it can't carry the chain", (() => {
+    const n = wcDict.byHead[wcStart.tail].find(o => o.tail === "ん");
+    wcType(n.answer);
+    wcSubmit();
+    return wcMsg() === n.written + " ends on ん — the chain can’t go on";
+  })());
+  // (Not one with ん before a vowel -- toRomaji writes きんえん as "kinen".)
+  const wcNext = wcDict.byHead[wcStart.tail].find(o => o.key !== wcStart.key && o.written !== o.answer && !/[んン][あいうえおやゆよアイウエオヤユヨ]/.test(o.answer)
+    && wcCarries(o, { [wcStart.key]: true }));
+  check("a good word typed in romaji joins the trail as it's written (kanji and all), its English under the field", (() => {
+    wcType(window.RaumeStudy.kanaRomaji.toRomaji(wcNext.answer).replace(/[āīūēō]/g, v => ({ ā: "a-", ī: "i-", ū: "u-", ē: "e-", ō: "o-" })[v]));
+    wcSubmit();
+    const chips = document.querySelectorAll("#fcPanelGames .fc-wc-chip");
+    return chips.length === 2 && chips[1].querySelector(".fc-wc-chip-w").textContent === wcNext.written
+      && wcEl(".fc-wc-en").textContent === wcNext.written + " · " + wcNext.clue && wcMsg() === "" && wcEl(".fc-wc-kana").textContent === wcNext.tail
+      && document.getElementById("fcLsCount").textContent === "2 / 3" && wcEl(".fc-wc-field").value === "";
+  })());
+  check("Hint shows the English of a word that would work", (() => {
+    document.getElementById("fcXwHint").click();
+    return /^Hint: .+/.test(wcMsg());
+  })());
+  check("⋯ › Skip this link moves on with a word that works", (() => {
+    document.getElementById("fcXwSkip").click();
+    return document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 3 && wcMsg() === "Skipped";
+  })());
+  await (async () => {
+    const need = wcEl(".fc-wc-kana").textContent;
+    const trailText = [...document.querySelectorAll("#fcPanelGames .fc-wc-chip-w")].map(c => c.textContent);
+    const good = wcDict.byHead[need].find(o => o.tail !== "ん" && !trailText.includes(o.written));
+    wcType(good.answer);
+    wcSubmit();
+    for (let waited = 0; waited < 3000 && !wcEl(".fc-mt-done"); waited += 25) await new Promise(r => setTimeout(r, 25));
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("wordchain").pop();
-    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
-      && done.querySelector(".fc-wc-chain").textContent.split(" → ").length === n + 1
-      && !!last && last.right === n - 1 && last.missed.join() === String(wcFirst.word.id) && /\|kana\|/.test(last.setup);
-  })());
+    check("the typed game ends after its links: the one clean link scored, the hinted and skipped ones missed, help logged, its own setup",
+      !!wcEl(".fc-mt-done") && wcEl(".fc-mt-done-time").textContent === "1 / 3" && wcEl(".fc-wc-chain").textContent.split(" → ").length === 4
+      && !!last && last.right === 1 && last.n === 3 && last.help === 1 && last.missed.length === 2 && /\|kana\|type\|3$/.test(last.setup));
+  })();
   xwSource("flashcards");
   xwPick("mode", "listening");
 

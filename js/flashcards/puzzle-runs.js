@@ -5,7 +5,7 @@
 //   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" | "oddone" | "speedsort" | "wordchain" |
 //     "crossword" | "arroword" | "wordsearch", n: pairs / questions / words, ms: time
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
-//     help: letters / words revealed (grids), setup: source|script|count
+//     help: letters / words revealed (grids; hints in typed Word chain), setup: source|script|count
 //     (for comparing like with like), splits: time at each round's end
 //     (Match, for the live split against your best), missed: vocab ids
 //     the game caught you on -- a wrong pair, a wrong answer, a word or
@@ -80,7 +80,11 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
       if (run.splits && run.splits.length) r.splits = run.splits.map(Math.round);
       if (run.sizes && run.sizes.length) r.sizes = run.sizes.slice();
     }
-    else if (isScored(run.mode)) r.right = run.right || 0;
+    else if (isScored(run.mode)) {
+      r.right = run.right || 0;
+      // Typed Word chain's hints, kept only when there were some.
+      if (run.help) r.help = run.help;
+    }
     else r.help = run.help || 0;
     save(load().concat([r]));
     return r;
