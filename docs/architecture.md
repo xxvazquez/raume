@@ -75,6 +75,13 @@ flowchart LR
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
   knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known) and `puzzle_runs` (every finished puzzle and game). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
+- **Today's tracker** — the flashcard cache's `day`: `{ date, count, fresh,
+  reviewed }`, the new cards met today (`count`, held to *New cards per day*,
+  and their ids in `fresh`) and the cards already past new that were reviewed
+  today (`reviewed`). It feeds the daily allowance and the Dashboard's Review
+  and Learn rings ([`scheduling.js`](../js/flashcards/scheduling.js)
+  `bumpNewToday` / `markReviewedToday` / `todayDay`). Device-local, like
+  Kana's own tracker: two devices studied the same day each count their own.
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
 - **Table customisations** (names / icons / order) follow the same pattern (an
@@ -169,7 +176,8 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
 `raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
 collapsible sections a reader has open, keyed per item, browser-local only
-(not part of the account sync any of the others above get), `raume-match-best` —
+(not part of the account sync any of the others above get), `raume-rings-shown` — the date
+the Dashboard's rings last drew up from nothing (once a day; browser-local), `raume-match-best` —
 Puzzles › Match best times, one per source + script + pair count, also
 browser-local only; Reset Match stats clears it), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen

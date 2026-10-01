@@ -42,8 +42,6 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // The verdict tag's icon -- same line-icon idiom as the speaker button
   // (js/vocab/render.js), just two glyphs, kept local since nothing else uses them.
   var VERDICT_OK_ICON = '<svg width="10" height="10" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
-  // The dashboard's "All caught up" tick -- the same mark, a size up.
-  var CHECK_ICON = '<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
   var VERDICT_BAD_ICON = '<svg width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
   // A near-miss (exactly one letter off) reads as a caution, not a flat pass
   // or fail -- same stroke style as the two icons above.
@@ -111,7 +109,6 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // flag it once it's meaningfully below what Settings asks FSRS to aim for,
     // so the tile isn't flickering color over nothing.
     var retentionLow = !retentionPending && stats.estimatedRetention < settings.fsrs_request_retention - 0.02;
-    var streak = settings.current_streak || 0;
     var now = new Date();
     if (weeklyActivity === null && !weeklyActivityLoading) {
       weeklyActivityLoading = true;
@@ -141,22 +138,22 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // cards instead -- "right now" (next review / today / Study now),
     // "your stats" (the 4 tiles) and "your progress" (the charts) -- each
     // item keeping its own colour/accent but losing its individual box.
+    var rings = todayRings(now, stats);
     panel.innerHTML =
-      // What needs you, with the button that does it on the same row, and
-      // today's progress as one quiet line underneath.
-      '<div class="fc-dash-now">' +
-      '<div class="fc-now-row">' + nextReviewHtml(now, ready, newInSession) +
+      // Today's rings beside their legend, then what a session holds now
+      // and the button that starts it, on one row.
+      '<div class="fc-dash-now fc-dash-rings">' +
+      '<div class="fc-rings-row">' + ringsSvgHtml(rings, 120, ringsAnimateToday(now)) + ringsLegendHtml(rings) + "</div>" +
+      '<div class="fc-now-row">' + ringsLineHtml(now, rings, ready.length + newInSession) +
       '<button type="button" class="fc-btn fc-btn-primary fc-now-btn" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
-      todayProgressHtml() +
       "</div>" +
+      streakStripHtml(now, rings) +
       '<div class="fc-dash-stats">' +
-      '<div class="fc-stats-grid">' +
-      statTile(streak, "Day streak", "streak") +
+      '<div class="fc-stats-grid fc-stats-grid-3">' +
       statTile(stats.total, "Total cards") +
       statTile(stats.reviewsCompleted, "Reviews completed") +
       statTile(retentionText, "Estimated retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null) +
       "</div>" +
-      (settings.longest_streak > streak ? '<p class="fc-note fc-longest-streak">Longest streak: ' + settings.longest_streak + " day" + (settings.longest_streak === 1 ? "" : "s") + ".</p>" : "") +
       (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note" id="fcRetentionNote" hidden>FSRS’s forecast of how likely you are to recall your reviewed cards — not a measured pass rate.</p>') +
       "</div>" +
       '<div class="fc-dash-progress">' +
@@ -249,14 +246,6 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<rect class="fc-bar-track" x="0" y="0" width="100" height="6" rx="3"></rect>' +
       (pct > 0 ? '<rect class="fc-bar-fill" x="0" y="0" width="' + Math.max(pct, 3) + '" height="6" rx="3"></rect>' : "") + "</svg>";
   }
-  function todayProgressHtml() {
-    var target = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
-    var done = reviewInsights ? reviewInsights.reviewedToday : 0;
-    return '<div class="fc-today"><span class="fc-today-label">Today</span>' +
-      progressBarHtml(done, target, done + " of " + target + " today") +
-      '<span class="fc-today-count">' + done + " of " + target + "</span></div>";
-  }
-
   // "in 8 minutes" for something imminent, "Tomorrow at 09:30" for something
   // further out -- both straight off each card's real FSRS `due`.
   function verboseUntil(now, ts) {
@@ -280,53 +269,147 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (dayDiff < 7) return d.toLocaleDateString(undefined, { weekday: "long" }) + " at " + time;
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " at " + time;
   }
-  // The summary above "Study now". Three honest states, always matching the
-  // button: something to do now / nothing now but more coming later today /
-  // nothing today. "Ready" is what a session would actually pull (readyToStudy
-  // + the new-card allowance), so it never claims cards you can't start.
-  function nextReviewHtml(now, ready, newInSession) {
-    var scheduled = studyableCards().filter(function (c) { return c.state !== 0; });
+  // --- Dashboard: Today's rings and the streak strip ---------------------
+  // Apple Fitness, not a points game: three rings to close each day, outer
+  // to inner -- Review (the cards due today you've cleared, of those due
+  // today), Learn (new cards introduced, of the day's allowance) and Play
+  // (one finished puzzle or game). All counted from what the app already
+  // keeps: today's tracker in scheduling.js (`fresh` / `reviewed` ids), the
+  // cards' due dates and the puzzle/game log. A ring past 100% laps.
+  var RINGS = [["review", "Review", "blue"], ["learn", "Learn", "green"], ["play", "Play", "purple"]];
+  function todayRings(now, stats) {
+    var day = sched.todayDay(now), fresh = {}, seen = {};
+    day.fresh.forEach(function (id) { fresh[id] = true; });
+    day.reviewed.forEach(function (id) { if (!fresh[id]) seen[id] = true; });
     var endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
-    var readyIds = {};
-    ready.forEach(function (c) { readyIds[c.id] = true; });
-    var laterToday = scheduled.filter(function (c) {
-      return !readyIds[c.id] && new Date(c.due) <= endToday;
+    var cleared = Object.keys(seen).length;
+    var left = studyableCards().filter(function (c) {
+      return c.state !== 0 && !seen[c.id] && !fresh[c.id] && new Date(c.due) <= endToday;
     }).length;
-    var futureTs = scheduled
-      .map(function (c) { return new Date(c.due).getTime(); })
-      .filter(function (t) { return t > now.getTime(); })
-      .sort(function (a, b) { return a - b; });
-    var nextTs = futureTs.length ? futureTs[0] : null;
-    var readyNow = ready.length + newInSession;
-    var title, sub, variant;
-    if (readyNow > 0) {
-      variant = "due";
-      title = readyNow === 1 ? "card to study" : "cards to study";
-      // What the count is made of, then what's still coming today -- never
-      // "Next review: tomorrow" under a pile that's ready now, which read
-      // as a contradiction.
-      var parts = [];
-      if (ready.length && newInSession) parts.push(ready.length + " due", newInSession + " new");
-      else if (!ready.length) parts.push("All new");
-      if (laterToday > 0) parts.push(laterToday + " more later today");
-      sub = parts.join(" · ");
-    } else if (laterToday > 0) {
-      variant = "clear";
-      title = "All caught up";
-      sub = "Next review: " + verboseUntil(now, nextTs);
-    } else {
-      variant = "clear";
-      title = "All caught up";
-      sub = "Next review: " + (nextTs ? friendlyWhen(now, nextTs) : "no cards scheduled yet");
+    var perDay = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
+    var learnGoal = Math.min(perDay, day.count + stats.newCount);
+    var runs = fc.puzzleRuns ? fc.puzzleRuns.all() : [];
+    var today = localDateStr(now);
+    var played = runs.filter(function (r) { return !r.reset && !r.ended && r.at && localDateStr(new Date(r.at)) === today; }).length;
+    return {
+      review: { done: cleared, goal: cleared + left },
+      learn: { done: day.count, goal: learnGoal, off: perDay === 0 },
+      play: { done: played, goal: 1 }
+    };
+  }
+  // "16/20" -- or, with nothing to count, what that means.
+  function ringValue(key, r, sep) {
+    if (key === "review" && r.goal === 0) return "Nothing due";
+    if (key === "learn" && r.goal === 0) return r.off ? "Off" : "No new words";
+    return r.done + sep + r.goal;
+  }
+  // A ring's share of its goal; nothing to do counts as closed.
+  function ringShare(r) { return r.goal > 0 ? r.done / r.goal : 1; }
+  function ringsClosed(rings) { return RINGS.every(function (k) { return ringShare(rings[k[0]]) >= 1; }); }
+  // One <svg>, three concentric rings from 12 o'clock, clockwise, round
+  // caps; each arc's length is an SVG attribute (pathLength 100), never a
+  // style. A second lap past 100% is a shade darker with a small shadow.
+  // `animate`: draw up from nothing (the day's first look only).
+  function ringsSvgHtml(rings, size, animate) {
+    var label = RINGS.map(function (k) { return k[1] + " " + ringValue(k[0], rings[k[0]], " of "); }).join(", ");
+    var arcs = RINGS.map(function (k, i) {
+      var rad = 52 - i * 14, share = ringShare(rings[k[0]]);
+      var circle = function (cls, len) {
+        return '<circle class="' + cls + '" cx="60" cy="60" r="' + rad + '"' +
+          (len == null ? "" : ' pathLength="100" stroke-dasharray="' + len + ' 100" transform="rotate(-90 60 60)"') + "/>";
+      };
+      var first = Math.min(share, 1), lap = Math.min(Math.max(share - 1, 0), 1);
+      return '<g class="fc-ring" data-tile="' + k[2] + '" data-i="' + i + '">' + circle("fc-ring-track") +
+        (first > 0 ? circle("fc-ring-arc", Math.round(first * 1000) / 10) : "") +
+        (lap > 0 ? circle("fc-ring-arc fc-ring-lap", Math.round(lap * 1000) / 10) : "") + "</g>";
+    }).join("");
+    return '<svg class="fc-rings' + (animate ? " fc-rings-animate" : "") + '" viewBox="0 0 120 120" width="' + size + '" height="' + size + '" role="img" aria-label="' + esc(label) + '">' + arcs + "</svg>";
+  }
+  var RING_DONE_ICON = '<svg class="fc-rings-tick" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  // The legend beside the rings, Fitness-style: the ring's name in its
+  // colour, then "16/20" in tabular figures; a closed ring adds a ✓.
+  function ringsLegendHtml(rings) {
+    return '<ul class="fc-rings-legend">' + RINGS.map(function (k) {
+      var r = rings[k[0]], value = ringValue(k[0], r, "/");
+      return '<li data-tile="' + k[2] + '"><span class="fc-rings-name">' + k[1] + '</span><span class="fc-rings-val">' + esc(value) +
+        (ringShare(r) >= 1 ? RING_DONE_ICON : "") + "</span></li>";
+    }).join("") + "</ul>";
+  }
+  // The rings draw up from nothing on the day's first Dashboard visit only
+  // (never on a rerender or the minute poll); reduced motion, never.
+  var RINGS_SHOWN_KEY = "raume-rings-shown";
+  function ringsAnimateToday(now) {
+    var today = localDateStr(now);
+    try {
+      if (localStorage.getItem(RINGS_SHOWN_KEY) === today) return false;
+      localStorage.setItem(RINGS_SHOWN_KEY, today);
+    } catch (e) { return false; }
+    return !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+  // The line beside Study now: what a session holds now, else when the
+  // next review is, else that every ring is closed.
+  function ringsLineHtml(now, rings, readyNow) {
+    var text;
+    if (readyNow > 0) text = readyNow + (readyNow === 1 ? " card" : " cards") + " to study";
+    else if (ringsClosed(rings)) text = "All rings closed";
+    else {
+      var next = studyableCards().filter(function (c) { return c.state !== 0; })
+        .map(function (c) { return new Date(c.due).getTime(); })
+        .filter(function (t) { return t > now.getTime(); }).sort(function (a, b) { return a - b; })[0];
+      var endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
+      text = next && next <= endToday.getTime() ? "Next review " + verboseUntil(now, next)
+        : "Nothing due — learn new words or play";
     }
-    // Due: the count is the headline, large, with its caption under it.
-    // Clear: a sage tick over "All caught up".
-    var lead = variant === "due"
-      ? '<span class="fc-next-review-count">' + readyNow + "</span>"
-      : '<span class="fc-next-review-check" aria-hidden="true">' + CHECK_ICON + "</span>";
-    return '<div class="fc-next-review fc-next-review-' + variant + '">' + lead +
-      '<span class="fc-next-review-title">' + esc(title) + "</span>" +
-      (sub ? '<span class="fc-next-review-sub">' + esc(sub) + "</span>" : "") + "</div>";
+    return '<p class="fc-rings-line">' + esc(text) + "</p>";
+  }
+
+  // The streak: the number with a flame, then this week as seven dots --
+  // filled for a day you studied, hollow for one you didn't, today half
+  // until its Review ring closes, the days ahead a grey track. The week
+  // starts where the locale's does (Monday when it can't say).
+  function weekStart() {
+    try {
+      var loc = new Intl.Locale(navigator.language || "en");
+      var info = loc.getWeekInfo ? loc.getWeekInfo() : loc.weekInfo;
+      if (info && info.firstDay) return info.firstDay % 7;
+    } catch (e) { /* older engines */ }
+    return 1;
+  }
+  // The streak as it stands today: a run that ended before yesterday is 0,
+  // not the number it reached.
+  function liveStreak(now) {
+    var s = getCache().settings, last = s.last_study_date;
+    var yesterday = localDateStr(new Date(now.getTime() - 86400000));
+    return last === localDateStr(now) || last === yesterday ? (s.current_streak || 0) : 0;
+  }
+  var FLAME_ICON = '<svg class="fc-streak-flame" data-tile="orange" viewBox="0 0 18 18" width="22" height="22" fill="currentColor" aria-hidden="true">' +
+    '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/></svg>';
+  function streakStripHtml(now, rings) {
+    var settings = getCache().settings, streak = liveStreak(now), best = Math.max(settings.longest_streak || 0, streak);
+    var studied = {};
+    (weeklyActivity || []).forEach(function (d) { if (d.count > 0) studied[d.date] = true; });
+    var todayStr = localDateStr(now);
+    if (settings.last_study_date === todayStr) studied[todayStr] = true;
+    var start = new Date(now); start.setHours(12, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() - weekStart() + 7) % 7));
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var key = localDateStr(d), state;
+      if (key === todayStr) state = studied[key] && ringShare(rings.review) >= 1 ? "done" : "today";
+      else if (key > todayStr) state = "future";
+      else state = studied[key] ? "done" : "missed";
+      var name = d.toLocaleDateString(undefined, { weekday: "long" });
+      days.push('<li class="fc-streak-day fc-streak-' + state + (key === todayStr ? " fc-streak-is-today" : "") + '">' +
+        '<span class="fc-streak-letter" aria-hidden="true">' + esc(d.toLocaleDateString(undefined, { weekday: "narrow" })) + "</span>" +
+        '<span class="fc-streak-dot" role="img" aria-label="' + esc(name + ": " + (state === "done" ? "studied" : state === "missed" ? "not studied" : state === "today" ? "today" : "still to come")) + '"></span></li>');
+    }
+    var line = best > streak ? "Best " + best + " days · " + (best - streak + 1) + " to beat it"
+      : streak >= 2 ? "Your longest streak yet" : "";
+    return '<div class="fc-dash-streak">' +
+      '<div class="fc-streak-head">' + FLAME_ICON + '<span class="fc-streak-num">' + streak + '</span><span class="fc-streak-lbl">day streak</span></div>' +
+      '<ol class="fc-streak-week" aria-label="This week">' + days.join("") + "</ol>" +
+      (line ? '<p class="fc-streak-line">' + esc(line) + "</p>" : "") + "</div>";
   }
 
   // Leeches -- words that keep lapsing (see scheduling.leechWords). Shown only
@@ -554,7 +637,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     for (var i = 6; i >= 0; i--) {
       var d = new Date(); d.setDate(d.getDate() - i);
       var key = localDateStr(d);
-      days.push({ label: d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 2), count: counts[key] || 0 });
+      days.push({ date: key, label: d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 2), count: counts[key] || 0 });
     }
     return days;
   }
@@ -1069,7 +1152,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // Counts against today's new-card allowance the moment a new card is
     // actually studied, not when it's merely offered -- a card queued but
     // never reached (session ended early) shouldn't use up the allowance.
-    if (wasNew) bumpNewToday(now);
+    if (wasNew) bumpNewToday(now, cardId); else sched.markReviewedToday(now, cardId);
     if (isGuestMode()) {
       // No server -- keep a capped local history. Beyond the day (for the
       // weekly chart) each entry carries what the Dashboard's mistake

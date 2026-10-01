@@ -144,6 +144,9 @@ window.RaumeStudy.flashcards.store = (function () {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
       typeof c.state === "number" && typeof c.due === "string" && typeof c.reps === "number";
   }
+  function idList(v) {
+    return Array.isArray(v) ? v.filter(function (x) { return typeof x === "string"; }) : [];
+  }
   function validateCache(raw) {
     if (!raw || typeof raw !== "object") return null;
     if (typeof raw.schemaVersion !== "number") return null;
@@ -170,7 +173,10 @@ window.RaumeStudy.flashcards.store = (function () {
       // to Supabase, so two devices studied the same day each get their own
       // allowance -- a pre-existing limitation this shares with Kana, not a
       // new one.
-      day: raw.day && typeof raw.day.date === "string" ? { date: raw.day.date, count: raw.day.count | 0 } : null,
+      // `fresh` / `reviewed`: the card ids introduced / reviewed that day
+      // (the Dashboard's rings).
+      day: raw.day && typeof raw.day.date === "string" ? { date: raw.day.date, count: raw.day.count | 0,
+        fresh: idList(raw.day.fresh), reviewed: idList(raw.day.reviewed) } : null,
       // Whole tables paused as a unit -- an overlay of table ids, not a state
       // on the cards. Their cards keep their own active/archived flag; this
       // list just holds them out of review, the stat tiles and the Manage

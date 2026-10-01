@@ -706,8 +706,10 @@ separated by inset hairlines (`--row-line`). The five sub-tabs are the shared se
 control (see "Controls library"), full width on a phone. The dashboard has to
 be scannable at a glance:
 
-- **One card per group** — `.fc-dash-now` ("right now": next review + today +
-  Study now), `.fc-dash-stats` (the 4 tiles) and then one `.fc-viz-card` each for
+- **One card per group** — `.fc-dash-now` ("right now": Today's rings +
+  Study now), `.fc-dash-streak` (the streak strip), `.fc-dash-stats` (three
+  tiles: Total cards, Reviews completed, Estimated retention, in one even row)
+  and then one `.fc-viz-card` each for
   Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
   layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
   — white Open Kana when nothing is due — and the sage bar), Puzzles and Games (full
@@ -726,13 +728,32 @@ be scannable at a glance:
   one action is Study now's size (40px capsule)
   (only when there are any) and Words to review. The two small charts still pair
   side by side on a wide window;
-- **"Right now"** leads with the count: a large 44px ink figure with "cards to
-  study" under it and one secondary line (what's in the queue, or when the
-  next review lands) — a number to act on, never a coral warning line. Study
-  now sits on the same row (`.fc-now-row`), trailing. Nothing due: a sage tick
-  in a soft circle over a larger "All caught up", Study now disabled in place.
-  Today is one quiet footer line under a hairline — "Today", a thin 4px sage
-  bar, "N of M";
+- **"Right now" is Today's rings**, Apple Fitness-style, never a points
+  game: one 120px `<svg role="img">` of three concentric 12px rings, 2px
+  apart — **Review** (blue), **Learn** (green), **Play** (purple) outer to
+  inner, from the `--tile` family — each on a track of its own hue at 18%
+  (22% dark), round caps from 12 o'clock, clockwise; each arc's length is an
+  SVG attribute (`pathLength` 100), never a style. Past 100% a ring laps:
+  the second lap a shade darker (82% with black) with a 1.5px shadow at its
+  cap. Beside it the legend, one entry per ring: the name in its colour
+  (13px semibold), the count under it at 20px in ink and tabular figures
+  ("16/20", "Nothing due", "No new words", "Off"), a small ✓ in the ring's
+  colour once closed — never a colour change for closed. Under them one row
+  (`.fc-now-row`): a grey line — "4 cards to study" / "Next review in 8
+  minutes" / "All rings closed" / "Nothing due — learn new words or play" —
+  and Study now trailing (disabled in place when there's nothing). On the
+  day's first visit the arcs draw up from nothing (700ms ease-out, 80ms
+  apart outer to inner, a lap after the first); later renders and reduced
+  motion draw them at rest (`raume-rings-shown` holds the date);
+- **The streak strip** (`.fc-dash-streak`, its own white card): an orange
+  flame (`--tile-orange`), the number at 28px semibold and "day streak" in
+  grey; then this week's seven days, the locale's first day first (Monday
+  when it can't say) — an 11px muted letter over a 14px dot: filled orange
+  studied, a pale orange ring missed, today half-filled until its Review ring
+  closes (its letter in ink), the days ahead the bar track. One grey line
+  under it only when there's news: "Best 21 days · 9 to beat it", or "Your
+  longest streak yet". A run that ended before yesterday shows 0, not the
+  number it reached; the strip wraps under the number on a phone;
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender — no shadow, it outranks the tinted buttons by fill alone;
 - **stat tiles** — a plain figure over a caption, no edge rule; each caption

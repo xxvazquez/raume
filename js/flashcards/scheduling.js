@@ -189,15 +189,31 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // and you'd get three times the configured new-card allowance. Same
   // {date, count} tracker as the Kana trainer (js/flashcards/kana.js
   // todayNew/bumpNew), reset the first time a new day sees a bump.
+  // It also keeps which cards were introduced (`fresh`) and which were
+  // reviewed (`reviewed`, cards already past new) today, by id -- the
+  // Dashboard's Review and Learn rings count off them.
   function todayNewCount(now) {
     var day = getCache().day;
     return day && day.date === localDateStr(now) ? day.count : 0;
   }
-  function bumpNewToday(now) {
-    var c = getCache();
-    var today = localDateStr(now);
-    if (!c.day || c.day.date !== today) c.day = { date: today, count: 0 };
-    c.day.count++;
+  function today(now) {
+    var c = getCache(), date = localDateStr(now);
+    if (!c.day || c.day.date !== date) c.day = { date: date, count: 0, fresh: [], reviewed: [] };
+    return c.day;
+  }
+  function bumpNewToday(now, cardId) {
+    var day = today(now);
+    day.count++;
+    if (cardId && day.fresh.indexOf(cardId) === -1) day.fresh.push(cardId);
+  }
+  function markReviewedToday(now, cardId) {
+    var day = today(now);
+    if (day.fresh.indexOf(cardId) === -1 && day.reviewed.indexOf(cardId) === -1) day.reviewed.push(cardId);
+  }
+  // Today's tracker, read-only: an empty one before anything's studied.
+  function todayDay(now) {
+    var day = getCache().day;
+    return day && day.date === localDateStr(now) ? day : { date: localDateStr(now), count: 0, fresh: [], reviewed: [] };
   }
   // What's studied in a session is: every card that's ready (readyToStudy)
   // plus whatever's left of that day's allowance of brand-new cards. These
@@ -251,6 +267,6 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
     readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats,
-    todayNewCount: todayNewCount, bumpNewToday: bumpNewToday
+    todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay
   };
 })();

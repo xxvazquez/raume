@@ -2019,7 +2019,7 @@ async function main() {
     firstAddBtn.disabled === true && firstAddBtn.querySelector(".fc-btn-tx").textContent === "Adding…");
   await flush();
   document.querySelector('.fc-tab[data-tab="dashboard"]').click();
-  const totalTileAfter = document.querySelector(".fc-stat-tile:nth-child(2) .fc-stat-value").textContent;
+  const totalTileAfter = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
   check("adding a word in guest mode updates the count with zero network calls", totalTileAfter === "4");
   if (storageUsable) check("its data actually lives in localStorage (not just in-memory)", /"active":true/.test(readLocalStorage("raume-flashcards-guest-v1") || ""));
 
@@ -2228,9 +2228,9 @@ async function main() {
     check("'Missed today' and 'Words to Review' fold into one line until there's history",
       !document.getElementById("fcWordsToReview") && !/Missed today/.test(dash)
       && /Words to review/.test(dash) && /Nothing to review yet/.test(dash));
-    check("the next-review card always carries a second line", (() => {
-      const sub = document.querySelector("#fcPanelDashboard .fc-next-review-sub");
-      return !!sub && sub.textContent.trim().length > 0;
+    check("the rings card always carries its line beside Study now", (() => {
+      const line = document.querySelector("#fcPanelDashboard .fc-now-row .fc-rings-line");
+      return !!line && line.textContent.trim().length > 0;
     })());
     check("Estimated retention spells out its pending state, not a bare \"—\"", (() => {
       const tile = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")]
@@ -2238,13 +2238,13 @@ async function main() {
       const val = tile && tile.querySelector(".fc-stat-value").textContent;
       return tile && tile.classList.contains("fc-stat-tile-pending") && val !== "—" && /reviews/i.test(val);
     })());
-    check("only Day streak carries a coloured stat-tile variant -- Total cards and Reviews completed stay the plain, quiet tile", (() => {
-      const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")];
-      const byLabel = (re) => tiles.find(t => re.test(t.querySelector(".fc-stat-label").textContent));
-      const hasVariant = (t) => !!t && (t.classList.contains("fc-stat-streak") || t.classList.contains("fc-stat-attention"));
-      return hasVariant(byLabel(/Day streak/))
-        && !hasVariant(byLabel(/Total cards/))
-        && !hasVariant(byLabel(/Reviews completed/));
+    check("the streak is its own strip -- the number, this week as seven days with today marked -- and the stat row keeps three plain tiles", (() => {
+      const strip = document.querySelector("#fcPanelDashboard .fc-dash-streak");
+      const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-dash-stats .fc-stat-tile")];
+      return !!strip && /^\d+$/.test(strip.querySelector(".fc-streak-num").textContent) && /day streak/.test(strip.textContent)
+        && strip.querySelectorAll(".fc-streak-day").length === 7 && strip.querySelectorAll(".fc-streak-is-today").length === 1
+        && tiles.length === 3 && !tiles.some(t => /Day streak/.test(t.textContent))
+        && !tiles.some(t => t.classList.contains("fc-stat-attention"));
     })());
     check("the dashboard is capped, not run to the full sheet -- a 2-up row shouldn't balloon", (() => {
       const rule = allCssRules.find(r => r.selectorText === "#fcPanelDashboard");
@@ -2261,12 +2261,15 @@ async function main() {
       const grid12 = /repeat\(\s*12\s*,/;
       return grid12.test(cols(".fc-stats-grid") || "") && grid12.test(cols(".fc-viz-grid") || "");
     })());
-    check("the right-now card leads with the count, large, and puts Study now on the same row -- no coral warning line", (() => {
-      const row = document.querySelector("#fcPanelDashboard .fc-dash-now .fc-now-row");
-      const count = row && row.querySelector(".fc-next-review-count");
-      return !!count && /^\d+$/.test(count.textContent) && !!row.querySelector("#fcStudyNow")
-        && /cards? to study/.test(row.querySelector(".fc-next-review-title").textContent)
-        && !!document.querySelector("#fcPanelDashboard .fc-dash-now > .fc-today");
+    check("the right-now card is Today's rings -- Review, Learn, Play read out as one image, a legend beside them -- with Study now and what it holds on one row", (() => {
+      const card = document.querySelector("#fcPanelDashboard .fc-dash-now");
+      const svg = card && card.querySelector("svg.fc-rings[role=img]");
+      const legend = card ? [...card.querySelectorAll(".fc-rings-legend li")].map(li => li.querySelector(".fc-rings-name").textContent) : [];
+      const row = card && card.querySelector(".fc-now-row");
+      return !!svg && /^Review .+, Learn \d+ of \d+, Play \d+ of 1$/.test(svg.getAttribute("aria-label"))
+        && svg.querySelectorAll(".fc-ring").length === 3 && legend.join("|") === "Review|Learn|Play"
+        && !!row.querySelector("#fcStudyNow") && /\d+ cards? to study/.test(row.querySelector(".fc-rings-line").textContent)
+        && document.querySelectorAll("#fcPanelDashboard [style]").length === 0;
     })());
   }
 
@@ -2463,13 +2466,14 @@ async function main() {
   document.getElementById("fcBackToDashboard").click();
   check("Back to Dashboard leaves the session for the dashboard", !document.querySelector(".fc-session-done") && !!document.querySelector(".fc-stats-grid"));
   await flush(); // the dashboard's async insight + weekly-activity loads
-  check("a review just done shows on the dashboard's Today count and today's weekly bar", (() => {
+  check("a review just done shows on the dashboard's rings and today's weekly bar", (() => {
     // Regression guard for the offline-history merge refactor: the review
     // computation (loadReviewInsights / loadWeeklyActivity) must still count a
     // review the moment it lands. Guest here; the signed-in outbox path adds to
-    // the same computation and needs live verification.
-    const todayText = (document.querySelector("#fcPanelDashboard .fc-today-count") || {}).textContent || "";
-    const reviewed = parseInt((todayText.match(/(\d+)\s+of\b/) || [])[1], 10) || 0;
+    // the same computation and needs live verification. The card was new, so
+    // it's the Learn ring that moves.
+    const learn = [...document.querySelectorAll("#fcPanelDashboard .fc-rings-legend li")].find(li => /Learn/.test(li.textContent));
+    const reviewed = parseInt(((learn && learn.querySelector(".fc-rings-val").textContent) || "").split("/")[0], 10) || 0;
     const cols = document.querySelectorAll("#fcPanelDashboard .fc-week-col");
     const todayCount = parseInt((cols[cols.length - 1].querySelector(".fc-week-count") || {}).textContent, 10) || 0;
     return reviewed >= 1 && todayCount >= 1;
@@ -2512,6 +2516,39 @@ async function main() {
     check("the allowance resets on a new calendar day", fcSched.buildQueue(tomorrow).length === 2);
     c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
     fcStore.saveCache();
+  }
+
+  console.log("Flashcards: Today's rings count from a seeded deck");
+  {
+    const fcStore = window.RaumeStudy.flashcards.store;
+    const fcSched = window.RaumeStudy.flashcards.scheduling;
+    const c = fcStore.getCache();
+    const saved = { settings: c.settings, day: c.day, cards: c.cards };
+    const now = new Date();
+    const far = new Date(now.getTime() + 30 * 86400000).toISOString();
+    const card = (id, state, due) => ({ id, vocabId: "v0001", direction: "jp-en", active: true, state, due, stability: state ? 3 : 0, difficulty: 5,
+      scheduled_days: 0, reps: state ? 2 : 0, lapses: 0, learning_steps: 0, last_review: state ? now.toISOString() : null });
+    c.settings = Object.assign({}, c.settings, { queue_new_cards_per_day: 4 });
+    c.cards = {};
+    // Introduced today (f0), reviewed today (r0, r1), still due today (d0-d2), new (n0-n2).
+    [card("f0", 1, now.toISOString()), card("r0", 2, far), card("r1", 2, far), card("d0", 2, now.toISOString()), card("d1", 2, now.toISOString()),
+      card("d2", 2, now.toISOString()), card("n0", 0, now.toISOString()), card("n1", 0, now.toISOString()), card("n2", 0, now.toISOString())]
+      .forEach(k => { c.cards[k.id] = k; });
+    c.day = null;
+    fcSched.bumpNewToday(now, "f0");
+    fcSched.markReviewedToday(now, "r0"); fcSched.markReviewedToday(now, "r1"); fcSched.markReviewedToday(now, "r1");
+    fcSched.markReviewedToday(now, "f0"); // a card met today and seen again is Learn's, not Review's
+    fcStore.saveCache();
+    window.RaumeStudy.flashcards.setActiveTab("dashboard");
+    window.RaumeStudy.flashcards.render();
+    const label = (document.querySelector("#fcPanelDashboard svg.fc-rings") || { getAttribute: () => "" }).getAttribute("aria-label");
+    check("Review counts today's due cards cleared of all due today, Learn the new cards met of the day's allowance, Play today's finished games",
+      /^Review 2 of 5, Learn 1 of 4, Play \d+ of 1$/.test(label));
+    check("today's streak dot is half until the Review ring closes",
+      !!document.querySelector("#fcPanelDashboard .fc-streak-is-today.fc-streak-today"));
+    c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
+    fcStore.saveCache();
+    window.RaumeStudy.flashcards.render();
   }
 
   console.log("Flashcards: Estimated retention colours the tile only once it's meaningfully under target");
@@ -3888,7 +3925,7 @@ async function main() {
     document.getElementById("fcUseGuest").click();
     if (document.getElementById("fcBack")) document.getElementById("fcBack").click(); // last screen left open was Help
     document.querySelector('.fc-tab[data-tab="dashboard"]').click();
-    const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(2) .fc-stat-value").textContent;
+    const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
     check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "4");
   }
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();

@@ -107,9 +107,9 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +
+      '<li><span class="help-term">Rings</span><span class="help-desc">Today’s three goals. Review: the cards due today you’ve done. Learn: new cards, up to your daily number. Play: one game or puzzle.</span></li>' +
       '<li><span class="help-term">Cards to study</span><span class="help-desc">What Study now would start with: due reviews plus today’s new cards.</span></li>' +
-      '<li><span class="help-term">Today</span><span class="help-desc">Reviews done against your daily new-card target.</span></li>' +
-      '<li><span class="help-term">Next review</span><span class="help-desc">When the next card is due.</span></li>' +
+      '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review. The dots are this week: full when studied, half for today until Review closes.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
       '<li><span class="help-term">Kana</span><span class="help-desc">Kana cards started, and how many to study now.</span></li>' +
       '<li><span class="help-term">Puzzles</span><span class="help-desc">Every game you finish or puzzle you solve: accuracy, best pace, games this week and the latest few.</span></li>' +
