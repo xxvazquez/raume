@@ -3781,6 +3781,16 @@ async function main() {
     return mt.played === pr.live("match").length && mt.played >= 1 && mt.streak.current === 1 && mt.best > 0
       && ls.played >= 1 && ls.best > 0 && ls.best <= 1 && mt.bests.length >= 1 && mt.trend.length === Math.min(30, mt.played);
   })());
+  check("trimming the log past its cap keeps old games that still hold a record and drops the rest", (() => {
+    const t0 = Date.parse("2020-01-01T00:00:00Z"), at = i => new Date(t0 + i * 60000).toISOString();
+    const runs = [
+      { id: "pb", at: at(0), mode: "match", n: 6, ms: 5000, miss: 0, setup: "cap|romaji|6" },
+      { id: "plain", at: at(1), mode: "match", n: 6, ms: 99000, miss: 0, setup: "cap|romaji|6" }
+    ];
+    for (let i = 0; i < pr.MAX; i++) runs.push({ id: "n" + i, at: at(2 + i), mode: "match", n: 6, ms: 20000, miss: 0, setup: "cap|romaji|6" });
+    const ids = pr.sanitize(runs).map(r => r.id);
+    return ids.includes("pb") && !ids.includes("plain") && ids.length === pr.MAX + 1;
+  })());
   check("Tricky words are the words missed in two or more games, most-missed first", (() => {
     // The Match above missed two words once each; one more game missing
     // the first makes it tricky, the second stays out.

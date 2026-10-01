@@ -18,7 +18,7 @@
 // would come straight back from another device. Everything of that style
 // up to its latest marker is left out of every number.
 // localStorage is the immediate source of truth (capped at MAX, newest
-// kept); while signed in the whole log is pushed best-effort to
+// kept, plus any older game still holding a record); while signed in the whole log is pushed best-effort to
 // flashcard_settings.puzzle_runs (js/flashcards/data-ops.js + bootstrap.js)
 // and merged back on sign-in -- union by id, so no device's games are lost.
 window.RaumeStudy = window.RaumeStudy || {};
@@ -40,9 +40,36 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
         typeof r.n === "number" && typeof r.ms === "number";
     });
   }
+  // Over MAX, the oldest go -- except a game that still holds a record
+  // (a personal best, a style's best, Match's fastest round of a size) or
+  // a style's latest reset marker. A record only ever goes by being beaten
+  // or reset, never because newer games pushed it out.
   function capped(arr) {
     arr.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
-    return arr.length > MAX ? arr.slice(arr.length - MAX) : arr;
+    if (arr.length <= MAX) return arr;
+    var keep = recordHolders(arr), cut = arr.length - MAX;
+    return arr.slice(0, cut).filter(function (r) { return keep[r.id]; }).concat(arr.slice(cut));
+  }
+  function recordHolders(arr) {
+    var resetAt = {}, marker = {}, top = {}, keep = {};
+    arr.forEach(function (r) {
+      if (r.reset && (!resetAt[r.mode] || r.at > resetAt[r.mode])) { resetAt[r.mode] = r.at; marker[r.mode] = r.id; }
+    });
+    function hold(key, r, wins) { if (!top[key] || wins(r, top[key])) top[key] = r; }
+    arr.forEach(function (r) {
+      if (r.reset || (resetAt[r.mode] && r.at <= resetAt[r.mode])) return;
+      hold("style|" + r.mode, r, function (a, b) { return better(a.mode, measure(a), measure(b)); });
+      if (r.setup && !r.ended) hold("setup|" + r.mode + "|" + r.setup, r, beats);
+      if (r.mode === "match") {
+        matchRoundTimes([r]).forEach(function (t) {
+          var key = "round|" + t.pairs;
+          if (!top[key] || t.ms < top[key].ms) top[key] = { id: r.id, ms: t.ms };
+        });
+      }
+    });
+    Object.keys(top).forEach(function (k) { keep[top[k].id] = true; });
+    Object.keys(marker).forEach(function (m) { keep[marker[m]] = true; });
+    return keep;
   }
   function load() {
     if (cache) return cache;
@@ -204,6 +231,12 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   }
   function higherIsBetter(mode) { return isScored(mode); }
   function better(mode, a, b) { return higherIsBetter(mode) ? a > b : a < b; }
+  // A personal best: the fastest whole game, or for a scored style the most
+  // right, then the fastest.
+  function beats(r, top) {
+    var a = higherIsBetter(r.mode) ? (r.right || 0) : -r.ms, b = higherIsBetter(r.mode) ? (top.right || 0) : -top.ms;
+    return a > b || (a === b && r.ms < top.ms);
+  }
   function average(xs) { return xs.reduce(function (a, b) { return a + b; }, 0) / (xs.length || 1); }
   function styleStats(mode, now) {
     var runs = live(mode);
@@ -232,10 +265,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     st.bests = Object.keys(bySetup).filter(Boolean).map(function (key) {
       var list = bySetup[key], whole = list.filter(function (r) { return !r.ended; }), top = whole[0];
       if (!top) return null;
-      whole.forEach(function (r) {
-        var a = higherIsBetter(mode) ? (r.right || 0) : -r.ms, b = higherIsBetter(mode) ? (top.right || 0) : -top.ms;
-        if (a > b || (a === b && r.ms < top.ms)) top = r;
-      });
+      whole.forEach(function (r) { if (beats(r, top)) top = r; });
       return { setup: key, best: top, runs: list.slice().reverse() };
     }).filter(Boolean).sort(function (a, b) { return a.best.at < b.best.at ? 1 : -1; });
     return st;

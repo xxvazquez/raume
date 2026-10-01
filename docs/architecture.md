@@ -194,7 +194,9 @@ word search is logged once when solved, never when revealed in full. Reset stats
 for a style adds a marker `{ mode, reset: true }` and drops that style's older
 games — the marker survives the union merge, so a reset stays reset on every
 device, and every count ignores that style's games up to its latest marker.
-Newest 500 kept;
+Newest 500 kept, plus any older game that still holds a record (a personal
+best, a style's best, Match's fastest round of a size) and each style's latest
+reset marker — a record only goes by being beaten or reset;
 signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
 and merged back on sign-in by id), `raume-kanji-write-outline` — Write it's Outline switch (browser-local),
 `raume-kanji-known` — kanji marked Known
