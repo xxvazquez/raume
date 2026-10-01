@@ -4288,7 +4288,13 @@ mark.fc-diff-co {
 .fc-session-done { text-align: center; padding: 40px 16px; color: var(--muted); }
 .fc-session-done-title { margin: 0 0 8px; font-size: var(--fs-section-title); color: var(--ink); font-weight: 500; }
 .fc-session-done-stats { margin: 0 0 4px; font-size: var(--fs-nav-sub); color: var(--muted); }
-.fc-session-done-streak { margin: 0 0 8px; font-size: var(--fs-small); color: var(--faint); }
+/* The wrap-up (dashboard.js renderSessionDone): today's rings at 110px
+   over the title and its grey line, then one inset-grouped card of only the
+   rows with news (a tiled 44px row each -- the streak's flame, a mastered
+   star), then the buttons. */
+.fc-session-done .fc-rings { margin: 0 auto 16px; }
+.fc-done-news { max-width: 360px; margin: 18px auto 0; text-align: left; }
+.fc-done-news .set-row { cursor: default; }
 .fc-session-done .fc-cta-row { justify-content: center; margin-top: 18px; }
 
 /* The prompt is the single thing you're being tested on, alone on the card --

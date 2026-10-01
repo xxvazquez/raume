@@ -864,8 +864,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // Review session flow
   // -----------------------------------------------------------------------
   function newSession(queue) {
+    var now = new Date();
     return { queue: queue, index: 0, checked: false, preview: null, correct: null,
-      reviewedCount: 0, correctCount: 0, seen: {}, done: false };
+      reviewedCount: 0, correctCount: 0, seen: {}, done: false, startedAt: now.getTime(), before: sessionSnapshot(now) };
   }
   function startSession() {
     session = newSession(buildQueue(new Date()));
@@ -920,25 +921,97 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!syncReviewCard()) rerender();
   }
 
+  // A word is mastered once every one of its cards in study has a
+  // stability of three weeks or more (FSRS: likely still recalled after
+  // 21 days) -- the ids, as a set.
+  var MASTERED_DAYS = 21;
+  function masteredWords() {
+    var byWord = {};
+    studyableCards().forEach(function (c) {
+      var ok = c.state !== 0 && (c.stability || 0) >= MASTERED_DAYS;
+      byWord[c.vocabId] = (byWord[c.vocabId] === undefined ? true : byWord[c.vocabId]) && ok;
+    });
+    var out = {};
+    Object.keys(byWord).forEach(function (v) { if (byWord[v]) out[v] = true; });
+    return out;
+  }
+  // Where the day stood when a session began, so its wrap-up can say what
+  // changed: the rings, the streak and the mastered words.
+  function sessionSnapshot(now) {
+    return { rings: todayRings(now, sched.computeStats(now)), streak: liveStreak(now), mastered: masteredWords() };
+  }
+  var NEWS_TILES = {
+    streak: ["orange", '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/>'],
+    mastered: ["green", '<path d="M9 2.5l2 4.3 4.6.5-3.4 3.1 1 4.6L9 12.6 4.8 15l1-4.6-3.4-3.1 4.6-.5z"/>']
+  };
+  function newsRowHtml(kind, text) {
+    var t = NEWS_TILES[kind];
+    return '<div class="set-row set-row-tiled fc-done-news-row"><span class="set-label"><span class="set-tile" data-tile="' + t[0] + '">' +
+      '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + t[1] + "</svg></span>" +
+      esc(text) + "</span></div>";
+  }
+  // A ring that closed during the session draws its last stretch once the
+  // wrap-up is up, from where it stood at the start (the arc's length is an
+  // SVG attribute, tweened -- never a style). Reduced motion: at rest.
+  function animateClosedRings(panel, before, after) {
+    if (!window.requestAnimationFrame || !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    RINGS.forEach(function (k, i) {
+      var from = Math.min(ringShare(before[k[0]]), 1), to = Math.min(ringShare(after[k[0]]), 1);
+      if (from >= 1 || to < 1) return;
+      var arc = panel.querySelector('.fc-ring[data-i="' + i + '"] .fc-ring-arc:not(.fc-ring-lap)');
+      if (!arc) return;
+      var t0 = null;
+      arc.setAttribute("stroke-dasharray", from * 100 + " 100");
+      function step(now) {
+        if (!arc.isConnected) return;
+        if (t0 === null) t0 = now + 250;
+        var p = Math.max(0, Math.min((now - t0) / 600, 1)), e = 1 - Math.pow(1 - p, 3);
+        arc.setAttribute("stroke-dasharray", Math.round((from + (to - from) * e) * 1000) / 10 + " 100");
+        if (p < 1) window.requestAnimationFrame(step);
+      }
+      window.requestAnimationFrame(step);
+    });
+  }
+  // The wrap-up, Fitness-style: today's rings, a title that says what
+  // happened, one grey line (cards · % right · minutes), then a card of only
+  // the rows with news -- a streak day added, words newly mastered. Then
+  // Keep going when more cards came ready, or Play a game while the Play
+  // ring is open, and Done.
   function renderSessionDone(panel) {
     var reviewed = session.reviewedCount;
+    var now = new Date();
+    var after = todayRings(now, sched.computeStats(now)), before = session.before || { rings: after, streak: 0, mastered: {} };
     var html = '<div class="fc-session-done">';
+    var playOpen = ringShare(after.play) < 1;
+    var moreReady = buildQueue(now).some(function (id) { return !session.seen[id]; });
     if (!reviewed) {
       html += '<p class="fc-session-done-title" tabindex="-1">Nothing to review right now</p>';
     } else {
       var correct = session.correctCount || 0;
-      var pct = Math.round((correct / reviewed) * 100);
-      var streak = getCache().settings.current_streak || 0;
-      html += '<p class="fc-session-done-title" tabindex="-1">' + (session.done ? "Session ended" : "Session complete") + "</p>" +
-        '<p class="fc-session-done-stats">' + reviewed + " reviewed · " + correct + " correct (" + pct + "%)</p>" +
-        (streak ? '<p class="fc-session-done-streak">Day streak: ' + streak + "</p>" : "");
+      var mins = Math.max(1, Math.round((now.getTime() - (session.startedAt || now.getTime())) / 60000));
+      var closedNow = function (key) { return ringShare(before.rings[key]) < 1 && ringShare(after[key]) >= 1; };
+      var title = ringsClosed(after) && RINGS.some(function (k) { return closedNow(k[0]); }) ? "All rings closed"
+        : closedNow("review") ? "Review ring closed"
+        : closedNow("learn") ? "Learn ring closed"
+        : session.done ? "Session ended" : "Session complete";
+      var streak = liveStreak(now), mastered = masteredWords();
+      var newlyMastered = Object.keys(mastered).filter(function (v) { return !before.mastered[v]; }).length;
+      var news = (streak > before.streak ? newsRowHtml("streak", streak + (streak === 1 ? " day" : " days") + " in a row") : "") +
+        (newlyMastered ? newsRowHtml("mastered", newlyMastered + (newlyMastered === 1 ? " word" : " words") + " mastered") : "");
+      html += ringsSvgHtml(after, 110, false) +
+        '<p class="fc-session-done-title" tabindex="-1">' + title + "</p>" +
+        '<p class="fc-session-done-stats">' + reviewed + (reviewed === 1 ? " card" : " cards") + " · " + Math.round(correct / reviewed * 100) + "% right · " +
+        mins + " min</p>" +
+        (news ? '<div class="set-card fc-done-news">' + news + "</div>" : "");
     }
-    var moreReady = buildQueue(new Date()).some(function (id) { return !session.seen[id]; });
+    var primary = moreReady ? "more" : playOpen ? "play" : "done";
     html += '<div class="fc-cta-row">' +
-      (moreReady ? '<button type="button" class="fc-btn fc-btn-primary" id="fcStudyMore">Keep going</button>' : "") +
-      '<button type="button" class="fc-btn' + (moreReady ? "" : " fc-btn-primary") + '" id="fcBackToDashboard">Back to Dashboard</button>' +
+      (primary === "more" ? '<button type="button" class="fc-btn fc-btn-primary" id="fcStudyMore">Keep going</button>' : "") +
+      (primary === "play" ? '<button type="button" class="fc-btn fc-btn-primary" id="fcPlayGame">Play a game</button>' : "") +
+      '<button type="button" class="fc-btn' + (primary === "done" ? " fc-btn-primary" : "") + '" id="fcBackToDashboard">Done</button>' +
       "</div></div>";
     panel.innerHTML = html;
+    if (reviewed) animateClosedRings(panel, before.rings, after);
     // Same innerHTML-drops-focus problem as the review card: move focus to the
     // wrap-up heading so the outcome is read and a keyboard user stays in the panel.
     var doneTitle = panel.querySelector(".fc-session-done-title");
@@ -946,6 +1019,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     document.getElementById("fcBackToDashboard").addEventListener("click", function () { session = null; rerender(); });
     var more = document.getElementById("fcStudyMore");
     if (more) more.addEventListener("click", function () { startSession(); });
+    var play = document.getElementById("fcPlayGame");
+    if (play) play.addEventListener("click", function () {
+      session = null;
+      window.RaumeStudy.flashcards.setActiveTab("games");
+      rerender();
+    });
   }
 
   // The review card is a persistent shell (progress line, prompt, answer field,

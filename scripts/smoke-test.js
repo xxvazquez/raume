@@ -2457,14 +2457,23 @@ async function main() {
     && /\b2 \/ /.test(document.querySelector(".fc-review-progress").textContent));
   document.getElementById("fcEndSession").click();
   const doneText = (document.querySelector(".fc-session-done") || {}).textContent || "";
-  check("ending mid-session shows a wrap-up, not a blank panel", /reviewed/.test(doneText));
+  check("ending mid-session shows a wrap-up, not a blank panel", /Session ended/.test(doneText));
   check("the wrap-up heading takes focus so it isn't lost to the body", (() => {
     const t = document.querySelector(".fc-session-done-title");
     return !!t && t.getAttribute("tabindex") === "-1";
   })());
-  check("the wrap-up counts the card just reviewed", /1 reviewed/.test(doneText) && /correct/.test(doneText));
+  check("the wrap-up counts the card just reviewed: cards · % right · minutes", /1 card · \d+% right · \d+ min/.test(doneText));
+  check("the wrap-up shows today's rings, a news card only with real news, and Keep going (cards left) before Done", (() => {
+    const done = document.querySelector(".fc-session-done");
+    const rows = [...done.querySelectorAll(".fc-done-news .set-row")].map(r => r.textContent);
+    const btns = [...done.querySelectorAll(".fc-cta-row .fc-btn")];
+    return !!done.querySelector("svg.fc-rings[role=img]") && rows.every(t => !/\b0\b/.test(t))
+      && rows.every(t => / in a row$| mastered$/.test(t))
+      && btns.map(b => b.textContent).join("|") === "Keep going|Done" && btns[0].classList.contains("fc-btn-primary")
+      && document.querySelectorAll(".fc-session-done [style]").length === 0;
+  })());
   document.getElementById("fcBackToDashboard").click();
-  check("Back to Dashboard leaves the session for the dashboard", !document.querySelector(".fc-session-done") && !!document.querySelector(".fc-stats-grid"));
+  check("Done leaves the session for the dashboard", !document.querySelector(".fc-session-done") && !!document.querySelector(".fc-stats-grid"));
   await flush(); // the dashboard's async insight + weekly-activity loads
   check("a review just done shows on the dashboard's rings and today's weekly bar", (() => {
     // Regression guard for the offline-history merge refactor: the review

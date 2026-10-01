@@ -201,6 +201,12 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 ```
 
 - Every rating saves at once, so **End session** never loses progress.
+- The wrap-up shows today's rings and says what happened — *Review ring
+  closed*, *All rings closed*, or *Session complete* — with cards · % right ·
+  minutes, then only real news: a day added to your streak, words newly
+  mastered (every card of the word stable for three weeks). **Keep going**
+  when more cards came ready, **Play a game** while the Play ring is open,
+  and **Done**.
 - The answer field stays focused from card to card, so a phone keyboard stays
   open.
 - After a wrong answer, **Again / Hard** read first and Good / Easy are

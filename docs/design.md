@@ -960,6 +960,19 @@ on one line, furigana or not) with a little more room above for the
 reading; the frame is drawn on the edge cells, so a table split across
 sheets closes at the foot of one and reopens under the repeated header.
 
+**The session wrap-up** (`renderSessionDone`) is Fitness's workout summary,
+quietly: the rings at 110px; a title that names what happened (*Review ring
+closed* / *Learn ring closed* / *All rings closed* / *Session complete* /
+*Session ended*); one grey line, "12 cards · 83% right · 6 min"; then one
+inset-grouped white card (max 360px) of 44px tiled rows, **only the rows
+with news** — the streak's orange flame ("5 days in a row"), a green star
+("3 words mastered") — never an empty or "0" row. A ring that closed in the
+session draws its last stretch once the screen is up (600ms after a 250ms
+beat; the arc's length tweened as an SVG attribute, at rest under reduced
+motion). Buttons: one filled — Keep going when more cards came ready, else
+Play a game while the Play ring is open (to Games) — then Done in white;
+with nothing else, Done is the filled one. No sound, no confetti.
+
 The review card's rating row needs a fourth hue: Again / Good / Easy reuse
 `--wrong` (coral) / `--right` (sage) / `--accent` (lavender); Hard gets the
 ochre `--fc-hard`.
