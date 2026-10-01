@@ -669,7 +669,23 @@ and Help.
 
 Light throughout — short opacity/transform transitions, chevron rotations, one
 card wash on a checked answer. A single `@media (prefers-reduced-motion: reduce)`
-block near-instants all of it.
+block near-instants all of it and drops every delay, so nothing staggered
+waits hidden.
+
+**Answer feel** (the games; `answerFeel` in `crosswords.js`, `.fc-fb-*` in
+CSS). Fitness-quiet, never Duolingo: each motion under half a second and only
+in answer to a tap; colour only means right, wrong or the section. A tile
+scales to .97 while pressed. Once answered, the right tile's sage wash grows
+from its middle (a layer under the label, so nothing moves) and a ✓ draws
+itself in its top-right corner — with a springy .95 press if it was your pick,
+or a sage ring pulsing to 2px if you picked another; a wrong pick washes coral
+with a firmer decaying shake (8px) and a drawn ✕. The other two step back to
+45%. The English under a word and the explanation line rise 4px into place;
+the counter's number rolls up. In the pick-one games a white capsule of five
+6px dots sits before the counter: each right answer in a row fills one in the
+section tint (it pops), the fifth turns the capsule the section wash with one
+soft glow and "5 in a row" (the words dropped at phone width, where the glow
+says it), then they empty; a miss empties them.
 
 Every control takes the same focus ring: a 2px `--section` outline at a 2px
 offset (the search box included). The Kana group picker and the Settings
@@ -826,13 +842,19 @@ tall, text wrapping) — the reading leading at 17px, the English trailing at
 14px — under a quiet "Round 1 of 3". A picked tile takes a section-tone ring
 and faint fill; a right pair washes sage and then goes invisible in place so
 nothing shifts; a wrong pair washes coral with the word search's small shake
-(none under reduced motion). The end is one white card: the time large, a
-grey line ("New best · 2.1s faster · 1 miss" / "0.8s off your best"), two
-quiet stat cells (pace "1.6s per pair", rank "3rd of 14 runs"), a 128px
-sparkline of the last ten runs on the same words in the section tint — higher
-is faster, this run the solid dot, "last 10 runs" under it — and a filled Play
-again. Listening's end card shares the stat cells (this game's accuracy, your
-average over all games). **Pause and breaks** use that same white card over
+(none under reduced motion). The end is one white card that plays once, in
+order: the time large (46px, semibold, tabular) counting up over ~700ms; a
+"★ New best" capsule in the section wash popping in; one grey line ("2.1s
+faster than before · 10 pairs · 1 miss" / "0.8s off your best · …"); a 120px
+ring drawing closed around the pace per pair ("1.6s / a pair") in the medal's
+hue — gold `--tile-amber` under 2s, silver `--tile-slate` under 3s, bronze
+`--tile-clay` under 4s, the section tint with no medal yet — on an 18% track,
+the tier named under it in its own ink and what the next tier needs in grey;
+then, over a hairline, "Last 10 games" / "Your 2nd fastest of 14" and a
+full-width sparkline of those runs in the section tint (higher is faster) that
+draws itself, this run's dot popping last; then a filled Play again and white
+Stats. Listening's end card has two quiet stat cells (this game's accuracy,
+your average over all games). **Pause and breaks** use that same white card over
 the board: *Paused* (a small grey title, the clock large, "Round 2 of 3",
 a filled Resume, then white Restart and End game), the board's tiles hidden
 rather than dimmed so a stopped clock isn't study time; between rounds,

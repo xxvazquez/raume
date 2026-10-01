@@ -359,6 +359,15 @@ play, *Restart* and *Stats*. Each tab keeps its own settings and its
 game in progress while you switch between them. Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
 
+Answering feels like a tap on something real, quietly: a tile squeezes under
+your finger; the right answer washes green from its middle out and a ✓ draws
+itself in its corner (a ring around it if you picked another), a wrong pick
+washes red with a short shake and a ✕, and the English rises into place. In
+Listening, Kana tiles, Odd one out and Word chain, five small dots beside the
+counter fill with each right answer in a row — the fifth glows once and says
+"5 in a row" — and a miss empties them. No sounds, points or confetti;
+with reduced motion on, it's all a plain change of state.
+
 <details>
 <summary><b>Match</b></summary>
 
@@ -379,9 +388,12 @@ scheduled; every finished game goes to the Dashboard.
 - Once you have a best on the same words, a small chip beside the clock after
   each round says how far ahead (sage, "−1.4s") or behind (coral, "+0.9s") of
   that best you are at that point.
-- At the end: your time, *New best* (and by how much) or how far off your
-  best you were, your misses, your pace per pair, where this run ranks among
-  your runs on the same words, and a small line of your last ten times.
+- At the end: your time counts up, a *New best* badge pops in when it is one,
+  then how much faster (or how far off your best) you were, the pairs and your
+  misses. A ring draws closed around your pace per pair, in its medal's
+  colour — **gold** under 2s a pair, **silver** under 3s, **bronze** under 4s —
+  with what the next tier needs. Under it your last ten games on the same
+  words draw themselves as a line (this one the dot), and where this run ranks.
   Best times are kept in this browser, one per source, script and word count.
   Two words with the same English never appear together.
 - **New game** picks new words; the **⋯** menu's *Restart* plays the same

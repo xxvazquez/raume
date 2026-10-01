@@ -354,10 +354,12 @@ body { --section-ink: color-mix(in srgb, var(--ink) 84%, var(--section)); }
 
 /* Motion here is light -- short opacity/transform transitions, chevron
    rotations, one card wash on a check -- but honour a reduced-motion request
-   all the same: near-instant everything, no smooth scroll. */
+   all the same: near-instant everything (no delays either, so nothing
+   staggered waits hidden), no smooth scroll. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
@@ -3448,10 +3450,57 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-mt-pause-actions .fc-btn { min-width: 160px; }
 .fc-mt-best-round { margin: -6px 0 12px; color: var(--right-strong); font-size: var(--fs-small); font-weight: 500; }
 .fc-mt-done-note { margin: -6px 0 12px; color: var(--faint); font-size: var(--fs-micro); }
-.fc-mt-spark { display: block; margin: 4px 0 0; overflow: visible; }
-.fc-mt-spark-lbl { margin: 0 0 12px; font-size: var(--fs-micro); color: var(--faint); }
-.fc-mt-spark polyline { fill: none; stroke: color-mix(in srgb, var(--section) 55%, var(--paper)); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.fc-mt-spark circle { fill: var(--section-strong, var(--section)); }
+/* Match's finish card plays once, in order: the time counts up (JS), a
+   "New best" capsule pops in, the line under it rises, a ring draws closed
+   around your pace per pair in its medal's hue -- gold / silver / bronze
+   from the --tile family's amber / slate / clay, the section tint when no
+   medal yet -- the tier named under it, then the last ten games draw
+   themselves as a line and this game's dot pops. No confetti, no sound;
+   reduced motion shows the finished card at once. */
+.fc-mt-finish { gap: 8px; }
+.fc-mt-finish .fc-mt-done-time { font-size: 46px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+.fc-mt-finish .fc-mt-done-meta { margin: 0; }
+.fc-mt-badge {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; margin: 0; padding: 0 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--section) 14%, var(--paper)); color: var(--section-strong);
+  font: 600 var(--fs-small)/1 var(--font-ui);
+  animation: fc-mt-badge .5s .75s cubic-bezier(.3, 1.5, .5, 1) both;
+}
+.fc-mt-delta { animation: fc-fb-rise .35s .9s ease-out both; }
+.fc-mt-pace { --tier: var(--section); display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 8px 0 0; }
+.fc-mt-tier-gold { --tier: var(--tile-amber); }
+.fc-mt-tier-silver { --tier: var(--tile-slate); }
+.fc-mt-tier-bronze { --tier: var(--tile-clay); }
+.fc-mt-ring { position: relative; width: 120px; height: 120px; margin-bottom: 6px; }
+.fc-mt-ring svg { display: block; }
+.fc-mt-ring circle { fill: none; stroke-width: 10; }
+.fc-mt-ring-track { stroke: color-mix(in srgb, var(--tier) 18%, var(--paper)); }
+.fc-mt-ring-arc {
+  stroke: var(--tier); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: fc-fb-draw 1s .35s cubic-bezier(.3, .7, .2, 1) forwards;
+}
+.fc-mt-ring-val {
+  position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  animation: fc-mt-pop .45s 1.2s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+.fc-mt-ring-num { font-size: 22px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fc-mt-ring-lbl { font-size: var(--fs-micro); color: var(--muted); }
+.fc-mt-tier-name, .fc-mt-tier-next { margin: 0; animation: fc-fb-rise .35s 1.35s ease-out both; }
+.fc-mt-tier-name { font-size: var(--fs-nav); font-weight: 600; color: color-mix(in srgb, var(--tier) 72%, var(--ink)); }
+.fc-mt-tier-next { font-size: var(--fs-small); color: var(--muted); }
+.fc-mt-history { align-self: stretch; margin: 10px 0 6px; padding-top: 14px; border-top: 1px solid var(--line); }
+.fc-mt-history-head { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 6px; font-size: var(--fs-small); color: var(--muted); }
+.fc-mt-spark { display: block; width: 100%; height: auto; overflow: visible; }
+.fc-mt-spark polyline {
+  fill: none; stroke: var(--section); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 100; stroke-dashoffset: 100; animation: fc-fb-draw .9s 1.5s ease-out forwards;
+}
+.fc-mt-spark circle {
+  fill: var(--section-strong, var(--section)); stroke: var(--paper); stroke-width: 2;
+  transform-box: fill-box; transform-origin: center; animation: fc-mt-pop .4s 2.3s cubic-bezier(.3, 1.6, .5, 1) both;
+}
+@keyframes fc-mt-badge { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes fc-mt-pop { 0% { opacity: 0; transform: scale(.3); } 70% { opacity: 1; transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
 /* Listening (js/flashcards/crosswords.js wireListening): one white card
    with a big round ▶ in the section tint, the word appearing under it once
    answered; four choices under it as Match's tiles (2x2, one column on a
@@ -3481,10 +3530,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    the other two stepped back. */
 .fc-ls-choice.fc-mt-right, .fc-oo-word.fc-mt-right { background: color-mix(in srgb, var(--right) 24%, var(--paper)); color: var(--right-strong); font-weight: 500; }
 .fc-ls-choice.fc-ls-chosen-wrong, .fc-oo-word.fc-ls-chosen-wrong { background: color-mix(in srgb, var(--wrong) 20%, var(--paper)); color: var(--wrong-strong); }
-.fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong) { opacity: .5; }
-/* A mark as well as the colour, so right and wrong never rest on hue alone. */
-.fc-ls-choice.fc-mt-right::before, .fc-oo-word.fc-mt-right .fc-oo-w::before { content: "✓ "; }
-.fc-ls-choice.fc-ls-chosen-wrong::before, .fc-oo-word.fc-ls-chosen-wrong .fc-oo-w::before { content: "✕ "; }
+/* A mark as well as the colour, so right and wrong never rest on hue
+   alone: the ✓ / ✕ that answerFeel draws in the tile's corner (below). */
 .fc-ls-next-row { display: flex; justify-content: center; margin-top: 14px; min-height: 36px; }
 @media (max-width: 380px) { .fc-ls-choices { grid-template-columns: minmax(0, 1fr); } }
 /* Kana tiles: Listening's white card holding the English, a small speaker
@@ -3566,6 +3613,70 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-wc-grid { margin-top: 12px; }
 .fc-wc-chain { margin: 4px 0 12px; color: var(--ink); font-size: var(--fs-nav); line-height: 1.6; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
+/* Answer feel (crosswords.js answerFeel), shared by the pick-one games: a
+   tile squeezes a little under a finger; once answered, the right tile's
+   sage wash grows from its middle (the colour on a layer under the label,
+   so the label never moves) and a ✓ draws itself in its corner -- a short
+   springy press if it was your pick, a sage ring if you picked another --
+   and a wrong pick washes coral with a firmer shake and a ✕. The English
+   and the line under the grid rise into place. All under half a second,
+   only in answer to a tap; reduced motion leaves the end state. */
+.fc-ls-choice, .fc-oo-word, .fc-ss-bucket { position: relative; transition: background-color .15s ease, box-shadow .15s ease, opacity .25s ease, transform .12s ease; }
+.fc-ls-choice:active:not(:disabled), .fc-oo-word:active:not(:disabled), .fc-ss-bucket:active:not(:disabled) { transform: scale(.97); }
+.fc-ls-choice { padding-inline: 26px; }
+.fc-mt-tile.fc-fb { isolation: isolate; overflow: hidden; background-color: var(--paper); }
+.fc-fb::after {
+  content: ""; position: absolute; z-index: -1; left: -30%; top: -60%; width: 160%; height: 220%;
+  border-radius: 50%; background: var(--fb-wash, transparent); transform: scale(0);
+  animation: fc-fb-wash .45s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+.fc-fb.fc-mt-right { --fb-wash: color-mix(in srgb, var(--right) 24%, var(--paper)); }
+.fc-fb.fc-mt-wrong, .fc-fb.fc-ls-chosen-wrong { --fb-wash: color-mix(in srgb, var(--wrong) 20%, var(--paper)); animation: fc-fb-shake .34s ease-out; }
+.fc-fb-press { animation: fc-fb-press .3s cubic-bezier(.3, 1.4, .5, 1); }
+.fc-fb-ring { animation: fc-fb-ring .5s ease-out forwards; }
+.fc-fb-mark {
+  position: absolute; top: 8px; right: 8px; width: 15px; height: 15px;
+  fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.fc-fb-mark path { stroke-dasharray: 100; stroke-dashoffset: 100; animation: fc-fb-draw .28s .15s ease-out forwards; }
+.fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong),
+.fc-oo-word:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong) { opacity: .45; }
+.fc-oo-en:not([hidden]) { animation: fc-fb-rise .3s .1s ease-out both; }
+.fc-oo-reveal:not([hidden]), .fc-ls-word:not([hidden]), .fc-kt-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
+/* The question counter's number rolls up into place. */
+.fc-fb-num { display: inline-block; }
+.fc-fb-roll { animation: fc-fb-roll .32s cubic-bezier(.2, .8, .2, 1); }
+/* Right in a row: five small dots in a white capsule beside the counter,
+   filling in the section tint; the fifth pops, the capsule takes the
+   section wash, glows once and says "5 in a row". */
+.fc-fb-streak {
+  display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px;
+  background: var(--paper); box-shadow: var(--control-lift); transition: background-color .3s ease;
+}
+.fc-fb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background-color .2s ease; }
+.fc-fb-dot.fc-fb-on { background: var(--section); }
+.fc-fb-dot.fc-fb-pop { animation: fc-fb-pop .4s cubic-bezier(.3, 1.6, .5, 1); }
+.fc-fb-hot-lbl { display: none; font: 600 var(--fs-micro)/1 var(--font-ui); color: var(--section-strong); white-space: nowrap; }
+.fc-fb-streak.fc-fb-hot { background: color-mix(in srgb, var(--section) 14%, var(--paper)); animation: fc-fb-glow 1.1s ease-out; }
+.fc-fb-hot .fc-fb-hot-lbl { display: inline; animation: fc-fb-rise .3s ease-out both; }
+/* On a phone the label would crowd the title: the glow says it alone. */
+@media (max-width: 420px) { .fc-fb-hot .fc-fb-hot-lbl { display: none; } }
+@keyframes fc-fb-wash { to { transform: scale(1); } }
+@keyframes fc-fb-press { 35% { transform: scale(.95); } }
+@keyframes fc-fb-shake { 18% { transform: translateX(-8px); } 36% { transform: translateX(7px); } 54% { transform: translateX(-4px); } 72% { transform: translateX(2px); } }
+@keyframes fc-fb-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--right) 0%, transparent); }
+  40% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--right) 90%, transparent); }
+  100% { box-shadow: 0 0 0 2px var(--right); }
+}
+@keyframes fc-fb-draw { to { stroke-dashoffset: 0; } }
+@keyframes fc-fb-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes fc-fb-roll { from { opacity: 0; transform: translateY(60%); } to { opacity: 1; transform: none; } }
+@keyframes fc-fb-pop { 0% { transform: scale(.4); } 60% { transform: scale(1.5); } 100% { transform: scale(1); } }
+@keyframes fc-fb-glow {
+  from { box-shadow: var(--control-lift), 0 0 0 0 color-mix(in srgb, var(--section) 35%, transparent); }
+  to { box-shadow: var(--control-lift), 0 0 0 12px color-mix(in srgb, var(--section) 0%, transparent); }
+}
 .fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
 .fc-ls-missed li {
   display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 4px;

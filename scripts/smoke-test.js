@@ -3174,7 +3174,18 @@ async function main() {
     let saved = {};
     try { saved = JSON.parse(window.localStorage.getItem(xw.MATCH_BEST_KEY)) || {}; } catch (e) { /* ignore */ }
     // file:// jsdom may refuse localStorage (storageUsable) -- then only the card is checked.
-    return !!done && /New best · 1 miss/.test(done.textContent) && (!storageUsable || Object.keys(saved).length === 1);
+    return !!done && /New best/.test(done.querySelector(".fc-mt-badge").textContent)
+      && /^\d+ pairs · 1 miss$/.test(done.querySelector(".fc-mt-delta").textContent) && (!storageUsable || Object.keys(saved).length === 1);
+  })());
+  check("the finish card rings your pace per pair in its medal's colour and names the next tier", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const pace = done.querySelector(".fc-mt-pace");
+    const run = window.RaumeStudy.flashcards.puzzleRuns.live("match").pop();
+    const per = run.ms / run.n / 1000;
+    const tier = per < 2 ? "gold" : per < 3 ? "silver" : per < 4 ? "bronze" : "none";
+    return !!pace && pace.classList.contains("fc-mt-tier-" + tier) && !!pace.querySelector(".fc-mt-ring-arc[pathLength]")
+      && pace.querySelector(".fc-mt-ring-num").textContent === per.toFixed(1) + "s"
+      && /under \d\.\ds a pair|The fastest tier/.test(pace.querySelector(".fc-mt-tier-next").textContent);
   })());
   check("the finished Match is logged with its setup and both words of the wrong pair as missed, and its card offers Stats beside Play again", (() => {
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("match").pop();
@@ -3312,11 +3323,30 @@ async function main() {
       && !word.hidden && word.textContent.includes(String(xwIndex[q.word.id].jpPlain || q.word.answer).replace(/^〜/, ""))
       && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
   })());
+  check("answer feel: a drawn ✕ on the wrong pick, a ✓ and a ring on the right one, the in-a-row dots empty", (() => {
+    const q = lsQ()[0];
+    const right = lsChoices()[q.choices.indexOf(q.word)];
+    const wrong = document.querySelector("#fcPanelGames .fc-ls-chosen-wrong");
+    return right.classList.contains("fc-fb") && right.classList.contains("fc-fb-ring") && !!right.querySelector(".fc-fb-mark")
+      && wrong.classList.contains("fc-fb") && !!wrong.querySelector(".fc-fb-mark") && right.textContent === q.word.clue
+      && document.querySelectorAll("#fcStreak .fc-fb-dot").length === 5 && !document.querySelector("#fcStreak .fc-fb-on");
+  })());
   document.querySelector("#fcPanelGames .fc-ls-next").click();
-  check("Next moves on and says the next word", lsCount() === "2 / " + lsQ().length && spoken[spoken.length - 1] === lsQ()[1].word.speak);
+  check("Next moves on and says the next word, the counter's number rolling up", lsCount() === "2 / " + lsQ().length && spoken[spoken.length - 1] === lsQ()[1].word.speak
+    && !!document.querySelector("#fcLsCount .fc-fb-roll"));
   for (let i = 1; i < lsQ().length; i++) {
     const q = lsQ()[i];
     lsChoices()[q.choices.indexOf(q.word)].click();
+    if (i === 1) {
+      const pick = lsChoices()[q.choices.indexOf(q.word)];
+      check("a right pick springs, gets its ✓, and fills the first in-a-row dot",
+        pick.classList.contains("fc-fb-press") && !!pick.querySelector(".fc-fb-mark")
+        && document.querySelectorAll("#fcStreak .fc-fb-on").length === 1 && document.getElementById("fcStreak").getAttribute("aria-label") === "1 right in a row");
+    }
+    if (i === 5) {
+      check("five right in a row: the capsule says so", document.getElementById("fcStreak").classList.contains("fc-fb-hot")
+        && /5 in a row/.test(document.getElementById("fcStreak").textContent));
+    }
     for (let waited = 0; waited < 5000; waited += 25) {
       if (document.querySelector("#fcPanelGames .fc-mt-done") || lsCount().startsWith((i + 2) + " /")) break;
       await new Promise(r => setTimeout(r, 25));

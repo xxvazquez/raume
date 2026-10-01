@@ -51,6 +51,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // MENU_ICON) -- the menu itself reuses that one's markup, so the delegated
   // open/close/Escape handling in js/vocab/interactions.js covers it too.
   // Three rising bars: the Stats screen.
+  var STAR_ICON = '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5l2 4.3 4.6.5-3.4 3.1 1 4.6L9 12.6 4.8 15l1-4.6-3.4-3.1 4.6-.5z"/></svg>';
   var STATS_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 15V10M9 15V4M14 15V7.5"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="4" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="9" cy="14" r="1.45"/></svg>';
   // Same ⓘ glyph as a reference row's grammar notes (js/vocab/render.js's
@@ -754,9 +755,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     return runs ? runs.record(run) : null;
   }
-  // Under a finished Match: pace per pair and where this run ranks among
-  // every run of the same setup, then a sparkline of the last ten -- this
-  // one the highlighted dot. Faster is higher on the line.
   function ordinal(n) {
     var t = n % 100, u = n % 10;
     return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th");
@@ -773,26 +771,121 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       (all.length > 1 ? '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + Math.round(got / asked * 100) + '%</span><span class="fc-mt-stat-lbl">over ' + all.length + " games</span></div>" : "") +
       "</div>";
   }
-  function matchStatsHtml(key, total, pairs, run) {
+  // Pace medals, per pair: gold under 2s, silver under 3s, bronze under 4s
+  // -- each tier's hue from the --tile family (amber / slate / clay).
+  var PACE_TIERS = [["gold", "Gold", 2], ["silver", "Silver", 3], ["bronze", "Bronze", 4]];
+  function paceTier(perPair) {
+    var at = -1;
+    PACE_TIERS.forEach(function (t, i) { if (at === -1 && perPair < t[2]) at = i; });
+    if (at === -1) at = PACE_TIERS.length;
+    var tier = PACE_TIERS[at], up = PACE_TIERS[at - 1];
+    return { key: tier ? tier[0] : "none", name: tier ? tier[1] + " pace" : "",
+      next: up ? up[1] + " is under " + up[2].toFixed(1) + "s a pair" : tier ? "The fastest tier" : "Bronze is under " + PACE_TIERS[2][2].toFixed(1) + "s a pair" };
+  }
+  // The finish card's middle: your pace per pair inside a ring that draws
+  // closed in the tier's hue, the tier named under it.
+  function paceRingHtml(perPair) {
+    var t = paceTier(perPair);
+    return '<div class="fc-mt-pace fc-mt-tier-' + t.key + '">' +
+      '<div class="fc-mt-ring"><svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">' +
+      '<circle class="fc-mt-ring-track" cx="60" cy="60" r="50"/>' +
+      '<circle class="fc-mt-ring-arc" cx="60" cy="60" r="50" pathLength="100" transform="rotate(-90 60 60)"/></svg>' +
+      '<p class="fc-mt-ring-val"><span class="fc-mt-ring-num">' + perPair.toFixed(1) + 's</span><span class="fc-mt-ring-lbl">a pair</span></p></div>' +
+      (t.name ? '<p class="fc-mt-tier-name">' + t.name + "</p>" : "") +
+      '<p class="fc-mt-tier-next">' + t.next + "</p></div>";
+  }
+  // Under it: the last ten runs on these words as a sparkline that draws
+  // itself (higher = faster), this run the dot, and where it ranks.
+  function matchHistoryHtml(key, total, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     var same = runs ? runs.live("match").filter(function (r) { return r.setup === key && !r.ended; }) : [];
     if (run && !same.some(function (r) { return r.id === run.id; })) same.push(run);
+    if (same.length < 2) return "";
     var rank = 1 + same.filter(function (r) { return r.ms < total; }).length;
-    var cells = '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + (total / pairs / 1000).toFixed(1) + 's</span><span class="fc-mt-stat-lbl">per pair</span></div>' +
-      (same.length > 1 ? '<div class="fc-mt-stat"><span class="fc-mt-stat-val">' + ordinal(rank) + '</span><span class="fc-mt-stat-lbl">of ' + same.length + " runs</span></div>" : "");
-    var last = same.slice(-10), spark = "";
-    if (last.length > 1) {
-      var max = Math.max.apply(null, last.map(function (r) { return r.ms; }));
-      var min = Math.min.apply(null, last.map(function (r) { return r.ms; }));
-      var span = Math.max(1, max - min), w = 120, h = 32, step = w / (last.length - 1);
-      var pts = last.map(function (r, i) { return [Math.round(i * step * 10) / 10, Math.round((4 + (r.ms - min) / span * (h - 8)) * 10) / 10]; });
-      var end = pts[pts.length - 1];
-      spark = '<svg class="fc-mt-spark" viewBox="-4 0 128 32" width="128" height="32" role="img" aria-label="Your last ' + last.length + ' times on these words">' +
-        '<polyline points="' + pts.map(function (q) { return q.join(","); }).join(" ") + '"/>' +
-        '<circle cx="' + end[0] + '" cy="' + end[1] + '" r="3.2"/></svg>' +
-        '<span class="fc-mt-spark-lbl">last ' + last.length + " runs</span>";
+    var last = same.slice(-10);
+    var max = Math.max.apply(null, last.map(function (r) { return r.ms; }));
+    var min = Math.min.apply(null, last.map(function (r) { return r.ms; }));
+    var span = Math.max(1, max - min), w = 300, h = 40, step = w / (last.length - 1);
+    var pts = last.map(function (r, i) { return [Math.round(i * step * 10) / 10, Math.round((5 + (r.ms - min) / span * (h - 10)) * 10) / 10]; });
+    var end = pts[pts.length - 1];
+    return '<div class="fc-mt-history"><p class="fc-mt-history-head"><span>Last ' + last.length + " games</span>" +
+      "<span>Your " + (rank === 1 ? "fastest" : ordinal(rank) + " fastest") + " of " + same.length + "</span></p>" +
+      '<svg class="fc-mt-spark" viewBox="-6 0 312 40" role="img" aria-label="Your last ' + last.length + ' times on these words">' +
+      '<polyline pathLength="100" points="' + pts.map(function (q) { return q.join(","); }).join(" ") + '"/>' +
+      '<circle cx="' + end[0] + '" cy="' + end[1] + '" r="4.5"/></svg></div>';
+  }
+  // The finish time counts up to itself (~700ms, easing out); the final
+  // value is in the markup from the start, and reduced motion (or a page
+  // that can't animate) just keeps it.
+  function countUpClock(el, ms) {
+    if (!el || !window.requestAnimationFrame || !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var t0 = null;
+    function step(now) {
+      if (!el.isConnected) return;
+      if (t0 === null) t0 = now;
+      var p = Math.min((now - t0) / 700, 1);
+      el.textContent = formatClock(ms * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) window.requestAnimationFrame(step);
     }
-    return '<div class="fc-mt-stats">' + cells + "</div>" + spark;
+    window.requestAnimationFrame(step);
+  }
+  // Answer feel, shared by the pick-one games (Listening, Odd one out, Word
+  // chain, Speed sort): the right tile washes sage from the middle out and
+  // a ✓ draws itself in its corner -- with a small springy press if it was
+  // your pick, or a sage ring if you picked another; a wrong pick washes
+  // coral with a shake and a ✕. Colours and marks come from the existing
+  // fc-mt-right / fc-mt-wrong classes; this adds only the motion.
+  var MARK_RIGHT = '<svg class="fc-fb-mark" viewBox="0 0 18 18" aria-hidden="true"><path pathLength="100" d="M4 9.5l3.2 3L14 5.5"/></svg>';
+  var MARK_WRONG = '<svg class="fc-fb-mark" viewBox="0 0 18 18" aria-hidden="true"><path pathLength="100" d="M5.5 5.5l7 7M12.5 5.5l-7 7"/></svg>';
+  function answerFeel(rightBtn, pickedBtn) {
+    if (rightBtn) {
+      rightBtn.classList.add("fc-fb", pickedBtn === rightBtn ? "fc-fb-press" : "fc-fb-ring");
+      rightBtn.insertAdjacentHTML("beforeend", MARK_RIGHT);
+    }
+    if (pickedBtn && pickedBtn !== rightBtn) {
+      pickedBtn.classList.add("fc-fb");
+      pickedBtn.insertAdjacentHTML("beforeend", MARK_WRONG);
+    }
+  }
+  // The question counter's number rolls up when it changes.
+  function setCount(countEl, n, total) {
+    var prev = countEl.querySelector(".fc-fb-num");
+    var same = prev && prev.textContent === String(n);
+    countEl.innerHTML = '<span class="fc-fb-num' + (prev && !same ? " fc-fb-roll" : "") + '">' + n + "</span> / " + total;
+  }
+  // Five dots beside the counter fill with each right answer in a row; the
+  // fifth glows once and says "5 in a row", then they start again. A miss
+  // empties them. Quiet: no number, no sound.
+  var STREAK_DOTS = 5;
+  function streakHtml() {
+    var dots = "";
+    for (var i = 0; i < STREAK_DOTS; i++) dots += '<span class="fc-fb-dot"></span>';
+    return '<span class="fc-fb-streak" id="fcStreak" role="img" aria-label="0 right in a row">' + dots +
+      '<span class="fc-fb-hot-lbl">' + STREAK_DOTS + " in a row</span></span>";
+  }
+  function streakMeter() {
+    var n = 0, timer = null;
+    function el() { return document.getElementById("fcStreak"); }
+    function draw(pop) {
+      var box = el();
+      if (!box) return;
+      box.querySelectorAll(".fc-fb-dot").forEach(function (d, i) {
+        d.classList.toggle("fc-fb-on", i < n);
+        d.classList.toggle("fc-fb-pop", i === pop);
+      });
+      box.classList.toggle("fc-fb-hot", n === STREAK_DOTS);
+      box.setAttribute("aria-label", n + " right in a row");
+    }
+    return {
+      hit: function (right) {
+        clearTimeout(timer);
+        if (n === STREAK_DOTS) n = 0;
+        n = right ? n + 1 : 0;
+        draw(right ? n - 1 : -1);
+        if (n === STREAK_DOTS) timer = setTimeout(function () { n = 0; draw(-1); }, 1800);
+      },
+      reset: function () { clearTimeout(timer); n = 0; draw(-1); }
+    };
   }
   // A finished game's buttons: Play again (new words), and Stats.
   function doneActionsHtml(againId) {
@@ -979,15 +1072,19 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var isBest = typeof best !== "number" || total < best;
       if (isBest) saveBest(key, total);
       var run = recordRun({ mode: "match", n: p.placements.length, ms: total, miss: misses, setup: key, splits: splits, missed: Object.keys(missedIds) });
+      var pairs = p.placements.length;
       var missText = misses === 0 ? "no misses" : misses + (misses === 1 ? " miss" : " misses");
-      var outcome = typeof best !== "number" ? "New best"
-        : isBest ? "New best · " + ((best - total) / 1000).toFixed(1) + "s faster"
-        : ((total - best) / 1000).toFixed(1) + "s off your best";
-      boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
+      var delta = typeof best !== "number" ? ""
+        : isBest ? ((best - total) / 1000).toFixed(1) + "s faster than before · "
+        : ((total - best) / 1000).toFixed(1) + "s off your best · ";
+      boardEl.innerHTML = '<div class="fc-mt-done fc-mt-finish" role="status">' +
         '<p class="fc-mt-done-time">' + formatClock(total) + "</p>" +
-        '<p class="fc-mt-done-meta">' + outcome + " · " + missText + "</p>" +
-        matchStatsHtml(key, total, p.placements.length, run) +
+        (isBest ? '<p class="fc-mt-badge">' + STAR_ICON + "New best</p>" : "") +
+        '<p class="fc-mt-done-meta fc-mt-delta">' + delta + pairs + " pairs · " + missText + "</p>" +
+        paceRingHtml(total / pairs / 1000) +
+        matchHistoryHtml(key, total, run) +
         doneActionsHtml("fcMtAgain") + "</div>";
+      countUpClock(boardEl.querySelector(".fc-mt-done-time"), total);
       bindDoneActions("fcMtAgain");
     }
     function select(tile) {
@@ -1103,8 +1200,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function wireListening(boardEl, countEl, p) {
     // `pausedMs`: time spent on the pause card, left out of the game's time.
-    var at, score, missed, game = 0, played, startedAt, pausedMs, pausedAt, done, pendingNext;
-    function count() { countEl.textContent = Math.min(at + 1, p.questions.length) + " / " + p.questions.length; }
+    var at, score, missed, game = 0, played, startedAt, pausedMs, pausedAt, done, pendingNext, streak = streakMeter();
+    function count() { setCount(countEl, Math.min(at + 1, p.questions.length), p.questions.length); }
     function renderQuestion() {
       var q = p.questions[at];
       count();
@@ -1127,12 +1224,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       speakWord(p.questions[at].word);
     }
     function answer(btn) {
-      var q = p.questions[at], chosen = q.choices[+btn.dataset.i], right = chosen === q.word, thisGame = game;
+      var q = p.questions[at], chosen = q.choices[+btn.dataset.i], right = chosen === q.word, thisGame = game, rightBtn = null;
       boardEl.querySelectorAll(".fc-ls-choice").forEach(function (b) {
         b.disabled = true;
-        if (q.choices[+b.dataset.i] === q.word) b.classList.add("fc-mt-right");
+        if (q.choices[+b.dataset.i] === q.word) { b.classList.add("fc-mt-right"); rightBtn = b; }
       });
       if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      answerFeel(rightBtn, btn);
+      streak.hit(right);
       var word = boardEl.querySelector(".fc-ls-word");
       word.innerHTML = spokenWordHtml(q.word);
       word.hidden = false;
@@ -1221,6 +1320,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       game++;
       hidePauseCard(boardEl);
       at = 0; score = 0; missed = []; played = false; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      streak.reset();
       var pb = document.getElementById("fcMtPause");
       if (pb) pb.disabled = false;
       countEl.classList.remove("fc-ws-count-done");
@@ -1283,9 +1383,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function wireKanaTiles(boardEl, countEl, p) {
     // `queue`: the questions still to go -- a missed word goes back on the
     // end, once. `placed`: the bank indexes in the slots, in order.
-    var queue, at, score, missed, retried, placed, game = 0, startedAt, pausedMs, pausedAt, done, locked;
+    var queue, at, score, missed, retried, placed, game = 0, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
     var total = p.questions.length;
-    function count() { countEl.textContent = Math.min(at + 1, total) + " / " + total; }
+    function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function q() { return queue[0]; }
     function render() {
       var cur = q();
@@ -1324,6 +1424,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var right = spelled === cur.word.answer, thisGame = game;
       locked = true;
       var slots = boardEl.querySelector(".fc-kt-slots");
+      streak.hit(right);
       if (right) {
         slots.classList.add("fc-kt-right");
         if (!retried[cur.word.id]) score++;
@@ -1423,6 +1524,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       game++;
       hidePauseCard(boardEl);
       queue = p.questions.slice(); at = 0; score = 0; missed = []; retried = {};
+      streak.reset();
       startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
       var pb = document.getElementById("fcMtPause");
       if (pb) pb.disabled = false;
@@ -1485,9 +1587,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return { placements: questions.map(function (q) { return q.words[q.odd]; }), questions: questions, clean: clean.length };
   }
   function wireOddOne(boardEl, countEl, p, romajiMode) {
-    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext;
+    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext, streak = streakMeter();
     var total = p.questions.length;
-    function count() { countEl.textContent = Math.min(at + 1, total) + " / " + total; }
+    function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function render() {
       var q = p.questions[at];
       count();
@@ -1511,6 +1613,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (+b.dataset.i === q.odd) b.classList.add("fc-mt-right");
       });
       if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      answerFeel(boardEl.querySelector('.fc-oo-word[data-i="' + q.odd + '"]'), btn);
+      streak.hit(right);
       var oddWord = q.words[q.odd];
       var reveal = boardEl.querySelector(".fc-oo-reveal");
       reveal.innerHTML = '<span' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(oddWord.answer) + "</span> is " +
@@ -1592,6 +1696,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       game++;
       hidePauseCard(boardEl);
       at = 0; score = 0; missed = []; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      streak.reset();
       var pb = document.getElementById("fcMtPause");
       if (pb) pb.disabled = false;
       countEl.classList.remove("fc-ws-count-done");
@@ -1702,6 +1807,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (chosen === it.bucket) {
         score++;
         btn.classList.add("fc-mt-right");
+        answerFeel(btn, btn);
         setTimeout(function () { if (thisGame === game && boardEl.isConnected) next(); }, 220);
         return;
       }
@@ -1709,7 +1815,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       tick();
       mistakes.push({ word: it.word, chosen: chosen, right: it.bucket });
       btn.classList.add("fc-mt-wrong");
-      boardEl.querySelector('.fc-ss-bucket[data-b="' + it.bucket + '"]').classList.add("fc-ss-was");
+      var was = boardEl.querySelector('.fc-ss-bucket[data-b="' + it.bucket + '"]');
+      was.classList.add("fc-ss-was");
+      answerFeel(was, btn);
       setTimeout(function () {
         if (thisGame !== game || !boardEl.isConnected) return;
         if (phase === "paused") pendingNext = true; else next();
@@ -1881,9 +1989,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return { placements: chain.slice(1), questions: questions, start: chain[0] };
   }
   function wireWordChain(boardEl, countEl, p) {
-    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext;
+    var at, score, missed, game = 0, startedAt, pausedMs, pausedAt, done, answered, pendingNext, streak = streakMeter();
     var total = p.questions.length;
-    function count() { countEl.textContent = Math.min(at + 1, total) + " / " + total; }
+    function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function render() {
       var q = p.questions[at];
       count();
@@ -1909,6 +2017,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (+b.dataset.i === q.right) b.classList.add("fc-mt-right");
       });
       if (!right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      answerFeel(boardEl.querySelector('.fc-oo-word[data-i="' + q.right + '"]'), btn);
+      streak.hit(right);
       var rule = chainRule(q.prev.answer);
       var reveal = boardEl.querySelector(".fc-oo-reveal");
       reveal.innerHTML = '<span lang="ja">' + esc(q.prev.answer) + "</span> ends on <span lang=\"ja\">" + esc(q.prev.tail) + "</span>" +
@@ -1995,6 +2105,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       game++;
       hidePauseCard(boardEl);
       at = 0; score = 0; missed = []; startedAt = Date.now(); pausedMs = 0; pausedAt = null; done = false; pendingNext = false;
+      streak.reset();
       var pb = document.getElementById("fcMtPause");
       if (pb) pb.disabled = false;
       countEl.classList.remove("fc-ws-count-done");
@@ -2565,7 +2676,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       (bare ? "" : '<button type="button" class="fc-btn fc-xw-new" id="fcXwNew">' + newLabel + "</button>" +
         (mt ? '<button type="button" class="fc-mt-pause-btn" id="fcMtPause" aria-label="Pause">' + PAUSE_ICON + "</button>"
           : '<button type="button" class="fc-btn fc-xw-hint" id="fcXwHint" title="' + (ws ? "Reveal a word" : "Reveal a letter") + '">' + HINT_ICON + "Hint</button>") +
-        (ls ? '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
+        (ls ? streakHtml() + '<span class="fc-ws-count" id="fcLsCount" aria-label="Question"></span>'
           : mt ? '<span class="fc-mt-split" id="fcMtSplit" aria-live="polite" hidden></span><span class="fc-ws-count fc-mt-clock" id="fcMtClock" role="timer" aria-label="Time"></span>'
           : ws ? '<span class="fc-ws-count" id="fcWsCount" aria-live="polite"></span>'
           : '<button type="button" class="fc-btn fc-btn-primary" id="fcXwCheck">Check</button>')) +
