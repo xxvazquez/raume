@@ -139,6 +139,12 @@ alter table public.flashcard_settings add column if not exists known_kanji jsonb
 -- "listening", "n": 15, "ms": 23400, "miss": 1, "right": 8, "setup": "..." }].
 alter table public.flashcard_settings add column if not exists puzzle_runs jsonb not null default '[]'::jsonb;
 
+-- The Dashboard's N5 journey: every word ever mastered (so forgetting one
+-- never drops a level) and every award earned (so each is celebrated once),
+-- id -> the day it happened. Union on merge, the earlier day wins. Shape:
+-- { "mastered": { "v0123": "2026-10-01" }, "awards": { "streak-7": "2026-10-01" } }.
+alter table public.flashcard_settings add column if not exists journey jsonb not null default '{}'::jsonb;
+
 -- Kana trainer cards + review history -- the exact parallel of flashcards /
 -- review_logs above, for the "Kana" tab's own hiragana/katakana drill.
 -- kana_id is the trainer's stable item id ("hira-gojuon:あ", ...); direction

@@ -541,8 +541,19 @@ window.RaumeStudy.flashcards.kana = (function () {
     p.toStudy = buildQueue(now || new Date()).length;
     return p;
   }
+  // One script's basic kana (every group but sokuon's words), chosen or not:
+  // how many have been studied at least once in either direction -- the
+  // Dashboard's Hiragana / Katakana awards.
+  function scriptProgress(script) {
+    var cards = load().cards, items = [], all = kanaData.allItems();
+    Object.keys(all).forEach(function (g) {
+      all[g].forEach(function (it) { if (it.script === script && !it.word) items.push(it); });
+    });
+    var started = items.filter(function (it) { return cards[cardKey(it, "k2r")] || cards[cardKey(it, "r2k")]; }).length;
+    return { started: started, total: items.length };
+  }
   return {
-    renderKana: renderKana, clearSession: clearSession, summary: summary,
+    renderKana: renderKana, clearSession: clearSession, summary: summary, scriptProgress: scriptProgress,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       checkKana: checkKana, checkR2k: checkR2k, buildQueue: buildQueue, selectedItems: selectedItems,

@@ -707,9 +707,11 @@ control (see "Controls library"), full width on a phone. The dashboard has to
 be scannable at a glance:
 
 - **One card per group** — `.fc-dash-now` ("right now": Today's rings +
-  Study now), `.fc-dash-streak` (the streak strip), `.fc-dash-stats` (three
-  tiles: Total cards, Reviews completed, Estimated retention, in one even row)
-  and then one `.fc-viz-card` each for
+  Study now), `.fc-dash-streak` (the streak strip), `.fc-dash-stats` (the
+  journey — see below — over three tiles: Total cards, Reviews completed,
+  Estimated retention, in one even row), Awards, a Highlights row when
+  there's news, and then, under a quiet "Details" list header (13px muted,
+  `.fc-dash-head`), one `.fc-viz-card` each for
   Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
   layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
   — white Open Kana when nothing is due — and the sage bar), Puzzles and Games (full
@@ -754,6 +756,28 @@ be scannable at a glance:
   under it only when there's news: "Best 21 days · 9 to beat it", or "Your
   longest streak yet". A run that ended before yesterday shows 0, not the
   number it reached; the strip wraps under the number on a phone;
+- **The journey** (`.fc-journey`, the stats card): "Level 4" at 20px
+  semibold with "14 words to Level 5" trailing in grey, the sage bar to the
+  next level, then three equal columns — Kana started, Kanji known, Words
+  mastered — each a tabular figure with "/total" in `--faint` and an 11.5px
+  grey label, the whole column a way in (Kana tab / Kanji section /
+  Library); a hairline, then the three stat tiles. No level names.
+- **Awards** (`.fc-dash-awards`), Fitness's medals: a 44px round face in the
+  award's `--tile` hue with a white glyph (a character for kana / kanji);
+  locked, a 40px track-grey face with a `--faint` glyph inside a thin 2.5px
+  ring of its progress in the hue (an SVG `pathLength` attribute). The name
+  under it at 11px, two lines at most; a locked one's progress ("38/50", or
+  "Not yet") under that. Six on the Dashboard — newest earned first, then
+  the nearest to go — three a row on a phone, six on a wide window; **Show
+  all** (plain tint text) pushes the Awards screen ("‹ Practice"): "7 of 23
+  earned", then a list header and one white card per kind. A medal opens a
+  sheet built from the confirm sheet's parts (glass group over a solid Done;
+  a centred card on a wide window): the medal at 88px, its name 17px
+  semibold, what it's for, "Earned 1 October 2026" or "38/100 so far";
+- **Highlights** — one tiled 44px row in a white card under a list header,
+  only for real news (this week's reviews up 15%+ on last week's, ten or
+  more in each; else a new best Match pace this week); never "fewer", never
+  an empty card;
 - **Study now** (`.fc-btn-primary`) fills with the deep `--section-strong`
   lavender — no shadow, it outranks the tinted buttons by fill alone;
 - **stat tiles** — a plain figure over a caption, no edge rule; each caption
@@ -966,7 +990,8 @@ closed* / *Learn ring closed* / *All rings closed* / *Session complete* /
 *Session ended*); one grey line, "12 cards · 83% right · 6 min"; then one
 inset-grouped white card (max 360px) of 44px tiled rows, **only the rows
 with news** — the streak's orange flame ("5 days in a row"), a green star
-("3 words mastered") — never an empty or "0" row. A ring that closed in the
+("3 words mastered"), an award earned in the session with its medal's glyph
+on its hue ("New award: 7-day streak") — never an empty or "0" row. A ring that closed in the
 session draws its last stretch once the screen is up (600ms after a 250ms
 beat; the arc's length tweened as an SVG attribute, at rest under reduced
 motion). Buttons: one filled — Keep going when more cards came ready, else

@@ -110,6 +110,31 @@ window.RaumeStudy.flashcards.store = (function () {
     return Object.assign({}, next);
   }
 
+  // The N5 journey (dashboard.js): every word ever mastered and every award
+  // earned, each id -> the day it happened ("YYYY-MM-DD"). Kept so a word
+  // forgotten later never takes a level back, and so an award is celebrated
+  // once. Part of the cache (a guest backup carries it); signed in, mirrored
+  // to flashcard_settings.journey by data-ops.
+  var DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+  function cleanDayMap(raw) {
+    var out = {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+    Object.keys(raw).forEach(function (id) { if (typeof raw[id] === "string" && DAY_RE.test(raw[id])) out[id] = raw[id]; });
+    return out;
+  }
+  function cleanJourney(raw) {
+    var j = raw && typeof raw === "object" ? raw : {};
+    return { mastered: cleanDayMap(j.mastered), awards: cleanDayMap(j.awards) };
+  }
+  // Union of two journeys, the earlier day per id winning.
+  function mergeJourney(a, b) {
+    var x = cleanJourney(a), y = cleanJourney(b);
+    ["mastered", "awards"].forEach(function (k) {
+      Object.keys(y[k]).forEach(function (id) { if (!(id in x[k]) || y[k][id] < x[k][id]) x[k][id] = y[k][id]; });
+    });
+    return x;
+  }
+
   function uuid() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -138,7 +163,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, journey: cleanJourney(null), lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -185,6 +210,9 @@ window.RaumeStudy.flashcards.store = (function () {
       // Leeches marked "Keep" -- vocabId -> lapse count at the time. Synced via
       // flashcard_settings.leech_kept (see js/flashcards/data-ops.js).
       leechKept: cleanLeechKept(raw.leechKept),
+      // Words ever mastered and awards earned -- see cleanJourney. Synced via
+      // flashcard_settings.journey.
+      journey: cleanJourney(raw.journey),
       lastSyncedAt: raw.lastSyncedAt || null
     };
   }
@@ -354,6 +382,7 @@ window.RaumeStudy.flashcards.store = (function () {
     uuid: uuid, localDateStr: localDateStr,
     getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
     mergeLeechKept: mergeLeechKept, cleanLeechKept: cleanLeechKept,
+    cleanJourney: cleanJourney, mergeJourney: mergeJourney,
     loadCache: loadCache, saveCache: saveCache, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,

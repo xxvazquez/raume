@@ -54,8 +54,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // instead of being two more segments. Back returns to whichever of the
   // five segments you came from.
   // The Stats screen (puzzle-stats.js) is pushed too, from Puzzles, Games
-  // or the Dashboard; its title names which.
-  var PUSHED_TABS = { settings: "Settings", help: "Help", stats: "Stats" };
+  // or the Dashboard; its title names which. So is Awards, from the
+  // Dashboard's Show all.
+  var PUSHED_TABS = { settings: "Settings", help: "Help", stats: "Stats", awards: "Awards" };
   var lastMainTab = "dashboard";
 
   function root() { return document.getElementById("flashcardsPage"); }
@@ -293,7 +294,8 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-tabpanel"' + (activeTab === "games" ? "" : " hidden") + ' id="fcPanelGames"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "settings" ? "" : " hidden") + ' id="fcPanelSettings"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "help" ? "" : " hidden") + ' id="fcPanelHelp"></div>' +
-      '<div class="fc-tabpanel"' + (activeTab === "stats" ? "" : " hidden") + ' id="fcPanelStats"></div>';
+      '<div class="fc-tabpanel"' + (activeTab === "stats" ? "" : " hidden") + ' id="fcPanelStats"></div>' +
+      '<div class="fc-tabpanel"' + (activeTab === "awards" ? "" : " hidden") + ' id="fcPanelAwards"></div>';
 
     if (isGuestMode()) {
       // Leaves the guest cache exactly as it is (own localStorage key) --
@@ -321,6 +323,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     else if (activeTab === "games") crosswords.renderGames(document.getElementById("fcPanelGames"));
     else if (activeTab === "help") renderHelp(document.getElementById("fcPanelHelp"));
     else if (activeTab === "stats") S.puzzleStats.render(document.getElementById("fcPanelStats"));
+    else if (activeTab === "awards") dashboard.renderAwards(document.getElementById("fcPanelAwards"));
     else renderSettings(document.getElementById("fcPanelSettings"));
 
     updateSyncChip();

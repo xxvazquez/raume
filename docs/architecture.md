@@ -73,7 +73,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known) and `puzzle_runs` (every finished puzzle and game). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - **Today's tracker** — the flashcard cache's `day`: `{ date, count, fresh,
   reviewed }`, the new cards met today (`count`, held to *New cards per day*,
@@ -230,6 +230,20 @@ sync, and heals on the next fetch. Nothing about a card is ever touched by it. T
 first version's device-local `raume-flashcards-leech-kept-v1` key is folded into the
 cache once and removed.
 
+**The N5 journey.** `getCache().journey` is `{ mastered: { vocabId: day },
+awards: { awardId: day } }` — every word ever mastered (every studyable card's
+stability ≥ 21 days) and every award earned, with the local day it happened.
+`dashboard.js` `noteJourney()` adds to it on each Dashboard / Awards render and
+session wrap-up; the level is `floor(mastered / 25) + 1`, so a word forgotten
+later never drops one, and an award noted once is never re-celebrated. Award
+values are derived (streak, `reps` summed, Known kanji, `kana.scriptProgress`,
+`puzzleRuns.all()` — not `live()`, so Reset stats never takes an award back).
+Guest mode: part of the cache, so a backup carries it. Signed in: mirrored to
+`flashcard_settings.journey` like `leech_kept` — `fetchAllFromServer()` unions
+both sides (`store.mergeJourney`, the earlier day winning) and pushes back
+what the account lacks; `dataOps.saveJourneyRemote` is best-effort on its own
+update, so a project that hasn't re-run `schema.sql` only logs a warning.
+
 ### Retrying a failed account push
 
 Reviews, table customisations, and custom vocabulary are all local-first --
@@ -293,7 +307,7 @@ js/
     puzzle-runs.js       every finished puzzle and game: the log, its numbers, Tricky words, reset
     puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
     puzzle-stats.js      the Stats screen for Puzzles and Games (a pushed screen)
-    dashboard.js         the Dashboard tab + the review session
+    dashboard.js         the Dashboard tab (with its level + awards, and the pushed Awards screen) + the review session
     views.js             the Library (key "manage") / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups
     kana.js              the Kana tab

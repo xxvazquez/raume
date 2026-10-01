@@ -164,6 +164,11 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // that hasn't re-run schema.sql yet: `leech_kept` is absent, treated as {}).
     var remoteKept = store.cleanLeechKept(settingsRow.leech_kept);
     c.leechKept = store.mergeLeechKept(c.leechKept, remoteKept);
+    // The N5 journey (words ever mastered, awards earned): union, the earlier
+    // day winning; push back whatever the account is missing (absent on a
+    // project that hasn't re-run schema.sql -- treated as empty).
+    var remoteJourney = store.cleanJourney(settingsRow.journey);
+    c.journey = store.mergeJourney(c.journey, remoteJourney);
     c.userId = user.id;
     c.lastSyncedAt = new Date().toISOString();
     saveCache();
@@ -179,6 +184,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (Object.keys(c.leechKept).some(function (id) { return !(id in remoteKept) || c.leechKept[id] > remoteKept[id]; })) {
       saveLeechKeptRemote(c.leechKept);
     }
+    if (journeyAhead(c.journey, remoteJourney)) saveJourneyRemote(c.journey);
     // Kanji marked Known (js/vocab/kanji-known.js) ride in this row too.
     if (window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.applyRemote(settingsRow.known_kanji || {});
     // So do finished Match / Listening games (puzzle-runs.js).
@@ -291,6 +297,20 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (!getClient() || !currentUser()) return Promise.resolve();
     return saveFsrsSettingsRemote({ leech_kept: obj || {} }).catch(function (e) {
       console.warn("Flashcards: could not sync kept leeches", e);
+    });
+  }
+  // Best-effort like the leech Keeps, on its own update so a project without
+  // the `journey` column never breaks any other settings save.
+  function saveJourneyRemote(journey) {
+    if (!getClient() || !currentUser()) return Promise.resolve();
+    return saveFsrsSettingsRemote({ journey: journey || {} }).catch(function (e) {
+      console.warn("Flashcards: could not sync the journey", e);
+    });
+  }
+  // Does `local` hold an id the account lacks, or an earlier day for one?
+  function journeyAhead(local, remote) {
+    return ["mastered", "awards"].some(function (k) {
+      return Object.keys(local[k] || {}).some(function (id) { return !(id in remote[k]) || local[k][id] < remote[k][id]; });
     });
   }
   // Best-effort like the leech Keeps: a Known mark is a view preference, and
@@ -920,7 +940,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused, keepLeech: keepLeech,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
-    saveTableCustomRemote: saveTableCustomRemote, saveKnownKanjiRemote: saveKnownKanjiRemote, savePuzzleRunsRemote: savePuzzleRunsRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
+    saveTableCustomRemote: saveTableCustomRemote, saveKnownKanjiRemote: saveKnownKanjiRemote, savePuzzleRunsRemote: savePuzzleRunsRemote, saveJourneyRemote: saveJourneyRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
     syncTableCustomIfDirty: syncTableCustomIfDirty,
     customVocabAddRows: customVocabAddRows, customVocabDeleteRows: customVocabDeleteRows,
     customVocabAddTable: customVocabAddTable, customVocabDeleteTable: customVocabDeleteTable,

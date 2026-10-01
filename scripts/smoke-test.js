@@ -2468,7 +2468,7 @@ async function main() {
     const rows = [...done.querySelectorAll(".fc-done-news .set-row")].map(r => r.textContent);
     const btns = [...done.querySelectorAll(".fc-cta-row .fc-btn")];
     return !!done.querySelector("svg.fc-rings[role=img]") && rows.every(t => !/\b0\b/.test(t))
-      && rows.every(t => / in a row$| mastered$/.test(t))
+      && rows.every(t => / in a row$| mastered$|^New award: /.test(t))
       && btns.map(b => b.textContent).join("|") === "Keep going|Done" && btns[0].classList.contains("fc-btn-primary")
       && document.querySelectorAll(".fc-session-done [style]").length === 0;
   })());
@@ -2558,6 +2558,82 @@ async function main() {
     c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
     fcStore.saveCache();
     window.RaumeStudy.flashcards.render();
+  }
+
+  console.log("Flashcards: the N5 journey -- level, awards, the Awards screen");
+  {
+    const F = window.RaumeStudy.flashcards;
+    const fcStore = F.store;
+    const c = fcStore.getCache();
+    const saved = { cards: c.cards, journey: c.journey, settings: c.settings };
+    const now = new Date();
+    const far = new Date(now.getTime() + 40 * 86400000).toISOString();
+    const vocabIds = [];
+    window.RaumeStudy.data.vocabularyTables.forEach(t => t.rows.forEach(r => { if (r.id && vocabIds.length < 30) vocabIds.push(r.id); }));
+    c.cards = {};
+    vocabIds.forEach((v, i) => {
+      c.cards["jr" + i] = { id: "jr" + i, vocabId: v, direction: "jp-en", active: true, state: 2, due: far,
+        stability: i < 26 ? 30 : 4, difficulty: 5, scheduled_days: 30, reps: 4, lapses: 0, learning_steps: 0, last_review: now.toISOString() };
+    });
+    c.journey = fcStore.cleanJourney(null);
+    c.settings = Object.assign({}, c.settings, { current_streak: 0, longest_streak: 0, last_study_date: null });
+    fcStore.saveCache();
+    F.setActiveTab("dashboard");
+    F.render();
+    const panel = document.getElementById("fcPanelDashboard");
+    const journey = panel.querySelector(".fc-dash-stats.fc-journey");
+    check("the journey card: Level 2 from 26 words mastered, 24 to the next, then Kana / Kanji / Words and the three tiles",
+      !!journey && /^Level 2$/.test(journey.querySelector(".fc-journey-level").textContent)
+      && /^24 words to Level 3$/.test(journey.querySelector(".fc-journey-next").textContent)
+      && [...journey.querySelectorAll(".fc-journey-lbl")].map(l => l.textContent).join("|") === "Kana started|Kanji known|Words mastered"
+      && /^26\/30$/.test(journey.querySelectorAll(".fc-journey-val")[2].textContent)
+      && journey.querySelectorAll(".fc-stat-tile").length === 3);
+    const today = fcStore.localDateStr(now);
+    check("an award unlocks the day it's earned and is noted in the synced journey (25 words mastered; 100 reviews from 30 cards x 4 reps)",
+      c.journey.awards["words-25"] === today && c.journey.awards["reviews-100"] === today
+      && !c.journey.awards["words-100"] && Object.keys(c.journey.mastered).length === 26);
+    const medals = [...panel.querySelectorAll(".fc-dash-awards .fc-award")];
+    check("the Dashboard shows six medals, earned first (filled), then the nearest locked with their progress ring and count",
+      medals.length === 6 && !medals[0].querySelector(".fc-medal-locked")
+      && medals.some(m => m.dataset.award === "words-25") && medals.some(m => m.querySelector(".fc-medal-locked .fc-medal-ring-arc"))
+      && medals.filter(m => m.querySelector(".fc-medal-locked")).every(m => !!m.querySelector(".fc-award-cap")));
+    // Seen once: a later day re-rendering never re-dates or re-adds it.
+    c.journey.awards["words-25"] = "2026-01-02";
+    F.render();
+    check("an award is noted once -- a later render keeps its first day", c.journey.awards["words-25"] === "2026-01-02");
+    // Forget every mastered word: the level holds.
+    Object.keys(c.cards).forEach(id => { c.cards[id].stability = 2; });
+    fcStore.saveCache();
+    F.render();
+    check("forgetting words never drops a level -- it counts words ever mastered",
+      /^Level 2$/.test(document.querySelector("#fcPanelDashboard .fc-journey-level").textContent)
+      && /^0\/30$/.test(document.querySelectorAll("#fcPanelDashboard .fc-journey-val")[2].textContent));
+    check("the journey merges as a union, the earlier day winning, and a backup keeps it", (() => {
+      const m = fcStore.mergeJourney({ mastered: { a: "2026-02-01" }, awards: { x: "2026-03-01", bad: 7 } }, { mastered: { a: "2026-01-01", b: "2026-05-05" }, awards: { x: "2026-04-01" } });
+      const raw = JSON.parse(JSON.stringify(c));
+      const kept = fcStore.validateCache(raw);
+      return m.mastered.a === "2026-01-01" && m.mastered.b === "2026-05-05" && m.awards.x === "2026-03-01" && !("bad" in m.awards)
+        && !!kept && kept.journey.awards["reviews-100"] === today;
+    })());
+    document.getElementById("fcAwardsAll").click();
+    const awardsPanel = document.getElementById("fcPanelAwards");
+    check("Show all pushes the Awards screen: back to Practice, a count, every award grouped by kind",
+      F.getActiveTab() === "awards" && !awardsPanel.hidden && !!document.getElementById("fcBack")
+      && /^\d+ of \d+ earned$/.test(awardsPanel.querySelector(".fc-awards-count").textContent)
+      && [...awardsPanel.querySelectorAll(".help-head")].map(h => h.textContent).slice(0, 3).join("|") === "Streaks|Reviews|Words"
+      && awardsPanel.querySelectorAll(".fc-award").length >= 20);
+    awardsPanel.querySelector('[data-award="words-100"]').click();
+    const sheet = document.querySelector(".fc-medal-host");
+    check("a medal opens its sheet: the medal large, its name, what it's for, how far along",
+      !!sheet && /100 words mastered/.test(sheet.textContent) && /Master 100 words/.test(sheet.textContent)
+      && /26\/100 so far/.test(sheet.querySelector(".fc-medal-when").textContent) && !!sheet.querySelector(".fc-medal-big"));
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
+    check("Escape closes the medal sheet", !document.querySelector(".fc-medal-host"));
+    check("no inline styles on the Awards screen", document.querySelectorAll("#fcPanelAwards [style]").length === 0);
+    c.cards = saved.cards; c.journey = saved.journey; c.settings = saved.settings;
+    fcStore.saveCache();
+    F.setActiveTab("dashboard");
+    F.render();
   }
 
   console.log("Flashcards: Estimated retention colours the tile only once it's meaningfully under target");
