@@ -322,9 +322,15 @@ scrolls sideways.
 - Tap a square or a clue and type. Typing follows the word's direction; tap a
   crossing square again to switch. The bar above the grid shows the clue
   you're on (it appears once you pick a square; the ⓘ beside Check has the
-  how-to). Backspace steps back, arrow keys move.
-- **Hint** fills one square (the one you're on if it's empty, else the next
-  empty one in your word). **Check** marks filled squares right or wrong. The
+  how-to). In a kana grid a hardware keyboard types romaji, as a Japanese
+  keyboard does — "ka" fills か, "kya" きゃ across two squares, "nn" ん. A
+  square turns green the moment it's right, and the last right square
+  solves the puzzle. Keys: arrows move (across the way you're typing, the
+  first press turns), Tab / Shift-Tab the next / previous word, Space
+  switches direction, Backspace steps back, Delete clears.
+- **Hint** fills one square (the one you're on unless it's already right —
+  empty or wrong — else the next one in your word that isn't). **Check**
+  marks filled squares right or wrong. The
   **⋯** menu has *Reveal puzzle*, *Clear answers* and *Save as PDF* — an A4
   worksheet the app draws itself, so it looks the same from any browser: the
   title, one line like "Drinks · 20 words · Romaji", the grid, Across and Down

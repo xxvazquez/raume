@@ -2513,9 +2513,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // direction of the clue you tapped, of the only word through a cell, or --
   // where an across and a down word cross -- whichever you were already
   // going; tapping that crossing cell again flips it.
+  //
+  // On a hardware keyboard a kana grid takes romaji, the way a Japanese
+  // keyboard does: "ka" fills か, "kya" きゃ across two squares, "nn" ん --
+  // no Japanese input method needed. The half-typed syllable waits in its
+  // square until it makes a kana. A square turns green as soon as it holds
+  // the right kana or letter (a wrong one stays plain until Check), and the
+  // last right square finishes the puzzle (`onSolved`).
   // -----------------------------------------------------------------------
-  function wireGrid(gridEl, cluesEl, currentEl, p, arroword) {
-    var dir = "across", lastInput = null;
+  function wireGrid(gridEl, cluesEl, currentEl, p, arroword, script, onSolved) {
+    var dir = "across", lastInput = null, kr = window.RaumeStudy.kanaRomaji;
+    var kanaGrid = script !== "romaji";
+    var pend = null; // { input, buf }: romaji typed into a kana square, not yet a kana
     function inputAt(r, c) {
       return gridEl.querySelector('.fc-xw-cell-input[data-r="' + r + '"][data-c="' + c + '"]');
     }
@@ -2536,6 +2545,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (cluesEl) cluesEl.querySelectorAll(".fc-xw-clue-active").forEach(function (el) { el.classList.remove("fc-xw-clue-active"); });
     }
     function setActive(input) {
+      if (pend && pend.input !== input) settle();
       lastInput = input;
       clearWordHighlight();
       var pl = activePlacement(input);
@@ -2563,6 +2573,47 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     function clearVerdict(input) {
       input.closest(".fc-xw-cell").classList.remove("fc-xw-cell-correct", "fc-xw-cell-wrong");
+    }
+    function rightAt(input) { return input.value === p.grid[input.dataset.r + "," + input.dataset.c]; }
+    // Green as soon as it's right; the whole grid right is the solve.
+    function verdict(input) {
+      clearVerdict(input);
+      if (!input.value || !rightAt(input)) return;
+      input.closest(".fc-xw-cell").classList.add("fc-xw-cell-correct");
+      if (onSolved && [].every.call(gridEl.querySelectorAll(".fc-xw-cell-input"), rightAt)) onSolved();
+    }
+    function kanaFor(s) { return script === "katakana" ? toKatakana(s) : toHiragana(s); }
+    // Feed romaji into the square you're on: each finished kana fills a
+    // square and moves along the word; what's left (k, ky, n) waits.
+    function feedRomaji(input, buf) {
+      var out = kr.toKana(buf, false), kana = out.replace(/[a-z'\-]+$/, ""), rest = out.slice(kana.length);
+      var at = input;
+      Array.from(kana).forEach(function (ch, i) {
+        if (i && at) at = step(at, 1) || null;
+        if (!at) return;
+        at.value = kanaFor(ch);
+        verdict(at);
+      });
+      if (!at) { pend = null; return; }
+      var next = kana && rest ? step(at, 1) : at;
+      if (rest && next) {
+        if (next !== at) { pend = null; go(next); }
+        next.value = rest;
+        clearVerdict(next);
+        pend = { input: next, buf: rest };
+      } else {
+        pend = null;
+        if (kana) go(step(at, 1) || at);
+      }
+    }
+    // Leaving a square with romaji still waiting in it: finish it (a lone n
+    // is ん), or clear it when it can't make a kana.
+    function settle() {
+      var p0 = pend; pend = null;
+      if (!p0 || !p0.input.isConnected) return;
+      var kana = kr.toKana(p0.buf, true);
+      p0.input.value = /^[^a-z'\-]$/.test(kana) ? kanaFor(kana) : "";
+      verdict(p0.input);
     }
 
     gridEl.addEventListener("focusin", function (e) {
@@ -2596,10 +2647,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
     function afterType(input) {
       clearVerdict(input);
+      // Romaji into a kana square from a keyboard that skipped keydown
+      // (Android's sends "Unidentified"): the same conversion.
+      if (kanaGrid && /[a-z]/i.test(input.value)) {
+        var typed = input.value.toLowerCase().replace(/[^a-z'\-]/g, "").slice(-1);
+        var buf = (pend && pend.input === input ? pend.buf : "") + typed;
+        input.value = "";
+        feedRomaji(input, buf);
+        return;
+      }
       if (input.value.length > 1) input.value = input.value.slice(-1);
       // Lowercase as typed -- only meaningful for a romaji answer (kana
       // passes through toLowerCase untouched), so this is safe in every mode.
       input.value = input.value.toLowerCase();
+      verdict(input);
       if (!input.value) return;
       // Letter cells in a line are always one word (fits() never lets two
       // words run end to end), so the next cell along is still this word.
@@ -2610,18 +2671,65 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (input && !composing) afterType(input);
     });
 
+    // The nearest square in a direction, past clue and blank squares.
+    function inputToward(input, dr, dc) {
+      var r = +input.dataset.r + dr, c = +input.dataset.c + dc;
+      for (; r >= 0 && c >= 0 && r < p.rows && c < p.cols; r += dr, c += dc) {
+        var el = inputAt(r, c);
+        if (el) return el;
+      }
+      return null;
+    }
+    // Tab / Shift-Tab: the next / previous word, in clue order.
+    function wordStep(input, sign) {
+      var list = p.placements.slice().sort(function (a, b) {
+        return a.dir === b.dir ? a.row - b.row || a.col - b.col : a.dir === "across" ? -1 : 1;
+      });
+      var i = list.indexOf(activePlacement(input));
+      var pl = list[(i + sign + list.length) % list.length];
+      focusAt(pl.row + "," + pl.col, pl.dir);
+    }
     gridEl.addEventListener("keydown", function (e) {
       var input = e.target.closest(".fc-xw-cell-input");
-      if (!input) return;
+      if (!input || e.isComposing || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (kanaGrid && /^[a-zA-Z'\-]$/.test(e.key)) {
+        e.preventDefault();
+        var buf = (pend && pend.input === input ? pend.buf : "") + e.key.toLowerCase();
+        input.value = "";
+        feedRomaji(input, buf);
+        return;
+      }
+      if (e.key === "Backspace" && pend && pend.input === input) {
+        e.preventDefault();
+        pend.buf = pend.buf.slice(0, -1);
+        input.value = pend.buf;
+        if (!pend.buf) pend = null;
+        return;
+      }
       if (e.key === "Backspace" && !input.value) {
         var prev = step(input, -1);
         if (prev) { e.preventDefault(); prev.value = ""; clearVerdict(prev); go(prev); }
         return;
       }
+      if (e.key === "Delete") { e.preventDefault(); input.value = ""; clearVerdict(input); return; }
+      if (e.key === "Tab") { e.preventDefault(); wordStep(input, e.shiftKey ? -1 : 1); return; }
+      // Space flips direction where two words cross.
+      if (e.key === " ") {
+        e.preventDefault();
+        if (placementsAt(input.dataset.r + "," + input.dataset.c).length > 1) { dir = dir === "across" ? "down" : "across"; setActive(input); }
+        return;
+      }
       var move = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] }[e.key];
       if (move) {
-        var t = inputAt(+input.dataset.r + move[0], +input.dataset.c + move[1]);
-        if (t) { e.preventDefault(); dir = move[0] ? "down" : "across"; go(t); }
+        e.preventDefault();
+        // An arrow across the way you're typing turns first, where a word
+        // runs that way, as crossword apps do; the next press moves.
+        var want = move[0] ? "down" : "across";
+        if (want !== dir && placementsAt(input.dataset.r + "," + input.dataset.c).some(function (pl) { return pl.dir === want; })) {
+          dir = want; setActive(input); return;
+        }
+        var t = inputToward(input, move[0], move[1]);
+        if (t) { dir = want; go(t); }
       }
     });
 
@@ -2636,6 +2744,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // The cell the reader was last in -- a toolbar/menu tap has taken focus
       // by the time Hint runs, so it can't just read document.activeElement.
       lastInput: function () { return lastInput; },
+      // After a hint, on to the next square of the word.
+      after: function (input) { pend = null; verdict(input); go(step(input, 1) || input); },
       activeCells: function () {
         var pl = lastInput && activePlacement(lastInput);
         return pl ? cellsForPlacement(pl) : [];
@@ -2666,21 +2776,22 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       cell.classList.add("fc-xw-cell-correct");
     });
   }
-  // One cell at a time, not the whole solution: the cell you were last in
-  // if it's still empty, else the next empty cell of that word, else the
-  // first empty cell in reading order.
+  // One cell at a time, not the whole solution: the square you're on unless
+  // it's already right (empty or wrong alike), else the next not-right
+  // square of that word, else the first in reading order.
   function hintGrid(gridEl, p, nav) {
     function inputFor(k) { var parts = k.split(","); return gridEl.querySelector('.fc-xw-cell-input[data-r="' + parts[0] + '"][data-c="' + parts[1] + '"]'); }
+    function open(el) { return el && el.value !== p.grid[el.dataset.r + "," + el.dataset.c]; }
     var last = nav.lastInput();
-    var target = last && !last.value ? last : null;
-    if (!target) target = nav.activeCells().map(inputFor).filter(function (el) { return el && !el.value; })[0] || null;
-    if (!target) target = [].filter.call(gridEl.querySelectorAll(".fc-xw-cell-input"), function (el) { return !el.value; })[0] || null;
-    if (!target) return null; // every cell already filled
+    var target = open(last) ? last : null;
+    if (!target) target = nav.activeCells().map(inputFor).filter(open)[0] || null;
+    if (!target) target = [].filter.call(gridEl.querySelectorAll(".fc-xw-cell-input"), open)[0] || null;
+    if (!target) return null; // every cell already right
     target.value = p.grid[target.dataset.r + "," + target.dataset.c];
     var cell = target.closest(".fc-xw-cell");
     cell.classList.remove("fc-xw-cell-wrong");
     cell.classList.add("fc-xw-cell-correct");
-    target.focus();
+    nav.after(target);
     return target.dataset.r + "," + target.dataset.c;
   }
   // Clears every typed letter and verdict but keeps the same grid -- for
@@ -2719,7 +2830,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
       : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
       : ws ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."
-      : "Tap a square or a clue, then type. Tap a crossing square again to switch direction.";
+      : "Tap a square or a clue, then type — on a keyboard, romaji turns into kana. A right square turns green. Tap a crossing square again to switch direction.";
   }
   function menuItemHtml(a, label) {
     return '<button type="button" class="fc-xw-menu-item" role="menuitem" id="fcXw' + a[0].charAt(0).toUpperCase() + a[0].slice(1) + '" data-action="' + a[0] + '">' +
@@ -3041,7 +3152,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       return;
     }
     var gridEl = panel.querySelector(".fc-xw-grid");
-    var nav = wireGrid(gridEl, panel.querySelector(".fc-xw-clues"), panel.querySelector(".fc-xw-current"), p, arroword);
+    var nav = wireGrid(gridEl, panel.querySelector(".fc-xw-clues"), panel.querySelector(".fc-xw-current"), p, arroword, state.script,
+      function () { solved(p.placements.length, gridEl.querySelectorAll(".fc-xw-cell-input").length); });
 
     document.getElementById("fcXwCheck").addEventListener("click", function () {
       var wrong = [];

@@ -3171,6 +3171,32 @@ async function main() {
     xwPick("script", "romaji");
     return k && h;
   })());
+  check("a kana grid takes romaji from a keyboard: \"ka\" fills か and turns green, the next square takes focus; arrows move", (() => {
+    xwPick("script", "hiragana");
+    const kr = window.RaumeStudy.kanaRomaji;
+    const pl = xw.state.puzzle.placements.find(p => /^[あ-ゔ][あ-ゔ]/.test(p.answer) && !/^[ぁぃぅぇぉゃゅょっゎん]/.test(p.answer.slice(1)));
+    const at = (r, c) => document.querySelector('#fcPanelCrosswords .fc-xw-cell-input[data-r="' + r + '"][data-c="' + c + '"]');
+    const first = at(pl.row, pl.col);
+    first.focus();
+    const key = k => document.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+    kr.toRomaji(pl.answer[0]).split("").forEach(key);
+    const typed = first.value === pl.answer[0] && first.closest(".fc-xw-cell").classList.contains("fc-xw-cell-correct")
+      && document.activeElement === (pl.dir === "down" ? at(pl.row + 1, pl.col) : at(pl.row, pl.col + 1));
+    key("x"); // half a syllable waits in its square, plain
+    const waiting = document.activeElement.value === "x" && !document.activeElement.closest(".fc-xw-cell").classList.contains("fc-xw-cell-correct");
+    key("Backspace");
+    first.focus();
+    key(pl.dir === "down" ? "ArrowDown" : "ArrowRight");
+    const moved = document.activeElement !== first;
+    // Hint fills the square you're on even when it holds a wrong kana.
+    first.value = "ぬ" === pl.answer[0] ? "ね" : "ぬ";
+    first.dispatchEvent(new window.Event("input", { bubbles: true }));
+    first.focus();
+    document.getElementById("fcXwHint").click();
+    const hinted = first.value === pl.answer[0] && first.closest(".fc-xw-cell").classList.contains("fc-xw-cell-correct");
+    xwPick("script", "romaji");
+    return typed && waiting && moved && hinted;
+  })());
   check("a word search hides every answer in a square of letters, filled only with the answers' own letters, in all directions", (() => {
     const pool = xw.tableWordPool([xwOtherTable.id]).filter(w => w.romaji && w.romaji.length >= 3).map(w => ({ id: w.id, clue: w.clue, answer: w.romaji }));
     let slanted = 0, backwards = 0;
