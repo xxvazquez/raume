@@ -1410,7 +1410,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
-          '<div class="fc-stage-typed">You wrote ' + cmp.youHtml + "</div>" +
+          // What you typed, set off in quotes (“You wrote test” read as one phrase);
+          // a blank answer just says so.
+          '<div class="fc-stage-typed">' + ((session.userAnswer || "").trim() ? "You wrote “" + cmp.youHtml + "”" : "No answer") + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
     // An English answer's note ("before a noun") sits right under it.
     if ((card.direction === "jp-en" || card.direction === "ro-en") && entry.englishNote) {
