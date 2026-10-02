@@ -465,6 +465,12 @@ window.RaumeStudy.flashcards.kana = (function () {
   document.addEventListener("keydown", function (event) {
     if (!session || document.body.dataset.activePage !== "flashcards") return;
     if (S.getActiveTab && S.getActiveTab() !== "kana") return;
+    // Same guard as the word review: an IME, a chord, or a key meant for
+    // another focused control is left alone.
+    if (event.isComposing || event.keyCode === 229 || event.metaKey || event.ctrlKey || event.altKey) return;
+    var focused = document.activeElement;
+    if (focused && focused.id !== "fcKanaInput" && focused.id !== "fcKanaBack" && !focused.classList.contains("fc-rating-btn")
+        && focused.matches && focused.matches("button, a[href], input, select, textarea, [contenteditable], [role=button], [role=menuitem]")) return;
     var isSubmitKey = event.key === "Enter" || event.key === " ";
 
     var back = document.getElementById("fcKanaBack");

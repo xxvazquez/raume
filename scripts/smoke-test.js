@@ -2461,6 +2461,15 @@ async function main() {
     return /^(Type the English meaning|Type the romaji reading): /.test(al) && al.indexOf(promptText.trim()) !== -1;
   })());
   answerInput.value = "definitely-not-right";
+  check("Enter on a focused End session, or while an IME composes, doesn't check the card", (() => {
+    document.getElementById("fcEndSession").focus();
+    const k1 = new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    document.dispatchEvent(k1);
+    answerInput.focus();
+    const k2 = new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, isComposing: true });
+    document.dispatchEvent(k2);
+    return !k1.defaultPrevented && !k2.defaultPrevented && document.querySelectorAll(".fc-rating-btn").length === 0;
+  })());
   answerInput.focus();
   // Enter from the focused field must check -- it's wired explicitly, not left
   // to the form's implicit submission (which some browsers won't fire here).

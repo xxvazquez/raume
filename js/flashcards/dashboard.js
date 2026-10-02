@@ -1533,6 +1533,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // (Word chain's field, say).
     var fc = window.RaumeStudy.flashcards;
     if (fc.getActiveTab && fc.getActiveTab() !== "dashboard") return;
+    // An IME confirming a conversion, a shortcut chord, or a key meant for
+    // another focused control (End session, the speaker, a menu) is not an
+    // answer key -- swallowing it here used to check the card instead of
+    // ending the session or playing the word.
+    if (event.isComposing || event.keyCode === 229 || event.metaKey || event.ctrlKey || event.altKey) return;
+    var focused = document.activeElement;
+    if (focused && focused.id !== "fcAnswerInput" && focused.id !== "fcBackToDashboard" && !focused.classList.contains("fc-rating-btn")
+        && focused.matches && focused.matches("button, a[href], input, select, textarea, [contenteditable], [role=button], [role=menuitem]")) return;
     var isSubmitKey = event.key === "Enter" || event.key === " ";
 
     var backBtn = document.getElementById("fcBackToDashboard");
