@@ -121,18 +121,19 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     status.hidden = count === 0;
     status.querySelector('.rows-hidden-count').textContent = count + ' row' + (count === 1 ? '' : 's') + ' hidden';
   }
-  // Close every open per-table overflow menu, resetting its button's aria state.
+  // Close the open per-table overflow menu, resetting its button's aria
+  // state. Only one is ever open (the click handler below opens them), so it
+  // is remembered rather than searched for -- this runs on every click.
+  let openMenuList = null;
   function closeSectionMenus(except) {
-    document.querySelectorAll('.section-menu-list:not([hidden])').forEach(function (list) {
-      if (list === except) return;
-      list.hidden = true;
-      const btn = list.parentElement && list.parentElement.querySelector('.section-menu-btn, .print-menu-btn');
-      if (btn) btn.setAttribute('aria-expanded', 'false');
-    });
-    document.querySelectorAll('.table-section.menu-open').forEach(function (section) {
-      if (except && section.contains(except)) return;
-      section.classList.remove('menu-open');
-    });
+    const list = openMenuList;
+    if (!list || list === except) return;
+    openMenuList = null;
+    list.hidden = true;
+    const btn = list.parentElement && list.parentElement.querySelector('.section-menu-btn, .print-menu-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    const section = list.closest('.table-section');
+    if (section) section.classList.remove('menu-open');
   }
   // The "jump to a table" dropdown.
   function closeTableIndexMenu() {
@@ -1050,6 +1051,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const willOpen = list.hidden;
         closeSectionMenus();
         list.hidden = !willOpen;
+        if (willOpen) openMenuList = list;
         el.setAttribute('aria-expanded', String(willOpen));
         const section = el.closest('.table-section');
         if (section) section.classList.toggle('menu-open', willOpen);
@@ -1092,7 +1094,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     });
     document.addEventListener('keydown', function (event) {
       if (event.key !== 'Escape') return;
-      const open = document.querySelector('.section-menu-list:not([hidden])');
+      const open = openMenuList;
       if (!open) return;
       const btn = open.parentElement.querySelector('.section-menu-btn, .print-menu-btn');
       closeSectionMenus();
@@ -1372,22 +1374,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Reading layer: on touch there's no hover, so a tap on a katakana unit
     // pins its romaji (`.kr-on`) and a tap anywhere else clears it. On desktop
     // the CSS :hover already handles it; a click just toggles the pin.
+    // At most one of each is pinned, and only here, so each is remembered
+    // rather than searched for across the page on every click.
+    const pinned = {};
+    function pin(kind, cls, el) {
+      if (pinned[kind] && pinned[kind] !== el) pinned[kind].classList.remove(cls);
+      if (el) { el.classList.toggle(cls); pinned[kind] = el.classList.contains(cls) ? el : null; }
+      else pinned[kind] = null;
+    }
     document.addEventListener('click', function (event) {
-      const kr = event.target.closest && event.target.closest('.kr');
-      document.querySelectorAll('.kr.kr-on').forEach(function (el) { if (el !== kr) el.classList.remove('kr-on'); });
-      if (kr) kr.classList.toggle('kr-on');
-
+      const t = event.target;
+      if (!t || !t.closest) return;
+      pin('kr', 'kr-on', t.closest('.kr'));
       // Same touch-pin behaviour for a particle's reading (は -> "wa").
-      const pt = event.target.closest && event.target.closest('.particle[data-r]');
-      document.querySelectorAll('.particle.particle-on').forEach(function (el) { if (el !== pt) el.classList.remove('particle-on'); });
-      if (pt) pt.classList.toggle('particle-on');
-
+      pin('particle', 'particle-on', t.closest('.particle[data-r]'));
       // Whole-word/sentence romaji reveal: click/tap the Japanese text to
       // open its romaji, click/tap elsewhere to close it -- no hover trigger
       // here (unlike .kr/.particle above), so this is the only way it opens.
-      const jw = event.target.closest && event.target.closest('.jpword[data-romaji]');
-      document.querySelectorAll('.jpword.jp-romaji-on').forEach(function (el) { if (el !== jw) el.classList.remove('jp-romaji-on'); });
-      if (jw) jw.classList.toggle('jp-romaji-on');
+      pin('jw', 'jp-romaji-on', t.closest('.jpword[data-romaji]'));
     });
 
     // Table personalisation: a chosen icon or custom name (from the section
