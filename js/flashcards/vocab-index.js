@@ -33,6 +33,19 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return v.replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
   }
 
+  // The other ways a Japanese keyboard spells the same kana (wāpuro /
+  // Kunrei: si, tu, hu, zi, sya, tya, zya, nn) and traditional Hepburn's m
+  // before b / p (shimbun), folded to the Hepburn the data uses -- on both
+  // sides, like the vowel folds, so "mittu" or "tenpura" / "tempura" count.
+  // The Kana drill accepts the same spellings (kana-data.js).
+  function foldSpellings(v) {
+    return v
+      .replace(/sy([auo])/g, "sh$1").replace(/(?:zy|jy)([auo])/g, "j$1").replace(/(?:ty|cy)([auo])/g, "ch$1")
+      .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji")
+      .replace(/(^|[^cs])hu/g, "$1fu")
+      .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n");
+  }
+
   function normalizeAnswer(s, romaji) {
     // An iPhone keyboard types a curly apostrophe (o’clock) -- the same mark.
     var v = String(s == null ? "" : s).replace(/[‘’ʼ`´]/g, "'").trim().replace(/\s+/g, " ").toLowerCase();
@@ -47,6 +60,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       // (Dropped before the vowel folds, so a break never changes them.)
       v = v.replace(/['\-\s]/g, "");
       v = foldMacrons(v);
+      v = foldSpellings(v);
       v = foldLongVowels(v);
       v = v.replace(/^~/, "");
     }
@@ -157,6 +171,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           // answers, each one on its own -- like a verb pair's two forms.
           var romajiAlts = entry.romajiUsable ? splitAlternatives(row.romaji) : [];
           entry.romajiAnswers = romajiAlts.map(function (r) { return normalizeAnswer(r, true); });
+          // The particles は / へ / を are said wa / e / o but typed ha / he /
+          // wo on a Japanese keyboard -- the kana's own spelling counts too.
+          var particleKana = row.jp.length === 1 && row.jp[0].p;
+          var KANA_SPELLING = { "は": "ha", "へ": "he", "を": "wo" };
+          if (entry.romajiUsable && KANA_SPELLING[particleKana]) entry.romajiAnswers.push(KANA_SPELLING[particleKana]);
           entry.romajiAnswerDisplays = romajiAlts;
         }
         entry.englishDisplay = row.english;

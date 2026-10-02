@@ -2529,6 +2529,17 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
   })());
+  check("a Japanese keyboard's spellings count (mittu, sasimi, tyousyoku, huraipan, tempura) and は / へ / を typed ha / he / wo, but a missing っ still doesn't", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    return vi.checkAnswer(idx.v0711, "jp-ro", "mittu") && vi.checkAnswer(idx.v0094, "jp-ro", "sasimi")
+      && vi.checkAnswer(idx.v0469, "jp-ro", "tyousyoku") && vi.checkAnswer(idx.v0048, "jp-ro", "huraipan")
+      && vi.checkAnswer(idx.v0080, "jp-ro", "tempura") && vi.checkAnswer(idx.v0029, "jp-ro", "syouyu")
+      && vi.checkAnswer(idx.v0081, "jp-ro", "gyuudonn")
+      && vi.checkAnswer(idx.v0229, "jp-ro", "wo") && vi.checkAnswer(idx.v0227, "jp-ro", "ha") && vi.checkAnswer(idx.v0235, "jp-ro", "he")
+      && vi.checkAnswer(idx.v0229, "jp-ro", "o") && !vi.checkAnswer(idx.v0229, "jp-ro", "ha")
+      && !vi.checkAnswer(idx.v0711, "jp-ro", "mitsu");
+  })());
   check("an English answer doesn't need its notes: parentheses and '...' are optional, the full wording still counts", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();

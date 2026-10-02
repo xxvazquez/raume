@@ -231,6 +231,9 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - Apostrophes, hyphens and spaces in romaji don't matter — `kin'en` /
   `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
   `'` in answers and search alike.
+- A Japanese keyboard's spellings count too — `tu`, `si`, `hu`, `zi`, `sya`,
+  `tya`, a doubled `nn`, and `m` before b / p (`mittu`, `tempura`) — and the
+  particles は / へ / を also take `ha` / `he` / `wo`.
 - You only type the meaning, never its note: どの is *which* with the note
   *before a noun* shown under it, and brackets in your own words are optional
   too.
