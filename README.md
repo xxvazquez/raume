@@ -519,9 +519,11 @@ with reduced motion on, it's all a plain change of state.
   of your tables, from different categories where possible), *Adjectives*
   (い / な) or *Verbs* (u-verb / ru-verb, plus irregular when there are
   some). Only the sorts your words can fill are offered.
-- A right tap moves straight on. A wrong one adds a second (as in Match),
-  shakes, and rings the right bucket for a moment. A word whose English is
-  its table's own name (かぞく *family* into Family) sits out.
+- A right tap washes green; a wrong one adds a second (as in Match), shakes,
+  and rings the right bucket. Either way the word's English then shows
+  under it with the clock stopped — about 3 seconds (4½ after a mistake) to
+  read it — and **Next** (or Enter) goes on at once. A word whose English
+  is its table's own name (かぞく *family* into Family) sits out.
 - At the end: your time, the score, and the words sorted the wrong way
   ("Fruits, not Family"). ⏸ and End game work as in the other games.
 

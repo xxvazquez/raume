@@ -146,7 +146,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
       '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order. A few tiles are look-alikes; a missed word comes back at the end.</span></li>' +
       '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words come from one table: tap the one that doesn’t belong.</span></li>' +
-      '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock. Sort by, on the setup screen, picks which.</span></li>' +
+      '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock. Each answer shows the English, clock stopped; Next or Enter goes on. Sort by, on the setup screen, picks which.</span></li>' +
       '<li><span class="help-term">Word chain</span><span class="help-desc">Type a word that starts with the kana the last one ends on — romaji turns into kana as you type. Hint shows one that would work; ⓘ has the rules.</span></li>' +
       '<li><span class="help-term">In a row</span><span class="help-desc">The five dots beside the counter fill with each right answer in a row; a miss empties them.</span></li>' +
       '<li><span class="help-term">Stats</span><span class="help-desc">On the setup screen or ⋯, for puzzles too: your bests, a trend, and the words you miss most — Practise these plays just them.</span></li>' +

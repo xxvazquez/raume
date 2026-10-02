@@ -3810,20 +3810,15 @@ async function main() {
   })());
   const ssItem = () => xw.state.puzzle.items[Number(document.querySelector("#fcPanelGames .fc-ss-count").textContent.split(" of ")[0]) - 1];
   const ssFirst = ssItem();
-  check("a wrong bucket: it washes coral, the right one takes a ring, and a second goes on the clock", (() => {
+  check("a wrong bucket: it washes coral, the right one takes a ring, a second goes on the clock -- and the English shows, the clock stopped, with Next", (() => {
     const wrong = [...document.querySelectorAll("#fcPanelGames .fc-ss-bucket")].find(b => +b.dataset.b !== ssFirst.bucket);
     wrong.click();
     return wrong.classList.contains("fc-mt-wrong") && document.querySelector('#fcPanelGames .fc-ss-bucket[data-b="' + ssFirst.bucket + '"]').classList.contains("fc-ss-was")
-      && document.getElementById("fcMtClock").textContent >= "0:01.0";
+      && document.getElementById("fcMtClock").textContent >= "0:01.0"
+      && en.classList.contains("fc-ss-en-shown") && en.textContent === ssFirst.word.clue && !!next && !next.hidden
+      && [...document.querySelectorAll("#fcPanelGames .fc-ss-bucket")].every(b => b.disabled);
   })());
   for (let k = 0; k < 120 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
-    const before = document.querySelector("#fcPanelGames .fc-ss-count") && document.querySelector("#fcPanelGames .fc-ss-count").textContent;
-    for (let waited = 0; waited < 3000; waited += 25) {
-      const b = document.querySelector("#fcPanelGames .fc-ss-bucket:not(.fc-mt-wrong):not(.fc-mt-right)");
-      if (document.querySelector("#fcPanelGames .fc-mt-done") || (b && !document.querySelector("#fcPanelGames .fc-ss-was, #fcPanelGames .fc-ss-bucket.fc-mt-right"))) break;
-      await new Promise(r => setTimeout(r, 25));
-    }
-    if (document.querySelector("#fcPanelGames .fc-mt-done")) break;
     document.querySelector('#fcPanelGames .fc-ss-bucket[data-b="' + ssItem().bucket + '"]').click();
   }
   check("the end: the time, N-1 right with the one mistake listed as \"Right, not Wrong\", and a logged speedsort game", (() => {
@@ -3871,9 +3866,21 @@ async function main() {
       && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 1 && !!wcEl(".fc-wc-field") && !!document.getElementById("fcXwHint")
       && !document.querySelector('#fcPanelGames [data-pick="script"]') && /^New game\|Skip this link\|How to play/.test(menu)
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+    const en = document.querySelector("#fcPanelGames .fc-ss-en");
+    const next = document.querySelector("#fcPanelGames .fc-ls-next");
   })());
   // A small game we can steer: a first word whose last kana starts both a
   // word ending in ん and one that carries on.
+  await (async () => {
+    const clock = document.getElementById("fcMtClock").textContent;
+    await new Promise(r => setTimeout(r, 250));
+    check("while the English is up the clock stands still, and Enter goes on to the next word", (() => {
+      const still = document.getElementById("fcMtClock").textContent === clock;
+      document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      return still && /^2 of \d+$/.test(document.querySelector("#fcPanelGames .fc-ss-count").textContent)
+        && !document.querySelector("#fcPanelGames .fc-ss-en").classList.contains("fc-ss-en-shown");
+    })());
+  })();
   const wcCarries = (w, used) => w.tail !== "ん" && (wcDict.byHead[w.tail] || []).some(o => o.key !== w.key && !used[o.key] && o.tail !== "ん");
   const wcStart = wcDict.all.find(s => wcCarries(s, {}) && (wcDict.byHead[s.tail] || []).some(o => o.tail === "ん")
     && (wcDict.byHead[s.tail] || []).some(o => o.key !== s.key && o.written !== o.answer && !/[んン][あいうえおやゆよアイウエオヤユヨ]/.test(o.answer)
@@ -3883,6 +3890,7 @@ async function main() {
   check("typing romaji shows it as kana as you go", (() => {
     wcType("yasa");
     const ok = wcEl(".fc-wc-field").value === "やさ";
+    if (!document.querySelector("#fcPanelGames .fc-mt-done")) document.querySelector("#fcPanelGames .fc-ls-next").click();
     wcType("");
     return ok;
   })());

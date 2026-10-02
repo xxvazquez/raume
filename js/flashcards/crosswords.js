@@ -1717,7 +1717,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // the clock: by table (Fruits / Clothes / Time), い- or な-adjective, or
   // u-verb / ru-verb / irregular verb (English names -- the kanji terms are
   // the reference tables' badges, not a game's labels). A wrong bucket adds
-  // a second, as in Match, shakes, and shows the right one for a moment.
+  // a second, as in Match, shakes, and rings the right one. Either way the
+  // word's English shows under it, with the clock stopped, long enough to
+  // read before the next word -- or Next (Enter) goes on at once.
   // A sort is only offered when the words hold enough of each kind.
   // Practice only.
   // -----------------------------------------------------------------------
@@ -1776,6 +1778,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var items = weightedOrder(pool, function (it) { return it.word.weight || 1; }).slice(0, limit);
     return { placements: items.map(function (it) { return it.word; }), items: items, buckets: buckets.map(function (b) { return { key: b.key, label: b.label }; }) };
   }
+  // How long a sorted word's English stays up before the next word.
+  var SORT_READ_MS = 3000, SORT_READ_WRONG_MS = 4500;
   function wireSpeedSort(boardEl, clockEl, p, romajiMode) {
     var at, acc, runAt, penalty, score, mistakes, game = 0, phase, pendingNext;
     var total = p.items.length;
@@ -1788,44 +1792,59 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var btn = document.getElementById("fcMtPause");
       if (btn) btn.disabled = ph === "done";
     }
+    // The English line and the Next row keep their space while hidden, so
+    // the buckets never move when a word is answered.
     function render() {
       var it = p.items[at];
       setPhase("play");
       boardEl.innerHTML =
         '<div class="fc-ls-card fc-ss-card"><p class="fc-ss-count">' + (at + 1) + " of " + total + "</p>" +
-        '<p class="fc-ss-word"' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(it.word.answer) + "</p></div>" +
+        '<p class="fc-ss-word"' + (romajiMode ? "" : ' lang="ja"') + ">" + esc(it.word.answer) + "</p>" +
+        '<p class="fc-ss-en" aria-live="polite"></p></div>' +
         '<div class="fc-ss-buckets" data-n="' + p.buckets.length + '">' + p.buckets.map(function (b, i) {
           return '<button type="button" class="fc-mt-tile fc-ss-bucket" data-b="' + i + '">' + esc(b.label) + "</button>";
-        }).join("") + "</div>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
     }
     function next() {
       at++;
       if (at >= total) { finish(); return; }
       render();
+      run();
     }
-    boardEl.addEventListener("click", function (e) {
-      var btn = e.target.closest(".fc-ss-bucket");
-      if (!btn || phase !== "play") return;
-      var it = p.items[at], chosen = +btn.dataset.b, thisGame = game;
+    function answer(btn) {
+      var it = p.items[at], chosen = +btn.dataset.b, thisGame = game, thisAt = at, right = chosen === it.bucket;
       setPhase("between");
-      if (chosen === it.bucket) {
+      halt();
+      boardEl.querySelectorAll(".fc-ss-bucket").forEach(function (b) { b.disabled = true; });
+      if (right) {
         score++;
         btn.classList.add("fc-mt-right");
         answerFeel(btn, btn);
-        setTimeout(function () { if (thisGame === game && boardEl.isConnected) next(); }, 220);
-        return;
+      } else {
+        penalty += MATCH_PENALTY_MS;
+        tick();
+        mistakes.push({ word: it.word, chosen: chosen, right: it.bucket });
+        btn.classList.add("fc-mt-wrong");
+        var was = boardEl.querySelector('.fc-ss-bucket[data-b="' + it.bucket + '"]');
+        was.classList.add("fc-ss-was");
+        answerFeel(was, btn);
       }
-      penalty += MATCH_PENALTY_MS;
-      tick();
-      mistakes.push({ word: it.word, chosen: chosen, right: it.bucket });
-      btn.classList.add("fc-mt-wrong");
-      var was = boardEl.querySelector('.fc-ss-bucket[data-b="' + it.bucket + '"]');
-      was.classList.add("fc-ss-was");
-      answerFeel(was, btn);
+      var en = boardEl.querySelector(".fc-ss-en");
+      en.textContent = it.word.clue;
+      en.classList.add("fc-ss-en-shown");
+      var nextBtn = boardEl.querySelector(".fc-ls-next");
+      nextBtn.hidden = false;
+      nextBtn.focus();
       setTimeout(function () {
-        if (thisGame !== game || !boardEl.isConnected) return;
+        if (thisGame !== game || thisAt !== at || !boardEl.isConnected || phase === "done") return;
         if (phase === "paused") pendingNext = true; else next();
-      }, 900);
+      }, right ? SORT_READ_MS : SORT_READ_WRONG_MS);
+    }
+    boardEl.addEventListener("click", function (e) {
+      if (e.target.closest(".fc-ls-next")) { if (phase === "between") next(); return; }
+      var btn = e.target.closest(".fc-ss-bucket");
+      if (btn && !btn.disabled && phase === "play") answer(btn);
     });
     function mistakesHtml() {
       return mistakes.length ? '<ul class="fc-ls-missed">' + mistakes.map(function (m) {
@@ -1855,8 +1874,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       halt();
       showPauseCard(boardEl, formatClock(elapsed()), (at + 1) + " of " + total, {
         resume: function () {
-          hidePauseCard(boardEl); setPhase(was === "between" ? "between" : "play"); run();
-          if (pendingNext) { pendingNext = false; next(); }
+          // A word whose English is up keeps the clock stopped until Next.
+          hidePauseCard(boardEl); setPhase(was);
+          if (pendingNext) { pendingNext = false; next(); } else if (was === "play") run();
         },
         restart: restart,
         end: endEarly
