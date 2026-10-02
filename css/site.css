@@ -2997,6 +2997,13 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      cell rules inside it. */
   .vocab.vocab-kanji tbody tr.kanji-tile td { border: 0 !important; border-radius: 0 !important; }
   .vocab.vocab-kanji tbody tr.kanji-tile { border: .75pt solid #bdbdbd; border-radius: 10px; }
+  /* Paper has no kanji sheet to tap, so a tile carries its readings: on
+     (katakana) and kun (hiragana, okurigana faint) in one small line under
+     the character, above the meaning. */
+  .vocab.vocab-kanji .kanji-readings {
+    display: block !important; margin: 1px 0 3px; font-size: 10px; line-height: 1.35; letter-spacing: 0;
+    color: var(--muted); text-wrap: balance;
+  }
   .vocab th { font-size: 11px; color: var(--faint); padding: 7px 14px 6px !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }

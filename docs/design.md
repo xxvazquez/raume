@@ -145,7 +145,9 @@ table underneath (display swapped to grid), so search, hide, print and the
 Tables directory are unchanged; in a search-results table a kanji row is an
 ordinary row (character + readings, English beside it). On paper each tile
 is one rounded (10px) mid-grey hairline frame, with none of the word
-tables' cell rules inside it.
+tables' cell rules inside it, and carries its readings (on in katakana, kun
+in hiragana, 10px muted) between the character and the meaning -- paper has
+no kanji sheet to tap.
 
 Tapping a tile opens the **kanji sheet** — an iOS sheet: a centred
 `--radius-sheet` card over a scrim on a wide screen, a bottom sheet with a grab
