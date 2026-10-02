@@ -118,7 +118,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       reviewInsightsLoading = true;
       loadReviewInsights().catch(function () { reviewInsights = emptyInsights(); }).then(function () { reviewInsightsLoading = false; rerender(); });
     }
-    var newInSession = Math.min(stats.newCount, Math.max(0, settings.queue_new_cards_per_day - todayNewCount(now)));
+    // New cards a session can introduce now: a new word's later directions
+    // wait until it's been seen, so this is fewer than stats.newCount.
+    var newInSession = Math.min(sched.introducibleCount(), Math.max(0, settings.queue_new_cards_per_day - todayNewCount(now)));
     // On a quiet account "Missed today" and "Words to Review" are two full-width
     // cards each holding one sentence -- fold them into a single line until
     // there's review history to show. (Still null while insights load: keep
@@ -294,7 +296,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       return c.state !== 0 && !seen[c.id] && !fresh[c.id] && new Date(c.due) <= endToday;
     }).length;
     var perDay = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
-    var learnGoal = Math.min(perDay, day.count + stats.newCount);
+    var learnGoal = Math.min(perDay, day.count + sched.introducibleCount());
     var runs = fc.puzzleRuns ? fc.puzzleRuns.all() : [];
     var today = localDateStr(now);
     var played = runs.filter(function (r) { return !r.reset && !r.ended && r.at && localDateStr(new Date(r.at)) === today; }).length;

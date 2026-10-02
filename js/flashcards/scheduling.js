@@ -242,6 +242,9 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       return w.seen || w.first === card || w.first.direction === card.direction;
     });
   }
+  // How many new cards could be introduced right now (see introducible) --
+  // what the Dashboard counts, so its numbers match what Study now holds.
+  function introducibleCount() { return introducible(studyableCards()).length; }
   function buildQueue(now) {
     var c = getCache();
     var allowance = Math.max(0, c.settings.queue_new_cards_per_day - todayNewCount(now));
@@ -284,7 +287,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     fsrsRowFields: fsrsRowFields,
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
-    readyToStudy: readyToStudy, buildQueue: buildQueue, computeStats: computeStats,
+    readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay
   };
 })();
