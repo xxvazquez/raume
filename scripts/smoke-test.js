@@ -1533,6 +1533,12 @@ async function main() {
   check("...and the reset control becomes enabled", document.querySelector('#customizePage .cz-row[data-table-id="1"] .cz-row-reset').disabled === false);
   document.querySelector('#customizePage .cz-row[data-table-id="1"] .cz-row-reset').click();
   check("reset restores the shipped name everywhere", document.querySelector('#vocabulary .table-section[data-table="1"] .section-title-text').textContent === "Drinks" && window.RaumeStudy.tableCustom.nameOf("1") === "");
+  check("escaped text survives inside an attribute -- a name with quotes keeps all of it", (() => {
+    const name = 'My "best" drinks & Tom\'s <tea>';
+    const probe = document.createElement("div");
+    probe.innerHTML = '<input value="' + window.RaumeStudy.shared.escapeHtml(name) + '" title=\'' + window.RaumeStudy.shared.escapeHtml(name) + "'>";
+    return probe.firstChild.value === name && probe.firstChild.title === name;
+  })());
 
   console.log("Customize page: reordering tables and categories");
   const foodGroup = () => [...document.querySelectorAll("#customizePage .cz-group")].find(g => g.querySelector(".cz-group-name").textContent === "Food & Ingredients");

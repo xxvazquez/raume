@@ -6,12 +6,16 @@ window.RaumeStudy.shared = (function () {
   "use strict";
 
   // Escape text for safe interpolation into an HTML string (the vocab and
-  // flashcards renderers both build markup as strings).
+  // flashcards renderers both build markup as strings) -- quotes too, since
+  // much of it lands in attribute values: a table named My "best" foods
+  // used to end its own value="" early.
   function escapeHtml(s) {
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // Spoken pronunciation. Prefers a prerendered native-voice clip (see
