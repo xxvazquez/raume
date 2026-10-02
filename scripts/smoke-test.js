@@ -1142,16 +1142,16 @@ async function main() {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return marks === "おおきい";
   })());
-  check("when the kana can't be matched (koohii vs コーヒー) the romaji line shows with just the run marked", (() => {
+  check("a doubled vowel matches the long-vowel mark: koohii tints コーヒー itself, no romaji line", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "koohii";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const w = document.querySelector('#vocabulary .jpword[data-romaji="kōhī"]');
-    const line = w && w.querySelector('.jp-romaji-line');
-    const marks = line ? [...line.querySelectorAll('mark.search-hit')].map(m => m.textContent).join("|") : "";
+    const units = w ? [...w.querySelectorAll('.kr')] : [];
+    const ok = units.length > 0 && units.every(u => u.classList.contains("search-hit")) && !w.querySelector('.jp-romaji-line');
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return marks === "kōhī";
+    return ok;
   })());
   check("a kanji found by romaji marks the reading it spells, with no extra romaji line (mizu -> みず on 水)", (() => {
     const input = document.getElementById("tableSearch");

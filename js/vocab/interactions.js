@@ -724,14 +724,26 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // romaji stays a tap away, as everywhere. Compared in hiragana, so
     // katakana matches too; a half-typed last syllable is left off ("miz"
     // tints み). Falls back to the romaji line when nothing matches (a long
-    // vowel spelt differently, furigana hidden).
+    // vowel spelt another way, as "kouhii" for コーヒー; furigana hidden).
     function toHiragana(s) {
       return s.replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    }
+    // ー stretches the vowel before it, so for matching it reads as that
+    // vowel (コーヒー as こおひい) -- one character for one, so a match's
+    // place in the text stays the same. "koohii" then finds コーヒー.
+    const VOWEL_KANA = { a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お' };
+    function stretchLongVowels(s, kr) {
+      let out = '';
+      for (const ch of s) {
+        const v = ch === 'ー' && out ? VOWEL_KANA[kr.toRomaji(out.slice(-1)).slice(-1)] : null;
+        out += v || ch;
+      }
+      return out;
     }
     function markReading(jpword, q) {
       const kr = window.RaumeStudy.kanaRomaji;
       if (!jpword || !kr) return false;
-      const k = toHiragana(kr.toKana(q, false).replace(/[^\u3040-\u30ff]/g, ''));
+      const k = stretchLongVowels(toHiragana(kr.toKana(q, false).replace(/[^\u3040-\u30ff]/g, '')), kr);
       if (!k) return false;
       const hideFuri = document.body.classList.contains('hide-furigana');
       // The reading's own pieces in order: furigana and kana text, katakana
@@ -752,7 +764,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
       let n;
       while ((n = walker.nextNode())) { segs.push({ node: n, start: pos, text: n.textContent }); pos += n.textContent.length; }
-      const full = toHiragana(segs.map(x => x.text).join(''));
+      const full = stretchLongVowels(toHiragana(segs.map(x => x.text).join('')), kr);
       const at = full.indexOf(k);
       if (at === -1) return false;
       const end = at + k.length;
