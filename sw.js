@@ -102,6 +102,32 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Answers a Range request (bytes=start-end, either end optional) from a
+// whole-file response with the 206 a media element expects; anything else
+// -- no Range, an already-partial or failed response -- passes through.
+function rangeOf(req, res) {
+  const range = req.headers && req.headers.get && req.headers.get('range');
+  const m = range && /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+  if (!m || !res.ok || res.status === 206 || (m[1] === '' && m[2] === '')) return res;
+  return res.blob().then((blob) => {
+    const size = blob.size;
+    const start = m[1] === '' ? Math.max(0, size - Number(m[2])) : Number(m[1]);
+    const end = m[1] === '' || m[2] === '' ? size - 1 : Math.min(Number(m[2]), size - 1);
+    if (start >= size || start > end) {
+      return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + size } });
+    }
+    return new Response(blob.slice(start, end + 1), {
+      status: 206,
+      headers: {
+        'Content-Type': res.headers.get('Content-Type') || 'audio/mpeg',
+        'Content-Range': 'bytes ' + start + '-' + end + '/' + size,
+        'Content-Length': String(end - start + 1),
+        'Accept-Ranges': 'bytes'
+      }
+    });
+  });
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -123,8 +149,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(req, copy));
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(req, copy));
+          }
           return res;
         })
         .catch(() => caches.match('index.html'))
@@ -135,11 +163,15 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.indexOf('/audio/') !== -1 && url.pathname.endsWith('.mp3')) {
     // Cache-first with no revalidation: the hash in the filename guarantees
     // these bytes never change, so a cache hit never needs a network check.
+    // An <audio> element asks for byte ranges, and the host answers those
+    // with a 206 partial response the Cache API refuses to store -- so the
+    // whole file is fetched (no Range) and cached instead, and the range the
+    // player asked for is cut from it (WebKit won't play media without one).
     event.respondWith(
-      caches.open(AUDIO_CACHE).then((cache) => cache.match(req).then((cached) => cached || fetch(req).then((res) => {
-        cache.put(req, res.clone());
+      caches.open(AUDIO_CACHE).then((cache) => cache.match(url.href).then((cached) => cached || fetch(url.href).then((res) => {
+        if (res.ok && res.status !== 206) cache.put(url.href, res.clone());
         return res;
-      })))
+      }))).then((res) => rangeOf(req, res))
     );
     return;
   }
@@ -150,8 +182,10 @@ self.addEventListener('fetch', (event) => {
     // bytes -- across deploys too, for a file that didn't change.
     event.respondWith(
       caches.match(req).then((cached) => cached || fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((cache) => cache.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy));
+        }
         return res;
       }))
     );
@@ -162,8 +196,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((cache) => cache.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy));
+        }
         return res;
       }).catch(() => cached);
       return cached || network;

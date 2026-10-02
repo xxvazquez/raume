@@ -380,6 +380,10 @@ Web Speech.
   filenames never change, so this cache survives a normal deploy instead of
   being wiped and re-downloaded every time. Clips are cached lazily (on first
   play), not precached at install, keeping the initial install small.
+  A player asks for byte ranges, which the host answers with a 206 the
+  Cache API won't store — so the worker fetches the whole file (no
+  `Range`), caches that, and cuts the requested range from it (WebKit
+  won't play media without a 206). Failed responses are never cached.
 - **Playback speed**: both paths play at 0.8x (`js/shared.js`) — VOICEVOX's
   and the Web Speech API's default (1x) both read faster than is easy to
   follow for a learner sounding out an unfamiliar word.

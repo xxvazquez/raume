@@ -49,6 +49,7 @@ function makeResponse(body, ok) {
 // --- Fake fetch (offline flag flips it to reject) -----------------------
 let online = true;
 let fetched = [];
+const audioFetches = [];
 // Files whose bytes a test pretends changed: served with this suffix.
 const edited = new Set();
 async function fakeFetch(input) {
@@ -56,6 +57,13 @@ async function fakeFetch(input) {
   if (!online) throw new Error("offline");
   fetched.push(url);
   const file = fileFor(url);
+  // Pronunciation clips are real Responses (the worker slices byte ranges
+  // out of them); asking for a range here would be a 206 the Cache API
+  // refuses, so the worker must never send one.
+  if (/\/audio\/.+\.mp3$/.test(url)) {
+    audioFetches.push({ url, range: input && input.headers && input.headers.get ? input.headers.get("range") : null });
+    return fs.existsSync(file) ? new Response(fs.readFileSync(file), { status: 200, headers: { "Content-Type": "audio/mpeg" } }) : new Response("", { status: 404 });
+  }
   if (!fs.existsSync(file)) return makeResponse("", false);
   const body = fs.readFileSync(file, "utf8");
   return makeResponse(edited.has(path.relative(ROOT, file)) ? body + "\n// edited" : body, true);
@@ -105,7 +113,7 @@ function loadServiceWorker(version, cacheStorage, source) {
     skipWaiting: () => Promise.resolve(),
     clients: { claim: () => Promise.resolve() },
   };
-  const sandbox = { self, caches: cacheStorage, fetch: fakeFetch, URL, Promise, console };
+  const sandbox = { self, caches: cacheStorage, fetch: fakeFetch, URL, Promise, console, Response };
   vm.runInNewContext((source || SW_SOURCE).replace(/__CACHEBUST__/g, version), sandbox);
 
   function dispatch(type, event) {
@@ -256,6 +264,32 @@ async function main() {
   const editedRes = await swB.handleFetch(assetRequest("js/vocab/render.js?v=" + deployB.versions["js/vocab/render.js"]));
   check("offline, the changed file is served in its new version", !!editedRes && (await editedRes.text()).endsWith("// edited"));
   check("the previous deploy's cache is gone", (await storage.keys()).length === 1);
+
+  console.log("Pronunciation clips: cached whole, served by byte range");
+  online = true;
+  const audioStorage = new FakeCacheStorage();
+  const swAudio = loadServiceWorker(V2, audioStorage);
+  const clip = fs.readdirSync(path.join(ROOT, "audio")).find((f) => f.endsWith(".mp3"));
+  const clipBytes = fs.readFileSync(path.join(ROOT, "audio", clip));
+  const audioReq = (name, range) => ({ url: resolveUrl("audio/" + name), method: "GET", mode: "no-cors", headers: new Headers(range ? { Range: range } : {}) });
+  const first = await swAudio.handleFetch(audioReq(clip, "bytes=0-"));
+  check("a player's range request is answered 206 with the whole clip", !!first && first.status === 206
+    && first.headers.get("Content-Range") === "bytes 0-" + (clipBytes.length - 1) + "/" + clipBytes.length
+    && Buffer.from(await first.arrayBuffer()).equals(clipBytes));
+  check("...fetched from the network without a Range header (a 206 can't be cached)", audioFetches.length === 1 && !audioFetches[0].range);
+  await new Promise((r) => setTimeout(r, 0));
+  check("...and cached whole in the audio cache", !!(await (await audioStorage.open("raume-audio-v1")).match(resolveUrl("audio/" + clip))));
+  online = false;
+  const part = await swAudio.handleFetch(audioReq(clip, "bytes=2-9"));
+  check("offline, a later range is cut from the cached clip", !!part && part.status === 206
+    && Buffer.from(await part.arrayBuffer()).equals(clipBytes.subarray(2, 10)));
+  const whole = await swAudio.handleFetch(audioReq(clip));
+  check("...and a plain request gets the whole clip", !!whole && whole.status === 200);
+  online = true;
+  const missing = await swAudio.handleFetch(audioReq("nope-not-a-clip.mp3", "bytes=0-"));
+  await new Promise((r) => setTimeout(r, 0));
+  check("a missing clip passes its 404 through and is never cached", !!missing && missing.status === 404
+    && !(await (await audioStorage.open("raume-audio-v1")).match(resolveUrl("audio/nope-not-a-clip.mp3"))));
 
   console.log(failures === 0 ? "\nService-worker test passed." : "\n" + failures + " service-worker check(s) failed.");
   process.exit(failures === 0 ? 0 : 1);
