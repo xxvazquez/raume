@@ -169,7 +169,7 @@ The **account button** (the person icon) opens one menu:
 | **Customize tables** · **Help** | Phone only; wider windows have their own icons |
 | **Support raume** | Ko-fi, in a new tab |
 | **Appearance** | System / Light / Dark — phone only, likewise |
-| **Sign out** | Signed in only — its one place, at every screen size |
+| **Sign out** | Signed in only — its one place, at every screen size. If something hasn't synced yet, it asks first |
 
 **Screen sizes.** On a phone the sections are a tab bar at the bottom, each
 screen starts with a large title, and the account button sits round beside it.

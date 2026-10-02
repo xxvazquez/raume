@@ -455,7 +455,20 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (isGuestMode()) { setStoredMode(null); invalidateInsights(); refreshRowToggleButtons(); }
     render();
   };
-  S.signOut = function () { signOut(); };
+  // Signing out empties this device's copy of the account -- anything still
+  // queued for it (an offline review, a word, a rename) would go with it, so
+  // ask first, the way an iOS app warns before discarding unsent changes.
+  S.signOut = function () {
+    var pending = getSyncState().pending;
+    if (!pending) { signOut(); return; }
+    window.RaumeStudy.shared.confirmSheet({
+      title: "Sign out?",
+      message: pending + (pending === 1 ? " change hasn’t" : " changes haven’t") +
+        " synced to your account yet. Signing out removes " + (pending === 1 ? "it" : "them") + " from this device.",
+      confirm: "Sign Out",
+      onConfirm: function () { signOut(); }
+    });
+  };
   S.setActiveTab = function (t) { activeTab = t; };
   S.getActiveTab = function () { return activeTab; };
 
