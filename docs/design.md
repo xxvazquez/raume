@@ -855,7 +855,8 @@ be scannable at a glance:
   its header.
 
 **Library**: the category name is a quiet label on the ground above its cards
-(section tone, no rule beneath, disclosure caret at the end); each table is one
+(section tone, no rule beneath, an iOS section chevron at the end — right when
+folded, down when open — with a 44px tap area); each table is one
 white card — a header row (chevron, icon tile, the name over a quiet "N / M"
 subtitle, table actions; the name wraps rather than truncating) over its words
 as hairline rows of two lines: the kanji with its romaji small and faint

@@ -4029,12 +4029,19 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    and count+caret flung to the other. */
 .fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: var(--fs-micro); font-weight: 400; }
 .fc-manage-group-title:hover .cat-name { color: var(--ink); }
+/* The iOS collapsible-section chevron: points right when folded, down when
+   open (a filled triangle is a desktop tree control, not iOS). */
 .fc-manage-group-title::after {
-  content: ""; display: inline-block; width: 0; height: 0; flex: 0 0 auto; align-self: center; margin-left: 2px;
-  border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--faint);
+  content: ""; display: inline-block; width: 6px; height: 6px; flex: 0 0 auto; align-self: center; margin-left: 2px;
+  border-right: 1.5px solid var(--faint); border-bottom: 1.5px solid var(--faint);
+  transform: translateX(-1px) rotate(-45deg);
   transition: transform .15s ease;
 }
-.fc-manage-group[open] > .fc-manage-group-title::after { transform: rotate(180deg); }
+.fc-manage-group[open] > .fc-manage-group-title::after { transform: translateY(-2px) rotate(45deg); }
+@media (prefers-reduced-motion: reduce) { .fc-manage-group-title::after { transition: none; } }
+/* The header line is 12px type; its tap area is still 44px tall. */
+.fc-manage-group-title { position: relative; }
+.fc-manage-group-title::before { content: ""; position: absolute; left: 0; right: 0; top: -14px; bottom: -12px; }
 
 /* One table = one white card: its header row on top (chevron, name, progress,
    actions), the words beneath as hairline-separated rows. */
