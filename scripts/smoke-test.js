@@ -1075,6 +1075,17 @@ async function main() {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return hit && !jpword.classList.contains('jp-romaji-hit') && !jpword.querySelector('.jp-romaji-line');
   })());
+  check("a kanji found by romaji marks the reading it spells, with no extra romaji line (mizu -> みず on 水)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "mizu";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "水");
+    const marks = tile ? [...tile.querySelectorAll(".kanji-readings mark.search-hit")].map(m => m.textContent) : [];
+    const ok = !!tile && !tile.classList.contains("search-hidden") && marks.join("|") === "みず" && !tile.querySelector(".jp-romaji-line");
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return ok && !tile.querySelector(".kanji-readings mark");
+  })());
   check("a macron reading marks the stored letters a doubled-vowel query matched (ookii -> ōkii)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "ookii";

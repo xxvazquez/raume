@@ -402,9 +402,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (kanjiPop && !t.closest('.kanji-help-pop')) closeKanjiPop();
     if (t.closest('button, a, #kanjiSheet')) return;
     // Cover answers: a tap checks the tile's meaning instead (the handler
-    // for that mode, below) -- the sheet would give it away.
+    // for that mode, below) -- the sheet would give it away. In a search
+    // result a kanji is an ordinary row: a tap on the character shows its
+    // romaji, like any word, and the rest of the row opens the sheet.
     const tile = t.closest('#vocabulary .vocab-kanji tr.kanji-tile');
-    if (tile && !document.body.classList.contains('selftest-mode')) openKanjiSheet(tile);
+    const revealTap = document.body.classList.contains('is-searching') && t.closest('.jpword');
+    if (tile && !revealTap && !document.body.classList.contains('selftest-mode')) openKanjiSheet(tile);
   });
   document.addEventListener('keydown', function (event) {
     const sheet = document.getElementById('kanjiSheet');
@@ -711,7 +714,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       highlighted.add(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
       if (hit.enHit) highlightCell(info.enCell, q);
-      if (hit.romajiHit) markRomaji(info.jpword, q);
+      if (hit.romajiHit && !markKanjiReadings(row, q)) markRomaji(info.jpword, q);
+    }
+    // A kanji row already shows its readings (スイ みず), so a romaji hit
+    // marks the reading it spells rather than adding the romaji as another
+    // line -- "mizu" tints みず. Falls back to the romaji line when no
+    // reading matches or readings are hidden.
+    function markKanjiReadings(row, q) {
+      const el = row.classList.contains('kanji-tile') && row.querySelector('.kanji-readings');
+      const kr = window.RaumeStudy.kanaRomaji;
+      if (!el || !kr || document.body.classList.contains('hide-furigana')) return false;
+      const qx = expandMacronsForSearch(q);
+      let any = false;
+      el.textContent.split(/\s+/).filter(Boolean).forEach(r => {
+        if (!expandMacronsForSearch(kr.toRomaji(r).toLocaleLowerCase()).includes(qx)) return;
+        highlightCell(el, r.toLocaleLowerCase());
+        any = true;
+      });
+      return any;
     }
     // The romaji reveal is content: attr(...) (css/site.css), with no text
     // to wrap in a <mark> -- so a match there swaps it for a real line of the

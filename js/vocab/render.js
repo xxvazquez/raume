@@ -364,8 +364,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var readings = (row.on || []).concat(row.kun || []).map(kanjiReadingHtml).join(' ');
     var known = window.RaumeStudy.knownKanji && window.RaumeStudy.knownKanji.isKnown(row.id);
     return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
-      '<td class="jp" lang="ja"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
-      '<span class="kanji-readings furigana">' + readings + '</span></td>' +
+      '<td class="jp" lang="ja"><div class="kanji-stack"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
+      '<span class="kanji-readings furigana">' + readings + '</span></div></td>' +
       meaningCell(row.english, row.id, '', '') + '</tr>';
   }
   var CHECK_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>';

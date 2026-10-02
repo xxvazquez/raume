@@ -2410,6 +2410,15 @@ body.ja-voice-ready .vocab:not(.vocab-sentences) .jp-speak-btn {
   display: block; margin-top: 1px; font-size: 12.5px; line-height: 1.45; letter-spacing: .02em; color: var(--furigana);
 }
 .kanji-okuri, .kanji-sep { color: var(--faint); }
+/* A kanji in a search result reads top to bottom: the character, its kana
+   readings, then the romaji when you tap it (the character's own reveal,
+   moved below the readings -- display: contents lets its ::after be ordered
+   as a sibling). */
+body.is-searching .kanji-stack { display: flex; flex-direction: column; align-items: flex-start; }
+body.is-searching .kanji-stack .kanji-char { display: contents; }
+body.is-searching .kanji-stack .kanji-readings { order: 1; }
+body.is-searching .kanji-stack .kanji-char::after,
+body.is-searching .kanji-stack .jp-romaji-line { order: 2; }
 body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
 body:not(.is-searching) .vocab.vocab-kanji, body:not(.is-searching) .vocab.vocab-kanji tbody { display: block; }
 body:not(.is-searching) .vocab.vocab-kanji thead { display: none; }
