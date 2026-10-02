@@ -2444,8 +2444,10 @@ body:not(.is-searching) .vocab.vocab-kanji tbody {
   body:not(.is-searching) .vocab.vocab-kanji tbody { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); }
 }
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 92px; padding: 8px 6px 10px;
+  /* Top-aligned, so every character in a row sits on one line however many
+     lines of readings run under it (centred, 四 and 七 rode higher). */
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  min-height: 92px; padding: 10px 6px 10px;
   border-radius: 14px; background: var(--group-ground);
   cursor: pointer; transition: background .12s ease, transform .12s ease;
 }
