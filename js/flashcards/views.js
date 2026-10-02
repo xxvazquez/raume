@@ -96,6 +96,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term"><kbd>Enter</kbd> or <kbd>Space</kbd></span><span class="help-desc">Check your answer.</span></li>' +
       '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — once the answer shows.</span></li>' +
+      '<li><span class="help-term">Checking</span><span class="help-desc">Type the answer and press Return to check it, then rate it Again, Hard, Good or Easy — 1–4 on a keyboard.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
       '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
       '<li><span class="help-term">Notes</span><span class="help-desc">The grey line under a meaning (“before a noun”) is a hint — type just the meaning.</span></li>' +
