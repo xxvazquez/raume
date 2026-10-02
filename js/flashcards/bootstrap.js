@@ -254,9 +254,6 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
         .finally(function () { kanaSyncInFlight = false; });
     }
     var stats = computeStats(new Date());
-    var identityHtml = isGuestMode()
-      ? '<div class="fc-signed-in-as"><span class="fc-signed-in-text">This device only · not backed up</span> <button type="button" id="fcGoAccount">Sign in</button></div>'
-      : '<div class="fc-signed-in-as"><span class="fc-signed-in-text">Signed in as ' + esc(currentUser().email) + '</span> <button type="button" id="fcSignOut">Sign out</button></div>';
     var pushed = activeTab === "stats" ? S.puzzleStats.title() : PUSHED_TABS[activeTab];
     if (!pushed) lastMainTab = activeTab;
     // Five segments -- the most an iOS segmented control holds and still
@@ -284,7 +281,6 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
         "</div></div>";
     el.innerHTML =
       header +
-      identityHtml +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
       '<ul class="fc-sync-detail" id="fcSyncDetail" hidden></ul>' +
       '<div class="fc-tabpanel"' + (activeTab === "dashboard" ? "" : " hidden") + ' id="fcPanelDashboard"></div>' +
@@ -297,14 +293,6 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-tabpanel"' + (activeTab === "stats" ? "" : " hidden") + ' id="fcPanelStats"></div>' +
       '<div class="fc-tabpanel"' + (activeTab === "awards" ? "" : " hidden") + ' id="fcPanelAwards"></div>';
 
-    if (isGuestMode()) {
-      // Leaves the guest cache exactly as it is (own localStorage key) --
-      // this only forgets the "use guest mode" preference so render() falls
-      // through to the sign-in/sign-up choice again.
-      document.getElementById("fcGoAccount").addEventListener("click", function () { setStoredMode(null); invalidateInsights(); render(); refreshRowToggleButtons(); });
-    } else {
-      document.getElementById("fcSignOut").addEventListener("click", function () { signOut(); });
-    }
     var back = document.getElementById("fcBack");
     if (back) back.addEventListener("click", function () { activeTab = lastMainTab; render(); window.scrollTo(0, 0); });
     el.querySelectorAll(".fc-tab, .fc-titlebar-btn").forEach(function (btn) {
@@ -459,10 +447,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   // Called back into by the view modules (dashboard.js, views.js).
   S.render = render;
-  // The masthead's account control (desktop glyph, phone menu item): a guest
-  // goes to the sign-in screen -- the same as the status line's "Sign in",
-  // guest data left untouched -- anyone signed in to Flashcards, where their
-  // account status and Sign out live.
+  // The account menu's Account row: a guest goes to the sign-in screen --
+  // only the "use guest mode" preference is forgotten, the guest cache (its
+  // own localStorage key) is left exactly as it is -- anyone signed in to
+  // Flashcards.
   S.openAccount = function () {
     if (isGuestMode()) { setStoredMode(null); invalidateInsights(); refreshRowToggleButtons(); }
     render();
@@ -524,8 +512,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // The phone's account menu header says the same, in two lines.
     var name = document.getElementById("accountMenuName"), status = document.getElementById("accountMenuStatus");
     if (name) name.textContent = signedIn ? currentUser().email : "Guest";
-    // Sign out lives here on a phone (Flashcards' "Signed in as" line is
-    // hidden there -- this menu already says who and whether it's synced).
+    // Sign out lives here, under who you are and whether you're synced.
     document.querySelectorAll("#accountMenu [data-signed-in-only]").forEach(function (el) { el.hidden = !signedIn; });
     var go = document.querySelector('#accountMenu [data-menu-go="account"]');
     if (go && go.firstChild) go.firstChild.textContent = signedIn ? "Account" : "Sign in";

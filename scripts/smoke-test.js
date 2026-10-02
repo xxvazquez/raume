@@ -1874,7 +1874,7 @@ async function main() {
   check("the guest button is a quiet button, not a filled primary", guestBtn.classList.contains("fc-btn") && !guestBtn.classList.contains("fc-btn-primary"));
   guestBtn.click();
   check("choosing it goes straight to the Dashboard tab, no session needed", !!document.querySelector("#fcPanelDashboard"));
-  check("it's labeled as on-device, not signed in", document.getElementById("flashcardsPage").textContent.includes("This device only"));
+  check("the account menu labels it on-device, not signed in", document.getElementById("accountMenuStatus").textContent.includes("This device only"));
   const starterCards = Object.values(window.RaumeStudy.flashcards.store.getCache().cards);
   const fruitIds = window.RaumeStudy.data.vocabularyTables.find(t => t.id === 3).rows.map(r => r.id);
   check("a first-time guest starts with the Fruits table added, not an empty deck",
@@ -4002,8 +4002,11 @@ async function main() {
       && (!host || !host.querySelector(".col-menu-item") || [...host.querySelectorAll(".col-menu-item")].every(b => b.hasAttribute("aria-checked")));
   })());
 
-  const goAccountBtn = document.getElementById("fcGoAccount");
-  check("guest mode offers a way to switch to syncing", !!goAccountBtn);
+  check("the Practice screen carries no \"Signed in as\" status line -- the account menu says it", !document.querySelector(".fc-signed-in-as"));
+  document.getElementById("accountToggle").click();
+  const goAccountBtn = document.querySelector('#accountMenu [data-menu-go="account"]');
+  check("the account button opens its menu at any width, and a guest's Account row reads Sign in", !document.getElementById("accountMenu").hidden
+    && !!goAccountBtn && /^Sign in/.test(goAccountBtn.textContent));
   goAccountBtn.click();
   check("switching to sign-in returns to the entry choice", !document.querySelector(".fc-stats-grid") && !!document.getElementById("fcUseGuest"));
   if (storageUsable) {

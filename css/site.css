@@ -419,6 +419,7 @@ body {
 
 /* --- Masthead: the header of a reference book, not a hero ---------- */
 .masthead {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -4144,7 +4145,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    hides the page but doesn't tear its content down) doesn't strand the
    chrome hidden app-wide. */
 body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
-  :is(.masthead, .site-nav, #flashcardsPage > .fc-titlebar, #flashcardsPage > .fc-back, #flashcardsPage > .fc-signed-in-as,
+  :is(.masthead, .site-nav, #flashcardsPage > .fc-titlebar, #flashcardsPage > .fc-back,
       #flashcardsPage > .fc-sync-chip, #flashcardsPage > .fc-sync-detail, #flashcardsPage > .fc-tabs, .site-footer) {
   display: none;
 }
@@ -4483,14 +4484,6 @@ mark.fc-diff-co {
 .fc-auth-error { color: var(--danger); font-size: var(--fs-small); margin-bottom: 10px; }
 .fc-auth-switch { margin-top: 12px; font-size: var(--fs-small); color: var(--muted); }
 .fc-auth-switch button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
-/* One line, always: the status truncates before it ever wraps, and the
-   action (Sign in / Sign out) keeps its place at the end. */
-.fc-signed-in-as { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--muted); font-size: var(--fs-small); }
-/* On a phone the account button's menu already says who you are, whether
-   it's synced, and has Sign in / Sign out -- this line would repeat it. */
-@media (max-width: 640px) { .fc-signed-in-as { display: none; } }
-.fc-signed-in-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fc-signed-in-as button { flex: 0 0 auto; appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; white-space: nowrap; }
 /* Offline / pending-sync status. The only signal that reviews aren't on the
    account yet, so it has to actually register -- a filled pill with an edge,
    not the hairline ghost it used to be. Still quiet by the site's standards:
@@ -4924,7 +4917,6 @@ mark.fc-diff-co {
 @media print {
   body.print-only #flashcardsPage > .fc-titlebar,
   body.print-only #flashcardsPage > .fc-back,
-  body.print-only #flashcardsPage > .fc-signed-in-as,
   body.print-only #flashcardsPage > .fc-sync-chip,
   body.print-only #flashcardsPage > .fc-tabs { display: none !important; }
   body.print-only #fcPanelDashboard > *:not(#fcWordsToReview) { display: none !important; }
@@ -5160,20 +5152,17 @@ mark.fc-diff-co {
    Settings / Help on the first row, the tabs full width under them. Wider:
    the title is visually hidden (the top bar names the page, as on the
    reference pages -- it stays in the accessibility tree), tabs leading and
-   Settings / Help trailing on one row, the status line under it. */
+   Settings / Help trailing on one row. Who you are and Sign out live in the
+   masthead's account menu, so the first card follows straight on. */
 .fc-titlebar:not(.fc-titlebar-pushed) { flex-wrap: wrap; row-gap: 10px; align-items: center; }
 .fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
-.fc-titlebar + .fc-signed-in-as { margin-top: 10px; }
-/* Phone: that status line is hidden (the account menu says it), so the
-   title bar itself keeps the tabs off the first card. */
-@media (max-width: 640px) { .fc-titlebar:not(.fc-titlebar-pushed) { margin-bottom: 16px; } }
+.fc-titlebar:not(.fc-titlebar-pushed) { margin-bottom: 16px; }
 @media (min-width: 641px) {
   .fc-titlebar:not(.fc-titlebar-pushed) > h1 {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
   .fc-titlebar > .fc-tabs { order: 0; flex: 0 1 auto; }
-  .fc-titlebar + .fc-signed-in-as { margin-top: 8px; margin-bottom: 16px; }
 }
 
 /* --- Puzzles / Games: the puzzle first --------------------------------
@@ -5302,8 +5291,22 @@ mark.fc-diff-co {
    masthead is lifted out of the flow and pinned over the title row). It
    keeps the sync dot and opens #accountMenu -- Account, Customize tables,
    Help, Appearance -- instead of four captioned glyphs across the top.
-   Wider windows keep the top-bar glyphs. */
+   Wider windows keep the top-bar glyphs, and the same menu drops under the
+   account glyph without the rows those glyphs already are. */
+.account-menu {
+  position: absolute; top: calc(100% - 4px); right: 20px; width: 256px; z-index: 60;
+  padding: 6px; border-radius: var(--radius-menu);
+  background: color-mix(in srgb, var(--group-ground) 84%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
 .account-menu[hidden] { display: none; }
+/* The account glyph sits last in the trailing cluster, where an Apple app
+   keeps its profile button, so the menu drops straight under it. */
+@media (min-width: 641px) {
+  .account-menu [data-phone-only] { display: none; }
+  .masthead-right #accountToggle { order: 1; }
+}
 @media (max-width: 640px) {
   .app-frame { position: relative; }
   .masthead {
@@ -5328,13 +5331,7 @@ mark.fc-diff-co {
   .screen-title, .cz-intro h1, .page-help h1 { padding-right: 48px; }
   .fc-titlebar:not(.fc-titlebar-pushed) .fc-titlebar-actions { margin-right: 46px; }
   .fc-titlebar-pushed h1 { padding-right: 48px; }
-  .account-menu {
-    position: absolute; top: calc(100% + 8px); right: 0; width: 256px; z-index: 60;
-    padding: 6px; border-radius: var(--radius-menu);
-    background: color-mix(in srgb, var(--group-ground) 84%, transparent);
-    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
-    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
-  }
+  .account-menu { top: calc(100% + 8px); right: 0; }
 }
 .account-menu-who { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--row-line); color: var(--muted); font-size: var(--fs-small); }
 .account-menu-who b { font-weight: 500; font-size: var(--fs-nav); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

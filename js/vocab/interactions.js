@@ -1130,12 +1130,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // signed-in/guest state is set by js/flashcards/bootstrap.js once auth
     // resolves (this file loads before flashcards, so it can only wire the
     // click, not know the state yet).
-    // Account: on a wide window it goes straight to Flashcards (sign in /
-    // sync). On a phone it's the one masthead control and opens the account
-    // menu instead (wired with the theme code below).
-    // Flashcards page, and for a guest straight to its sign-in screen
-    // (flashcards.openAccount) -- otherwise a guest lands on the dashboard
-    // they're already on and nothing seems to happen.
+    // Account: the masthead button opens the account menu (wired with the
+    // theme code below); its Account row goes to the Flashcards page, and
+    // for a guest straight to its sign-in screen (flashcards.openAccount) --
+    // otherwise a guest lands on the dashboard they're already on and
+    // nothing seems to happen.
     function openAccount() {
       if (vocab.showFlashcardsPage) vocab.showFlashcardsPage();
       const fc = window.RaumeStudy.flashcards;
@@ -1144,10 +1143,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const accountToggle = document.getElementById('accountToggle');
     const phoneWidth = window.matchMedia ? window.matchMedia('(max-width: 640px)') : null;
     if (accountToggle) {
-      accountToggle.addEventListener('click', function () {
-        if (phoneWidth && phoneWidth.matches && vocab.toggleAccountMenu) { vocab.toggleAccountMenu(); return; }
-        openAccount();
-      });
+      accountToggle.addEventListener('click', function () { if (vocab.toggleAccountMenu) vocab.toggleAccountMenu(); });
     }
 
     // Table-index dropdown -- rendered once. The trigger opens/closes the
@@ -1328,11 +1324,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         applyThemeChoice(THEME_ORDER[(THEME_ORDER.indexOf(currentThemeChoice()) + 1) % THEME_ORDER.length]);
       });
     }
-    // The phone's account menu (index.html #accountMenu): who you are and the
-    // sync state (filled in by js/flashcards/bootstrap.js), Account /
-    // Customize tables / Help -- the same pages the desktop glyphs open -- and
-    // Appearance as a System / Light / Dark switch that applies at once and
-    // leaves the menu open. Closes on an outside tap or Escape.
+    // The account menu (index.html #accountMenu): who you are and the sync
+    // state (filled in by js/flashcards/bootstrap.js), Account, Support and
+    // Sign out -- plus, on a phone, Customize tables / Help (the pages the
+    // wider masthead's glyphs open) and Appearance as a System / Light /
+    // Dark switch that applies at once and leaves the menu open. Closes on
+    // an outside tap or Escape.
     const accountMenu = document.getElementById('accountMenu');
     function setAccountMenu(open) {
       if (!accountMenu) return;
@@ -1363,8 +1360,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         setAccountMenu(false);
         if (accountToggle) accountToggle.focus();
       });
-      // Rotating to a wide window hands the masthead back to its glyphs.
-      if (phoneWidth && phoneWidth.addEventListener) phoneWidth.addEventListener('change', function () { if (!phoneWidth.matches) setAccountMenu(false); });
+      // Crossing the phone width swaps which rows it shows; start fresh.
+      if (phoneWidth && phoneWidth.addEventListener) phoneWidth.addEventListener('change', function () { setAccountMenu(false); });
     }
     if (darkMedia) {
       const onOsThemeChange = function () { if (currentThemeChoice() === 'system') applyThemeChoice('system'); };

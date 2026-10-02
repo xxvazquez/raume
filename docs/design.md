@@ -429,12 +429,14 @@ and Help.
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
   menu of words: who you are + sync state, Account (reads "Sign in" for a guest
-  and opens the sign-in screen, as the desktop glyph does) / Customize tables / Help,
+  and opens the sign-in screen) / Customize tables / Help,
   and Appearance as a System / Light / Dark segmented control that applies at
   once, then — signed in — a separated **Sign out** row in the coral
-  `--wrong-strong`, iOS's destructive position at the bottom. Because the menu
-  says all of that, Practice's "Signed in as… Sign out" line is hidden on a
-  phone. The button scrolls away with the title, as on iOS. **The rule app-wide: no
+  `--wrong-strong`, iOS's destructive position at the bottom. Wider windows
+  open the same menu under the account glyph, minus the rows their own glyphs
+  already are (`data-phone-only`: Customize tables, Help, Appearance). Because
+  the menu says who you are and holds Sign out, Practice has no "Signed in
+  as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Library's buttons keep a one-word label
   (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are
@@ -658,9 +660,9 @@ and Help.
   the title bar. On a phone: the large "Flashcards" title with Settings / Help,
   the segments full width under it. Wider: the title is visually hidden (the
   top bar names the page, as on the reference pages), segments leading and
-  Settings / Help trailing on one row, the status line under it.
+  Settings / Help trailing on one row.
 - **Flashcards is one centred 900px column** past phone width — title bar,
-  status line, tabs and every panel on the same edges (padding on
+  tabs and every panel on the same edges (padding on
   `#flashcardsPage`, so the inline-flex tabs line up too). Customize (720px)
   and Help (680px) centre on their own widths the same way, so no page hugs
   the left edge of a wide window. **Library** fills

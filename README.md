@@ -158,14 +158,17 @@ flashcard directions. Changes save immediately and sync when signed in.
 | **Version** | A quiet line at the foot of every page: the deployed commit's short SHA and date (**Local build** when run from a checkout). Hidden during a review and in print. |
 | **Sign-in dot** | On the person icon: **green** = everything synced; **amber** = offline or a change hasn't reached your account yet. Hover it for details. |
 
-**On a phone** there's no wordmark row: each screen starts with its large
-title and one round **account button** beside it, which opens a menu —
+The **account button** (the person icon) opens a menu —
 
 - who you're signed in as and whether you're synced
 - **Account** (**Sign in** for a guest — straight to the sign-in screen)
-- **Customize tables** · **Help** · **Support raume** (Ko-fi, new tab)
-- **Appearance** (System / Light / Dark)
-- **Sign out** (signed in only — on a phone it lives here, not on the Practice screen)
+- **Customize tables** · **Help** (phone only — wider windows have their icons)
+- **Support raume** (Ko-fi, new tab)
+- **Appearance** (System / Light / Dark — phone only, likewise)
+- **Sign out** (signed in only — its one place, on every screen size)
+
+**On a phone** there's no wordmark row: each screen starts with its large
+title and the account button, round, beside it.
 
 On a tablet the masthead icons carry captions (Account, Help, Customize, the
 current theme). The search bar's buttons read **Tables** and **Options**, and
