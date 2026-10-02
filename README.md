@@ -198,6 +198,8 @@ flashcards**, or single words from **Library** or a search result.
   with the day's new cards, in a fresh random order every time. Each word's
   directions are dealt one per round, each round reshuffled, so the same word
   never appears twice in a row and no stretch of words repeats.
+- A new word is met **JP → EN** first (or the first direction you study, if
+  that one's off); its other directions join once you've seen it.
 
 ### Reviewing
 

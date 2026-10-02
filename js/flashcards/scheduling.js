@@ -224,10 +224,28 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // regardless of what's due or what was just added. It's still spaced by
   // word afterwards (so the same word's other directions never land back
   // to back).
+  // A new word is met Japanese -> English first: recognising it comes before
+  // producing it. Until a word has been studied in some direction, only its
+  // first one still in study (in DIRECTIONS order -- Japanese -> English
+  // unless that's switched off or paused) can be introduced; its other new
+  // cards wait until that one has been seen, then join like any other.
+  function introducible(cards) {
+    var order = store.DIRECTIONS, byWord = {};
+    cards.forEach(function (card) {
+      var w = byWord[card.vocabId] || (byWord[card.vocabId] = { seen: false, first: null });
+      if (card.state !== 0) w.seen = true;
+      else if (!w.first || order.indexOf(card.direction) < order.indexOf(w.first.direction)) w.first = card;
+    });
+    return cards.filter(function (card) {
+      if (card.state !== 0) return false;
+      var w = byWord[card.vocabId];
+      return w.seen || w.first === card || w.first.direction === card.direction;
+    });
+  }
   function buildQueue(now) {
     var c = getCache();
     var allowance = Math.max(0, c.settings.queue_new_cards_per_day - todayNewCount(now));
-    var fresh = shuffle(studyableCards().filter(function (card) { return card.state === 0; }))
+    var fresh = shuffle(introducible(studyableCards()))
       .slice(0, allowance);
     return spaceByVocab(shuffle(readyToStudy(now).concat(fresh)))
       .map(function (card) { return card.id; });

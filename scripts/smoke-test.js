@@ -2456,6 +2456,11 @@ async function main() {
   }
 
   console.log("Flashcards: review session bookends");
+  // A new word only offers its Japanese -> English card at first, so make
+  // sure the session holds more than one card to advance through.
+  await window.RaumeStudy.flashcards.dataOps.addVocabs(["v0820", "v0821"]);
+  window.RaumeStudy.flashcards.render();
+  await flush();
   document.getElementById("fcStudyNow").click();
   check("Study now opens a review card", !!document.querySelector(".fc-review-card"));
   check("the review card has an in-session way out", !!document.getElementById("fcEndSession"));
@@ -2726,6 +2731,20 @@ async function main() {
       fcSched.buildQueue(now).length === 0);
     const tomorrow = new Date(now.getTime() + 86400000);
     check("the allowance resets on a new calendar day", fcSched.buildQueue(tomorrow).length === 2);
+    // A new word is introduced Japanese -> English first; its other
+    // directions wait until it has been seen once.
+    c.day = null;
+    c.cards = {};
+    ["jp-en", "jp-ro", "ro-en", "en-ro"].forEach((d) => {
+      c.cards["intro-" + d] = { id: "intro-" + d, vocabId: "v0033", direction: d, active: true, state: 0, due: now.toISOString(), stability: 0, difficulty: 0, scheduled_days: 0, reps: 0, lapses: 0, learning_steps: 0, last_review: null };
+    });
+    c.settings = Object.assign({}, saved.settings, { queue_new_cards_per_day: 10, enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true } });
+    fcStore.saveCache();
+    const introQ = fcSched.buildQueue(now);
+    c.cards["intro-jp-en"].state = 1; c.cards["intro-jp-en"].due = farFuture;
+    const afterQ = fcSched.buildQueue(now);
+    check("a new word's first card is Japanese -> English; its other directions join once it's been seen",
+      introQ.length === 1 && introQ[0] === "intro-jp-en" && afterQ.length === 3 && afterQ.indexOf("intro-jp-en") === -1);
     c.settings = saved.settings; c.day = saved.day; c.cards = saved.cards;
     fcStore.saveCache();
   }
@@ -4362,7 +4381,7 @@ async function main() {
     if (document.getElementById("fcBack")) document.getElementById("fcBack").click(); // last screen left open was Help
     document.querySelector('.fc-tab[data-tab="dashboard"]').click();
     const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
-    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "4");
+    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "12");
   }
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
 
