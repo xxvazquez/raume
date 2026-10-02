@@ -131,6 +131,14 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         learning_steps: row.learning_steps, last_review: row.last_review
       };
     });
+    // Reviews still queued in the outbox haven't reached the server yet, so
+    // the rows above predate them -- put each one back on its card (in queue
+    // order, only while the card is still at that review's starting reps), or
+    // a word reviewed offline would come back due after a reload.
+    (c.logsOutbox || []).forEach(function (entry) {
+      var card = c.cards[entry.cardId];
+      if (card && card.reps === entry.baseCard.reps) Object.assign(card, entry.resultCard);
+    });
     c.settings = {
       fsrs_request_retention: settingsRow.fsrs_request_retention,
       fsrs_maximum_interval: settingsRow.fsrs_maximum_interval,
@@ -614,6 +622,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var ok2 = await applyCardUpdateGuarded(entry.cardId, replayed.card, server.reps);
     if (!ok2) return "retry";
     entry.resultCard = replayed.card;
+    // The local card still holds this device's own result -- match it to
+    // what actually landed.
+    if (c.cards[entry.cardId]) Object.assign(c.cards[entry.cardId], replayed.card);
     return "done";
   }
   // -----------------------------------------------------------------------
@@ -794,6 +805,14 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var kc = store.getKanaCache();
     kc.cards = {};
     cardsRes.data.forEach(function (row) { kc.cards[row.kana_id + "|" + row.direction] = kanaRowToLocal(row); });
+    // Queued offline reviews aren't on the server yet -- reapply them, as
+    // fetchAllFromServer does for the vocab cards. A card first reviewed
+    // offline has no row yet, so it starts from the review's own result.
+    (kc.logsOutbox || []).forEach(function (entry) {
+      var key = entry.kanaId + "|" + entry.direction, card = kc.cards[key];
+      if (!card && entry.baseReps === 0) kc.cards[key] = Object.assign({}, entry.resultCard);
+      else if (card && card.reps === entry.baseReps) Object.assign(card, entry.resultCard);
+    });
     var prefs = (setRes.data && setRes.data.kana_prefs) || {};
     if (Array.isArray(prefs.groups)) kc.groups = prefs.groups.filter(function (g) { return typeof g === "string"; });
     if (prefs.dirs && typeof prefs.dirs === "object") {
