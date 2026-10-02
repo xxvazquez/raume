@@ -40,9 +40,10 @@ window.RaumeStudy.flashcards.kana = (function () {
   function fsrs() { return load().fsrs || store.defaultKanaFsrs(); }
   function newPerDay() { return fsrs().new_per_day; }
   var LEARN_AHEAD_MS = 20 * 60 * 1000; // match scheduling.js: a short learning step counts as ready
-  var DIRECTIONS = ["k2r", "r2k"]; // kana -> romaji, romaji -> kana (both typed)
-  var DIR_LABEL = { k2r: "Kana → romaji", r2k: "Romaji → kana" };
-  function isDir(d) { return DIRECTIONS.indexOf(d) !== -1; }
+  // One direction: see the kana, type its romaji. (Romaji -> kana was
+  // dropped -- typing kana needs a kana keyboard, and reading romaji back
+  // isn't recall. Its old |r2k cards stay in storage, just never dealt.)
+  var DIR = "k2r";
 
   // -----------------------------------------------------------------------
   // Store access -- the cache lives in store.js (guest vs signed-in keys,
@@ -52,12 +53,11 @@ window.RaumeStudy.flashcards.kana = (function () {
   function load() { return store.getKanaCache(); }
   function save() { store.saveKanaCache(); }
   function signedIn() { return !!(dataOps && dataOps.currentUser && dataOps.currentUser()); }
-  // Push the group/direction picker state up so it follows the account
+  // Push the group picker state up so it follows the account
   // (best-effort, exactly like the vocabulary table icons).
   function pushPrefs() {
     if (!signedIn()) return;
-    var s = load();
-    dataOps.saveKanaPrefsRemote({ groups: s.groups.slice(), dirs: { k2r: s.dirs.k2r !== false, r2k: s.dirs.r2k !== false } }).catch(function () {});
+    dataOps.saveKanaPrefsRemote({ groups: load().groups.slice() }).catch(function () {});
   }
 
   function cardKey(item, dir) { return item.id + "|" + dir; }
@@ -92,29 +92,10 @@ window.RaumeStudy.flashcards.kana = (function () {
   }
   function selectedItems() { return kanaData.itemsFor(selectedGroupIds()); }
 
-  function enabledDirs() {
-    var d = load().dirs;
-    return DIRECTIONS.filter(function (k) { return d[k] !== false; });
-  }
-  function setDir(dir, on) {
-    if (!isDir(dir)) return;
-    var s = load(), next = {};
-    DIRECTIONS.forEach(function (k) { next[k] = s.dirs[k] !== false; });
-    next[dir] = !!on;
-    if (!DIRECTIONS.some(function (k) { return next[k]; })) return; // keep at least one on
-    s.dirs = next;
-    save();
-    pushPrefs();
-  }
-  // Every selected kana, once per enabled direction -- the unit the queue and
-  // the progress line actually count. `dir` rides along so each card is keyed
-  // <itemId>|<dir> and rendered its own way.
+  // Every selected kana -- the unit the queue and the progress line count.
+  // `dir` rides along so each card is keyed <itemId>|k2r, as it always was.
   function studyUnits() {
-    var items = selectedItems(), dirs = enabledDirs(), out = [];
-    items.forEach(function (it) {
-      dirs.forEach(function (d) { out.push({ item: it, dir: d }); });
-    });
-    return out;
+    return selectedItems().map(function (it) { return { item: it, dir: DIR }; });
   }
 
   function dueState(card, now) {
@@ -206,13 +187,6 @@ window.RaumeStudy.flashcards.kana = (function () {
     var n = normalizeKana(input);
     return item.answers.some(function (a) { return normalizeKana(a) === n; });
   }
-  // Romaji -> kana is graded on the glyph: what you type has to be the kana
-  // itself (the group already fixes the script), give or take surrounding
-  // space. Romaji spellings aren't accepted here -- reading the prompt back
-  // isn't recall.
-  function checkR2k(item, input) {
-    return String(input == null ? "" : input).replace(/\s+/g, "") === item.kana;
-  }
 
   // Grade what was typed and move to the checked state. Both directions have a
   // text answer now; only the grader and the prompt differ.
@@ -222,19 +196,8 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (!unit) return;
     var input = document.getElementById("fcKanaInput");
     if (!input) return;
-    // Romaji typed for a kana answer means the keyboard, not the memory, is
-    // wrong -- say so and wait, rather than log a miss the schedule would
-    // carry. (Turning it into kana as you type would give the answer away.)
-    var dyn = document.querySelector("#fcPanelKana .fc-review-dynamic");
-    if (unit.dir === "r2k" && /[a-z]/i.test(input.value) && !/[\u3040-\u30ff]/.test(input.value)) {
-      if (dyn) dyn.innerHTML = '<p class="fc-kana-kb-hint" role="status">Answer in kana — switch to a Japanese kana keyboard.</p>';
-      input.focus();
-      return;
-    }
     session.userAnswer = input.value;
-    session.correct = unit.dir === "r2k"
-      ? checkR2k(unit.item, input.value)
-      : checkKana(unit.item, input.value);
+    session.correct = checkKana(unit.item, input.value);
     session.checked = true;
     var base = load().cards[cardKey(unit.item, unit.dir)] || newCard(new Date());
     session.preview = previewRatings(getScheduler(fsrs()), base, new Date());
@@ -302,13 +265,8 @@ window.RaumeStudy.flashcards.kana = (function () {
       (on ? " checked" : "") + "> " + esc(g.label) +
       ' <span class="fc-kana-group-n">' + g.count + "</span></label>";
   }
-  function dirCheckbox(dir, on) {
-    return '<label class="fc-kana-group"><input type="checkbox" class="fc-kana-dir-cb" data-dir="' + dir + '"' +
-      (on ? " checked" : "") + "> " + esc(DIR_LABEL[dir]) + "</label>";
-  }
   function renderOverview(panel) {
     var selected = selectedGroupIds();
-    var dirs = enabledDirs();
     var groups = kanaData.groups();
     var byScript = { hiragana: [], katakana: [] };
     groups.forEach(function (g) { byScript[g.script].push(g); });
@@ -335,17 +293,10 @@ window.RaumeStudy.flashcards.kana = (function () {
           byScript[script].map(function (g) { return groupCheckbox(g, selected.indexOf(g.id) !== -1); }).join("") +
           "</div></fieldset>";
       }).join("") +
-      '<fieldset class="fc-kana-fieldset"><legend>Directions</legend>' +
-      '<div class="fc-kana-card">' +
-      DIRECTIONS.map(function (d) { return dirCheckbox(d, dirs.indexOf(d) !== -1); }).join("") +
-      "</div></fieldset>" +
       "</div>";
 
     panel.querySelectorAll(".fc-kana-group-cb").forEach(function (cb) {
       cb.addEventListener("change", function () { setGroup(cb.dataset.group, cb.checked); rerender(); });
-    });
-    panel.querySelectorAll(".fc-kana-dir-cb").forEach(function (cb) {
-      cb.addEventListener("change", function () { setDir(cb.dataset.dir, cb.checked); rerender(); });
     });
     var start = document.getElementById("fcKanaStart");
     if (start) start.addEventListener("click", startSession);
@@ -382,13 +333,12 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<span class="fc-review-progress"></span></div>' +
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt"></div>' +
-      // r2k wants kana in the field -- lang is set per card in syncReviewCard so
-      // a system IME picks the right keyboard. No visible Check button -- Enter
-      // (or a mobile keyboard's own Go/submit action) checks, same as the word
-      // card (js/flashcards/dashboard.js). The placeholder alone (Kana /
-      // Romaji) says what to type -- no separate direction label above it.
+      // No visible Check button -- Enter (or a mobile keyboard's own
+      // Go/submit action) checks, same as the word card
+      // (js/flashcards/dashboard.js). The placeholder alone (Romaji) says
+      // what to type -- no separate direction label above it.
       '<form class="fc-answer-form" id="fcKanaForm">' +
-      '<input id="fcKanaInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      '<input id="fcKanaInput" type="text" placeholder="Romaji" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
       '</form>' +
       '<div class="fc-review-dynamic" aria-live="polite"></div>' +
       "</div>";
@@ -397,12 +347,6 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (end) end.addEventListener("click", endSession);
     var form = document.getElementById("fcKanaForm");
     if (form) form.addEventListener("submit", function (e) { e.preventDefault(); submitCheck(); });
-    // The keyboard hint (submitCheck) goes as soon as you change the answer.
-    var field = document.getElementById("fcKanaInput");
-    if (field) field.addEventListener("input", function () {
-      var hint = document.querySelector("#fcPanelKana .fc-kana-kb-hint");
-      if (hint) hint.remove();
-    });
 
     syncReviewCard();
     var input = document.getElementById("fcKanaInput");
@@ -415,30 +359,22 @@ window.RaumeStudy.flashcards.kana = (function () {
     var shell = document.querySelector("#fcPanelKana .fc-review-card");
     var unit = currentUnit();
     if (!shell || !unit) return false;
-    var item = unit.item, r2k = unit.dir === "r2k";
+    var item = unit.item;
     var wordCls = item.word ? " fc-prompt-kana-word" : "";
 
     shell.querySelector(".fc-review-progress").textContent =
-      DIR_LABEL[unit.dir] + " · " + (session.index + 1) + " / " + session.queue.length;
+      (session.index + 1) + " / " + session.queue.length;
     var bar = shell.querySelector(".fc-progress");
     if (bar) { bar.max = session.queue.length; bar.value = session.index; }
     var promptEl = shell.querySelector(".fc-prompt");
-    if (r2k) {
-      promptEl.className = "fc-prompt fc-prompt-romaji";
-      promptEl.removeAttribute("lang");
-      promptEl.textContent = item.romaji;
-    } else {
-      promptEl.className = "fc-prompt fc-prompt-kana" + wordCls;
-      promptEl.setAttribute("lang", "ja");
-      promptEl.textContent = item.kana;
-    }
+    promptEl.className = "fc-prompt fc-prompt-kana" + wordCls;
+    promptEl.setAttribute("lang", "ja");
+    promptEl.textContent = item.kana;
 
     var input = shell.querySelector("#fcKanaInput");
-    if (r2k) { input.setAttribute("lang", "ja"); input.placeholder = "Kana"; }
-    else { input.removeAttribute("lang"); input.placeholder = "Romaji"; }
     // Name the field with its prompt, so a screen-reader user dropped onto it
     // between cards knows what to type without hunting for the visual label.
-    input.setAttribute("aria-label", (r2k ? "Type the kana for" : "Type the romaji reading for") + " " + (r2k ? item.romaji : item.kana));
+    input.setAttribute("aria-label", "Type the romaji reading for " + item.kana);
     input.value = session.userAnswer || "";
 
     var form = shell.querySelector("#fcKanaForm");
@@ -456,16 +392,16 @@ window.RaumeStudy.flashcards.kana = (function () {
     // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
     if (form) form.classList.add("fc-answer-form-checked");
-    var expected = r2k ? item.kana : item.romaji;
+    var expected = item.romaji;
     var typedRaw = session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "";
     // Same merged reveal as the vocabulary word card: an icon-only verdict,
     // the ANSWER big and first, what you typed a quiet struck-through line
     // below it (kana/romaji typos aren't diffed letter-by-letter here the
     // way a romaji vocabulary answer is, just shown plain).
     var stageHtml = session.correct
-      ? '<div class="fc-stage-expected"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</div>"
-      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text"' + (r2k ? ' lang="ja"' : "") + ">" + esc(expected) + "</span></div>" +
-          '<div class="fc-stage-typed">You wrote <span' + (r2k ? ' lang="ja"' : "") + ">" + esc(typedRaw || "(nothing)") + "</span></div></div>";
+      ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
+      : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + esc(expected) + "</span></div>" +
+          '<div class="fc-stage-typed">You wrote <span>' + esc(typedRaw || "(nothing)") + "</span></div></div>";
     dyn.innerHTML =
       '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1">' +
       // No repeated prompt here -- the original above (.fc-prompt) never
@@ -557,8 +493,9 @@ window.RaumeStudy.flashcards.kana = (function () {
     return p;
   }
   // One script's basic kana (every group but sokuon's words), chosen or not:
-  // how many have been studied at least once in either direction -- the
-  // Dashboard's Hiragana / Katakana awards.
+  // how many have been studied at least once -- in either direction, so a
+  // kana met in the old romaji -> kana drill still counts -- the Dashboard's
+  // Hiragana / Katakana awards.
   function scriptProgress(script) {
     var cards = load().cards, items = [], all = kanaData.allItems();
     Object.keys(all).forEach(function (g) {
@@ -571,8 +508,8 @@ window.RaumeStudy.flashcards.kana = (function () {
     renderKana: renderKana, clearSession: clearSession, summary: summary, scriptProgress: scriptProgress,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
-      checkKana: checkKana, checkR2k: checkR2k, buildQueue: buildQueue, selectedItems: selectedItems,
-      setGroup: setGroup, setDir: setDir, enabledDirs: enabledDirs, studyUnits: studyUnits
+      checkKana: checkKana, buildQueue: buildQueue, selectedItems: selectedItems,
+      setGroup: setGroup, studyUnits: studyUnits
     }
   };
 })();

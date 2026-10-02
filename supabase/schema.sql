@@ -103,9 +103,10 @@ alter table public.flashcard_settings add column if not exists enabled_en_ro boo
 -- devices without a table of its own. Shape: { "<tableId>": { "icon": "..." } }.
 alter table public.flashcard_settings add column if not exists table_custom jsonb not null default '{}'::jsonb;
 
--- Kana trainer (the Flashcards "Kana" tab) group + direction picker state, so
+-- Kana trainer (the Flashcards "Kana" tab) group picker state, so
 -- it follows you across devices like the other settings. Shape:
--- { "groups": ["hira-gojuon", ...], "dirs": { "k2r": true, "r2k": true } }.
+-- { "groups": ["hira-gojuon", ...] } (older rows may still carry a "dirs" object from
+-- the dropped romaji -> kana direction; it is ignored).
 alter table public.flashcard_settings add column if not exists kana_prefs jsonb not null default '{}'::jsonb;
 
 -- Kana trainer FSRS knobs -- the same three the vocab cards expose plus a

@@ -4246,8 +4246,6 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 /* Quiet but readable in both themes -- secondary grey at full strength, not
    faded further (it read as nearly invisible in dark mode). */
 .fc-stage-typed { font-size: var(--fs-small); color: var(--muted); overflow-wrap: anywhere; }
-/* Kana tab, romaji typed where kana was asked: one quiet line, no verdict. */
-.fc-kana-kb-hint { margin: 10px 0 0; text-align: center; font-size: var(--fs-small); color: var(--muted); }
 .fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
 .fc-review-dynamic { align-self: stretch; }
 mark.fc-diff-you {
@@ -4324,11 +4322,6 @@ mark.fc-diff-co {
    the size pass lower in this file. */
 .fc-review-card .fc-prompt-kana { font-size: 32px; line-height: 1.15; margin-bottom: 20px; }
 .fc-review-card .fc-prompt-kana-word { font-size: 24px; }
-/* Romaji -> kana: a romaji cue, kana typed into the answer field (a touch
-   larger than the Latin default so the glyphs read), and the correct kana
-   shown a little larger again once checked. */
-.fc-review-card .fc-prompt-romaji { font-size: 21px; margin-bottom: 16px; }
-.fc-answer-form input[lang="ja"] { font-size: 16px; }
 /* Phone: the study card and its four-up rating row are laid out for a desktop
    column. Tighten the chrome (meta line, padding, rating row) but let the
    prompt keep its full size + the air around it -- it's the anchor the eye
@@ -4355,9 +4348,7 @@ mark.fc-diff-co {
   .fc-review-card { padding: 28px 26px; }
   .fc-review-card .fc-prompt-kana { font-size: 38px; }
   .fc-review-card .fc-prompt-kana-word { font-size: 28px; }
-  .fc-review-card .fc-prompt-romaji { font-size: 24px; }
   .fc-answer-form input { height: 40px; }
-  .fc-answer-form input[lang="ja"] { font-size: 18px; }
 }
 /* flex-start, not the default stretch: "Directions" has two rows against the
    scripts' five, and stretching it to match left a tall box mostly empty.

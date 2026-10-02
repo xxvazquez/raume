@@ -2751,13 +2751,10 @@ async function main() {
   check("re-selecting a group re-enables Study", !document.getElementById("fcKanaStart").disabled);
   if (storageUsable) check("the group choice is saved to its own key", /hira-gojuon/.test(readLocalStorage("raume-kana-v1") || ""));
 
-  check("the picker offers both study directions, on by default",
-    document.querySelectorAll("#fcPanelKana .fc-kana-dir-cb").length === 2
-    && [...document.querySelectorAll("#fcPanelKana .fc-kana-dir-cb")].every(cb => cb.checked));
+  check("the picker has no direction choice -- kana -> romaji is the only drill",
+    !document.querySelector("#fcPanelKana .fc-kana-dir-cb") && !/Romaji → kana/.test(document.getElementById("fcPanelKana").textContent));
 
-  // --- kana -> romaji: the typed direction (drill r2k off so the queue is
-  // all k2r and the first card is deterministic). ---
-  kh.setDir("r2k", false);
+  // --- kana -> romaji: the typed drill. ---
   document.getElementById("fcKanaStart").click();
   check("Study now opens a kana review card", !!document.querySelector("#fcPanelKana .fc-review-card .fc-prompt-kana"));
   const kanaGlyph = document.querySelector("#fcPanelKana .fc-prompt-kana").textContent;
@@ -2791,47 +2788,6 @@ async function main() {
   check("ending shows a wrap-up", /reviewed/.test((document.querySelector("#fcPanelKana .fc-session-done") || {}).textContent || ""));
   document.getElementById("fcKanaBack").click();
 
-  // --- romaji -> kana: also typed, graded on the glyph. Drill handakuten only
-  // (ぱぴぷぺぽ -- five unambiguous readings, so the prompt maps to one kana). ---
-  kh.setDir("r2k", true);
-  kh.setDir("k2r", false);
-  kh.setGroup("hira-gojuon", false);
-  kh.setGroup("hira-handakuten", true);
-  check("checkR2k wants the kana glyph, not the romaji", (() => {
-    const pa = kd.itemsFor(["hira-handakuten"]).find(it => it.kana === "ぱ");
-    return kh.checkR2k(pa, "ぱ") && kh.checkR2k(pa, " ぱ ") && !kh.checkR2k(pa, "pa");
-  })());
-  document.getElementById("fcKanaStart").click();
-  check("romaji → kana shows a romaji prompt and a text input, no Reveal button",
-    !!document.querySelector("#fcPanelKana .fc-prompt-romaji")
-    && !!document.getElementById("fcKanaInput") && !document.getElementById("fcKanaReveal"));
-  const r2kRomaji = document.querySelector("#fcPanelKana .fc-prompt-romaji").textContent;
-  const r2kItem = kd.itemsFor(["hira-handakuten"]).find(it => it.romaji === r2kRomaji);
-  document.getElementById("fcKanaInput").value = r2kRomaji;
-  document.getElementById("fcKanaForm").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
-  check("romaji typed for a kana answer isn't graded -- a line asks for the kana keyboard instead", (() => {
-    const p = document.getElementById("fcPanelKana");
-    return !p.querySelector(".fc-review-verdict") && !!p.querySelector(".fc-kana-kb-hint")
-      && document.getElementById("fcKanaInput").value === r2kRomaji;
-  })());
-  document.getElementById("fcKanaInput").value = r2kItem.kana;
-  document.getElementById("fcKanaInput").dispatchEvent(new window.Event("input", { bubbles: true }));
-  check("changing the answer clears the keyboard line", !document.querySelector("#fcPanelKana .fc-kana-kb-hint"));
-  document.getElementById("fcKanaForm").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
-  check("typing the right kana is marked correct with four ratings and the glyph shown", (() => {
-    const p = document.getElementById("fcPanelKana");
-    return !!p.querySelector(".fc-verdict-ok")
-      && !!p.querySelector(".fc-stage-expected[lang=\"ja\"]")
-      && p.querySelectorAll(".fc-rating-btn").length === 4;
-  })());
-  document.querySelector('#fcPanelKana .fc-rating-btn[data-rating="good"]').click();
-  check("rating advances to the next card", /2 \/ /.test(document.querySelector("#fcPanelKana .fc-review-meta span").textContent));
-  if (storageUsable) check("the romaji → kana review is stored under its own |r2k key", /\|r2k"/.test(readLocalStorage("raume-kana-v1") || ""));
-  document.getElementById("fcKanaEnd").click();
-  document.getElementById("fcKanaBack").click();
-  kh.setDir("k2r", true);
-  kh.setGroup("hira-handakuten", false);
-  kh.setGroup("hira-gojuon", true);
   check("Back to groups returns to the picker, now showing progress", !!document.getElementById("fcKanaStart") && /started/.test(document.getElementById("fcKanaSummary").textContent));
 
   // Guest mode keeps no sync outbox -- its local kana cache is the record,

@@ -276,12 +276,9 @@ history are always kept.
 
 The tab opens on the same card as the Dashboard: how many kana a session holds
 now (started / not started under it) and **Study now**. Below it, choose groups
-(**gojūon, dakuten, handakuten, yōon, sokuon**, for each script) and directions:
-
-| Direction | You type |
-| --- | --- |
-| **Kana → romaji** | The reading. A few alternates like `si` / `shi` are accepted. Vowel length counts here. |
-| **Romaji → kana** | The kana itself, on a Japanese kana keyboard. Romaji typed here isn't marked wrong — a line asks you to switch keyboards. |
+(**gojūon, dakuten, handakuten, yōon, sokuon**, for each script). Each card
+shows a kana and you type its reading in romaji; a few alternates like `si` /
+`shi` are accepted, and vowel length counts.
 
 It uses the same review card as the word flashcards, with its own FSRS
 settings.

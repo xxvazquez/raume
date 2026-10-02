@@ -124,7 +124,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<h3 class="help-head">Kana</h3>' +
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Groups</span><span class="help-desc">Gojūon, dakuten, handakuten, yōon and sokuon, for each script.</span></li>' +
-      '<li><span class="help-term">Directions</span><span class="help-desc">Kana → romaji, or romaji → kana (needs a kana keyboard).</span></li>' +
+      '<li><span class="help-term">Answering</span><span class="help-desc">See a kana, type its reading in romaji.</span></li>' +
       '<li><span class="help-term">Progress</span><span class="help-desc">Its own FSRS schedule and settings, separate from word cards.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Puzzles</h3>' +
