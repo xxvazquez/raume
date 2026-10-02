@@ -313,7 +313,8 @@ window.RaumeStudy.customize = (function () {
       flashHtml("import") +
       "</details>" +
 
-      '<div class="cv-card cv-owned"><h3>Words you’ve added</h3>' +
+      // A grey group header over its card, like Your vocabulary above.
+      '<h3 class="cv-group-head">Words you’ve added</h3><div class="cv-card cv-owned">' +
       '<div class="cv-owned-controls">' +
       '<label class="cv-owned-search-field"><span class="visually-hidden">Search your words</span>' +
       '<input type="search" class="cv-owned-search" placeholder="Search your words" aria-label="Search your words" value="' + esc(cvOwnedQuery) + '"></label>' +

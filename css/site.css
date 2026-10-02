@@ -1479,7 +1479,7 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
 .cz-section-label {
   display: flex; align-items: center; gap: 8px;
   margin: 0 0 10px; padding: 10px 0;
-  font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0;
+  font-size: var(--fs-subhead); font-weight: 400; letter-spacing: 0;
   border-bottom: 1px solid var(--row-line);
 }
 .cz-group { margin-top: 10px; }
@@ -1496,7 +1496,7 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
 }
 /* The merged solo case carries the section's own job -- matching the eyebrow
    it's standing in for -- so it reads as a section row, a size up, in ink. */
-.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 500; letter-spacing: 0; color: var(--ink); }
+.cz-group-title-solo { padding-top: 10px; padding-bottom: 10px; font-size: var(--fs-subhead); font-weight: 400; letter-spacing: 0; color: var(--ink); }
 /* The count is the row's trailing value, just before the chevron. */
 .cz-group-count { margin-left: auto; font-weight: 400; color: var(--faint); }
 .cz-section-label::after, .cz-group-title::after { margin-left: 10px; }
@@ -1593,7 +1593,7 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
    every other section in the app (13px grey over its card), not a second
    bold title mid-page. */
 .cv-section { margin-top: 8px; }
-.cv-section h2 { display: flex; align-items: center; gap: 4px; margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.cv-section h2, .cv-section .cv-group-head { display: flex; align-items: center; gap: 4px; margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .cv-section code {
   font: 500 var(--fs-micro)/1.4 var(--font-ui);
   background: var(--surface); border-radius: 4px; padding: 1px 5px; color: var(--ink);
@@ -1602,11 +1602,11 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
   border-radius: var(--radius-card);
   background: var(--paper); padding: 16px 16px 18px; margin-bottom: 12px;
 }
-/* The same 15px row voice as the section rows above (.cz-group-title-solo)
-   -- fields are no longer forced to 16px, so nothing needs the bigger size. */
+/* The same 15px regular row voice as the section rows above
+   (.cz-group-title-solo) -- a list row's title, never bold. */
 .cv-card h3, .cv-card-summary {
   display: flex; align-items: center; gap: 8px;
-  margin: 0 0 12px; font-size: var(--fs-subhead); font-weight: 500; color: var(--ink);
+  margin: 0 0 12px; font-size: var(--fs-subhead); font-weight: 400; color: var(--ink);
 }
 /* A closed action row is a 44px list row. */
 details.cv-card:not([open]) { padding-top: 12px; padding-bottom: 12px; }

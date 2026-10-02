@@ -1848,6 +1848,10 @@ async function main() {
       && !window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[made.id]);
   }
   check("the Customize page has a Your vocabulary block", !!document.querySelector("#customizePage .cv-section"));
+  check("...with Words you've added as a grey group header over its card, not a bold title inside it", (() => {
+    const h = document.querySelector("#customizePage .cv-group-head");
+    return !!h && /Words you/.test(h.textContent) && !h.closest(".cv-card") && h.nextElementSibling.classList.contains("cv-owned");
+  })());
   check("...a guest sees no New table card (accounts only)", (() => {
     const heads = [...document.querySelectorAll("#customizePage .cv-card h3, #customizePage .cv-card-summary")]
       .map(h => h.firstChild ? h.firstChild.textContent : h.textContent);

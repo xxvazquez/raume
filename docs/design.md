@@ -646,13 +646,13 @@ and Help.
     shrink under 640px, clawing back most of what it took from the name
     field rather than letting names truncate more than before.
   - **Your vocabulary**'s action rows (Add a word / New table / Import a list,
-    each a `.cv-card` `<details>` with a sentence-case `<summary>` at
-    `--fs-card-heading`) sit back to back as one inset-grouped card — an inset
+    each a `.cv-card` `<details>` with a sentence-case `<summary>` in the
+    15px regular row voice, never bold) sit back to back as one inset-grouped card — an inset
     hairline between them, corners only on the ends — and all start closed. Forms are label-over-field with filled, unbordered fields; the
     parsed-ruby preview and the import result sit on `--surface`, an error on
     `--wrong-soft`; the buttons are tinted (`.cv-btn`) or plain (`.cv-file-btn`).
-  - **Words you've added** is one non-collapsible card (same `--fs-card-heading`
-    heading as above) holding a search field + a Recently added/A–Z sort
+  - **Words you've added** is one non-collapsible card under a grey group
+    header (`.cv-group-head`, the same voice as *Your vocabulary*), holding a search field + a Recently added/A–Z sort
     (`.cv-owned-controls`, filters and reorders via a plain DOM swap in
     `updateOwnedList()` — no full re-render, so the search input never loses
     focus mid-keystroke; the sort is an iOS pop-up button, tint text with the
