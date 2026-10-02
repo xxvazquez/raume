@@ -112,7 +112,8 @@ Functional roles, each one job — all muted:
 - **ochre** (`--fc-hard` / `-soft` / `-strong`) — one job only: the rating row's
   Hard button, which needs a fourth hue distinct from Again (coral), Good (sage)
   and Easy (lavender). Also the Learning segment of the Card-progress bar;
-- a slate wash (`--irregular-bg` / `--irregular-ink`) marks irregular-verb rows;
+- a slate wash (`--irregular-bg` / `--irregular-ink`) marks irregular-verb rows
+  (printed as the wash alone — no edge bar against the table's frame);
 - the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`) behind
   only the matched run — romaji included — never an underline or a whole-cell bar.
   While searching on a phone the account button steps aside so the search bar has the top.

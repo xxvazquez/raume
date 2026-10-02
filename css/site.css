@@ -3019,6 +3019,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .vocab th:last-child { border-top-right-radius: 10px; }
   .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 10px; }
   .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 10px; }
+  /* An irregular row prints as its wash alone: the on-screen edge bar sat
+     against the frame's left rule and read as a thick, broken border. The
+     wash is forced so it survives "Background graphics" being off. */
+  .irregular-row td:first-child { box-shadow: none !important; }
+  .irregular-row td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* A kanji table prints as its tile grid: each tile one rounded hairline
      frame (its screen fill is white on paper), none of the word tables'
      cell rules inside it. */
