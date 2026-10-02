@@ -2807,7 +2807,16 @@ async function main() {
     && !!document.getElementById("fcKanaInput") && !document.getElementById("fcKanaReveal"));
   const r2kRomaji = document.querySelector("#fcPanelKana .fc-prompt-romaji").textContent;
   const r2kItem = kd.itemsFor(["hira-handakuten"]).find(it => it.romaji === r2kRomaji);
+  document.getElementById("fcKanaInput").value = r2kRomaji;
+  document.getElementById("fcKanaForm").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+  check("romaji typed for a kana answer isn't graded -- a line asks for the kana keyboard instead", (() => {
+    const p = document.getElementById("fcPanelKana");
+    return !p.querySelector(".fc-review-verdict") && !!p.querySelector(".fc-kana-kb-hint")
+      && document.getElementById("fcKanaInput").value === r2kRomaji;
+  })());
   document.getElementById("fcKanaInput").value = r2kItem.kana;
+  document.getElementById("fcKanaInput").dispatchEvent(new window.Event("input", { bubbles: true }));
+  check("changing the answer clears the keyboard line", !document.querySelector("#fcPanelKana .fc-kana-kb-hint"));
   document.getElementById("fcKanaForm").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
   check("typing the right kana is marked correct with four ratings and the glyph shown", (() => {
     const p = document.getElementById("fcPanelKana");

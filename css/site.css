@@ -4246,6 +4246,8 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 /* Quiet but readable in both themes -- secondary grey at full strength, not
    faded further (it read as nearly invisible in dark mode). */
 .fc-stage-typed { font-size: var(--fs-small); color: var(--muted); overflow-wrap: anywhere; }
+/* Kana tab, romaji typed where kana was asked: one quiet line, no verdict. */
+.fc-kana-kb-hint { margin: 10px 0 0; text-align: center; font-size: var(--fs-small); color: var(--muted); }
 .fc-stage-meaning { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 10px; font-size: var(--fs-subhead); color: var(--ink-2); }
 .fc-review-dynamic { align-self: stretch; }
 mark.fc-diff-you {

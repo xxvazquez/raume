@@ -222,6 +222,15 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (!unit) return;
     var input = document.getElementById("fcKanaInput");
     if (!input) return;
+    // Romaji typed for a kana answer means the keyboard, not the memory, is
+    // wrong -- say so and wait, rather than log a miss the schedule would
+    // carry. (Turning it into kana as you type would give the answer away.)
+    var dyn = document.querySelector("#fcPanelKana .fc-review-dynamic");
+    if (unit.dir === "r2k" && /[a-z]/i.test(input.value) && !/[\u3040-\u30ff]/.test(input.value)) {
+      if (dyn) dyn.innerHTML = '<p class="fc-kana-kb-hint" role="status">Answer in kana — switch to a Japanese kana keyboard.</p>';
+      input.focus();
+      return;
+    }
     session.userAnswer = input.value;
     session.correct = unit.dir === "r2k"
       ? checkR2k(unit.item, input.value)
@@ -388,6 +397,12 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (end) end.addEventListener("click", endSession);
     var form = document.getElementById("fcKanaForm");
     if (form) form.addEventListener("submit", function (e) { e.preventDefault(); submitCheck(); });
+    // The keyboard hint (submitCheck) goes as soon as you change the answer.
+    var field = document.getElementById("fcKanaInput");
+    if (field) field.addEventListener("input", function () {
+      var hint = document.querySelector("#fcPanelKana .fc-kana-kb-hint");
+      if (hint) hint.remove();
+    });
 
     syncReviewCard();
     var input = document.getElementById("fcKanaInput");

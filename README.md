@@ -281,7 +281,7 @@ now (started / not started under it) and **Study now**. Below it, choose groups
 | Direction | You type |
 | --- | --- |
 | **Kana → romaji** | The reading. A few alternates like `si` / `shi` are accepted. Vowel length counts here. |
-| **Romaji → kana** | The kana itself. |
+| **Romaji → kana** | The kana itself, on a Japanese kana keyboard. Romaji typed here isn't marked wrong — a line asks you to switch keyboards. |
 
 It uses the same review card as the word flashcards, with its own FSRS
 settings.
