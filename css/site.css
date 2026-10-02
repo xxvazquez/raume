@@ -2583,10 +2583,13 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .ks-sub { flex: 0 0 100%; font-size: var(--fs-small); line-height: 1.3; color: var(--muted); }
 .role-pop.kanji-help-pop { z-index: 95; width: min(290px, calc(100vw - 16px)); max-width: none; padding: 12px 14px; white-space: normal; }
 .kanji-help-pop rt { font-size: 9.5px; font-weight: 400; color: var(--furigana); }
-.kh-title { font-size: 15px; font-weight: 600; line-height: 1.5; color: var(--ink); }
-/* An iOS Help list: each term on its own line, one short grey line under it. */
-.kh-terms { margin: 4px 0 0; }
-.kh-term { padding: 6px 0; border-top: 1px solid var(--row-line); }
+/* An iOS Help list: each term on its own line, one short grey line under it,
+   hairlines between -- no title (the card header it hangs from names it). */
+.kh-terms { margin: 0; }
+.kh-term { padding: 6px 0; }
+.kh-term + .kh-term { border-top: 1px solid var(--row-line); }
+.kh-term:first-child { padding-top: 0; }
+.kh-term:last-child { padding-bottom: 0; }
 .kh-term dt { color: var(--ink); line-height: 1.9; }
 .kh-term dd { margin: 0; color: var(--muted); line-height: 1.4; }
 /* Stroke order (render.js kanjiStrokesHtml): the kanji's outline faint,

@@ -272,7 +272,8 @@ async function main() {
     const pop = document.querySelector(".kanji-help-pop");
     const opened = infos.map(b => b.dataset.help).join(",") === "readings,writing" && infos.every(b => b.closest(".ks-group-head"))
       && !sheet.querySelector(".ks-row .ks-info") && !!pop
-      && pop.querySelector(".kh-title").textContent === "Writing" && pop.querySelectorAll(".kh-term").length === 2
+      && !pop.querySelector(".kh-title") && pop.querySelectorAll(".kh-term").length === 2
+      && [...pop.querySelectorAll(".kh-term dt")].map(d => d.textContent.split(" ·")[0]).join() === "Strokes,Radical"
       && writing.getAttribute("aria-expanded") === "true"
       && /Just for sorting/.test(sheet.querySelector(".ks-row-sub .ks-sub").textContent);
     const allRuby = infos.every(b => {

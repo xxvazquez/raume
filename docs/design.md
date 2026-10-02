@@ -200,9 +200,9 @@ drawing.
 Readings and Writing each have one ⓘ, on the card's header — the Settings
 cards' convention (faint, tinted while open); a row ⓘ in iOS means "details of
 this item", never "what does this label mean", so no row has one. It opens the
-tables' grammar popover (`.role-pop`), not a pushed page: the card's name in
-bold, then an iOS Help list — each term on its own line, one short grey line
-under it, hairlines between — never a paragraph. N5 readers: every kanji in it
+tables' grammar popover (`.role-pop`), not a pushed page: an iOS Help list —
+each term on its own line, one short grey line under it, hairlines between —
+with no title (the header it hangs from already names it), never a paragraph. N5 readers: every kanji in it
 carries furigana.
 
 ## Labels and measure

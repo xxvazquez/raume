@@ -413,16 +413,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // explainer per card, behind the ⓘ on its header (the Settings cards'
   // convention: a row ⓘ in iOS means "details of this item", never "what
   // does this label mean"). Each is an iOS Help list: a term, then one short
-  // line (kanjiHelpHtml; js/vocab/interactions.js places the popover). Every
+  // line -- no title, the header it hangs from already names it
+  // (kanjiHelpHtml; js/vocab/interactions.js places the popover). Every
   // kanji in them carries furigana: {漢字|かんじ}.
   var KANJI_HELP = {
     readings: { label: 'Readings', items: [
-      ['On’yomi · {音読|おんよ}み', 'The reading that came from Chinese — in katakana, mostly in words of two or more kanji: {富士山|ふじさん}.'],
-      ['Kun’yomi · {訓読|くんよ}み', 'The Japanese word for it — in hiragana, when the kanji stands alone or has kana after it: {山|やま}, {見|み}る. The lighter kana are okurigana.'],
-      ['Flashcards', 'Any one of its readings counts.']] },
+      ['On’yomi · {音読|おんよ}み', 'From Chinese, in katakana. Mostly in longer words: {富士山|ふじさん}.'],
+      ['Kun’yomi · {訓読|くんよ}み', 'The Japanese word, in hiragana: {山|やま}.'],
+      ['Okurigana · {送|おく}り{仮名|がな}', 'The lighter kana after a kanji: {見|み}る.'],
+      ['Flashcards', 'Any one reading is right.']] },
     writing: { label: 'Writing', items: [
-      ['Strokes', 'How many lines it’s written with — top to bottom, left to right, across before down ({十|じゅう}).'],
-      ['Radical · {部首|ぶしゅ}', 'The part a dictionary files a kanji under, often a hint to its meaning: {亻|にんべん} + {木|き} = {休|やす}む.']] }
+      ['Strokes', 'Top to bottom, left to right, across before down: {十|じゅう}.'],
+      ['Radical · {部首|ぶしゅ}', 'The part a dictionary files it under: {亻|にんべん} in {休|やす}む.']] }
   };
   function withFurigana(text) {
     return esc(text).replace(/\{([^|}]+)\|([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
@@ -430,7 +432,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function kanjiHelpHtml(vocabId, key) {
     var h = KANJI_HELP[key];
     if (!rawRow(vocabId) || !h) return '';
-    return '<div class="kh-title">' + h.label + '</div><dl class="kh-terms">' + h.items.map(function (p) {
+    return '<dl class="kh-terms" aria-label="' + h.label + '">' + h.items.map(function (p) {
       return '<div class="kh-term"><dt>' + withFurigana(p[0]) + '</dt><dd>' + withFurigana(p[1]) + '</dd></div>';
     }).join('') + '</dl>';
   }
