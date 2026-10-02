@@ -2111,9 +2111,12 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
      always (this only wraps when it genuinely doesn't fit -- that's what
      "normal" means), but nowrap was letting the longest katakana entries
      (6 kana + the speaker icon, e.g. チャーシュー) overflow their flex-shrunk
-     box and paint straight through it instead of wrapping under it. */
+     box and paint straight through it instead of wrapping under it.
+     Kinsoku (strict): when it does wrap, ー and small kana never start the
+     second line -- チャー / シュー, never チャーシュ / ー. */
   white-space: normal;
   overflow-wrap: anywhere;
+  line-break: strict;
 }
 .jpword { vertical-align: middle; }
 .jpword ruby { ruby-position: over; ruby-align: start; }
