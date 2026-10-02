@@ -2500,12 +2500,13 @@ async function main() {
       && vi.checkAnswer(idx.v0166, "jp-ro", "yon") && vi.checkAnswer(idx.v0166, "jp-ro", "shi") && vi.checkAnswer(idx.v0166, "jp-ro", "yon / shi")
       && vi.checkAnswer(idx.v0622, "jp-ro", "mainen");
   })());
-  check("a meaning's note is its own field: shown under the English in the table, never required in an answer", (() => {
+  check("a meaning's note is its own field: shown in grey right after the English in the table (dropping whole under it only when it doesn't fit), never required in an answer", (() => {
     const cell = document.querySelector('tr[data-vocab-id="v0825"] .meaning-text');
     const note = cell && cell.querySelector(".meaning-note");
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const e = vi.getVocabIndex().v0825;
-    return !!note && note.textContent === "before a noun" && cell.firstChild.textContent.trim() === "which"
+    const inline = allCssRules.some(r => r.selectorText === ".meaning-note" && r.style.display === "inline-block");
+    return !!note && inline && note.textContent === "before a noun" && cell.firstChild.textContent.trim() === "which"
       && e.englishNote === "before a noun" && e.englishFull === "which (before a noun)"
       && vi.promptFor(e, "en-ro").note === "before a noun"
       && vi.checkAnswer(e, "jp-en", "which") && !vi.checkAnswer(e, "jp-en", "before a noun");

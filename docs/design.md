@@ -517,9 +517,12 @@ and Help.
   line (`adjNote` / `verbNote`, else `VERB_CLASS_META.irregular.genericNote`).
   A regular adjective's or verb's `usageNote` (多い, 遊ぶ) keeps the plain
   capsule and just adds to its line.
-- **A meaning's note** (`enNote`: "before a noun", "weather") sits on its own
-  line under the English (`.meaning-note`, 11.5px `--faint`, a clear step below
-  the 14.5px answer) — never in brackets in the answer. Flashcards puts it under an English prompt (`.fc-prompt-note`)
+- **A meaning's note** (`enNote`: "before a noun", "polite") is part of the
+  meaning, so it stays visible: secondary grey (`.meaning-note`, 13px
+  `--muted`) right after the English on its line, an inline-block that drops
+  whole under the English only when it doesn't fit — a note on its own line
+  made those rows taller than their neighbours. Never in brackets in the
+  answer. Flashcards puts it under an English prompt (`.fc-prompt-note`)
   or answer (`.fc-stage-note`) in 15px muted.
   The popover (`.role-pop`, `openPop()` in `js/vocab/interactions.js`) is a
   small white rounded surface with the menu shadow and an arrow at its
@@ -556,8 +559,8 @@ and Help.
   every row gets it, so rows stay one height), the word is set on a
   `--l1` line box with the speaker exactly that tall, and the English (on
   its own `--en-lh`) is pushed down by half the difference so its first
-  line and the row icons centre on the same line. The romaji caption, a
-  wrapped English line and an `enNote` all sit *below* that line and grow
+  line (with its note) and the row icons centre on the same line. The romaji
+  caption and a wrapped English line sit *below* that line and grow
   the row downward without moving it. Checked by measuring every row
   (speaker, word and English first-line centres within 0.5px) at 375 /
   760 / 1200px, romaji shown and not.

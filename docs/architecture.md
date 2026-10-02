@@ -436,8 +436,8 @@ regular adjective or verb — on a word it needs an `adj`; it keeps the plain
 badge and shows in the ⓘ popover.
 
 `english` holds only what a learner types; context for it goes in an optional
-`enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note shows in
-small grey under the English in the tables, under an English prompt or answer in
+`enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note follows
+the English in grey on the same line in the tables, under an English prompt or answer in
 Flashcards, and in parentheses in lists and puzzle clues — it's never part of a
 right answer. Parentheses left in `english` are optional words inside the answer
 itself ("one pair (of shoes)"); answer-checking accepts it with or without them.

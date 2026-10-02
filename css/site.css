@@ -2377,8 +2377,8 @@ body.ja-voice-ready .jp-speak-btn {
      difference, so its first line centres on the same line; the row icons
      take the English line's height.
    Everything that can add height -- the romaji caption under the word, a
-   wrapped English line, an enNote -- sits below that line and grows the row
-   downward without moving it. */
+   wrapped English line -- sits below that line and grows the row downward
+   without moving it. */
 .vocab:not(.vocab-sentences) {
   --row-top: 13px; --l1: 28px; --en-lh: 18px; --row-bottom: 5px;
 }
@@ -3146,7 +3146,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 .vocab tbody td:last-child { padding-right: 10px; }
 .meaning-cell { display: flex; align-items: flex-start; gap: 2px; }
 .meaning-text { flex: 1 1 auto; min-width: 0; }
-.meaning-note { display: block; margin-top: 2px; color: var(--faint); font-size: var(--fs-micro); line-height: 1.3; letter-spacing: .005em; }
+/* A meaning's note is part of the meaning (その / あの both read "that"
+   without it): secondary grey right after the English, on its line, and
+   only when it doesn't fit does it drop -- whole -- under it. A note under
+   every such row made those rows taller than their neighbours. */
+.meaning-note { display: inline-block; max-width: 100%; color: var(--muted); font-size: var(--fs-small); letter-spacing: .005em; }
 
 /* い/な-adjective badge: a small capsule in the trailing cluster beside the row
    icons (so the meaning text keeps one left edge on every row) -- a tint of
