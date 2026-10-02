@@ -70,10 +70,24 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // cell can't ask for a macron), lowercased, spaces/punctuation stripped
   // so it reads as one unbroken word on the grid, matching how a kana
   // answer never has spaces either.
-  function foldRomajiForGrid(s) {
-    return String(s || "").split(" / ")[0].replace(/^~/, "").toLowerCase()
-      .replace(/[āâ]/g, "a").replace(/[īî]/g, "i").replace(/[ūû]/g, "u").replace(/[ēê]/g, "e").replace(/[ōô]/g, "o")
-      .replace(/[^a-z]/g, "");
+  // A long vowel is spelled out, never dropped: budō is "budou", kōhī
+  // "koohii" (ō -> o would make ぶどう read ぶど). Spelled from the kana
+  // reading where that agrees with the stored romaji (so おう is "ou", おお
+  // "oo", ー a doubled vowel); otherwise -- a particle read differently from
+  // its kana, は as wa -- from the romaji, each macron doubled.
+  function foldRomajiForGrid(s, reading) {
+    var kr = window.RaumeStudy.kanaRomaji;
+    var first = String(s || "").split(" / ")[0].replace(/^~/, "");
+    function spell(t) {
+      return String(t || "").toLowerCase()
+        .replace(/[āâ]/g, "aa").replace(/[īî]/g, "ii").replace(/[ūû]/g, "uu").replace(/[ēê]/g, "ee").replace(/[ōô]/g, "oo")
+        .replace(/[^a-z]/g, "");
+    }
+    if (reading) {
+      var fromKana = spell(kr.toRomaji(String(reading).replace(/^〜/, "")));
+      if (fromKana && kr.foldRomaji(fromKana) === kr.foldRomaji(first)) return fromKana;
+    }
+    return spell(first);
   }
   // A clue that hands over its own answer isn't a clue: "Japanese sake" for
   // *sake*, or a loanword whose English is the word itself (cola -> コーラ,
@@ -134,8 +148,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var clue = String(entry.englishDisplay || "").split(" / ")[0].trim();
       if (!clue) return;
       if (entry.englishNote) clue += " (" + entry.englishNote + ")";
-      if (isGiveaway(reading, foldRomajiForGrid(entry.romajiDisplay), clue)) return;
-      var romaji = entry.romajiUsable ? foldRomajiForGrid(entry.romajiDisplay) : "";
+      if (isGiveaway(reading, foldRomajiForGrid(entry.romajiDisplay, reading), clue)) return;
+      var romaji = entry.romajiUsable ? foldRomajiForGrid(entry.romajiDisplay, reading) : "";
       if (romaji.length < MIN_LEN + 1 || romaji.length > MAX_LEN * 2) romaji = "";
       // tableId: Listening draws its wrong choices from the same table first;
       // speak: the exact reading the speaker buttons play (it keys the

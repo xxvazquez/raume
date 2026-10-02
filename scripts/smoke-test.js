@@ -3065,9 +3065,11 @@ async function main() {
     xw.toKatakana("さくら") === "サクラ" && xw.toHiragana("サクラ") === "さくら"
     && xw.toHiragana("コーヒー") === "こーひー" && xw.scriptedAnswer("さくら", "katakana") === "サクラ"
     && xw.scriptedAnswer("さくら", "native") === "さくら");
-  check("romaji folding takes the first alternative, drops a counter's ~, folds macrons, and strips everything but a-z",
-    xw.foldRomajiForGrid("kōhī") === "kohi" && xw.foldRomajiForGrid("kaeru / kaerimasu") === "kaeru"
-    && xw.foldRomajiForGrid("~hon") === "hon" && xw.foldRomajiForGrid("O-namae wa?") === "onamaewa");
+  check("romaji folding takes the first alternative, drops a counter's ~, spells long vowels out (never drops them), and strips everything but a-z",
+    xw.foldRomajiForGrid("kōhī") === "koohii" && xw.foldRomajiForGrid("kaeru / kaerimasu") === "kaeru"
+    && xw.foldRomajiForGrid("~hon") === "hon" && xw.foldRomajiForGrid("O-namae wa?") === "onamaewa"
+    && xw.foldRomajiForGrid("budō", "ぶどう") === "budou" && xw.foldRomajiForGrid("kōhī", "コーヒー") === "koohii"
+    && xw.foldRomajiForGrid("ōkii", "おおきい") === "ookii" && xw.foldRomajiForGrid("wa", "は") === "wa");
   check("given a whole pool and a size, the builder swaps in words that cross until it reaches that size -- not a pre-picked handful that mostly doesn't", (() => {
     const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
     const pool = xw.tableWordPool([biggest.id]).filter(w => w.romaji).map(w => ({ id: w.id, clue: w.clue, answer: w.romaji }));
