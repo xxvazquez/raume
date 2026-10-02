@@ -714,7 +714,55 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       highlighted.add(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
       if (hit.enHit) highlightCell(info.enCell, q);
-      if (hit.romajiHit && !markKanjiReadings(row, q)) markRomaji(info.jpword, q);
+      if (hit.romajiHit && !markKanjiReadings(row, q) && !markReading(info.jpword, q)) markRomaji(info.jpword, q);
+    }
+    // A word's reading is already on screen -- its kana, or the furigana over
+    // its kanji -- so a romaji hit tints the kana it spells there ("mizu"
+    // tints the みず over 水) instead of adding the romaji as a line; the
+    // romaji stays a tap away, as everywhere. Compared in hiragana, so
+    // katakana matches too; a half-typed last syllable is left off ("miz"
+    // tints み). Falls back to the romaji line when nothing matches (a long
+    // vowel spelt differently, furigana hidden).
+    function toHiragana(s) {
+      return s.replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    }
+    function markReading(jpword, q) {
+      const kr = window.RaumeStudy.kanaRomaji;
+      if (!jpword || !kr) return false;
+      const k = toHiragana(kr.toKana(q, false).replace(/[^\u3040-\u30ff]/g, ''));
+      if (!k) return false;
+      const hideFuri = document.body.classList.contains('hide-furigana');
+      // The reading's own pieces in order: furigana and kana text, katakana
+      // units whole -- never the kanji under a furigana.
+      const segs = [];
+      let pos = 0;
+      const walker = document.createTreeWalker(jpword, NodeFilter.SHOW_TEXT + NodeFilter.SHOW_ELEMENT, {
+        acceptNode(n) {
+          const el = n.nodeType === 3 ? n.parentElement : n;
+          if (el.closest('.jp-romaji-line, rb, .jpmain')) return NodeFilter.FILTER_REJECT;
+          if (n.nodeType === 3) {
+            if (el.closest('.kr')) return NodeFilter.FILTER_REJECT;
+            if (el.closest('rt') && hideFuri) return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return n.classList.contains('kr') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        }
+      });
+      let n;
+      while ((n = walker.nextNode())) { segs.push({ node: n, start: pos, text: n.textContent }); pos += n.textContent.length; }
+      const full = toHiragana(segs.map(x => x.text).join(''));
+      const at = full.indexOf(k);
+      if (at === -1) return false;
+      const end = at + k.length;
+      segs.forEach(x => {
+        const xEnd = x.start + x.text.length;
+        if (xEnd <= at || x.start >= end) return;
+        if (x.node.nodeType === 3) {
+          const lo = Math.max(0, at - x.start), hi = Math.min(x.text.length, end - x.start);
+          markTextNode(x.node, lo, hi - lo);
+        } else x.node.classList.add('search-hit');
+      });
+      return true;
     }
     // A kanji row already shows its readings (スイ みず), so a romaji hit
     // marks the reading it spells rather than adding the romaji as another

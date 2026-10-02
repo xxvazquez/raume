@@ -63,7 +63,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 
 | | |
 | --- | --- |
-| **Grid** | Each theme opens as a grid of tiles: the kanji large, its meaning under it. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
+| **Grid** | Each theme opens as a grid of tiles: the kanji large, its readings in kana under it (on in katakana, kun in hiragana; hidden with furigana), then its meaning. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
 | **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana) and romaji, its stroke count and radical, an example word with furigana, **Words with** it — every word from the other tables written with that kanji, shortest first, folded away until you tap it — and **Add to flashcards**. |
 | **Known** | **Mark as known** under the sheet's title turns that kanji's tile sage green with a check, so what's left to learn stays grey; tap **Known** to undo. The Dashboard's Kanji card counts them. Kept on the device and, signed in, synced to your account. |
 | **Write it** | Under the stroke-order drawing: a writing pad for that kanji. Draw each stroke in order with a finger or the mouse — a right stroke snaps to its clean line in its stroke-order colour, a wrong one (misplaced, backwards or out of order) shakes the pad and counts a miss, and after three misses on one stroke it's shown as a hint. **Outline** (on by default, remembered) shows the faint kanji to trace; off, it's the real test. Undo, Clear, then "6 / 6 strokes · 1 miss" (or a clean run) with **Again** and **Next kanji** (the next one in the theme). Practice only. |
@@ -75,7 +75,7 @@ row. Grammatical **particles are blue and bold** everywhere.
 
 | | |
 | --- | --- |
-| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted; a single letter only finds words that start with it (one kana or kanji still matches anywhere). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
+| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted (a romaji query tints the kana or furigana it spells — the romaji itself stays a tap away); a single letter only finds words that start with it (one kana or kanji still matches anywhere). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
 | **Tables** | The list button in the pinned search bar (named after the table you're reading, on desktop) lists every table in the section with its entry count. |
 | **Opening a table** | Keeps the row you tapped exactly where it was. While it's open, its title stays pinned under the search bar as you scroll, and closing it from there keeps it in place. |
 | **URL** | Follows the view (`#grammar`, `#kanji`, `#table-15`, `#practice` — an old `#flashcards` link still opens Practice), so any view can be bookmarked. |

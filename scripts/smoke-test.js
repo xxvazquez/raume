@@ -1062,18 +1062,38 @@ async function main() {
     jpword.click();
     return opened && !jpword.classList.contains('jp-romaji-on');
   })());
-  check("a romaji-only match reveals the reading with only the matched run marked, and clears with the query", (() => {
+  check("a romaji-only match tints the furigana it spells, adds no romaji line, and clears with the query (shi -> し over 塩)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "shi";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const jpword = saltRow.querySelector('.jpword[data-romaji]');
-    const line = jpword.querySelector('.jp-romaji-line');
-    const marks = line ? [...line.querySelectorAll('mark.search-hit')].map(m => m.textContent) : [];
-    const hit = !saltRow.classList.contains("search-hidden") && jpword.classList.contains('jp-romaji-hit')
-      && line.textContent === jpword.dataset.romaji && marks.join("|") === "shi";
+    const marks = [...jpword.querySelectorAll('rt mark.search-hit')].map(m => m.textContent);
+    const hit = !saltRow.classList.contains("search-hidden") && marks.join("|") === "し"
+      && !jpword.querySelector('.jp-romaji-line') && !jpword.querySelector('rb mark, .jpmain mark');
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return hit && !jpword.classList.contains('jp-romaji-hit') && !jpword.querySelector('.jp-romaji-line');
+    return hit && !jpword.querySelector('mark');
+  })());
+  check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "ookii";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const w = document.querySelector('#vocabulary .jpword[data-romaji="ōkii"]');
+    const marks = w ? [...w.querySelectorAll('mark.search-hit')].map(m => m.textContent).join("") : "";
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return marks === "おおきい";
+  })());
+  check("when the kana can't be matched (koohii vs コーヒー) the romaji line shows with just the run marked", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "koohii";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const w = document.querySelector('#vocabulary .jpword[data-romaji="kōhī"]');
+    const line = w && w.querySelector('.jp-romaji-line');
+    const marks = line ? [...line.querySelectorAll('mark.search-hit')].map(m => m.textContent).join("|") : "";
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return marks === "kōhī";
   })());
   check("a kanji found by romaji marks the reading it spells, with no extra romaji line (mizu -> みず on 水)", (() => {
     const input = document.getElementById("tableSearch");
@@ -1085,15 +1105,6 @@ async function main() {
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return ok && !tile.querySelector(".kanji-readings mark");
-  })());
-  check("a macron reading marks the stored letters a doubled-vowel query matched (ookii -> ōkii)", (() => {
-    const input = document.getElementById("tableSearch");
-    input.value = "ookii";
-    input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    const marks = [...document.querySelectorAll('.jp-romaji-line mark.search-hit')].map(m => m.textContent);
-    input.value = "";
-    input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return marks.length > 0 && marks.every(m => m.toLowerCase() === "ōkii");
   })());
 
   console.log("\"Show polite\" only appears where verb rows are actually visible");
