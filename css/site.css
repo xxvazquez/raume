@@ -5169,41 +5169,49 @@ mark.fc-diff-co {
   .fc-titlebar > .fc-tabs { order: 0; flex: 0 1 auto; }
 }
 
-/* --- Puzzles / Games: the puzzle first --------------------------------
-   One toolbar row, as an iOS game screen: the title menu leading ("Word
-   search ⌄" -- the puzzle or game, the one setting you switch often), and
+/* --- Puzzles / Games: setup, then play ---------------------------------
+   Each tab opens on a setup screen (iOS Settings cards: the puzzle or game
+   as checkmark rows, then Words from / Script / Word count, then Start).
+   In play, one toolbar row: ‹ and the name leading (back to setup), and
    trailing only what you use mid-play: Hint, Check (or the count / clock)
-   and ⋯. The ⋯ menu holds the rest -- New puzzle on a phone, then a
-   group of settings as value rows (Words from / Word count / Script, each
-   opening the native picker), How to play, Reveal / Clear / Save as PDF,
-   Stats. */
+   and ⋯ -- New puzzle on a phone, How to play, Reveal / Clear / Save as
+   PDF, Stats. */
+.fc-gs { max-width: 560px; }
+.fc-gs .help-head:first-child { margin-top: 0; }
+.fc-gs-mode { min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
+.fc-gs-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.fc-gs-mode-tx { flex: 1 1 auto; min-width: 0; }
+.fc-gs-mode-name { display: block; color: var(--ink); }
+.fc-gs-check { flex: none; color: var(--section-strong); visibility: hidden; }
+.fc-gs-radio:checked ~ .fc-gs-check { visibility: visible; }
+.fc-gs-mode:hover, .fc-gs-pick:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.fc-gs-mode:has(.fc-gs-radio:focus-visible), .fc-gs-pick:has(.fc-xw-pick-select:focus-visible),
+.fc-gs-src:focus-visible, .fc-gs-stats:focus-visible { box-shadow: inset 0 0 0 2px var(--section); outline: 0; }
+.fc-gs-src, .fc-gs-stats { appearance: none; border: 0; background: transparent; text-align: left; }
+.fc-gs-stats { color: var(--ink); justify-content: space-between; }
+.fc-gs-words { position: relative; }
+.fc-gs-words .fc-xw-sheet { top: 52px; left: auto; right: 0; }
+.fc-gs-why { margin-top: 8px; }
+.fc-gs-go { display: flex; justify-content: center; margin: 24px 0; }
+.fc-gs-start { min-width: 220px; min-height: 50px; font-size: var(--fs-body); }
+.fc-gs-start:disabled { opacity: .4; cursor: default; }
+.fc-xw-title-back { flex: none; margin-left: -5px; color: var(--section-strong); }
 .fc-xw-actions, .fc-xw-current { max-width: none; }
 .fc-xw-actions { margin-bottom: 14px; }
 .fc-xw-title {
   position: relative; display: inline-flex; align-items: center; gap: 5px; min-width: 0; min-height: 44px;
   color: var(--ink); font: 500 17px/1.2 var(--font-ui); cursor: pointer;
 }
+button.fc-xw-title { appearance: none; border: 0; background: none; padding: 0; gap: 2px; }
+button.fc-xw-title:hover { opacity: .7; }
+button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
 .fc-xw-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fc-xw-title-chev { flex: none; color: var(--section-strong); }
 .fc-xw-title:has(.fc-xw-pick-select:focus-visible) { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
 .fc-xw-actions-end { flex: none; }
 .fc-xw-hint svg { margin: 0 5px 0 -3px; }
-/* The ⋯ menu's settings: a group of value rows set off by a ground band,
-   as an iOS menu's inline section. */
 .fc-xw-menu-list { min-width: 250px; }
-.fc-xw-menu-group { display: flex; flex-direction: column; border-bottom: 8px solid var(--group-ground); }
-.section-menu-list > .fc-xw-menu-new + .fc-xw-menu-group { border-top: 8px solid var(--group-ground); }
-.fc-xw-menu-group + * { border-top: 0 !important; }
-.fc-xw-menu-pick {
-  position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 12px 14px; color: var(--ink); font: 400 var(--fs-subhead)/1.3 var(--font-ui); cursor: pointer; white-space: nowrap;
-}
-.fc-xw-menu-pick:hover { background: var(--accent-soft); }
-/* Words from opens a sheet rather than a picker: a button row, › trailing. */
-.fc-xw-menu-src { appearance: none; border: 0; background: transparent; width: 100%; text-align: left; }
-.fc-xw-menu-src:focus-visible { box-shadow: inset 0 0 0 2px var(--section); outline: 0; }
 .fc-xw-row-chev { flex: none; color: var(--faint); }
-.fc-xw-menu-pick:has(.fc-xw-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
 .fc-xw-menu-val { display: inline-flex; align-items: center; gap: 5px; min-width: 0; max-width: 150px; color: var(--muted); }
 .fc-xw-menu-val { overflow: hidden; text-overflow: ellipsis; }
 .fc-xw-menu-val .fc-xw-updown { flex: none; color: var(--faint); }

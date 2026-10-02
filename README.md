@@ -268,7 +268,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
 | **Games** | Match / Listening / Kana tiles / Odd one out / Speed sort / Word chain from your words ([below](#games)) |
 | **Awards** | Every award, grouped Streaks / Reviews / Words / Kana / Kanji / Puzzles / Games — opened from the Dashboard's **Show all** |
-| **Stats** | Per puzzle or game style — opened from ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
+| **Stats** | Per puzzle or game style — opened from the setup screen's *Stats*, ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
 | **Help** | Adding & pausing, Library icons, reviewing, each tab, syncing, backup |
@@ -320,14 +320,16 @@ Clues that give the answer away are left out: the word written in its own
 clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 (*cola* → コーラ).
 
-The puzzle comes first, under one toolbar row: the puzzle's name as a menu
-(*Word search ⌄* — tap to switch to a crossword or arroword), then **Hint**,
-**Check** (a word search shows "3 / 15" found instead) and **⋯**. The ⋯ menu
-holds the rest: **New puzzle** (its own button on a wide window), your
-settings — *Words from* (a checklist: Flashcards, or as many tables as you
-like), *Word count* and *Script* (each opening the phone's own picker) — then *How to play*, *Reveal puzzle*,
-*Clear*, *Save as PDF* and [*Stats*](#stats). Changing a setting makes a new
-puzzle. On a wide window the clue you're on and the Across / Down lists sit beside the grid —
+The tab opens on a **setup screen**: the puzzle (Crossword, Arroword or
+Word search, each with a line on how it plays), then *Words from* (a
+checklist: Flashcards, or as many tables as you like), *Script* and *Word
+count* (each opening the phone's own picker), then **Start** — off, with
+the reason under it, until there are enough words — and [*Stats*](#stats).
+Your choices are remembered on this device for next time. In play, one
+toolbar row: **‹** and the puzzle's name (back to the setup screen), then
+**Hint**, **Check** (a word search shows "3 / 15" found instead) and **⋯** —
+**New puzzle** (same settings, fresh words; its own button on a wide
+window), *How to play*, *Reveal puzzle*, *Clear*, *Save as PDF* and *Stats*. On a wide window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
 stays with the puzzle while you move between tabs and starts blank with the
@@ -391,11 +393,13 @@ scrolls sideways.
 
 ### Games
 
-Timed and scored rounds: **Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort** and **Word chain**. Same toolbar as
-Puzzles — the game's name as a menu, the clock (or "3 / 10"), and ⋯ with
-New game, Words from / Word count / Script (none for Listening or Word chain), Skip
-(Word chain), How to
-play, *Restart* and *Stats*. Each tab keeps its own settings and its
+Timed and scored rounds: **Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort** and **Word chain**. Same setup screen
+and toolbar as Puzzles — pick the game, Words from / Script (none for
+Listening or Word chain) / Word count / Sort by (Speed sort), then **Start**;
+in play ‹ and the game's name, the clock (or "3 / 10"), and ⋯ with New
+game, Skip (Word chain), How to play, *Restart* and *Stats*. On a keyboard
+the arrow keys move between tiles and choices, Enter or Space picks, 1–4
+picks a choice by number, and Enter goes on to the next question. Each tab keeps its own settings and its
 game in progress while you switch between them. Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
 

@@ -368,14 +368,17 @@ and Help.
     no border — never a grey tint) and *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
     all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
     instead of an underline).
-  - **Title menu** (`.fc-xw-title`, Puzzles / Games): the screen's subject as
+  - **Title menu** (`.fc-xw-title`, Puzzle / Game stats): the screen's subject as
     17px text + a small tint chevron, a native `<select>` laid invisibly over
-    it — the one setting switched often, two taps (UIKit's navigation title
-    menu). **Menu value rows** (`.fc-xw-menu-pick`): a setting inside a ⋯
-    menu — its name left, its value + faint ⌃⌄ right, a native `<select>`
-    over the row (Photos' ⋯ › Sort By) — grouped as an inline section set
-    off by 8px ground bands. Settings you change now and then go there, not
-    in a row of pills over the content (Laura, 2026-09-28: pills were too much).
+    it (UIKit's navigation title menu). In play on Puzzles / Games the same
+    title is a back button instead — ‹ + the name, to the setup screen.
+  - **Setup screen** (`.fc-gs`, Puzzles / Games — Laura, 2026-10-02: a game
+    starts from its own setup, never mid-game with a random one): Settings
+    cards — the styles as checkmark rows with a grey line on how each plays,
+    then **value rows** (`.fc-gs-pick`: name left, value + faint ⌃⌄ right, a
+    native `<select>` over the row; Words from with a › opening its sheet),
+    then a filled 50px **Start** capsule, centred, and a Stats row. Never a
+    row of pills over the content (Laura, 2026-09-28).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
     (Show / Study), white `--radius-card` cards of 44px rows with inset hairlines, switches
@@ -840,21 +843,20 @@ card's background from the legend's midline). The sync chip is a tinted capsule
 with no outline, and the sign-in / entry cards are borderless (the tinted "This
 device only" card gives its button a white fill so it still reads as a button).
 
-**Puzzles** (and Games) put the puzzle first, under one toolbar row, as an
-iOS game screen: the **title menu** leading ("Word search ⌄"), and trailing
+**Puzzles** (and Games) open on their **setup screen** (above, Controls);
+**Start** puts the puzzle first, under one toolbar row, as an iOS game
+screen: **‹ and the name** leading (back to setup), and trailing
 only what you use mid-play — **Hint** (white, lightbulb + word; "Reveal a
 letter" / "Reveal a word" as its title), filled **Check** (or the quiet
 count / clock) — then ⋯. A wide window adds a white **New puzzle** before
-Hint. The ⋯ menu: New puzzle (phone only), a band, the settings as menu
-value rows (Words from, with a › — it opens a sheet, not a picker — then
-Word count and Script over native pickers), a band, then How to play (a
+Hint. The ⋯ menu: New puzzle (phone only), then How to play (a
 small glass note under the toolbar), Reveal puzzle / Clear / Save as PDF,
 Stats. **Words from** is one multi-select checklist (Mail's mailbox picker,
 not a menu of one): Flashcards ticked on top, then every table by category
 as checkmark rows under a "Words from" title and a Done button — tick as
 many tables as you like; ticking one leaves Flashcards, ticking Flashcards
 clears the tables, unticking the last table goes back to Flashcards — in a
-glass popover under the toolbar
+glass popover under the setup screen's Words from row
 (`.fc-xw-sheet`, the Options pattern) — a bottom sheet over a scrim on a
 phone — staying open while you tick, closing on Done, an outside tap or
 Escape. No pills over the content: an earlier row of four setting pills

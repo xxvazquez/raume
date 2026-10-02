@@ -2195,12 +2195,40 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Puzzles (grids to solve) and Games (timed / scored rounds) are two
   // tabs drawn by this one module, each keeping its own settings and its
   // current puzzle or game; `state` is whichever tab is showing.
-  function freshState(kind) {
-    return { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
-      script: "romaji", size: 15, sortBy: "tables", puzzle: null, poolCount: 0, notes: "" };
+  //
+  // Each tab opens on its setup screen -- which puzzle or game, the words,
+  // the script, how many -- and play starts with Start (`started`). The
+  // choices are remembered on this device for next time (SETUP_KEY); the
+  // puzzle itself still isn't.
+  var SETUP_KEY = "raume-games-setup";
+  var SETUP_FIELDS = ["mode", "source", "tables", "script", "size", "sortBy"];
+  function loadSetup(kind) {
+    try { return (JSON.parse(localStorage.getItem(SETUP_KEY)) || {})[kind] || {}; } catch (e) { return {}; }
   }
-  var states = { puzzles: freshState("puzzles"), games: freshState("games") };
-  var state = states.puzzles;
+  function saveSetup() {
+    try {
+      var all = JSON.parse(localStorage.getItem(SETUP_KEY)) || {}, mine = {};
+      SETUP_FIELDS.forEach(function (k) { mine[k] = state[k]; });
+      if (mine.source === "tricky") { mine.source = "flashcards"; mine.tables = []; } // a one-off from Stats
+      all[state.kind] = mine;
+      localStorage.setItem(SETUP_KEY, JSON.stringify(all));
+    } catch (e) { /* private mode: just not remembered */ }
+  }
+  function freshState(kind) {
+    var st = { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
+      script: "romaji", size: 15, sortBy: "tables", puzzle: null, poolCount: 0, notes: "", started: false };
+    var saved = loadSetup(kind);
+    var modes = MODE_OPTS.map(function (o) { return o[0]; });
+    if (modes.indexOf(saved.mode) !== -1 && (PUZZLE_MODES.indexOf(saved.mode) !== -1) === (kind === "puzzles")) st.mode = saved.mode;
+    if (saved.source === "table" && Array.isArray(saved.tables) && saved.tables.length) { st.source = "table"; st.tables = saved.tables.map(String); }
+    if (SCRIPT_OPTS.some(function (o) { return o[0] === saved.script; })) st.script = saved.script;
+    if (typeof saved.size === "number" && saved.size > 0) st.size = saved.size;
+    if (typeof saved.sortBy === "string") st.sortBy = saved.sortBy;
+    return st;
+  }
+  // Filled in at the end of this file: MODE_OPTS and SCRIPT_OPTS come later.
+  var states = {};
+  var state = null;
   var currentPanel = null;
 
   function rerender() { S.render(); }
@@ -2350,7 +2378,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // A native <select> laid invisibly over a control, so a tap opens the
   // platform's own picker (the wheel/menu on iOS). 16px so iOS never zooms.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
-  var TITLE_CHEVRON = '<svg class="fc-xw-title-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
   function optionsHtml(options, current) {
     return options.map(function (o) {
       var val = Array.isArray(o) ? o[0] : String(o);
@@ -2363,17 +2390,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   // The toolbar's title: the puzzle or game you're on, as an iOS title
   // menu ("Word search ⌄") -- the one setting you switch often.
+  // In play it leads back to the setup screen, ‹ and the name, as an iOS
+  // back button -- a different game or other words start from there.
+  var BACK_ICON = '<svg class="fc-xw-title-back" viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>';
   function titleMenuHtml() {
-    return '<label class="fc-xw-title"><span class="fc-xw-title-text">' + esc(optionLabel(MODE_OPTS, state.mode)) + "</span>" + TITLE_CHEVRON +
-      selectHtml("mode", state.kind === "games" ? "Game" : "Puzzle", optionsHtml(modeOpts(), state.mode)) + "</label>";
+    return '<button type="button" class="fc-xw-title" id="fcXwBack" aria-label="' + esc(optionLabel(MODE_OPTS, state.mode)) + ' — back to the ' + (state.kind === "games" ? "game" : "puzzle") + ' setup">' +
+      BACK_ICON + '<span class="fc-xw-title-text">' + esc(optionLabel(MODE_OPTS, state.mode)) + "</span></button>";
   }
-  // A setting inside the ⋯ menu, iOS-style: its name, then its value and
-  // ⌃⌄ trailing; a tap opens the native picker (Photos' ⋯ › Sort By).
-  function menuPickHtml(name, label, shown, optsHtml) {
-    return '<label class="fc-xw-menu-pick"><span class="menu-item-tx">' + esc(label) + "</span>" +
-      '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" + selectHtml(name, label, optsHtml) + "</label>";
-  }
-
   function selectedTables() {
     var ids = state.tables.map(String);
     return vocabTables().filter(function (t) { return ids.indexOf(String(t.id)) !== -1; });
@@ -2416,10 +2439,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // number of tables ticked at once (Mail's mailbox picker, not a menu of
   // one); the row names what's picked.
   var ROW_CHEVRON = '<svg class="fc-xw-row-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5 11.5 9 7 13.5"/></svg>';
-  function sourcePickHtml() {
-    var shown = state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
-    return '<button type="button" class="fc-xw-menu-pick fc-xw-menu-src" id="fcXwSource" aria-haspopup="dialog" aria-controls="fcXwSheet">' +
-      '<span class="menu-item-tx">Words from</span><span class="fc-xw-menu-val">' + esc(shown) + ROW_CHEVRON + "</span></button>";
+  function sourceLabel() {
+    return state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
   }
   function tablesSheetHtml() {
     return '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
@@ -2428,14 +2449,82 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<button type="button" class="fc-xw-sheet-done" id="fcXwTablesDone">Done</button></div>' +
       tableChecklistHtml() + "</div>";
   }
-  // The settings you change now and then: a group at the top of ⋯.
-  function settingsMenuHtml() {
-    return sourcePickHtml() +
-      menuPickHtml("size", "Word count", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
-      (state.mode !== "listening" && state.mode !== "wordchain" ? menuPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "") +
-      (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length
-        ? menuPickHtml("sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), optionsHtml(state.sortAvail, state.sortBy)) : "");
+  // The setup screen, as an iOS game's: which one (checkmark rows with a
+  // line on how it plays), then the words -- where from, the script, how
+  // many -- as Settings value rows, then Start. Stats sits below.
+  var MODE_BLURBS = {
+    crossword: "Numbered clues beside the grid",
+    arroword: "Each clue in a square before its answer",
+    wordsearch: "Find the words hidden in a square of letters",
+    match: "Pair each word with its meaning, against the clock",
+    listening: "Hear a word, pick its meaning",
+    kanatiles: "Spell the word from kana tiles",
+    oddone: "Spot the word that doesn’t belong",
+    speedsort: "Sort each word into its bucket, fast",
+    wordchain: "Each word starts on the kana the last one ended"
+  };
+  var CHECK_ICON = '<svg class="fc-gs-check" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 7.5 13.5 14.5 5"/></svg>';
+  function setupPickHtml(name, label, shown, optsHtml) {
+    return '<label class="set-row fc-gs-pick"><span class="set-label">' + esc(label) + '</span>' +
+      '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" + selectHtml(name, label, optsHtml) + "</label>";
   }
+  function setupHtml() {
+    var games = state.kind === "games";
+    var short = state.poolCount < MIN_WORDS;
+    var why = state.source === "table" && !state.tables.length ? "Choose a table to play with."
+      : "This needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — these have " + state.poolCount : "") +
+        ". Tick more tables under Words from" + (state.source === "table" ? "" : ", or add words to your flashcards") + ".";
+    return '<div class="fc-gs">' +
+      '<h3 class="help-head set-head">' + (games ? "Game" : "Puzzle") + "</h3>" +
+      '<div class="help-card set-card fc-gs-modes" role="radiogroup" aria-label="' + (games ? "Game" : "Puzzle") + '">' +
+      modeOpts().map(function (o) {
+        return '<label class="set-row fc-gs-mode"><input type="radio" class="fc-gs-radio" name="fcGsMode" value="' + o[0] + '"' + (o[0] === state.mode ? " checked" : "") + ">" +
+          '<span class="fc-gs-mode-tx"><span class="fc-gs-mode-name">' + esc(o[1]) + '</span><span class="help-desc">' + esc(MODE_BLURBS[o[0]]) + "</span></span>" + CHECK_ICON + "</label>";
+      }).join("") + "</div>" +
+      '<h3 class="help-head set-head">Words</h3>' +
+      '<div class="fc-gs-words"><div class="help-card set-card">' +
+      '<button type="button" class="set-row fc-gs-pick fc-gs-src" id="fcXwSource" aria-haspopup="dialog" aria-controls="fcXwSheet">' +
+      '<span class="set-label">Words from</span><span class="fc-xw-menu-val">' + esc(sourceLabel()) + ROW_CHEVRON + "</span></button>" +
+      (state.mode !== "listening" && state.mode !== "wordchain" ? setupPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "") +
+      setupPickHtml("size", "Word count", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
+      (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length
+        ? setupPickHtml("sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), optionsHtml(state.sortAvail, state.sortBy)) : "") +
+      "</div>" + tablesSheetHtml() + "</div>" +
+      (short ? '<p class="set-foot fc-gs-why">' + esc(why) + "</p>" : "") +
+      '<div class="fc-gs-go"><button type="button" class="fc-btn fc-btn-primary fc-gs-start" id="fcGsStart"' + (short ? " disabled" : "") + ">Start</button></div>" +
+      '<div class="help-card set-card fc-gs-more"><button type="button" class="set-row set-action fc-gs-stats" id="fcGsStats">' +
+      '<span class="set-label">Stats</span>' + ROW_CHEVRON + "</button></div>" +
+      "</div>";
+  }
+  function renderSetup(panel) {
+    if (!state.puzzle) generate();
+    panel.innerHTML = setupHtml();
+    bindControls(panel);
+    panel.querySelectorAll(".fc-gs-radio").forEach(function (r) {
+      r.addEventListener("change", function () {
+        state.mode = r.value;
+        if (!isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
+        saveSetup();
+        generate();
+        rerender();
+        var again = currentPanel && currentPanel.querySelector('.fc-gs-radio[value="' + state.mode + '"]');
+        if (again) again.focus();
+      });
+    });
+    document.getElementById("fcGsStart").addEventListener("click", function () {
+      state.started = true;
+      generate();
+      rerender();
+    });
+    document.getElementById("fcGsStats").addEventListener("click", openStats);
+  }
+  function backToSetup() {
+    state.started = false;
+    stopMatchTimer();
+    activeGame = null;
+    rerender();
+  }
+
   function arrowIcon(dir) {
     return dir === "down"
       ? '<svg class="fc-xw-arrow-svg" width="9" height="9" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v11M4.5 10l4.5 4.5L13.5 10"/></svg>'
@@ -2865,11 +2954,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="More">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list fc-xw-menu-list" role="menu" hidden>' +
       (bare ? "" : menuItemHtml(["newMenu", "", NEW_ICON], newLabel).replace('class="fc-xw-menu-item"', 'class="fc-xw-menu-item fc-xw-menu-new"')) +
-      '<div class="fc-xw-menu-group">' + settingsMenuHtml() + "</div>" +
       actions.map(function (a) { return menuItemHtml(a, labels[a[0]] || a[1]); }).join("") +
       "</div></div>" +
       '<p class="fc-xw-tip-pop" id="fcXwTipPop" role="note" hidden>' + howToText() + "</p>" +
-      tablesSheetHtml() +
       "</div></div>";
   }
 
@@ -2883,7 +2970,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (!sheet) return;
     sheet.hidden = !open;
     if (scrim) scrim.hidden = !open;
-    if (!open) { var more = panel.querySelector(".fc-xw-menu .section-menu-btn"); if (more) more.focus(); }
+    if (!open) { var src = panel.querySelector("#fcXwSource"); if (src) src.focus(); }
   }
   // How to play: a small glass note under the toolbar, from ⋯.
   function setTipOpen(open) {
@@ -2903,7 +2990,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (!state.tablesOpen || !e.target.isConnected) return;
       var panel = currentPanel;
       var box = panel && panel.querySelector(".fc-xw-sheet");
-      if (!box || box.contains(e.target) || (e.target.closest && e.target.closest(".fc-xw-menu"))) return;
+      if (!box || box.contains(e.target) || (e.target.closest && e.target.closest("#fcXwSource"))) return;
       setTablesOpen(panel, false);
     });
     document.addEventListener("keydown", function (e) {
@@ -2913,26 +3000,79 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (panel) setTablesOpen(panel, false);
     });
   }
+  // Games from a keyboard: the arrows move between the board's tiles and
+  // choices by where they sit on screen (Match's two columns, Kana tiles'
+  // rows, Speed sort's buckets), Enter or Space picks, 1-9 picks a choice
+  // by number, and Enter goes on when there's a Next / Play again to press.
+  // A puzzle grid and a word search have their own arrow keys; a typed
+  // field keeps its keys.
+  var boardKeysWired = false;
+  function wireBoardKeys() {
+    if (boardKeysWired) return;
+    boardKeysWired = true;
+    function seen(el) { return !el.disabled && !el.closest("[hidden]") && el.getAttribute("aria-hidden") !== "true"; }
+    document.addEventListener("keydown", function (e) {
+      var panel = currentPanel;
+      if (!panel || !state || !state.started || !isGame(state.mode) || state.mode === "wordchain" || panel.closest("[hidden]") || !panel.isConnected) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+      var focus = document.activeElement;
+      if (focus && (/^(INPUT|TEXTAREA|SELECT)$/.test(focus.tagName) || focus.isContentEditable)) return;
+      if (focus && focus.closest && focus.closest(".section-menu, .fc-xw-actions")) return;
+      var board = panel.querySelector(".fc-mt, .fc-ls");
+      if (!board) return;
+      var items = [].filter.call(board.querySelectorAll("button"), seen);
+      if (!items.length) return;
+      var go = [].filter.call(board.querySelectorAll(".fc-ls-next, .fc-btn-primary"), seen)[0];
+      // Once Next (or Next round, Play again, Resume) shows, the choices are
+      // done with: Enter presses it wherever focus is.
+      if ((e.key === "Enter" || e.key === " ") && go) { e.preventDefault(); go.click(); return; }
+      if (/^[1-9]$/.test(e.key)) {
+        var choices = [].filter.call(board.querySelectorAll(".fc-ls-choice, .fc-oo-word, .fc-ss-bucket"), seen);
+        var pick = choices[+e.key - 1];
+        if (pick) { e.preventDefault(); pick.click(); }
+        return;
+      }
+      var dir = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[e.key];
+      if (!dir) return;
+      e.preventDefault();
+      var at = items.indexOf(focus);
+      if (at === -1) { (board.querySelector('[aria-pressed="true"]') || items.filter(function (el) { return !el.classList.contains("fc-ls-play"); })[0] || items[0]).focus(); return; }
+      var r0 = focus.getBoundingClientRect();
+      var cx = r0.left + r0.width / 2, cy = r0.top + r0.height / 2, best = null, bestScore = Infinity;
+      items.forEach(function (el) {
+        if (el === focus) return;
+        var r = el.getBoundingClientRect();
+        var dx = r.left + r.width / 2 - cx, dy = r.top + r.height / 2 - cy;
+        var along = dx * dir[0] + dy * dir[1], across = Math.abs(dir[0] ? dy : dx);
+        if (along <= 1) return;
+        var score = along + across * 2;
+        if (score < bestScore) { bestScore = score; best = el; }
+      });
+      // No layout to measure (nothing laid out yet): reading order.
+      if (!r0.width && !r0.height) best = items[at + (dir[0] + dir[1] > 0 ? 1 : -1)] || null;
+      if (best) best.focus();
+    });
+  }
   function bindControls(panel) {
     wireOptionsDismiss();
+    wireBoardKeys();
     var done = panel.querySelector("#fcXwTablesDone");
     if (done) done.addEventListener("click", function () { setTablesOpen(panel, false); });
     panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
       sel.addEventListener("change", function () {
         var key = sel.dataset.pick;
         state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
-        if (key === "mode" && !isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
+        saveSetup();
         generate();
         rerender();
+        var again = currentPanel && currentPanel.querySelector('.fc-xw-pick-select[data-pick="' + key + '"]');
+        if (again) again.focus();
       });
     });
     var src = panel.querySelector("#fcXwSource");
-    if (src) src.addEventListener("click", function () {
-      var menu = src.closest(".fc-xw-menu");
-      menu.querySelector(".section-menu-list").hidden = true;
-      menu.querySelector(".section-menu-btn").setAttribute("aria-expanded", "false");
-      setTablesOpen(panel, true);
-    });
+    if (src) src.addEventListener("click", function () { setTablesOpen(panel, true); });
+    var back = panel.querySelector("#fcXwBack");
+    if (back) back.addEventListener("click", backToSetup);
     // Ticking a table switches to tables and adds it; Flashcards (or
     // Tricky words) and tables don't mix -- ticking Flashcards clears the
     // tables, unticking the last table goes back to Flashcards. The game
@@ -2950,6 +3090,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           else if (!cb.checked && i !== -1) state.tables.splice(i, 1);
           if (!state.tables.length) state.source = "flashcards";
         }
+        saveSetup();
         generate();
         rerender();
       });
@@ -2974,11 +3115,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var retry = document.getElementById("fcXwNew");
       if (retry) retry.addEventListener("click", function () { generate(); rerender(); });
     }
-    var more = state.source === "table" ? "tick another table under ⋯ › Words from" : "add more words to flashcards, or pick a table under ⋯ › Words from";
+    if (!state.started) { renderSetup(panel); return; }
+    var more = state.source === "table" ? "go back and tick another table under Words from" : "go back and pick tables under Words from, or add words to flashcards";
     if (!state.puzzle) generate();
     if (state.poolCount < MIN_WORDS) {
       notEnough(state.source === "table" && !state.tables.length
-        ? "Choose a table to build a puzzle from (⋯ › Words from)."
+        ? "Choose a table to build a puzzle from (Words from, on the setup screen)."
         : "A puzzle needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — this has " + state.poolCount : "") + ". To get more, " + more + ".", false);
       return;
     }
@@ -2987,17 +3129,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // from one of them) -- say what would make a set.
     if (state.mode === "oddone" && !p.questions.length) {
       notEnough("Odd one out needs words from at least two tables, with three or more from one of them. " +
-        "Tick them under ⋯ › Words from.", false);
+        "Go back and tick them under Words from.", false);
       return;
     }
     if (state.mode === "speedsort" && !p.items.length) {
       notEnough("Speed sort needs at least 3 words of each kind: from two tables, い- and な-adjectives, or u- and ru-verbs. " +
-        "Tick more tables under ⋯ › Words from.", false);
+        "Go back and tick more tables under Words from.", false);
       return;
     }
     if (state.mode === "wordchain" && !p.start) {
       notEnough("None of these words can start a chain — each ends on ん or on a kana no other word starts with. " +
-        "Tick more tables under ⋯ › Words from.", false);
+        "Go back and tick more tables under Words from.", false);
       return;
     }
     if (p.placements.length < MIN_WORDS && state.mode !== "oddone" && state.mode !== "speedsort" && state.mode !== "wordchain") {
@@ -3193,10 +3335,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function playWords(kind, mode, ids) {
     var st = states[kind];
     st.mode = mode; st.source = "tricky"; st.trickyIds = ids.slice(); st.tables = []; st.tablesOpen = false;
-    st.puzzle = null;
+    st.puzzle = null; st.started = true;
     state = st;
     generate();
   }
+
+  states.puzzles = freshState("puzzles");
+  states.games = freshState("games");
+  state = states.puzzles;
 
   return {
     playWords: playWords,

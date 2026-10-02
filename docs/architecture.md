@@ -178,7 +178,9 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
 `raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
 collapsible sections a reader has open, keyed per item, browser-local only
-(not part of the account sync any of the others above get), `raume-rings-shown` — the date
+(not part of the account sync any of the others above get), `raume-games-setup` — the
+Puzzles and Games setup screens' last choices (`{ puzzles, games }`, each mode /
+source / tables / script / size / sortBy; browser-local), `raume-rings-shown` — the date
 the Dashboard's rings last drew up from nothing (once a day; browser-local)), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
