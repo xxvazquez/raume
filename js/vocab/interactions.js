@@ -1172,8 +1172,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
     // Table-index dropdown -- rendered once. The trigger opens/closes the
     // menu; picking a table jumps to it and closes; outside-click / Esc
-    // close it. The trigger label and the menu's `.current` mark track
-    // whichever table is in view as you scroll.
+    // close it. The menu's `.current` mark tracks whichever table is in view
+    // as you scroll; the trigger always reads "Tables" -- a bar button that
+    // renamed itself as you scrolled changed width under your thumb, and an
+    // open table's own title already pins under the bar.
     const tableIndex = document.getElementById('tableIndex');
     // Every table link in the visible panel -- the directory shows them all,
     // so keyboard nav walks the whole list.
@@ -1236,7 +1238,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     });
     vocab.syncTableIndexActive = function (forceId) {
       const panel = document.querySelector('#tableIndex .tindex-panel:not(.page-hidden)');
-      const label = document.querySelector('.tindex-trigger-label');
       if (!panel) return;
       const visible = [...document.querySelectorAll('#vocabulary .table-section:not(.page-hidden):not(.search-hidden)')];
       let current = visible[0];
@@ -1246,10 +1247,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       panel.querySelectorAll('a[data-target]').forEach(function (a) {
         a.classList.toggle('current', !!current && a.dataset.target === current.dataset.table);
       });
-      // Names the table you're reading; "Tables" while you're on the list of
-      // closed rows itself rather than inside one.
-      const inside = current && !current.classList.contains('collapsed');
-      if (label) label.textContent = inside ? (current.querySelector('.section-title-text')?.textContent || 'Tables') : 'Tables';
       if (vocab.updateAdjLegend) vocab.updateAdjLegend(current);
     };
     window.addEventListener('scroll', function () {

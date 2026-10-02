@@ -395,9 +395,11 @@ and Help.
     lifts the toolbar above the tab bar while open (`.options-open`). The sticky
     bar is one row — the search capsule, then one shared glass capsule
     (`.bar-capsule`, iOS 26's grouped bar buttons) holding **Tables** and
-    **Options** with a hairline between them — the **Jump to a table** button (`.tindex-trigger`: a
-    list glyph, plus the current table's name on a wide screen; its menu lifts the
-    bar the same way, `.tindex-open`), then Options. Both buttons are permanent —
+    **Options**, no rule between them — the **Jump to a table** button (`.tindex-trigger`: a
+    list glyph and "Tables", never renamed as you scroll — an open table's title
+    already pins under the bar; its menu lifts the bar the same way,
+    `.tindex-open`, and wraps a long table name rather than truncating it), then
+    Options. Both buttons are permanent —
     nothing in the bar appears or disappears as tables open and close, and
     opening a table scroll-compensates so the tapped row stays put. A dot
     (`.options-dot`) on Options flags a non-default state. Rows that don't apply hide (Show polite

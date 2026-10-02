@@ -596,7 +596,7 @@ body {
   right: 0;
   z-index: 60;
   width: max-content;
-  max-width: min(560px, calc(100vw - 40px));
+  max-width: min(600px, calc(100vw - 40px));
   max-height: 70vh;
   max-height: 70dvh;
   overflow: auto;
@@ -613,7 +613,7 @@ body {
    long section stays compact; a short one (Grammar) keeps a single column.
    The menu is `width: max-content`, so it shrink-wraps whichever panel is
    showing. */
-.tindex-panel--wide { width: 452px; max-width: 100%; column-count: 2; column-gap: 24px; }
+.tindex-panel--wide { width: 540px; max-width: 100%; column-count: 2; column-gap: 24px; }
 .tindex-cat-group { break-inside: avoid; }
 .tindex-cat-group + .tindex-cat-group { margin-top: 12px; }
 /* Category label -- a quiet, non-interactive heading over its tables, with the
@@ -654,7 +654,8 @@ body {
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
-.tindex-tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A name wraps rather than truncates -- "Signs, Doors & Pla…" told you nothing. */
+.tindex-tname { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
 .tindex-menu a:hover { background: var(--section-soft); color: var(--section-strong); }
 .tindex-menu a:hover .tindex-count { color: var(--section-strong); }
 /* The table you're viewing now -- a section-colour left edge + tinted ground,
@@ -1086,17 +1087,15 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 /* Tables and Options share one capsule beside the search field -- iOS 26
    groups related bar buttons in a single pill -- styled exactly like the
-   search field (solid white, hairline edge, soft lift), a hairline between
-   the two words. */
+   search field (solid white, hairline edge, soft lift), no rule between
+   the two words -- a 1px line on a capsule-rounded button was clipped into
+   a bracket, and iOS 26's grouped bar buttons have none. */
 .bar-capsule {
   position: relative; flex: 0 0 auto; display: flex; align-items: center;
   height: 36px; border-radius: 999px;
   background: var(--paper); box-shadow: var(--control-lift);
 }
 .bar-capsule .tindex-trigger, .bar-capsule .options-btn { height: 36px; border-radius: 999px; }
-.bar-capsule .table-index:not(.search-hidden) + .options-btn {
-  background: linear-gradient(var(--line-strong), var(--line-strong)) left center / 1px 18px no-repeat;
-}
 /* Search: solid white, a hairline edge and a very soft lift -- not glass,
    which read as grey over the grey ground (Laura, 2026-09-24) -- matching
    the Tables | Options capsule beside it. */

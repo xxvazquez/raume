@@ -860,8 +860,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         '" data-section="' + sec + '" role="menu">' + body + '</div>';
     }).join('');
     // A permanent button in the sticky search bar (not a row of its own that
-    // came and went as tables opened, shoving the page down): a list glyph,
-    // plus -- where there's room -- the name of the table you're in.
+    // came and went as tables opened, shoving the page down): a list glyph
+    // and "Tables".
     return '<button type="button" class="tindex-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
       TINDEX_ICON + '<span class="tindex-trigger-label">Tables</span><span class="tindex-trigger-short" aria-hidden="true">Tables</span>' + CHEVRON_ICON + '</button>' +
       '<div class="tindex-menu" id="tindexMenu" hidden>' +
