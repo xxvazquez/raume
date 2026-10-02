@@ -22,13 +22,14 @@ cooking or studying, and for printing clean A4 study sheets.
 
 - [Quick start](#quick-start)
 - [The reference](#the-reference)
-  - [Sections](#sections) · [Finding things](#finding-things) ·
+  - [Sections](#sections) · [Kanji](#kanji) · [Finding things](#finding-things) ·
     [Reading the tables](#reading-the-tables) · [Options](#options) ·
     [Grammar notes](#grammar-notes) · [Customising](#customising) ·
-    [Print, theme and navigation](#print-theme-and-navigation)
+    [Around the app](#around-the-app)
 - [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
-    [Screens](#screens) · [Kana trainer](#kana-trainer) · [Puzzles](#puzzles) · [Games](#games) · [Stats](#stats)
+    [Screens](#screens) · [Dashboard](#dashboard) · [Kana trainer](#kana-trainer) ·
+    [Puzzles](#puzzles) · [Games](#games) · [Stats](#stats)
 - [Accounts and storage](#accounts-and-storage)
 - [Development](#development)
 - [License](#license)
@@ -37,9 +38,11 @@ cooking or studying, and for printing clean A4 study sheets.
 
 ## Quick start
 
+Open `index.html` in a browser — it runs straight from `file://`, nothing to
+install. A local server is only needed to test the service worker (offline):
+
 ```bash
-open index.html            # runs straight from file:// — nothing to install
-python3 -m http.server     # only needed to test the service worker / offline
+python3 -m http.server
 ```
 
 ---
@@ -56,15 +59,14 @@ python3 -m http.server     # only needed to test the service worker / offline
 | **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
-On a phone the nav is a tab bar at the bottom; on a wider screen it's the top
-row. Grammatical **particles are blue and bold** everywhere.
+Grammatical **particles are blue and bold** everywhere.
 
 ### Kanji
 
 | | |
 | --- | --- |
-| **Grid** | Each theme opens as a grid of tiles: the kanji large, its on readings (katakana) on one line under it and its kun readings (hiragana) on the next, ・ between readings; hidden with furigana. The meaning and romaji are in the sheet a tap opens; *Cover answers* covers the readings, and a tap shows them. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
-| **Kanji sheet** | Tap a tile for its readings (on in katakana, kun in hiragana) and romaji, its stroke count and radical, an example word with furigana, **Words with** it — every word from the other tables written with that kanji, shortest first, folded away until you tap it — and **Add to flashcards**. |
+| **Grid** | Each theme is a grid of tiles: the kanji large, its on readings (katakana) under it, its kun readings (hiragana) under those. The readings hide with furigana, and *Cover answers* covers them until tapped. Themes run in teaching order (numbers first), kanji in their natural order (一 二 三…). |
+| **Kanji sheet** | Tap a tile for its readings with romaji, stroke count and radical, an example word, **Words with** it (every word in the other tables that uses it, shortest first, folded until tapped) and **Add to flashcards**. |
 | **Known** | **Mark as known** under the sheet's title turns that kanji's tile sage green with a check, so what's left to learn stays grey; tap **Known** to undo. The Dashboard's Kanji card counts them. Kept on the device and, signed in, synced to your account. |
 | **Write it** | Under the stroke-order drawing: a writing pad for that kanji. Draw each stroke in order with a finger or the mouse — a right stroke snaps to its clean line in its stroke-order colour, a wrong one (misplaced, backwards or out of order) shakes the pad and counts a miss, and after three misses on one stroke it's shown as a hint. **Outline** (on by default, remembered) shows the faint kanji to trace; off, it's the real test. Undo, Clear, then "6 / 6 strokes · 1 miss" (or a clean run) with **Again** and **Next kanji** (the next one in the theme). Practice only. |
 | **Stroke order** | The sheet draws the kanji stroke by stroke over a faint outline, each stroke numbered as it starts; **Replay** draws it again (finished drawing, no animation, with reduced motion on). Drawings from [KanjiVG](http://kanjivg.tagaini.net), CC BY-SA 3.0. |
@@ -148,31 +150,31 @@ button's menu.
 Custom words work everywhere — furigana, search, print, audio, all four
 flashcard directions. Changes save immediately and sync when signed in.
 
-### Print, theme and navigation
+### Around the app
 
 | | |
 | --- | --- |
-| **Print** | A4 at three scopes: one table (printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
-| **Theme** | Cycles **System → Light → Dark**, applied before first paint (on a phone: **Appearance** in the account button's menu). |
-| **Help** | The masthead **?**: four topics (Finding words, Reading, Options, Making it yours), each a short list of one-line rows, then a **Support raume** link to the Ko-fi page (`ko-fi.com/raume`). Flashcards has its own Help screen in the same style. |
-| **Version** | A quiet line at the foot of every page: the deployed commit's short SHA and date (**Local build** when run from a checkout). Hidden during a review and in print. |
-| **Sign-in dot** | On the person icon: **green** = everything synced; **amber** = offline or a change hasn't reached your account yet. Hover it for details. |
+| **Print** | A4 at three scopes: one table (its printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
+| **Theme** | **System → Light → Dark**, applied before the first paint. |
+| **Help** | The **?** at the top: four topics (Finding words, Reading, Options, Making it yours) as short one-line rows, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)). Practice has its own Help screen. |
+| **Version** | A quiet line at the foot of every page: the deployed commit and its date (**Local build** in a checkout). |
+| **Sync dot** | On the person icon: **green** = everything synced, **amber** = offline or something hasn't reached your account yet. |
 
-The **account button** (the person icon) opens a menu —
+The **account button** (the person icon) opens one menu:
 
-- who you're signed in as and whether you're synced
-- **Account** (**Sign in** for a guest — straight to the sign-in screen)
-- **Customize tables** · **Help** (phone only — wider windows have their icons)
-- **Support raume** (Ko-fi, new tab)
-- **Appearance** (System / Light / Dark — phone only, likewise)
-- **Sign out** (signed in only — its one place, on every screen size)
+| Row | Shows |
+| --- | --- |
+| *(header)* | Who you're signed in as, and whether you're synced |
+| **Account** | Practice — or **Sign in** for a guest, straight to the sign-in screen |
+| **Customize tables** · **Help** | Phone only; wider windows have their own icons |
+| **Support raume** | Ko-fi, in a new tab |
+| **Appearance** | System / Light / Dark — phone only, likewise |
+| **Sign out** | Signed in only — its one place, at every screen size |
 
-**On a phone** there's no wordmark row: each screen starts with its large
-title and the account button, round, beside it.
-
-On a tablet the masthead icons carry captions (Account, Help, Customize, the
-current theme). The search bar's buttons read **Tables** and **Options**, and
-Library's buttons keep a one-word label — nothing relies on hover.
+**Screen sizes.** On a phone the sections are a tab bar at the bottom, each
+screen starts with a large title, and the account button sits round beside it.
+On a tablet the top icons carry captions. On desktop the sections sit in a
+floating bar at the top. Nothing relies on hover.
 
 <sub>[↑ Contents](#contents)</sub>
 
@@ -261,19 +263,43 @@ sit at the top right, beside the title, and open as their own screen with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Dashboard** | **Today's rings**, Apple Fitness-style — **Review** (the cards due today you've done, of all due today), **Learn** (new cards met, of your daily number) and **Play** (one finished puzzle or game; more laps the ring) — beside how many cards Study now holds; the **streak** with this week as seven dots (studied / missed / today half until Review closes) and your best to beat; your **level** (one per 25 words ever mastered — forgetting a word never takes one back) with **Kana** started, **Kanji** known and **Words** mastered beside total / reviews / estimated retention; **Awards** (medals for streaks, reviews, words mastered, all the hiragana / katakana, kanji known, puzzles and games, Match under 2s a pair, a perfect Listening game — the newest six earned and nearest to go, **Show all** for every one; tap one for what it's for and when you earned it; synced to your account when signed in); one **Highlights** line only when there's news (reviews up on last week, a new best Match pace); then, under **Details**, card progress, this week's reviews, a 7-day due forecast, **Kana** (how many of your chosen kana cards you've started, how many to study now, and a button straight to it), **Puzzles** (every crossword, arroword and word search you solve — one revealed in full doesn't count: puzzles solved and your day streak, the last three) and **Games** (every finished game: games played and your day streak, games per day this week, the last three — each game named once, its result on the right, "9 / 10" or a time) — each with **See stats**, and synced to your account when signed in, **Kanji** (how many of the N5 kanji you've marked Known), missed today (only when you missed something), **Leeches** (words forgotten 8+ times after being learned — *Pause* or *Keep* them), and **Words to review** (its ⋯ menu ticks Japanese / Furigana / English on or off) |
+| **Dashboard** | Today's progress, streak, level, awards and the details behind them ([below](#dashboard)) |
 | **Kana** | A hiragana / katakana drill, separate from the word cards ([below](#kana-trainer)) |
 | **Puzzles** | Crossword / arroword / word search from your words ([below](#puzzles)) |
 | **Games** | Match / Listening / Kana tiles / Odd one out / Speed sort / Word chain from your words ([below](#games)) |
 | **Awards** | Every award, grouped Streaks / Reviews / Words / Kana / Kanji / Puzzles / Games — opened from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — opened from ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
-| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), set separately for words and kana. Changes save as you make them — no Save button. Guests also get **Back up & restore** (a JSON file — cards, kana, table customisations, your own words, Known kanji and puzzle games) |
-| **Help** | Pausing, the Library icons, keyboard shortcuts |
+| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
+| **Help** | Adding & pausing, Library icons, reviewing, each tab, syncing, backup |
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused
 table just stops appearing in reviews until you resume it. FSRS state and
 history are always kept.
+
+### Dashboard
+
+From the top:
+
+| Card | Shows |
+| --- | --- |
+| **Today's rings** | Apple Fitness-style: **Review** (cards due today that you've done), **Learn** (new cards met, of your daily number) and **Play** (one finished puzzle or game; more laps the ring), beside how many cards **Study now** holds |
+| **Streak** | Days in a row, this week as seven dots (studied / missed / today half-filled until Review closes) and your best to beat |
+| **Level** | One per 25 words ever mastered (forgetting a word never takes one back), with Kana started, Kanji known, Words mastered, total cards, reviews and estimated retention |
+| **Awards** | Medals for streaks, reviews, words mastered, all the hiragana / katakana, kanji known, puzzles and games, a Match under 2s a pair, a perfect Listening game. The newest six earned and the nearest to go; **Show all** for every one, tap one for what it's for and when you earned it |
+| **Highlights** | One line, only when there's news — reviews up on last week, a new best Match pace |
+
+Then, under **Details**:
+
+- **Card progress**, **Reviews this week** and **Due next 7 days**
+- **Kana** — how many of your chosen kana you've started, how many are ready, and a button straight to it
+- **Puzzles** and **Games** — solved / played, your day streak, the last three (each with its result), and **See stats**. A puzzle revealed in full doesn't count
+- **Kanji** — how many of the N5 kanji you've marked Known
+- **Missed today** — only when you missed something
+- **Leeches** — words forgotten 8+ times after being learned; *Pause* or *Keep* them
+- **Words to review** — its ⋯ menu ticks Japanese / Furigana / English on or off
+
+Awards, puzzles and games follow your account when signed in.
 
 ### Kana trainer
 
@@ -301,8 +327,7 @@ holds the rest: **New puzzle** (its own button on a wide window), your
 settings — *Words from* (a checklist: Flashcards, or as many tables as you
 like), *Word count* and *Script* (each opening the phone's own picker) — then *How to play*, *Reveal puzzle*,
 *Clear*, *Save as PDF* and [*Stats*](#stats). Changing a setting makes a new
-puzzle. On a wide
-window the clue you're on and the Across / Down listswindow the clue you're on and the Across / Down lists sit beside the grid —
+puzzle. On a wide window the clue you're on and the Across / Down lists sit beside the grid —
 or below it, when the grid is too wide to share the row. Beside the lists
 there's a **Notes** pad for readings, guesses or kana while you solve; it
 stays with the puzzle while you move between tabs and starts blank with the
@@ -570,10 +595,10 @@ never mix.
 - **Local-first** — reviews, customisations and custom words apply
   immediately. Anything that couldn't sync is queued, survives a reload and
   retries on its own.
-- **Sync status** — all synced, the account button's dot is green and nothing
-  else shows; otherwise a chip under your name shows *Syncing N…* or an
-  amber *Offline* / *couldn't sync* with **Sync now**. **What's pending?**
-  lists exactly what hasn't reached your account yet.
+- **Sync status** — when everything is synced, the account button's dot is
+  green and nothing else shows. Otherwise a chip at the top of Practice shows
+  *Syncing N…*, or an amber *Offline* / *couldn't sync* with **Sync now**;
+  **What's pending?** lists exactly what hasn't reached your account yet.
 - **Nothing is hard-deleted**, except custom words and tables you delete
   yourself.
 - The anon key in `js/config.js` is safe to commit, because Row Level
@@ -587,14 +612,22 @@ Full storage model and schema: [`docs/architecture.md`](docs/architecture.md).
 
 ## Development
 
+Plain HTML, CSS and classic `<script>` tags — no framework, no bundler, no
+build step. Everything hangs off one global, `window.RaumeStudy`.
+
 ```bash
-npm run validate            # every JS file parses + vocab data is well-formed (no deps)
-npm install && npm test     # jsdom smoke test of the page + service-worker test
-npm run generate:vocab-ids  # assign ids to new vocab rows
+npm run validate                    # every JS file parses + the vocab data is well-formed (no deps)
+npm install && npm test             # jsdom smoke test of the whole page + service-worker test
+node scripts/smoke-test.js games    # one area only: reference | flashcards | games
+npm run generate:vocab-ids          # give new vocab rows their permanent ids
 ```
 
-Run `validate` before data changes and `test` before touching `js/`. The smoke
-test can't reach Supabase, so check the signed-in path by hand.
+The smoke test can't reach Supabase, so check the signed-in path by hand.
+
+**Deploying.** Pushing `main` publishes to GitHub Pages
+(`.github/workflows/pages.yml`). Each asset's URL is stamped with a hash of its
+own contents, so after a deploy a returning visitor downloads only the files
+that changed; the service worker keeps the rest offline.
 
 | Doc | Covers |
 | --- | ------ |
