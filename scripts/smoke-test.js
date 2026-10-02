@@ -2503,8 +2503,9 @@ async function main() {
     document.getElementById("fcAnswerInput") === answerInput
     && document.activeElement === answerInput
     && answerInput.classList.contains("fc-answer-locked"));
-  check("the vocabulary card has no visible Check button -- Enter (or a mobile keyboard's Go) checks instead", () => {
-    return !document.querySelector(".fc-answer-form .fc-check-btn");
+  check("the answer line ends in a labelled Check arrow that submits the field's form", () => {
+    const b = document.querySelector("#fcAnswerForm .fc-check-btn");
+    return !!b && b.type === "submit" && b.getAttribute("aria-label") === "Check answer";
   });
   check("the result drops into an aria-live region, so it's announced without moving focus off the field", () => {
     const dyn = document.querySelector(".fc-review-dynamic");

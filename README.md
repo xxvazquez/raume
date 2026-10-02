@@ -204,7 +204,7 @@ flashcards**, or single words from **Library** or a search result.
 ### Reviewing
 
 ```
-card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1–4  →  next
+card  →  type answer, Enter or ↑  →  verdict + answer (audio plays)  →  rate 1–4  →  next
 ```
 
 - Every rating saves at once, so **End session** never loses progress.
@@ -215,6 +215,8 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
   **Keep going**
   when more cards came ready, **Play a game** while the Play ring is open,
   and **Done**.
+- The **↑** arrow at the end of the answer line checks too (like Messages'
+  send); tapping it keeps the field focused.
 - The answer field stays focused from card to card, so a phone keyboard stays
   open.
 - After a wrong answer, **Again / Hard** read first and Good / Easy are

@@ -1312,13 +1312,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt"></div>' +
       '<div class="fc-prompt-reading" hidden></div>' +
-      // No visible Check button -- Enter (or a mobile keyboard's own Go/
-      // submit action) checks, same as the keyboard shortcut comment below
-      // documents. One quiet input is the whole "answering" screen. The
-      // placeholder alone (English / Romaji) says what to type -- no
+      // One quiet answer line is the whole "answering" screen: Enter (or a
+      // phone keyboard's return) checks, and so does the arrow at its end.
+      // The placeholder alone (English / Romaji) says what to type -- no
       // separate direction label needed above it.
       '<form class="fc-answer-form" id="fcAnswerForm">' +
-      '<input id="fcAnswerInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      '<input id="fcAnswerInput" type="text" enterkeyhint="go" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      window.RaumeStudy.shared.CHECK_BUTTON_HTML +
       '</form>' +
       // aria-live so the result is announced when it drops in, without moving
       // focus off the answer field (that focus move was the mobile-keyboard bug).
@@ -1329,6 +1329,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (endBtn) endBtn.addEventListener("click", endSession);
     var form = document.getElementById("fcAnswerForm");
     if (form) form.addEventListener("submit", function (event) { event.preventDefault(); submitCheck(); });
+    window.RaumeStudy.shared.keepFieldFocus(form);
 
     syncReviewCard();
     var input = document.getElementById("fcAnswerInput");

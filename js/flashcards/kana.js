@@ -333,12 +333,12 @@ window.RaumeStudy.flashcards.kana = (function () {
       '<span class="fc-review-progress"></span></div>' +
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt"></div>' +
-      // No visible Check button -- Enter (or a mobile keyboard's own
-      // Go/submit action) checks, same as the word card
-      // (js/flashcards/dashboard.js). The placeholder alone (Romaji) says
-      // what to type -- no separate direction label above it.
+      // Enter (or a phone keyboard's return) checks, and so does the arrow
+      // at the line's end -- same as the word card (js/flashcards/
+      // dashboard.js). The placeholder alone (Romaji) says what to type.
       '<form class="fc-answer-form" id="fcKanaForm">' +
-      '<input id="fcKanaInput" type="text" placeholder="Romaji" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      '<input id="fcKanaInput" type="text" placeholder="Romaji" enterkeyhint="go" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+      window.RaumeStudy.shared.CHECK_BUTTON_HTML +
       '</form>' +
       '<div class="fc-review-dynamic" aria-live="polite"></div>' +
       "</div>";
@@ -347,6 +347,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (end) end.addEventListener("click", endSession);
     var form = document.getElementById("fcKanaForm");
     if (form) form.addEventListener("submit", function (e) { e.preventDefault(); submitCheck(); });
+    window.RaumeStudy.shared.keepFieldFocus(form);
 
     syncReviewCard();
     var input = document.getElementById("fcKanaInput");

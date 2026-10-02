@@ -242,5 +242,16 @@ window.RaumeStudy.shared = (function () {
     document.getElementById("iosConfirmCancel").focus();
   }
 
-  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet };
+  // The study cards' Check button: an arrow at the trailing end of the
+  // answer line, like Messages' send. Return still checks; this is the
+  // visible way to. It never takes focus from the field (a phone's keyboard
+  // stays up) -- see keepFieldFocus.
+  var CHECK_BUTTON_HTML = '<button type="submit" class="fc-check-btn" aria-label="Check answer">' +
+    '<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15V3.5M4 8.5l5-5 5 5"/></svg></button>';
+  function keepFieldFocus(form) {
+    var btn = form && form.querySelector(".fc-check-btn");
+    if (btn) btn.addEventListener("mousedown", function (e) { e.preventDefault(); });
+  }
+
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus };
 })();

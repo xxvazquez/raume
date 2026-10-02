@@ -4271,6 +4271,20 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
   text-align: center;
 }
 .fc-answer-form input:focus-visible { outline: none; border-color: var(--section); }
+/* The Check arrow (shared.js CHECK_BUTTON_HTML), Messages' send: a 26px
+   filled circle in the section tone at the line's trailing end, sitting on
+   the underline's text band. The field pads both sides by its width, so
+   the typed text stays centred on the line. 44pt to the touch. */
+.fc-answer-form { position: relative; }
+.fc-answer-form input { padding-left: 34px; padding-right: 34px; }
+.fc-check-btn {
+  position: absolute; right: 0; top: 0; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--section-strong); color: var(--paper); cursor: pointer;
+}
+.fc-check-btn::after { content: ""; position: absolute; inset: -9px; }
+.fc-check-btn:active { opacity: .7; }
+.fc-check-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 /* Locked answer field -- checked, waiting for a rating. Kept in the DOM and
    focused (so a phone's on-screen keyboard doesn't drop between cards) but
    quietened: the rating row below is the live control now. */

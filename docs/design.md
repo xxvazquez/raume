@@ -35,7 +35,9 @@ sections below cover each part of it.
   700 + `--particle` blue): a grammar signal that needs to jump out of a
   sentence at a glance, and colour alone wasn't enough against Japanese text.
 - On the review card the prompt is the anchor — 26px, the largest text on the
-  card, with no direction label above it at all: the answer field's own
+  card, with no direction label above it at all. The answer line ends in the
+  Check arrow — a 26px filled circle in the section tone, Messages' send —
+  and pads both sides by its width so the typed text stays centred. The answer field's own
   placeholder (English…/Romaji…) already says what to type, so a second label
   saying the same thing was redundant. A kanji prompt always carries
   furigana, and so does the Japanese a Romaji / English card reveals under
