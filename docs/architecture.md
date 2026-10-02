@@ -411,6 +411,7 @@ Installable and offline-capable once visited.
 ```bash
 npm run validate            # check every JS file parses + the vocab data is well-formed (no deps)
 npm install && npm test     # render the page in jsdom and exercise it; runs the SW test too
+node scripts/smoke-test.js games   # just one area: reference | flashcards | games
 npm run generate:vocab-ids  # assign ids to any new vocab rows
 npm run generate:icons      # rebuild the favicon + PWA icons from logo.png (Pillow + NumPy)
 npm run vendor:libs         # re-copy the vendored libs after a version bump
@@ -471,7 +472,14 @@ fails, since it would silently read as ichidan in the UI.
   touching `js/vocab/` or `js/flashcards/`.
 - The smoke test (`scripts/smoke-test.js`) is DOM-coupled — expect to update its
   assertions when the markup changes on purpose, and add coverage for new
-  behaviour. It **cannot** reach Supabase, so the signed-in path needs a manual
+  behaviour. It runs in three areas, each on a fresh page: **reference** (the
+  tables, search, Options, Customize, the Help page), **flashcards** (guest
+  mode, Library, reviews, Dashboard, Kana, Settings, Flashcards Help) and
+  **games** (Puzzles, Games, their stats). With no area named it runs all three
+  as parallel processes; `--serial` runs them in one page, in order. A new
+  check goes in the area it exercises; a helper more than one area needs goes
+  at the top of `main()`. An area that depends on earlier state sets it up
+  itself when run alone (games enters guest mode on Practice). It **cannot** reach Supabase, so the signed-in path needs a manual
   check.
 - Testing the service worker needs a real server (`python3 -m http.server`) —
   browsers won't register one on `file://`. Everything else works from `file://`.

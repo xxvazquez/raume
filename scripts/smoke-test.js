@@ -10,11 +10,49 @@
 // -- none of that needs a network. Everything that talks to Supabase (auth,
 // add/remove/restore/delete-forever, review sync, offline-outbox replay) has
 // no live project to test against here and needs manual verification instead.
+//
+// Three areas, each a fresh page: reference (the tables, search, Options,
+// Customize, Help), flashcards (guest mode, Library, reviews, Dashboard,
+// Kana, Settings, Help) and games (Puzzles and Games, their stats).
+//   node scripts/smoke-test.js              all three, side by side
+//   node scripts/smoke-test.js games        just one (or several) areas
+//   node scripts/smoke-test.js --serial     all three in one page, in order
 const path = require("path");
+const { spawn } = require("child_process");
 const { JSDOM } = require("jsdom");
+
+const AREAS = ["reference", "flashcards", "games"];
+const args = process.argv.slice(2);
+const picked = args.filter(a => AREAS.includes(a));
+const unknown = args.filter(a => a !== "--serial" && !AREAS.includes(a));
+if (unknown.length) { console.error("Unknown area: " + unknown.join(", ") + " (areas: " + AREAS.join(", ") + ")"); process.exit(2); }
+function want(area) { return !picked.length || picked.includes(area); }
+
+// No area named: run each in its own process at once, print each one's
+// output whole (in order), and fail if any failed.
+if (!picked.length && !args.includes("--serial")) {
+  Promise.all(AREAS.map(area => new Promise(resolve => {
+    const child = spawn(process.execPath, [__filename, area]);
+    let out = "";
+    child.stdout.on("data", d => { out += d; });
+    child.stderr.on("data", d => { out += d; });
+    child.on("close", code => resolve({ area, code, out }));
+  }))).then(results => {
+    results.forEach(r => process.stdout.write("\n=== " + r.area + " ===\n" + r.out));
+    const failed = results.filter(r => r.code !== 0).map(r => r.area);
+    console.log(failed.length ? "\nFailed: " + failed.join(", ") : "\nAll areas passed.");
+    process.exit(failed.length ? 1 : 0);
+  });
+  return;
+}
 
 let failures = 0;
 function check(label, cond) {
+  // A check given a function runs it -- several are written that way, and a
+  // function is always truthy, so it used to pass without being called.
+  if (typeof cond === "function") {
+    try { cond = cond(); } catch (e) { console.error("  FAIL " + label + " (threw: " + e.message + ")"); failures++; return; }
+  }
   if (cond) { console.log("  ok  " + label); }
   else { console.error("  FAIL " + label); failures++; }
 }
@@ -60,6 +98,28 @@ async function main() {
   });
   const document = window.document;
 
+  // Helpers every area uses -- defined once here so an area can run alone.
+  const allCssRules = (() => {
+    const flat = [];
+    const walk = list => { for (const r of list) { flat.push(r); if (r.cssRules) walk(r.cssRules); } };
+    for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
+    return flat;
+  })();
+  function readLocalStorage(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return undefined; } // undefined = inaccessible here, not "empty"
+  }
+  const storageUsable = readLocalStorage("raume-flashcards-mode") !== undefined;
+  const fcOpenPushed = t => {
+    const back = document.getElementById("fcBack");
+    if (back) back.click();
+    document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="' + t + '"]').click();
+  };
+  const kd = window.RaumeStudy.flashcards.kanaData;
+  const kh = window.RaumeStudy.flashcards.kana.__testHooks;
+  const gojuon = kd.itemsFor(["hira-gojuon"]);
+  const gakkou = kd.itemsFor(["hira-sokuon"]).find(it => it.romaji === "gakkou");
+
+  if (want("reference")) {
   console.log("Global pull-to-refresh (touch)");
   (() => {
     function touch(type, y, opts) {
@@ -361,12 +421,6 @@ async function main() {
   // style="" attribute gets silently dropped by the browser (not an error) --
   // easy to introduce by accident and easy to miss without a check like this.
   check("no element relies on an inline style=\"\" attribute (blocked by CSP style-src)", document.querySelectorAll("[style]").length === 0);
-  const allCssRules = (() => {
-    const flat = [];
-    const walk = list => { for (const r of list) { flat.push(r); if (r.cssRules) walk(r.cssRules); } };
-    for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch (e) { /* cross-origin */ } }
-    return flat;
-  })();
   check("い-adj and な-adj are capsule badges in two different, distinctly-saturated tokens (no edge bar, not tinted text)", (() => {
     const iRule = allCssRules.find(r => r.selectorText === ".adj-badge-i");
     const naRule = allCssRules.find(r => r.selectorText === ".adj-badge-na");
@@ -1766,6 +1820,8 @@ async function main() {
   check("clicking the help button again returns to the reference", document.getElementById("vocabPage").hidden === false && document.getElementById("helpPage").hidden === true);
   window.location.hash = "";
 
+  }
+  if (want("flashcards")) {
   console.log("Flashcards: page navigation");
   check("no console errors from vendor/flashcards scripts loading", true); // JSDOM.fromFile above would have rejected on a thrown top-level error
   const flashcardsLink = document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]');
@@ -1837,10 +1893,6 @@ async function main() {
   // the in-memory fallback that keeps guest mode working for the rest of
   // this pageview regardless); this test mirrors that same defensiveness
   // rather than asserting on window.localStorage directly.
-  function readLocalStorage(key) {
-    try { return window.localStorage.getItem(key); } catch (e) { return undefined; } // undefined = inaccessible here, not "empty"
-  }
-  const storageUsable = readLocalStorage("raume-flashcards-mode") !== undefined;
 
   if (storageUsable) {
     check("the head migration moves old sakura- keys onto the raume- prefix", (() => {
@@ -2123,11 +2175,6 @@ async function main() {
   }
   // Settings and Help open like a pushed screen from the title bar; Back
   // returns to the segment you came from.
-  const fcOpenPushed = t => {
-    const back = document.getElementById("fcBack");
-    if (back) back.click();
-    document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="' + t + '"]').click();
-  };
   check("the Flashcards sub-tabs are five segments -- Settings and Help moved to the title bar",
     [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Kana|Puzzles|Games|Library"
     && [...document.querySelectorAll("#flashcardsPage .fc-titlebar-btn")].map(b => b.textContent).join("|") === "Settings|Help");
@@ -2731,7 +2778,6 @@ async function main() {
   }
 
   console.log("Flashcards: Kana tab");
-  const kd = window.RaumeStudy.flashcards.kanaData;
   check("the kana tables expose the named groups per script with counts", (() => {
     const g = kd.groups();
     return g.length === 10 && g.filter(x => x.script === "hiragana").length === 5
@@ -2741,7 +2787,6 @@ async function main() {
       && g.find(x => x.id === "hira-handakuten").count === 5
       && g.find(x => x.label === "Yōon (combinations)");
   })());
-  const kh = window.RaumeStudy.flashcards.kana.__testHooks;
   const shiItem = kd.itemsFor(["hira-gojuon"]).find(it => it.kana === "し");
   check("a kana item carries its romaji derived from the reading layer", !!shiItem && shiItem.romaji === "shi");
   check("checking accepts the Hepburn spelling and a common alternate, rejects a wrong one",
@@ -2749,13 +2794,11 @@ async function main() {
   // Vowel length matters in a reading trainer: unlike the vocab cards, "ii"
   // is not "i". Macron <-> doubled vowel both ways; おう long o accepts
   // ou / oo / ō; but a short vowel never matches a long one.
-  const gojuon = kd.itemsFor(["hira-gojuon"]);
   const iItem = gojuon.find(it => it.kana === "い");
   const oItem = gojuon.find(it => it.kana === "お");
   check("a short vowel is not a long vowel (い rejects \"ii\", お rejects \"oo\")",
     kh.checkKana(iItem, "i") && !kh.checkKana(iItem, "ii")
     && kh.checkKana(oItem, "o") && !kh.checkKana(oItem, "oo"));
-  const gakkou = kd.itemsFor(["hira-sokuon"]).find(it => it.romaji === "gakkou");
   check("がっこう accepts gakkou / gakkoo / gakkō, rejects gakko",
     !!gakkou && kh.checkKana(gakkou, "gakkou") && kh.checkKana(gakkou, "gakkoo")
     && kh.checkKana(gakkou, "gakkō") && !kh.checkKana(gakkou, "gakko"));
@@ -2828,6 +2871,16 @@ async function main() {
   if (storageUsable) check("guest reviews land in raume-kana-v1, never a signed-in cache key",
     !!readLocalStorage("raume-kana-v1") && readLocalStorage("raume-kana-cache-v1") === null);
 
+  }
+  if (want("games")) {
+  if (!want("flashcards")) {
+    // Alone, this area starts where the flashcards area leaves the page:
+    // on Practice, in guest mode (with its starter deck).
+    document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]').click();
+    await flush();
+    document.getElementById("fcUseGuest").click();
+    await flush();
+  }
   console.log("Flashcards: Crosswords (Puzzles) tab");
   const xw = window.RaumeStudy.flashcards.crosswords.__testHooks;
   // Each tab opens on its setup screen: xwSetup goes back to it from play,
@@ -3985,6 +4038,8 @@ async function main() {
   window.RaumeStudy.flashcards.store.saveCache();
   window.RaumeStudy.flashcards.render();
 
+  }
+  if (want("flashcards")) {
   console.log("Flashcards: Settings tab");
   fcOpenPushed("settings");
   check("Settings card titles are sentence case, like the Help tab's", (() => {
@@ -4156,7 +4211,7 @@ async function main() {
   })());
   const particleEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "topic / contrast");
   check("a particle entry's flashcard prompt carries the blue/bold .particle span", () =>
-    !!particleEntry && /<span class="particle">は<\/span>/.test(fc.promptFor(particleEntry, "jp-en").html));
+    !!particleEntry && /<span class="particle"[^>]*>は<\/span>/.test(fc.promptFor(particleEntry, "jp-en").html));
   const verbPairEntry = Object.values(vocabIndex).find(e => (e.romajiDisplay || "").includes(" / "));
   check("a verb-pair entry's prompt carries one speaker button per form (plain and polite)", (() => {
     if (!verbPairEntry) return false;
@@ -4165,8 +4220,9 @@ async function main() {
     return matches.length === 2 && matches[0] !== matches[1] && matches.every(Boolean);
   })());
 
+  }
   console.log(failures === 0 ? "\nSmoke test passed." : "\n" + failures + " smoke test check(s) failed.");
   process.exit(failures === 0 ? 0 : 1);
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+if (picked.length || args.includes("--serial")) main().catch(err => { console.error(err); process.exit(1); });
