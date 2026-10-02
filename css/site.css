@@ -2072,6 +2072,11 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
 .vocab th:first-child, .vocab td:first-child { padding-left: 14px; }
 .vocab th:last-child, .vocab td:last-child { padding-right: 0; }
 .vocab tbody tr:last-child td { border-bottom: 0; }
+/* Searching hides the rows that don't match, so the last row showing may not
+   be the table's last row -- in the last table showing, its hairline would
+   run across the card's rounded foot. (Between tables it stays: it's the
+   divider before the next one.) */
+body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):not(.page-hidden))) .vocab tbody tr:not(:has(~ tr:not(.search-hidden))) td { border-bottom: 0; }
 /* Hover: a very subtle wash of the live section tone -- no edge, no fill. */
 .vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 8%, var(--paper)); }
 
@@ -2220,12 +2225,13 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
   font-family: var(--font-ui); font-size: var(--fs-romaji); font-style: italic; line-height: 1.3; color: var(--romaji);
 }
 .jpword.jp-romaji-on::after { display: block; }
-/* A search match found only in the romaji (not the kanji/kana) auto-reveals
-   and highlights it -- same idea as .kr.search-hit below, needed for the
-   same reason: content(attr) can't be split with a <mark>, so the whole
-   reading takes the highlight treatment instead of just the matched run. */
-.jpword.jp-romaji-hit::after {
-  display: block; color: inherit; background: var(--hl); border-bottom: 2px solid var(--hl-ink);
+/* A search match in the romaji shows the reading as a real line
+   (.jp-romaji-line, js/vocab/interactions.js markRomaji) so only the
+   matched run is marked; the attr() reveal steps aside meanwhile. */
+.jpword.jp-romaji-hit::after { display: none; }
+.jp-romaji-line {
+  display: block; margin-top: 2px;
+  font-family: var(--font-ui); font-size: var(--fs-romaji); font-style: italic; line-height: 1.3; color: var(--romaji);
 }
 
 .verb-form { display: block; }
@@ -2748,16 +2754,13 @@ mark.search-hit {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
-/* In the Japanese cell the same wash sits behind the matched run; a thin
-   underline in the darker tone keeps it legible over the larger glyphs.
-   Katakana units (.kr spans) can't be split into a <mark>, so they take the
-   same treatment via a class. */
+/* In the Japanese cell the same soft wash sits behind the matched run, the
+   glyphs keeping their own colour -- no underline, like a find-in-page
+   match on iOS. Katakana units (.kr spans) can't be split into a <mark>,
+   so they take the same treatment via a class. */
 .vocab td.jp mark.search-hit,
-.vocab td.jp .kr.search-hit {
-  color: inherit;
-  border-bottom: 2px solid var(--hl-ink);
-}
-.vocab td.jp .kr.search-hit { background: var(--hl); }
+.vocab td.jp .kr.search-hit { color: inherit; }
+.vocab td.jp .kr.search-hit { background: var(--hl); border-radius: 2px; }
 
 .vocab th { position: relative; }
 .sort-button {
@@ -5273,6 +5276,10 @@ mark.fc-diff-co {
   }
   .masthead .masthead-account svg { width: 18px; height: 18px; }
   .masthead .masthead-account .masthead-cap { display: none; }
+  /* The button sits beside the large title, which a search hides -- it
+     would then float over the search bar's Options. Like an iOS search,
+     the bar has the top to itself until it's cleared. */
+  body.is-searching .masthead { display: none; }
   .masthead .masthead-account .masthead-account-dot { top: 0; right: 0; border-color: var(--group-ground); }
   .page { padding-top: 16px; }
   /* Room for the button at the end of every large-title row. */

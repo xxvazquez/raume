@@ -639,6 +639,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function clearHighlights(row) {
       row.querySelectorAll('mark.search-hit').forEach(mark => mark.replaceWith(document.createTextNode(mark.textContent)));
       row.querySelectorAll('.kr.search-hit').forEach(el => el.classList.remove('search-hit'));
+      row.querySelectorAll('.jp-romaji-line').forEach(el => el.remove());
       row.querySelectorAll('.jpword.jp-romaji-hit').forEach(el => el.classList.remove('jp-romaji-hit'));
       [...row.cells].forEach(cell => cell.normalize());
     }
@@ -710,12 +711,36 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       highlighted.add(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
       if (hit.enHit) highlightCell(info.enCell, q);
-      // The romaji reveal has no text node to wrap in <mark> (it's
-      // content: attr(...) -- see css/site.css), so a match there
-      // auto-reveals and highlights the whole reading instead of just
-      // the matched run, the same degradation .kr.search-hit already
-      // accepts for the per-kana layer.
-      if (hit.romajiHit) info.jpword.classList.add('jp-romaji-hit');
+      if (hit.romajiHit) markRomaji(info.jpword, q);
+    }
+    // The romaji reveal is content: attr(...) (css/site.css), with no text
+    // to wrap in a <mark> -- so a match there swaps it for a real line of the
+    // same reading with just the matched run marked, like any other hit.
+    // The query was compared macron-expanded (ō -> oo), so each stored
+    // letter is mapped to its run in that spelling to find the run to mark.
+    function markRomaji(jpword, q) {
+      const raw = jpword.dataset.romaji || '';
+      const qx = expandMacronsForSearch(q);
+      const starts = [];
+      let x = '';
+      for (const ch of raw) { starts.push(x.length); x += expandMacronsForSearch(ch.toLocaleLowerCase()); }
+      starts.push(x.length);
+      const rawAt = i => { let k = 0; while (starts[k + 1] <= i) k++; return k; };
+      const line = document.createElement('span');
+      line.className = 'jp-romaji-line';
+      let from = 0, done = 0, at;
+      while (qx && (at = x.indexOf(qx, from)) !== -1) {
+        const lo = rawAt(at), hi = rawAt(at + qx.length - 1) + 1;
+        if (lo > done) line.appendChild(document.createTextNode(raw.slice(done, lo)));
+        const mark = document.createElement('mark');
+        mark.className = 'search-hit';
+        mark.textContent = raw.slice(lo, hi);
+        line.appendChild(mark);
+        done = hi; from = at + qx.length;
+      }
+      if (done < raw.length) line.appendChild(document.createTextNode(raw.slice(done)));
+      jpword.appendChild(line);
+      jpword.classList.add('jp-romaji-hit');
     }
 
     function byOriginalIndex(a, b) { return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex); }

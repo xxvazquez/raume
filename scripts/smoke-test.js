@@ -1062,15 +1062,27 @@ async function main() {
     jpword.click();
     return opened && !jpword.classList.contains('jp-romaji-on');
   })());
-  check("a romaji-only match auto-reveals and highlights the reading (can't wrap content: attr(...) in <mark>, so the whole reading is flagged instead)", (() => {
+  check("a romaji-only match reveals the reading with only the matched run marked, and clears with the query", (() => {
     const input = document.getElementById("tableSearch");
-    input.value = "shio";
+    input.value = "shi";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     const jpword = saltRow.querySelector('.jpword[data-romaji]');
-    const hit = !saltRow.classList.contains("search-hidden") && jpword.classList.contains('jp-romaji-hit');
+    const line = jpword.querySelector('.jp-romaji-line');
+    const marks = line ? [...line.querySelectorAll('mark.search-hit')].map(m => m.textContent) : [];
+    const hit = !saltRow.classList.contains("search-hidden") && jpword.classList.contains('jp-romaji-hit')
+      && line.textContent === jpword.dataset.romaji && marks.join("|") === "shi";
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return hit && !jpword.classList.contains('jp-romaji-hit'); // cleared once the query is gone
+    return hit && !jpword.classList.contains('jp-romaji-hit') && !jpword.querySelector('.jp-romaji-line');
+  })());
+  check("a macron reading marks the stored letters a doubled-vowel query matched (ookii -> ōkii)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "ookii";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const marks = [...document.querySelectorAll('.jp-romaji-line mark.search-hit')].map(m => m.textContent);
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return marks.length > 0 && marks.every(m => m.toLowerCase() === "ōkii");
   })());
 
   console.log("\"Show polite\" only appears where verb rows are actually visible");

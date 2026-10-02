@@ -113,7 +113,9 @@ Functional roles, each one job — all muted:
   Hard button, which needs a fourth hue distinct from Again (coral), Good (sage)
   and Easy (lavender). Also the Learning segment of the Card-progress bar;
 - a slate wash (`--irregular-bg` / `--irregular-ink`) marks irregular-verb rows;
-- the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`).
+- the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`) behind
+  only the matched run — romaji included — never an underline or a whole-cell bar.
+  While searching on a phone the account button steps aside so the search bar has the top.
 
 ### Per-section tone
 
