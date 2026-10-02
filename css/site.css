@@ -4482,17 +4482,13 @@ mark.fc-diff-co {
   max-width: 760px;
 }
 .fc-entry-card { background: var(--paper); border-radius: var(--radius-card); padding: 20px 22px; }
-/* "This device only" is the gently preferred path: a soft accent-tinted
-   surface. "Sync across devices" stays neutral white. */
-.fc-entry-grid > .fc-entry-card:first-child { background: var(--accent-soft); }
-/* A tinted button on a tinted card would vanish -- it takes the white fill. */
-.fc-entry-grid > .fc-entry-card:first-child .fc-btn { background: var(--paper); }
-/* --fs-card-heading, not --fs-subhead -- the email/password fields in
-   .fc-auth below (and the recovery card's) are forced to 16px on a touch
-   screen; see --fs-card-heading's own comment in the type scale. */
+/* Both cards are plain white surfaces -- a tint on one would be decoration.
+   "This device only" is the gently preferred path, so its one button is the
+   filled primary; Sign in stays the white secondary. Full-width buttons in
+   these cards are 44px, the iOS large-button height. */
 .fc-entry-card h3 { margin: 0 0 6px; color: var(--ink); font-size: var(--fs-card-heading); font-weight: 500; }
 .fc-entry-card .fc-note { margin: 0 0 16px; font-size: var(--fs-nav-sub); color: var(--muted); }
-.fc-entry-card .fc-btn { width: 100%; min-height: 34px; padding: 7px 18px; font-size: var(--fs-small); }
+.fc-entry-card .fc-btn { width: 100%; min-height: 44px; padding: 7px 18px; font-size: var(--fs-small); }
 .fc-entry-card .fc-auth { max-width: none; margin: 0; }
 /* The password-recovery landing (a lone card, not part of the two-up grid) --
    same width as the sign-in form it stands in for. */

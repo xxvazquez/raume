@@ -864,8 +864,9 @@ are white capsules with accent text on `--control-lift` — never a grey tint. *
 sections are the same white cards; a picker's rows are checkmark rows with inset
 hairlines (the `legend` is floated into flow so a browser doesn't paint the
 card's background from the legend's midline). The sync chip is a tinted capsule
-with no outline, and the sign-in / entry cards are borderless (the tinted "This
-device only" card gives its button a white fill so it still reads as a button).
+with no outline, and the sign-in / entry cards are borderless white cards; "This
+device only" is the gently preferred path, so its button is the screen's one filled
+primary (44px, full width) and Sign in stays the white secondary.
 
 **Puzzles** (and Games) open on their **setup screen** (above, Controls);
 **Start** puts the puzzle first, under one toolbar row, as an iOS game

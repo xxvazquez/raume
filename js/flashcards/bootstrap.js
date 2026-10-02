@@ -202,10 +202,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-entry-grid">' +
       '<div class="fc-entry-card"><h3>This device only</h3>' +
       '<p class="fc-note">Stored in this browser — nothing to set up, nothing sent anywhere. Clearing site data or switching browsers loses it.</p>' +
-      '<button type="button" class="fc-btn" id="fcUseGuest">Continue without an account</button></div>' +
+      '<button type="button" class="fc-btn fc-btn-primary" id="fcUseGuest">Continue without an account</button></div>' +
       '<div class="fc-entry-card"><h3>Sync across devices</h3>' +
       (configured()
-        ? '<p class="fc-note">Free account, backed by Supabase. Only you can see your data.</p>' + authFormHtml()
+        ? '<p class="fc-note">Your progress lives in your account, on every device you sign in on. Only you can see it.</p>' + authFormHtml()
         : '<p class="fc-note">Needs a one-time setup — see <code>SUPABASE_SETUP.md</code> in the project, then fill in <code>js/config.js</code>.</p>') +
       "</div></div>";
     document.getElementById("fcUseGuest").addEventListener("click", function () {
