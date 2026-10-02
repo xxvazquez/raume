@@ -16,7 +16,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   var vidx = window.RaumeStudy.flashcards.vocabIndex;
   var getCache = store.getCache, saveCache = store.saveCache, resetCacheForUser = store.resetCacheForUser;
   var resetKanaCacheForUser = store.resetKanaCacheForUser;
-  var isGuestMode = store.isGuestMode, uuid = store.uuid, localDateStr = store.localDateStr;
+  var isGuestMode = store.isGuestMode, uuid = store.uuid, localDateStr = store.localDateStr, dayBefore = store.dayBefore;
   var RATING_NAMES = store.RATING_NAMES;
   var getVocabIndex = vidx.getVocabIndex, directionsForEntry = vidx.directionsForEntry;
   var fsrsRowFields = sched.fsrsRowFields, getScheduler = sched.getScheduler, applyRating = sched.applyRating;
@@ -446,7 +446,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var s = getCache().settings;
     var today = localDateStr(now);
     if (s.last_study_date === today) return; // already counted today
-    var yesterday = localDateStr(new Date(now.getTime() - 86400000));
+    var yesterday = localDateStr(dayBefore(now));
     s.current_streak = s.last_study_date === yesterday ? s.current_streak + 1 : 1;
     s.longest_streak = Math.max(s.longest_streak, s.current_streak);
     s.last_study_date = today;

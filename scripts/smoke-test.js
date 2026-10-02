@@ -2340,6 +2340,12 @@ async function main() {
       const val = tile && tile.querySelector(".fc-stat-value").textContent;
       return tile && tile.classList.contains("fc-stat-tile-pending") && val !== "—" && /reviews/i.test(val);
     })());
+    check("the streak's yesterday is the calendar day before, even just after a clock change (not now minus 24 hours)", (() => {
+      const st = window.RaumeStudy.flashcards.store;
+      return st.localDateStr(st.dayBefore(new Date(2026, 2, 9, 0, 30))) === "2026-03-08"
+        && st.localDateStr(st.dayBefore(new Date(2026, 2, 30, 0, 30))) === "2026-03-29"
+        && st.localDateStr(st.dayBefore(new Date(2026, 0, 1, 12))) === "2025-12-31";
+    })());
     check("the streak is its own strip -- the number, this week as seven days with today marked -- and the stat row keeps three plain tiles", (() => {
       const strip = document.querySelector("#fcPanelDashboard .fc-dash-streak");
       const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-dash-stats .fc-stat-tile")];

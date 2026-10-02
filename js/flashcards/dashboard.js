@@ -17,7 +17,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var esc = window.RaumeStudy.shared.escapeHtml;
   var speech = window.RaumeStudy.shared.speech;
 
-  var getCache = store.getCache, localDateStr = store.localDateStr, isGuestMode = store.isGuestMode;
+  var getCache = store.getCache, localDateStr = store.localDateStr, dayBefore = store.dayBefore, isGuestMode = store.isGuestMode;
   var uuid = store.uuid, RATING_NAMES = store.RATING_NAMES, DIRECTION_LABEL = store.DIRECTION_LABEL;
   var studyableCards = sched.studyableCards, buildQueue = sched.buildQueue, shuffle = sched.shuffle;
   var readyToStudy = sched.readyToStudy;
@@ -386,7 +386,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // not the number it reached.
   function liveStreak(now) {
     var s = getCache().settings, last = s.last_study_date;
-    var yesterday = localDateStr(new Date(now.getTime() - 86400000));
+    var yesterday = localDateStr(dayBefore(now));
     return last === localDateStr(now) || last === yesterday ? (s.current_streak || 0) : 0;
   }
   var FLAME_ICON = '<svg class="fc-streak-flame" data-tile="orange" viewBox="0 0 18 18" width="22" height="22" fill="currentColor" aria-hidden="true">' +

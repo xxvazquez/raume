@@ -159,6 +159,13 @@ window.RaumeStudy.flashcards.store = (function () {
   function localDateStr(d) {
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
+  // The calendar day before `d`. Not `d - 24h`: the day after clocks go
+  // forward is 23 hours long, so just after midnight that lands two days back.
+  function dayBefore(d) {
+    var y = new Date(d.getTime());
+    y.setDate(y.getDate() - 1);
+    return y;
+  }
 
   // -----------------------------------------------------------------------
   // Local cache -- versioned, validated, disposable. Never authoritative.
@@ -392,7 +399,7 @@ window.RaumeStudy.flashcards.store = (function () {
     CACHE_SCHEMA_VERSION: CACHE_SCHEMA_VERSION,
     getStoredMode: getStoredMode, setStoredMode: setStoredMode,
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,
-    uuid: uuid, localDateStr: localDateStr,
+    uuid: uuid, localDateStr: localDateStr, dayBefore: dayBefore,
     getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
     mergeLeechKept: mergeLeechKept, cleanLeechKept: cleanLeechKept,
     cleanJourney: cleanJourney, mergeJourney: mergeJourney,
