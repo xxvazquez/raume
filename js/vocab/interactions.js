@@ -1431,7 +1431,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         setAccountMenu(false);
         if (go.dataset.menuGo === 'account') openAccount();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
-        else if (go.dataset.menuGo === 'help') { const h = document.getElementById('helpToggle'); if (h) h.click(); }
+        else if (go.dataset.menuGo === 'help') {
+          // Help for the screen you're on: on Practice, the Flashcards Help
+          // (already open: stay there); anywhere else, the reference Help.
+          if (document.body.dataset.activePage === 'flashcards') {
+            const fcHelp = document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="help"]');
+            if (fcHelp) fcHelp.click();
+            return;
+          }
+          const h = document.getElementById('helpToggle'); if (h) h.click();
+        }
         else if (go.dataset.menuGo === 'signout') { const fc = window.RaumeStudy.flashcards; if (fc && fc.signOut) fc.signOut(); }
       });
       document.addEventListener('click', function (e) {

@@ -4370,6 +4370,14 @@ async function main() {
   })());
 
   check("the Practice screen carries no \"Signed in as\" status line -- the account menu says it", !document.querySelector(".fc-signed-in-as"));
+  check("on Practice the account menu's Help opens the Flashcards Help, not the reference one", (() => {
+    document.getElementById("accountToggle").click();
+    document.querySelector('#accountMenu [data-menu-go="help"]').click();
+    const ok = document.body.dataset.activePage === "flashcards" && !document.getElementById("fcPanelHelp").hidden
+      && document.getElementById("accountMenu").hidden;
+    if (document.getElementById("fcBack")) document.getElementById("fcBack").click();
+    return ok;
+  })());
   document.getElementById("accountToggle").click();
   const goAccountBtn = document.querySelector('#accountMenu [data-menu-go="account"]');
   check("the account button opens its menu at any width, and a guest's Account row reads Sign in", !document.getElementById("accountMenu").hidden

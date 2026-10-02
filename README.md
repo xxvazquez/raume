@@ -156,7 +156,7 @@ flashcard directions. Changes save immediately and sync when signed in.
 | --- | --- |
 | **Print** | A4 at three scopes: one table (its printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
 | **Theme** | **System → Light → Dark**, applied before the first paint. |
-| **Help** | The **?** at the top: four topics (Finding words, Reading, Options, Making it yours) as short one-line rows, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)). Practice has its own Help screen. |
+| **Help** | The **?** at the top: four topics (Finding words, Reading, Options, Making it yours) as short one-line rows, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)). Practice has its own Help screen; on a phone, the account menu's **Help** opens whichever fits the screen you're on. |
 | **Version** | A quiet line at the foot of every page: the deployed commit and its date (**Local build** in a checkout). |
 | **Sync dot** | On the person icon: **green** = everything synced, **amber** = offline or something hasn't reached your account yet. |
 
