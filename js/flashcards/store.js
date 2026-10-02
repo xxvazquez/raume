@@ -38,16 +38,29 @@ window.RaumeStudy.flashcards.store = (function () {
   // rather than just declining to persist) -- without it, choosing "guest
   // mode" would silently fail to take effect at all rather than just fail
   // to be *remembered* next visit.
-  var inMemoryMode = null;
+  //
+  // The mode is read from storage once and then kept here: getCache() asks
+  // for it on every call -- once per word while a list renders -- and a
+  // storage read each time (or, where storage throws, a thrown error each
+  // time) was most of a Library render's cost. Another tab changing it
+  // arrives as a "storage" event.
+  var inMemoryMode = null, modeLoaded = false;
   var currentSession = null;
   function setSession(session) { currentSession = session; }
   function getStoredMode() {
-    try { return localStorage.getItem(MODE_KEY); } catch (e) { return inMemoryMode; }
+    if (!modeLoaded) {
+      try { inMemoryMode = localStorage.getItem(MODE_KEY); } catch (e) {}
+      modeLoaded = true;
+    }
+    return inMemoryMode;
   }
   function setStoredMode(m) {
-    inMemoryMode = m;
+    inMemoryMode = m; modeLoaded = true;
     try { if (m) localStorage.setItem(MODE_KEY, m); else localStorage.removeItem(MODE_KEY); } catch (e) {}
   }
+  window.addEventListener("storage", function (e) {
+    if (e.key === MODE_KEY || e.key === null) modeLoaded = false;
+  });
   function isGuestMode() { return !currentSession && getStoredMode() === "guest"; }
   function hasActiveSession() { return isGuestMode() || !!currentSession; }
 
