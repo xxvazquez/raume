@@ -2428,6 +2428,9 @@ body:not(.is-searching) .vocab-kanji .kanji-stack { align-items: center; }
 body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
 body:not(.is-searching) .vocab.vocab-kanji, body:not(.is-searching) .vocab.vocab-kanji tbody { display: block; }
 body:not(.is-searching) .vocab.vocab-kanji thead { display: none; }
+/* Closed is closed: the grid's display above outranks the shared
+   .collapsed rule, so a kanji table never folded away. */
+body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji { display: none; }
 body:not(.is-searching) .vocab.vocab-kanji tbody {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
   gap: 8px; padding: 6px 12px 14px;
