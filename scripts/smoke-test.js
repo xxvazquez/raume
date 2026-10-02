@@ -1162,6 +1162,25 @@ async function main() {
     count("");
     return straight > 0 && curly === straight;
   })());
+  check("search finds a verb's polite form, a kanji word by its kana reading, romaji typed without long vowels or in keyboard spellings, and English only where a word starts", (() => {
+    const input = document.getElementById("tableSearch");
+    const firstJp = q => {
+      input.value = q;
+      input.dispatchEvent(new window.Event("input", { bubbles: true }));
+      return [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)')].map(r => {
+        const c = r.querySelector("td.jp").cloneNode(true);
+        c.querySelectorAll(".visually-hidden, rt, .jp-romaji-line").forEach(n => n.remove());
+        return c.textContent.replace(/\s+/g, "");
+      });
+    };
+    const polite = firstJp("tabemasu"), reading = firstJp("たべもの"), shoyu = firstJp("shoyu"), kohi = firstJp("kohi"), mittu = firstJp("mittu"), eat = firstJp("eat");
+    firstJp("たべもの");
+    const readingTinted = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) rt mark.search-hit')].length > 0;
+    firstJp("");
+    return polite.some(t => t.includes("食べます")) && reading.length === 1 && reading[0].startsWith("食べ物") && readingTinted
+      && shoyu.some(t => t.startsWith("醤油")) && kohi.some(t => t.startsWith("コーヒー")) && mittu.some(t => t.startsWith("三つ"))
+      && eat.some(t => t.startsWith("食べる")) && !eat.some(t => t.startsWith("温める"));
+  })());
   check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "ookii";

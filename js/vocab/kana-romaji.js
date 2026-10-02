@@ -210,7 +210,27 @@ window.RaumeStudy.kanaRomaji = (function () {
     return out;
   }
 
+  // Romaji folded to one spelling per sound, for matching what someone typed
+  // against the data (flashcard answers, search). Lower-cased; apostrophes,
+  // hyphens and spaces dropped (kin'en / kinen); macrons folded (ō -> o); a
+  // Japanese keyboard's spellings (wāpuro / Kunrei: si, tu, hu, zi, sya, tya,
+  // zya, nn) and traditional Hepburn's m before b / p folded to the Hepburn
+  // the data uses; then vowel length dropped ("ou" / "oo" -> "o", any doubled
+  // vowel -> one), since a long vowel can't be typed as such. A small っ
+  // (doubled consonant) is kept -- kite and kitte are different words.
+  function foldRomaji(s) {
+    return String(s == null ? "" : s).toLowerCase()
+      .replace(/['\u2018\u2019\-\s]/g, "")
+      .replace(/[\u0101\u00e2]/g, "a").replace(/[\u012b\u00ee]/g, "i").replace(/[\u016b\u00fb]/g, "u")
+      .replace(/[\u0113\u00ea]/g, "e").replace(/[\u014d\u00f4]/g, "o")
+      .replace(/sy([auo])/g, "sh$1").replace(/(?:zy|jy)([auo])/g, "j$1").replace(/(?:ty|cy)([auo])/g, "ch$1")
+      .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji")
+      .replace(/(^|[^cs])hu/g, "$1fu")
+      .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n")
+      .replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
+  }
+
   return {
-    toRomaji: toRomaji, toKana: toKana, decorate: decorate, isKana: isKana
+    toRomaji: toRomaji, toKana: toKana, decorate: decorate, isKana: isKana, foldRomaji: foldRomaji
   };
 })();

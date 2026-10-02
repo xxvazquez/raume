@@ -33,19 +33,6 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return v.replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
   }
 
-  // The other ways a Japanese keyboard spells the same kana (wāpuro /
-  // Kunrei: si, tu, hu, zi, sya, tya, zya, nn) and traditional Hepburn's m
-  // before b / p (shimbun), folded to the Hepburn the data uses -- on both
-  // sides, like the vowel folds, so "mittu" or "tenpura" / "tempura" count.
-  // The Kana drill accepts the same spellings (kana-data.js).
-  function foldSpellings(v) {
-    return v
-      .replace(/sy([auo])/g, "sh$1").replace(/(?:zy|jy)([auo])/g, "j$1").replace(/(?:ty|cy)([auo])/g, "ch$1")
-      .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji")
-      .replace(/(^|[^cs])hu/g, "$1fu")
-      .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n");
-  }
-
   function normalizeAnswer(s, romaji) {
     // An iPhone keyboard types a curly apostrophe (o’clock) -- the same mark.
     var v = String(s == null ? "" : s).replace(/[‘’ʼ`´]/g, "'").trim().replace(/\s+/g, " ").toLowerCase();
@@ -58,11 +45,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       // Apostrophes, hyphens and word breaks are spelling conventions, not
       // the reading: kin'en / kinen, shabu-shabu / shabu shabu all count.
       // (Dropped before the vowel folds, so a break never changes them.)
-      v = v.replace(/['\-\s]/g, "");
-      v = foldMacrons(v);
-      v = foldSpellings(v);
-      v = foldLongVowels(v);
-      v = v.replace(/^~/, "");
+      // Spellings and vowel length fold the same way search does
+      // (kanaRomaji.foldRomaji): mittu, tempura, koohii all count.
+      v = window.RaumeStudy.kanaRomaji.foldRomaji(v).replace(/^~/, "");
     }
     return v;
   }

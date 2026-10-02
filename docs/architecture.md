@@ -299,7 +299,9 @@ js/
   sw-register.js        service-worker registration
   vocab/                the reference page
     kana-romaji.js       kana → romaji converter (the reading layer), and
-                         romaji → kana (toKana: typed Word chain answers)
+                         romaji → kana (toKana: typed Word chain answers),
+                         foldRomaji (one spelling per sound, shared by
+                         flashcard answers and search)
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
     table-custom.js      per-table names / icons / order

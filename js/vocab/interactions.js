@@ -598,15 +598,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           else if (!p.closest('.visually-hidden')) kanji += n.data;
         }
       }
-      const jpword = jpCell && jpCell.querySelector('.jpword[data-romaji]');
+      // Every form a row shows -- a verb's plain and polite form both
+      // (tabemasu finds 食べます, not just taberu).
+      const jpwords = jpCell ? [...jpCell.querySelectorAll('.jpword[data-romaji]')] : [];
       // English: every row keeps it in cells[1] (.meaning-text, so the
       // row-action icons never register) -- word and sentence rows alike.
       const enEl = enCell && enCell.querySelector('.meaning-text');
+      const fold = window.RaumeStudy.kanaRomaji.foldRomaji;
       info = {
-        jpCell, enCell, jpword,
+        jpCell, enCell, jpwords, jpword: jpwords[0] || null,
         kanji: kanji.toLocaleLowerCase(),
         furigana: furigana.toLocaleLowerCase(),
-        romaji: jpword ? expandMacronsForSearch(jpword.dataset.romaji).toLocaleLowerCase() : '',
+        // Each form's whole reading in hiragana -- furigana in place of its
+        // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
+        readings: jpwords.map(readingOf),
+        romaji: jpwords.map(w => expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase()),
+        // ...and folded (see foldRomaji): whole, and word by word.
+        romajiFolded: jpwords.map(w => [fold(w.dataset.romaji)].concat(String(w.dataset.romaji).split(/[\s-]+/).slice(1).map(fold))),
         english: enEl ? enEl.textContent.toLocaleLowerCase() : ''
       };
       rowInfo.set(row, info);
@@ -629,6 +637,35 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (prefixOnly || !t.includes(q)) return null;
       if (t.endsWith(q)) return 2;
       return 3;
+    }
+    // English is words: past its start, a query matches only where a word
+    // starts -- "eat" finds "eat", not "heat", "great" or "seat".
+    function rankWords(t, q, prefixOnly) {
+      if (!t) return null;
+      if (t === q) return 0;
+      if (t.startsWith(q)) return 1;
+      if (prefixOnly) return null;
+      for (let at = t.indexOf(q); at !== -1; at = t.indexOf(q, at + 1)) {
+        if (!/[\p{L}\p{N}']/u.test(t[at - 1])) return 2;
+      }
+      return null;
+    }
+    function bestOf(list, fn) {
+      let best = null;
+      list.forEach(x => { const r = fn(x); if (r !== null && (best === null || r < best)) best = r; });
+      return best;
+    }
+    // A word's reading, hiragana: the furigana in place of each kanji, every
+    // kana kept, katakana folded to hiragana (コーヒー as こーひー).
+    function readingOf(jpword) {
+      let out = '';
+      const walker = document.createTreeWalker(jpword, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (n.parentElement.closest('rb, .jpmain, .visually-hidden, .jp-romaji-line')) continue;
+        out += n.data;
+      }
+      return toHiragana(out);
     }
 
     // Long vowels in romaji are stored with a macron (ōkii) but can't be
@@ -707,25 +744,42 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
     // Ranks a row against the query using the indexed text -- no DOM work.
     // `hide` is the current column visibility, read once per search.
-    function rankRow(info, q, qExpanded, prefixOnly, hide) {
-      let best = null, jpHit = false, enHit = false, romajiHit = false;
+    function rankRow(info, q, qx, prefixOnly, hide) {
+      let best = null, jpHit = false, enHit = false, readingHit = false;
+      const romajiHits = [];
       function take(r) { if (r !== null && (best === null || r < best)) best = r; return r !== null; }
       if (!hide.japanese) {
         if (take(rankOf(info.kanji, q, prefixOnly))) jpHit = true;
         if (!hide.furigana && take(rankOf(info.furigana, q, prefixOnly))) jpHit = true;
+        // Kana typed against the whole reading (たべ -> 食べる).
+        if (!jpHit && !hide.furigana && qx.kana && take(bestOf(info.readings, t => rankOf(t, qx.kana, false)))) readingHit = true;
       }
       // Romaji is never hidden by a toggle -- it's an always-searchable
-      // on-demand reveal in the jp cell, not its own column. Expanding is
-      // only meaningful here (kanji/English never carry a macron).
-      if (take(rankOf(info.romaji, qExpanded, prefixOnly))) romajiHit = true;
-      if (!hide.english && take(rankOf(info.english, q, prefixOnly))) enHit = true;
-      return { rank: best, jpHit, enHit, romajiHit };
+      // on-demand reveal in the jp cell, not its own column. Each form is
+      // ranked on its own: as typed (macrons expanded, so "gohan" is found
+      // inside asagohan) and folded, from the start of the reading or of one
+      // of its words (shoyu, kohi, mittu, tabemasu, ramen in miso rāmen). The
+      // folded match never runs mid-word: folding shrinks English too ("beer"
+      // -> "ber"), which would otherwise turn up taberu.
+      info.romaji.forEach((t, i) => {
+        const folded = info.romajiFolded[i];
+        const r = [rankOf(t, qx.expanded, prefixOnly),
+          qx.folded && folded[0] === qx.folded ? 0 : null,
+          qx.folded && folded.some(f => f.startsWith(qx.folded)) ? 1 : null
+        ].reduce((a, b) => b === null ? a : (a === null || b < a ? b : a), null);
+        if (take(r)) romajiHits.push(info.jpwords[i]);
+      });
+      if (!hide.english && take(rankWords(info.english, q, prefixOnly))) enHit = true;
+      return { rank: best, jpHit, enHit, readingHit, romajiHits };
     }
     function highlightRow(row, info, hit, q) {
       highlighted.add(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
       if (hit.enHit) highlightCell(info.enCell, q);
-      if (hit.romajiHit && !markKanjiReadings(row, q) && !markReading(info.jpword, q)) markRomaji(info.jpword, q);
+      if (hit.readingHit) info.jpwords.forEach(w => markReading(w, q));
+      if (hit.romajiHits.length && !markKanjiReadings(row, q)) {
+        hit.romajiHits.forEach(w => { if (!markReading(w, q)) markRomaji(w, q); });
+      }
     }
     // A word's reading is already on screen -- its kana, or the furigana over
     // its kanji -- so a romaji hit tints the kana it spells there ("mizu"
@@ -875,7 +929,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const activeSection = document.body.dataset.activeSection || 'vocabulary';
       let totalRows = 0, totalTables = 0;
       const sectionOrder = [];
-      const qExpanded = expandMacronsForSearch(q);
+      const kr = window.RaumeStudy.kanaRomaji;
+      const latin = /^[a-z0-9 '\-āīūēōâîûêô~]+$/.test(q);
+      const qx = {
+        expanded: expandMacronsForSearch(q),
+        // Folded romaji, from three letters on (one or two letters folded
+        // would match far too much).
+        folded: latin && q.replace(/[\s'-]/g, '').length >= 3 ? kr.foldRomaji(q) : '',
+        kana: /[\u3040-\u30ff]/.test(q) ? toHiragana(q) : ''
+      };
       // A single Latin letter only matches words that start with it: "t"
       // appearing anywhere matches most of the page, which is noise to read
       // and hundreds of rows to lay out on a phone. One kana or kanji (水)
@@ -922,7 +984,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const ranked = [];
         [...tbody.rows].sort(byOriginalIndex).forEach(row => {
           const info = infoFor(row);
-          const hit = userHidden ? { rank: null } : rankRow(info, q, qExpanded, prefixOnly, hide);
+          const hit = userHidden ? { rank: null } : rankRow(info, q, qx, prefixOnly, hide);
           const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
           r.row.classList.toggle('search-hidden', !r.match);
           if (r.match) {
