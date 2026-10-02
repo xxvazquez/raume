@@ -638,11 +638,14 @@ window.RaumeStudy.flashcards.views = (function () {
     if (!backup.available()) {
       return '<h3 class="help-head">Back up &amp; restore</h3><p class="set-foot set-foot-alone">Your progress is saved to your account, so there is nothing to back up here.</p>';
     }
-    return '<h3 class="help-head">Back up &amp; restore</h3><div class="help-card set-card-actions">' +
-      '<button type="button" class="set-row set-action" id="fcBackupExport">Download backup</button>' +
+    // The explainer sits behind the header's ⓘ like every other Settings card.
+    return '<h3 class="help-head set-head">Back up &amp; restore' +
+      '<button type="button" class="fc-stat-info set-info" aria-expanded="false" aria-controls="fcBackupFoot" aria-label="About Back up &amp; restore">' + INFO_GLYPH + '</button></h3>' +
+      '<div class="help-card set-card-actions">' +
+      '<button type="button" class="set-row set-action" id="fcBackupExport">Save a backup…</button>' +
       '<button type="button" class="set-row set-action" id="fcBackupImport">Restore from a file…</button>' +
       '<input type="file" id="fcBackupFile" accept="application/json,.json" hidden></div>' +
-      '<p class="set-foot">This device is the only copy of your flashcards, Kana progress, table customisations and your own words. Restoring replaces what\'s here with the file.</p>' +
+      '<p class="set-foot" id="fcBackupFoot" hidden>This device is the only copy of your flashcards, Kana progress, table customisations and your own words. Restoring replaces what\'s here with the file.</p>' +
       '<div class="fc-auth-error" id="fcBackupError" role="alert" hidden></div>';
   }
   function wireBackup() {

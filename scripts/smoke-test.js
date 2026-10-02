@@ -2255,7 +2255,9 @@ async function main() {
   check("Settings opens as a pushed screen: its own title, a Back button, no segmented control",
     document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Settings"
     && !!document.getElementById("fcBack") && !document.querySelector("#flashcardsPage .fc-tabs"));
-  check("Settings offers Download backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  check("Settings offers Save a backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  check("...with its explainer behind the header's ⓘ, not a standing footnote", document.getElementById("fcBackupFoot").hidden === true
+    && document.querySelector('.set-info[aria-controls="fcBackupFoot"]') !== null);
   {
     const fileInput = document.getElementById("fcBackupFile");
     const cardsBefore = JSON.stringify(window.RaumeStudy.flashcards.store.getCache().cards);
