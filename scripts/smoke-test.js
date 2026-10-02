@@ -1132,6 +1132,17 @@ async function main() {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return hit && !jpword.querySelector('mark');
   })());
+  check("an iPhone's curly apostrophe searches like a straight one (o’clock finds the o'clock rows)", (() => {
+    const input = document.getElementById("tableSearch");
+    const count = q => {
+      input.value = q;
+      input.dispatchEvent(new window.Event("input", { bubbles: true }));
+      return document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
+    };
+    const straight = count("o'clock"), curly = count("o’clock");
+    count("");
+    return straight > 0 && curly === straight;
+  })());
   check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "ookii";
@@ -4188,6 +4199,18 @@ async function main() {
     && fc.normalizeAnswer("satou", true) === fc.normalizeAnswer("satō", true)
     && fc.normalizeAnswer("gakkou", true) === fc.normalizeAnswer("gakkō", true));
   check("normalizeAnswer strips a leading ~ for romaji (counters)", fc.normalizeAnswer("~ko", true) === "ko");
+  check("romaji ignores apostrophes, hyphens and word breaks: kin'en / kinen / kin’en, shabu-shabu / shabu shabu", (() => {
+    const idx = fc.getVocabIndex();
+    const kinen = Object.values(idx).find(e => e.romajiDisplay === "kin'en");
+    const shabu = Object.values(idx).find(e => e.romajiDisplay === "shabu-shabu");
+    return !!kinen && !!shabu && ["kin'en", "kinen", "kin’en", "Kin en"].every(t => fc.checkAnswer(kinen, "en-ro", t))
+      && ["shabu-shabu", "shabu shabu", "shabushabu"].every(t => fc.checkAnswer(shabu, "en-ro", t))
+      && !fc.checkAnswer(kinen, "en-ro", "kinin");
+  })());
+  check("an iPhone's curly apostrophe is a right English answer (1 o’clock)", (() => {
+    const e = Object.values(fc.getVocabIndex()).find(x => /^1 o'clock/.test(x.englishDisplay || ""));
+    return !!e && fc.checkAnswer(e, "jp-en", "1 o’clock") && fc.checkAnswer(e, "jp-en", "1 o'clock");
+  })());
   check("normalizeAnswer drops sentence punctuation so a phrase answer is typeable", (() => {
     return fc.normalizeAnswer("Onamae wa?", true) === fc.normalizeAnswer("onamae wa", true)
       && fc.normalizeAnswer("What is your name?", false) === fc.normalizeAnswer("what is your name", false);

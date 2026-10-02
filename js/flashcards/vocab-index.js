@@ -34,13 +34,18 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
 
   function normalizeAnswer(s, romaji) {
-    var v = String(s == null ? "" : s).trim().replace(/\s+/g, " ").toLowerCase();
+    // An iPhone keyboard types a curly apostrophe (o’clock) -- the same mark.
+    var v = String(s == null ? "" : s).replace(/[‘’ʼ`´]/g, "'").trim().replace(/\s+/g, " ").toLowerCase();
     // Sentence punctuation isn't meaningful for matching -- a phrase card whose
     // answer is "Onamae wa?" / "What is your name?" has to accept the same
     // words typed without the mark. Kept for the expected-answer *display*
     // (that reads the raw field), stripped only here for the comparison.
     v = v.replace(/[?!.,;:…。、！？「」『』（）()]/g, "").replace(/\s+/g, " ").trim();
     if (romaji) {
+      // Apostrophes, hyphens and word breaks are spelling conventions, not
+      // the reading: kin'en / kinen, shabu-shabu / shabu shabu all count.
+      // (Dropped before the vowel folds, so a break never changes them.)
+      v = v.replace(/['\-\s]/g, "");
       v = foldMacrons(v);
       v = foldLongVowels(v);
       v = v.replace(/^~/, "");

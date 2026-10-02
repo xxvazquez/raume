@@ -228,6 +228,9 @@ card  →  type answer, Enter  →  verdict + answer (audio plays)  →  rate 1�
 - Long vowels are ignored — `kōhī`, `koohii` and `kouhii` all match, and
   likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked letters treat them as the
   same sound too.
+- Apostrophes, hyphens and spaces in romaji don't matter — `kin'en` /
+  `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
+  `'` in answers and search alike.
 - You only type the meaning, never its note: どの is *which* with the note
   *before a noun* shown under it, and brackets in your own words are optional
   too.

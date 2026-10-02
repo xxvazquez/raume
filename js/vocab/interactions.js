@@ -844,7 +844,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
     let preSearch = null;
     function runSearch() {
-      const q = input.value.trim().toLocaleLowerCase();
+      // An iPhone keyboard types a curly apostrophe (o’clock); the tables use '.
+      const q = input.value.trim().replace(/[‘’ʼ`´]/g, "'").toLocaleLowerCase();
       box.classList.toggle('has-value', Boolean(q));
       // Shows each row's add-to-flashcards toggle (css/site.css) only while
       // searching; its plus/check state is refreshed as the search starts,
