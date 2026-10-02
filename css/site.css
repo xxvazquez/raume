@@ -5222,12 +5222,32 @@ mark.fc-diff-co {
 .fc-gs-check { flex: none; color: var(--section-strong); visibility: hidden; }
 .fc-gs-radio:checked ~ .fc-gs-check { visibility: visible; }
 .fc-gs-mode:hover, .fc-gs-pick:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
-.fc-gs-mode:has(.fc-gs-radio:focus-visible), .fc-gs-pick:has(.fc-xw-pick-select:focus-visible),
-.fc-gs-src:focus-visible, .fc-gs-stats:focus-visible { box-shadow: inset 0 0 0 2px var(--section); outline: 0; }
-.fc-gs-src, .fc-gs-stats { appearance: none; border: 0; background: transparent; text-align: left; }
+/* Keyboard focus on a row is the row lit in the section tone, as iOS
+   highlights a focused cell -- an inset ring was cut by the card's
+   corners and broken by the hairline. */
+.fc-gs-mode:has(.fc-gs-radio:focus-visible), .fc-gs-pick:focus-visible,
+.fc-gs-stats:focus-visible { background: var(--section-soft); outline: 0; }
+.fc-gs-pick, .fc-gs-stats { appearance: none; border: 0; background: transparent; text-align: left; }
+.fc-gs-pick[aria-expanded="true"] { background: color-mix(in srgb, var(--ink) 5%, var(--paper)); }
 .fc-gs-stats { color: var(--ink); justify-content: space-between; }
 .fc-gs-words { position: relative; }
+/* Every row's menu drops from under its own row's trailing edge: row N
+   of the 44px card (Words from is 0). */
 .fc-gs-words .fc-xw-sheet { top: 52px; left: auto; right: 0; }
+.fc-gs-words .fc-gs-menu-at-1 { top: 96px; }
+.fc-gs-words .fc-gs-menu-at-2 { top: 140px; }
+.fc-gs-words .fc-gs-menu-at-3 { top: 184px; }
+/* A single-choice menu: checkmark rows, no title (an iOS menu has none) --
+   the title shows only on a phone's sheet. */
+.fc-xw-sheet.fc-gs-menu { width: auto; min-width: 220px; padding: 6px; }
+.fc-xw-sheet-head.fc-gs-menu-head { display: none; }
+.fc-gs-opt {
+  appearance: none; border: 0; background: none; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  width: 100%; min-height: 44px; padding: 0 12px; border-radius: 14px; cursor: pointer; text-align: left;
+  color: var(--ink); font: 400 15px/1.3 var(--font-ui);
+}
+.fc-gs-opt:hover, .fc-gs-opt:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
+.fc-gs-opt[aria-checked="true"] .fc-gs-check { visibility: visible; }
 .fc-gs-why { margin-top: 8px; }
 .fc-gs-go { display: flex; justify-content: center; margin: 24px 0; }
 .fc-gs-start { min-width: 220px; min-height: 50px; font-size: var(--fs-body); }
@@ -5272,7 +5292,24 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   appearance: none; border: 0; background: none; padding: 6px 2px; cursor: pointer;
   color: var(--accent-strong); font: 600 var(--fs-nav)/1 var(--font-ui);
 }
-.fc-xw-sheet .fc-xw-table-picker { max-height: none; margin: 0; }
+/* Words from: the title row and search stay put; only the list scrolls. */
+#fcXwSheet { display: flex; flex-direction: column; overflow: hidden; }
+#fcXwSheet[hidden] { display: none; }
+.fc-xw-sheet .fc-xw-table-picker { flex: 1 1 auto; min-height: 0; max-height: min(50vh, 420px); margin: 0; }
+.fc-xw-table-cat[hidden], .fc-xw-table-check[hidden] { display: none; }
+.fc-xw-table-none { margin: 14px 6px; color: var(--muted); font-size: var(--fs-small); }
+.fc-xw-search {
+  flex: none; display: flex; align-items: center; gap: 6px; margin: 0 0 8px; padding: 0 12px; min-height: 36px;
+  border-radius: var(--radius-button); background: var(--paper); box-shadow: var(--control-lift); color: var(--faint);
+}
+.fc-xw-search-glyph { flex: none; }
+.fc-xw-search input {
+  flex: 1 1 auto; min-width: 0; border: 0; background: none; padding: 8px 0; color: var(--ink);
+  font: 400 var(--fs-nav)/1.2 var(--font-ui); -webkit-appearance: none; appearance: none;
+}
+.fc-xw-search input:focus { outline: 0; }
+.fc-xw-search:focus-within { box-shadow: var(--control-lift), 0 0 0 2px var(--section); }
+.fc-xw-search input::-webkit-search-decoration { -webkit-appearance: none; }
 .fc-xw-scrim { display: none; }
 .fc-xw-actions + .fc-xw-footnote { margin-top: -6px; }
 
@@ -5329,6 +5366,10 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
     max-height: 80vh; border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
     padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
   }
+  .fc-gs-words .fc-xw-sheet { top: auto; left: 0; }
+  .fc-xw-sheet-head.fc-gs-menu-head { display: flex; }
+  .fc-xw-sheet.fc-gs-menu { padding: 14px 10px calc(16px + env(safe-area-inset-bottom)); }
+  .fc-xw-sheet .fc-xw-table-picker { max-height: none; }
 }
 @media print {
   body.print-only .fc-xw-current { display: none !important; }

@@ -384,8 +384,13 @@ and Help.
   - **Setup screen** (`.fc-gs`, Puzzles / Games — Laura, 2026-10-02: a game
     starts from its own setup, never mid-game with a random one): Settings
     cards — the styles as checkmark rows with a grey line on how each plays,
-    then **value rows** (`.fc-gs-pick`: name left, value + faint ⌃⌄ right, a
-    native `<select>` over the row; Words from with a › opening its sheet),
+    then **value rows** (`.fc-gs-pick`: name left, value + faint ⌃⌄ right —
+    Words from, Script, Word count and Sort by alike, each opening the same
+    glass menu under its own row, a bottom sheet on a phone: checkmark rows,
+    a tap picks and closes; Words from's is the multi-select checklist with
+    a search field. No native `<select>` — its menu looked different on every
+    platform and beside Words from's sheet; keyboard focus lights the row in
+    the section tone, never an inset ring the card's corners would cut),
     then a filled 50px **Start** capsule, centred, and a Stats row. Never a
     row of pills over the content (Laura, 2026-09-28).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):

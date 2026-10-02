@@ -2936,9 +2936,15 @@ async function main() {
   const xwStart = () => { const go = xwPanel().querySelector("#fcGsStart"); if (go && !go.disabled) go.click(); };
   const xwPick = (name, value) => {
     xwSetup();
-    const sel = name === "mode" ? xwPanel().querySelector('.fc-gs-radio[value="' + value + '"]') : xwPanel().querySelector('[data-pick="' + name + '"]');
-    if (name === "mode") sel.checked = true; else sel.value = value;
-    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    if (name === "mode") {
+      const radio = xwPanel().querySelector('.fc-gs-radio[value="' + value + '"]');
+      radio.checked = true;
+      radio.dispatchEvent(new window.Event("change", { bubbles: true }));
+    } else {
+      // The row opens its menu; the option picks and closes it.
+      xwPanel().querySelector('.fc-gs-pick[data-pick="' + name + '"]').click();
+      xwPanel().querySelector('.fc-gs-opt[data-pick="' + name + '"][data-value="' + value + '"]').click();
+    }
     xwStart();
   };
   // Words from is a checklist sheet: tick / untick one row ("flashcards" or
@@ -3100,8 +3106,28 @@ async function main() {
       && modes.map(r => r.value).join() === "crossword,arroword,wordsearch" && modes[0].checked
       && rows.join("|") === "Words from|Script|Word count"
       && panel.querySelector("#fcXwSource .fc-xw-menu-val").textContent === "Flashcards"
-      && panel.querySelector('[data-pick="script"]').value === "romaji"
+      && panel.querySelector('.fc-gs-opt[data-pick="script"][aria-checked="true"]').dataset.value === "romaji"
       && !document.getElementById("fcGsStart").disabled && !!document.getElementById("fcGsStats");
+  })());
+  check("Words from, Script and Word count are one kind of row -- the value and ⌃⌄ -- and Script / Word count open the same glass menu of checkmark rows: a tap picks and closes it, Escape closes it", (() => {
+    const panel = document.getElementById("fcPanelCrosswords");
+    const rows = [...panel.querySelectorAll(".fc-gs-words .fc-gs-pick")];
+    const same = rows.length === 3 && rows.every(r => r.tagName === "BUTTON" && r.querySelector(".fc-xw-updown") && !r.querySelector("select, .fc-xw-row-chev"));
+    const row = panel.querySelector('.fc-gs-pick[data-pick="size"]'), menu = document.getElementById("fcGsMenu-size");
+    row.click();
+    const opened = !menu.hidden && row.getAttribute("aria-expanded") === "true" && menu.classList.contains("fc-xw-sheet")
+      && document.activeElement === menu.querySelector('[aria-checked="true"]')
+      && [...menu.querySelectorAll(".fc-gs-opt")].map(o => o.textContent).join("|") === "10 words|15 words|20 words|30 words|40 words";
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const esc = menu.hidden && document.activeElement === row;
+    const before = xw.state.size;
+    row.click();
+    document.querySelector('#fcGsMenu-size .fc-gs-opt[data-value="20"]').click();
+    const picked = xw.state.size === 20 && document.getElementById("fcGsMenu-size").hidden
+      && document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="size"] .fc-xw-menu-val').textContent.indexOf("20 words") === 0;
+    document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="size"]').click();
+    document.querySelector('#fcGsMenu-size .fc-gs-opt[data-value="' + before + '"]').click();
+    return same && opened && esc && picked && xw.state.size === before;
   })());
   xwStart();
   check("the Puzzles tab renders a puzzle once there are enough flashcard words -- never fewer than 6 of them",
@@ -3262,6 +3288,38 @@ async function main() {
   check("unticking a table drops it, leaving the other one active", (() => {
     return xw.state.tables.length === 1 && String(xw.state.tables[0]) === String(xwOtherTable.id)
       && !document.querySelector("#fcPanelCrosswords #fcXwSource .fc-xw-menu-val").textContent.includes(xwDefaultTable.title);
+  })());
+  check("the sheet's search narrows the list to matching tables (a category with none hides), a tick keeps the list where it was scrolled and the search as typed, and Escape clears the search before it closes the sheet", (() => {
+    const field = document.getElementById("fcXwSearch");
+    const visible = () => [...document.querySelectorAll("#fcXwTablePicker .fc-xw-table-check")].filter(l => !l.closest("[hidden]"));
+    const all = visible().length;
+    field.value = xwDefaultTable.title.slice(0, 5);
+    field.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const narrowed = visible().length < all && visible().some(l => l.textContent === xwDefaultTable.title)
+      && visible().every(l => l.textContent.toLowerCase().includes(field.value.toLowerCase()) || l.closest(".fc-xw-table-cat").querySelector(".fc-xw-table-cat-name").textContent.toLowerCase().includes(field.value.toLowerCase()));
+    field.value = "zzzz";
+    field.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const none = !visible().length && !document.querySelector("#fcXwTablePicker .fc-xw-table-none").hidden;
+    field.value = "";
+    field.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const list = document.getElementById("fcXwTablePicker");
+    list.scrollTop = 120;
+    const top = list.scrollTop;
+    field.value = xwDefaultTable.title.slice(0, 5);
+    field.dispatchEvent(new window.Event("input", { bubbles: true }));
+    xwTick(xwDefaultTable.id, true);
+    const kept = document.getElementById("fcXwSearch").value === xwDefaultTable.title.slice(0, 5) && visible().length < all
+      && document.activeElement === document.querySelector('#fcXwTablePicker input[data-table-id="' + xwDefaultTable.id + '"]');
+    xwTick(xwDefaultTable.id, false);
+    document.getElementById("fcXwSearch").focus();
+    document.getElementById("fcXwSearch").dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const cleared = document.getElementById("fcXwSearch").value === "" && visible().length === all && !document.getElementById("fcXwSheet").hidden;
+    document.getElementById("fcXwSearch").value = "";
+    const list2 = document.getElementById("fcXwTablePicker");
+    list2.scrollTop = top;
+    xwTick(xwOtherTable.id, true);
+    const scrolled = document.getElementById("fcXwTablePicker").scrollTop === top;
+    return narrowed && none && kept && cleared && scrolled;
   })());
   document.getElementById("fcXwTablesDone").click();
   check("Done closes the sheet", document.getElementById("fcXwSheet").hidden && !xw.state.tablesOpen);
@@ -3546,7 +3604,7 @@ async function main() {
   xwPick("mode", "crossword");
   check("a crossword doesn't offer Japanese (a square can't take a whole kanji) -- it falls back to Hiragana", (() => {
     xwSetup();
-    const opts = [...document.querySelectorAll('#fcPanelCrosswords [data-pick="script"] option')].map(o => o.value);
+    const opts = [...document.querySelectorAll('#fcPanelCrosswords .fc-gs-opt[data-pick="script"]')].map(o => o.dataset.value);
     xwStart();
     return xw.state.script === "hiragana" && opts.indexOf("native") === -1 && opts.indexOf("hiragana") !== -1;
   })());
@@ -3673,7 +3731,7 @@ async function main() {
   xwPick("mode", "kanatiles");
   check("Kana tiles offers only Hiragana / Katakana (it spells in kana), falling back to Hiragana, and only words really written that way", (() => {
     xwSetup();
-    const opts = [...document.querySelectorAll('#fcPanelGames [data-pick="script"] option')].map(o => o.value).join("|");
+    const opts = [...document.querySelectorAll('#fcPanelGames .fc-gs-opt[data-pick="script"]')].map(o => o.dataset.value).join("|");
     xwStart();
     return opts === "hiragana|katakana" && xw.state.script === "hiragana"
       && xw.state.puzzle.questions.every(q => /^[ぁ-ゖー]+$/.test(q.word.answer));

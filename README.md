@@ -325,8 +325,9 @@ clue ("Japanese sake" → *sake*), or a loanword that just echoes its English
 
 The tab opens on a **setup screen**: the puzzle (Crossword, Arroword or
 Word search, each with a line on how it plays), then *Words from* (a
-checklist: Flashcards, or as many tables as you like), *Script* and *Word
-count* (each opening the phone's own picker), then **Start** — off, with
+checklist: Flashcards, or as many tables as you like, with a search field
+to find a table), *Script* and *Word count* — three alike rows, each
+opening the same menu of checkmark rows (a bottom sheet on a phone) — then **Start** — off, with
 the reason under it, until there are enough words — and [*Stats*](#stats).
 Your choices are remembered on this device for next time. In play, one
 toolbar row: **‹** and the puzzle's name (back to the setup screen), then

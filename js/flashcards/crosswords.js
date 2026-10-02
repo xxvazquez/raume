@@ -2385,9 +2385,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   var GRID_MAX_WORDS = 40;
   var ALL_WORDS = 9999;
   var GRID_SIZE_OPTS = [10, 15, 20, 30, 40];
-  var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, [String(ALL_WORDS), "All"]];
+  var GAME_SIZE_OPTS = [10, 15, 20, 30, 40, 60, 80, 100, ALL_WORDS];
   function isGame(mode) { return mode === "match" || mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort" || mode === "wordchain"; }
-  function sizeOpts() { return isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS; }
+  // Each written out as the row reads it ("15 words", "All words").
+  function sizeOpts() {
+    return (isGame(state.mode) ? GAME_SIZE_OPTS : GRID_SIZE_OPTS).map(function (n) {
+      return [String(n), n === ALL_WORDS ? "All words" : n + " words"];
+    });
+  }
   // The count the game will really have: never more than the pool holds.
   function sizeLabel() {
     var n = Math.min(state.size, state.poolCount || state.size);
@@ -2398,16 +2403,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // A native <select> laid invisibly over a control, so a tap opens the
   // platform's own picker (the wheel/menu on iOS). 16px so iOS never zooms.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
-  function optionsHtml(options, current) {
-    return options.map(function (o) {
-      var val = Array.isArray(o) ? o[0] : String(o);
-      var text = Array.isArray(o) ? o[1] : String(o);
-      return '<option value="' + esc(val) + '"' + (String(current) === val ? " selected" : "") + ">" + esc(text) + "</option>";
-    }).join("");
-  }
-  function selectHtml(name, label, optsHtml) {
-    return '<select class="fc-xw-pick-select" data-pick="' + name + '" aria-label="' + esc(label) + '">' + optsHtml + "</select>";
-  }
   // The toolbar's title: the puzzle or game you're on, as an iOS title
   // menu ("Word search ⌄") -- the one setting you switch often.
   // In play it leads back to the setup screen, ‹ and the name, as an iOS
@@ -2453,20 +2448,24 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         }).join("");
       return '<div class="fc-xw-table-cat"><div class="fc-xw-table-cat-name">' + esc(cat) + "</div>" + items + "</div>";
     }).join("");
-    return '<div class="fc-xw-table-picker" id="fcXwTablePicker">' + groups + "</div>";
+    return '<div class="fc-xw-table-picker" id="fcXwTablePicker">' + groups +
+      '<p class="fc-xw-table-none" hidden>No tables match.</p></div>';
   }
-  // Words from: a row that opens the checklist sheet -- Flashcards, or any
+  // Words from: a row that opens the checklist -- Flashcards, or any
   // number of tables ticked at once (Mail's mailbox picker, not a menu of
-  // one); the row names what's picked.
+  // one); the row names what's picked. A search field over the list
+  // narrows 30-odd tables to the one you're after.
   var ROW_CHEVRON = '<svg class="fc-xw-row-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5 11.5 9 7 13.5"/></svg>';
   function sourceLabel() {
     return state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
   }
+  var SEARCH_ICON = '<svg class="fc-xw-search-glyph" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5"/><path d="m12 12 3.5 3.5"/></svg>';
   function tablesSheetHtml() {
     return '<div class="fc-xw-scrim"' + (state.tablesOpen ? "" : " hidden") + "></div>" +
       '<div class="fc-xw-sheet" id="fcXwSheet" role="dialog" aria-label="Words from"' + (state.tablesOpen ? "" : " hidden") + ">" +
       '<div class="fc-xw-sheet-head"><h4 class="fc-xw-sheet-title">Words from</h4>' +
       '<button type="button" class="fc-xw-sheet-done" id="fcXwTablesDone">Done</button></div>' +
+      '<label class="fc-xw-search">' + SEARCH_ICON + '<input type="search" id="fcXwSearch" placeholder="Search" aria-label="Search tables" autocomplete="off"></label>' +
       tableChecklistHtml() + "</div>";
   }
   // The setup screen, as an iOS game's: which one (checkmark rows with a
@@ -2484,9 +2483,22 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     wordchain: "Each word starts on the kana the last one ended"
   };
   var CHECK_ICON = '<svg class="fc-gs-check" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 7.5 13.5 14.5 5"/></svg>';
-  function setupPickHtml(name, label, shown, optsHtml) {
-    return '<label class="set-row fc-gs-pick"><span class="set-label">' + esc(label) + '</span>' +
-      '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" + selectHtml(name, label, optsHtml) + "</label>";
+  // Script, Word count, Sort by: the same row as Words from -- the value
+  // and ⌃⌄ -- opening the same glass menu of checkmark rows; a tap picks
+  // and closes it. The menus sit after the card (it clips), each anchored
+  // under its own row (.fc-gs-menu-at-N, N = the row's place).
+  function setupPickHtml(name, label, shown) {
+    return '<button type="button" class="set-row fc-gs-pick" data-pick="' + name + '" aria-haspopup="menu" aria-expanded="false" aria-controls="fcGsMenu-' + name + '">' +
+      '<span class="set-label">' + esc(label) + '</span><span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span></button>";
+  }
+  function setupMenuHtml(name, label, options, current, at) {
+    return '<div class="fc-xw-sheet fc-gs-menu fc-gs-menu-at-' + at + '" id="fcGsMenu-' + name + '" role="menu" aria-label="' + esc(label) + '" hidden>' +
+      '<div class="fc-xw-sheet-head fc-gs-menu-head"><h4 class="fc-xw-sheet-title">' + esc(label) + "</h4></div>" +
+      options.map(function (o) {
+        var val = Array.isArray(o) ? o[0] : String(o), on = String(current) === val;
+        return '<button type="button" class="fc-gs-opt" role="menuitemradio" aria-checked="' + on + '" data-pick="' + name + '" data-value="' + esc(val) + '">' +
+          '<span class="fc-gs-opt-tx">' + esc(Array.isArray(o) ? o[1] : String(o)) + "</span>" + CHECK_ICON + "</button>";
+      }).join("") + "</div>";
   }
   function setupHtml() {
     var games = state.kind === "games";
@@ -2494,6 +2506,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var why = state.source === "table" && !state.tables.length ? "Choose a table to play with."
       : "This needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — these have " + state.poolCount : "") +
         ". Tick more tables under Words from" + (state.source === "table" ? "" : ", or add words to your flashcards") + ".";
+    // [key, label, shown value, options] per row under Words from.
+    var picks = [];
+    if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
+    picks.push(["size", "Word count", sizeLabel(), sizeOpts()]);
+    if (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length) picks.push(["sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), state.sortAvail]);
     return '<div class="fc-gs">' +
       '<h3 class="help-head set-head">' + (games ? "Game" : "Puzzle") + "</h3>" +
       '<div class="help-card set-card fc-gs-modes" role="radiogroup" aria-label="' + (games ? "Game" : "Puzzle") + '">' +
@@ -2503,13 +2520,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }).join("") + "</div>" +
       '<h3 class="help-head set-head">Words</h3>' +
       '<div class="fc-gs-words"><div class="help-card set-card">' +
-      '<button type="button" class="set-row fc-gs-pick fc-gs-src" id="fcXwSource" aria-haspopup="dialog" aria-controls="fcXwSheet">' +
-      '<span class="set-label">Words from</span><span class="fc-xw-menu-val">' + esc(sourceLabel()) + ROW_CHEVRON + "</span></button>" +
-      (state.mode !== "listening" && state.mode !== "wordchain" ? setupPickHtml("script", "Script", optionLabel(SCRIPT_OPTS, state.script), optionsHtml(scriptOpts(), state.script)) : "") +
-      setupPickHtml("size", "Word count", sizeLabel(), optionsHtml(sizeOpts(), state.size)) +
-      (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length
-        ? setupPickHtml("sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), optionsHtml(state.sortAvail, state.sortBy)) : "") +
-      "</div>" + tablesSheetHtml() + "</div>" +
+      '<button type="button" class="set-row fc-gs-pick fc-gs-src" id="fcXwSource" aria-haspopup="dialog" aria-expanded="' + !!state.tablesOpen + '" aria-controls="fcXwSheet">' +
+      '<span class="set-label">Words from</span><span class="fc-xw-menu-val">' + esc(sourceLabel()) + UPDOWN_ICON + "</span></button>" +
+      picks.map(function (p) { return setupPickHtml(p[0], p[1], p[2]); }).join("") +
+      "</div>" + tablesSheetHtml() +
+      picks.map(function (p, i) { return setupMenuHtml(p[0], p[1], p[3], state[p[0]], i + 1); }).join("") + "</div>" +
       (short ? '<p class="set-foot fc-gs-why">' + esc(why) + "</p>" : "") +
       '<div class="fc-gs-go"><button type="button" class="fc-btn fc-btn-primary fc-gs-start" id="fcGsStart"' + (short ? " disabled" : "") + ">Start</button></div>" +
       '<div class="help-card set-card fc-gs-more"><button type="button" class="set-row set-action fc-gs-stats" id="fcGsStats">' +
@@ -2984,13 +2999,71 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Wiring shared by the empty-state and full-puzzle renders below -- every
   // control has to work even when the current source/table pick has
   // nothing yet to build a grid from.
+  // The setup rows' menus: one open at a time -- Words from's checklist
+  // (state.tablesOpen, kept across the re-render each tick does) or a
+  // single-choice menu (openPick, gone with the re-render a pick does).
+  // Opening one lands focus on what's picked; closing goes back to its row.
+  var openPick = null, tablesQuery = "";
   function setTablesOpen(panel, open) {
+    if (open) closePick(panel, false);
     state.tablesOpen = open;
-    var sheet = panel.querySelector(".fc-xw-sheet"), scrim = panel.querySelector(".fc-xw-scrim");
+    var sheet = panel.querySelector("#fcXwSheet"), scrim = panel.querySelector(".fc-xw-scrim"), src = panel.querySelector("#fcXwSource");
     if (!sheet) return;
     sheet.hidden = !open;
     if (scrim) scrim.hidden = !open;
-    if (!open) { var src = panel.querySelector("#fcXwSource"); if (src) src.focus(); }
+    if (src) src.setAttribute("aria-expanded", String(open));
+    if (open) {
+      if (sheet.scrollIntoView) sheet.scrollIntoView({ block: "nearest" });
+      var first = sheet.querySelector("#fcXwTablePicker input:checked");
+      if (first) first.focus();
+    } else {
+      filterTables(panel, "");
+      if (src) src.focus();
+    }
+  }
+  function openPickMenu(panel, name) {
+    if (state.tablesOpen) setTablesOpen(panel, false);
+    closePick(panel, false);
+    var menu = panel.querySelector("#fcGsMenu-" + name), row = panel.querySelector('.fc-gs-pick[data-pick="' + name + '"]');
+    if (!menu) return;
+    openPick = name;
+    menu.hidden = false;
+    var scrim = panel.querySelector(".fc-xw-scrim");
+    if (scrim) scrim.hidden = false;
+    if (row) row.setAttribute("aria-expanded", "true");
+    if (menu.scrollIntoView) menu.scrollIntoView({ block: "nearest" });
+    (menu.querySelector('[aria-checked="true"]') || menu.querySelector(".fc-gs-opt")).focus();
+  }
+  function closePick(panel, refocus) {
+    if (!openPick) return;
+    var name = openPick;
+    openPick = null;
+    var menu = panel.querySelector("#fcGsMenu-" + name), row = panel.querySelector('.fc-gs-pick[data-pick="' + name + '"]');
+    var scrim = panel.querySelector(".fc-xw-scrim");
+    if (menu) menu.hidden = true;
+    if (scrim && !state.tablesOpen) scrim.hidden = true;
+    if (row) { row.setAttribute("aria-expanded", "false"); if (refocus) row.focus(); }
+  }
+  // Search narrows the checklist as you type: a table shows when its name
+  // (or its category's) has the words; a category with none left hides.
+  function filterTables(panel, query) {
+    tablesQuery = query;
+    var picker = panel.querySelector("#fcXwTablePicker"), field = panel.querySelector("#fcXwSearch");
+    if (!picker) return;
+    if (field && field.value !== query) field.value = query;
+    var q = query.trim().toLowerCase(), any = false;
+    picker.querySelectorAll(".fc-xw-table-cat").forEach(function (cat) {
+      var name = cat.querySelector(".fc-xw-table-cat-name"), catHit = !!(q && name && name.textContent.toLowerCase().indexOf(q) !== -1), shown = 0;
+      cat.querySelectorAll(".fc-xw-table-check").forEach(function (row) {
+        var hit = !q || catHit || row.textContent.toLowerCase().indexOf(q) !== -1;
+        row.hidden = !hit;
+        if (hit) shown++;
+      });
+      cat.hidden = !shown;
+      if (shown) any = true;
+    });
+    var none = picker.querySelector(".fc-xw-table-none");
+    if (none) none.hidden = any;
   }
   // How to play: a small glass note under the toolbar, from ⋯.
   function setTipOpen(open) {
@@ -3007,17 +3080,36 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // detaching the clicked node -- that was a click inside, not outside.
       var tip = currentPanel && currentPanel.querySelector("#fcXwTipPop");
       if (tip && !tip.hidden && !tip.contains(e.target) && !(e.target.closest && e.target.closest("#fcXwHowto"))) setTipOpen(false);
-      if (!state.tablesOpen || !e.target.isConnected) return;
+      if (!e.target.isConnected || !currentPanel) return;
       var panel = currentPanel;
-      var box = panel && panel.querySelector(".fc-xw-sheet");
+      if (openPick) {
+        var menu = panel.querySelector("#fcGsMenu-" + openPick);
+        if (menu && !menu.contains(e.target) && !(e.target.closest && e.target.closest('.fc-gs-pick[data-pick="' + openPick + '"]'))) closePick(panel, false);
+      }
+      if (!state.tablesOpen) return;
+      var box = panel.querySelector("#fcXwSheet");
       if (!box || box.contains(e.target) || (e.target.closest && e.target.closest("#fcXwSource"))) return;
       setTablesOpen(panel, false);
     });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") setTipOpen(false);
-      if (e.key !== "Escape" || !state.tablesOpen) return;
       var panel = currentPanel;
-      if (panel) setTablesOpen(panel, false);
+      if (!panel || (!state.tablesOpen && !openPick)) return;
+      if (e.key === "Escape") {
+        // Escape in a search with words in it clears them first.
+        if (e.target.id === "fcXwSearch" && e.target.value) { filterTables(panel, ""); return; }
+        if (openPick) closePick(panel, true); else setTablesOpen(panel, false);
+        return;
+      }
+      // Up / down walk the open menu's rows, as a native menu's.
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      var box = panel.querySelector(openPick ? "#fcGsMenu-" + openPick : "#fcXwSheet");
+      if (!box) return;
+      var items = [].filter.call(box.querySelectorAll(".fc-gs-opt, #fcXwSearch, #fcXwTablePicker input"), function (el) { return !el.closest("[hidden]"); });
+      var at = items.indexOf(document.activeElement);
+      if (!items.length) return;
+      e.preventDefault();
+      items[Math.max(0, Math.min(items.length - 1, at + (e.key === "ArrowDown" ? 1 : -1)))].focus();
     });
   }
   // Games from a keyboard: the arrows move between the board's tiles and
@@ -3078,19 +3170,31 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     wireBoardKeys();
     var done = panel.querySelector("#fcXwTablesDone");
     if (done) done.addEventListener("click", function () { setTablesOpen(panel, false); });
-    panel.querySelectorAll(".fc-xw-pick-select").forEach(function (sel) {
-      sel.addEventListener("change", function () {
-        var key = sel.dataset.pick;
-        state[key] = key === "size" ? parseInt(sel.value, 10) : sel.value;
+    openPick = null;
+    panel.querySelectorAll(".fc-gs-pick[data-pick]").forEach(function (row) {
+      row.addEventListener("click", function () {
+        if (openPick === row.dataset.pick) closePick(panel, false); else openPickMenu(panel, row.dataset.pick);
+      });
+    });
+    panel.querySelectorAll(".fc-gs-opt").forEach(function (opt) {
+      opt.addEventListener("click", function () {
+        var key = opt.dataset.pick;
+        openPick = null;
+        state[key] = key === "size" ? parseInt(opt.dataset.value, 10) : opt.dataset.value;
         saveSetup();
         generate();
         rerender();
-        var again = currentPanel && currentPanel.querySelector('.fc-xw-pick-select[data-pick="' + key + '"]');
+        var again = currentPanel && currentPanel.querySelector('.fc-gs-pick[data-pick="' + key + '"]');
         if (again) again.focus();
       });
     });
     var src = panel.querySelector("#fcXwSource");
-    if (src) src.addEventListener("click", function () { setTablesOpen(panel, true); });
+    if (src) src.addEventListener("click", function () { setTablesOpen(panel, !state.tablesOpen); });
+    var search = panel.querySelector("#fcXwSearch");
+    if (search) {
+      search.addEventListener("input", function () { filterTables(panel, search.value); });
+      if (state.tablesOpen && tablesQuery) filterTables(panel, tablesQuery);
+    }
     var back = panel.querySelector("#fcXwBack");
     if (back) back.addEventListener("click", backToSetup);
     // Ticking a table switches to tables and adds it; Flashcards (or
@@ -3110,9 +3214,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           else if (!cb.checked && i !== -1) state.tables.splice(i, 1);
           if (!state.tables.length) state.source = "flashcards";
         }
+        // The tick re-renders the setup (the row's value, Start); keep the
+        // list where it was scrolled and focus on the row just ticked.
+        var list = panel.querySelector("#fcXwTablePicker"), top = list ? list.scrollTop : 0;
+        var key = cb.dataset.source ? '[data-source="' + cb.dataset.source + '"]' : '[data-table-id="' + cb.dataset.tableId + '"]';
         saveSetup();
         generate();
         rerender();
+        var again = currentPanel && currentPanel.querySelector("#fcXwTablePicker");
+        if (!again) return;
+        again.scrollTop = top;
+        var row = again.querySelector("input" + key);
+        if (row) row.focus({ preventScroll: true });
       });
     });
   }
