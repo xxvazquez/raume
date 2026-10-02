@@ -4629,6 +4629,10 @@ mark.fc-diff-co {
 .fc-direction-check:has(input:checked)::after {
   opacity: 1;
 }
+/* A group's kana count is the row's value: right-aligned in one column
+   (iOS Settings' label left / value right), the tick's slot after it. */
+.fc-kana-group .fc-kana-group-n { margin-left: auto; color: var(--muted); font-size: var(--fs-small); }
+.fc-kana-group::after { margin-left: 12px; }
 .fc-kana-group:has(input:focus-visible),
 .fc-direction-check:has(input:focus-visible) {
   outline: 2px solid var(--section); outline-offset: 2px;
