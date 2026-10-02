@@ -3826,15 +3826,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 /* Dashboard visualizations -- colors reused from the existing palette. The
    two compact charts share the top row; the mistakes list, which grows,
-   spans the full width below so cards size to their content instead of the
-   short ones stretching to leave dead white space.
+   spans the full width below. Cards sharing a row stretch to one height, so
+   a shorter neighbour never leaves a gap of ground beside the taller one.
    Every .fc-viz-card is its own white card on the ground (in the grid or
    standalone, as renderWordsToReview's fallback is). */
 .fc-viz-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
-  align-items: start;
 }
 .fc-viz-card { background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; }
 /* .fc-viz-wide (Missed today / Words to review) always spans full width,
