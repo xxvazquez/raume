@@ -141,7 +141,9 @@ ink, its meaning at 11.5px muted under it (two lines at most), centred; hover
 washes it in the section tone, a press scales it to 97%. It is still a real
 table underneath (display swapped to grid), so search, hide, print and the
 Tables directory are unchanged; in a search-results table a kanji row is an
-ordinary row (character + readings, English beside it).
+ordinary row (character + readings, English beside it). On paper each tile
+is one rounded (10px) mid-grey hairline frame, with none of the word
+tables' cell rules inside it.
 
 Tapping a tile opens the **kanji sheet** — an iOS sheet: a centred
 `--radius-sheet` card over a scrim on a wide screen, a bottom sheet with a grab

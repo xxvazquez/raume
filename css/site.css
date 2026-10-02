@@ -2405,46 +2405,46 @@ body.ja-voice-ready .vocab:not(.vocab-sentences) .jp-speak-btn {
 }
 .kanji-okuri, .kanji-sep { color: var(--faint); }
 body.hide-furigana .vocab .kanji-readings * { color: transparent !important; }
-.vocab.vocab-kanji, .vocab.vocab-kanji tbody { display: block; }
-.vocab.vocab-kanji thead { display: none; }
-.vocab.vocab-kanji tbody {
+body:not(.is-searching) .vocab.vocab-kanji, body:not(.is-searching) .vocab.vocab-kanji tbody { display: block; }
+body:not(.is-searching) .vocab.vocab-kanji thead { display: none; }
+body:not(.is-searching) .vocab.vocab-kanji tbody {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
   gap: 8px; padding: 6px 12px 14px;
 }
-.vocab.vocab-kanji tbody tr.kanji-tile {
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-height: 92px; padding: 8px 6px 10px;
   border-radius: 14px; background: var(--group-ground);
   cursor: pointer; transition: background .12s ease, transform .12s ease;
 }
-.vocab.vocab-kanji tbody tr.kanji-tile.row-hidden { display: none; }
-.vocab.vocab-kanji tbody tr.kanji-tile:hover { background: color-mix(in srgb, var(--section) 12%, var(--group-ground)); }
-.vocab.vocab-kanji tbody tr.kanji-tile:active { transform: scale(.97); }
-.vocab.vocab-kanji tbody tr.kanji-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.row-hidden { display: none; }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:hover { background: color-mix(in srgb, var(--section) 12%, var(--group-ground)); }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:active { transform: scale(.97); }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 /* !important: the word tables' per-column insets (a left inset on the
    Japanese, a trailing one on the English) would push the two apart. */
-.vocab.vocab-kanji tbody tr.kanji-tile td {
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile td {
   display: block; align-self: stretch; width: auto; padding: 0 !important; border: 0; background: transparent; text-align: center;
 }
-.vocab.vocab-kanji .kanji-char {
+body:not(.is-searching) .vocab.vocab-kanji .kanji-char {
   display: block; font-size: 34px; line-height: 44px; color: var(--ink);
 }
-.vocab.vocab-kanji .kanji-char::after,
-.vocab.vocab-kanji .kanji-readings,
-.vocab.vocab-kanji .row-actions { display: none; }
-.vocab.vocab-kanji .meaning-cell { display: block; }
-.vocab.vocab-kanji .meaning-text {
+body:not(.is-searching) .vocab.vocab-kanji .kanji-char::after,
+body:not(.is-searching) .vocab.vocab-kanji .kanji-readings,
+body:not(.is-searching) .vocab.vocab-kanji .row-actions { display: none; }
+body:not(.is-searching) .vocab.vocab-kanji .meaning-cell { display: block; }
+body:not(.is-searching) .vocab.vocab-kanji .meaning-text {
   display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
   margin-top: 2px; font-size: var(--fs-micro); line-height: 1.3; color: var(--muted);
 }
-.vocab.vocab-kanji .meaning-text mark.search-hit { color: var(--hl-ink); }
+body:not(.is-searching) .vocab.vocab-kanji .meaning-text mark.search-hit { color: var(--hl-ink); }
 /* Known (the sheet's "Mark as known"): the tile goes sage -- the character
    and a small check in the state colour on its soft wash -- so what's left
    to learn is what stays grey. */
-.vocab.vocab-kanji tbody tr.kanji-tile.kanji-known { position: relative; background: var(--right-soft); }
-.vocab.vocab-kanji tbody tr.kanji-tile.kanji-known:hover { background: color-mix(in srgb, var(--right) 18%, var(--right-soft)); }
-.vocab.vocab-kanji tr.kanji-known .kanji-char, .vocab.vocab-kanji tr.kanji-known .meaning-text { color: var(--right-strong); }
-.vocab.vocab-kanji tbody tr.kanji-tile.kanji-known::after {
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known { position: relative; background: var(--right-soft); }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known:hover { background: color-mix(in srgb, var(--right) 18%, var(--right-soft)); }
+body:not(.is-searching) .vocab.vocab-kanji tr.kanji-known .kanji-char, body:not(.is-searching) .vocab.vocab-kanji tr.kanji-known .meaning-text { color: var(--right-strong); }
+body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known::after {
   content: ""; position: absolute; top: 7px; right: 7px; width: 14px; height: 14px; border-radius: 50%;
   background: var(--right-strong) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7.2l2 1.9 4-4.2'/%3E%3C/svg%3E") center / 14px no-repeat;
 }
@@ -2989,6 +2989,11 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .vocab th:last-child { border-top-right-radius: 10px; }
   .vocab tbody tr:last-child td:first-child { border-bottom-left-radius: 10px; }
   .vocab tbody tr:last-child td:last-child { border-bottom-right-radius: 10px; }
+  /* A kanji table prints as its tile grid: each tile one rounded hairline
+     frame (its screen fill is white on paper), none of the word tables'
+     cell rules inside it. */
+  .vocab.vocab-kanji tbody tr.kanji-tile td { border: 0 !important; border-radius: 0 !important; }
+  .vocab.vocab-kanji tbody tr.kanji-tile { border: .75pt solid #bdbdbd; border-radius: 10px; }
   .vocab th { font-size: 11px; color: var(--faint); padding: 7px 14px 6px !important; }
   .vocab thead { display: table-header-group; }
   .vocab tr { break-inside: avoid; page-break-inside: avoid; }
