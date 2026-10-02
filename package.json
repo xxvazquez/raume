@@ -1,5 +1,6 @@
 {
   "name": "raume",
+  "version": "1.0.0",
   "private": true,
   "license": "(PolyForm-Noncommercial-1.0.0 AND CC-BY-NC-SA-4.0)",
   "scripts": {

@@ -495,7 +495,10 @@ Pushing `main` triggers the GitHub Pages workflow
 asset's content hash (`node scripts/stamp-asset-versions.js`), puts the commit
 SHA in the service-worker cache name, stamps the footer's version line (the text between
 `<!--build-->` and `<!--/build-->` in `index.html` becomes
-"Version <short SHA> · <commit date>") and deploys. Set the repo's Pages source to "GitHub Actions" once.
+"Version 1.0 (512) · 2 Oct 2026, 22:09 CEST" — `package.json`'s `version`
+(a trailing `.0` dropped), the build number (`git rev-list --count HEAD`, so the
+checkout fetches the full history) and the commit time in Warsaw) and deploys.
+Bump `version` for a release worth naming; the build number moves by itself. Set the repo's Pages source to "GitHub Actions" once.
 
 `.github/workflows/generate-audio.yml` is separate and manual-only
 (`workflow_dispatch`, not triggered by push) — see "Pronunciation audio"

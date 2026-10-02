@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the whole history, so the build number can count it
       - uses: actions/configure-pages@v5
       - name: Cache-bust static assets
         # Each asset's ?v= becomes its own content hash, so a deploy changes
@@ -31,8 +33,14 @@ jobs:
           node scripts/stamp-asset-versions.js
           sed -i "s/__CACHEBUST__/${GITHUB_SHA}/g" index.html sw.js
       - name: Stamp version and date in the footer
+        # "Version 1.0 (512) · 2 Oct 2026, 22:09 CEST": the version from
+        # package.json (1.0.0 reads 1.0), the build number (every commit on main counts one, so
+        # it only ever goes up), and the commit time in Warsaw.
         run: |
-          STAMP="Version ${GITHUB_SHA::7} · $(git log -1 --format=%cd --date=format:'%-d %b %Y')"
+          VERSION=$(node -p "require('./package.json').version.replace(/\\.0$/, '')")
+          BUILD=$(git rev-list --count HEAD)
+          WHEN=$(TZ=Europe/Warsaw git log -1 --format=%cd --date=format-local:'%-d %b %Y, %H:%M %Z')
+          STAMP="Version ${VERSION} (${BUILD}) · ${WHEN}"
           sed -i "s|<!--build-->[^<]*<!--/build-->|${STAMP}|" index.html
       - uses: actions/upload-pages-artifact@v3
         with:
