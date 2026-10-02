@@ -537,6 +537,14 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   updateAccountIndicator();
   onSyncStateChange(updateAccountIndicator);
 
+  // A different account (or none) means the store just started over empty
+  // (store.resetCacheForUser) -- so the deck has to be fetched again, or
+  // signing back in without a reload showed an empty one.
+  var syncedUserId = null;
+  onAuthChange(function () {
+    var uid = currentUser() ? currentUser().id : null;
+    if (uid !== syncedUserId) { syncedUserId = uid; initialSyncDone = false; lastInitialSyncAttempt = 0; lastKanaSyncAttempt = 0; }
+  });
   onAuthChange(function () { wireCustomVocabRemote(); invalidateInsights(); render(); refreshRowToggleButtons(); updateAccountIndicator(); });
 
   // Vocabulary-page table icons: while signed in, a local pick is pushed to
