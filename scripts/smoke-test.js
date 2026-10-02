@@ -3989,6 +3989,17 @@ async function main() {
     document.getElementById("fcXwSkip").click();
     return document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 3 && wcMsg() === "Skipped";
   })());
+  check("going to Library and back keeps the game where it was -- the same trail, paused, and Resume carries on", (() => {
+    const panel = document.getElementById("fcPanelGames");
+    document.querySelector('.fc-tab[data-tab="manage"]').click();
+    const away = !document.getElementById("fcPanelGames").querySelector(".fc-wc-chip");
+    document.querySelector('.fc-tab[data-tab="games"]').click();
+    const back = document.getElementById("fcPanelGames");
+    const paused = back === panel && back.querySelector(".fc-mt-paused") !== null && !!document.getElementById("fcPauseResume");
+    document.getElementById("fcPauseResume").click();
+    return away && paused && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 3
+      && !document.getElementById("fcPauseResume") && document.getElementById("fcLsCount").textContent === "3 / 3";
+  })());
   await (async () => {
     const need = wcEl(".fc-wc-kana").textContent;
     const trailText = [...document.querySelectorAll("#fcPanelGames .fc-wc-chip-w")].map(c => c.textContent);

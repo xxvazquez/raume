@@ -952,6 +952,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   document.addEventListener("visibilitychange", function () {
     if (document.hidden && activeGame && activeGame.pause) activeGame.pause();
   });
+  // So does going to Vocabulary, Kanji or another page: Practice stays in
+  // the page, hidden, and the clock would otherwise run on.
+  new MutationObserver(function () {
+    if (document.body.dataset.activePage !== "flashcards" && activeGame && activeGame.pause) activeGame.pause();
+  }).observe(document.body, { attributes: true, attributeFilter: ["data-active-page"] });
 
   function wireMatch(boardEl, clockEl, p, romajiMode) {
     // The clock only runs while you play: `acc` holds the time banked
@@ -3230,14 +3235,36 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
   }
 
+  // Going to another Practice tab rebuilds every panel. A puzzle or game
+  // part-way through isn't thrown away: its panel -- the board, what's
+  // typed, the clock -- is set aside, paused, and put back in place of the
+  // fresh one when its tab comes back. `keep` gets the tab about to show;
+  // a redraw of the same tab (New puzzle, a setting) still starts afresh.
+  var keptPanels = {};
+  function keep(nextTab) {
+    var panel = currentPanel;
+    if (!panel || !panel.isConnected || !state || !state.started || !state.puzzle) return;
+    var kind = state === states.games ? "games" : "puzzles";
+    if (nextTab === (kind === "games" ? "games" : "crosswords")) return;
+    if (activeGame && activeGame.pause) activeGame.pause();
+    keptPanels[kind] = { panel: panel, puzzle: state.puzzle, game: activeGame };
+  }
   function renderCrosswords(panel) { renderTab(panel, "puzzles"); }
   function renderGames(panel) { renderTab(panel, "games"); }
   function renderTab(panel, kind) {
     if (!panel) return;
     state = states[kind];
-    currentPanel = panel;
     stopMatchTimer();
     activeGame = null;
+    var kept = keptPanels[kind];
+    delete keptPanels[kind];
+    if (kept && state.started && kept.puzzle === state.puzzle) {
+      panel.replaceWith(kept.panel);
+      currentPanel = kept.panel;
+      activeGame = kept.game;
+      return;
+    }
+    currentPanel = panel;
     // Below MIN_WORDS there's no real puzzle to show -- say why, and what
     // would fix it, instead of a two-word grid.
     function notEnough(msg, canRetry) {
@@ -3479,6 +3506,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   return {
     playWords: playWords,
+    keep: keep,
     renderCrosswords: renderCrosswords,
     renderGames: renderGames,
     // pure hooks for scripts/smoke-test.js

@@ -404,7 +404,9 @@ in play ‹ and the game's name, the clock (or "3 / 10"), and ⋯ with New
 game, Skip (Word chain), How to play, *Restart* and *Stats*. On a keyboard
 the arrow keys move between tiles and choices, Enter or Space picks, 1–4
 picks a choice by number, and Enter goes on to the next question. Each tab keeps its own settings and its
-game in progress while you switch between them. Practice only — nothing is
+game in progress while you switch between them: going to another Practice
+tab or page pauses the game, and coming back finds it exactly where you left
+it, paused (a part-typed puzzle grid too). Practice only — nothing is
 scheduled; every finished game goes to the Dashboard.
 
 Answering feels like a tap on something real, quietly: a tile squeezes under

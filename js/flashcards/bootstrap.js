@@ -279,6 +279,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
         '<button type="button" class="fc-titlebar-btn" data-tab="settings">Settings</button>' +
         '<button type="button" class="fc-titlebar-btn" data-tab="help">Help</button>' +
         "</div></div>";
+    // A game left part-way is set aside (paused) before the panels are
+    // rebuilt, and put back when its tab is shown again.
+    crosswords.keep(activeTab);
     el.innerHTML =
       header +
       '<div class="fc-sync-chip" id="fcSyncChip" hidden><span class="fc-sync-chip-text" role="status" aria-live="polite"></span></div>' +
