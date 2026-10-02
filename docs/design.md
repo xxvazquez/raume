@@ -138,8 +138,10 @@ dark, so moving between sections reads as a change of place.
 
 ### Kanji grid and sheet
 
-A Kanji table opens as a grid of tiles inside its card, like a Photos grid:
-each tile a `--group-ground` rounded square (14px), the character at 34px in
+A Kanji table is a row like any other table's -- same tile, title, ⋯, print
+and chevron, closed until you open it -- and opens as a grid of tiles inside
+its card, like a Photos grid, on the title row's 16px edge with 10px between
+tiles: each tile a `--group-ground` rounded square (14px), the character at 34px in
 ink, its on readings (katakana) on one line and its kun readings (hiragana)
 on the next at 11px in the furigana tone, ・ between readings with its
 full-width bearings pulled in (hidden with furigana), centred -- no meaning
