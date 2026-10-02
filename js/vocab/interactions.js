@@ -401,10 +401,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (info) { if (kanjiPopOwner === info) closeKanjiPop(); else openKanjiPop(info); return; }
     if (kanjiPop && !t.closest('.kanji-help-pop')) closeKanjiPop();
     if (t.closest('button, a, #kanjiSheet')) return;
-    // Cover answers: a tap checks the tile's meaning instead (the handler
-    // for that mode, below) -- the sheet would give it away. In a search
-    // result a kanji is an ordinary row: a tap on the character shows its
-    // romaji, like any word, and the rest of the row opens the sheet.
+    // A tile opens its sheet -- romaji, meaning and the rest live there.
+    // In a search result a kanji is an ordinary row: a tap on the character
+    // shows its romaji, like any word, and the rest of the row opens the
+    // sheet. (Cover answers: a tap checks the tile instead -- the handler for
+    // that mode, below -- the sheet would give it away.)
     const tile = t.closest('#vocabulary .vocab-kanji tr.kanji-tile');
     const revealTap = document.body.classList.contains('is-searching') && t.closest('.jpword');
     if (tile && !revealTap && !document.body.classList.contains('selftest-mode')) openKanjiSheet(tile);
@@ -774,7 +775,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!el || !kr || document.body.classList.contains('hide-furigana')) return false;
       const qx = expandMacronsForSearch(q);
       let any = false;
-      el.textContent.split(/\s+/).filter(Boolean).forEach(r => {
+      [...el.children].map(c => c.textContent).join('・').split('・').filter(Boolean).forEach(r => {
         if (!expandMacronsForSearch(kr.toRomaji(r).toLocaleLowerCase()).includes(qx)) return;
         highlightCell(el, r.toLocaleLowerCase());
         any = true;

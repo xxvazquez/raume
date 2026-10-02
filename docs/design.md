@@ -139,8 +139,10 @@ dark, so moving between sections reads as a change of place.
 
 A Kanji table opens as a grid of tiles inside its card, like a Photos grid:
 each tile a `--group-ground` rounded square (14px), the character at 34px in
-ink, its kana readings at 11px in the furigana tone under it (hidden with
-furigana), then its meaning at 11.5px muted (two lines at most), centred; hover
+ink, its on readings (katakana) on one line and its kun readings (hiragana)
+on the next at 11px in the furigana tone, ・ between readings with its
+full-width bearings pulled in (hidden with furigana), centred -- no meaning
+or romaji on the tile: those are in the sheet a tap opens; hover
 washes it in the section tone, a press scales it to 97%. It is still a real
 table underneath (display swapped to grid), so search, hide, print and the
 Tables directory are unchanged; in a search-results table a kanji row is an

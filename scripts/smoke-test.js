@@ -153,7 +153,7 @@ async function main() {
   check("renders 47 table sections", sections.length === 47);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 990 vocabulary rows", totalRows === 990);
-  check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character, its meaning, its readings along hidden for search", (() => {
+  check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
     const kanjiSecs = [...document.querySelectorAll('#vocabulary .table-section[data-category="N5 Kanji"]')];
     const rows = kanjiSecs.flatMap(s => [...s.querySelectorAll("tbody tr")]);
     const yama = rows.find(r => r.querySelector(".kanji-char").textContent === "山");
@@ -162,7 +162,9 @@ async function main() {
       && kanjiSecs.map(s => s.querySelector(".section-title-text").textContent).join(",") === "Numbers & Money,Days & Time,People & Body,Places & Directions,Nature & Things,Verbs,Adjectives"
       && kanjiSecs[0].querySelector("tbody tr .kanji-char").textContent === "一"
       && rows.every(r => r.classList.contains("kanji-tile") && r.tabIndex === 0 && !r.cells[0].querySelector("ruby") && r.cells[0].querySelector(".kanji-readings.furigana"))
-      && yama.querySelector(".kanji-readings").textContent === "サン やま" && yama.querySelector(".jpword").dataset.romaji === "yama / san"
+      && yama.querySelector(".kanji-on").textContent === "サン" && yama.querySelector(".kanji-kun").textContent === "やま"
+      && rows.find(r => r.querySelector(".kanji-char").textContent === "九").querySelector(".kanji-on").textContent === "キュウ・ク"
+      && yama.querySelector(".jpword").dataset.romaji === "yama / san"
       && miru.querySelector(".kanji-okuri").textContent === "る" && yama.cells[1].querySelector(".meaning-text").textContent === "mountain";
   })());
   check("tapping a kanji tile opens its sheet -- readings, strokes and radical, an example with furigana, the reader's words that use it folded away (not repeating the example), Add to flashcards -- and Escape closes it, back on the tile", (() => {

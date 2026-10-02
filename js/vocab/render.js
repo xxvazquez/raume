@@ -361,7 +361,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   function kanjiRow(row) {
     var ch = row.jp[0].kanji;
-    var readings = (row.on || []).concat(row.kun || []).map(kanjiReadingHtml).join(' ');
+    // On readings on one line, kun on the next, ・ between readings in a
+    // group -- so ジュウ and とお never read as one word.
+    var sep = '<span class="kanji-sep">・</span>';
+    var on = (row.on || []).map(kanjiReadingHtml).join(sep), kun = (row.kun || []).map(kanjiReadingHtml).join(sep);
+    var readings = (on ? '<span class="kanji-on">' + on + '</span>' : '') + (kun ? '<span class="kanji-kun">' + kun + '</span>' : '');
     var known = window.RaumeStudy.knownKanji && window.RaumeStudy.knownKanji.isKnown(row.id);
     return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
       '<td class="jp" lang="ja"><div class="kanji-stack"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
