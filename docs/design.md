@@ -284,8 +284,11 @@ and Help.
   iOS ignores it for the reader's own pinch-zoom, so zooming stays available,
   and other platforms (where it could block pinch-zoom) never auto-zoom
   anyway. Never `user-scalable=no`, and never force fields up to 16px; hit
-  areas are ≥44pt — small controls (the ⋯ button, the reorder arrows) get an
-  invisible `::after` and a collapsed table's whole row is its toggle; the
+  areas are ≥44pt — small controls (the ⋯ button, the reorder arrows, 32–36px capsule buttons,
+  the account button, a table's sort chevrons, each row's speaker / hide / add
+  glyphs) get an invisible `::after` grown to 44pt on the short sides only, and a
+  collapsed table's whole row is its toggle; ⋯ menus use the horizontal ⋯ glyph
+  (never Android's vertical ⋮); the
   masthead icons are 44px; `--faint` is AA on both `--paper` and the grey ground
   and the tile hues clear 3:1 against their white glyph; sheets use `dvh` so the
   iOS toolbar doesn't clip them; `theme-color` has light and dark variants tinted

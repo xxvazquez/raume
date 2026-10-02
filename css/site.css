@@ -5041,6 +5041,16 @@ mark.fc-diff-co {
 #vocabulary .section-head { position: relative; }
 #vocabulary .section-toggle::after { content: ""; position: absolute; inset: 0; }
 #vocabulary .section-head > .controls { position: relative; z-index: 1; }
+/* Every other small control gets the same invisible pad, grown only on the
+   sides shorter than 44px (min() keeps a bigger control's hit area its own
+   size): capsule buttons drawn 32-36px tall, the account button, a table's
+   sort chevrons, and each row's speaker / hide / add glyphs. */
+.fc-btn, .masthead-gear, .sort-button, .vocab tbody .jp-speak-btn, .row-hide-btn, .fc-toggle-btn { position: relative; }
+.fc-btn::after, .masthead-gear::after, .sort-button::after, .vocab tbody .jp-speak-btn::after, .row-hide-btn::after, .fc-toggle-btn::after {
+  content: ""; position: absolute;
+  top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px));
+  left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px));
+}
 /* Each row's controls are their own z-index:1 layer, so an open ⋯ menu
    can't rise past the next row's controls on its own -- the row whose menu
    is open lifts its controls above every other row's. */
