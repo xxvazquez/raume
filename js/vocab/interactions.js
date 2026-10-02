@@ -368,7 +368,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const t = event.target;
     if (!t || !t.closest) return;
     if (t.closest('.ks-close, #kanjiScrim')) { closeKanjiSheet(); return; }
-    // A row's ⓘ opens its explainer in a popover (again: closes it); any
+    // A card header's ⓘ opens its explainer in a popover (again: closes it); any
     // other tap closes an open one.
     // Replay: a fresh copy of the drawing restarts its CSS animation.
     // Write it: the sheet turns into the writing pad (js/vocab/kanji-write.js);
@@ -396,6 +396,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const knownBtn = t.closest('#kanjiSheet .ks-known');
     if (knownBtn && window.RaumeStudy.knownKanji) {
       window.RaumeStudy.knownKanji.setKnown(knownBtn.dataset.vocabId, knownBtn.getAttribute('aria-pressed') !== 'true');
+      return;
+    }
+    // A reading row plays its reading -- the whole row is the touch target,
+    // its speaker button the visible sign that it plays (and the keyboard's
+    // way in). Only while that button shows, i.e. a voice is ready.
+    const reading = t.closest('#kanjiSheet .ks-reading');
+    if (reading && !t.closest('button')) {
+      const speak = reading.querySelector('.jp-speak-btn');
+      if (speak && getComputedStyle(speak).display !== 'none') speak.click();
       return;
     }
     const info = t.closest('#kanjiSheet .ks-info');

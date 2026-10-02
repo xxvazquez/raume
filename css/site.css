@@ -2513,7 +2513,7 @@ body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known::afte
 .ks-note { margin: 2px 0 0; font-size: var(--fs-small); color: var(--muted); }
 /* The sheet's speaker is its main "hear it" action: a round tinted 30px
    button beside the ✕, not the tables' faint row glyph. */
-body.ja-voice-ready .kanji-sheet .jp-speak-btn {
+body.ja-voice-ready .kanji-sheet .ks-top .jp-speak-btn {
   flex: none; align-self: flex-start; width: 30px; height: 30px; margin: 0; padding: 0;
   align-items: center; justify-content: center; border-radius: 50%; opacity: 1;
   background: color-mix(in srgb, var(--section) 14%, transparent); color: var(--section-strong);
@@ -2549,31 +2549,46 @@ body.ja-voice-ready .kanji-sheet .jp-speak-btn {
 }
 .ks-example-jp rt { font-size: 11px; color: var(--furigana); }
 .ks-example-en { color: var(--muted); }
-/* Each row's trailing ⓘ, in the tint, opens a small popover with its
+/* Each card's ⓘ sits on its header, like the Settings cards': quiet until
+   opened, then in the tint. It opens a small popover with the card's
    explainer -- the tables' grammar popover (.role-pop), set a touch wider,
    its kanji with furigana (render.js kanjiHelpHtml). */
 .ks-val { margin-left: auto; }
+.ks-group-head { display: flex; align-items: center; gap: 2px; }
 .ks-info {
   appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; margin: -6px -8px -6px -6px; padding: 0; border: 0;
-  background: transparent; color: var(--section-strong); cursor: pointer;
+  min-width: 28px; min-height: 28px; margin: -8px 0; padding: 0; border: 0;
+  background: transparent; color: var(--faint); cursor: pointer;
 }
-.ks-info svg { width: 20px; height: 20px; }
+.ks-info[aria-expanded="true"] { color: var(--section-strong); }
 .ks-info:active { opacity: .5; }
+/* A reading row (Contacts' phone-number row): the kind small and grey over
+   the kana, its romaji beside it, the speaker trailing. The whole row plays,
+   with the Settings rows' neutral press fill. */
+.ks-reading { cursor: pointer; transition: background .12s ease; }
+.ks-reading:active { background-color: color-mix(in srgb, var(--ink) 7%, var(--paper)); }
+.ks-reading-main { display: flex; flex-direction: column; min-width: 0; }
+.ks-reading-kind { font-size: var(--fs-small); line-height: 1.3; color: var(--muted); }
+.ks-reading-val { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.ks-reading-kana { font-size: 19px; line-height: 1.35; color: var(--ink); }
+.ks-reading-ro { color: var(--muted); }
+/* Tinted, at full strength: here the speaker is the row's one action (and
+   the sign that the row plays), not a faint glyph in a dense table. */
+body.ja-voice-ready .ks-reading .jp-speak-btn {
+  flex: none; margin: -8px -8px -8px 0; padding: 10px; opacity: 1; color: var(--section-strong);
+}
+.ks-reading .jp-speak-btn svg { width: 18px; height: 18px; }
+/* A grey line about this kanji's radical, under the row. */
+.ks-row-sub { flex-wrap: wrap; row-gap: 2px; }
+.ks-sub { flex: 0 0 100%; font-size: var(--fs-small); line-height: 1.3; color: var(--muted); }
 .role-pop.kanji-help-pop { z-index: 95; width: min(290px, calc(100vw - 16px)); max-width: none; padding: 12px 14px; white-space: normal; }
 .kanji-help-pop rt { font-size: 9.5px; font-weight: 400; color: var(--furigana); }
-.kh-title { font-size: 15px; font-weight: 600; line-height: 1.9; color: var(--ink); }
-.kh-lead { margin: 2px 0 8px; line-height: 1.4; color: var(--ink-2); }
-.kh-list { margin: 0; }
-.kh-item { display: flex; gap: 10px; padding: 5px 0; border-top: 1px solid var(--row-line); line-height: 1.9; }
-.kh-item dt { flex: 0 0 82px; color: var(--muted); }
-.kh-item dd { margin: 0; flex: 1 1 auto; color: var(--ink-2); line-height: 1.4; align-self: center; }
-.kh-ex {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  margin-top: 8px; padding: 6px 10px 5px; border-radius: 10px; background: var(--group-ground);
-}
-.kh-ex-jp { flex: none; font-size: 17px; line-height: 1.9; color: var(--ink); white-space: nowrap; }
-.kh-ex-en { color: var(--muted); text-align: right; white-space: nowrap; }
+.kh-title { font-size: 15px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+/* An iOS Help list: each term on its own line, one short grey line under it. */
+.kh-terms { margin: 4px 0 0; }
+.kh-term { padding: 6px 0; border-top: 1px solid var(--row-line); }
+.kh-term dt { color: var(--ink); line-height: 1.9; }
+.kh-term dd { margin: 0; color: var(--muted); line-height: 1.4; }
 /* Stroke order (render.js kanjiStrokesHtml): the kanji's outline faint,
    each stroke drawn over it in turn -- 0.55s a stroke, the next starting
    0.7s after -- its number fading in as it starts. Reduced motion: the

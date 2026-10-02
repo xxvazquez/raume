@@ -245,18 +245,36 @@ async function main() {
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     return closedAtStart && opened && sheet.hidden && scrim.hidden && sheet.innerHTML === "" && document.activeElement === tile;
   })());
-  check("each sheet row's ⓘ opens a popover explaining it -- every kanji in it with furigana, a sorting-only radical saying so -- tapping elsewhere or Escape closes it, Escape again closes the sheet", (() => {
+  check("readings are one row each, Contacts-style -- the kind over the kana, its romaji beside it in the row's own spelling, a speaker that plays it as hiragana -- and tapping the row plays it too", (() => {
+    const sheet = document.getElementById("kanjiSheet");
+    [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "九").click();
+    const rows = [...sheet.querySelectorAll(".ks-reading")];
+    const shape = rows.map(r => r.querySelector(".ks-reading-kind").textContent + ":" + r.querySelector(".ks-reading-kana").textContent + ":" + r.querySelector(".ks-reading-ro").textContent).join(",")
+      === "on’yomi:キュウ:kyū,on’yomi:ク:ku,kun’yomi:ここのつ:kokonotsu";
+    const btns = rows.map(r => r.querySelector(".jp-speak-btn"));
+    const keyed = btns.map(b => b.dataset.jpSpeak).join(",") === "きゅう,く,ここのつ" && btns[0].getAttribute("aria-label") === "Play キュウ";
+    const noRomajiRow = ![...sheet.querySelectorAll(".ks-label")].some(l => l.textContent === "Romaji");
+    const speech = window.RaumeStudy.shared.speech, said = [], orig = speech.speak;
+    speech.speak = t => said.push(t);
+    document.body.classList.add("ja-voice-ready");
+    rows[2].querySelector(".ks-reading-kana").click();
+    speech.speak = orig;
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    return shape && keyed && noRomajiRow && said.join() === "ここのつ";
+  })());
+  check("each card has one ⓘ, on its header (Readings, Writing) -- no row ⓘs -- opening its explainer as a Help list, every kanji in it with furigana; a sorting-only radical says so under its own row; tapping elsewhere or Escape closes it, Escape again closes the sheet", (() => {
     const sheet = document.getElementById("kanjiSheet");
     const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "九");
     tile.click();
     const infos = [...sheet.querySelectorAll(".ks-info")];
-    const rad = sheet.querySelector('.ks-info[data-help="radical"]');
-    rad.click();
-    let pop = document.querySelector(".kanji-help-pop");
-    const opened = infos.map(b => b.dataset.help).join(",") === "on,kun,romaji,strokes,radical" && !!pop
-      && infos.map(b => b.closest(".ks-row").querySelector(".ks-label").textContent).join(",") === "On,Kun,Romaji,Strokes,Radical"
-      && !!pop.querySelector(".kh-title") && pop.querySelectorAll(".kh-item").length >= 3
-      && /just for sorting/.test(pop.textContent) && rad.getAttribute("aria-expanded") === "true";
+    const writing = sheet.querySelector('.ks-info[data-help="writing"]');
+    writing.click();
+    const pop = document.querySelector(".kanji-help-pop");
+    const opened = infos.map(b => b.dataset.help).join(",") === "readings,writing" && infos.every(b => b.closest(".ks-group-head"))
+      && !sheet.querySelector(".ks-row .ks-info") && !!pop
+      && pop.querySelector(".kh-title").textContent === "Writing" && pop.querySelectorAll(".kh-term").length === 2
+      && writing.getAttribute("aria-expanded") === "true"
+      && /Just for sorting/.test(sheet.querySelector(".ks-row-sub .ks-sub").textContent);
     const allRuby = infos.every(b => {
       b.click();
       const p = document.querySelector(".kanji-help-pop");
@@ -266,7 +284,7 @@ async function main() {
     });
     sheet.querySelector(".ks-meaning").click();
     const tappedAway = !document.querySelector(".kanji-help-pop");
-    rad.click();
+    writing.click();
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     const escPop = !document.querySelector(".kanji-help-pop") && !sheet.hidden;
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));

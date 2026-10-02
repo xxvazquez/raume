@@ -409,63 +409,74 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.wordsWithKanji = wordsWithKanji;
   var CLOSE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9"/></svg>';
-  // What an N5 learner hasn't met yet, said the way a teacher would. Each
-  // row has a trailing ⓘ that opens a small popover with its explainer
-  // (kanjiHelpHtml; js/vocab/interactions.js places it, like the tables'
-  // grammar ⓘ). Every kanji in them carries furigana: {漢字|かんじ}.
-  // Each: a title, a one-line definition, a few labelled lines and an
-  // example or two -- short enough to take in at a glance.
+  // What an N5 learner hasn't met yet, said the way a teacher would -- one
+  // explainer per card, behind the ⓘ on its header (the Settings cards'
+  // convention: a row ⓘ in iOS means "details of this item", never "what
+  // does this label mean"). Each is an iOS Help list: a term, then one short
+  // line (kanjiHelpHtml; js/vocab/interactions.js places the popover). Every
+  // kanji in them carries furigana: {漢字|かんじ}.
   var KANJI_HELP = {
-    on: { label: 'On', title: 'On’yomi · {音読|おんよ}み', lead: 'The reading that came from Chinese.',
-      points: [['Written', 'in katakana'], ['Used', 'mostly in words of two or more kanji']],
-      examples: [['{富士山|ふじさん}', 'Mt. Fuji']] },
-    kun: { label: 'Kun', title: 'Kun’yomi · {訓読|くんよ}み', lead: 'The Japanese word for it.',
-      points: [['Written', 'in hiragana'], ['Used', 'when the kanji stands alone, or has hiragana after it'],
-        ['Lighter kana', 'okurigana — the hiragana after the kanji']],
-      examples: [['{山|やま}', 'mountain'], ['{見|み}る', 'to see']] },
-    romaji: { label: 'Romaji', title: 'Romaji', lead: 'Every reading, in romaji.',
-      points: [['Flashcards', 'any one of them counts'], ['Tip', 'learn each reading with a word']] },
-    strokes: { label: 'Strokes', title: 'Strokes', lead: 'How many lines it’s written with.',
-      points: [['Order', 'top to bottom, left to right'], ['Crossing', 'across before down — {十|じゅう}'],
-        ['A box', 'sides, inside, then close the bottom — {日|ひ}']] },
-    radical: { label: 'Radical', title: 'Radical · {部首|ぶしゅ}', lead: 'The part a dictionary files a kanji under — often a hint to its meaning.',
-      points: [['〜へん', 'on the left'], ['〜かんむり', 'on top'], ['〜がまえ', 'around']],
-      examples: [['{亻|にんべん} → {休|やす}む', 'person + tree = rest']] },
-    radicalSelf: 'a radical itself — you’ll spot it inside other kanji',
-    radicalSort: 'just for sorting — no need to learn it'
+    readings: { label: 'Readings', items: [
+      ['On’yomi · {音読|おんよ}み', 'The reading that came from Chinese — in katakana, mostly in words of two or more kanji: {富士山|ふじさん}.'],
+      ['Kun’yomi · {訓読|くんよ}み', 'The Japanese word for it — in hiragana, when the kanji stands alone or has kana after it: {山|やま}, {見|み}る. The lighter kana are okurigana.'],
+      ['Flashcards', 'Any one of its readings counts.']] },
+    writing: { label: 'Writing', items: [
+      ['Strokes', 'How many lines it’s written with — top to bottom, left to right, across before down ({十|じゅう}).'],
+      ['Radical · {部首|ぶしゅ}', 'The part a dictionary files a kanji under, often a hint to its meaning: {亻|にんべん} + {木|き} = {休|やす}む.']] }
   };
   function withFurigana(text) {
     return esc(text).replace(/\{([^|}]+)\|([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>');
   }
   function kanjiHelpHtml(vocabId, key) {
-    var row = rawRow(vocabId), h = KANJI_HELP[key];
-    if (!row || !h || typeof h === 'string') return '';
-    var points = h.points.slice();
-    if (key === 'radical' && row.radical.r === row.jp[0].kanji) points.push(['This one', KANJI_HELP.radicalSelf]);
-    else if (key === 'radical' && row.radical.sortOnly) points.push(['This one', KANJI_HELP.radicalSort]);
-    return '<div class="kh-title">' + withFurigana(h.title) + '</div><p class="kh-lead">' + withFurigana(h.lead) + '</p>' +
-      '<dl class="kh-list">' + points.map(function (p) {
-        return '<div class="kh-item"><dt>' + withFurigana(p[0]) + '</dt><dd>' + withFurigana(p[1]) + '</dd></div>';
-      }).join('') + '</dl>' +
-      (h.examples || []).map(function (x) {
-        return '<div class="kh-ex"><span class="kh-ex-jp" lang="ja">' + withFurigana(x[0]) + '</span><span class="kh-ex-en">' + esc(x[1]) + '</span></div>';
-      }).join('');
+    var h = KANJI_HELP[key];
+    if (!rawRow(vocabId) || !h) return '';
+    return '<div class="kh-title">' + h.label + '</div><dl class="kh-terms">' + h.items.map(function (p) {
+      return '<div class="kh-term"><dt>' + withFurigana(p[0]) + '</dt><dd>' + withFurigana(p[1]) + '</dd></div>';
+    }).join('') + '</dl>';
   }
   vocab.kanjiHelpHtml = kanjiHelpHtml;
-  // A row's value.
-  function kanjiFieldHtml(row, key) {
-    var ch = row.jp[0].kanji, rad = row.radical;
-    if (key === 'on' || key === 'kun') return (row[key] || []).map(kanjiReadingHtml).join('<span class="kanji-sep">、</span>');
-    if (key === 'romaji') return esc(row.romaji);
-    if (key === 'strokes') return String(row.strokes);
-    return rad.r === ch ? 'It’s one itself'
-      : '<span class="ks-rad" lang="ja">' + esc(rad.r) + '</span> <span lang="ja">' + esc(rad.name) + '</span> · ' + esc(rad.en);
+  function cardHead(key) {
+    var label = KANJI_HELP[key].label;
+    return '<h3 class="ks-group-head">' + label + '<button type="button" class="ks-info" data-help="' + key +
+      '" aria-expanded="false" aria-label="About ' + label.toLowerCase() + '">' + INFO_ICON + '</button></h3>';
   }
-  function kanjiRowHtml(row, key) {
-    var h = KANJI_HELP[key], ja = key === 'on' || key === 'kun';
-    return '<div class="ks-row"><span class="ks-label">' + h.label + '</span><span class="ks-val"' + (ja ? ' lang="ja"' : '') + '>' +
-      kanjiFieldHtml(row, key) + '</span><button type="button" class="ks-info" data-help="' + key + '" aria-expanded="false" aria-label="' + esc('About ' + h.label) + '">' +
-      INFO_ICON + '</button></div>';
+  // Each reading's romaji, in the row's own spelling (jū, not juu): the
+  // reading is converted, then matched to the authored list by sound.
+  function readingRomaji(row, reading) {
+    var kr = window.RaumeStudy.kanaRomaji;
+    var raw = kr ? kr.toRomaji(reading.replace('.', '')) : '';
+    var key = function (r) {
+      return String(r).toLowerCase().replace(/[āâ]/g, 'aa').replace(/[īî]/g, 'ii').replace(/[ūû]/g, 'uu')
+        .replace(/[ēê]/g, 'ee').replace(/[ōô]/g, 'oo').replace(/ou/g, 'oo');
+    };
+    var authored = String(row.romaji || '').split(' / ');
+    for (var i = 0; i < authored.length; i++) if (key(authored[i]) === key(raw)) return authored[i];
+    return raw;
+  }
+  // One row per reading, the way Contacts lists phone numbers: a small grey
+  // kind over the kana, its romaji beside it, and the speaker every word row
+  // has -- so a tap always says which reading it plays. Spoken as hiragana
+  // (ジュウ -> じゅう), the spelling the prerendered clips are keyed by.
+  function kanjiReadingRowHtml(row, kind, reading) {
+    var plain = reading.replace('.', '');
+    var spoken = plain.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); });
+    return '<div class="ks-row ks-reading"><span class="ks-reading-main"><span class="ks-reading-kind">' +
+      (kind === 'on' ? 'on’yomi' : 'kun’yomi') + '</span><span class="ks-reading-val"><span class="ks-reading-kana" lang="ja">' +
+      kanjiReadingHtml(reading) + '</span><span class="ks-reading-ro">' + esc(readingRomaji(row, reading)) + '</span></span></span>' +
+      '<button type="button" class="jp-speak-btn" data-jp-speak="' + esc(spoken) + '" aria-label="' + esc('Play ' + plain) + '">' + SPEAKER_ICON + '</button></div>';
+  }
+  // A Writing row: label left, value right; the radical row adds a grey line
+  // about *this* kanji's radical when there's something to say.
+  function kanjiWritingRowHtml(row, key) {
+    var ch = row.jp[0].kanji, rad = row.radical, val, sub = '';
+    if (key === 'strokes') val = String(row.strokes);
+    else if (rad.r === ch) { val = 'It’s one itself'; sub = 'You’ll spot it inside other kanji.'; }
+    else {
+      val = '<span class="ks-rad" lang="ja">' + esc(rad.r) + '</span> <span lang="ja">' + esc(rad.name) + '</span> · ' + esc(rad.en);
+      if (rad.sortOnly) sub = 'Just for sorting — no need to learn it.';
+    }
+    return '<div class="ks-row' + (sub ? ' ks-row-sub' : '') + '"><span class="ks-label">' + (key === 'strokes' ? 'Strokes' : 'Radical') +
+      '</span><span class="ks-val">' + val + '</span>' + (sub ? '<span class="ks-sub">' + sub + '</span>' : '') + '</div>';
   }
   // Stroke order, drawn one stroke at a time (css/site.css .so-*): the
   // kanji's outline faint underneath, each stroke drawn in order over it
@@ -486,10 +497,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.kanjiStrokesHtml = kanjiStrokesHtml;
   // The kanji detail sheet: the character and its meaning, then iOS-style
-  // grouped cards -- its readings (on in katakana, kun in hiragana with the
-  // okurigana lighter), how it's written (its stroke order drawn, strokes,
-  // its radical) -- each row
-  // with its ⓘ explainer -- an example word with furigana, and the reader's words that
+  // grouped cards -- its readings (one row each: on in katakana, kun in
+  // hiragana with the okurigana lighter, romaji beside, a speaker), how it's
+  // written (its stroke order drawn, strokes, its radical) -- each card with
+  // one ⓘ explainer on its header -- an example word with furigana, and the reader's words that
   // use it (wordsWithKanji, folded away until asked for) -- and the same
   // add-to-flashcards toggle a search result has (js/flashcards/views.js).
   function kanjiSheetHtml(vocabId) {
@@ -502,11 +513,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     };
     var drawing = kanjiStrokesHtml(ch);
     var writing = row.strokes || row.radical || drawing
-      ? '<h3 class="ks-group-head">Writing</h3><div class="ks-card">' +
+      ? cardHead('writing') + '<div class="ks-card">' +
         (drawing ? '<div class="ks-row ks-so"><div class="ks-so-box">' + drawing + '</div>' +
           '<div class="ks-so-actions"><button type="button" class="ks-replay">Replay</button>' +
           (window.RaumeStudy.kanjiWrite ? '<button type="button" class="ks-write">Write it</button>' : '') + '</div></div>' : '') +
-        (row.strokes ? kanjiRowHtml(row, 'strokes') : '') + (row.radical ? kanjiRowHtml(row, 'radical') : '') + '</div>' +
+        (row.strokes ? kanjiWritingRowHtml(row, 'strokes') : '') + (row.radical ? kanjiWritingRowHtml(row, 'radical') : '') + '</div>' +
         // KanjiVG's licence asks for its name, a link and the licence's.
         (drawing ? '<p class="ks-credit">Stroke order from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a>, ' +
           '<a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="noopener" target="_blank">CC BY-SA 3.0</a></p>' : '')
@@ -526,9 +537,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       (row.enNote ? '<p class="ks-note">' + esc(row.enNote) + '</p>' : '') + knownButtonHtml(row.id) + '</div>' +
       speakButton(jpReadingOf(row.jp)) +
       '<button type="button" class="ks-close" aria-label="Close">' + CLOSE_ICON + '</button></div>' +
-      '<h3 class="ks-group-head">Readings</h3><div class="ks-card">' +
-      (row.on && row.on.length ? kanjiRowHtml(row, 'on') : '') + (row.kun && row.kun.length ? kanjiRowHtml(row, 'kun') : '') +
-      kanjiRowHtml(row, 'romaji') + '</div>' +
+      cardHead('readings') + '<div class="ks-card">' +
+      (row.on || []).map(function (r) { return kanjiReadingRowHtml(row, 'on', r); }).join('') +
+      (row.kun || []).map(function (r) { return kanjiReadingRowHtml(row, 'kun', r); }).join('') + '</div>' +
       writing + example + wordsHtml +
       '<button type="button" class="fc-toggle-btn ks-add" data-vocab-id="' + esc(row.id) + '" aria-pressed="false">' +
       '<span class="ks-add-off">Add to flashcards</span><span class="ks-add-on">In your flashcards</span></button>';

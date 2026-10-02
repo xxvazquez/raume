@@ -159,8 +159,12 @@ Tapping a tile opens the **kanji sheet** — an iOS sheet: a centred
 `--radius-sheet` card over a scrim on a wide screen, a bottom sheet with a grab
 bar on a phone, at body level (never under a backdrop-filter). Its ground is
 `--group-ground`: the character in a white 76px tile beside the meaning as a
-title, then inset-grouped cards under list-header labels — Readings (On / Kun /
-Romaji rows, okurigana lighter), Writing (Strokes, Radical), Example, and In your
+title, then inset-grouped cards under list-header labels — Readings (one row per
+reading, as Contacts lists phone numbers: a small grey *on’yomi* / *kun’yomi* over
+the 19px kana, okurigana lighter, its romaji grey beside it, and a tinted speaker
+trailing — the row plays on tap, the speaker is what says so), Writing (Strokes,
+Radical, with a grey line under the radical row when it's the kanji itself or
+only there for sorting), Example, and In your
 tables: one *Words with 新 · 17* disclosure row that unfolds the whole list as
 compact rows — and one full-width filled capsule, **Add to flashcards**, that
 turns white (secondary) once added. Under the title sits a small white capsule,
@@ -193,10 +197,13 @@ a white secondary **Replay** capsule beside it; a faint *Stroke order from
 KanjiVG* credit under the card. Reduced motion shows the finished, numbered
 drawing.
 
-Every Readings / Writing row ends in a tinted ⓘ. It opens the tables' grammar
-popover (`.role-pop`), not a pushed page: a bold title, a one-line definition,
-a few hairline-separated label / value lines and an example on a grey chip —
-never a paragraph. N5 readers: every kanji in it carries furigana.
+Readings and Writing each have one ⓘ, on the card's header — the Settings
+cards' convention (faint, tinted while open); a row ⓘ in iOS means "details of
+this item", never "what does this label mean", so no row has one. It opens the
+tables' grammar popover (`.role-pop`), not a pushed page: the card's name in
+bold, then an iOS Help list — each term on its own line, one short grey line
+under it, hairlines between — never a paragraph. N5 readers: every kanji in it
+carries furigana.
 
 ## Labels and measure
 
