@@ -3,7 +3,8 @@
 ## Constraints
 
 - **Vanilla JS, no build.** Classic `<script>` tags loaded in a fixed order (see
-  the comment block in `index.html`). No bundler, no ES modules, no TypeScript.
+  the comment block in `index.html`) — `defer` in the body, so they download in
+  parallel and still run in order; only the two tiny `<head>` scripts block. No bundler, no ES modules, no TypeScript.
   Everything works from `file://`.
 - **One global.** Everything hangs off `window.RaumeStudy`, with a sub-namespace
   per area (`.data`, `.config`, `.shared`, `.vocab`, `.flashcards`, …). A file
@@ -22,7 +23,7 @@
 
 Update **all** of these or `npm test` fails:
 
-1. `index.html` — the `<script>` tag *and* the load-order comment block
+1. `index.html` — the `<script defer>` tag *and* the load-order comment block
 2. `sw.js` — the `VERSIONED` precache list
 3. `scripts/sw-test.js` — `REFERENCE_SHELL` or `FLASHCARDS_SHELL`
 4. `package.json` — add a `node --check` to the `validate` script
