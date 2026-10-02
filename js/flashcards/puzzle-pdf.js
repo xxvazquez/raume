@@ -326,17 +326,37 @@ window.RaumeStudy.flashcards.puzzlePdf = (function () {
     }).then(pdfFromJpegs);
   }
 
+  // On a phone the PDF goes to the system share sheet (Save to Files,
+  // Print, Books) -- a blob download from a home-screen app is unreliable on
+  // iPhone. The tap's permission to open the sheet can run out while the
+  // pages draw; then it falls back to the download. Cancelling the sheet
+  // is just that, never a download.
+  function share(blob, fileName) {
+    if (typeof File === "undefined" || !navigator.share || !navigator.canShare ||
+        !window.matchMedia || !window.matchMedia("(pointer: coarse)").matches) return Promise.reject(null);
+    var file = new File([blob], fileName, { type: "application/pdf" });
+    if (!navigator.canShare({ files: [file] })) return Promise.reject(null);
+    return navigator.share({ files: [file] });
+  }
+
   function save(opts, fileName) {
     return build(opts).then(function (blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url; a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-      return blob;
+      return share(blob, fileName).then(function () { return blob; }, function (e) {
+        if (e && e.name === "AbortError") return blob;
+        return download(blob, fileName);
+      });
     });
+  }
+
+  function download(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    return blob;
   }
 
   return { build: build, save: save, render: render, pdfFromJpegs: pdfFromJpegs };

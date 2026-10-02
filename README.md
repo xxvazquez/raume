@@ -330,7 +330,7 @@ scrolls sideways.
   title, one line like "Drinks · 20 words · Romaji", the grid, Across and Down
   side by side, and an **Answers** page last. A wide grid turns the page to
   landscape; arroword squares grow to 13mm so their clues stay readable. On a
-  phone it opens in the PDF viewer to print or save to Files.
+  phone it opens the share sheet — Save to Files, Print, Books.
 - Grids are built compact — each word goes where it crosses the most and
   grows the grid the least — so even 40 words stay a dense block.
 - When **Check** finds every square right, the solve goes to the Dashboard's

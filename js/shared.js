@@ -140,24 +140,38 @@ window.RaumeStudy.shared = (function () {
       // cancel(); a resume() when it isn't paused is a harmless no-op.
       if (synth.paused) synth.resume();
     }
-    // Kept alive the same way as currentUtterance, and for the same reason:
-    // an <audio> element with nothing still referencing it can be GC'd and
-    // stop mid-playback on some engines.
+    // One <audio> element for every clip, reused rather than made per word.
+    // iOS only lets a page start sound from a tap -- but once an element has
+    // played from one, it may play again later without another, so a word
+    // that plays by itself (Listening's next word) is only allowed on the
+    // element a tap already unlocked. Kept at module level, too, because an
+    // element nothing references can be GC'd mid-playback on some engines.
+    var player = null;
     var currentAudio = null;
     function playPrerendered(text) {
       if (!audioManifest) return false;
       var h = hash(text);
       if (!audioManifest.has(h)) return false;
-      var audio = new Audio("audio/" + h + ".mp3");
+      if (!player) player = new Audio();
+      var audio = player;
       // VOICEVOX's default synthesis speed reads quick and clipped for a
       // learner -- match the same 0.8 slowdown applied to the Web Speech
       // fallback below, so pronunciation sounds equally natural whichever
-      // path a given word takes.
+      // path a given word takes. Loading a new src resets playbackRate to
+      // the default rate, so both are set.
+      audio.defaultPlaybackRate = 0.8;
+      audio.src = "audio/" + h + ".mp3";
       audio.playbackRate = 0.8;
       currentAudio = audio;
       // Falls back to Web Speech rather than staying silent if the file is
-      // somehow missing/corrupt despite being listed in the manifest.
-      audio.play().catch(function () { speakWebSpeech(text); });
+      // somehow missing/corrupt despite being listed in the manifest -- but
+      // not when this clip was only cut short by the next one (AbortError),
+      // which would speak a stale word over the new one.
+      var src = audio.src;
+      audio.play().catch(function (e) {
+        if ((e && e.name === "AbortError") || currentAudio !== audio || audio.src !== src) return;
+        speakWebSpeech(text);
+      });
       return true;
     }
     // Interrupts whatever's still playing so a second click doesn't queue up
