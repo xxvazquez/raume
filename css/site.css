@@ -4644,6 +4644,16 @@ mark.fc-diff-co {
 .fc-now-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 /* Every Dashboard card's one action is the same size as Study now. */
 .fc-now-btn, .fc-kj-row .fc-btn, .fc-pz-empty .fc-btn { flex: none; min-height: 40px; padding: 8px 20px; }
+/* The Kana tab's "now" card: the count to study is the headline, large
+   ink, "kana to study" under it and what the groups hold on a quiet line
+   below -- a number to act on, beside Study now. */
+.fc-next-review { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.fc-next-review-count {
+  font-size: 44px; line-height: .95; font-weight: 500; letter-spacing: -.02em;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.fc-next-review-title { font-size: var(--fs-subhead); color: var(--ink); margin-top: 4px; }
+.fc-next-review-sub { color: var(--muted); font-size: var(--fs-small); margin-top: 2px; text-wrap: balance; }
 /* One shared grid past 620px for the Dashboard's multi-item rows --
    .fc-stats-grid and .fc-viz-grid -- so a seam in one lines up with
    a seam in another instead of three grids each rounding independently (each
