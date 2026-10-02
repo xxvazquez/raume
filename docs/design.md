@@ -16,6 +16,9 @@ sections below cover each part of it.
   desktop top bar (the phone has no wordmark row).
 - **Inter** is everything else. Both are self-hosted (SIL OFL); there is no
   external font runtime.
+- **Japanese** (any `[lang="ja"]`) uses the system's Japanese face through
+  `--font-jp` — Noto on Android, Hiragino on Apple, Yu Gothic / Meiryo on
+  Windows — never Inter's fallback, so kanji keep Japanese glyph shapes.
 - Hierarchy comes from size, spacing, position, and colour — **not** bold weight
   or high contrast. Default weight is 400; 500 marks a genuinely active or
   labelled state. One type scale (`--fs-*` tokens: `--fs-micro` 11.5 · `--fs-small`
