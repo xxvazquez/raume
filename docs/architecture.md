@@ -172,6 +172,13 @@ The keys come from constants those modules export
 `customVocab.GUEST_KEY`) rather than being repeated, so a renamed key carries
 the backup along.
 
+`downloadBackup()` saves the file: on iPhone / iPad through the share sheet
+(`navigator.share({ files })`, when `navigator.canShare` accepts the file —
+Save to Files, AirDrop, Mail), since an `<a download>` in the home-screen app
+has nowhere to put it; everywhere else an `<a download>` on an object URL,
+kept until the next backup or a minute later. It resolves `"shared"`,
+`"download"` or `"cancelled"` (the sheet closed — not an error).
+
 ### localStorage keys
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,

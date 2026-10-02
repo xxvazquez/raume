@@ -655,7 +655,8 @@ window.RaumeStudy.flashcards.views = (function () {
     function showError(msg) { errorBox.textContent = msg; errorBox.hidden = !msg; }
     exportBtn.addEventListener("click", function () {
       showError("");
-      try { backup.downloadBackup(); } catch (e) { showError("Couldn't create the backup file — " + (e.message || "try again.")); }
+      function failed(e) { showError("Couldn't create the backup file — " + ((e && e.message) || "try again.")); }
+      try { backup.downloadBackup().catch(failed); } catch (e) { failed(e); }
     });
     importBtn.addEventListener("click", function () { showError(""); fileInput.click(); });
     fileInput.addEventListener("change", function () {

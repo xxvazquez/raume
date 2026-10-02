@@ -2157,6 +2157,40 @@ async function main() {
   check("a backup carries its format + version and the guest flashcards, with no account or sync queue", builtBackup.format === "raume-backup" && builtBackup.version === 1
     && Object.keys(builtBackup.data.flashcards.cards).length === liveCardCount && builtBackup.data.flashcards.userId === null && builtBackup.data.flashcards.logsOutbox.length === 0);
   check("it names the file by date", /^raume-backup-\d{4}-\d{2}-\d{2}\.json$/.test(backupApi.fileName()));
+  await (async () => {
+    // Saving: iPhone hands a File to the share sheet; a cancelled sheet isn't
+    // an error; desktop / Android keep the <a download>, its URL kept a while.
+    const nav = window.navigator, realUA = Object.getOwnPropertyDescriptor(nav, "userAgent");
+    const realCreate = window.URL.createObjectURL, realRevoke = window.URL.revokeObjectURL;
+    let shared = null, clicked = null, revoked = 0, shareResult = Promise.resolve();
+    nav.share = data => { shared = data; return shareResult; };
+    nav.canShare = data => !!(data && data.files && data.files.length);
+    window.URL.createObjectURL = () => "blob:raume-test";
+    window.URL.revokeObjectURL = () => { revoked++; };
+    const realClick = window.HTMLAnchorElement.prototype.click;
+    window.HTMLAnchorElement.prototype.click = function () { clicked = this.download; };
+    try {
+      Object.defineProperty(nav, "userAgent", { configurable: true, get: () => "Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X)" });
+      const r1 = await backupApi.downloadBackup();
+      const f = shared && shared.files && shared.files[0];
+      check("on an iPhone the backup goes to the share sheet as a dated .json file (Save to Files), not a download",
+        r1 === "shared" && !!f && f.name === backupApi.fileName() && f.type === "application/json" && clicked === null);
+      shareResult = Promise.reject(Object.assign(new Error("cancel"), { name: "AbortError" }));
+      check("...and closing the share sheet without saving is no error", await backupApi.downloadBackup() === "cancelled");
+      shareResult = Promise.reject(new Error("boom"));
+      check("...but a share sheet that fails reaches the caller", await backupApi.downloadBackup().then(() => false, e => e.message === "boom"));
+      Object.defineProperty(nav, "userAgent", { configurable: true, get: () => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/140" });
+      shared = null;
+      const r2 = await backupApi.downloadBackup();
+      check("on desktop / Android it's a plain download, its URL not revoked straight away",
+        r2 === "download" && shared === null && clicked === backupApi.fileName() && revoked === 0);
+    } finally {
+      if (realUA) Object.defineProperty(nav, "userAgent", realUA); else delete nav.userAgent;
+      delete nav.share; delete nav.canShare;
+      window.URL.createObjectURL = realCreate; window.URL.revokeObjectURL = realRevoke;
+      window.HTMLAnchorElement.prototype.click = realClick;
+    }
+  })();
   const parsedBackup = backupApi.parseBackup(JSON.stringify(builtBackup));
   check("a backup round-trips through parse, with a summary a confirm can show", parsedBackup.ok && parsedBackup.summary.cards === liveCardCount && parsedBackup.summary.words >= 1);
   const badFile = (obj) => backupApi.parseBackup(typeof obj === "string" ? obj : JSON.stringify(obj));

@@ -79,17 +79,53 @@ window.RaumeStudy.flashcards.backup = (function () {
 
   function fileName() { return "raume-backup-" + store.localDateStr(new Date()) + ".json"; }
 
-  function downloadBackup() {
-    var json = JSON.stringify(buildBackup(), null, 2);
-    var blob = new Blob([json], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
+  // iPhone / iPad hand the file to the share sheet (Save to Files, AirDrop,
+  // Mail), as an iOS app exports: an <a download> in the home-screen app has
+  // no downloads bar and can open a dead-end viewer or do nothing. Desktop
+  // and Android keep the plain download -- a share sheet there would be a
+  // detour.
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+  function canShareFile(file) {
+    try { return isIOS() && !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [file] }); }
+    catch (e) { return false; }
+  }
+  // The last download's object URL lives until the next backup or a minute
+  // on -- revoked at once, WebKit could drop the blob before reading it.
+  var lastUrl = null, lastUrlTimer = null;
+  function releaseUrl() {
+    if (lastUrl) URL.revokeObjectURL(lastUrl);
+    lastUrl = null;
+    clearTimeout(lastUrlTimer);
+  }
+  function saveByDownload(blob, name) {
+    releaseUrl();
+    lastUrl = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = url; a.download = fileName();
+    a.href = lastUrl; a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    return a.download;
+    lastUrlTimer = setTimeout(releaseUrl, 60000);
+  }
+  // Resolves "shared", "download" or "cancelled" (the share sheet closed
+  // without saving -- not an error); rejects only when the share sheet
+  // itself failed for another reason.
+  function downloadBackup() {
+    var json = JSON.stringify(buildBackup(), null, 2);
+    var name = fileName();
+    var blob = new Blob([json], { type: "application/json" });
+    var file = typeof File === "function" ? new File([json], name, { type: "application/json" }) : null;
+    if (file && canShareFile(file)) {
+      // Called straight from the tap: the share sheet needs that gesture.
+      return navigator.share({ files: [file] }).then(function () { return "shared"; }, function (e) {
+        if (e && e.name === "AbortError") return "cancelled";
+        throw e;
+      });
+    }
+    saveByDownload(blob, name);
+    return Promise.resolve("download");
   }
 
   // Parse + validate a backup file's text. Every section goes back through the
