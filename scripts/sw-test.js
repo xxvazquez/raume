@@ -6,7 +6,9 @@
 //
 //   fresh install -> SW precaches the versioned first-party shell
 //   -> go offline -> the reference page and the Flashcards path still load
-//   -> a redeploy (new ?v=) drops the old cache and does NOT serve it stale.
+//   -> a redeploy (new ?v=) drops the old cache and does NOT serve it stale
+//   -> with per-file content hashes stamped (scripts/stamp-asset-versions.js),
+//      a redeploy downloads only the files that changed.
 //
 // No network and no dependencies. Direct file:// use does not involve a
 // service worker at all and is verified separately (manually, in a browser).
@@ -46,12 +48,17 @@ function makeResponse(body, ok) {
 
 // --- Fake fetch (offline flag flips it to reject) -----------------------
 let online = true;
+let fetched = [];
+// Files whose bytes a test pretends changed: served with this suffix.
+const edited = new Set();
 async function fakeFetch(input) {
   const url = typeof input === "string" ? resolveUrl(input) : input.url;
   if (!online) throw new Error("offline");
+  fetched.push(url);
   const file = fileFor(url);
   if (!fs.existsSync(file)) return makeResponse("", false);
-  return makeResponse(fs.readFileSync(file, "utf8"), true);
+  const body = fs.readFileSync(file, "utf8");
+  return makeResponse(edited.has(path.relative(ROOT, file)) ? body + "\n// edited" : body, true);
 }
 
 // --- Fake Cache API ----------------------------------------------------
@@ -68,6 +75,7 @@ class FakeCache {
       this.entries.set(keyOf(u), res);
     }
   }
+  async add(u) { await this.addAll([u]); }
   async put(req, res) { this.entries.set(keyOf(req), res); }
   async match(req) { return this.entries.get(keyOf(req)); }
 }
@@ -89,7 +97,7 @@ class FakeCacheStorage {
 }
 
 // --- Load sw.js into a fresh worker scope, sharing one CacheStorage ----
-function loadServiceWorker(version, cacheStorage) {
+function loadServiceWorker(version, cacheStorage, source) {
   const listeners = {};
   const self = {
     location: { origin: ORIGIN },
@@ -98,7 +106,7 @@ function loadServiceWorker(version, cacheStorage) {
     clients: { claim: () => Promise.resolve() },
   };
   const sandbox = { self, caches: cacheStorage, fetch: fakeFetch, URL, Promise, console };
-  vm.runInNewContext(SW_SOURCE.replace(/__CACHEBUST__/g, version), sandbox);
+  vm.runInNewContext((source || SW_SOURCE).replace(/__CACHEBUST__/g, version), sandbox);
 
   function dispatch(type, event) {
     const fn = listeners[type];
@@ -212,6 +220,42 @@ async function main() {
   check("a request for the PREVIOUS ?v= URL misses (no ignoreSearch staleness)", staleRes === undefined);
   const freshRes = await sw2.handleFetch(assetRequest("js/vocab/render.js?v=" + V2));
   check("a request for the CURRENT ?v= URL still hits offline", !!freshRes);
+
+  console.log("Per-file hashes: a redeploy downloads only what changed");
+  online = true;
+  const { stamp } = require("./stamp-asset-versions.js");
+  const INDEX_SOURCE = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const readAsset = (p) => (edited.has(p) ? fs.readFileSync(path.join(ROOT, p), "utf8") + "\n// edited" : fs.readFileSync(path.join(ROOT, p)));
+  const deployA = stamp(INDEX_SOURCE, SW_SOURCE, readAsset);
+  const pageUrls = (html) => [...html.matchAll(/(?:src|href)="([^"]+\?v=[^"]+)"/g)].map((m) => m[1]);
+  check("every asset URL the stamped page requests carries a content hash, none the token", pageUrls(deployA.html).length === REFERENCE_SHELL.length + FLASHCARDS_SHELL.length
+    && pageUrls(deployA.html).every((u) => /\?v=[0-9a-f]{12}$/.test(u)));
+  const H1 = "sha-hash-a000000000000000000000000000000000";
+  const swA = loadServiceWorker(H1, storage, deployA.sw);
+  await swA.install();
+  await swA.activate();
+  const cacheA = await storage.open("raume-" + H1);
+  check("the worker precaches exactly the URLs the stamped page requests", pageUrls(deployA.html).every((u) => cacheA.entries.has(resolveUrl(u))));
+
+  edited.add("js/vocab/render.js");
+  const deployB = stamp(INDEX_SOURCE, SW_SOURCE, readAsset);
+  check("editing one file changes only its URL", deployB.versions["js/vocab/render.js"] !== deployA.versions["js/vocab/render.js"]
+    && Object.keys(deployA.versions).filter((p) => deployA.versions[p] !== deployB.versions[p]).length === 1);
+  fetched = [];
+  const H2 = "sha-hash-b111111111111111111111111111111111";
+  const swB = loadServiceWorker(H2, storage, deployB.sw);
+  await swB.install();
+  await swB.activate();
+  const versionedFetches = fetched.filter((u) => /\?v=/.test(u));
+  check("the next install downloads only the changed file", versionedFetches.length === 1 && versionedFetches[0] === resolveUrl("js/vocab/render.js?v=" + deployB.versions["js/vocab/render.js"]));
+  check("...the page itself is always fetched fresh", fetched.includes(resolveUrl("index.html")));
+  check("...and the fonts come over from the previous cache", !fetched.includes(resolveUrl("fonts/InterVariable.woff2")));
+  const cacheB = await storage.open("raume-" + H2);
+  check("the new cache still holds every URL the new page requests", pageUrls(deployB.html).every((u) => cacheB.entries.has(resolveUrl(u))));
+  online = false;
+  const editedRes = await swB.handleFetch(assetRequest("js/vocab/render.js?v=" + deployB.versions["js/vocab/render.js"]));
+  check("offline, the changed file is served in its new version", !!editedRes && (await editedRes.text()).endsWith("// edited"));
+  check("the previous deploy's cache is gone", (await storage.keys()).length === 1);
 
   console.log(failures === 0 ? "\nService-worker test passed." : "\n" + failures + " service-worker check(s) failed.");
   process.exit(failures === 0 ? 0 : 1);

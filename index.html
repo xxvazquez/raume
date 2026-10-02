@@ -205,9 +205,10 @@
   through one namespace, window.RaumeStudy (sub-namespaces: .data, .config,
   .shared, .vocab, .flashcards). Each file may only read namespaces populated by a
   file above it. Vendored libraries keep their own globals (window.FSRS,
-  window.supabase). The ?v=__CACHEBUST__ token is stamped with the commit SHA at
-  deploy time (.github/workflows/pages.yml) and matched exactly by the service
-  worker's precache (sw.js).
+  window.supabase). The ?v=__CACHEBUST__ token is stamped at deploy time with each
+  file's own content hash (scripts/stamp-asset-versions.js, run by
+  .github/workflows/pages.yml) and matched exactly by the service worker's
+  precache (sw.js), so a deploy re-downloads only the files that changed.
 
   Two <head> scripts run first, before the first paint: js/storage-migration.js
   (one-time rename of on-device localStorage keys from the old "sakura-" prefix),

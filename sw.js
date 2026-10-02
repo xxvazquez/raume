@@ -1,14 +1,17 @@
 // Offline / installability layer for the PWA.
 //
-// VERSION is stamped with the commit SHA at deploy time (the same
-// __CACHEBUST__ replacement the deploy workflow applies to index.html -- see
-// .github/workflows/pages.yml). Every first-party asset that index.html
-// requests with a ?v=<sha> query is precached here under that *exact* URL, so
-// a cache hit is always the right version and a redeploy's new URLs simply
-// miss and refetch. The cache name carries VERSION too, so activating a new
-// deploy drops the previous deploy's cache wholesale -- no stale entries, no
-// unbounded growth, and no reliance on ignoreSearch.
+// VERSION is stamped with the commit SHA at deploy time (see
+// .github/workflows/pages.yml) and names the cache, so activating a new
+// deploy drops the previous deploy's cache -- no unbounded growth.
+// ASSET_VERSIONS is stamped just before it by scripts/stamp-asset-versions.js:
+// each versioned file's content hash, the same ?v= index.html requests it
+// with. Every such asset is precached under that *exact* URL, so a cache hit
+// is always the right bytes (no ignoreSearch), and a file that didn't change
+// keeps its URL -- install copies it over from the previous deploy's cache
+// instead of downloading it again. In a checkout the map is empty and every
+// file falls back to VERSION, matching index.html's literal token.
 const VERSION = '__CACHEBUST__';
+const ASSET_VERSIONS = /*__ASSET_VERSIONS__*/{};
 const CACHE = 'raume-' + VERSION;
 // Prerendered pronunciation clips (js/shared.js, scripts/generate-audio.js).
 // Content-addressed by a hash of the text, so a given URL's bytes never
@@ -32,7 +35,7 @@ const UNVERSIONED = [
   'fonts/SpaceGrotesk.woff2',
 ];
 
-// Requested by the browser WITH ?v=<sha> (see the <script>/<link> tags in
+// Requested by the browser WITH ?v=<hash> (see the <script>/<link> tags in
 // index.html). Cached under the exact versioned URL. Keep this list in sync
 // with index.html whenever a first-party script or stylesheet is added.
 const VERSIONED = [
@@ -73,12 +76,20 @@ const VERSIONED = [
   'js/sw-register.js',
 ];
 
-const PRECACHE = UNVERSIONED.concat(VERSIONED.map((p) => p + '?v=' + VERSION));
+const PRECACHE = UNVERSIONED.concat(VERSIONED.map((p) => p + '?v=' + (ASSET_VERSIONS[p] || VERSION)));
+// Always downloaded fresh on install: the page itself names this deploy's
+// asset URLs. Everything else that's already cached under the same URL is
+// reused -- a versioned URL's bytes never change, and the unversioned icons
+// and fonts are refreshed by stale-while-revalidate whenever they're used.
+const ALWAYS_FETCH = ['./', 'index.html', 'manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      .then((cache) => Promise.all(PRECACHE.map((url) =>
+        (ALWAYS_FETCH.indexOf(url) !== -1 ? Promise.resolve(undefined) : caches.match(url))
+          .then((hit) => (hit ? cache.put(url, hit) : cache.add(url)))
+      )))
       .then(() => self.skipWaiting())
   );
 });
@@ -134,8 +145,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (isVersioned) {
-    // Cache-first, exact match (no ignoreSearch): the query string changes
-    // every deploy, so a cached hit is guaranteed to be the right version.
+    // Cache-first, exact match (no ignoreSearch): the query string is the
+    // file's content hash, so a cached hit is guaranteed to be the right
+    // bytes -- across deploys too, for a file that didn't change.
     event.respondWith(
       caches.match(req).then((cached) => cached || fetch(req).then((res) => {
         const copy = res.clone();

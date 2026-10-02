@@ -15,9 +15,10 @@
   `style="…"` attributes are blocked, and the smoke test asserts there are zero
   of them. All positioning and styling goes through CSS classes. `img-src` also
   allows `data:` so uploaded table icons can be data URLs.
-- **Cache-busting.** Asset URLs carry `?v=__CACHEBUST__`; the Pages workflow
-  replaces the literal token with the commit SHA on deploy. Leave the token in
-  source.
+- **Cache-busting.** Asset URLs carry `?v=__CACHEBUST__`; on deploy
+  `scripts/stamp-asset-versions.js` replaces it with each file's own content
+  hash (and fills `sw.js`'s `ASSET_VERSIONS` map to match), so a deploy
+  re-downloads only the files that changed. Leave the token in source.
 
 ## Adding a JS file
 
@@ -391,8 +392,11 @@ Installable and offline-capable once visited.
   `apple-mobile-web-app-*` tags in `index.html` handle the icon, name, and
   chrome-less launch.
 - The service-worker cache is named `raume-<sha>` — one per deploy, previous one
-  dropped on activate. Only the precache list in `sw.js` has to stay in sync
-  with what `index.html` requests.
+  dropped on activate. Installing a new deploy copies every file whose URL
+  (content hash) didn't change over from the previous cache, and the icons and
+  fonts too (stale-while-revalidate refreshes those); only the page, the
+  manifest and changed files are downloaded. Only the precache list in `sw.js`
+  has to stay in sync with what `index.html` requests.
 - App icons and the favicon are generated from `logo.png` (the master mark, a
   circular sun-over-water motif) by `scripts/generate-icons.py`: cropped to its
   bounding box, padded square, centred on an opaque `#f4f6f8` tile — 192/512
@@ -473,8 +477,9 @@ fails, since it would silently read as ichidan in the UI.
 ## Deploying
 
 Pushing `main` triggers the GitHub Pages workflow
-(`.github/workflows/pages.yml`), which swaps the cache-busting token for the
-commit SHA, stamps the footer's version line (the text between
+(`.github/workflows/pages.yml`), which swaps the cache-busting token for each
+asset's content hash (`node scripts/stamp-asset-versions.js`), puts the commit
+SHA in the service-worker cache name, stamps the footer's version line (the text between
 `<!--build-->` and `<!--/build-->` in `index.html` becomes
 "Version <short SHA> · <commit date>") and deploys. Set the repo's Pages source to "GitHub Actions" once.
 

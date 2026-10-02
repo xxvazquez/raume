@@ -24,7 +24,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
       - name: Cache-bust static assets
-        run: sed -i "s/__CACHEBUST__/${GITHUB_SHA}/g" index.html sw.js
+        # Each asset's ?v= becomes its own content hash, so a deploy changes
+        # only the URLs of files that changed; the commit SHA then names the
+        # service-worker cache (and anything left unstamped).
+        run: |
+          node scripts/stamp-asset-versions.js
+          sed -i "s/__CACHEBUST__/${GITHUB_SHA}/g" index.html sw.js
       - name: Stamp version and date in the footer
         run: |
           STAMP="Version ${GITHUB_SHA::7} · $(git log -1 --format=%cd --date=format:'%-d %b %Y')"
