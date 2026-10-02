@@ -106,7 +106,7 @@ bottom sheet on a phone. A dot on it means something is off its default.
 | **Cover answers** | Blanks the English. Tap a row to reveal it. |
 | **Show polite** | Switches verbs to 〜ます. Only appears while the Verbs table is open. |
 | **Expand all · Print** | Open every table; print the section or everything. |
-| **Legends** | The badges on screen, and **Row icons** — what the speaker, hide, + and ⋯ glyphs do. |
+| **Legends** | The badges on screen, and **Row icons** — each glyph (speaker, hide, ⓘ, +, ⋯) named, with one short line on what it does. |
 
 ### Grammar notes
 

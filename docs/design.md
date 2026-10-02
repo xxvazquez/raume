@@ -453,8 +453,10 @@ and Help.
   as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Library's buttons keep a one-word label
-  (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, +, ⋯) are
-  spelled out in the Options sheet's **Row icons** group. Standard iOS glyphs
+  (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, ⓘ, +, ⋯)
+  are spelled out in the Options sheet's **Row icons** group — iOS subtitle
+  cells: the glyph in its own column, a 15px name, one 13px grey line under it,
+  the hairline starting at the words. Standard iOS glyphs
   (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
