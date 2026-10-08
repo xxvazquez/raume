@@ -4418,8 +4418,17 @@ async function main() {
   const fc = window.RaumeStudy.flashcards.__testHooks;
   check("test hooks are exposed", !!fc);
   check("normalizeAnswer trims/collapses/lowercases", fc.normalizeAnswer("  Hot   Water  ", false) === "hot water");
-  check("normalizeAnswer folds macrons for romaji", fc.normalizeAnswer("Kōhī", true) === "kohi");
-  check("romaji answer-checking is long-vowel insensitive (can't type macrons)",
+  check("normalizeAnswer spells a macron as its doubled vowel for romaji", fc.normalizeAnswer("Kōhī", true) === "koohii");
+  check("a long vowel can be typed any way, but not left out: obasan isn't obāsan, kohi isn't kōhī -- and the wrong answer marks the missing length", (() => {
+    const idx = fc.getVocabIndex();
+    const grandma = Object.values(idx).find(e => e.romajiDisplay === "obāsan");
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const cmp = vi.answerCompareHtml(grandma, "en-ro", "obasan");
+    return !!grandma && fc.checkAnswer(grandma, "en-ro", "obaasan") && !fc.checkAnswer(grandma, "en-ro", "obasan")
+      && fc.normalizeAnswer("kohi", true) !== fc.normalizeAnswer("kōhī", true)
+      && (cmp.youHtml.match(/<mark/g) || []).length === 1;
+  })());
+  check("romaji answer-checking takes any spelling of a long vowel (can't type macrons)",
     fc.normalizeAnswer("koohii", true) === fc.normalizeAnswer("Kōhī", true)
     && fc.normalizeAnswer("kouhii", true) === fc.normalizeAnswer("Kōhī", true)
     && fc.normalizeAnswer("satou", true) === fc.normalizeAnswer("satō", true)

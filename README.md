@@ -229,9 +229,10 @@ card  →  type answer, Enter or ↑  →  verdict + answer (audio plays)  →  
 
 - A wrong romaji answer highlights exactly which letters were off
   (`kaeramasu → kaerimasu`).
-- Long vowels are ignored — `kōhī`, `koohii` and `kouhii` all match, and
-  likewise ā/aa, ū/uu, ē/ee, ō/oo/ou; the marked letters treat them as the
-  same sound too.
+- A long vowel can be typed any way — `kōhī`, `koohii` and `kouhii` all
+  match, and likewise ā/aa, ū/uu, ē/ee, ō/oo/ou — but not left out:
+  `obasan` (aunt) isn't `obāsan` (grandmother), and the marked letters show
+  the missing length. (Search is looser: `kohi` still finds コーヒー.)
 - Apostrophes, hyphens and spaces in romaji don't matter — `kin'en` /
   `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
   `'` in answers and search alike.

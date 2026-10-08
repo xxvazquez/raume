@@ -45,9 +45,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       // Apostrophes, hyphens and word breaks are spelling conventions, not
       // the reading: kin'en / kinen, shabu-shabu / shabu shabu all count.
       // (Dropped before the vowel folds, so a break never changes them.)
-      // Spellings and vowel length fold the same way search does
-      // (kanaRomaji.foldRomaji): mittu, tempura, koohii all count.
-      v = window.RaumeStudy.kanaRomaji.foldRomaji(v).replace(/^~/, "");
+      // Spellings fold the same way search does (kanaRomaji.foldRomaji):
+      // mittu, tempura, koohii / kouhii / kōhī all count -- but a long vowel
+      // has to be there (keepLength): obasan is not obāsan.
+      v = window.RaumeStudy.kanaRomaji.foldRomaji(v, true).replace(/^~/, "");
     }
     return v;
   }
@@ -289,13 +290,14 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // that differ instead of re-showing the whole word as an error.
   //
   // It compares sounds, not raw letters: a long vowel is one unit however
-  // it's spelled (ō, oo, ou -- likewise aa/ā, ii/ī, uu/ū, ee/ē) and, as in
-  // the answer check itself, length-insensitive, so "ryoori" against "ryōri"
-  // lines up clean and only the real slip gets marked.
+  // it's spelled (ō, oo, ou -- likewise aa/ā, ii/ī, uu/ū, ee/ē), so "ryoori"
+  // against "ryōri" lines up clean; a long vowel typed short ("obasan" for
+  // obāsan) is a different unit, and marked, as the answer check counts it.
   var ROMAJI_UNIT = /[āâ]|a{2,}|[īî]|i{2,}|[ūû]|u{2,}|[ēê]|e{2,}|[ōô]|o{2,}|ou|[\s\S]/g;
   function romajiUnits(s) {
     return (s.match(ROMAJI_UNIT) || []).map(function (text) {
-      return { text: text, key: foldLongVowels(foldMacrons(text)) };
+      var v = foldLongVowels(foldMacrons(text));
+      return { text: text, key: text.length > 1 || text !== v ? v + ":" : v };
     });
   }
   function alignChars(target, typed) {

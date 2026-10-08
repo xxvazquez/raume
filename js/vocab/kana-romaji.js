@@ -218,16 +218,23 @@ window.RaumeStudy.kanaRomaji = (function () {
   // the data uses; then vowel length dropped ("ou" / "oo" -> "o", any doubled
   // vowel -> one), since a long vowel can't be typed as such. A small っ
   // (doubled consonant) is kept -- kite and kitte are different words.
-  function foldRomaji(s) {
-    return String(s == null ? "" : s).toLowerCase()
+  // keepLength (answer checking): a long vowel may be spelled any way -- ō,
+  // oo or ou all read "oo" -- but not left out, since length changes the
+  // word (obasan is an aunt, obāsan a grandmother; imasu "be", iimasu "say").
+  // Search leaves it off: there, finding kōhī from "kohi" is the point.
+  function foldRomaji(s, keepLength) {
+    var mac = keepLength ? function (v) { return v + v; } : function (v) { return v; };
+    var out = String(s == null ? "" : s).toLowerCase()
       .replace(/['\u2018\u2019\-\s]/g, "")
-      .replace(/[\u0101\u00e2]/g, "a").replace(/[\u012b\u00ee]/g, "i").replace(/[\u016b\u00fb]/g, "u")
-      .replace(/[\u0113\u00ea]/g, "e").replace(/[\u014d\u00f4]/g, "o")
+      .replace(/[\u0101\u00e2]/g, mac("a")).replace(/[\u012b\u00ee]/g, mac("i")).replace(/[\u016b\u00fb]/g, mac("u"))
+      .replace(/[\u0113\u00ea]/g, mac("e")).replace(/[\u014d\u00f4]/g, mac("o"))
       .replace(/sy([auo])/g, "sh$1").replace(/(?:zy|jy)([auo])/g, "j$1").replace(/(?:ty|cy)([auo])/g, "ch$1")
       .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji")
       .replace(/(^|[^cs])hu/g, "$1fu")
-      .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n")
-      .replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
+      .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n");
+    return keepLength
+      ? out.replace(/ou/g, "oo").replace(/([aiueo])\1+/g, "$1$1")
+      : out.replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
   }
 
   return {
