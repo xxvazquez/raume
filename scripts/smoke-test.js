@@ -994,10 +994,13 @@ async function main() {
     return !!flashTitle && flashTitle.textContent === "Practice"
       && document.querySelector(".page-help h1").textContent === "Help";
   })());
-  check("on a phone the main nav is pinned to the bottom as a tab bar; desktop keeps the sticky top nav", (() => {
+  check("on a phone the main nav floats at the bottom as an iOS 26 tab bar -- a glass capsule, the selected tab on a rounded highlight; desktop keeps the sticky top nav", (() => {
     const base = allCssRules.find(r => r.selectorText === ".site-nav");
-    const phone = allCssRules.find(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)
-      && [...r.cssRules].some(x => x.selectorText === ".site-nav" && x.style.position === "fixed" && x.style.bottom === "0px"));
+    const phoneRules = allCssRules.filter(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)).flatMap(r => [...r.cssRules]);
+    const phone = phoneRules.some(x => x.selectorText === ".site-nav" && x.style.position === "fixed" && x.style.borderRadius === "999px")
+      && phoneRules.some(x => x.selectorText === ".site-nav" && /blur/.test(x.style.backdropFilter || x.style.getPropertyValue("-webkit-backdrop-filter")))
+      && phoneRules.some(x => x.selectorText === ".site-nav-link.active" && /color-mix/.test(x.style.background))
+      && phoneRules.some(x => x.selectorText === ".site-nav-link" && x.style.borderRadius === "999px");
     return !!base && base.style.position === "sticky" && !!phone
       && /viewport-fit=cover/.test(document.querySelector('meta[name="viewport"]').content);
   })());

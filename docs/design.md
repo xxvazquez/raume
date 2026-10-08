@@ -478,13 +478,17 @@ and Help.
   fill, `--section-strong` text, weight 500 — instead of a tinted block over a
   3px underline; the rest are plain secondary text. The capsule is the one place
   a section tone is spent on the chrome. That is the layout from 641px up.
-- **On a phone (≤640px) the same `#siteNav` becomes an iOS tab bar**, pinned to the
-  bottom edge (`position: fixed`, one hairline above it): five equal tabs, an
-  icon over an 11.5px label, unselected in `--faint`, the selected one in its
-  section tone at weight 500 on a square, full-height cell of neutral fill — no
-  capsule, no rounded bubble. It deliberately stays this traditional, solid bar
-  under iOS 26 (a floating glass capsule was tried and didn't sit well over
-  scrolling content). Nothing is added or removed (same
+- **On a phone (≤640px) the same `#siteNav` becomes an iOS 26 tab bar**: a
+  floating Liquid Glass capsule (`position: fixed`), 16px in from the sides and
+  just above the home indicator (`--tabbar-gap`: the bottom safe-area inset less
+  12px, at least 12px), 58px tall with 4px inside. Its glass is the system's —
+  `--glass-bg` with `--glass-blur`, the bright top rim, the hairline edge, the one
+  soft shadow — so content scrolling under it shows through; the blur sits on
+  the bar itself, which has no `position: fixed` children. Five equal tabs, an
+  icon over a 10.5px label (iOS's ~10pt), unselected in `--muted`, the selected
+  one in its section tone on a rounded neutral highlight (`--ink` 8%,
+  concentric inside the capsule), same weight. (Laura, 2026-10-08 — replacing
+  the traditional square, full-width bar.) Nothing is added or removed (same
   five links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
   is untouched. All five are drawn from the same family as `js/vocab/icons.js`'s
@@ -492,8 +496,9 @@ and Help.
   list, the 文/A "languages" glyph, a map pin, two stacked cards — so the row reads as
   one matched set rather than five icons with their own stroke weight and
   visual density. `--nav-h` drops to ~0 so the sticky reference toolbar sits at
-  the very top with nothing above it, `body` gets bottom padding for the bar plus
-  `env(safe-area-inset-*)` (the meta viewport carries `viewport-fit=cover`), and a
+  the very top with nothing above it, `body` gets bottom padding so the last row
+  scrolls clear of the floating bar, plus `env(safe-area-inset-*)` at the sides
+  (the meta viewport carries `viewport-fit=cover`), and a
   running study session hides the bar and gives the space back like the rest of the
   chrome. The table-index sheet (`z-index` 60) and its scrim (59) cover the bar.
 - **Large screen titles, and every screen's `<h1>`** — every screen names itself

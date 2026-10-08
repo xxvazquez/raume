@@ -2923,33 +2923,40 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 
-/* --- Phone: the main nav becomes an iOS tab bar ------------------------
+/* --- Phone: the main nav becomes an iOS 26 tab bar ---------------------
    At phone width the same #siteNav (nothing added, nothing removed -- same
-   links, same taps) is pinned to the bottom edge as five icon-over-label
-   tabs, the selected one tinted with its section tone. The icons are CSS
-   masks on ::before (data: SVGs, allowed by the CSP's img-src) so the JS-built
-   markup is untouched. --nav-h drops to ~0 so the sticky toolbar sits at the
-   top now that nothing is above it; body gets bottom padding for the bar and
-   the home-indicator inset (viewport-fit=cover in the meta viewport).
-   Screen titles step up to a large title. Desktop keeps the top capsule nav. */
+   links, same taps) floats over the content as a Liquid Glass capsule:
+   inset 16px from the sides, just above the home indicator, five
+   icon-over-label tabs, the selected one on a rounded highlight in its
+   section tone (the glass itself is in the Liquid Glass section below). The
+   icons are CSS masks on ::before (data: SVGs, allowed by the CSP's img-src)
+   so the JS-built markup is untouched. --nav-h drops to ~0 so the sticky
+   toolbar sits at the top now that nothing is above it; body gets bottom
+   padding so the last row scrolls clear of the bar (viewport-fit=cover in
+   the meta viewport). Screen titles step up to a large title. Desktop keeps
+   the top capsule nav. */
 @media (max-width: 640px) {
-  :root { --nav-h: 1px; --tabbar-h: 54px; --fs-large-title: 28px; }
+  :root {
+    --nav-h: 1px; --tabbar-h: 58px; --fs-large-title: 28px;
+    /* Above the home indicator where there is one, 12px off the edge where not. */
+    --tabbar-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 12px));
+  }
   body {
-    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tabbar-h) + var(--tabbar-gap) + 16px);
     padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
   }
   .site-nav {
-    position: fixed; top: auto; left: 0; right: 0; bottom: 0; z-index: 50;
-    gap: 0; padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+    position: fixed; top: auto; z-index: 50;
+    left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right)); bottom: var(--tabbar-gap);
+    height: var(--tabbar-h); gap: 0; padding: 4px;
     align-items: stretch; overflow: visible;
-    border-bottom: 0; border-top: 1px solid var(--row-line);
+    border: 0; border-radius: 999px;
   }
   .site-nav-link {
     flex: 1 1 0; min-width: 0;
-    flex-direction: column; justify-content: center; gap: 3px;
-    padding: 6px 2px 4px; border-radius: 0; background: none;
-    font-size: var(--fs-micro); letter-spacing: 0; color: var(--faint);
+    flex-direction: column; justify-content: center; gap: 2px;
+    padding: 4px 3px 3px; border-radius: 999px; background: none;
+    font-size: 10.5px; letter-spacing: 0; color: var(--muted); /* iOS tab labels are ~10pt */
   }
   .site-nav-link::before {
     content: ""; width: 24px; height: 24px; background: currentColor;
@@ -2966,7 +2973,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link[data-section="kanji"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="travel"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
-  .site-nav-link.active { background: none; font-weight: 500; }
+  .site-nav-link.active { font-weight: 400; }
   .table-section { scroll-margin-top: 92px; }
   /* The grey ground runs to the bottom edge, as on iOS: no lighter band and
      rounded corner under a short list. */
@@ -5141,12 +5148,18 @@ mark.fc-diff-co {
 }
 @media (max-width: 640px) {
   .page-vocab .vocab-toolbar { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
-  /* The tab bar stays the traditional one -- full width, fixed to the bottom
-     edge, square, a hairline on top (Laura, 2026-09-23: a floating rounded
-     capsule didn't sit well over scrolling content). The selected section
-     is a square cell of neutral fill, full height, its icon and label in the
-     section tone -- no bubble, no rounded highlight. */
-  .site-nav-link.active { background: color-mix(in srgb, var(--ink) 6%, var(--paper)); color: var(--section-strong); }
+  /* The tab bar is iOS 26's (Laura, 2026-10-08): a floating Liquid Glass
+     capsule -- translucent fill and blur so the content scrolling under it
+     shows through, the bright top rim, a hairline edge, one soft shadow --
+     and the selected tab on a rounded neutral highlight, its icon and label
+     in the section tone. It has no position:fixed children, so the blur sits
+     on the bar itself. */
+  .site-nav {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+  }
+  .site-nav-link.active { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--section-strong); }
 }
 @media print {
   .options-sheet, .tindex-menu, .section-menu-list, .page-vocab .vocab-toolbar::before {
