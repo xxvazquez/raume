@@ -1184,6 +1184,17 @@ async function main() {
       && shoyu.some(t => t.startsWith("醤油")) && kohi.some(t => t.startsWith("コーヒー")) && mittu.some(t => t.startsWith("三つ"))
       && eat.some(t => t.startsWith("食べる")) && !eat.some(t => t.startsWith("温める"));
   })());
+  check("an English word that folds like romaji doesn't drag in every reading it would start: see finds 見る first and not 千 (sen); sit finds only sit down", (() => {
+    const input = document.getElementById("tableSearch");
+    const meanings = q => {
+      input.value = q;
+      input.dispatchEvent(new window.Event("input", { bubbles: true }));
+      return [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) .meaning-text')].map(m => m.textContent);
+    };
+    const see = meanings("see"), sit = meanings("sit"), koohii = meanings("koohii");
+    meanings("");
+    return /^see/.test(see[0] || "") && !see.includes("1,000") && sit.length === 1 && sit[0] === "sit down" && koohii.includes("coffee");
+  })());
   check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "ookii";

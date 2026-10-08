@@ -613,8 +613,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
         readings: jpwords.map(readingOf),
         romaji: jpwords.map(w => expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase()),
-        // ...and folded (see foldRomaji): whole, and word by word.
-        romajiFolded: jpwords.map(w => [fold(w.dataset.romaji)].concat(String(w.dataset.romaji).split(/[\s-]+/).slice(1).map(fold))),
+        // ...and folded (see foldRomaji): whole, then each of its words.
+        romajiFolded: jpwords.map(w => [fold(w.dataset.romaji)].concat(String(w.dataset.romaji).split(/[\s-]+/).map(fold))),
         english: enEl ? enEl.textContent.toLocaleLowerCase() : ''
       };
       rowInfo.set(row, info);
@@ -760,12 +760,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // inside asagohan) and folded, from the start of the reading or of one
       // of its words (shoyu, kohi, mittu, tabemasu, ramen in miso rāmen). The
       // folded match never runs mid-word: folding shrinks English too ("beer"
-      // -> "ber"), which would otherwise turn up taberu.
+      // -> "ber"), which would otherwise turn up taberu. And when folding
+      // changed the query itself (a doubled vowel, ou, a Kunrei spelling), it
+      // has to be a whole reading or word: "koohii" is kōhī, but "see" folds
+      // to "se" and would otherwise start every sen, sensei and sētā, above
+      // "to see" itself.
       info.romaji.forEach((t, i) => {
         const folded = info.romajiFolded[i];
         const r = [rankOf(t, qx.expanded, prefixOnly),
           qx.folded && folded[0] === qx.folded ? 0 : null,
-          qx.folded && folded.some(f => f.startsWith(qx.folded)) ? 1 : null
+          qx.folded && (qx.foldedWhole ? folded.slice(1).some(f => f === qx.folded)
+            : folded.some(f => f.startsWith(qx.folded))) ? 1 : null
         ].reduce((a, b) => b === null ? a : (a === null || b < a ? b : a), null);
         if (take(r)) romajiHits.push(info.jpwords[i]);
       });
@@ -936,6 +941,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         // Folded romaji, from three letters on (one or two letters folded
         // would match far too much).
         folded: latin && q.replace(/[\s'-]/g, '').length >= 3 ? kr.foldRomaji(q) : '',
+        // Folding changed more than case, breaks and macrons (see rankRow).
+        foldedWhole: latin && kr.foldRomaji(q) !== q.replace(/[\s'-]/g, '')
+          .replace(/[āâ]/g, 'a').replace(/[īî]/g, 'i').replace(/[ūû]/g, 'u').replace(/[ēê]/g, 'e').replace(/[ōô]/g, 'o'),
         kana: /[\u3040-\u30ff]/.test(q) ? toHiragana(q) : ''
       };
       // A single Latin letter only matches words that start with it: "t"
