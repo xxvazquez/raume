@@ -3871,13 +3871,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    below. */
 .fc-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; margin-bottom: 18px; }
 /* No coloured edge bars (iOS): the four numbers are plain figure + caption.
-   The one signal left is Estimated retention's figure turning coral once it
+   The one signal left is Retention's figure turning coral once it
    has slipped under the Settings target. */
 .fc-stat-tile { position: relative; padding: 0; }
 .fc-stat-attention .fc-stat-value { color: var(--warn-strong); }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
-.fc-stat-label { display: flex; align-items: center; gap: 4px; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); }
-.fc-stat-glyph { flex: none; color: var(--faint); }
+/* The glyph sits on the label's first line; a wrapped label grows down. */
+.fc-stat-label { display: flex; align-items: flex-start; gap: 4px; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }
+.fc-stat-label-text { min-width: 0; }
+.fc-stat-label-end { white-space: nowrap; }
+.fc-stat-glyph { flex: none; margin-top: calc((var(--fs-micro) * 1.4 - 12px) / 2); color: var(--faint); }
 .fc-stat-glyph[data-tile] { color: var(--tile); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
 .fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
@@ -3986,8 +3989,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-retention-note { margin: 2px 0 16px; max-width: none; }
 .fc-retention-note[hidden] { display: none; }
 .fc-stat-info {
-  appearance: none; border: 0; background: none; padding: 0 2px; margin: -6px 0 -6px 2px; min-height: 28px;
-  display: inline-flex; align-items: center; color: var(--faint); cursor: pointer;
+  appearance: none; border: 0; background: none; padding: 0 2px; margin: -7px 0 -7px 2px; min-height: 28px;
+  display: inline-flex; align-items: center; vertical-align: middle; color: var(--faint); cursor: pointer;
 }
 .fc-stat-info[aria-expanded="true"] { color: var(--section-strong, var(--accent-dark)); }
 .fc-dash-empty-puzzles { margin-top: 8px; }

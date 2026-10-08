@@ -144,8 +144,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var jn = noteJourney(now, stats);
     var tilesHtml = '<div class="fc-stats-grid fc-stats-grid-3 fc-journey-stats">' +
       statTile(stats.total, "Total cards") +
-      statTile(stats.reviewsCompleted, "Reviews completed") +
-      statTile(retentionText, "Estimated retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null) +
+      statTile(stats.reviewsCompleted, "Reviews") +
+      statTile(retentionText, "Retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null) +
       "</div>" +
       (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note" id="fcRetentionNote" hidden>FSRS’s forecast of how likely you are to recall your reviewed cards — not a measured pass rate.</p>');
     panel.innerHTML =
@@ -224,16 +224,16 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var STAT_GLYPH_PATHS = {
     "Day streak": '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/>',
     "Total cards": '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>',
-    "Reviews completed": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
+    "Reviews": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
     "Games played": '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>',
     "Puzzles solved": '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>',
-    "Estimated retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
+    "Retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
   // `info`: an ⓘ after the label that shows the tile's explainer
   // (#fcRetentionNote) -- hidden until asked for, never a standing footnote.
   var STAT_HUES = {
-    "Day streak": "orange", "Total cards": "blue", "Reviews completed": "green", "Estimated retention": "indigo",
+    "Day streak": "orange", "Total cards": "blue", "Reviews": "green", "Retention": "indigo",
     "Games played": "purple", "Puzzles solved": "teal"
   };
   function statTile(value, label, variant, pending, info) {
@@ -242,7 +242,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       ? '<svg class="fc-stat-glyph"' + (STAT_HUES[label] ? ' data-tile="' + STAT_HUES[label] + '"' : "") + ' viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
       : "";
     var infoBtn = info ? '<button type="button" class="fc-stat-info" aria-expanded="false" aria-controls="fcRetentionNote" aria-label="What is ' + esc(label) + '?">' + INFO_GLYPH + "</button>" : "";
-    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + esc(label) + infoBtn + "</span></div>";
+    // The ⓘ rides on the label's last word, so a label that wraps keeps it
+    // beside "retention" instead of stranded at the tile's far edge.
+    var text = esc(label);
+    if (infoBtn) {
+      var cut = text.lastIndexOf(" ") + 1;
+      text = text.slice(0, cut) + '<span class="fc-stat-label-end">' + text.slice(cut) + infoBtn + "</span>";
+    }
+    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + '<span class="fc-stat-label-text">' + text + "</span></span></div>";
   }
 
   // --- Dashboard: Today's progress, Next review, Missed today, Words to Review ---

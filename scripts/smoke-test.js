@@ -2426,9 +2426,9 @@ async function main() {
       const line = document.querySelector("#fcPanelDashboard .fc-now-row .fc-rings-line");
       return !!line && line.textContent.trim().length > 0;
     })());
-    check("Estimated retention spells out its pending state, not a bare \"—\"", (() => {
+    check("Retention spells out its pending state, not a bare \"—\"", (() => {
       const tile = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")]
-        .find(t => /Estimated retention/.test(t.querySelector(".fc-stat-label").textContent));
+        .find(t => /^Retention/.test(t.querySelector(".fc-stat-label").textContent));
       const val = tile && tile.querySelector(".fc-stat-value").textContent;
       return tile && tile.classList.contains("fc-stat-tile-pending") && val !== "—" && /reviews/i.test(val);
     })());
@@ -2877,7 +2877,7 @@ async function main() {
     F.render();
   }
 
-  console.log("Flashcards: Estimated retention colours the tile only once it's meaningfully under target");
+  console.log("Flashcards: Retention colours the tile only once it's meaningfully under target");
   {
     // Give a few cards enough review history to be scored, but stale enough
     // (long overdue against a low stability) that FSRS predicts poor recall --
@@ -2899,10 +2899,10 @@ async function main() {
     window.RaumeStudy.flashcards.render();
     check("a retention well under target gets the amber attention tile, not the plain quiet rule", (() => {
       const tiles = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")];
-      const tile = tiles.find(t => /Estimated retention/.test(t.querySelector(".fc-stat-label").textContent));
+      const tile = tiles.find(t => /^Retention/.test(t.querySelector(".fc-stat-label").textContent));
       return !!tile && tile.classList.contains("fc-stat-attention") && !tile.classList.contains("fc-stat-tile-pending");
     })());
-    check("what Estimated retention means waits behind its ⓘ, shown only on tap", (() => {
+    check("what Retention means waits behind its ⓘ, shown only on tap", (() => {
       const info = document.querySelector("#fcPanelDashboard .fc-stat-info");
       const note = document.getElementById("fcRetentionNote");
       if (!info || !note || !note.hidden) return false;

@@ -759,8 +759,8 @@ be scannable at a glance:
 
 - **One card per group** — `.fc-dash-now` ("right now": Today's rings +
   Study now), `.fc-dash-streak` (the streak strip), `.fc-dash-stats` (the
-  journey — see below — over three tiles: Total cards, Reviews completed,
-  Estimated retention, in one even row), Awards, a Highlights row when
+  journey — see below — over three tiles: Total cards, Reviews,
+  Retention, in one even row; each label one line), Awards, a Highlights row when
   there's news, and then, under a quiet "Details" list header (13px muted,
   `.fc-dash-head`), one `.fc-viz-card` each for
   Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
@@ -840,7 +840,7 @@ be scannable at a glance:
   "N / N" count is `--right-strong`, not the section tone); titles are ink.
   Settings value rows carry no icon tiles — iOS puts tiles only on rows
   that open another screen. The one signal
-  is **Estimated retention**'s figure turning coral once it drops under the
+  is **Retention**'s figure turning coral once it drops under the
   Settings target (`.fc-stat-attention`). What the figure means sits behind a
   small ⓘ after its label, shown only when tapped — explanations never stand
   on the screen taking space;

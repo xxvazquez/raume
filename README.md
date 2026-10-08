@@ -296,7 +296,7 @@ From the top:
 | --- | --- |
 | **Today's rings** | Apple Fitness-style: **Review** (cards due today that you've done), **Learn** (new cards met, of your daily number) and **Play** (one finished puzzle or game; more laps the ring), beside how many cards **Study now** holds |
 | **Streak** | Days in a row, this week as seven dots (studied / missed / today half-filled until Review closes) and your best to beat |
-| **Level** | One per 25 words ever mastered (forgetting a word never takes one back), with Kana started, Kanji known, Words mastered, total cards, reviews and estimated retention |
+| **Level** | One per 25 words ever mastered (forgetting a word never takes one back), with Kana started, Kanji known, Words mastered, total cards, reviews and retention (FSRS's forecast, behind its ⓘ) |
 | **Awards** | Medals for streaks, reviews, words mastered, all the hiragana / katakana, kanji known, puzzles and games, a Match under 2s a pair, a perfect Listening game. The newest six earned and the nearest to go; **Show all** for every one, tap one for what it's for and when you earned it |
 | **Highlights** | One line, only when there's news — reviews up on last week, a new best Match pace |
 
