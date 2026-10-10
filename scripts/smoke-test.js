@@ -1111,6 +1111,19 @@ async function main() {
   check("the Grammar nav link is active", grammarNav.classList.contains("active"));
   check("the Vocabulary nav link is no longer active", !document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("Grammar has no in-flow category sub-heading (single category)", ![...document.querySelectorAll('#vocabulary .cat-heading:not(.page-hidden)')].length);
+  check("tapping the section you're on while scrolled only scrolls back to the top", (() => {
+    const realTo = window.scrollTo, calls = [];
+    const searchInput = document.getElementById("tableSearch");
+    window.scrollTo = (o) => calls.push(o);
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 600 });
+    if (searchInput) searchInput.value = "keep";
+    grammarNav.click();
+    const kept = !searchInput || searchInput.value === "keep";
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+    if (searchInput) searchInput.value = "";
+    window.scrollTo = realTo;
+    return calls.length === 1 && calls[0].top === 0 && kept && grammarNav.classList.contains("active");
+  })());
 
   console.log("Romaji reveal");
   const saltRow = document.querySelector('#vocabulary .table-section:not([data-section="grammar"]) tbody tr .jpword[data-romaji="shio"]').closest("tr");

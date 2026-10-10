@@ -300,6 +300,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (back) back.addEventListener("click", function () { activeTab = lastMainTab; render(); window.scrollTo(0, 0); });
     el.querySelectorAll(".fc-tab, .fc-titlebar-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        if (btn.dataset.tab === activeTab && window.RaumeStudy.shared.scrollToTopFirst()) return;
         activeTab = btn.dataset.tab;
         dashboard.setSession(null);
         if (kana) kana.clearSession();

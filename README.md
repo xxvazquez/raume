@@ -174,7 +174,9 @@ The **account button** (the person icon) opens one menu:
 **Screen sizes.** On a phone the sections are a tab bar at the bottom, each
 screen starts with a large title, and the account button sits round beside it.
 On a tablet the top icons carry captions. On desktop the sections sit in a
-floating bar at the top. Nothing relies on hover.
+floating bar at the top. Nothing relies on hover. Tapping the section or
+Practice tab you're already on scrolls back to the top, as in any iOS app;
+tapping it again once at the top goes back to that section's start.
 
 <sub>[↑ Contents](#contents)</sub>
 

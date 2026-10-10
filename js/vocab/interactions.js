@@ -1197,6 +1197,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     document.querySelectorAll('#siteNav .site-nav-link').forEach(function (link) {
       link.addEventListener('click', function (event) {
         event.preventDefault();
+        if (link.classList.contains('active') && window.RaumeStudy.shared.scrollToTopFirst()) return;
         if (link.dataset.page === 'flashcards') { if (vocab.showFlashcardsPage) vocab.showFlashcardsPage(); }
         else if (link.dataset.section) showSection(link.dataset.section);
       });

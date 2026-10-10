@@ -253,5 +253,16 @@ window.RaumeStudy.shared = (function () {
     if (btn) btn.addEventListener("mousedown", function (e) { e.preventDefault(); });
   }
 
-  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus };
+  // Tapping the tab you're already on scrolls back to the top, as in every
+  // iOS app; only once you're at the top does a second tap do the tab's
+  // own thing (re-open the section, back to the tab's first screen).
+  // Returns true when it scrolled, so the caller stops there.
+  function scrollToTopFirst() {
+    if ((window.scrollY || window.pageYOffset || 0) < 4) return false;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    return true;
+  }
+
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
 })();
