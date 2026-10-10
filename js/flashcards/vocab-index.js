@@ -333,17 +333,17 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
   // Verb-pairs accept two independent romaji forms -- diff against whichever
   // one the typed answer is actually closest to, so a near-miss on the
-  // polite form doesn't get compared against the casual one.
-  function closestRomajiDisplay(entry, typedNormalized) {
+  // polite form doesn't get compared against the casual one. Returns its index.
+  function closestRomajiIndex(entry, typedNormalized) {
     var displays = entry.romajiAnswerDisplays || [];
-    if (displays.length < 2) return displays[0] || entry.romajiDisplay;
     var best = 0, bestDist = Infinity;
+    if (displays.length < 2) return 0;
     displays.forEach(function (disp, idx) {
       var norm = entry.romajiAnswers[idx] || normalizeAnswer(disp, true);
       var dist = alignChars(norm, typedNormalized).distance;
       if (dist < bestDist) { bestDist = dist; best = idx; }
     });
-    return displays[best];
+    return best;
   }
   // Builds the wrong-answer "you wrote / correct" comparison for the review
   // card's reveal. Romaji targets get a real letter-level diff (a fair,
@@ -356,7 +356,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     if (!isRomajiTarget) {
       return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "", near: false, marked: false };
     }
-    var correctDisplay = closestRomajiDisplay(entry, normalizeAnswer(typed, true));
+    var displays = (entry.romajiAnswerDisplays || []).length ? entry.romajiAnswerDisplays : [entry.romajiDisplay];
+    var closest = closestRomajiIndex(entry, normalizeAnswer(typed, true));
+    var correctDisplay = displays[closest];
     var aligned = alignChars(String(correctDisplay || "").toLowerCase(), typed.toLowerCase());
     var pairs = aligned.pairs;
     var bad = pairs.filter(function (p) { return p.bad; });
@@ -376,7 +378,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var marked = bad.length <= 2;
     return {
       youHtml: typed ? (marked ? wordDiffHtml(pairs, "you") : esc(typed)) : "(nothing)",
-      correctHtml: marked ? wordDiffHtml(pairs, "co") : esc(String(correctDisplay || "")),
+      // Every accepted form shows ("nomu / nomimasu"), the marks only on
+      // the one compared against.
+      correctHtml: displays.map(function (disp, idx) {
+        return idx === closest && marked ? wordDiffHtml(pairs, "co") : esc(String(disp || ""));
+      }).join(" / "),
       note: note,
       // Exactly one letter wrong / missing / extra: a typo, not a different word.
       near: !!typed && bad.length === 1,

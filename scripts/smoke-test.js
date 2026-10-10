@@ -2674,6 +2674,15 @@ async function main() {
     const totalLetters = compare.textContent.replace(/[\s→]/g, "").length;
     return marks.length < totalLetters;
   })());
+  check("a wrong verb-pair answer reveals both forms, marks only on the closest one", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const drink = vi.getVocabIndex().v0138;
+    const far = drink && vi.answerCompareHtml(drink, "en-ro", "nemasu");
+    const near = drink && vi.answerCompareHtml(drink, "en-ro", "nomimasi");
+    const text = (h) => h.replace(/<[^>]+>/g, "");
+    return !!far && text(far.correctHtml) === "nomu / nomimasu"
+      && text(near.correctHtml) === "nomu / nomimasu" && /^nomu \/ nomimas<mark/.test(near.correctHtml);
+  })());
   document.querySelector('.fc-rating-btn[data-rating="again"]').click();
   await flush();
   check("rating advances in place -- the answer field survives to the next card, ratings + lock cleared", () =>
