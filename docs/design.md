@@ -382,7 +382,10 @@ and Help.
     `::before` / `::after`.
   - **Buttons** (all capsules): *filled* (`.fc-btn-primary`, deep section tone,
     no shadow), *white* secondary (`.fc-btn`, accent text on `--control-lift`,
-    no border — never a grey tint) and *plain* (per-row actions `.fc-btn-vocabaction`, the Options sheet's **Expand
+    no border — never a grey tint), *tinted* (per-word Pause / Restore,
+    `.fc-btn-vocabaction`: section-tone text on the soft `--section-soft` wash,
+    App Store "Get" style, so it reads as a button inside a white card; Add stays
+    faint text until hover) and *plain* (the Options sheet's **Expand
     all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
     instead of an underline).
   - **Title menu** (`.fc-xw-title`, Puzzle / Game stats): the screen's subject as

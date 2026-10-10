@@ -4174,16 +4174,17 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-word .fc-tag-leech { color: var(--warn-strong); }
 .fc-manage-row .fc-actions { flex: 0 0 auto; display: flex; gap: 6px; }
 /* Per-word Add / Pause / Restore -- icon + label, mirroring the table actions.
-   Plain text buttons (accent text, no fill) so a long list of rows isn't a
-   column of tinted pills; Add is quieter still at rest (it's the common case
-   down a long, mostly-untouched list -- exactly like "Add table") and takes
-   the tinted fill on hover / focus. */
-.fc-btn-vocabaction { gap: 6px; background: transparent; box-shadow: none; }
-.fc-btn-vocabaction:hover { background: var(--accent-soft); }
-.fc-btn-vocabaction[data-action="add"] { color: var(--faint); }
+   Pause / Restore sit on a soft section-tone capsule (the App Store "Get"
+   shape) so they read as buttons inside the white card -- as plain text they
+   looked like one more line of the word. Add is quieter at rest (it's the
+   common case down a long, mostly-untouched list -- exactly like "Add
+   table") and takes the tinted fill on hover / focus. */
+.fc-btn-vocabaction { gap: 6px; background: var(--section-soft); box-shadow: none; }
+.fc-btn-vocabaction:hover { background: color-mix(in srgb, var(--section) 22%, var(--paper)); }
+.fc-btn-vocabaction[data-action="add"] { background: transparent; color: var(--faint); }
 .fc-btn-vocabaction[data-action="add"]:hover,
 .fc-btn-vocabaction[data-action="add"]:focus-visible {
-  background: var(--accent-soft); color: var(--accent-dark);
+  background: var(--section-soft); color: var(--section-strong);
 }
 /* Phone: drop the separate romaji column so each row stays one tight line --
    kanji + English + the action, which keeps its one-word label (Add / Pause
