@@ -1492,6 +1492,10 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
   font-size: var(--fs-subhead); font-weight: 400; letter-spacing: 0;
   border-bottom: 1px solid var(--row-line);
 }
+/* Inside the card the rows reach its trailing edge, as iOS runs a
+   separator from the text to the card's right side -- the card's 14px
+   becomes each row's own trailing padding, so content stays put. */
+.cz-groups .cz-section-label, .cz-groups .cz-group-title, .cz-groups .cz-row { margin-right: -14px; padding-right: 14px; }
 .cz-group { margin-top: 10px; }
 .cz-section-block > .cz-group:first-of-type,
 .cz-section-body > .cz-group:first-of-type { margin-top: 0; }

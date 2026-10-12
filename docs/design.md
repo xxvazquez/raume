@@ -2,7 +2,8 @@
 
 The target is iOS 26 (Liquid Glass): content first, chrome that recedes. One
 system across the whole app — a grey grouped ground, white borderless cards
-(20px, `--radius-card`) sitting directly on it, inset hairlines between rows,
+(20px, `--radius-card`) sitting directly on it, hairlines between rows (inset
+at the text, running to the card's trailing edge),
 capsule controls, and floating chrome (the sticky search band, sheets, ⋯ menus)
 in translucent glass. A small set of muted tones carries hierarchy — dusty
 lavender for what you act on, soft sage for progress, muted coral for attention,
