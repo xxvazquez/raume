@@ -695,7 +695,9 @@ and Help.
   bullets, no ALL-CAPS headings, nothing open until tapped. Under it, a
   one-row card for the Ko-fi support link (amber tile, trailing ↗ since it
   leaves the site) with one grey footnote — a quiet thank-you, never a banner
-  or a prompt elsewhere in the app.
+  or a prompt elsewhere in the app. Footnotes are iOS section footers:
+  ragged-right (never justified), and a link inside one never breaks across
+  lines.
 - **Sheets** (the table-index popover / bottom sheet, the icon picker) are
   glass surfaces (`--radius-menu`, `--radius-sheet` for a phone bottom sheet's
   top corners) with the one float shadow; the current table in the index is a
