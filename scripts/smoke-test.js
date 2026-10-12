@@ -1240,6 +1240,17 @@ async function main() {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return ok && !tile.querySelector(".kanji-readings mark");
   })());
+  check("a kanji's katakana reading is found typed in hiragana, and marked as shown (えき -> エキ on 駅)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "えき";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const tile = [...document.querySelectorAll("#vocabulary .vocab-kanji tr.kanji-tile")].find(r => r.querySelector(".kanji-char").textContent === "駅");
+    const marks = tile ? [...tile.querySelectorAll(".kanji-readings mark.search-hit")].map(m => m.textContent) : [];
+    const ok = !!tile && !tile.classList.contains("search-hidden") && marks.join("|") === "エキ";
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return ok;
+  })());
 
   console.log("\"Show polite\" only appears where verb rows are actually visible");
   check("hidden on Vocabulary (no verb tables)", (() => {

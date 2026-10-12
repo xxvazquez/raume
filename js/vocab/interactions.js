@@ -609,6 +609,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         jpCell, enCell, jpwords, jpword: jpwords[0] || null,
         kanji: kanji.toLocaleLowerCase(),
         furigana: furigana.toLocaleLowerCase(),
+        // ...and in hiragana: a kanji's on readings are katakana (イチ),
+        // and いち typed should find them too.
+        furiganaKana: toHiragana(furigana),
         // Each form's whole reading in hiragana -- furigana in place of its
         // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
         readings: jpwords.map(readingOf),
@@ -745,14 +748,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Ranks a row against the query using the indexed text -- no DOM work.
     // `hide` is the current column visibility, read once per search.
     function rankRow(info, q, qx, prefixOnly, hide) {
-      let best = null, jpHit = false, enHit = false, readingHit = false;
+      let best = null, jpHit = false, enHit = false, readingHit = false, onHit = false;
       const romajiHits = [];
       function take(r) { if (r !== null && (best === null || r < best)) best = r; return r !== null; }
       if (!hide.japanese) {
         if (take(rankOf(info.kanji, q, prefixOnly))) jpHit = true;
         if (!hide.furigana && take(rankOf(info.furigana, q, prefixOnly))) jpHit = true;
+        else if (!hide.furigana && qx.kana && take(rankOf(info.furiganaKana, qx.kana, prefixOnly))) onHit = true;
         // Kana typed against the whole reading (たべ -> 食べる).
-        if (!jpHit && !hide.furigana && qx.kana && take(bestOf(info.readings, t => rankOf(t, qx.kana, false)))) readingHit = true;
+        if (!jpHit && !onHit && !hide.furigana && qx.kana && take(bestOf(info.readings, t => rankOf(t, qx.kana, false)))) readingHit = true;
       }
       // Romaji is never hidden by a toggle -- it's an always-searchable
       // on-demand reveal in the jp cell, not its own column. Each form is
@@ -775,11 +779,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (take(r)) romajiHits.push(info.jpwords[i]);
       });
       if (!hide.english && take(rankWords(info.english, q, prefixOnly))) enHit = true;
-      return { rank: best, jpHit, enHit, readingHit, romajiHits };
+      return { rank: best, jpHit, enHit, readingHit, onHit, romajiHits };
     }
     function highlightRow(row, info, hit, q) {
       highlighted.add(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
+      // Typed in hiragana, shown in katakana: mark it as shown.
+      if (hit.onHit) highlightCell(info.jpCell, toHiragana(q).replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60)));
       if (hit.enHit) highlightCell(info.enCell, q);
       if (hit.readingHit) info.jpwords.forEach(w => markReading(w, q));
       if (hit.romajiHits.length && !markKanjiReadings(row, q)) {
