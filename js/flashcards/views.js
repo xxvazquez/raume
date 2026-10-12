@@ -156,6 +156,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<h3 class="help-head">Syncing</h3>' +
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Signed in</span><span class="help-desc">Saved on this device first, then synced to your account.</span></li>' +
+      '<li><span class="help-term">Offline</span><span class="help-desc">Everything keeps working. Changes wait here and sync on their own when you’re back.</span></li>' +
       '<li><span class="help-term">Status</span><span class="help-desc"><em>Syncing…</em>, <em>Offline</em>, or <em>couldn’t sync</em> with Sync now to retry.</span></li>' +
       '<li><span class="help-term">What’s pending?</span><span class="help-desc">Lists exactly what hasn’t reached your account yet.</span></li>' +
       '<li><span class="help-term">Signing out</span><span class="help-desc">Anything not yet synced stays on this device and syncs the next time you sign in here.</span></li>' +
