@@ -155,6 +155,7 @@ const REFERENCE_SHELL = [
   "css/site.css",
   "data/vocabulary.js",
   "data/kanji-strokes.js",
+  "data/kana-strokes.js",
   "js/config.js",
   "js/shared.js",
   "js/pull-refresh.js",
@@ -172,7 +173,7 @@ const REFERENCE_SHELL = [
   "vendor/ts-fsrs.js",
   "vendor/supabase.js",
 ];
-const FLASHCARDS_SHELL = ["js/flashcards/store.js", "js/flashcards/vocab-index.js", "js/flashcards/scheduling.js", "js/flashcards/data-ops.js", "js/flashcards/backup.js", "js/flashcards/puzzle-runs.js", "js/flashcards/dashboard.js", "js/flashcards/views.js", "js/flashcards/kana-data.js", "js/flashcards/kana.js", "js/flashcards/crosswords.js", "js/flashcards/puzzle-pdf.js", "js/flashcards/puzzle-stats.js", "js/flashcards/bootstrap.js"];
+const FLASHCARDS_SHELL = ["js/flashcards/store.js", "js/flashcards/vocab-index.js", "js/flashcards/scheduling.js", "js/flashcards/data-ops.js", "js/flashcards/backup.js", "js/flashcards/puzzle-runs.js", "js/flashcards/write-card.js", "js/flashcards/dashboard.js", "js/flashcards/views.js", "js/flashcards/kana-data.js", "js/flashcards/kana.js", "js/flashcards/crosswords.js", "js/flashcards/puzzle-pdf.js", "js/flashcards/puzzle-stats.js", "js/flashcards/bootstrap.js"];
 
 async function main() {
   const V1 = "sha-one-0000000000000000000000000000000000";

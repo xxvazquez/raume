@@ -1,4 +1,5 @@
 data/kanji-strokes.js -- stroke order for the N5 kanji
+data/kana-strokes.js -- stroke order for every hiragana and katakana, and ー
 
 Adapted from KanjiVG (http://kanjivg.tagaini.net).
 Copyright (C) 2009/2010/2011 Ulrich Apel.
@@ -9,11 +10,13 @@ Full legal code: http://creativecommons.org/licenses/by-sa/3.0/legalcode
 
 Changes made: for each of the 102 kanji, the stroke paths (in stroke order)
 and the positions of the stroke numbers were extracted from KanjiVG's
-kanji/<codepoint>.svg files into one JavaScript data file. The paths and
+kanji/<codepoint>.svg files into one JavaScript data file; for each of the
+177 kana (hiragana U+3041-3096, katakana U+30A1-30FA, and U+30FC), the
+stroke paths alone, into a second one. The paths and
 positions themselves are unchanged; the other SVG markup and metadata were
 left out.
 
-As an adaptation, data/kanji-strokes.js is distributed under the same
-Creative Commons Attribution-Share Alike 3.0 licence. It is the only file in
-this repository under that licence; everything else is covered by LICENSE
+As adaptations, data/kanji-strokes.js and data/kana-strokes.js are
+distributed under the same Creative Commons Attribution-Share Alike 3.0
+licence. They are the only files in this repository under that licence; everything else is covered by LICENSE
 and NOTICE.

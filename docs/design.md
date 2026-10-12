@@ -38,6 +38,13 @@ sections below cover each part of it.
   chips. The sole exception is a **particle** (`.particle`,
   700 + `--particle` blue): a grammar signal that needs to jump out of a
   sentence at a glance, and colour alone wasn't enough against Japanese text.
+- An **English → Writing** card swaps the answer line for the writing pad:
+  a row of 36px `--group-ground` squares, one per kana (the one being written
+  ringed in the section tone, finished ones filled in Japanese type), over
+  Write it's square pad — no outline, a little larger (340px) since it's
+  meant for a tablet and pen — then the kana count and Undo / Show answer as
+  white capsules. Its reveal is the usual verdict: the kana as the answer (in
+  the Japanese face), one grey line for how it went, the word as written.
 - On the review card the prompt is the anchor — 26px, the largest text on the
   card, with no direction label above it at all. The answer line ends in the
   Check arrow — a 26px filled circle in the section tone, Messages' send —

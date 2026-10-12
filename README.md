@@ -11,7 +11,7 @@ cooking or studying, and for printing clean A4 study sheets.
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar, Kanji and Travel tables — furigana, search, audio, print |
-| **Practice**    | Flashcards: FSRS-6 spaced repetition, four directions per word, daily streak |
+| **Practice**    | Flashcards: FSRS-6 spaced repetition, up to five directions per word (one handwritten), daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords and word searches from your words |
 | **Games**       | A timed Match game, Listening, Kana tiles, Odd one out, Speed sort and Word chain from your words |
@@ -147,8 +147,8 @@ button's menu.
 | **New table** | Needs an account. Guests can still add words to existing tables. |
 | **Words you've added** | Edit or delete your words (an action sheet asks before a delete). Searchable; sorts by date added or A–Z. |
 
-Custom words work everywhere — furigana, search, print, audio, all four
-flashcard directions. Changes save immediately and sync when signed in.
+Custom words work everywhere — furigana, search, print, audio, every
+flashcard direction. Changes save immediately and sync when signed in.
 
 ### Around the app
 
@@ -193,9 +193,9 @@ flashcards**, or single words from **Library** or a search result.
 
 - Real **FSRS-6** scheduling via
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
-- Each word becomes up to four cards: **JP → EN · JP → Romaji · Romaji → EN ·
-  EN → Romaji**. You never type Japanese. **Study directions** in Settings
-  picks which ones you get.
+- Each word becomes up to five cards: **JP → EN · JP → Romaji · Romaji → EN ·
+  EN → Romaji · EN → Writing**. You never type Japanese. **Study directions**
+  in Settings picks which ones you get; Writing is off until you turn it on.
 - A session mixes everything due (plus learning steps due within 20 minutes)
   with the day's new cards, in a fresh random order every time. Each word's
   directions are dealt one per round, each round reshuffled, so the same word
@@ -225,6 +225,29 @@ card  →  type answer, Enter or ↑  →  verdict + answer (audio plays)  →  
   dimmed, but still one tap away if it was just a typo.
 - During a session the navigation hides and the card gets the whole screen.
 - Results are announced to screen readers without moving focus.
+
+### Writing cards
+
+**English → Writing** is for a tablet and pen (a finger or mouse works too).
+The card shows the English; under it, one square per kana and a writing pad.
+Write the word in kana, one kana at a time, each stroke in order — a word
+with kanji in its reading, like 水, is written みず, and loanwords are in
+katakana (ビール). Turn it on in Settings › Study directions; the words you
+already study get their writing card then.
+
+- A right stroke snaps to its clean line; a wrong one (misplaced, backwards or
+  out of order) shakes the pad and counts a miss. After three misses on one
+  stroke it's drawn as a hint. There's no outline to trace.
+- A finished kana drops into its square and the pad clears for the next.
+  **Undo** takes back the last stroke (into the previous kana too).
+- The last stroke checks the card: the kana, how it went (*Written cleanly*,
+  *Written · 2 misses*, *Written with 1 hint*) and the word as it's really
+  written, kanji and all. Then rate it as usual — a hint or **Show answer**
+  counts as a miss, with Again / Hard first.
+- With an Apple Pencil, touches on the pad are ignored once the pen has
+  drawn, so a resting palm doesn't make strokes.
+- Only words that can be written in kana get one — not kanji cards, counters
+  (〜), or words with two readings.
 
 <details>
 <summary><b>How answers are checked</b></summary>
@@ -683,5 +706,5 @@ Third-party parts keep their own licenses:
 | `ts-fsrs`, `supabase-js` | MIT (`vendor/*.LICENSE.txt`) |
 | Lucide-derived icons | ISC (`vendor/*.LICENSE.txt`) |
 | Inter, Space Grotesk | SIL Open Font License (`fonts/*.LICENSE.txt`) |
-| Kanji stroke order (`data/kanji-strokes.js`) | Adapted from [KanjiVG](http://kanjivg.tagaini.net), © Ulrich Apel — [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) (`data/kanji-strokes.LICENSE.txt`); that file stays under CC BY-SA |
+| Kanji and kana stroke order (`data/kanji-strokes.js`, `data/kana-strokes.js`) | Adapted from [KanjiVG](http://kanjivg.tagaini.net), © Ulrich Apel — [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) (`data/kanji-strokes.LICENSE.txt`); those files stay under CC BY-SA |
 | Pronunciation audio (`audio/*.mp3`) | Generated with [VOICEVOX](https://voicevox.hiroshiba.jp/), voice VOICEVOX:四国めたん |

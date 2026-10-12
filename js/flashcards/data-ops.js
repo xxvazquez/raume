@@ -154,7 +154,9 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       // default), not "off".
       enabled_directions: {
         "jp-en": settingsRow.enabled_jp_en !== false, "jp-ro": settingsRow.enabled_jp_ro !== false,
-        "ro-en": settingsRow.enabled_ro_en !== false, "en-ro": settingsRow.enabled_en_ro !== false
+        "ro-en": settingsRow.enabled_ro_en !== false, "en-ro": settingsRow.enabled_en_ro !== false,
+        // Writing is the one direction that starts off -- only an explicit on counts.
+        "en-wr": settingsRow.enabled_en_wr === true
       }
     };
     // Paused tables: union the account's list with whatever this device had
@@ -217,6 +219,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         })
       });
     }
+    // Last, once the reader's own words are in the index too.
+    await ensureWritingCards().catch(function (e) { console.warn("Flashcards: could not add writing cards", e); });
   }
 
   // Custom vocabulary writes -- thin inserts/deletes against the reader's own
@@ -258,13 +262,21 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var client = getClient(), user = currentUser();
     var index = getVocabIndex();
     var rows = [];
+    var writeRows = [];
     vocabIds.forEach(function (vocabId) {
       var entry = index[vocabId];
       if (!entry) return; // skip anything not resolvable (e.g. a stale id)
       directionsForEntry(entry).forEach(function (d) {
-        rows.push({ user_id: user.id, vocab_id: vocabId, direction: d, active: true });
+        (d === "en-wr" ? writeRows : rows).push({ user_id: user.id, vocab_id: vocabId, direction: d, active: true });
       });
     });
+    // Writing cards go up on their own, after the rest: a project that hasn't
+    // re-run supabase/schema.sql refuses the direction, and that mustn't
+    // stop the word itself being added.
+    if (writeRows.length) {
+      var wres = await client.from("flashcards").upsert(writeRows, { onConflict: "user_id,vocab_id,direction" }).select();
+      if (wres.error) console.warn("Flashcards: could not add writing cards", wres.error);
+    }
     if (!rows.length) return [];
     // Only user_id/vocab_id/direction/active are in the payload, so on a
     // conflict (an archived row already exists) Postgres's upsert only
@@ -356,7 +368,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }).catch(function (e) { console.warn("Flashcards: settings sync failed", e); });
     return settingsChain;
   }
-  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro" };
+  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro", "en-wr": "enabled_en_wr" };
   // Lay queued changes over the account's row just read into the cache.
   function applyPendingSettings(c) {
     var p = c.pendingSettings || {};
@@ -364,7 +376,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       if (k in p) c.settings[k] = p[k];
     });
     Object.keys(DIRECTION_COLUMN).forEach(function (d) {
-      if (DIRECTION_COLUMN[d] in p) c.settings.enabled_directions[d] = p[DIRECTION_COLUMN[d]] !== false;
+      if (DIRECTION_COLUMN[d] in p) c.settings.enabled_directions[d] = d === "en-wr" ? p[DIRECTION_COLUMN[d]] === true : p[DIRECTION_COLUMN[d]] !== false;
     });
     if (Array.isArray(p.paused_tables)) c.pausedTables = p.paused_tables.map(String);
     // The streak is the one place the account can be ahead: another device
@@ -475,6 +487,49 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     });
     saveCache();
   }
+  // English -> Writing cards for every word in study that can be written but
+  // has none yet -- words added before the direction existed. Only while
+  // it's switched on, so a deck that never writes never gets them. Re-run
+  // safely any time (after switching it on, after each sign-in fetch): a
+  // word that already has one, studied or archived, is left alone.
+  async function ensureWritingCards() {
+    var c = getCache();
+    if (c.settings.enabled_directions["en-wr"] !== true) return;
+    var index = getVocabIndex(), has = {}, inStudy = {};
+    Object.keys(c.cards).forEach(function (id) {
+      var card = c.cards[id];
+      if (card.direction === "en-wr") has[card.vocabId] = true;
+      else if (card.active) inStudy[card.vocabId] = true;
+    });
+    var missing = Object.keys(inStudy).filter(function (v) { return !has[v] && index[v] && index[v].writeChars; });
+    if (!missing.length) return;
+    if (isGuestMode()) {
+      missing.forEach(function (v) { var card = newLocalCard(v, "en-wr"); c.cards[card.id] = card; });
+      saveCache();
+      return;
+    }
+    var client = getClient(), user = currentUser();
+    if (!client || !user) return;
+    var res = await client.from("flashcards").upsert(missing.map(function (v) {
+      return { user_id: user.id, vocab_id: v, direction: "en-wr", active: true };
+    }), { onConflict: "user_id,vocab_id,direction" }).select();
+    if (res.error) {
+      // 23514: the direction check from before writing existed.
+      throw new Error(res.error.code === "23514"
+        ? "writing cards need the latest supabase/schema.sql run on your Supabase project."
+        : (res.error.message || "check your connection and try again."));
+    }
+    if (getCache() !== c) return;
+    (res.data || []).forEach(function (row) {
+      c.cards[row.id] = {
+        id: row.id, vocabId: row.vocab_id, direction: row.direction, active: row.active,
+        state: row.state, due: row.due, stability: row.stability, difficulty: row.difficulty,
+        scheduled_days: row.scheduled_days, reps: row.reps, lapses: row.lapses,
+        learning_steps: row.learning_steps, last_review: row.last_review
+      };
+    });
+    saveCache();
+  }
   // A first-time guest starts with one small table already added, so the
   // Dashboard, a study session and Puzzles all have something to show.
   // Only into a deck that has never held a card -- archiving keeps cards,
@@ -514,16 +569,19 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // keeps enabled directions as one nested object (for easy `enabled[dir]`
   // lookups in buildQueue/computeStats), but Supabase stores them as 4 flat
   // boolean columns -- same pattern (mutate cache, persist locally always,
-  // push remotely when signed in), just with that one translation.
+  // push remotely when signed in), just with that one translation. Switching
+  // writing on also gives the words already in study their writing cards.
   async function saveDirectionSettings(enabledMap) {
     getCache().settings.enabled_directions = enabledMap;
     saveCache();
     if (!isGuestMode()) {
       await pushSettings({
         enabled_jp_en: enabledMap["jp-en"], enabled_jp_ro: enabledMap["jp-ro"],
-        enabled_ro_en: enabledMap["ro-en"], enabled_en_ro: enabledMap["en-ro"]
+        enabled_ro_en: enabledMap["ro-en"], enabled_en_ro: enabledMap["en-ro"],
+        enabled_en_wr: enabledMap["en-wr"] === true
       });
     }
+    await ensureWritingCards();
   }
   // Guest mode has nothing to fetch -- its cache already is the record.
   async function refreshData() { if (!isGuestMode()) await fetchAllFromServer(); }
@@ -1051,6 +1109,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     onAuthChange: onAuthChange, authState: authState,
     fetchAllFromServer: fetchAllFromServer,
     addVocab: addVocab, addVocabs: addVocabs, addVocabsRemote: addVocabsRemote, seedGuestStarter: seedGuestStarter,
+    ensureWritingCards: ensureWritingCards,
     archiveVocab: archiveVocab, archiveVocabs: archiveVocabs, setTablePaused: setTablePaused, keepLeech: keepLeech,
     saveFsrsSettings: saveFsrsSettings, saveQueueSettings: saveQueueSettings,
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,

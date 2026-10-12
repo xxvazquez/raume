@@ -11,12 +11,15 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 window.RaumeStudy.flashcards.store = (function () {
   "use strict";
 
-  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro"];
+  // en-wr: English -> the word handwritten in kana on a pad
+  // (js/flashcards/write-card.js) -- off until switched on in Settings.
+  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr"];
   var DIRECTION_LABEL = {
     "jp-en": "Japanese → English",
     "jp-ro": "Japanese → Romaji",
     "ro-en": "Romaji → English",
-    "en-ro": "English → Romaji"
+    "en-ro": "English → Romaji",
+    "en-wr": "English → Writing"
   };
   var RATING_NAMES = ["Again", "Hard", "Good", "Easy"];
   // localStorage keys. Old "sakura-*" names (the app's former name) are moved
@@ -175,11 +178,12 @@ window.RaumeStudy.flashcards.store = (function () {
       fsrs_request_retention: 0.9, fsrs_maximum_interval: 36500, fsrs_enable_fuzz: false,
       queue_new_cards_per_day: 20, schema_version: 1,
       current_streak: 0, longest_streak: 0, last_study_date: null,
-      // Which of the 4 directions actually get studied -- not an FSRS
-      // setting, and independent of which cards exist: turning a direction
-      // off just leaves its cards out of the queue/stats, never deletes or
-      // resets them. All on by default, same as before this setting existed.
-      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true }
+      // Which directions actually get studied -- not an FSRS setting, and
+      // independent of which cards exist: turning a direction off just
+      // leaves its cards out of the queue/stats, never deletes or resets
+      // them. The typed four are on by default, same as before this setting
+      // existed; writing is off (slow without a pen).
+      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true, "en-wr": false }
     };
   }
   function emptyCache(userId) {

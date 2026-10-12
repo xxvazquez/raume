@@ -2726,6 +2726,24 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .kw-actions { margin-top: 14px; }
 .kw-finish-actions .fc-btn, .kw-actions .fc-btn { min-height: 40px; padding: 8px 20px; }
 .kw-switch-row { cursor: pointer; }
+/* English -> Writing review cards (js/flashcards/write-card.js): in place
+   of the answer field, a row of squares -- one per kana, filling in as each
+   is finished, the one being written ringed in the section tone -- over the
+   same square pad as Write it (no outline: it's the test), the kana count
+   and misses under it, then Undo / Show answer. A little larger than the
+   kanji sheet's pad, since a tablet and pen are what it's for. */
+.fc-answer-form[hidden], .fc-write-host[hidden] { display: none; }
+.fc-write-host { align-self: stretch; margin: 0 0 18px; }
+.fcw-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 14px; }
+.fcw-slot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px; background: var(--group-ground);
+  font: 400 22px/1 var(--font-jp); color: var(--ink);
+}
+.fcw-slot-now { box-shadow: inset 0 0 0 1.5px var(--section); }
+.fcw-pad-wrap { width: min(340px, 100%); }
+.fcw-pad { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.fc-stage-expected:lang(ja) { font-family: var(--font-jp); font-weight: 400; }
 @media (prefers-reduced-motion: reduce) {
   .kw-pad-wrap.kw-miss { animation: none; }
   .kw-hint-stroke { animation: none; stroke-dashoffset: 0; }

@@ -7,7 +7,8 @@
 // Copyright (C) 2009/2010/2011 Ulrich Apel.
 // Licensed under Creative Commons Attribution-Share Alike 3.0
 // (http://creativecommons.org/licenses/by-sa/3.0/). As an adaptation, this
-// file -- and only this file -- is distributed under that same licence; see
+// file -- like data/kana-strokes.js, and only those two -- is distributed
+// under that same licence; see
 // data/kanji-strokes.LICENSE.txt and NOTICE.
 // Changes: the stroke paths (in stroke order) and stroke-number positions
 // were extracted from KanjiVG's kanji/<codepoint>.svg files, unchanged; the

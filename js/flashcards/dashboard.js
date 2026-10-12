@@ -28,6 +28,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var contextDisplayFor = vidx.contextDisplayFor, homophonesOf = vidx.homophonesOf;
   var checkAnswer = vidx.checkAnswer, otherLanguageHint = vidx.otherLanguageHint, getRawVocabRow = vidx.getRawVocabRow;
   var answerCompareHtml = vidx.answerCompareHtml;
+  var writeCard = fc.writeCard;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
   var recordStudyActivity = dataOps.recordStudyActivity, syncOutbox = dataOps.syncOutbox;
 
@@ -1152,7 +1153,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var card = getCache().cards[session.queue[session.index]];
     var entry = card && getVocabIndex()[card.vocabId];
     var input = document.getElementById("fcAnswerInput");
-    if (!card || !entry || !input) return;
+    if (!card || !entry || !input || card.direction === "en-wr") return; // writing checks itself
+    session.write = null;
     session.userAnswer = input.value;
     session.correct = checkAnswer(entry, card.direction, input.value);
     // Right answer, wrong language: say which one the card wants and keep the
@@ -1302,7 +1304,23 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   function currentReviewCard() {
     var card = getCache().cards[session.queue[session.index]];
     var entry = card && getVocabIndex()[card.vocabId];
+    if (card && card.direction === "en-wr" && entry && !entry.writeChars) return null;
     return card && card.active && entry ? { card: card, entry: entry } : null;
+  }
+  // An English -> Writing card checks itself: the pad (write-card.js) calls
+  // this once the last kana is written, or Show answer is tapped. Clean or
+  // with misses counts as recalled; a hint or giving up doesn't.
+  function writeKey(card) { return session.startedAt + ":" + session.index + ":" + card.id; }
+  function writeDone(result) {
+    var cur = session && !session.checked && currentReviewCard();
+    if (!cur || cur.card.direction !== "en-wr") return;
+    session.write = result;
+    session.userAnswer = "";
+    session.correct = !result.revealed && !result.hints;
+    session.checked = true;
+    session.preview = previewRatings(getScheduler(getCache().settings), cur.card, new Date());
+    speech.speak(cur.entry.jpReading);
+    if (!syncReviewCard()) rerender();
   }
   function renderReview(panel) {
     if (session.done || !session.queue.length || session.index >= session.queue.length) {
@@ -1321,6 +1339,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<progress class="fc-progress" aria-label="Session progress" max="1" value="0"></progress>' +
       '<div class="fc-prompt"></div>' +
       '<div class="fc-prompt-reading" hidden></div>' +
+      // English -> Writing: the pad (write-card.js) in place of the field.
+      '<div class="fc-write-host" hidden></div>' +
       // One quiet answer line is the whole "answering" screen: Enter (or a
       // phone keyboard's return) checks, and so does the arrow at its end.
       // The placeholder alone (English / Romaji) says what to type -- no
@@ -1342,7 +1362,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
     syncReviewCard();
     var input = document.getElementById("fcAnswerInput");
-    if (input && !session.checked) input.focus();
+    if (input && !session.checked && !input.form.hidden) input.focus();
   }
 
   // Reflect the current session state onto the live review-card shell. Returns
@@ -1390,6 +1410,27 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     input.value = session.userAnswer || "";
     var form = shell.querySelector("#fcAnswerForm");
     var dyn = shell.querySelector(".fc-review-dynamic");
+
+    // A writing card has no field: hide it (dropping a phone keyboard) and
+    // put the pad there instead -- until checked, when the answer below says
+    // it all (the squares would only repeat it).
+    var writing = card.direction === "en-wr";
+    var writeHost = shell.querySelector(".fc-write-host");
+    if (form) form.hidden = writing;
+    if (writeHost) {
+      writeHost.hidden = !writing || session.checked;
+      if (writing) {
+        if (document.activeElement === input) input.blur();
+        writeCard.mount(writeHost, writeKey(card), entry.writeChars, writeDone);
+      } else {
+        writeHost.innerHTML = "";
+      }
+    }
+    if (writing) {
+      dyn.innerHTML = session.checked ? writeVerdictHtml(entry, context) + ratingRowHtml() + "</div>" : "";
+      wireRatings(dyn);
+      return true;
+    }
 
     if (!session.checked) {
       input.classList.remove("fc-answer-locked");
@@ -1447,10 +1488,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy sit at reduced opacity -- still one click away (typos
       // happen), just not the default read.
-      '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name) {
-        var p = session.preview[name];
-        return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
-      }).join("") + "</div></div>";
+      ratingRowHtml() + "</div>";
 
     var resultEl = dyn.querySelector(".fc-review-verdict");
     if (resultEl) resultEl.setAttribute("aria-label",
@@ -1459,10 +1497,39 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       " " + context.label + ": " + context.value + "." +
       (sameSound.length ? " Same sound: " + sameSound.map(function (h) { return h.jpPlain + ", " + h.englishFull; }).join("; ") + "." : "") +
       " Answer: " + expected + (entry.englishNote && (card.direction === "jp-en" || card.direction === "ro-en") ? ", " + entry.englishNote : "") + ".");
+    wireRatings(dyn);
+    return true;
+  }
+  function ratingRowHtml() {
+    return '<div class="fc-rating-row' + (session.correct === false ? " fc-rating-row-missed" : "") + '">' + RATING_NAMES.map(function (name) {
+      var p = session.preview[name];
+      return '<button type="button" class="fc-rating-btn" data-rating="' + name.toLowerCase() + '"><span class="fc-rating-name">' + name + '</span><span class="fc-rating-interval">' + p.intervalLabel + "</span></button>";
+    }).join("") + "</div>";
+  }
+  function wireRatings(dyn) {
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });
-    return true;
+  }
+  // The written word's reveal: the kana as the answer, how it went, and the
+  // word as it's really written (kanji and all) when that differs.
+  function writeVerdictHtml(entry, context) {
+    var w = session.write || { misses: 0, hints: 0, revealed: true };
+    var kana = expectedDisplayFor(entry, "en-wr");
+    var how = w.revealed ? "Not written"
+      : w.hints ? "Written with " + w.hints + (w.hints === 1 ? " hint" : " hints")
+      : w.misses ? "Written · " + w.misses + (w.misses === 1 ? " miss" : " misses")
+      : "Written cleanly";
+    var kind = !session.correct ? "bad" : (w.misses ? "almost" : "ok");
+    var icon = kind === "ok" ? VERDICT_OK_ICON : (kind === "almost" ? VERDICT_ALMOST_ICON : VERDICT_BAD_ICON);
+    var showJp = context.value !== kana;
+    return '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1" aria-label="' +
+      esc(how + ". Answer: " + kana + "." + (showJp ? " Japanese: " + context.value + "." : "")) + '">' +
+      '<span class="fc-verdict-badge fc-verdict-badge-' + kind + '">' + icon + "</span>" +
+      '<div class="fc-stage"><div class="fc-stage-expected" lang="ja">' + esc(kana) + "</div>" +
+      '<div class="fc-stage-typed">' + how + "</div>" +
+      (showJp ? '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span><span lang="ja">' + context.html + "</span></div>" : "") +
+      "</div>";
   }
 
   // Move to the next card in place (keeping the answer field + its focus, so a
@@ -1473,7 +1540,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (session.index >= session.queue.length) return false;
     if (!syncReviewCard()) return false;
     var input = document.getElementById("fcAnswerInput");
-    if (input) input.focus(); // within the rating click / keydown, so mobile honours it
+    // within the rating click / keydown, so mobile honours it; a writing card has no field
+    if (input && !input.form.hidden) input.focus();
     return true;
   }
 
@@ -1530,6 +1598,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.checked = false;
     session.userAnswer = "";
     session.hint = "";
+    session.write = null;
     // Advance in place where we can (keeps the answer field + a phone keyboard
     // alive); full render for the wrap-up at the end of the queue.
     if (session.done || session.index >= session.queue.length || !advanceReviewCard()) rerender();

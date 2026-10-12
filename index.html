@@ -155,7 +155,7 @@
         <li><span class="help-term">Kanji</span><span class="help-desc">Tap a kanji for its readings (tap one to hear it), strokes and radical, an example, words that use it and Add to flashcards. The ⓘ by Readings or Writing explains that card.</span></li>
         <li><span class="help-term">Write it</span><span class="help-desc">In a kanji’s sheet: draw it stroke by stroke, in order, on a pad.</span></li>
         <li><span class="help-term">Known</span><span class="help-desc">Mark as known in a kanji’s sheet turns its tile green.</span></li>
-        <li><span class="help-term">Stroke order</span><span class="help-desc">A kanji draws itself stroke by stroke; Replay draws it again. Drawings adapted from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a> by Ulrich Apel, <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="noopener" target="_blank">CC BY-SA 3.0</a>.</span></li>
+        <li><span class="help-term">Stroke order</span><span class="help-desc">A kanji draws itself stroke by stroke; Replay draws it again. Kanji and kana drawings adapted from <a href="http://kanjivg.tagaini.net" rel="noopener" target="_blank">KanjiVG</a> by Ulrich Apel, <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="noopener" target="_blank">CC BY-SA 3.0</a>.</span></li>
         <li><span class="help-term">ⓘ on a row</span><span class="help-desc">Its grammar in one place: い / な, 五段 / 一段 / 変格, and the particles it takes.</span></li>
       </ul>
     </details>
@@ -222,6 +222,8 @@
   1. data/vocabulary.js   -> RaumeStudy.data       (vocabulary dataset, data only)
      data/kanji-strokes.js -> RaumeStudy.data.kanjiStrokes (N5 kanji stroke order, from
                        KanjiVG, CC BY-SA 3.0; must follow vocabulary.js, which sets .data)
+     data/kana-strokes.js -> RaumeStudy.data.kanaStrokes (every kana's stroke order, same source
+                       and licence, for English -> Writing cards)
   2. js/config.js         -> RaumeStudy.config     (Supabase connection config)
   3. js/shared.js         -> RaumeStudy.shared     (cross-feature helpers: escape, speech, confirm sheet)
   4. js/pull-refresh.js   (no namespace; global touch pull-to-refresh gesture,
@@ -246,6 +248,7 @@
        data-ops.js    .dataOps     auth, Supabase sync, guest store, mode-aware ops, streak
        backup.js      .backup      guest-mode export / import of the on-device data (a JSON file)
        puzzle-runs.js .puzzleRuns  finished Match / Listening games, for the Dashboard's Puzzles card
+       write-card.js  .writeCard   English -> Writing cards' pad (kana written stroke by stroke; reads .kanjiWrite's judge)
        dashboard.js   .dashboard   Dashboard tab, review-history insights, review session flow
        views.js       .views       Library (key "manage") / Settings / Help tabs + vocabulary-row toggle
        kana-data.js   .kanaData    built-in hiragana/katakana tables + practice groups (data only)
@@ -258,6 +261,7 @@
 -->
 <script defer src="data/vocabulary.js?v=__CACHEBUST__"></script>
 <script defer src="data/kanji-strokes.js?v=__CACHEBUST__"></script>
+<script defer src="data/kana-strokes.js?v=__CACHEBUST__"></script>
 <script defer src="js/config.js?v=__CACHEBUST__"></script>
 <script defer src="js/shared.js?v=__CACHEBUST__"></script>
 <script defer src="js/pull-refresh.js?v=__CACHEBUST__"></script>
@@ -279,6 +283,7 @@
 <script defer src="js/flashcards/data-ops.js?v=__CACHEBUST__"></script>
 <script defer src="js/flashcards/backup.js?v=__CACHEBUST__"></script>
 <script defer src="js/flashcards/puzzle-runs.js?v=__CACHEBUST__"></script>
+<script defer src="js/flashcards/write-card.js?v=__CACHEBUST__"></script>
 <script defer src="js/flashcards/dashboard.js?v=__CACHEBUST__"></script>
 <script defer src="js/flashcards/views.js?v=__CACHEBUST__"></script>
 <script defer src="js/flashcards/kana-data.js?v=__CACHEBUST__"></script>

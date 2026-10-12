@@ -1845,8 +1845,8 @@ async function main() {
       && /^cv-/.test(made.id) && vegTable.rows.some(r => r.id === made.id && r.__custom));
     const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
     const entry = idx[made.id];
-    check("...the flashcards index picks it up with all four directions", !!entry
-      && window.RaumeStudy.flashcards.vocabIndex.directionsForEntry(entry).length === 4);
+    check("...the flashcards index picks it up with all five directions (it's writable in kana)", !!entry
+      && window.RaumeStudy.flashcards.vocabIndex.directionsForEntry(entry).length === 5);
     check("...answer checking accepts the romaji and the English", !!entry
       && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-ro", "nasu")
       && window.RaumeStudy.flashcards.vocabIndex.checkAnswer(entry, "jp-en", "eggplant"));
@@ -2736,6 +2736,73 @@ async function main() {
     const todayCount = parseInt((cols[cols.length - 1].querySelector(".fc-week-count") || {}).textContent, 10) || 0;
     return reviewed >= 1 && todayCount >= 1;
   })());
+
+  console.log("Flashcards: English -> Writing cards");
+  {
+    const fcx = window.RaumeStudy.flashcards, kw = window.RaumeStudy.kanjiWrite, K = window.RaumeStudy.data.kanaStrokes;
+    const c = fcx.store.getCache();
+    const saved = { settings: JSON.parse(JSON.stringify(c.settings)), cards: JSON.parse(JSON.stringify(c.cards)), reviewLogs: c.reviewLogs.slice(), day: c.day };
+    check("every kana's own KanjiVG strokes pass the judge, ー and small kana included", Object.keys(K).length === 177
+      && Object.keys(K).every(ch => K[ch].p.every(d => kw.judge(kw.parsePath(d), d).ok)));
+    const idx = fcx.vocabIndex.getVocabIndex();
+    const byEn = en => Object.values(idx).find(e => e.englishDisplay === en && !e.kanji);
+    check("a word is written as its reading: kanji as their furigana, loanwords in katakana; counters, kanji rows and two-reading words can't be",
+      byEn("water").writeChars.join("") === "みず" && byEn("beer").writeChars.join("") === "ビール"
+      && Object.values(idx).filter(e => e.kanji).every(e => !e.writeChars)
+      && Object.values(idx).filter(e => /^~/.test(e.romajiDisplay)).every(e => !e.writeChars)
+      && fcx.vocabIndex.directionsForEntry(byEn("water")).indexOf("en-wr") !== -1
+      && Object.values(idx).filter(e => e.kanji).every(e => fcx.vocabIndex.directionsForEntry(e).indexOf("en-wr") === -1));
+    await fcx.dataOps.addVocabs(["v0015"]);
+    Object.keys(c.cards).forEach(id => { if (c.cards[id].direction === "en-wr" && c.cards[id].vocabId === "v0015") delete c.cards[id]; });
+    check("writing is off by default", saved.settings.enabled_directions["en-wr"] === false);
+    await fcx.dataOps.saveDirectionSettings({ "jp-en": false, "jp-ro": false, "ro-en": false, "en-ro": false, "en-wr": true });
+    const wr = Object.values(c.cards).filter(x => x.vocabId === "v0015" && x.direction === "en-wr");
+    check("switching it on gives words already in study their writing card, once", wr.length === 1 && wr[0].active);
+    await fcx.dataOps.saveDirectionSettings(c.settings.enabled_directions);
+    check("...and switching it on again adds no second one", Object.values(c.cards).filter(x => x.vocabId === "v0015" && x.direction === "en-wr").length === 1);
+    const go = document.createElement("button");
+    go.dataset.reviewVocab = "v0015";
+    document.body.appendChild(go);
+    go.click();
+    const host = document.querySelector(".fc-write-host");
+    check("the card asks for the English, written: the field hides and the pad shows one square per kana", !!host && !host.hidden
+      && document.getElementById("fcAnswerForm").hidden && document.querySelector(".fc-prompt").textContent === "water"
+      && host.querySelectorAll(".fcw-slot").length === 2 && !!host.querySelector(".fcw-pad")
+      && /Kana 1 of 2/.test(host.querySelector(".fcw-status").textContent) && document.querySelectorAll(".fc-rating-btn").length === 0
+      && /English → Writing/.test(document.querySelector(".fc-review-progress").textContent));
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    check("Enter doesn't check a writing card -- only the pad does", document.querySelectorAll(".fc-rating-btn").length === 0);
+    fcx.writeCard.submit(kw.parsePath(K["み"].p[1])); // み's second stroke first
+    check("a stroke out of order counts a miss", /1 miss/.test(host.querySelector(".fcw-status").textContent));
+    K["み"].p.forEach(d => fcx.writeCard.submit(kw.parsePath(d)));
+    check("finishing a kana fills its square and moves the pad to the next", host.querySelector(".fcw-slot").textContent === "み"
+      && host.querySelector(".fcw-slot-now") === host.querySelectorAll(".fcw-slot")[1] && /Kana 2 of 2/.test(host.querySelector(".fcw-status").textContent)
+      && host.querySelectorAll(".kw-done path").length === 0);
+    host.querySelector(".fcw-undo").click();
+    check("Undo steps back into the previous kana", host.querySelector(".fcw-slot").textContent === "" && /Kana 1 of 2/.test(host.querySelector(".fcw-status").textContent)
+      && host.querySelectorAll(".kw-done path").length === K["み"].p.length - 1);
+    fcx.writeCard.submit(kw.parsePath(K["み"].p[K["み"].p.length - 1]));
+    K["ず"].p.forEach(d => fcx.writeCard.submit(kw.parsePath(d)));
+    const dyn = document.querySelector(".fc-review-dynamic");
+    check("the last stroke checks the card: the kana as the answer, the misses, the word as written, the four ratings",
+      document.querySelectorAll(".fc-rating-btn").length === 4 && dyn.querySelector(".fc-stage-expected").textContent === "みず"
+      && /Written · 1 miss/.test(dyn.textContent) && !!dyn.querySelector(".fc-verdict-badge-almost")
+      && /水/.test(dyn.querySelector(".fc-stage-meaning").textContent) && host.hidden);
+    document.querySelector('.fc-rating-btn[data-rating="good"]').click();
+    check("rating it finishes the review like any card", !!document.querySelector(".fc-session-done") && Object.values(c.cards).find(x => x.vocabId === "v0015" && x.direction === "en-wr").reps === 1);
+    document.getElementById("fcBackToDashboard").click();
+    go.click();
+    document.querySelector(".fcw-reveal").click();
+    check("Show answer gives the answer and counts as not recalled", /Not written/.test(document.querySelector(".fc-review-dynamic").textContent)
+      && !!document.querySelector(".fc-rating-row-missed") && document.querySelector(".fc-stage-expected").textContent === "みず");
+    document.getElementById("fcEndSession").click();
+    if (document.getElementById("fcBackToDashboard")) document.getElementById("fcBackToDashboard").click();
+    go.remove();
+    c.settings = saved.settings; c.cards = saved.cards; c.reviewLogs = saved.reviewLogs; c.day = saved.day;
+    fcx.store.saveCache();
+    window.RaumeStudy.flashcards.render();
+    await flush();
+  }
 
   console.log("Flashcards: the daily new-card allowance holds across sessions, not just one queue build");
   {
@@ -4374,15 +4441,15 @@ async function main() {
       && document.querySelectorAll("#fcPanelSettings .set-info").length >= 3 && shown && foot.hidden;
   })());
   const dirChecks = [...document.querySelectorAll(".fc-dir-checkbox")];
-  check("all 4 directions are offered as a setting", dirChecks.length === 4);
-  check("all 4 are enabled by default", dirChecks.every(cb => cb.checked));
+  check("all 5 directions are offered as a setting", dirChecks.length === 5);
+  check("the four typed ones are on by default, writing off", dirChecks.every(cb => cb.checked === (cb.dataset.direction !== "en-wr")));
   const fcChange = el => el.dispatchEvent(new window.Event("change", { bubbles: true }));
   check("there's no Save button -- changes save as you make them, as in iOS Settings", !document.getElementById("fcSaveSettings"));
-  for (const cb of dirChecks) { cb.checked = false; fcChange(cb); await flush(); }
+  for (const cb of dirChecks.filter(x => x.checked)) { cb.checked = false; fcChange(cb); await flush(); }
   check("the last direction can't be turned off: its tick comes back with a note",
     document.getElementById("fcDirError").hidden === false
     && [...document.querySelectorAll(".fc-dir-checkbox")].filter(cb => cb.checked).length === 1);
-  for (const cb of [...document.querySelectorAll(".fc-dir-checkbox")]) { if (!cb.checked) { cb.checked = true; fcChange(cb); await flush(); } }
+  for (const cb of [...document.querySelectorAll(".fc-dir-checkbox")]) { if (!cb.checked && cb.dataset.direction !== "en-wr") { cb.checked = true; fcChange(cb); await flush(); } }
   document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]').checked = false;
   fcChange(document.querySelector('.fc-dir-checkbox[data-direction="ro-en"]'));
   await flush();
@@ -4541,8 +4608,8 @@ async function main() {
   check("multi-answer English fields still reject an unlisted word", !fc.checkAnswer(listenEntry, "jp-en", "speak"));
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");
   check("the Numbers table now carries real romaji (not kana), so the row is romaji-usable", !!numberEntry && numberEntry.romajiUsable === true);
-  check("...so all four directions are offered for it", JSON.stringify(fc.directionsForEntry(numberEntry)) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
-  check("a normal entry offers all four directions", JSON.stringify(fc.directionsForEntry(beerEntry)) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
+  check("...so the four typed directions are offered for it", JSON.stringify(fc.directionsForEntry(numberEntry).filter(d => d !== "en-wr")) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
+  check("a normal entry offers all five directions", JSON.stringify(fc.directionsForEntry(beerEntry)) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr"]));
   check("the jp-en/jp-ro prompt for a word entry carries a speaker button keyed to its reading", (() => {
     const prompt = fc.promptFor(beerEntry, "jp-en");
     return prompt.lang === "ja" && /class="jp-speak-btn" data-jp-speak="[^"]+"/.test(prompt.html);

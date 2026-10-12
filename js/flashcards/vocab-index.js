@@ -70,6 +70,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return segments.map(function (seg) { return seg.kanji ? seg.kanji : (seg.text || seg.p || ""); }).join("");
   }
 
+  // The kana an English -> Writing card asks for, one per pad: the word's
+  // reading (a verb pair's plain form), kanji written as their furigana,
+  // loanwords in katakana. null when it can't be written that way -- a kanji
+  // row, a counter's 〜, two readings, a character without stroke data
+  // (data/kana-strokes.js), or anything longer than a short phrase.
+  var WRITE_MAX = 12;
+  function writeCharsOf(entry, row) {
+    if (entry.kanji) return null;
+    var strokes = window.RaumeStudy.data.kanaStrokes || {};
+    var jp = row.type === "verb-pair" ? row.forms[0].jp : row.jp;
+    var reading = (window.RaumeStudy.vocab.jpReadingOf || function () { return ""; })(jp || []);
+    var chars = Array.from(String(reading).replace(/\s+/g, ""));
+    if (!chars.length || chars.length > WRITE_MAX) return null;
+    return chars.every(function (ch) { return !!strokes[ch]; }) ? chars : null;
+  }
+
   var vocabIndex = null;
   function buildVocabIndex() {
     var index = {};
@@ -164,6 +180,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           if (entry.romajiUsable && KANA_SPELLING[particleKana]) entry.romajiAnswers.push(KANA_SPELLING[particleKana]);
           entry.romajiAnswerDisplays = romajiAlts;
         }
+        entry.writeChars = writeCharsOf(entry, row);
         entry.englishDisplay = row.english;
         // The meaning's note ("before a noun") is shown, never required --
         // though typing it along with the answer still counts.
@@ -207,17 +224,21 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // A kanji is studied from the character: its meaning and its readings.
   // Romaji or English -> kanji would be a vocabulary card, and "san" alone
   // can't say which kanji it means.
+  // English -> Writing only for a word that can be written in kana
+  // (writeCharsOf).
   function directionsForEntry(entry) {
     if (entry.kanji) return entry.romajiUsable ? ["jp-en", "jp-ro"] : ["jp-en"];
-    return entry.romajiUsable ? DIRECTIONS.slice() : ["jp-en"];
+    if (!entry.romajiUsable) return ["jp-en"];
+    return DIRECTIONS.filter(function (d) { return d !== "en-wr" || !!entry.writeChars; });
   }
 
   function promptFor(entry, direction) {
     if (direction === "jp-en" || direction === "jp-ro") return { html: entry.jpPromptHtml, lang: "ja" };
     if (direction === "ro-en") return { text: entry.romajiDisplay };
-    return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro
+    return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro, en-wr
   }
   function askLabelFor(direction) {
+    if (direction === "en-wr") return "Write it in kana";
     return direction === "jp-en" || direction === "ro-en" ? "Type the English meaning" : "Type the romaji reading";
   }
   // Same "which language" cue as the label above the prompt, but repeated
@@ -227,6 +248,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "jp-en" || direction === "ro-en" ? "English" : "Romaji";
   }
   function expectedDisplayFor(entry, direction) {
+    if (direction === "en-wr") return (entry.writeChars || []).join("");
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;
   }
   // One extra field for the answer reveal, beyond the one actually tested --
@@ -239,7 +261,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function contextDisplayFor(entry, direction) {
     if (direction === "jp-en") return { label: "Romaji", value: entry.romajiDisplay };
     if (direction === "jp-ro") return { label: "English", value: entry.englishFull };
-    // ro-en, en-ro. Japanese always carries its furigana -- `html` is the
+    // ro-en, en-ro, en-wr. Japanese always carries its furigana -- `html` is the
     // ruby markup to show, `value` the plain text for comparisons and labels.
     return { label: "Japanese", value: entry.jpPlain, html: entry.jpInlineHtml };
   }

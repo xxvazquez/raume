@@ -21,6 +21,6 @@ You may copy, share and adapt this content for noncommercial purposes, as long
 as you give credit and share your adaptations under this same licence.
 
 Not covered: the bare facts — individual Japanese words, their readings and
-their English meanings — which nobody owns; `data/kanji-strokes.js`, which is
+their English meanings — which nobody owns; `data/kanji-strokes.js` and `data/kana-strokes.js`, which are
 KanjiVG's data under CC BY-SA 3.0 (`data/kanji-strokes.LICENSE.txt`); and the
 raume name, wordmark and logo, which are reserved (`NOTICE`).

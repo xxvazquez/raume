@@ -40,8 +40,8 @@ Bundled third-party components (unaffected by LICENSE)
   fonts/InterVariable.woff2  OFL 1.1 — fonts/Inter.LICENSE.txt
   fonts/SpaceGrotesk.woff2   OFL 1.1 — fonts/SpaceGrotesk.LICENSE.txt
   data/kanji-strokes.js      CC BY-SA 3.0 — data/kanji-strokes.LICENSE.txt
-                             Stroke order adapted from KanjiVG
+  data/kana-strokes.js       Stroke order adapted from KanjiVG
                              (http://kanjivg.tagaini.net), copyright (C)
-                             2009/2010/2011 Ulrich Apel. This file alone is
-                             distributed under CC BY-SA 3.0
+                             2009/2010/2011 Ulrich Apel. These two files alone
+                             are distributed under CC BY-SA 3.0
                              (http://creativecommons.org/licenses/by-sa/3.0/)
