@@ -290,8 +290,11 @@ and Help.
   and other platforms (where it could block pinch-zoom) never auto-zoom
   anyway. Never `user-scalable=no`, and never force fields up to 16px; hit
   areas are ≥44pt — small controls (the ⋯ button, the reorder arrows, 32–36px capsule buttons,
-  the account button, a table's sort chevrons, each row's speaker / hide / add
-  glyphs) get an invisible `::after` grown to 44pt on the short sides only, and a
+  the account button, a table's sort chevrons and print glyph, each row's speaker / hide / add
+  glyphs, the Flashcards segments, Settings / Help, the Puzzles links, and the
+  wide-window section links an iPad's finger hits) get an invisible `::after`
+  grown to 44pt on the short sides only (on touch, a table row's ⋯ and print
+  glyphs sit 12px apart so their pads don't overlap), and a
   collapsed table's whole row is its toggle; ⋯ menus use the horizontal ⋯ glyph
   (never Android's vertical ⋮); the
   masthead icons are 44px; `--faint` is AA on both `--paper` and the grey ground

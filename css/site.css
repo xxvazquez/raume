@@ -5091,9 +5091,14 @@ mark.fc-diff-co {
 /* Every other small control gets the same invisible pad, grown only on the
    sides shorter than 44px (min() keeps a bigger control's hit area its own
    size): capsule buttons drawn 32-36px tall, the account button, a table's
-   sort chevrons, and each row's speaker / hide / add glyphs. */
-.fc-btn, .masthead-gear, .sort-button, .vocab tbody .jp-speak-btn, .row-hide-btn, .fc-toggle-btn { position: relative; }
-.fc-btn::after, .masthead-gear::after, .sort-button::after, .vocab tbody .jp-speak-btn::after, .row-hide-btn::after, .fc-toggle-btn::after {
+   sort chevrons, each row's speaker / hide / add glyphs, a table's print
+   glyph, and the text buttons drawn 30-32px tall (the Flashcards segments,
+   Settings / Help, the Puzzles links) -- on a tablet these desktop-sized
+   controls take a finger too. */
+.fc-btn, .masthead-gear, .sort-button, .vocab tbody .jp-speak-btn, .row-hide-btn, .fc-toggle-btn,
+.print-one, .fc-tab, .fc-titlebar-btn, .fc-back, .fc-pz-link { position: relative; }
+.fc-btn::after, .masthead-gear::after, .sort-button::after, .vocab tbody .jp-speak-btn::after, .row-hide-btn::after, .fc-toggle-btn::after,
+.print-one::after, .fc-tab::after, .fc-titlebar-btn::after, .fc-back::after, .fc-pz-link::after {
   content: ""; position: absolute;
   top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px));
   left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px));
@@ -5102,6 +5107,18 @@ mark.fc-diff-co {
    can't rise past the next row's controls on its own -- the row whose menu
    is open lifts its controls above every other row's. */
 #vocabulary .table-section.menu-open .section-head > .controls { z-index: 70; }
+/* Past phone width the section links are a 33px capsule row (the phone's
+   are the tab bar's own tall items, whose ::before is the glyph). */
+@media (min-width: 641px) {
+  .site-nav-link { position: relative; }
+  .site-nav-link::after { content: ""; position: absolute; top: -6px; bottom: -6px; left: 0; right: 0; }
+}
+/* A table row's ⋯ and print glyphs sit 5px apart -- fine for a pointer, but
+   their 44pt pads would overlap under a finger (an iPad gets the desktop
+   row), so touch spaces them out. */
+@media (pointer: coarse) and (min-width: 641px) {
+  #vocabulary .section-head > .controls { gap: 12px; }
+}
 
 /* ==========================================================================
    iOS 26 materials (Liquid Glass) -- CLAUDE.md › Design.
