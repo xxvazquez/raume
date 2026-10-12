@@ -11,7 +11,7 @@ cooking or studying, and for printing clean A4 study sheets.
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar, Kanji and Travel tables — furigana, search, audio, print |
-| **Practice**    | Flashcards: FSRS-6 spaced repetition, up to five directions per word (one handwritten), daily streak |
+| **Practice**    | Flashcards: FSRS-6 spaced repetition, up to six directions per word (two handwritten), daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords and word searches from your words |
 | **Games**       | A timed Match game, Listening, Kana tiles, Odd one out, Speed sort and Word chain from your words |
