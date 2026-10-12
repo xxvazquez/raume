@@ -10,7 +10,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0001","type":"word","jp":[{"text":"〜"},{"kanji":"個","reading":"こ"}],"romaji":"~ko","english":"small individual items"},
     {"id":"v0002","type":"word","jp":[{"text":"〜"},{"kanji":"枚","reading":"まい"}],"romaji":"~mai","english":"flat items"},
     {"id":"v0003","type":"word","jp":[{"text":"〜"},{"kanji":"本","reading":"ほん"}],"romaji":"~hon","english":"long, thin items"},
-    {"id":"v0004","type":"word","jp":[{"text":"〜"},{"kanji":"杯","reading":"はい"}],"romaji":"~hai","english":"cups, glasses and bowls of drinks / food"},
+    {"id":"v0004","type":"word","jp":[{"text":"〜"},{"kanji":"杯","reading":"はい"}],"romaji":"~hai","english":"cups / glasses / bowls","enNote":"of a drink or food"},
     {"id":"v0005","type":"word","jp":[{"text":"〜"},{"kanji":"皿","reading":"さら"}],"romaji":"~sara","english":"servings on plates"},
     {"id":"v0006","type":"word","jp":[{"text":"〜"},{"kanji":"切","reading":"き"},{"text":"れ"}],"romaji":"~kire","english":"slices / pieces"},
     {"id":"v0724","type":"word","jp":[{"text":"〜"},{"kanji":"匹","reading":"ひき"}],"romaji":"~hiki","english":"small animals"},
