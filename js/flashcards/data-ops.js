@@ -323,6 +323,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       .upsert(Object.assign({ user_id: user.id }, patch), { onConflict: "user_id" });
     if (res.error) throw res.error;
   }
+  // PostgREST's / Postgres's "no such column" -- a schema.sql not re-run.
+  var MISSING_COLUMN = { PGRST204: true, "42703": true };
   // One push at a time, each sending the queue as it stands when it goes.
   var settingsChain = Promise.resolve();
   function syncSettings() {
@@ -344,14 +346,15 @@ window.RaumeStudy.flashcards.dataOps = (function () {
           // The server turned the batch down -- most likely a column a
           // project without the latest schema.sql doesn't have. Send each
           // one alone so the rest still land; only a column the server
-          // itself rejects is let go (it could never sync).
+          // says it doesn't have is let go (it could never sync). Anything
+          // else -- an expired sign-in, say -- stays queued for a retry.
           for (var i = 0; i < keys.length; i++) {
             var one = {};
             one[keys[i]] = sent[keys[i]];
             try { await withTimeout(upsertSettings(user, one), "settings sync"); landed.push(keys[i]); }
             catch (e2) {
-              if (e2 && e2.code) { console.warn("Flashcards: the account can't store " + keys[i] + "; dropping it", e2); landed.push(keys[i]); }
-              else { syncErrored = true; break; }
+              if (e2 && MISSING_COLUMN[e2.code]) { console.warn("Flashcards: the account can't store " + keys[i] + "; dropping it", e2); landed.push(keys[i]); }
+              else { syncErrored = true; console.warn("Flashcards: settings sync failed, will retry", e2); break; }
             }
           }
         }
@@ -385,9 +388,17 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if ("last_study_date" in p) {
       var s = c.settings;
       if (!s.last_study_date || (p.last_study_date && p.last_study_date >= s.last_study_date)) {
-        s.longest_streak = Math.max(s.longest_streak || 0, p.longest_streak || 0);
-        s.current_streak = p.current_streak || 0;
+        // This device's count only knew its own days: when the account's
+        // run reaches the queued day (same day, or the day before), carry
+        // that run on rather than restarting it.
+        var current = p.current_streak || 0, d = String(p.last_study_date).split("-");
+        var dayPrior = localDateStr(dayBefore(new Date(Number(d[0]), Number(d[1]) - 1, Number(d[2]))));
+        if (s.last_study_date === p.last_study_date) current = Math.max(current, s.current_streak || 0);
+        else if (s.last_study_date === dayPrior) current = Math.max(current, (s.current_streak || 0) + 1);
+        s.longest_streak = Math.max(s.longest_streak || 0, p.longest_streak || 0, current);
+        s.current_streak = current;
         s.last_study_date = p.last_study_date;
+        c.pendingSettings = Object.assign({}, p, { current_streak: current, longest_streak: s.longest_streak });
       } else {
         var trimmed = Object.assign({}, p);
         delete trimmed.current_streak; delete trimmed.longest_streak; delete trimmed.last_study_date;

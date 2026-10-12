@@ -300,10 +300,13 @@ attempted once and logged. `js/flashcards/data-ops.js`:
   `pushSettings()` queues then tries; `syncSettings()` upserts the whole
   queue and clears only what landed (and wasn't changed again meanwhile). A
   batch the server rejects (a column an older schema lacks) is retried one
-  column at a time, so the rest still land. `fetchAllFromServer()` /
+  column at a time, so the rest still land; only a column the server says
+  it lacks (`PGRST204` / `42703`) is let go -- any other refusal, an expired
+  sign-in say, keeps it queued. `fetchAllFromServer()` /
   `fetchKanaFromServer()` lay the queue over the row they read
   (`applyPendingSettings`), so an offline change isn't undone by a refresh;
-  for the streak the later study day wins. Leech Keeps, the journey, Known
+  for the streak the later study day wins, carrying on the account's run
+  when that ended the same day or the day before. Leech Keeps, the journey, Known
   kanji and puzzle runs don't need it -- the fetch merges both sides.
 - **Table customisations** (`raume-table-custom-dirty-v1`) -- simpler, since
   `js/vocab/table-custom.js` always pushes its *whole* current state
