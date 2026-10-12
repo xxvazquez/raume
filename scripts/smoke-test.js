@@ -3134,6 +3134,11 @@ async function main() {
   const sakka = kd.itemsFor(["kata-sokuon"]).find(it => /kk[aā]+$/.test(it.romaji));
   check("a macron long vowel (サッカー) accepts the doubled-vowel typing, rejects the short one",
     !!sakka && kh.checkKana(sakka, "sakkaa") && !kh.checkKana(sakka, "sakka"));
+  const zasshi = kd.itemsFor(["hira-sokuon"]).find(it => it.kana === "ざっし");
+  const matchi = kd.itemsFor(["kata-sokuon"]).find(it => it.kana === "マッチ");
+  check("a sokuon word takes a keyboard's spellings, as word cards do (zassi, macchi), but still needs its small tsu",
+    !!zasshi && !!matchi && kh.checkKana(zasshi, "zassi") && kh.checkKana(matchi, "macchi") && kh.checkKana(matchi, "matchi")
+    && !kh.checkKana(zasshi, "zasi") && !kh.checkKana(matchi, "machi"));
   const sokuon = kd.itemsFor(["hira-sokuon"]);
   check("sokuon is drilled as short doubled-consonant words", sokuon.length > 3 && sokuon.every(it => it.word && it.kana.length > 1 && /[a-z]/.test(it.romaji)));
 

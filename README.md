@@ -270,7 +270,7 @@ their cards then.
   `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
   `'` in answers and search alike.
 - A Japanese keyboard's spellings count too — `tu`, `si`, `hu`, `zi`, `sya`,
-  `tya`, a doubled `nn`, and `m` before b / p (`mittu`, `tempura`) — and the
+  `tya`, `cch` for っち, a doubled `nn`, and `m` before b / p (`mittu`, `tempura`) — and the
   particles は / へ / を also take `ha` / `he` / `wo`.
 - You only type the meaning, never its note: どの is *which* with the note
   *before a noun* shown under it, and brackets in your own words are optional
@@ -351,7 +351,8 @@ The tab opens on the same card as the Dashboard: how many kana a session holds
 now (started / not started under it) and **Study now**. Below it, choose groups
 (**gojūon, dakuten, handakuten, yōon, sokuon**, for each script). Each card
 shows a kana and you type its reading in romaji; a few alternates like `si` /
-`shi` are accepted, and vowel length counts.
+`shi` are accepted (a sokuon word takes every keyboard spelling a word card
+does — `zassi`, `macchi`), and vowel length counts.
 
 It uses the same review card as the word flashcards, with its own FSRS
 settings.

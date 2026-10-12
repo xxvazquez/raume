@@ -214,7 +214,7 @@ window.RaumeStudy.kanaRomaji = (function () {
   // against the data (flashcard answers, search). Lower-cased; apostrophes,
   // hyphens and spaces dropped (kin'en / kinen); macrons folded (ō -> o); a
   // Japanese keyboard's spellings (wāpuro / Kunrei: si, tu, hu, zi, sya, tya,
-  // zya, nn) and traditional Hepburn's m before b / p folded to the Hepburn
+  // zya, nn, cchi for っち) and traditional Hepburn's m before b / p folded to the Hepburn
   // the data uses; then vowel length dropped ("ou" / "oo" -> "o", any doubled
   // vowel -> one), since a long vowel can't be typed as such. A small っ
   // (doubled consonant) is kept -- kite and kitte are different words.
@@ -229,7 +229,7 @@ window.RaumeStudy.kanaRomaji = (function () {
       .replace(/[\u0101\u00e2]/g, mac("a")).replace(/[\u012b\u00ee]/g, mac("i")).replace(/[\u016b\u00fb]/g, mac("u"))
       .replace(/[\u0113\u00ea]/g, mac("e")).replace(/[\u014d\u00f4]/g, mac("o"))
       .replace(/sy([auo])/g, "sh$1").replace(/(?:zy|jy)([auo])/g, "j$1").replace(/(?:ty|cy)([auo])/g, "ch$1")
-      .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji")
+      .replace(/si/g, "shi").replace(/ti/g, "chi").replace(/tu/g, "tsu").replace(/zi/g, "ji").replace(/cch/g, "tch")
       .replace(/(^|[^cs])hu/g, "$1fu")
       .replace(/nn(?![aiueoy])/g, "n").replace(/m(?=[bp])/g, "n");
     return keepLength

@@ -183,9 +183,14 @@ window.RaumeStudy.flashcards.kana = (function () {
       .replace(/[ēê]/g, "ee").replace(/[ōô]/g, "oo")
       .replace(/ou/g, "oo");
   }
+  // A sokuon word is spelt out like a word card's answer, so it takes the
+  // same keyboard spellings (zassi, tyotto, macchi) -- foldRomaji, keeping
+  // vowel length.
   function checkKana(item, input) {
     var n = normalizeKana(input);
-    return item.answers.some(function (a) { return normalizeKana(a) === n; });
+    if (item.answers.some(function (a) { return normalizeKana(a) === n; })) return true;
+    var fold = window.RaumeStudy.kanaRomaji.foldRomaji;
+    return !!item.word && item.answers.some(function (a) { return fold(a, true) === fold(String(input == null ? "" : input).trim(), true); });
   }
 
   // Grade what was typed and move to the checked state. Both directions have a
