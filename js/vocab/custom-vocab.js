@@ -147,21 +147,23 @@ window.RaumeStudy.customVocab = (function () {
   // A paste / CSV, one record per non-blank line, three columns:
   // japanese(furigana),romaji,english. English may contain commas, so only the
   // first two commas split -- romaji and the furigana field never carry one.
-  // Returns { rows:[{segments,romaji,english}], skipped:[{line,raw,reason}] }.
+  // A line with tabs in it (cells copied from a spreadsheet) splits on its
+  // tabs instead. Returns { rows:[{segments,romaji,english}], skipped:[{line,raw,reason}] }.
   function parseImport(text) {
     var out = { rows: [], skipped: [] };
     String(text || "").split(/\r?\n/).forEach(function (raw, idx) {
       var line = raw.trim();
       if (!line) return;
-      var c1 = line.indexOf(",");
-      var c2 = c1 === -1 ? -1 : line.indexOf(",", c1 + 1);
+      var sep = line.indexOf("\t") !== -1 ? "\t" : ",";
+      var c1 = line.indexOf(sep);
+      var c2 = c1 === -1 ? -1 : line.indexOf(sep, c1 + 1);
       if (c1 === -1 || c2 === -1) {
-        out.skipped.push({ line: idx + 1, raw: line, reason: "needs three comma-separated columns" });
+        out.skipped.push({ line: idx + 1, raw: line, reason: "needs three columns, separated by commas" });
         return;
       }
       var jp = stripQuotes(line.slice(0, c1));
       var ro = stripQuotes(line.slice(c1 + 1, c2));
-      var en = stripQuotes(line.slice(c2 + 1));
+      var en = stripQuotes(line.slice(c2 + 1).split("\t")[0]); // a spreadsheet's further columns aren't the English
       if (jp.toLowerCase() === "japanese" && ro.toLowerCase() === "romaji" && en.toLowerCase() === "english") return;
       if (!jp || !ro || !en) {
         out.skipped.push({ line: idx + 1, raw: line, reason: "a column is empty" });

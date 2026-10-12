@@ -1845,6 +1845,9 @@ async function main() {
     check("parseImport keeps the good rows and skips the bad", res.rows.length === 2 && res.skipped.length === 2);
     check("...the header line is dropped silently", !res.skipped.some(s => /japanese/i.test(s.raw)));
     check("...each skip carries a line number and a reason", res.skipped.every(s => s.line > 0 && s.reason));
+    const tabbed = cvNs.parseImport("茄子(なす)\tnasu\teggplant, aubergine\tsummer veg").rows;
+    check("...cells pasted from a spreadsheet split on their tabs, extra columns left out",
+      tabbed.length === 1 && tabbed[0].romaji === "nasu" && tabbed[0].english === "eggplant, aubergine");
     check("...an English value with a comma survives intact", res.rows.some(r => r.english === "sushi, the rice dish"));
   }
   {
