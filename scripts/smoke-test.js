@@ -2610,7 +2610,9 @@ async function main() {
     return vi.checkAnswer(idx.v0856, "jp-en", "grandfather, old man") && vi.checkAnswer(idx.v0856, "jp-en", "old man or grandfather")
       && !vi.checkAnswer(idx.v0856, "jp-en", "grandfather, cat")
       && vi.checkAnswer(idx.v0166, "jp-ro", "yon") && vi.checkAnswer(idx.v0166, "jp-ro", "shi") && vi.checkAnswer(idx.v0166, "jp-ro", "yon / shi")
-      && vi.checkAnswer(idx.v0622, "jp-ro", "mainen");
+      && vi.checkAnswer(idx.v0622, "jp-ro", "mainen")
+      // "or" is an answer of its own for か, so typing the whole meaning still counts.
+      && vi.checkAnswer(idx.v0775, "jp-en", "question marker / or");
   })());
   check("a meaning's note is its own field: shown in grey right after the English in the table (dropping whole under it only when it doesn't fit), never required in an answer", (() => {
     const cell = document.querySelector('tr[data-vocab-id="v0825"] .meaning-text');

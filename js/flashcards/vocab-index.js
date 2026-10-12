@@ -291,10 +291,14 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
   // Several right answers typed together -- "grandfather, old man",
   // "yon / shi", "this or this one" -- count when every one of them is right.
+  // "or" is tried apart from the marks, since it can be an answer itself
+  // (か: "question marker / or").
   function allAlternativesTyped(answers, input, romaji) {
-    var parts = String(input == null ? "" : input).split(/\s*(?:\/|,|;|\bor\b)\s*/i)
-      .map(function (p) { return normalizeAnswer(p, romaji); }).filter(Boolean);
-    return parts.length > 1 && parts.every(function (p) { return answers.indexOf(p) !== -1; });
+    return [/\s*(?:\/|,|;)\s*/, /\s*(?:\/|,|;|\bor\b)\s*/i].some(function (sep) {
+      var parts = String(input == null ? "" : input).split(sep)
+        .map(function (p) { return normalizeAnswer(p, romaji); }).filter(Boolean);
+      return parts.length > 1 && parts.every(function (p) { return answers.indexOf(p) !== -1; });
+    });
   }
   // The other entries sharing this one's romaji spelling (see buildVocabIndex).
   function homophonesOf(entry) {
