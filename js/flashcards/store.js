@@ -11,15 +11,18 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 window.RaumeStudy.flashcards.store = (function () {
   "use strict";
 
-  // en-wr: English -> the word handwritten in kana on a pad
-  // (js/flashcards/write-card.js) -- off until switched on in Settings.
-  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr"];
+  // en-wr / en-wk: English -> the word handwritten on a pad
+  // (js/flashcards/write-card.js), in kana or as it's written with its
+  // kanji -- each off until switched on in Settings.
+  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr", "en-wk"];
+  function isWriteDirection(d) { return d === "en-wr" || d === "en-wk"; }
   var DIRECTION_LABEL = {
     "jp-en": "Japanese → English",
     "jp-ro": "Japanese → Romaji",
     "ro-en": "Romaji → English",
     "en-ro": "English → Romaji",
-    "en-wr": "English → Writing"
+    "en-wr": "English → Japanese (kana)",
+    "en-wk": "English → Japanese (kanji)"
   };
   var RATING_NAMES = ["Again", "Hard", "Good", "Easy"];
   // localStorage keys. Old "sakura-*" names (the app's former name) are moved
@@ -182,8 +185,8 @@ window.RaumeStudy.flashcards.store = (function () {
       // independent of which cards exist: turning a direction off just
       // leaves its cards out of the queue/stats, never deletes or resets
       // them. The typed four are on by default, same as before this setting
-      // existed; writing is off (slow without a pen).
-      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true, "en-wr": false }
+      // existed; the two written ones are off (slow without a pen).
+      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true, "en-wr": false, "en-wk": false }
     };
   }
   function emptyCache(userId) {
@@ -461,7 +464,7 @@ window.RaumeStudy.flashcards.store = (function () {
   }
 
   return {
-    DIRECTIONS: DIRECTIONS, DIRECTION_LABEL: DIRECTION_LABEL, RATING_NAMES: RATING_NAMES,
+    DIRECTIONS: DIRECTIONS, DIRECTION_LABEL: DIRECTION_LABEL, isWriteDirection: isWriteDirection, RATING_NAMES: RATING_NAMES,
     CACHE_SCHEMA_VERSION: CACHE_SCHEMA_VERSION,
     getStoredMode: getStoredMode, setStoredMode: setStoredMode,
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,

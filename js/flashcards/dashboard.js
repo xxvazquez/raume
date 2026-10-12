@@ -1153,7 +1153,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var card = getCache().cards[session.queue[session.index]];
     var entry = card && getVocabIndex()[card.vocabId];
     var input = document.getElementById("fcAnswerInput");
-    if (!card || !entry || !input || card.direction === "en-wr") return; // writing checks itself
+    if (!card || !entry || !input || store.isWriteDirection(card.direction)) return; // writing checks itself
     session.write = null;
     session.userAnswer = input.value;
     session.correct = checkAnswer(entry, card.direction, input.value);
@@ -1304,16 +1304,16 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   function currentReviewCard() {
     var card = getCache().cards[session.queue[session.index]];
     var entry = card && getVocabIndex()[card.vocabId];
-    if (card && card.direction === "en-wr" && entry && !entry.writeChars) return null;
+    if (card && store.isWriteDirection(card.direction) && entry && !vidx.writeCharsFor(entry, card.direction)) return null;
     return card && card.active && entry ? { card: card, entry: entry } : null;
   }
-  // An English -> Writing card checks itself: the pad (write-card.js) calls
+  // A written card (English -> Japanese, kana or kanji) checks itself: the pad (write-card.js) calls
   // this once the last kana is written, or Show answer is tapped. Clean or
   // with misses counts as recalled; a hint or giving up doesn't.
   function writeKey(card) { return session.startedAt + ":" + session.index + ":" + card.id; }
   function writeDone(result) {
     var cur = session && !session.checked && currentReviewCard();
-    if (!cur || cur.card.direction !== "en-wr") return;
+    if (!cur || !store.isWriteDirection(cur.card.direction)) return;
     session.write = result;
     session.userAnswer = "";
     session.correct = !result.revealed && !result.hints;
@@ -1414,20 +1414,20 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // A writing card has no field: hide it (dropping a phone keyboard) and
     // put the pad there instead -- until checked, when the answer below says
     // it all (the squares would only repeat it).
-    var writing = card.direction === "en-wr";
+    var writing = store.isWriteDirection(card.direction);
     var writeHost = shell.querySelector(".fc-write-host");
     if (form) form.hidden = writing;
     if (writeHost) {
       writeHost.hidden = !writing || session.checked;
       if (writing) {
         if (document.activeElement === input) input.blur();
-        writeCard.mount(writeHost, writeKey(card), entry.writeChars, writeDone);
+        writeCard.mount(writeHost, writeKey(card), vidx.writeCharsFor(entry, card.direction), writeDone);
       } else {
         writeHost.innerHTML = "";
       }
     }
     if (writing) {
-      dyn.innerHTML = session.checked ? writeVerdictHtml(entry, context) + ratingRowHtml() + "</div>" : "";
+      dyn.innerHTML = session.checked ? writeVerdictHtml(entry, card.direction, context) + ratingRowHtml() + "</div>" : "";
       wireRatings(dyn);
       return true;
     }
@@ -1511,11 +1511,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });
   }
-  // The written word's reveal: the kana as the answer, how it went, and the
-  // word as it's really written (kanji and all) when that differs.
-  function writeVerdictHtml(entry, context) {
+  // The written word's reveal: what was asked for as the answer, how it
+  // went, and the other spelling -- the word with its kanji under kana, the
+  // reading under kanji -- when that differs.
+  function writeVerdictHtml(entry, direction, context) {
     var w = session.write || { misses: 0, hints: 0, revealed: true };
-    var kana = expectedDisplayFor(entry, "en-wr");
+    var kana = expectedDisplayFor(entry, direction);
     var how = w.revealed ? "Not written"
       : w.hints ? "Written with " + w.hints + (w.hints === 1 ? " hint" : " hints")
       : w.misses ? "Written · " + w.misses + (w.misses === 1 ? " miss" : " misses")
@@ -1524,11 +1525,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var icon = kind === "ok" ? VERDICT_OK_ICON : (kind === "almost" ? VERDICT_ALMOST_ICON : VERDICT_BAD_ICON);
     var showJp = context.value !== kana;
     return '<div class="fc-review-verdict ' + (session.correct ? "fc-verdict-ok" : "fc-verdict-bad") + '" tabindex="-1" aria-label="' +
-      esc(how + ". Answer: " + kana + "." + (showJp ? " Japanese: " + context.value + "." : "")) + '">' +
+      esc(how + ". Answer: " + kana + "." + (showJp ? " " + context.label + ": " + context.value + "." : "")) + '">' +
       '<span class="fc-verdict-badge fc-verdict-badge-' + kind + '">' + icon + "</span>" +
       '<div class="fc-stage"><div class="fc-stage-expected" lang="ja">' + esc(kana) + "</div>" +
       '<div class="fc-stage-typed">' + how + "</div>" +
-      (showJp ? '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span><span lang="ja">' + context.html + "</span></div>" : "") +
+      (showJp ? '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span><span lang="ja">' + (context.html || esc(context.value)) + "</span></div>" : "") +
       "</div>";
   }
 

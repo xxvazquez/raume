@@ -1,10 +1,12 @@
-// Flashcards -- the English -> Writing card's pad (RaumeStudy.flashcards.writeCard).
+// Flashcards -- the written cards' pad (RaumeStudy.flashcards.writeCard).
 //
-// The review card shows the English; this writes the word in kana under it,
-// one kana at a time on one square pad, with a row of squares above it -- one
-// per kana -- that fill in as each is finished. Every stroke is judged the way
-// the kanji sheet's Write it judges one (RaumeStudy.kanjiWrite.judge against
-// KanjiVG's centre-lines, data/kana-strokes.js): a right stroke snaps to its
+// The review card shows the English; this writes the word under it -- in kana
+// (English -> Japanese (kana)) or with its kanji (English -> Japanese (kanji))
+// -- one character at a time on one square pad, with a row of squares above
+// it, one per character, that fill in as each is finished. Every stroke is
+// judged the way the kanji sheet's Write it judges one
+// (RaumeStudy.kanjiWrite.judge against KanjiVG's centre-lines,
+// data/kana-strokes.js and data/kanji-strokes.js): a right stroke snaps to its
 // clean line, a wrong one shakes the pad and counts a miss, and after three
 // misses on one stroke that stroke is shown as a hint. No outline -- this is
 // the test. Show answer gives up.
@@ -25,17 +27,20 @@ window.RaumeStudy.flashcards.writeCard = (function () {
   // strokes -- for the rest of the visit.
   var penSeen = false;
 
-  function strokesOf(ch) { var k = (window.RaumeStudy.data.kanaStrokes || {})[ch]; return k ? k.p : []; }
+  function strokesOf(ch) {
+    var data = window.RaumeStudy.data, k = (data.kanaStrokes || {})[ch] || (data.kanjiStrokes || {})[ch];
+    return k ? k.p : [];
+  }
   function reducedMotion() { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
   function soClass(i) { return "so-" + Math.min(i + 1, 20); }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
 
   function statusText() {
-    return "Kana " + (st.ci + 1) + " of " + st.chars.length +
+    return (st.ci + 1) + " of " + st.chars.length +
       (st.misses ? ' <span class="kw-misses">· ' + plural(st.misses, "miss", "misses") + "</span>" : "");
   }
   function slotsHtml() {
-    return '<div class="fcw-slots" role="list" aria-label="' + plural(st.chars.length, "kana", "kana") + '">' +
+    return '<div class="fcw-slots" role="list" aria-label="' + plural(st.chars.length, "character", "characters") + '">' +
       st.chars.map(function (ch, i) {
         var written = i < st.ci, now = !st.finished && i === st.ci;
         return '<span role="listitem" lang="ja" class="fcw-slot' + (written ? " fcw-slot-done" : "") + (now ? " fcw-slot-now" : "") + '"' +
@@ -45,7 +50,7 @@ window.RaumeStudy.flashcards.writeCard = (function () {
   function padHtml() {
     var strokes = strokesOf(st.chars[st.ci]), done = "";
     for (var i = 0; i < st.si; i++) done += '<path class="kw-stroke ' + soClass(i) + '" d="' + esc(strokes[i]) + '"/>';
-    return '<div class="kw-pad-wrap fcw-pad-wrap"><svg class="kw-pad fcw-pad" viewBox="0 0 109 109" role="img" aria-label="Writing pad, kana ' +
+    return '<div class="kw-pad-wrap fcw-pad-wrap"><svg class="kw-pad fcw-pad" viewBox="0 0 109 109" role="img" aria-label="Writing pad, character ' +
       (st.ci + 1) + " of " + st.chars.length + '">' +
       '<g class="kw-grid"><path d="M54.5 4v101M4 54.5h101"/></g>' +
       '<g class="kw-done">' + done + "</g>" +
@@ -161,7 +166,7 @@ window.RaumeStudy.flashcards.writeCard = (function () {
 
   // Puts the pad for one card in `host`. The same key picks up where it
   // left off (the review re-rendered); a new one starts fresh. onDone gets
-  // { misses, hints, revealed } once the last kana is written or given up.
+  // { misses, hints, revealed } once the last character is written or given up.
   function mount(host, key, chars, onDone) {
     if (!st || st.key !== key) {
       st = { key: key, chars: chars.slice(), ci: 0, si: 0, misses: 0, hints: 0, onStroke: 0, hinted: {}, finished: false };

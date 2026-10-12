@@ -106,7 +106,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Kanji cards</span><span class="help-desc">A kanji asks only its meaning and one reading — yama or san both count.</span></li>' +
       '<li><span class="help-term">New words</span><span class="help-desc">Each starts Japanese → English; its other directions follow once you’ve seen it.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns each direction on or off — progress is kept.</span></li>' +
-      '<li><span class="help-term">Writing</span><span class="help-desc">English → Writing (off until you turn it on): write the word in kana on the pad, stroke by stroke. Show answer if you’re stuck.</span></li>' +
+      '<li><span class="help-term">Writing</span><span class="help-desc">English → Japanese, off until you turn it on: write the word on the pad stroke by stroke — in kana (みず), or with its kanji (水). Show answer if you’re stuck.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +

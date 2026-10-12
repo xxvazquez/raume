@@ -220,10 +220,10 @@
   order, after the page is parsed and before DOMContentLoaded.
 
   1. data/vocabulary.js   -> RaumeStudy.data       (vocabulary dataset, data only)
-     data/kanji-strokes.js -> RaumeStudy.data.kanjiStrokes (N5 kanji stroke order, from
+     data/kanji-strokes.js -> RaumeStudy.data.kanjiStrokes (kanji stroke order -- the N5 set, then every kanji the vocabulary uses -- from
                        KanjiVG, CC BY-SA 3.0; must follow vocabulary.js, which sets .data)
      data/kana-strokes.js -> RaumeStudy.data.kanaStrokes (every kana's stroke order, same source
-                       and licence, for English -> Writing cards)
+                       and licence, for the written cards)
   2. js/config.js         -> RaumeStudy.config     (Supabase connection config)
   3. js/shared.js         -> RaumeStudy.shared     (cross-feature helpers: escape, speech, confirm sheet)
   4. js/pull-refresh.js   (no namespace; global touch pull-to-refresh gesture,
@@ -248,7 +248,7 @@
        data-ops.js    .dataOps     auth, Supabase sync, guest store, mode-aware ops, streak
        backup.js      .backup      guest-mode export / import of the on-device data (a JSON file)
        puzzle-runs.js .puzzleRuns  finished Match / Listening games, for the Dashboard's Puzzles card
-       write-card.js  .writeCard   English -> Writing cards' pad (kana written stroke by stroke; reads .kanjiWrite's judge)
+       write-card.js  .writeCard   written cards' pad (a word written stroke by stroke; reads .kanjiWrite's judge)
        dashboard.js   .dashboard   Dashboard tab, review-history insights, review session flow
        views.js       .views       Library (key "manage") / Settings / Help tabs + vocabulary-row toggle
        kana-data.js   .kanaData    built-in hiragana/katakana tables + practice groups (data only)

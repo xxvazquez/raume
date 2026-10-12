@@ -131,17 +131,20 @@ flowchart LR
   (no custom tables); guest rows migrate up on first sign-in, like guest
   flashcard progress. Deleting a custom row/table is a real delete (no learning
   history on the content itself to keep).
-- Each vocab entry maps to up to five independently scheduled cards (jp-en,
-  jp-ro, ro-en, en-ro, en-wr), never Japanese-to-type. Rows whose romaji is still kana
-  get jp-en only. **en-wr** (English → Writing) asks for the word handwritten in
-  kana on a pad (`js/flashcards/write-card.js`), judged stroke by stroke with
-  `kanjiWrite.judge` against `data/kana-strokes.js`. Only a word whose reading
-  (`vocab-index.js` `writeCharsOf`: furigana for kanji, a verb pair's plain form,
-  no 〜, no two readings, at most 12 kana) is all kana with stroke data gets one
-  (`entry.writeChars`). It is off by default (`enabled_en_wr`, false when
-  absent) and its cards are added beside the others when a word is added, plus
-  `dataOps.ensureWritingCards()` backfills words already in study when it's
-  switched on and after each sign-in fetch. Remotely the en-wr rows go up in
+- Each vocab entry maps to up to six independently scheduled cards (jp-en,
+  jp-ro, ro-en, en-ro, en-wr, en-wk), never Japanese-to-type. Rows whose romaji is still kana
+  get jp-en only. **en-wr** / **en-wk** (English → Japanese (kana) / (kanji))
+  ask for the word handwritten on a pad (`js/flashcards/write-card.js`), judged
+  stroke by stroke with `kanjiWrite.judge` against `data/kana-strokes.js` and
+  `data/kanji-strokes.js`. `vocab-index.js` `writeCharsOf` gives what each asks
+  for (`entry.writeChars`: the reading, furigana for kanji; `entry.writeKanjiChars`:
+  the word as written, only when it has kanji) from a verb pair's plain form —
+  no 〜, no two readings, at most 12 characters, every one with stroke data;
+  `writeCharsFor(entry, direction)` picks one, `store.isWriteDirection(d)` tells
+  the two apart from the typed four. Both are off by default (`enabled_en_wr`,
+  `enabled_en_wk`, false when absent) and their cards are added beside the others when a word is added, plus
+  `dataOps.ensureWritingCards()` backfills words already in study when one is
+  switched on and after each sign-in fetch. Remotely the written rows go up in
   their own upsert, so a project whose `flashcards_direction_check` predates it
   still adds the word; switching it on there reports that `schema.sql` needs
   re-running. Pausing a word ("archive") keeps the FSRS state and full
@@ -353,7 +356,7 @@ js/
     puzzle-runs.js       every finished puzzle and game: the log, its numbers, Tricky words, reset
     puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
     puzzle-stats.js      the Stats screen for Puzzles and Games (a pushed screen)
-    write-card.js        English → Writing cards' pad: kana written stroke by stroke
+    write-card.js        written cards' pad: a word written stroke by stroke, in kana or with its kanji
     dashboard.js         the Dashboard tab (with its level + awards, and the pushed Awards screen) + the review session
     views.js             the Library (key "manage") / Settings / Help tabs
     kana-data.js         built-in kana tables + practice groups
@@ -364,7 +367,8 @@ data/vocabulary.js      the vocabulary as plain data; every row has a permanent 
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
                         verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
                         kanji rows -- type:"kanji", the N5 Kanji tables -- see below)
-data/kanji-strokes.js   N5 kanji stroke order from KanjiVG (CC BY-SA 3.0, see NOTICE)
+data/kanji-strokes.js   kanji stroke order from KanjiVG (CC BY-SA 3.0, see NOTICE): the N5 kanji,
+                        then (paths only) every other kanji the vocabulary uses
 data/kana-strokes.js    every kana's stroke order (and ー), same source + licence
 vendor/                 vendored ts-fsrs + supabase-js
 fonts/                  self-hosted Inter + Space Grotesk (SIL OFL)
@@ -501,7 +505,7 @@ tables. The sheet's *Words with* list is computed, not stored
 `data/kanji-strokes.js` (`RaumeStudy.data.kanjiStrokes`: per kanji, `p` the stroke
 paths in order on KanjiVG's 109x109 grid, `n` each stroke number's position). That
 file is adapted from KanjiVG, CC BY-SA 3.0 — with `data/kana-strokes.js` (same
-shape, `p` only; English → Writing cards), the only files not under LICENSE
+shape, `p` only; written cards), the only files not under LICENSE
 (`data/kanji-strokes.LICENSE.txt`, NOTICE; credited with links under the drawing,
 on the Help page and in README). Keep that attribution wherever the data is shown;
 it loads right after `vocabulary.js` (which assigns `RaumeStudy.data`). The smoke

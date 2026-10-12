@@ -97,14 +97,15 @@ alter table public.flashcard_settings add column if not exists enabled_jp_ro boo
 alter table public.flashcard_settings add column if not exists enabled_ro_en boolean not null default true;
 alter table public.flashcard_settings add column if not exists enabled_en_ro boolean not null default true;
 
--- English -> Writing (the word handwritten in kana on a pad): a fifth
--- direction, off until switched on. Its cards need the direction check
--- widened -- dropped and re-added under Postgres's own name for the inline
--- check above, so a re-run lands on the same constraint.
+-- English -> Japanese, written (the word handwritten on a pad): en-wr in
+-- kana, en-wk with its kanji, each off until switched on. Their cards need
+-- the direction check widened -- dropped and re-added under Postgres's own
+-- name for the inline check above, so a re-run lands on the same constraint.
 alter table public.flashcard_settings add column if not exists enabled_en_wr boolean not null default false;
+alter table public.flashcard_settings add column if not exists enabled_en_wk boolean not null default false;
 alter table public.flashcards drop constraint if exists flashcards_direction_check;
 alter table public.flashcards add constraint flashcards_direction_check
-  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr'));
+  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk'));
 
 -- Per-table personalisation for the vocabulary page (the icon you pick for a
 -- table header, keyed by the table's permanent id). Not a flashcards concept

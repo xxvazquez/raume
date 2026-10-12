@@ -112,9 +112,9 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       // A card whose word left the dataset (a removed table, or a custom
       // word not loaded yet) has nothing to show -- skip it, don't jam the queue.
       var entry = index[card.vocabId];
-      // A writing card whose word can no longer be written in kana (its
+      // A written card whose word can no longer be written that way (its
       // reading changed) has nothing to ask either.
-      if (entry && card.direction === "en-wr" && !entry.writeChars) return false;
+      if (entry && store.isWriteDirection(card.direction) && !vidx.writeCharsFor(entry, card.direction)) return false;
       return !!entry && !store.isTablePaused(entry.tableId);
     });
   }

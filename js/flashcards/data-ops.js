@@ -155,8 +155,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       enabled_directions: {
         "jp-en": settingsRow.enabled_jp_en !== false, "jp-ro": settingsRow.enabled_jp_ro !== false,
         "ro-en": settingsRow.enabled_ro_en !== false, "en-ro": settingsRow.enabled_en_ro !== false,
-        // Writing is the one direction that starts off -- only an explicit on counts.
-        "en-wr": settingsRow.enabled_en_wr === true
+        // The written ones start off -- only an explicit on counts.
+        "en-wr": settingsRow.enabled_en_wr === true, "en-wk": settingsRow.enabled_en_wk === true
       }
     };
     // Paused tables: union the account's list with whatever this device had
@@ -267,7 +267,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       var entry = index[vocabId];
       if (!entry) return; // skip anything not resolvable (e.g. a stale id)
       directionsForEntry(entry).forEach(function (d) {
-        (d === "en-wr" ? writeRows : rows).push({ user_id: user.id, vocab_id: vocabId, direction: d, active: true });
+        (store.isWriteDirection(d) ? writeRows : rows).push({ user_id: user.id, vocab_id: vocabId, direction: d, active: true });
       });
     });
     // Writing cards go up on their own, after the rest: a project that hasn't
@@ -368,7 +368,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }).catch(function (e) { console.warn("Flashcards: settings sync failed", e); });
     return settingsChain;
   }
-  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro", "en-wr": "enabled_en_wr" };
+  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro", "en-wr": "enabled_en_wr", "en-wk": "enabled_en_wk" };
   // Lay queued changes over the account's row just read into the cache.
   function applyPendingSettings(c) {
     var p = c.pendingSettings || {};
@@ -376,7 +376,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       if (k in p) c.settings[k] = p[k];
     });
     Object.keys(DIRECTION_COLUMN).forEach(function (d) {
-      if (DIRECTION_COLUMN[d] in p) c.settings.enabled_directions[d] = d === "en-wr" ? p[DIRECTION_COLUMN[d]] === true : p[DIRECTION_COLUMN[d]] !== false;
+      if (DIRECTION_COLUMN[d] in p) c.settings.enabled_directions[d] = store.isWriteDirection(d) ? p[DIRECTION_COLUMN[d]] === true : p[DIRECTION_COLUMN[d]] !== false;
     });
     if (Array.isArray(p.paused_tables)) c.pausedTables = p.paused_tables.map(String);
     // The streak is the one place the account can be ahead: another device
@@ -487,31 +487,37 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     });
     saveCache();
   }
-  // English -> Writing cards for every word in study that can be written but
-  // has none yet -- words added before the direction existed. Only while
-  // it's switched on, so a deck that never writes never gets them. Re-run
-  // safely any time (after switching it on, after each sign-in fetch): a
-  // word that already has one, studied or archived, is left alone.
+  // Written cards (kana, kanji) for every word in study that can be written
+  // that way but has none yet -- words added before the direction existed.
+  // Only for a direction switched on, so a deck that never writes never gets
+  // them. Re-run safely any time (after switching one on, after each sign-in
+  // fetch): a word that already has one, studied or archived, is left alone.
   async function ensureWritingCards() {
     var c = getCache();
-    if (c.settings.enabled_directions["en-wr"] !== true) return;
+    var dirs = ["en-wr", "en-wk"].filter(function (d) { return c.settings.enabled_directions[d] === true; });
+    if (!dirs.length) return;
     var index = getVocabIndex(), has = {}, inStudy = {};
     Object.keys(c.cards).forEach(function (id) {
       var card = c.cards[id];
-      if (card.direction === "en-wr") has[card.vocabId] = true;
+      if (store.isWriteDirection(card.direction)) has[card.vocabId + "|" + card.direction] = true;
       else if (card.active) inStudy[card.vocabId] = true;
     });
-    var missing = Object.keys(inStudy).filter(function (v) { return !has[v] && index[v] && index[v].writeChars; });
+    var missing = [];
+    Object.keys(inStudy).forEach(function (v) {
+      dirs.forEach(function (d) {
+        if (!has[v + "|" + d] && index[v] && vidx.writeCharsFor(index[v], d)) missing.push({ vocabId: v, direction: d });
+      });
+    });
     if (!missing.length) return;
     if (isGuestMode()) {
-      missing.forEach(function (v) { var card = newLocalCard(v, "en-wr"); c.cards[card.id] = card; });
+      missing.forEach(function (m) { var card = newLocalCard(m.vocabId, m.direction); c.cards[card.id] = card; });
       saveCache();
       return;
     }
     var client = getClient(), user = currentUser();
     if (!client || !user) return;
-    var res = await client.from("flashcards").upsert(missing.map(function (v) {
-      return { user_id: user.id, vocab_id: v, direction: "en-wr", active: true };
+    var res = await client.from("flashcards").upsert(missing.map(function (m) {
+      return { user_id: user.id, vocab_id: m.vocabId, direction: m.direction, active: true };
     }), { onConflict: "user_id,vocab_id,direction" }).select();
     if (res.error) {
       // 23514: the direction check from before writing existed.
@@ -578,7 +584,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       await pushSettings({
         enabled_jp_en: enabledMap["jp-en"], enabled_jp_ro: enabledMap["jp-ro"],
         enabled_ro_en: enabledMap["ro-en"], enabled_en_ro: enabledMap["en-ro"],
-        enabled_en_wr: enabledMap["en-wr"] === true
+        enabled_en_wr: enabledMap["en-wr"] === true, enabled_en_wk: enabledMap["en-wk"] === true
       });
     }
     await ensureWritingCards();

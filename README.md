@@ -193,9 +193,11 @@ flashcards**, or single words from **Library** or a search result.
 
 - Real **FSRS-6** scheduling via
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
-- Each word becomes up to five cards: **JP → EN · JP → Romaji · Romaji → EN ·
-  EN → Romaji · EN → Writing**. You never type Japanese. **Study directions**
-  in Settings picks which ones you get; Writing is off until you turn it on.
+- Each word becomes up to six cards: **JP → EN · JP → Romaji · Romaji → EN ·
+  EN → Romaji**, plus two handwritten ones, **EN → Japanese (kana)** and
+  **EN → Japanese (kanji)**. You never type Japanese. **Study directions** in
+  Settings picks which ones you get; the handwritten two are off until you
+  turn them on.
 - A session mixes everything due (plus learning steps due within 20 minutes)
   with the day's new cards, in a fresh random order every time. Each word's
   directions are dealt one per round, each round reshuffled, so the same word
@@ -228,26 +230,32 @@ card  →  type answer, Enter or ↑  →  verdict + answer (audio plays)  →  
 
 ### Writing cards
 
-**English → Writing** is for a tablet and pen (a finger or mouse works too).
-The card shows the English; under it, one square per kana and a writing pad.
-Write the word in kana, one kana at a time, each stroke in order — a word
-with kanji in its reading, like 水, is written みず, and loanwords are in
-katakana (ビール). Turn it on in Settings › Study directions; the words you
-already study get their writing card then.
+**English → Japanese** cards are for a tablet and pen (a finger or mouse works
+too). The card shows the English; under it, one square per character and a
+writing pad. Write the word one character at a time, each stroke in order:
+
+- **(kana)** — the reading: 水 is written みず, loanwords in katakana (ビール).
+  For before you know the kanji.
+- **(kanji)** — the word as it's written: 水, 食べる. Only for words with kanji
+  in them (ビール would just be the kana card again); every kanji the
+  vocabulary uses has its strokes.
+
+Turn either on in Settings › Study directions; the words you already study get
+their cards then.
 
 - A right stroke snaps to its clean line; a wrong one (misplaced, backwards or
   out of order) shakes the pad and counts a miss. After three misses on one
   stroke it's drawn as a hint. There's no outline to trace.
-- A finished kana drops into its square and the pad clears for the next.
-  **Undo** takes back the last stroke (into the previous kana too).
-- The last stroke checks the card: the kana, how it went (*Written cleanly*,
-  *Written · 2 misses*, *Written with 1 hint*) and the word as it's really
-  written, kanji and all. Then rate it as usual — a hint or **Show answer**
+- A finished character drops into its square and the pad clears for the next.
+  **Undo** takes back the last stroke (into the previous character too).
+- The last stroke checks the card: what you wrote, how it went (*Written
+  cleanly*, *Written · 2 misses*, *Written with 1 hint*), and the other
+  spelling — the word with its kanji under a kana card, the reading under a
+  kanji one. Then rate it as usual — a hint or **Show answer**
   counts as a miss, with Again / Hard first.
 - With an Apple Pencil, touches on the pad are ignored once the pen has
   drawn, so a resting palm doesn't make strokes.
-- Only words that can be written in kana get one — not kanji cards, counters
-  (〜), or words with two readings.
+- Not for kanji cards, counters (〜) or words with two readings.
 
 <details>
 <summary><b>How answers are checked</b></summary>

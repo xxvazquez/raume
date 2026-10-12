@@ -12,6 +12,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   "use strict";
 
   var DIRECTIONS = window.RaumeStudy.flashcards.store.DIRECTIONS;
+  var isWriteDirection = window.RaumeStudy.flashcards.store.isWriteDirection;
 
   var JAPANESE_SCRIPT = /[ぁ-ゖァ-ヺ一-鿏々〆ヵヶ]/;
 
@@ -70,20 +71,28 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return segments.map(function (seg) { return seg.kanji ? seg.kanji : (seg.text || seg.p || ""); }).join("");
   }
 
-  // The kana an English -> Writing card asks for, one per pad: the word's
-  // reading (a verb pair's plain form), kanji written as their furigana,
-  // loanwords in katakana. null when it can't be written that way -- a kanji
-  // row, a counter's 〜, two readings, a character without stroke data
-  // (data/kana-strokes.js), or anything longer than a short phrase.
+  // What the two English -> Japanese written cards ask for, one character
+  // per pad, from a verb pair's plain form:
+  //   kana  (en-wr) the reading -- kanji as their furigana, loanwords in katakana
+  //   kanji (en-wk) the word as it's written, kanji and all -- only for a
+  //         word with kanji in it (otherwise it's the kana card again)
+  // null when it can't be written that way -- a kanji row, a counter's 〜,
+  // two readings, a character without stroke data (data/kana-strokes.js,
+  // data/kanji-strokes.js), or anything longer than a short phrase.
   var WRITE_MAX = 12;
-  function writeCharsOf(entry, row) {
+  var KANJI_CHAR = /[一-鿏々]/;
+  function writeCharsOf(entry, row, withKanji) {
     if (entry.kanji) return null;
-    var strokes = window.RaumeStudy.data.kanaStrokes || {};
-    var jp = row.type === "verb-pair" ? row.forms[0].jp : row.jp;
-    var reading = (window.RaumeStudy.vocab.jpReadingOf || function () { return ""; })(jp || []);
-    var chars = Array.from(String(reading).replace(/\s+/g, ""));
+    var data = window.RaumeStudy.data, kana = data.kanaStrokes || {}, kanji = data.kanjiStrokes || {};
+    var jp = (row.type === "verb-pair" ? row.forms[0].jp : row.jp) || [];
+    var text = withKanji ? jpPlainOf(jp) : (window.RaumeStudy.vocab.jpReadingOf || function () { return ""; })(jp);
+    var chars = Array.from(String(text).replace(/\s+/g, ""));
     if (!chars.length || chars.length > WRITE_MAX) return null;
-    return chars.every(function (ch) { return !!strokes[ch]; }) ? chars : null;
+    if (withKanji && !chars.some(function (ch) { return KANJI_CHAR.test(ch); })) return null;
+    return chars.every(function (ch) { return !!kana[ch] || (withKanji && !!kanji[ch]); }) ? chars : null;
+  }
+  function writeCharsFor(entry, direction) {
+    return direction === "en-wk" ? entry.writeKanjiChars : direction === "en-wr" ? entry.writeChars : null;
   }
 
   var vocabIndex = null;
@@ -180,7 +189,8 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           if (entry.romajiUsable && KANA_SPELLING[particleKana]) entry.romajiAnswers.push(KANA_SPELLING[particleKana]);
           entry.romajiAnswerDisplays = romajiAlts;
         }
-        entry.writeChars = writeCharsOf(entry, row);
+        entry.writeChars = writeCharsOf(entry, row, false);
+        entry.writeKanjiChars = writeCharsOf(entry, row, true);
         entry.englishDisplay = row.english;
         // The meaning's note ("before a noun") is shown, never required --
         // though typing it along with the answer still counts.
@@ -224,21 +234,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // A kanji is studied from the character: its meaning and its readings.
   // Romaji or English -> kanji would be a vocabulary card, and "san" alone
   // can't say which kanji it means.
-  // English -> Writing only for a word that can be written in kana
+  // The written directions only for a word that can be written that way
   // (writeCharsOf).
   function directionsForEntry(entry) {
     if (entry.kanji) return entry.romajiUsable ? ["jp-en", "jp-ro"] : ["jp-en"];
     if (!entry.romajiUsable) return ["jp-en"];
-    return DIRECTIONS.filter(function (d) { return d !== "en-wr" || !!entry.writeChars; });
+    return DIRECTIONS.filter(function (d) { return !isWriteDirection(d) || !!writeCharsFor(entry, d); });
   }
 
   function promptFor(entry, direction) {
     if (direction === "jp-en" || direction === "jp-ro") return { html: entry.jpPromptHtml, lang: "ja" };
     if (direction === "ro-en") return { text: entry.romajiDisplay };
-    return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro, en-wr
+    return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro, en-wr, en-wk
   }
   function askLabelFor(direction) {
     if (direction === "en-wr") return "Write it in kana";
+    if (direction === "en-wk") return "Write it with its kanji";
     return direction === "jp-en" || direction === "ro-en" ? "Type the English meaning" : "Type the romaji reading";
   }
   // Same "which language" cue as the label above the prompt, but repeated
@@ -248,7 +259,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "jp-en" || direction === "ro-en" ? "English" : "Romaji";
   }
   function expectedDisplayFor(entry, direction) {
-    if (direction === "en-wr") return (entry.writeChars || []).join("");
+    if (isWriteDirection(direction)) return (writeCharsFor(entry, direction) || []).join("");
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;
   }
   // One extra field for the answer reveal, beyond the one actually tested --
@@ -259,6 +270,8 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // covering half the word, so they add Japanese -- never English for en-ro,
   // since English is already the prompt there.
   function contextDisplayFor(entry, direction) {
+    // Written with its kanji: the reading is what's left to show.
+    if (direction === "en-wk") return { label: "Reading", value: entry.jpReading };
     if (direction === "jp-en") return { label: "Romaji", value: entry.romajiDisplay };
     if (direction === "jp-ro") return { label: "English", value: entry.englishFull };
     // ro-en, en-ro, en-wr. Japanese always carries its furigana -- `html` is the
@@ -424,7 +437,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
 
   return {
-    getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry,
+    getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
     otherLanguageHint: otherLanguageHint, homophonesOf: homophonesOf,
