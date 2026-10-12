@@ -1148,9 +1148,9 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section:not(.collapsed) { background: var(--paper); padding: 0 16px; margin-top: 0; margin-bottom: 0; }
 #vocabulary .table-section .section-menu-btn,
 #vocabulary .table-section .print-one { border-color: transparent; background: none; }
-#vocabulary .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section) { border-radius: var(--radius-card) var(--radius-card) 0 0; }
+#vocabulary .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section) { border-radius: var(--radius-card) var(--radius-card) 0 0; --card-top-r: var(--radius-card); }
 #vocabulary .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(:has(+ .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: 0 0 var(--radius-card) var(--radius-card); }
-#vocabulary .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section):not(:has(+ .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: var(--radius-card); }
+#vocabulary .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden) + .table-section):not(:has(+ .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden))) { border-radius: var(--radius-card); --card-top-r: var(--radius-card); }
 /* Row: icon tile, title, chevron, actions -- the hairline is inset to start
    under the title, as in an iOS list; the last closed row has none. An open
    row keeps it (it divides the row from its table), and the row after an
@@ -1174,6 +1174,16 @@ body.selftest-mode .selftest-hint { display: block; }
   margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 38px; --chev-right: 16px;
   border-top-left-radius: inherit; border-top-right-radius: inherit;
   background: var(--paper);
+}
+/* Pinned, the title's round corners sit over its own table's white rows,
+   so they'd read square: paint the ground back into the two corners
+   (--card-top-r is 0 for a table that isn't first in its card). */
+#vocabulary .table-section:not(.collapsed) > .section-head::before {
+  display: block; content: ""; position: absolute; top: 0; left: 0; right: 0;
+  width: auto; min-height: 0; height: var(--card-top-r, 0px); border-radius: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 100% 100%, transparent calc(var(--card-top-r, 0px) - 0.5px), var(--page-bg) var(--card-top-r, 0px)) top left / var(--card-top-r, 0px) var(--card-top-r, 0px) no-repeat,
+    radial-gradient(circle at 0 100%, transparent calc(var(--card-top-r, 0px) - 0.5px), var(--page-bg) var(--card-top-r, 0px)) top right / var(--card-top-r, 0px) var(--card-top-r, 0px) no-repeat;
 }
 #vocabulary .table-section:not(.collapsed) > .section-head::after { left: 16px; right: 16px; }
 #vocabulary .table-section:not(.collapsed) > .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 53px; }
