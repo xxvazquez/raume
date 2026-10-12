@@ -65,7 +65,13 @@ flowchart LR
   on reconnect (`syncOutbox` / `syncKanaOutbox` in `data-ops.js`). The cache
   survives a reload: a restored session for the same account keeps it
   (`store.resetCacheForUser` only empties it for a different user), so the
-  dashboard shows at once, works offline, and queued reviews still sync. Each queued
+  dashboard shows at once, works offline, and queued reviews still sync.
+  Unsynced work is never dropped when the account changes: signing out (or
+  the session ending on its own, even mid-sync) parks a cache that still has
+  queued reviews or settings under `raume-flashcards-parked-<userId>` /
+  `raume-kana-parked-<userId>`, and the same account signing in here again
+  takes it back and syncs it; another account never sees it. Reset and park
+  only touch the signed-in keys, never the guest record. Each queued
   review is synced under a 20s timeout so a half-open connection can't leave the
   flag stuck and block every future retry; a review whose card no longer exists
   on the server (FK violation) is dropped rather than wedging the queue. The two
@@ -223,8 +229,11 @@ script — it moves each key across and drops the old name.
 Two more, both retry state for the account sync (see "Retrying a failed
 account push" below), browser-local, never synced themselves:
 `raume-custom-vocab-outbox-v1` (an ordered queue of custom-vocab writes that
-failed to reach Supabase) and `raume-table-custom-dirty-v1` (a flag: the
-account's copy of table customisations is stale).
+failed to reach Supabase, each tagged with its account's `userId`) and
+`raume-table-custom-dirty-v1` (a flag: the account's copy of table
+customisations is stale). Plus the parked caches above. `sw-register.js` asks
+for persistent storage (`navigator.storage.persist()`) so the browser doesn't
+clear any of it under storage pressure.
 
 **Leeches.** The detector is `scheduling.leechWords()`: per word, the worst
 studyable card's `lapses` against `LEECH_LAPSES` (8, Anki's default), re-flagging a
@@ -271,18 +280,31 @@ attempted once and logged. `js/flashcards/data-ops.js`:
   wrappers (`customVocabAddRowsQueued` etc.) try once immediately, and only
   queue the operation (`{op, payload}`) if that fails. `syncCvOutbox()`
   replays it the same FIFO way.
+- **Settings** (`pendingSettings` in the flashcards cache: column -> value)
+  -- every `flashcard_settings` write that has to land: the study settings,
+  directions, the streak, `paused_tables`, `kana_prefs`, `kana_fsrs`.
+  `pushSettings()` queues then tries; `syncSettings()` upserts the whole
+  queue and clears only what landed (and wasn't changed again meanwhile). A
+  batch the server rejects (a column an older schema lacks) is retried one
+  column at a time, so the rest still land. `fetchAllFromServer()` /
+  `fetchKanaFromServer()` lay the queue over the row they read
+  (`applyPendingSettings`), so an offline change isn't undone by a refresh;
+  for the streak the later study day wins. Leech Keeps, the journey, Known
+  kanji and puzzle runs don't need it -- the fetch merges both sides.
 - **Table customisations** (`raume-table-custom-dirty-v1`) -- simpler, since
   `js/vocab/table-custom.js` always pushes its *whole* current state
   (idempotent, last-edit-wins), so there's no op log to replay -- just a
   dirty flag set on failure and cleared on success. `syncTableCustomIfDirty()`
   retries by pushing whatever the current state is *now*, not a stale
-  snapshot of what failed.
+  snapshot of what failed. While dirty, `fetchAllFromServer()` merges with
+  this device winning per table (`tableCustom.applyRemote(obj, true)`), so
+  an offline edit isn't overwritten before it goes up.
 
-All three fold into one `getSyncState()` (`pending`, `online`, `syncing`,
+All four fold into one `getSyncState()` (`pending`, `online`, `syncing`,
 `stalled`), so the Flashcards sync chip and the masthead account icon (green
 = synced, amber = offline or something pending) both reflect every source,
 not just reviews. `pendingItems()` gives the itemised version of the same
-three sources (raw ids/payloads, not display text) -- the chip's **What's
+four sources (raw ids/payloads, not display text) -- the chip's **What's
 pending?** toggle resolves each one back to a word/kana character via
 `vocabIndex`/the kana id's embedded character for its detail list.
 
@@ -296,7 +318,7 @@ js/
   theme-init.js         sets the theme in <head>, before first paint
   config.js             Supabase URL + anon key
   shared.js             cross-feature helpers (HTML escape, pronunciation playback, the iOS confirm sheet)
-  sw-register.js        service-worker registration
+  sw-register.js        service-worker registration + persistent-storage request
   vocab/                the reference page
     kana-romaji.js       kana → romaji converter (the reading layer), and
                          romaji → kana (toKana: typed Word chain answers),

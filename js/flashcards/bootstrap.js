@@ -37,7 +37,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var clearPasswordRecovery = dataOps.clearPasswordRecovery;
   var initAuth = dataOps.initAuth, onAuthChange = dataOps.onAuthChange;
   var fetchAllFromServer = dataOps.fetchAllFromServer, syncOutbox = dataOps.syncOutbox;
-  var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty;
+  var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty, syncSettings = dataOps.syncSettings;
   var syncNow = dataOps.syncNow, withTimeout = dataOps.withTimeout;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
   var getPendingItems = dataOps.pendingItems;
@@ -237,7 +237,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       initialSyncInFlight = true;
       lastInitialSyncAttempt = Date.now();
       withTimeout(fetchAllFromServer(), "initial sync")
-        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); render(); })
+        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncSettings(); render(); })
         .catch(function (e) { console.error("Flashcards: could not load from Supabase", e); render(); })
         .finally(function () { initialSyncInFlight = false; });
     }
@@ -357,6 +357,14 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       if (item.op === "deleteTable") return "A table removed";
       return "A change to your own words";
     }
+    if (item.kind === "settings") {
+      var k = item.keys || [], parts = [];
+      if (k.indexOf("last_study_date") !== -1) parts.push("Your study streak");
+      if (k.indexOf("paused_tables") !== -1) parts.push("Paused tables");
+      if (k.indexOf("kana_prefs") !== -1 || k.indexOf("kana_fsrs") !== -1) parts.push("Kana settings");
+      if (k.some(function (x) { return /^(fsrs_|queue_|enabled_)/.test(x); })) parts.push("Study settings");
+      return parts.join(", ") || "Settings";
+    }
     return "Table icon/name changes";
   }
 
@@ -459,16 +467,17 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     if (isGuestMode()) { setStoredMode(null); invalidateInsights(); refreshRowToggleButtons(); }
     render();
   };
-  // Signing out empties this device's copy of the account -- anything still
-  // queued for it (an offline review, a word, a rename) would go with it, so
-  // ask first, the way an iOS app warns before discarding unsent changes.
+  // Signing out never loses anything still queued (an offline review, a
+  // word, a setting): it waits on this device, out of view, and syncs the
+  // next time this account signs in here (store.resetCacheForUser). Still
+  // say so first -- it won't reach your other devices until then.
   S.signOut = function () {
     var pending = getSyncState().pending;
     if (!pending) { signOut(); return; }
     window.RaumeStudy.shared.confirmSheet({
       title: "Sign out?",
       message: pending + (pending === 1 ? " change hasn’t" : " changes haven’t") +
-        " synced to your account yet. Signing out removes " + (pending === 1 ? "it" : "them") + " from this device.",
+        " synced yet. " + (pending === 1 ? "It stays on this device and syncs" : "They stay on this device and sync") + " the next time you sign in here.",
       confirm: "Sign Out",
       onConfirm: function () { signOut(); }
     });

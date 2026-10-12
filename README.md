@@ -614,9 +614,16 @@ never mix.
 | Custom tables | — | Yes |
 | New accounts | — | Off by default: the project's sign-ups are closed and `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |
 
-- **Local-first** — reviews, customisations and custom words apply
-  immediately. Anything that couldn't sync is queued, survives a reload and
-  retries on its own.
+- **Local-first** — reviews, settings, your streak, customisations and
+  custom words apply immediately. Anything that couldn't sync is queued,
+  survives a reload and retries on its own. A refresh never undoes a change
+  that's still waiting.
+- **Nothing unsynced is lost on sign-out** — signing out, or the session
+  ending on its own while you're offline, keeps queued changes on this
+  device, out of sight of anyone else who signs in. They sync the next time
+  you sign in here.
+- **Storage is kept** — the app asks the browser to keep its storage rather
+  than clear it when the device runs low on space.
 - **Sync status** — when everything is synced, the account button's dot is
   green and nothing else shows. Otherwise a chip at the top of Practice shows
   *Syncing N…*, or an amber *Offline* / *couldn't sync* with **Sync now**;

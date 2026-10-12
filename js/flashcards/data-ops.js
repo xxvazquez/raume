@@ -181,18 +181,17 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     c.lastSyncedAt = new Date().toISOString();
     saveCache();
     if (c.pausedTables.some(function (t) { return remotePaused.indexOf(t) === -1; })) {
-      // Best-effort merge push -- if it fails, the merged list still lives in
-      // the local cache and this device behaves correctly; just leave a
-      // trace instead of a silent, un-retried drop of a device-only pause
-      // set that never makes it to the account.
-      savePausedTablesRemote(c.pausedTables).catch(function (e) {
-        console.warn("Flashcards: could not sync merged paused-tables list", e);
-      });
+      // Through the settings queue: a failed push stays queued and retries.
+      pushSettings({ paused_tables: c.pausedTables });
     }
     if (Object.keys(c.leechKept).some(function (id) { return !(id in remoteKept) || c.leechKept[id] > remoteKept[id]; })) {
       saveLeechKeptRemote(c.leechKept);
     }
     if (journeyAhead(c.journey, remoteJourney)) saveJourneyRemote(c.journey);
+    // Anything changed on this device that hasn't reached the account yet
+    // is newer than the row just read -- put it back on top.
+    applyPendingSettings(c);
+    saveCache();
     // Kanji marked Known (js/vocab/kanji-known.js) ride in this row too.
     if (window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.applyRemote(settingsRow.known_kanji || {});
     // So do finished Match / Listening games (puzzle-runs.js).
@@ -200,7 +199,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // The vocabulary page's per-table icons live in this same row -- hand
     // them to their own store so a header icon set on another device shows up.
     if (window.RaumeStudy.tableCustom) {
-      window.RaumeStudy.tableCustom.applyRemote(settingsRow.table_custom || {});
+      window.RaumeStudy.tableCustom.applyRemote(settingsRow.table_custom || {}, tcDirty());
     }
     // The reader's own vocabulary rows/tables (js/vocab/custom-vocab.js) --
     // their own Supabase tables, not this settings row.
@@ -287,15 +286,109 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var res = await client.from("flashcard_settings").update(patch).eq("user_id", user.id);
     if (res.error) throw res.error;
   }
+  // -----------------------------------------------------------------------
+  // Settings queue. Every flashcard_settings change that has to reach the
+  // account -- the study settings, the streak, paused tables, the Kana
+  // picker and knobs -- is written to the cache's `pendingSettings` first
+  // (column -> value) and only cleared once the account has it. Offline, or
+  // signed out before it went, it simply waits: it survives a reload, is
+  // parked with the account's other unsynced changes on sign-out, outranks
+  // the older row on the next refresh, and shows in What's pending?.
+  // -----------------------------------------------------------------------
+  function pushSettings(patch) {
+    if (isGuestMode()) return Promise.resolve();
+    var c = getCache();
+    c.pendingSettings = Object.assign({}, c.pendingSettings, patch);
+    saveCache();
+    notifySyncStateChange();
+    return syncSettings();
+  }
+  function hasPendingSettings() {
+    return !isGuestMode() && Object.keys(getCache().pendingSettings || {}).length > 0;
+  }
+  async function upsertSettings(user, patch) {
+    var res = await getClient().from("flashcard_settings")
+      .upsert(Object.assign({ user_id: user.id }, patch), { onConflict: "user_id" });
+    if (res.error) throw res.error;
+  }
+  // One push at a time, each sending the queue as it stands when it goes.
+  var settingsChain = Promise.resolve();
+  function syncSettings() {
+    settingsChain = settingsChain.then(async function () {
+      var user = currentUser(), c = getCache();
+      if (isGuestMode() || !configured() || !user) return;
+      var sent = Object.assign({}, c.pendingSettings);
+      var keys = Object.keys(sent);
+      if (!keys.length) return;
+      var landed = [];
+      try {
+        await withTimeout(upsertSettings(user, sent), "settings sync");
+        landed = keys;
+      } catch (e) {
+        if (!e || !e.code) { // no answer from the server: keep it all queued
+          syncErrored = true;
+          console.warn("Flashcards: settings sync failed, will retry", e);
+        } else {
+          // The server turned the batch down -- most likely a column a
+          // project without the latest schema.sql doesn't have. Send each
+          // one alone so the rest still land; only a column the server
+          // itself rejects is let go (it could never sync).
+          for (var i = 0; i < keys.length; i++) {
+            var one = {};
+            one[keys[i]] = sent[keys[i]];
+            try { await withTimeout(upsertSettings(user, one), "settings sync"); landed.push(keys[i]); }
+            catch (e2) {
+              if (e2 && e2.code) { console.warn("Flashcards: the account can't store " + keys[i] + "; dropping it", e2); landed.push(keys[i]); }
+              else { syncErrored = true; break; }
+            }
+          }
+        }
+      }
+      // Clear what landed -- unless it was changed again meanwhile.
+      if (getCache() === c && landed.length) {
+        var next = Object.assign({}, c.pendingSettings);
+        landed.forEach(function (k) { if (JSON.stringify(next[k]) === JSON.stringify(sent[k])) delete next[k]; });
+        c.pendingSettings = next;
+        saveCache();
+      }
+      if (totalPending() === 0) syncErrored = false;
+      notifySyncStateChange();
+    }).catch(function (e) { console.warn("Flashcards: settings sync failed", e); });
+    return settingsChain;
+  }
+  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro" };
+  // Lay queued changes over the account's row just read into the cache.
+  function applyPendingSettings(c) {
+    var p = c.pendingSettings || {};
+    ["fsrs_request_retention", "fsrs_maximum_interval", "fsrs_enable_fuzz", "queue_new_cards_per_day"].forEach(function (k) {
+      if (k in p) c.settings[k] = p[k];
+    });
+    Object.keys(DIRECTION_COLUMN).forEach(function (d) {
+      if (DIRECTION_COLUMN[d] in p) c.settings.enabled_directions[d] = p[DIRECTION_COLUMN[d]] !== false;
+    });
+    if (Array.isArray(p.paused_tables)) c.pausedTables = p.paused_tables.map(String);
+    // The streak is the one place the account can be ahead: another device
+    // studied on a later day. The later day wins; an older queued one is
+    // dropped rather than pushed over it.
+    if ("last_study_date" in p) {
+      var s = c.settings;
+      if (!s.last_study_date || (p.last_study_date && p.last_study_date >= s.last_study_date)) {
+        s.longest_streak = Math.max(s.longest_streak || 0, p.longest_streak || 0);
+        s.current_streak = p.current_streak || 0;
+        s.last_study_date = p.last_study_date;
+      } else {
+        var trimmed = Object.assign({}, p);
+        delete trimmed.current_streak; delete trimmed.longest_streak; delete trimmed.last_study_date;
+        c.pendingSettings = trimmed;
+      }
+    }
+  }
+
   // Vocabulary-page table icons ride along in the same settings row so they
   // sync across devices (see js/vocab/table-custom.js).
   async function saveTableCustomRemote(obj) {
     if (!getClient() || !currentUser()) return;
     return saveFsrsSettingsRemote({ table_custom: obj || {} });
-  }
-  async function savePausedTablesRemote(arr) {
-    if (!getClient() || !currentUser()) return;
-    return saveFsrsSettingsRemote({ paused_tables: arr || [] });
   }
   // Best-effort by design: a "Keep" is only a stop-flagging mark, so a failed
   // push (offline, or `leech_kept` not there yet because schema.sql hasn't been
@@ -346,7 +439,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // review, the stat tiles and every Manage filter except "All vocabulary".
   async function setTablePaused(tableId, paused) {
     var list = store.setTablePausedLocal(tableId, paused);
-    if (!isGuestMode()) await savePausedTablesRemote(list);
+    if (!isGuestMode()) await pushSettings({ paused_tables: list });
   }
 
   // -----------------------------------------------------------------------
@@ -414,7 +507,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   async function saveFsrsSettings(patch) {
     Object.assign(getCache().settings, patch);
     saveCache();
-    if (!isGuestMode()) await saveFsrsSettingsRemote(patch);
+    if (!isGuestMode()) await pushSettings(patch);
   }
   async function saveQueueSettings(patch) { return saveFsrsSettings(patch); }
   // Separate from saveFsrsSettings because the shapes differ: the cache
@@ -426,7 +519,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     getCache().settings.enabled_directions = enabledMap;
     saveCache();
     if (!isGuestMode()) {
-      await saveFsrsSettingsRemote({
+      await pushSettings({
         enabled_jp_en: enabledMap["jp-en"], enabled_jp_ro: enabledMap["jp-ro"],
         enabled_ro_en: enabledMap["ro-en"], enabled_en_ro: enabledMap["en-ro"]
       });
@@ -437,10 +530,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
 
   // -----------------------------------------------------------------------
   // Daily study streak -- a motivational counter, not an FSRS concept.
-  // Computed locally (so it still counts an offline review) and pushed to
-  // Supabase best-effort; worst case (app closed before it syncs) it's off
-  // by a day until the next review, never lost outright since it's derived
-  // fresh from last_study_date each time, not incremented blindly.
+  // Computed locally (so it still counts an offline review) and sent through
+  // the settings queue, so a day studied offline still reaches the account.
   // -----------------------------------------------------------------------
   function recordStudyActivity(now) {
     var s = getCache().settings;
@@ -451,11 +542,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     s.longest_streak = Math.max(s.longest_streak, s.current_streak);
     s.last_study_date = today;
     saveCache();
-    syncStreakRemote(s).catch(function () {}); // best-effort; local cache already has it
-  }
-  async function syncStreakRemote(s) {
-    if (!configured() || !currentUser()) return;
-    await saveFsrsSettingsRemote({ current_streak: s.current_streak, longest_streak: s.longest_streak, last_study_date: s.last_study_date });
+    pushSettings({ current_streak: s.current_streak, longest_streak: s.longest_streak, last_study_date: s.last_study_date });
   }
 
   // Returns true when the log is (now or already) on the server, false when the
@@ -525,7 +612,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   var syncErrored = false;
   function onSyncStateChange(fn) { syncStateListeners.push(fn); }
   function totalPending() {
-    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount() + cvOutboxPending() + (tcDirty() ? 1 : 0));
+    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount() + cvOutboxPending() + (tcDirty() ? 1 : 0) + (hasPendingSettings() ? 1 : 0));
   }
   function getSyncState() {
     var online = typeof navigator === "undefined" || navigator.onLine !== false;
@@ -553,10 +640,11 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     (store.getKanaCache().logsOutbox || []).forEach(function (e) {
       out.push({ kind: "kana", kanaId: e.kanaId, direction: e.direction });
     });
-    loadCvOutbox().forEach(function (e) {
+    myCvOutbox().forEach(function (e) {
       out.push({ kind: "cv", op: e.op, payload: e.payload });
     });
     if (tcDirty()) out.push({ kind: "table" });
+    if (hasPendingSettings()) out.push({ kind: "settings", keys: Object.keys(cache.pendingSettings) });
     return out;
   }
   // Kick every outbox now -- the chip's "Sync now" button, for a queue that
@@ -568,6 +656,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     syncKanaOutbox();
     syncCvOutbox();
     syncTableCustomIfDirty();
+    syncSettings();
   }
   function notifySyncStateChange() {
     var st = getSyncState();
@@ -648,13 +737,21 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   function saveCvOutbox(arr) {
     try { window.localStorage.setItem(CV_OUTBOX_KEY, JSON.stringify(arr)); } catch (e) {}
   }
+  // Each op carries the account it belongs to, so one signed out before it
+  // synced waits for that account -- never replayed into whoever signs in
+  // next. (Ops queued before this had no owner; they go to the current one.)
   function queueCvOp(op, payload) {
-    var q = loadCvOutbox();
-    q.push({ op: op, payload: payload });
+    var q = loadCvOutbox(), user = currentUser();
+    q.push({ op: op, payload: payload, userId: user ? user.id : null });
     saveCvOutbox(q);
     notifySyncStateChange();
   }
-  function cvOutboxPending() { return isGuestMode() ? 0 : loadCvOutbox().length; }
+  function isMine(entry) {
+    var user = currentUser();
+    return !!user && (!entry.userId || entry.userId === user.id);
+  }
+  function myCvOutbox() { return loadCvOutbox().filter(isMine); }
+  function cvOutboxPending() { return isGuestMode() ? 0 : myCvOutbox().length; }
   // Every queued op replays through the exact same function a live edit
   // calls (customVocabAddRows etc. above), so a retried change can't drift
   // from what a same-session one does.
@@ -670,16 +767,16 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (cvSyncing || !configured() || !currentUser()) return;
     cvSyncing = true;
     try {
-      var q = loadCvOutbox();
-      while (q.length) {
+      var q = loadCvOutbox(), i;
+      while ((i = q.findIndex(isMine)) !== -1) {
         try {
-          await withTimeout(runCvOp(q[0]), "custom vocab sync");
+          await withTimeout(runCvOp(q[i]), "custom vocab sync");
         } catch (e) {
           syncErrored = true;
           console.warn("Flashcards: custom vocab sync failed, will retry", e);
           break;
         }
-        q.shift();
+        q.splice(i, 1);
         saveCvOutbox(q);
         notifySyncStateChange();
       }
@@ -763,7 +860,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   }
 
   window.addEventListener("online", function () {
-    notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); syncCvOutbox(); syncTableCustomIfDirty();
+    notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncSettings();
   });
   window.addEventListener("offline", function () { notifySyncStateChange(); });
 
@@ -813,7 +910,10 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       if (!card && entry.baseReps === 0) kc.cards[key] = Object.assign({}, entry.resultCard);
       else if (card && card.reps === entry.baseReps) Object.assign(card, entry.resultCard);
     });
-    var prefs = (setRes.data && setRes.data.kana_prefs) || {};
+    // A picker or knob change still queued on this device is newer than
+    // the row just read.
+    var queued = getCache().pendingSettings || {};
+    var prefs = ("kana_prefs" in queued ? queued.kana_prefs : setRes.data && setRes.data.kana_prefs) || {};
     if (Array.isArray(prefs.groups)) kc.groups = prefs.groups.filter(function (g) { return typeof g === "string"; });
     if (prefs.dirs && typeof prefs.dirs === "object") {
       var d = { k2r: prefs.dirs.k2r !== false, r2k: prefs.dirs.r2k !== false };
@@ -822,7 +922,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // FSRS knobs: an account that has never touched the Kana settings has an
     // empty {} here, so keep the defaults; otherwise take (and re-sanitise)
     // what the account holds -- the account wins, same as kana_prefs.
-    var serverFsrs = setRes.data && setRes.data.kana_fsrs;
+    var serverFsrs = "kana_fsrs" in queued ? queued.kana_fsrs : setRes.data && setRes.data.kana_fsrs;
     if (serverFsrs && typeof serverFsrs === "object" && Object.keys(serverFsrs).length) {
       kc.fsrs = store.sanitizeKanaFsrs(serverFsrs);
     }
@@ -851,22 +951,17 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (all.error) throw all.error;
     return all.data;
   }
-  async function saveKanaPrefsRemote(prefs) {
-    if (isGuestMode() || !getClient() || !currentUser()) return;
-    var client = getClient(), user = currentUser();
-    // upsert (not update) so it also works before fetchAllFromServer has
-    // created the settings row; on conflict only kana_prefs is touched.
-    var res = await client.from("flashcard_settings").upsert({ user_id: user.id, kana_prefs: prefs || {} }, { onConflict: "user_id" });
-    if (res.error) throw res.error;
+  // Both go through the settings queue (an upsert, so it also works before
+  // fetchAllFromServer has created the settings row).
+  function saveKanaPrefsRemote(prefs) {
+    if (isGuestMode() || !currentUser()) return Promise.resolve();
+    return pushSettings({ kana_prefs: prefs || {} });
   }
-  // Kana FSRS knobs: mutate the cache first (so an offline change still takes
-  // effect and isn't lost), then best-effort push the whole blob -- same
-  // local-first pattern as saveFsrsSettings for the vocab cards.
-  async function saveKanaFsrsRemote(fsrs) {
-    if (isGuestMode() || !getClient() || !currentUser()) return;
-    var client = getClient(), user = currentUser();
-    var res = await client.from("flashcard_settings").upsert({ user_id: user.id, kana_fsrs: fsrs || {} }, { onConflict: "user_id" });
-    if (res.error) throw res.error;
+  // Kana FSRS knobs: mutate the cache first, then queue the whole blob --
+  // same local-first pattern as saveFsrsSettings for the vocab cards.
+  function saveKanaFsrsRemote(fsrs) {
+    if (isGuestMode() || !currentUser()) return Promise.resolve();
+    return pushSettings({ kana_fsrs: fsrs || {} });
   }
   function getKanaFsrs() { return store.sanitizeKanaFsrs(store.getKanaCache().fsrs); }
   async function saveKanaFsrs(patch) {
@@ -971,6 +1066,6 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     onSyncStateChange: onSyncStateChange, getSyncState: getSyncState, pendingItems: pendingItems,
     fetchKanaFromServer: fetchKanaFromServer, saveKanaPrefsRemote: saveKanaPrefsRemote,
     getKanaFsrs: getKanaFsrs, saveKanaFsrs: saveKanaFsrs,
-    syncKanaOutbox: syncKanaOutbox, kanaPendingCount: kanaPendingCount
+    syncKanaOutbox: syncKanaOutbox, kanaPendingCount: kanaPendingCount, syncSettings: syncSettings
   };
 })();

@@ -2938,23 +2938,73 @@ async function main() {
     window.RaumeStudy.flashcards.render();
   }
 
-  console.log("Flashcards: a restored session keeps its own cache");
+  console.log("Flashcards: a restored session keeps its own cache; unsynced changes are never dropped");
   {
     const fcStore = window.RaumeStudy.flashcards.store;
-    const c = fcStore.getCache();
-    const saved = JSON.stringify(c);
-    c.userId = "user-a";
-    c.logsOutbox = [{ clientReviewId: "r1", cardId: "x" }];
-    fcStore.saveCache();
-    const cardCount = Object.keys(c.cards).length;
+    const guestBefore = JSON.stringify(fcStore.getCache());
+    const kanaGuestBefore = JSON.stringify(fcStore.getKanaCache());
+    fcStore.setSession({ user: { id: "user-a" } });
     fcStore.resetCacheForUser("user-a");
-    const kept = Object.keys(fcStore.getCache().cards).length === cardCount && fcStore.getCache().logsOutbox.length === 1;
-    fcStore.resetCacheForUser("user-b");
-    const wiped = Object.keys(fcStore.getCache().cards).length === 0 && fcStore.getCache().userId === "user-b";
-    check("the same account coming back keeps its cards and offline outbox; another account starts empty", cardCount > 0 && kept && wiped);
-    Object.assign(fcStore.getCache(), JSON.parse(saved));
+    fcStore.resetKanaCacheForUser("user-a");
+    const c = fcStore.getCache();
+    c.cards = { x: { id: "x", vocabId: "v0001", direction: "jp-en", state: 2, due: new Date().toISOString(), reps: 3 } };
+    c.logsOutbox = [{ clientReviewId: "r1", cardId: "x" }];
+    c.pendingSettings = { fsrs_request_retention: 0.85 };
     fcStore.saveCache();
+    const kc = fcStore.getKanaCache();
+    kc.logsOutbox = [{ clientReviewId: "k1", kanaId: "hira:あ", direction: "k2r" }];
+    fcStore.saveKanaCache();
+    fcStore.resetCacheForUser("user-a");
+    const kept = Object.keys(fcStore.getCache().cards).length === 1 && fcStore.getCache().logsOutbox.length === 1;
+    // Signed out (by hand, or the session ending on its own): the queue is
+    // parked under the account, the guest record untouched.
+    fcStore.setSession(null);
+    fcStore.resetCacheForUser(null);
+    fcStore.resetKanaCacheForUser(null);
+    const guestSafe = JSON.stringify(fcStore.getCache()) === guestBefore && JSON.stringify(fcStore.getKanaCache()) === kanaGuestBefore;
+    // Someone else signs in: starts empty, never sees (or sends) user-a's queue.
+    fcStore.setSession({ user: { id: "user-b" } });
+    fcStore.resetCacheForUser("user-b");
+    fcStore.resetKanaCacheForUser("user-b");
+    const otherEmpty = fcStore.getCache().userId === "user-b" && fcStore.getCache().logsOutbox.length === 0
+      && Object.keys(fcStore.getCache().pendingSettings).length === 0 && fcStore.getKanaCache().logsOutbox.length === 0;
+    // user-a back: the parked queue is theirs again, ready to sync.
+    fcStore.setSession({ user: { id: "user-a" } });
+    fcStore.resetCacheForUser("user-a");
+    fcStore.resetKanaCacheForUser("user-a");
+    const back = fcStore.getCache().logsOutbox.length === 1 && fcStore.getCache().pendingSettings.fsrs_request_retention === 0.85
+      && fcStore.getKanaCache().logsOutbox.length === 1;
+    // Parked once only: signing out with nothing queued leaves nothing behind.
+    fcStore.getCache().logsOutbox = []; fcStore.getCache().pendingSettings = {}; fcStore.saveCache();
+    fcStore.getKanaCache().logsOutbox = []; fcStore.saveKanaCache();
+    fcStore.setSession(null);
+    fcStore.resetCacheForUser(null);
+    fcStore.resetKanaCacheForUser(null);
+    fcStore.setSession({ user: { id: "user-a" } });
+    fcStore.resetCacheForUser("user-a");
+    const nothingLeft = fcStore.getCache().logsOutbox.length === 0 && Object.keys(fcStore.getCache().cards).length === 0;
+    check("the same account coming back keeps its cards and offline outbox", kept);
+    check("signing out leaves the guest record alone", guestSafe);
+    check("another account starts empty, without the signed-out account's queue", otherEmpty);
+    check("signing back in to the same account restores its parked reviews and settings", back && nothingLeft);
+    fcStore.setSession(null);
+    fcStore.resetCacheForUser(null);
+    fcStore.resetKanaCacheForUser(null);
     window.RaumeStudy.flashcards.render();
+  }
+
+  console.log("Flashcards: table edits made offline outrank the account's older copy");
+  {
+    const tc = window.RaumeStudy.tableCustom;
+    const before = JSON.stringify(tc.getAll());
+    tc.setName(3, "Offline name");
+    tc.applyRemote({ "3": { name: "Account name" }, "4": { name: "Other device" } }, true);
+    const localWon = tc.nameOf(3) === "Offline name" && tc.nameOf(4) === "Other device";
+    tc.applyRemote({ "3": { name: "Account name" } });
+    check("unsynced local table edits win the merge; otherwise the account wins", localWon && tc.nameOf(3) === "Account name");
+    tc.forget(3); tc.forget(4);
+    const prior = JSON.parse(before);
+    [3, 4].forEach(id => { if (prior[id] && prior[id].name) tc.setName(id, prior[id].name); });
   }
 
   console.log("Flashcards: Kana tab");

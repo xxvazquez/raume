@@ -183,7 +183,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, journey: cleanJourney(null), lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, journey: cleanJourney(null), pendingSettings: {}, lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -233,6 +233,9 @@ window.RaumeStudy.flashcards.store = (function () {
       // Words ever mastered and awards earned -- see cleanJourney. Synced via
       // flashcard_settings.journey.
       journey: cleanJourney(raw.journey),
+      // flashcard_settings columns changed on this device that haven't
+      // reached the account yet (column -> value); see data-ops pushSettings.
+      pendingSettings: raw.pendingSettings && typeof raw.pendingSettings === "object" && !Array.isArray(raw.pendingSettings) ? raw.pendingSettings : {},
       lastSyncedAt: raw.lastSyncedAt || null
     };
   }
@@ -280,6 +283,7 @@ window.RaumeStudy.flashcards.store = (function () {
     return cache;
   }
   function saveCache() {
+    if (!cache) return; // just reset for a new account -- nothing loaded to save
     var key = cacheKey();
     inMemoryCaches[key] = cache;
     try { localStorage.setItem(key, JSON.stringify(cache)); } catch (e) {}
@@ -309,11 +313,63 @@ window.RaumeStudy.flashcards.store = (function () {
   // cached cards and offline outbox, so the dashboard isn't "No flashcards
   // yet" until the server answers, works offline after a reload, and a
   // review queued offline survives the reload to sync later.
+  //
+  // Anything the outgoing account hasn't synced yet is never thrown away:
+  // signing out (or the session ending on its own -- a password change, a
+  // sign-out everywhere -- even mid-flight back online) parks that cache
+  // under the account's id, out of sight of whoever uses the device next,
+  // and signing back in to the same account picks it up and syncs it.
+  var PARKED_PREFIX = "raume-flashcards-parked-";
+  var KANA_PARKED_PREFIX = "raume-kana-parked-";
+  // Reset/park touch only the signed-in copy -- never the guest record, even
+  // when "use guest mode" is still the stored preference as a session ends.
+  // Where storage is unavailable, a same-pageview copy (like the caches').
+  var inMemoryJson = {};
+  function readJson(key) {
+    try { var raw = localStorage.getItem(key); if (raw) return JSON.parse(raw); } catch (e) {}
+    return inMemoryJson[key] ? JSON.parse(inMemoryJson[key]) : null;
+  }
+  function writeJson(key, value) {
+    if (value) inMemoryJson[key] = JSON.stringify(value); else delete inMemoryJson[key];
+    try {
+      if (value) localStorage.setItem(key, JSON.stringify(value)); else localStorage.removeItem(key);
+    } catch (e) {}
+  }
+  function hasUnsynced(c) {
+    return !!(c && ((c.logsOutbox && c.logsOutbox.length) || (c.pendingSettings && Object.keys(c.pendingSettings).length)));
+  }
+  // Two parked copies of one account (parked, never signed back in here,
+  // parked again) -- keep every queued review once, the newer settings.
+  function mergeOutboxes(a, b) {
+    var seen = {}, out = [];
+    (a || []).concat(b || []).forEach(function (e) {
+      if (e && e.clientReviewId && !seen[e.clientReviewId]) { seen[e.clientReviewId] = true; out.push(e); }
+    });
+    return out;
+  }
+  function park(prefix, outgoing, validate) {
+    var key = prefix + outgoing.userId;
+    var earlier = validate(readJson(key));
+    if (earlier) {
+      outgoing.logsOutbox = mergeOutboxes(earlier.logsOutbox, outgoing.logsOutbox);
+      if (earlier.pendingSettings) outgoing.pendingSettings = Object.assign({}, earlier.pendingSettings, outgoing.pendingSettings);
+    }
+    writeJson(key, outgoing);
+  }
+  function unpark(prefix, userId, validate) {
+    if (!userId) return null;
+    var parked = validate(readJson(prefix + userId));
+    writeJson(prefix + userId, null);
+    return parked && parked.userId === userId ? parked : null;
+  }
   function resetCacheForUser(userId) {
-    if (userId && loadCache().userId === userId) return;
-    cache = emptyCache(userId);
-    cacheLoadedKey = cacheKey();
-    saveCache();
+    var current = (cacheLoadedKey === CACHE_KEY && cache) || validateCache(migrate(readJson(CACHE_KEY))) || inMemoryCaches[CACHE_KEY];
+    if (userId && current && current.userId === userId) return;
+    if (current && current.userId && hasUnsynced(current)) park(PARKED_PREFIX, current, validateCache);
+    var next = unpark(PARKED_PREFIX, userId, validateCache) || emptyCache(userId);
+    inMemoryCaches[CACHE_KEY] = next;
+    writeJson(CACHE_KEY, next);
+    cache = null; // getCache() reloads whichever copy the mode now reads
   }
 
   // -----------------------------------------------------------------------
@@ -379,6 +435,7 @@ window.RaumeStudy.flashcards.store = (function () {
     return kanaCache;
   }
   function saveKanaCache() {
+    if (!kanaCache) return;
     var key = kanaCacheKey();
     inMemoryKanaCaches[key] = kanaCache;
     try { localStorage.setItem(key, JSON.stringify(kanaCache)); } catch (e) {}
@@ -387,11 +444,16 @@ window.RaumeStudy.flashcards.store = (function () {
     if (!kanaCache || kanaCacheLoadedKey !== kanaCacheKey()) return loadKanaCache();
     return kanaCache;
   }
+  // Same account: keep it; anything unsynced is parked, not dropped (see
+  // resetCacheForUser).
   function resetKanaCacheForUser(userId) {
-    if (userId && loadKanaCache().userId === userId) return; // same account: keep it (see resetCacheForUser)
-    kanaCache = emptyKanaCache(userId);
-    kanaCacheLoadedKey = kanaCacheKey();
-    saveKanaCache();
+    var current = (kanaCacheLoadedKey === KANA_CACHE_KEY && kanaCache) || validateKanaCache(readJson(KANA_CACHE_KEY)) || inMemoryKanaCaches[KANA_CACHE_KEY];
+    if (userId && current && current.userId === userId) return;
+    if (current && current.userId && current.logsOutbox.length) park(KANA_PARKED_PREFIX, current, validateKanaCache);
+    var next = unpark(KANA_PARKED_PREFIX, userId, validateKanaCache) || emptyKanaCache(userId);
+    inMemoryKanaCaches[KANA_CACHE_KEY] = next;
+    writeJson(KANA_CACHE_KEY, next);
+    kanaCache = null;
   }
 
   return {

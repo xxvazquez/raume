@@ -151,12 +151,15 @@ window.RaumeStudy.tableCustom = (function () {
   // devices), but a table customised locally that the account doesn't know
   // about yet -- e.g. set as a guest, before signing in -- is kept and pushed
   // up rather than dropped.
-  function applyRemote(obj) {
+  function applyRemote(obj, localWins) {
     var remote = obj && typeof obj === "object" ? obj : {};
     load();
     var merged = {};
-    Object.keys(cache).forEach(function (k) { merged[k] = cache[k]; });
-    Object.keys(remote).forEach(function (k) { merged[k] = remote[k]; });
+    // `localWins`: this device has edits the account hasn't received yet
+    // (made offline), so they outrank the older row instead of being undone.
+    var base = localWins ? remote : cache, winner = localWins ? cache : remote;
+    Object.keys(base).forEach(function (k) { merged[k] = base[k]; });
+    Object.keys(winner).forEach(function (k) { merged[k] = winner[k]; });
     var mergedJson = JSON.stringify(merged);
     var changedLocally = mergedJson !== JSON.stringify(cache);
     var addsToRemote = mergedJson !== JSON.stringify(remote);
