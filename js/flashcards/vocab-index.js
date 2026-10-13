@@ -281,15 +281,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     // ruby markup to show, `value` the plain text for comparisons and labels.
     return { label: "Japanese", value: entry.jpPlain, html: entry.jpInlineHtml };
   }
+  // English with its apostrophes, hyphens and spaces left out -- a phone
+  // keyboard buries ' and -, so "oclock" is o'clock and "tshirt" T-shirt.
+  function squashEnglish(s) { return s.replace(/['\s-]/g, ""); }
+  function englishMatches(answers, norm) {
+    var loose = squashEnglish(norm);
+    return answers.some(function (a) { return a === norm || (loose && squashEnglish(a) === loose); });
+  }
   function checkAnswer(entry, direction, input) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var norm = normalizeAnswer(input, isRomajiTarget);
     var answers = isRomajiTarget ? entry.romajiAnswers : entry.englishAnswers;
-    if (answers.indexOf(norm) !== -1) return true;
+    if (isRomajiTarget ? answers.indexOf(norm) !== -1 : englishMatches(answers, norm)) return true;
     if (allAlternativesTyped(answers, input, isRomajiTarget)) return true;
     // "atsui" alone could be any of its namesakes -- their meanings count too.
     return direction === "ro-en" && homophonesOf(entry).some(function (h) {
-      return h.englishAnswers.indexOf(norm) !== -1;
+      return englishMatches(h.englishAnswers, norm);
     });
   }
   // Several right answers typed together -- "grandfather, old man",

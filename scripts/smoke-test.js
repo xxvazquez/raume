@@ -2609,6 +2609,13 @@ async function main() {
       return fc.scheduling.todayNewCount(now) === 3 && d.fresh.join() === "a,c,d" && d.reviewed.join() === "b,e";
     } finally { c.day = saved; }
   })());
+  check("English typed without its apostrophes or hyphens counts (1 oclock, deep fry, stirfry), but not a different number", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    const deepFry = Object.values(idx).find(e => e.englishDisplay === "deep-fry"), stirFry = Object.values(idx).find(e => e.englishDisplay === "stir-fry");
+    return vi.checkAnswer(idx.v0635, "jp-en", "1 oclock") && !vi.checkAnswer(idx.v0635, "jp-en", "2 oclock")
+      && !!deepFry && vi.checkAnswer(deepFry, "jp-en", "deep fry") && !!stirFry && vi.checkAnswer(stirFry, "jp-en", "stirfry");
+  })());
   check("ん typed nn before a vowel or y counts (kinnen, honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();

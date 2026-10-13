@@ -266,8 +266,9 @@ their cards then.
   match, and likewise ā/aa, ū/uu, ē/ee, ō/oo/ou — but not left out:
   `obasan` (aunt) isn't `obāsan` (grandmother), and the marked letters show
   the missing length. (Search is looser: `kohi` still finds コーヒー.)
-- Apostrophes, hyphens and spaces in romaji don't matter — `kin'en` /
-  `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
+- Apostrophes, hyphens and spaces don't matter — in romaji (`kin'en` /
+  `kinen`, `shabu-shabu` / `shabu shabu`) and in English (`oclock`,
+  `deep fry`, `stirfry`) — and a phone's curly `’` counts as
   `'` in answers and search alike.
 - A Japanese keyboard's spellings count too — `tu`, `si`, `hu`, `zi`, `sya`,
   `tya`, `cch` for っち, a doubled `nn` (also for the apostrophe's ん:
