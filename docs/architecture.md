@@ -88,8 +88,11 @@ flowchart LR
   and their ids in `fresh`) and the cards already past new that were reviewed
   today (`reviewed`). It feeds the daily allowance and the Dashboard's Review
   and Learn rings ([`scheduling.js`](../js/flashcards/scheduling.js)
-  `bumpNewToday` / `markReviewedToday` / `todayDay`). Device-local, like
-  Kana's own tracker: two devices studied the same day each count their own.
+  `bumpNewToday` / `markReviewedToday` / `todayDay`). Kept on the device;
+  signed in, every server fetch also reads today's `review_logs` (`state` 0 =
+  a new card introduced) and folds them in (`mergeToday`, a union), so two
+  devices share one allowance and one set of rings. Kana's own tracker is
+  still device-local.
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
 - **Table customisations** (names / icons / order) follow the same pattern (an

@@ -109,6 +109,21 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }
   }
 
+  // Today's reviews from every device (review_logs.state is the card's
+  // state before the rating, so 0 = a new card introduced). Only an extra:
+  // a failure leaves this device's own tally as it was.
+  async function mergeTodayFromServer(client, user) {
+    var now = new Date(), midnight = new Date(now);
+    midnight.setHours(0, 0, 0, 0);
+    var res = await fetchAllRows(function () {
+      return client.from("review_logs").select("id,card_id,state").eq("user_id", user.id).gte("reviewed_at", midnight.toISOString());
+    });
+    if (res.error) { console.warn("Flashcards: couldn't read today's reviews", res.error); return; }
+    var fresh = [], reviewed = [];
+    res.data.forEach(function (log) { (log.state === 0 ? fresh : reviewed).push(log.card_id); });
+    sched.mergeToday(now, fresh, reviewed);
+    saveCache();
+  }
   async function fetchAllFromServer() {
     var client = getClient(), user = currentUser();
     var cardsRes = await fetchAllRows(function () { return client.from("flashcards").select("*").eq("user_id", user.id); });
@@ -194,6 +209,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // is newer than the row just read -- put it back on top.
     applyPendingSettings(c);
     saveCache();
+    await mergeTodayFromServer(client, user);
     // Kanji marked Known (js/vocab/kanji-known.js) ride in this row too.
     if (window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.applyRemote(settingsRow.known_kanji || {});
     // So do finished Match / Listening games (puzzle-runs.js).

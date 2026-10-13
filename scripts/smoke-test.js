@@ -2599,6 +2599,16 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
   })());
+  check("today's reviews from another device fold into this one's tally: one shared new-card allowance, a card introduced and reviewed counted once", (() => {
+    const fc = window.RaumeStudy.flashcards, c = fc.store.getCache(), saved = c.day ? JSON.parse(JSON.stringify(c.day)) : null;
+    const now = new Date();
+    try {
+      c.day = { date: fc.store.localDateStr(now), count: 1, fresh: ["a"], reviewed: ["b"] };
+      fc.scheduling.mergeToday(now, ["a", "c", "d"], ["c", "b", "e"]);
+      const d = fc.scheduling.todayDay(now);
+      return fc.scheduling.todayNewCount(now) === 3 && d.fresh.join() === "a,c,d" && d.reviewed.join() === "b,e";
+    } finally { c.day = saved; }
+  })());
   check("ん typed nn before a vowel or y counts (kinnen, honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();

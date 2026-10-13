@@ -213,6 +213,18 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     var day = today(now);
     if (day.fresh.indexOf(cardId) === -1 && day.reviewed.indexOf(cardId) === -1) day.reviewed.push(cardId);
   }
+  // Today's tracker is kept per device; signed in, the account's own review
+  // log says what every device studied today. Folded in (union) so two
+  // devices share one daily new-card allowance and one set of rings.
+  function mergeToday(now, freshIds, reviewedIds) {
+    var day = today(now);
+    freshIds.forEach(function (id) { if (day.fresh.indexOf(id) === -1) day.fresh.push(id); });
+    reviewedIds.forEach(function (id) {
+      if (day.fresh.indexOf(id) === -1 && day.reviewed.indexOf(id) === -1) day.reviewed.push(id);
+    });
+    day.reviewed = day.reviewed.filter(function (id) { return day.fresh.indexOf(id) === -1; });
+    day.count = Math.max(day.count, day.fresh.length);
+  }
   // Today's tracker, read-only: an empty one before anything's studied.
   function todayDay(now) {
     var day = getCache().day;
@@ -291,6 +303,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
     readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
-    todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay
+    todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay,
+    mergeToday: mergeToday
   };
 })();
