@@ -48,6 +48,8 @@ function makeResponse(body, ok) {
 
 // --- Fake fetch (offline flag flips it to reject) -----------------------
 let online = true;
+// A connection that never answers (weak signal): requests just hang.
+let hanging = false;
 let fetched = [];
 const audioFetches = [];
 // Files whose bytes a test pretends changed: served with this suffix.
@@ -55,6 +57,7 @@ const edited = new Set();
 async function fakeFetch(input) {
   const url = typeof input === "string" ? resolveUrl(input) : input.url;
   if (!online) throw new Error("offline");
+  if (hanging) return new Promise(() => {});
   fetched.push(url);
   const file = fileFor(url);
   // Pronunciation clips are real Responses (the worker slices byte ranges
@@ -113,7 +116,9 @@ function loadServiceWorker(version, cacheStorage, source) {
     skipWaiting: () => Promise.resolve(),
     clients: { claim: () => Promise.resolve() },
   };
-  const sandbox = { self, caches: cacheStorage, fetch: fakeFetch, URL, Promise, console, Response };
+  // Timers run at most 50ms here, so the page-load timeout doesn't slow the test.
+  const sandbox = { self, caches: cacheStorage, fetch: fakeFetch, URL, Promise, console, Response,
+    setTimeout: (fn, ms) => setTimeout(fn, Math.min(ms, 50)), clearTimeout };
   vm.runInNewContext((source || SW_SOURCE).replace(/__CACHEBUST__/g, version), sandbox);
 
   function dispatch(type, event) {
@@ -203,6 +208,10 @@ async function main() {
   online = false;
   const navRes = await sw1.handleFetch(navRequest());
   check("navigation falls back to the cached shell", navRes && (await navRes.text()).includes("<title>raume</title>"));
+  online = true; hanging = true;
+  const slowNav = await sw1.handleFetch(navRequest());
+  hanging = false; online = false;
+  check("a network that never answers still opens the cached shell", slowNav && (await slowNav.text()).includes("<title>raume</title>"));
   for (const p of REFERENCE_SHELL) {
     const res = await sw1.handleFetch(assetRequest(p + "?v=" + V1));
     check("offline hit for reference asset: " + p, !!res && typeof (await res.text()) === "string");

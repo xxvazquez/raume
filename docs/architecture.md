@@ -461,6 +461,10 @@ Installable and offline-capable once visited.
   fonts too (stale-while-revalidate refreshes those); only the page, the
   manifest and changed files are downloaded. Only the precache list in `sw.js`
   has to stay in sync with what `index.html` requests.
+- Opening the app is network-first (the newest page names the newest asset
+  URLs), but waits at most 3 s (`NAV_TIMEOUT_MS`): on a weak signal it opens
+  the cached shell instead of sitting blank, and the late answer still
+  refreshes the cache for next time.
 - App icons and the favicon are generated from `logo.png` (the master mark, a
   circular sun-over-water motif) by `scripts/generate-icons.py`: cropped to its
   bounding box, padded square, centred on an opaque `#f4f6f8` tile — 192/512

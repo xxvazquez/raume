@@ -79,6 +79,9 @@ const VERSIONED = [
 ];
 
 const PRECACHE = UNVERSIONED.concat(VERSIONED.map((p) => p + '?v=' + (ASSET_VERSIONS[p] || VERSION)));
+// How long a page load waits on the network before opening the cached shell.
+const NAV_TIMEOUT_MS = 3000;
+
 // Always downloaded fresh on install: the page itself names this deploy's
 // asset URLs. Everything else that's already cached under the same URL is
 // reused -- a versioned URL's bytes never change, and the unversioned icons
@@ -147,18 +150,27 @@ self.addEventListener('fetch', (event) => {
   if (isNavigation) {
     // Network-first: always try to get the latest page (and therefore the
     // latest versioned asset URLs) when online; fall back to the cached
-    // shell when offline.
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(req, copy));
-          }
-          return res;
-        })
-        .catch(() => caches.match('index.html'))
-    );
+    // shell when offline -- or when the network is too slow to answer: a
+    // weak signal can hold a request open for a minute, and the home-screen
+    // app would sit blank all that time. The late answer still refreshes the
+    // cache for next launch.
+    const network = fetch(req).then((res) => {
+      if (res.ok) {
+        const copy = res.clone();
+        return caches.open(CACHE).then((cache) => cache.put(req, copy)).then(() => res, () => res);
+      }
+      return res;
+    });
+    event.respondWith(new Promise((resolve, reject) => {
+      let settled = false;
+      const settle = (res) => { if (!settled && res) { settled = true; resolve(res); } return !!res; };
+      const timer = setTimeout(() => { caches.match('index.html').then(settle); }, NAV_TIMEOUT_MS);
+      network.then((res) => { clearTimeout(timer); settle(res); }, () => {
+        clearTimeout(timer);
+        caches.match('index.html').then((hit) => { if (!settle(hit) && !settled) reject(new Error('offline')); });
+      });
+    }));
+    event.waitUntil(network.catch(() => {}));
     return;
   }
 
