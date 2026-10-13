@@ -77,7 +77,7 @@ Grammatical **particles are blue and bold** everywhere.
 
 | | |
 | --- | --- |
-| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted (a romaji query tints the kana or furigana it spells — the romaji itself stays a tap away); a single letter only finds words that start with it (one kana or kanji still matches anywhere). Kana finds a kanji word by its reading (たべ → 食べる, 食べ物) and a kanji by either script (えき → エキ on 駅); romaji works with or without long vowels and in a Japanese keyboard's spellings (*shoyu*, *kohi*, *mittu*), and finds a verb's polite form too (*tabemasu*); English matches where a word starts (*eat* finds *eat*, not *heat*). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
+| **Search** | Covers every section. Ranked exact → starts with → ends with → contains, match highlighted (a romaji query tints the kana or furigana it spells — the romaji itself stays a tap away); a single letter only finds words that start with it (one kana or kanji still matches anywhere). Kana finds a kanji word by its reading (たべ → 食べる, 食べ物) and a kanji by either script (えき → エキ on 駅); romaji works with or without long vowels and in a Japanese keyboard's spellings (*shoyu*, *kohi*, *mittu*, *honnya*), and finds a verb's polite form too (*tabemasu*); English matches where a word starts (*eat* finds *eat*, not *heat*). Clearing it puts back the tables you had open. Searches whichever of Japanese / furigana / English are visible, plus romaji. Each result has a **+ / ✓** toggle to add the word to flashcards or pause it. |
 | **Tables** | The list button in the pinned search bar lists every table in the section, full names and entry counts, the one you're reading marked. |
 | **Opening a table** | Keeps the row you tapped exactly where it was. While it's open, its title stays pinned under the search bar as you scroll, and closing it from there keeps it in place. |
 | **URL** | Follows the view (`#grammar`, `#kanji`, `#table-15`, `#practice` — an old `#flashcards` link still opens Practice), so any view can be bookmarked. |
@@ -270,7 +270,8 @@ their cards then.
   `kinen`, `shabu-shabu` / `shabu shabu` — and a phone's curly `’` counts as
   `'` in answers and search alike.
 - A Japanese keyboard's spellings count too — `tu`, `si`, `hu`, `zi`, `sya`,
-  `tya`, `cch` for っち, a doubled `nn`, and `m` before b / p (`mittu`, `tempura`) — and the
+  `tya`, `cch` for っち, a doubled `nn` (also for the apostrophe's ん:
+  `kinnen`, `honnya`), and `m` before b / p (`mittu`, `tempura`) — and the
   particles は / へ / を also take `ha` / `he` / `wo`.
 - You only type the meaning, never its note: どの is *which* with the note
   *before a noun* shown under it, and brackets in your own words are optional

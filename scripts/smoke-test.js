@@ -1189,13 +1189,13 @@ async function main() {
         return c.textContent.replace(/\s+/g, "");
       });
     };
-    const polite = firstJp("tabemasu"), reading = firstJp("たべもの"), shoyu = firstJp("shoyu"), kohi = firstJp("kohi"), mittu = firstJp("mittu"), eat = firstJp("eat");
+    const polite = firstJp("tabemasu"), reading = firstJp("たべもの"), shoyu = firstJp("shoyu"), kohi = firstJp("kohi"), mittu = firstJp("mittu"), eat = firstJp("eat"), honnya = firstJp("honnya");
     firstJp("たべもの");
     const readingTinted = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) rt mark.search-hit')].length > 0;
     firstJp("");
     return polite.some(t => t.includes("食べます")) && reading.length === 1 && reading[0].startsWith("食べ物") && readingTinted
       && shoyu.some(t => t.startsWith("醤油")) && kohi.some(t => t.startsWith("コーヒー")) && mittu.some(t => t.startsWith("三つ"))
-      && eat.some(t => t.startsWith("食べる")) && !eat.some(t => t.startsWith("温める"));
+      && honnya.some(t => t.startsWith("本屋")) && eat.some(t => t.startsWith("食べる")) && !eat.some(t => t.startsWith("温める"));
   })());
   check("an English word that folds like romaji doesn't drag in every reading it would start: see finds 見る first and not 千 (sen); sit finds only sit down", (() => {
     const input = document.getElementById("tableSearch");
@@ -2598,6 +2598,13 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryoori o shimasu") && vi.checkAnswer(cook, "en-ro", "ryōri wo suru")
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
+  })());
+  check("ん typed nn before a vowel or y counts (kinnen, honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    return vi.checkAnswer(idx.v0361, "jp-ro", "kinnen") && vi.checkAnswer(idx.v0900, "jp-ro", "honnya")
+      && vi.checkAnswer(idx.v0556, "jp-ro", "kinnyoubi") && vi.checkAnswer(idx.v0361, "jp-ro", "kinen")
+      && vi.checkAnswer(idx.v0361, "jp-ro", "kin'en");
   })());
   check("a Japanese keyboard's spellings count (mittu, sasimi, tyousyoku, huraipan, tempura) and は / へ / を typed ha / he / wo, but a missing っ still doesn't", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;

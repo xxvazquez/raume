@@ -181,7 +181,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           // Two readings ("yon / shi", "maitoshi / mainen") are two right
           // answers, each one on its own -- like a verb pair's two forms.
           var romajiAlts = entry.romajiUsable ? splitAlternatives(row.romaji) : [];
-          entry.romajiAnswers = romajiAlts.map(function (r) { return normalizeAnswer(r, true); });
+          // kin'en also typed kinnen, as a Japanese keyboard spells it.
+          entry.romajiAnswers = romajiAlts.reduce(function (all, r) {
+            return all.concat(window.RaumeStudy.kanaRomaji.romajiSpellings(r).map(function (v) { return normalizeAnswer(v, true); }));
+          }, []);
           // The particles は / へ / を are said wa / e / o but typed ha / he /
           // wo on a Japanese keyboard -- the kana's own spelling counts too.
           var particleKana = row.jp.length === 1 && row.jp[0].p;

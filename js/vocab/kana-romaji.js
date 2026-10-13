@@ -237,7 +237,17 @@ window.RaumeStudy.kanaRomaji = (function () {
       : out.replace(/ou/g, "o").replace(/([aiueo])\1+/g, "$1");
   }
 
+  // A reading's other written spelling, for matching: Hepburn marks ん before
+  // a vowel or y with an apostrophe (kin'en, hon'ya), where a Japanese
+  // keyboard types it nn (kinnen, honnya). The fold above can't turn nn back
+  // into n' (konnichiwa is ko-n-ni), so the data offers both.
+  function romajiSpellings(s) {
+    var str = String(s == null ? "" : s), ime = str.replace(/n['’](?=[aiueoyāīūēō])/gi, "nn");
+    return ime === str ? [str] : [str, ime];
+  }
+
   return {
-    toRomaji: toRomaji, toKana: toKana, decorate: decorate, isKana: isKana, foldRomaji: foldRomaji
+    toRomaji: toRomaji, toKana: toKana, decorate: decorate, isKana: isKana, foldRomaji: foldRomaji,
+    romajiSpellings: romajiSpellings
   };
 })();

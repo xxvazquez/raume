@@ -616,8 +616,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
         readings: jpwords.map(readingOf),
         romaji: jpwords.map(w => expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase()),
-        // ...and folded (see foldRomaji): whole, then each of its words.
-        romajiFolded: jpwords.map(w => [fold(w.dataset.romaji)].concat(String(w.dataset.romaji).split(/[\s-]+/).map(fold))),
+        // ...and folded (see foldRomaji): whole, and each of its words --
+        // kin'en also as kinnen (kanaRomaji.romajiSpellings).
+        romajiFolded: jpwords.map(w => {
+          const spellings = window.RaumeStudy.kanaRomaji.romajiSpellings(w.dataset.romaji);
+          return {
+            whole: spellings.map(fold),
+            words: spellings.reduce((all, r) => all.concat(String(r).split(/[\s-]+/).map(fold)), [])
+          };
+        }),
         english: enEl ? enEl.textContent.toLocaleLowerCase() : ''
       };
       rowInfo.set(row, info);
@@ -772,9 +779,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       info.romaji.forEach((t, i) => {
         const folded = info.romajiFolded[i];
         const r = [rankOf(t, qx.expanded, prefixOnly),
-          qx.folded && folded[0] === qx.folded ? 0 : null,
-          qx.folded && (qx.foldedWhole ? folded.slice(1).some(f => f === qx.folded)
-            : folded.some(f => f.startsWith(qx.folded))) ? 1 : null
+          qx.folded && folded.whole.includes(qx.folded) ? 0 : null,
+          qx.folded && (qx.foldedWhole ? folded.words.includes(qx.folded)
+            : folded.whole.concat(folded.words).some(f => f.startsWith(qx.folded))) ? 1 : null
         ].reduce((a, b) => b === null ? a : (a === null || b < a ? b : a), null);
         if (take(r)) romajiHits.push(info.jpwords[i]);
       });
