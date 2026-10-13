@@ -288,7 +288,11 @@ attempted once and logged. `js/flashcards/data-ops.js`:
 - **Reviews** (`logsOutbox` / kana's own outbox, in the flashcards cache) --
   the original pattern here; a queue of individual entries, replayed FIFO by
   `syncOutbox()`/`syncKanaOutbox()`, one entry shifted off on success, the
-  whole run stopping (not dropping) on failure.
+  whole run stopping (not dropping) on failure. A card update refused because
+  the card moved on is replayed on the server's state -- unless the server's
+  card already is this review (one rep past the base, this review's
+  `last_review`): a request that timed out here can still have landed, and
+  replaying it would count the review twice.
 - **Custom vocabulary** (`raume-custom-vocab-outbox-v1`) -- the same shape,
   applied to `js/vocab/custom-vocab.js`'s four remote writes: `*Queued`
   wrappers (`customVocabAddRowsQueued` etc.) try once immediately, and only

@@ -644,6 +644,14 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     if (res.error) throw res.error;
     return res.data && res.data.length > 0;
   }
+  // A refused update isn't always another device: a request that timed out
+  // on our side can still have landed, and replaying it would count one
+  // review twice. The server's card is this very review when it is one rep
+  // past the base and carries this review's own timestamp.
+  function reviewLanded(server, baseReps, resultCard) {
+    if (!server || server.reps !== baseReps + 1 || !server.last_review || !resultCard.last_review) return false;
+    return new Date(server.last_review).getTime() === new Date(resultCard.last_review).getTime();
+  }
   async function fetchCardById(cardId) {
     var client = getClient();
     var res = await client.from("flashcards").select("*").eq("id", cardId).maybeSingle();
@@ -780,6 +788,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     // saw at the time; this only reconciles the card's live pointer.
     var server = await fetchCardById(entry.cardId);
     if (!server) return "deleted";
+    if (reviewLanded(server, entry.baseCard.reps, entry.resultCard)) return "done";
     var c = getCache();
     var scheduler = getScheduler(c.settings);
     var replayed = applyRating(scheduler, fsrsRowFields(server), new Date(entry.logFields.review), RATING_NAMES[entry.logFields.rating - 1]);
@@ -1077,6 +1086,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var serverRes = await client.from("kana_cards").select("*").eq("id", row.id).single();
     if (serverRes.error) throw serverRes.error;
     var server = serverRes.data;
+    if (reviewLanded(server, entry.baseReps, entry.resultCard)) return { done: true, cardId: row.id, card: entry.resultCard };
     var replay = applyRating(getScheduler(kanaFsrs()), fsrsRowFields(server), new Date(log.review), RATING_NAMES[log.rating - 1]);
     var payload2 = fsrsRowFields(replay.card);
     payload2.updated_at = new Date().toISOString();
