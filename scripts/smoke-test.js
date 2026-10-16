@@ -77,6 +77,11 @@ async function main() {
     // wins without having to intercept the file load.
     beforeParse(window) {
       window.RaumeStudy = { config: { url: "", anonKey: "" } };
+      // jsdom has no Badging API: a stand-in that records what the app asks
+      // for, so the app-icon badge (Settings › App icon) can be checked.
+      window.__badgeCalls = [];
+      window.navigator.setAppBadge = n => { window.__badgeCalls.push(n); return Promise.resolve(); };
+      window.navigator.clearAppBadge = () => { window.__badgeCalls.push(0); return Promise.resolve(); };
       // Seed a couple of old-prefix keys so the head migration
       // (js/storage-migration.js) has something to move -- checked after load.
       // Both are signed-in cache keys, never read in the guest-mode flow this
@@ -4525,6 +4530,18 @@ async function main() {
     const titles = [...document.querySelectorAll("#fcPanelSettings .help-head")].map(h => h.textContent.trim());
     // no title has a Title-Cased second word (acronyms like FSRS are fine)
     return titles.length >= 3 && titles.every(t => !/ [A-Z][a-z]/.test(t));
+  })());
+  check("Settings › App icon has a Badge switch, off by default, counting what Study now and Kana hold", await (async () => {
+    const fcNs = window.RaumeStudy.flashcards, sw = document.getElementById("fcAppBadge");
+    const now = new Date();
+    const counts = fcNs.appBadge.count(now) === fcNs.dashboard.studyNowCount(now) + fcNs.kana.toStudyCount(now);
+    if (!sw || sw.checked || !counts || !/App icon/.test(sw.closest(".set-card").previousElementSibling.textContent)) return false;
+    if (!storageUsable) return true; // can't remember the choice here (see storageUsable)
+    window.__badgeCalls.length = 0;
+    const on = await fcNs.appBadge.setOn(true);
+    const set = window.__badgeCalls.slice(-1)[0] === fcNs.appBadge.count(new Date());
+    await fcNs.appBadge.setOn(false);
+    return on && set && window.__badgeCalls.slice(-1)[0] === 0;
   })());
   check("Help and Settings hold a readable measure, not the full sheet", (() => {
     const rule = allCssRules.find(r => r.selectorText

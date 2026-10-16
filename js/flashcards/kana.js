@@ -517,7 +517,8 @@ window.RaumeStudy.flashcards.kana = (function () {
     return { started: started, total: items.length };
   }
   return {
-    renderKana: renderKana, clearSession: clearSession, summary: summary, scriptProgress: scriptProgress,
+    renderKana: renderKana, clearSession: clearSession, summary: summary,
+    toStudyCount: function (now) { return buildQueue(now || new Date()).length; }, scriptProgress: scriptProgress,
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       checkKana: checkKana, buildQueue: buildQueue, selectedItems: selectedItems,

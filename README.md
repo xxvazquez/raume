@@ -318,7 +318,7 @@ sit at the top right, beside the title, and open as their own screen with a
 | **Awards** | Every award, grouped Streaks / Reviews / Words / Kana / Kanji / Puzzles / Games — opened from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — opened from the setup screen's *Stats*, ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
-| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
+| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. **App icon › Badge** (where the browser can show one — an installed app on iPhone, Mac or Windows) puts the cards Study now and Kana hold on the app's icon, like Mail's unread count; it's off until you turn it on, per device, and an iPhone asks to allow notifications first. It recounts while raume is open, so a closed app's badge can read low, never high. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
 | **Help** | Adding & pausing, Library icons, reviewing, each tab, syncing, backup |
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused

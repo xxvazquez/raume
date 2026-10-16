@@ -107,6 +107,8 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Kanji cards</span><span class="help-desc">A kanji asks only its meaning and one reading — yama or san both count.</span></li>' +
       '<li><span class="help-term">New words</span><span class="help-desc">Each starts Japanese → English; its other directions follow once you’ve seen it.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns each direction on or off — progress is kept.</span></li>' +
+      (window.RaumeStudy.flashcards.appBadge && window.RaumeStudy.flashcards.appBadge.supported
+        ? '<li><span class="help-term">Badge</span><span class="help-desc">Settings › App icon puts the number of cards to study on raume’s icon.</span></li>' : '') +
       '<li><span class="help-term">Writing</span><span class="help-desc">English → Japanese, off until you turn it on: write the word on the pad stroke by stroke — in kana (みず), or with its kanji (水). Show answer if you’re stuck.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
@@ -534,6 +536,7 @@ window.RaumeStudy.flashcards.views = (function () {
     retention: ["indigo", '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.2"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'],
     interval: ["blue", '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>'],
     perDay: ["green", '<path d="M9 4.5v9M4.5 9h9"/>'],
+    badge: ["clay", '<rect x="2.5" y="4.5" width="11" height="11" rx="3"/><circle cx="13.5" cy="4.5" r="2.6" fill="currentColor" stroke="none"/>'],
     fuzz: ["slate", '<path d="M3 5.5h2.5c3.5 0 3.5 7 7 7H15M3 12.5h2.5c1.4 0 2.2-1.1 2.8-2.4M10.2 7.9c.6-1.3 1.4-2.4 2.8-2.4H15M13 3.5l2 2-2 2M13 10.5l2 2-2 2"/>']
   };
   function setTile(key) {
@@ -560,6 +563,14 @@ window.RaumeStudy.flashcards.views = (function () {
       '</h3><div class="help-card set-card">' + rowsHtml + "</div>" +
       (foot ? '<p class="set-foot" id="' + id + '" hidden>' + foot + "</p>" : "");
   }
+  // The app-icon badge (bootstrap.js S.appBadge): only where the browser can
+  // show one. A per-device choice, so it isn't one of the synced settings.
+  function appBadgeGroupHtml() {
+    var badge = window.RaumeStudy.flashcards.appBadge;
+    if (!badge || !badge.supported) return "";
+    return setGroup("App icon", setSwitch("fcAppBadge", "Badge", badge.isOn(), "badge"),
+      "The number on raume’s icon: the cards Study now and Kana hold. It recounts whenever raume is open. On iPhone it needs notifications allowed — you’re asked when you turn it on.");
+  }
   function renderSettings(panel) {
     var s = getCache().settings;
     var k = getKanaFsrs();
@@ -580,6 +591,7 @@ window.RaumeStudy.flashcards.views = (function () {
         setNum("fcKanaNewPerDay", "New kana per day", k.new_per_day, 0, 200, "", "perDay") +
         setSwitch("fcKanaFuzz", "Fuzz intervals", k.fsrs_enable_fuzz, "fuzz"),
         "Its own schedule, separate from word cards.") +
+      appBadgeGroupHtml() +
       '<p class="set-status" id="fcSettingsSaved" role="status" aria-live="polite"></p>' +
       backupSectionHtml();
     wireBackup();
@@ -650,6 +662,16 @@ window.RaumeStudy.flashcards.views = (function () {
     panel.addEventListener("change", function (e) {
       if (!e.target.closest(".set-card")) return;
       var target = e.target;
+      if (target.id === "fcAppBadge") {
+        var wanted = target.checked;
+        window.RaumeStudy.flashcards.appBadge.setOn(wanted).then(function (on) {
+          target.checked = on;
+          var note = document.getElementById("fcSettingsSaved");
+          // Refused: the iPhone only shows it once notifications are allowed.
+          if (note) note.textContent = wanted && !on ? "Allow notifications for raume in iPhone Settings to show the badge." : "Saved";
+        });
+        return;
+      }
       saving = saving.then(function () { return saveAll(target); });
     });
     panel.addEventListener("keydown", function (e) {

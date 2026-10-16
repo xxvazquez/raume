@@ -67,6 +67,16 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     }, 60000);
   }
 
+  // New cards a session can introduce now: a new word's later directions
+  // wait until it's been seen, so this is fewer than stats.newCount.
+  function newInSessionCount(now) {
+    var perDay = getCache().settings.queue_new_cards_per_day;
+    return Math.min(sched.introducibleCount(), Math.max(0, perDay - todayNewCount(now)));
+  }
+  // What Study now holds: cards ready to review plus the day's new ones --
+  // the number beside the button, and the app-icon badge's word share.
+  function studyNowCount(now) { return readyToStudy(now).length + newInSessionCount(now); }
+
   // Nothing added yet -- a dashboard of zeroes and empty charts tells a new
   // user nothing. Show only what to do next: add some vocabulary.
   function renderEmptyDashboard(panel) {
@@ -119,9 +129,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       reviewInsightsLoading = true;
       loadReviewInsights().catch(function () { reviewInsights = emptyInsights(); }).then(function () { reviewInsightsLoading = false; rerender(); });
     }
-    // New cards a session can introduce now: a new word's later directions
-    // wait until it's been seen, so this is fewer than stats.newCount.
-    var newInSession = Math.min(sched.introducibleCount(), Math.max(0, settings.queue_new_cards_per_day - todayNewCount(now)));
+    var newInSession = newInSessionCount(now);
     // On a quiet account "Missed today" and "Words to Review" are two full-width
     // cards each holding one sentence -- fold them into a single line until
     // there's review history to show. (Still null while insights load: keep
@@ -1686,7 +1694,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
   return {
     renderDashboard: renderDashboard, renderAwards: renderAwards,
-    invalidateInsights: invalidateInsights, dueForecast: dueForecast,
+    invalidateInsights: invalidateInsights, dueForecast: dueForecast, studyNowCount: studyNowCount,
     getSession: getSession, setSession: setSession
   };
 })();

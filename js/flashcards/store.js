@@ -289,11 +289,17 @@ window.RaumeStudy.flashcards.store = (function () {
     cacheLoadedKey = key;
     return cache;
   }
+  // Told after every save of either deck (a rating, a sync, an add or
+  // pause) -- the app-icon badge (bootstrap.js) recounts off it.
+  var saveListeners = [];
+  function onSave(fn) { saveListeners.push(fn); }
+  function announceSave() { saveListeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
   function saveCache() {
     if (!cache) return; // just reset for a new account -- nothing loaded to save
     var key = cacheKey();
     inMemoryCaches[key] = cache;
     try { localStorage.setItem(key, JSON.stringify(cache)); } catch (e) {}
+    announceSave();
   }
   function getCache() {
     // Re-load if the active mode changed which key we should be reading
@@ -446,6 +452,7 @@ window.RaumeStudy.flashcards.store = (function () {
     var key = kanaCacheKey();
     inMemoryKanaCaches[key] = kanaCache;
     try { localStorage.setItem(key, JSON.stringify(kanaCache)); } catch (e) {}
+    announceSave();
   }
   function getKanaCache() {
     if (!kanaCache || kanaCacheLoadedKey !== kanaCacheKey()) return loadKanaCache();
@@ -472,7 +479,7 @@ window.RaumeStudy.flashcards.store = (function () {
     getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
     mergeLeechKept: mergeLeechKept, cleanLeechKept: cleanLeechKept,
     cleanJourney: cleanJourney, mergeJourney: mergeJourney,
-    loadCache: loadCache, saveCache: saveCache, getCache: getCache, resetCacheForUser: resetCacheForUser,
+    loadCache: loadCache, saveCache: saveCache, onSave: onSave, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,
     resetKanaCacheForUser: resetKanaCacheForUser,

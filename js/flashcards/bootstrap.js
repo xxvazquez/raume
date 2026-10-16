@@ -583,12 +583,64 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     });
   }
 
+  // -----------------------------------------------------------------------
+  // App-icon badge, as Mail counts unread: what Study now and the Kana
+  // drill hold right now, on the home-screen / dock icon. Off until turned
+  // on in Settings (per device -- an iPhone needs notification permission
+  // for it, asked when you turn it on). Recounted after every save, when
+  // the app is left or reopened, and every few minutes while it's open;
+  // a closed app can't recount, so overnight it can only read low, never
+  // high. Nothing shows where the browser has no badge (the row hides).
+  // -----------------------------------------------------------------------
+  var BADGE_KEY = "raume-app-badge";
+  var badgeSupported = typeof navigator.setAppBadge === "function";
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  function badgeOn() {
+    try { return localStorage.getItem(BADGE_KEY) === "1"; } catch (e) { return false; }
+  }
+  function badgeCount(now) {
+    if (!store.hasActiveSession()) return 0;
+    var n = dashboard.studyNowCount(now);
+    if (kana && kana.toStudyCount) n += kana.toStudyCount(now);
+    return n;
+  }
+  function updateAppBadge() {
+    if (!badgeSupported) return;
+    var n = badgeOn() ? badgeCount(new Date()) : 0;
+    (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(function () {});
+  }
+  var badgeQueued = null;
+  function queueAppBadge() {
+    if (!badgeSupported || badgeQueued) return;
+    badgeQueued = setTimeout(function () { badgeQueued = null; updateAppBadge(); }, 300);
+  }
+  // Resolves to whether the badge is on afterwards: turning it on can be
+  // refused (iPhone notification permission), and then it stays off.
+  async function setBadgeOn(on) {
+    if (on && isIOS && window.Notification && Notification.permission !== "granted") {
+      var answer = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+      if (answer !== "granted") on = false;
+    }
+    try { if (on) localStorage.setItem(BADGE_KEY, "1"); else localStorage.removeItem(BADGE_KEY); } catch (e) {}
+    updateAppBadge();
+    return badgeOn();
+  }
+  S.appBadge = { supported: badgeSupported, isOn: badgeOn, setOn: setBadgeOn, count: badgeCount };
+  if (badgeSupported) {
+    store.onSave(queueAppBadge);
+    onAuthChange(queueAppBadge);
+    document.addEventListener("visibilitychange", updateAppBadge);
+    setInterval(function () { if (!document.hidden) updateAppBadge(); }, 5 * 60 * 1000);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     loadCache();
     loadKanaCache();
     initAuth();
     render();
     refreshRowToggleButtons();
+    updateAppBadge();
   });
 
   // Pure-logic hooks for scripts/smoke-test.js -- exposes nothing sensitive
