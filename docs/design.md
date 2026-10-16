@@ -538,8 +538,17 @@ and Help.
   would drop it from the accessibility tree too, leaving desktop with no
   heading at all for the active section. Hidden outright (the `display: none`
   case) while a search is running, since results span every section. It
-  scrolls away with the page (the masthead isn't sticky), leaving the sticky
-  toolbar at the top.
+  scrolls away with the page (the masthead isn't sticky); once it has gone
+  under the top edge, its small copy shows centred in a 44px glass bar there
+  (`.compact-title`, 15px semibold, the search band's own glass so the two
+  read as one header) — iOS navigation's collapsing title, on every screen
+  with a large title (reference sections, Practice and its pushed screens,
+  Customize, Help). The bar's height is reserved for good on a phone
+  (`--compact-h`, which `--nav-h` follows), so the sticky search bar and a
+  pinned table title stop under it and nothing moves when it appears; at
+  the top it is clear and empty. It takes no taps, is `aria-hidden` (the
+  `<h1>` stays the heading), fades in (just appears with reduced motion),
+  and steps aside while searching, when the search bar has the top.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — never a tracked ALL-CAPS micro-label) in a ~44px-tall row, closed by

@@ -534,6 +534,46 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.routeFromHash = routeFromHash;
   window.addEventListener('popstate', routeFromHash);
 
+  /* iOS navigation on a phone: once the screen's large title has scrolled
+     up under the top edge, a small centred copy of it shows in a glass bar
+     there (css/site.css .compact-title) -- you always know where you are.
+     The bar's height is reserved for good (the sticky search bar stops
+     under it), so nothing moves when it appears. The large title itself
+     stays the screen's real heading; the bar is aria-hidden. Whichever
+     page's h1 is on screen counts, so the reference sections, Practice and
+     its pushed screens, Customize and Help all get it. */
+  document.addEventListener('DOMContentLoaded', function () {
+    const bar = document.getElementById('compactTitle');
+    if (!bar || !window.matchMedia) return;
+    const phone = window.matchMedia('(max-width: 640px)');
+    let queued = false;
+    function sync() {
+      if (!queued) return;
+      queued = false;
+      const h1 = phone.matches ? [...document.querySelectorAll('main .page:not([hidden]) h1')].find(h => h.getClientRects().length) : null;
+      const collapsed = !!h1 && h1.getBoundingClientRect().bottom <= bar.offsetHeight;
+      if (collapsed) {
+        const text = h1.textContent.trim();
+        if (bar.textContent !== text) bar.textContent = text;
+      }
+      document.body.classList.toggle('title-collapsed', collapsed);
+    }
+    function queue() {
+      if (queued) return;
+      queued = true;
+      // A hidden tab pauses animation frames, so a timer backs the frame up.
+      requestAnimationFrame(sync);
+      setTimeout(sync, 100);
+    }
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+    // A tap can swap the screen (a tab, a pushed screen, Back) with the page
+    // already scrolled -- recheck once it has rendered.
+    document.addEventListener('click', function () { setTimeout(queue, 0); });
+    window.addEventListener('hashchange', queue);
+    queue();
+  });
+
   /* Search across whichever of Japanese / furigana / romaji / English is
      still visible (the column-visibility toggles below narrow it). Results
      rank exact > starts-with > ends-with > contains, reorder within their

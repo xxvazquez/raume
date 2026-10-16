@@ -3008,6 +3008,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    visually. Visually-hidden, not display:none, which would drop it from the
    accessibility tree along with the pixels and leave desktop with no heading
    at all for the active section. */
+/* Phone only (the tab-bar block below); a wider window has the top nav. */
+.compact-title { display: none; }
 .screen-title {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
@@ -3027,7 +3029,10 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    the top capsule nav. */
 @media (max-width: 640px) {
   :root {
-    --nav-h: 1px; --tabbar-h: 58px; --fs-large-title: 28px;
+    /* The sticky search bar stops under the compact-title bar's height
+       (reserved for good, so nothing moves when the small title appears). */
+    --compact-h: calc(44px + env(safe-area-inset-top, 0px));
+    --nav-h: calc(var(--compact-h) + 1px); --tabbar-h: 58px; --fs-large-title: 28px;
     /* Above the home indicator where there is one, 12px off the edge where not. */
     --tabbar-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 12px));
   }
@@ -3064,7 +3069,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link[data-section="travel"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { font-weight: 400; }
-  .table-section { scroll-margin-top: 92px; }
+  .table-section { scroll-margin-top: calc(var(--compact-h) + 92px); }
   /* The grey ground runs to the bottom edge, as on iOS: no lighter band and
      rounded corner under a short list. */
   html, body { background: var(--group-ground); }
@@ -3079,6 +3084,33 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     overflow: visible; clip: auto; white-space: normal; border: 0;
   }
   body.is-searching .screen-title { display: none; }
+  /* iOS navigation: the large title's small copy, centred in a glass bar at
+     the top once the large one has scrolled under it (interactions.js sets
+     title-collapsed). Clear and empty until then -- at the top of a screen
+     the large title is the title. It holds no controls, so taps go through.
+     While searching it steps aside like the account button: the search bar
+     has the top to itself. */
+  .compact-title {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 46;
+    height: var(--compact-h); padding: env(safe-area-inset-top, 0px) 64px 0;
+    display: flex; align-items: center; justify-content: center;
+    font: 600 var(--fs-subhead)/1.2 var(--font-ui);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    pointer-events: none;
+    background: transparent; color: transparent;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  body.title-collapsed .compact-title {
+    background: color-mix(in srgb, var(--group-ground) 72%, transparent);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    color: var(--ink);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    body.title-collapsed .compact-title { background: var(--group-ground); }
+  }
+  @media (prefers-reduced-motion: reduce) { .compact-title { transition: none; } }
+  body.is-searching { --nav-h: 1px; }
+  body.is-searching .compact-title { display: none; }
   body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
@@ -3105,7 +3137,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     --section: #555; --section-strong: #444;
     --particle: #1b1b1b; /* on paper a particle reads by its bold weight alone */
   }
-  .masthead, .site-nav, .screen-title, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
+  .masthead, .site-nav, .compact-title, .screen-title, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
   .page-title { display: none; }

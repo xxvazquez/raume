@@ -1183,6 +1183,18 @@ async function main() {
     count("");
     return straight > 0 && curly === straight;
   })());
+  check("a phone's small title bar: aria-hidden, fixed, never takes a tap, and its height reserved under the sticky search bar (stepping aside while searching)", (() => {
+    const bar = document.getElementById("compactTitle");
+    const phone = allCssRules.filter(r => r.media && /max-width: 640px/.test(r.media.mediaText)).flatMap(r => [...r.cssRules]);
+    const rule = sel => phone.find(r => r.selectorText === sel);
+    const base = rule(".compact-title"), root = rule(":root"), search = rule("body.is-searching");
+    return !!bar && bar.getAttribute("aria-hidden") === "true"
+      && !!base && base.style.position === "fixed" && base.style.pointerEvents === "none"
+      && !!rule("body.title-collapsed .compact-title")
+      && !!root && /--compact-h/.test(root.style.getPropertyValue("--nav-h"))
+      && !!search && search.style.getPropertyValue("--nav-h").trim() === "1px"
+      && allCssRules.some(r => r.selectorText === ".compact-title" && !r.media && r.style.display === "none");
+  })());
   // Recents live in localStorage, which this harness can't always reach
   // (see storageUsable); without it the list just never opens.
   if (!storageUsable) check("recent searches stay closed (and nothing throws) without localStorage", (() => {
