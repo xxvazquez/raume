@@ -459,6 +459,19 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
+- **Accessibility display settings** (the block at the very end of
+  `css/site.css`): **Reduce Transparency**
+  (`prefers-reduced-transparency: reduce`) turns every glass surface solid —
+  `--glass-bg` becomes `--paper`, `--glass-blur` `none`, and the surfaces that
+  mix their own translucent ground (search band, Options and puzzle sheets,
+  account menu, desktop/tablet bars, the phone's small title, the
+  confirmation group) take their solid ground. **Increase Contrast**
+  (`prefers-contrast: more`) keeps the palette but steps it up once:
+  darker hairlines and row rules, secondary / tertiary text, romaji and
+  furigana nearer the ink, and a real 1px edge on white controls and glass
+  (`--control-lift`, `--glass-edge`), in light and dark. iPhone WebKit
+  reports Increase Contrast; it doesn't report Reduce Transparency yet, so
+  that one reaches Chrome and Android only.
 - **No sheet.** Past phone width there is no bordered white page any more:
   the `--group-ground` runs edge to edge like the phone, and the content keeps
   a centred 1180px column (`.app-frame > .app`). **≥900px the masthead is one

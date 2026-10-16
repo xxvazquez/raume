@@ -5758,3 +5758,37 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .undo-toast { bottom: calc(var(--tabbar-h) + var(--tabbar-gap) + 10px); }
 }
 @media print { .undo-toast { display: none; } }
+
+/* ==========================================================================
+   Accessibility display settings, as iOS honours them
+   ========================================================================== */
+/* Reduce Transparency: every glass surface turns solid -- the same fills
+   the @supports fallback uses, no blur -- so nothing shows through. The
+   tokens cover menus, popovers, the phone tab bar and Undo; the surfaces
+   that mix their own translucent ground are listed after. */
+@media (prefers-reduced-transparency: reduce) {
+  :root, :root[data-theme="dark"] { --glass-bg: var(--paper); --glass-blur: none; }
+  .options-sheet, .fc-xw-sheet, .account-menu,
+  .page-vocab .vocab-toolbar::before, .masthead::before,
+  body.title-collapsed .compact-title { background: var(--group-ground); }
+  .ios-confirm-group { background: var(--paper); }
+  @media (min-width: 641px) and (max-width: 899px) { .site-nav { background: var(--group-ground); } }
+}
+/* Increase Contrast: the same quiet palette, one firm step stronger --
+   hairlines and row rules darker, secondary and tertiary text (labels,
+   romaji, furigana, counts) closer to the ink, and the edges of white
+   controls and glass a real line instead of a whisper. */
+@media (prefers-contrast: more) {
+  :root {
+    --line: #b4bcc7; --line-strong: #8a95a3;
+    --muted: #3d4652; --faint: #4a5361; --romaji: #444f5c; --furigana: #47525f;
+    --glass-edge: rgba(24, 24, 40, .24);
+    --control-lift: 0 0 0 1px rgba(24, 24, 40, .38), 0 1px 3px rgba(24, 24, 40, .07);
+  }
+  :root[data-theme="dark"] {
+    --line: #5b606a; --line-strong: #7a808b; --row-line: #5b636f; --field-line: #808a98;
+    --muted: #c3ccd6; --faint: #b0bac6; --romaji: #bec8d4; --furigana: #b6c1cd;
+    --glass-edge: rgba(255, 255, 255, .24);
+    --control-lift: 0 0 0 1px rgba(255, 255, 255, .32), 0 1px 3px rgba(0, 0, 0, .4);
+  }
+}
