@@ -4569,6 +4569,21 @@ async function main() {
   })();
 
   console.log("Flashcards: Settings tab");
+  check("opening a pushed screen is a push transition and Back a pop (where the browser has View Transitions)", (() => {
+    const kinds = [];
+    if (document.getElementById("fcBack")) document.getElementById("fcBack").click();
+    document.startViewTransition = update => {
+      kinds.push(document.documentElement.dataset.vt);
+      update();
+      return { finished: Promise.resolve() };
+    };
+    try {
+      fcOpenPushed("help");
+      const pushed = !document.getElementById("fcPanelHelp").hidden;
+      document.getElementById("fcBack").click();
+      return pushed && kinds.join(",") === "push,pop" && document.getElementById("fcPanelHelp").hidden;
+    } finally { delete document.startViewTransition; }
+  })());
   fcOpenPushed("settings");
   check("Settings card titles are sentence case, like the Help tab's", (() => {
     const titles = [...document.querySelectorAll("#fcPanelSettings .help-head")].map(h => h.textContent.trim());

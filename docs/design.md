@@ -1163,7 +1163,16 @@ the most an iOS segmented control holds and still reads at a glance, so
 nothing more joins without restructuring. Settings and Help
 are plain tint-text buttons at the title's trailing edge (an iOS navigation
 bar's right-hand items) and open as pushed screens: a "‹ Practice" back
-button above their own large title, no segmented control. The active sub-tab
+button above their own large title, no segmented control. A pushed screen
+(Settings, Help, Stats, Awards) slides in from the right over the screen it
+came from, which eases a third left and dims; Back runs it in reverse and
+puts you back where you were scrolled; as a session ends the review card
+turns into the wrap-up. A View Transition (`bootstrap.js` `render`,
+`html[data-vt]`), the tab bar and top bar held still as their own layers
+(named only while it runs — a named element is a backdrop root and would
+stop the top bar's glass blurring). No View Transitions or Reduce Motion:
+the screen just changes; a transition that hasn't started within 300ms is
+skipped, so the change never waits on it. The active sub-tab
 (`.fc-tab.active`) is the raised segment of a segmented control; the active nav link (`.site-nav-link.active`) is a soft capsule in the
 section tone — clearly the live one against the muted rest.
 

@@ -678,8 +678,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (medal) { openMedalSheet(medal.dataset.award); return; }
     if (event.target.closest && event.target.closest("#fcAwardsAll")) {
       window.RaumeStudy.flashcards.setActiveTab("awards");
-      rerender();
-      window.scrollTo(0, 0);
+      rerender(); // a push: lands at the top (bootstrap.js render)
     }
   });
 

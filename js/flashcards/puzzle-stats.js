@@ -47,8 +47,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     view.mode = mode;
     view.open = null;
     S.setActiveTab("stats");
-    S.render();
-    window.scrollTo(0, 0);
+    S.render(); // a push: lands at the top (bootstrap.js render)
   }
 
   // --- formatting ---
@@ -230,8 +229,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
       var ids = runs().trickyWords(PRACTISE_WORDS, 1).map(function (t) { return t.id; });
       S.crosswords.playWords(view.kind, view.mode, ids);
       S.setActiveTab(view.kind === "games" ? "games" : "crosswords");
-      S.render();
-      window.scrollTo(0, 0);
+      S.render({ top: true });
     });
     document.getElementById("fcStReset").addEventListener("click", function () {
       var name = modeName(view.mode), mode = view.mode;

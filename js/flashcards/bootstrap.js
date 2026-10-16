@@ -61,7 +61,39 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   function root() { return document.getElementById("flashcardsPage"); }
 
-  function render() {
+  // Screen changes move the way iOS moves them: a pushed screen (Settings,
+  // Help, Stats, Awards) slides in from the right over the screen it came
+  // from, Back slides it away and returns you to where you were scrolled,
+  // and a review card turns into the wrap-up as a session ends. A View
+  // Transition: the tab bar and top bar hold still while the page moves.
+  // Where the browser has none, or Reduce Motion is on, the screen just
+  // changes. Callers never scroll after render() -- a push lands at the top
+  // and Back restores your place as part of the change itself; a caller
+  // starting something new from a pushed screen passes { top: true }.
+  var shownPushed = false, shownDone = false, pushedFromY = 0;
+  function isPushedTab(t) { return t === "stats" || !!PUSHED_TABS[t]; }
+  function render(opts) {
+    var pushedNow = isPushedTab(activeTab) && (isGuestMode() || !!authState.session);
+    var s = dashboard.getSession(), doneNow = !!(s && s.done);
+    var kind = pushedNow !== shownPushed ? (pushedNow ? "push" : "pop") : doneNow && !shownDone ? "done" : null;
+    if (kind === "push") pushedFromY = window.scrollY || 0;
+    var y = kind === "push" || (opts && opts.top) ? 0 : kind === "pop" ? pushedFromY : null;
+    shownPushed = pushedNow; shownDone = doneNow;
+    function update() { renderNow(); if (y !== null) window.scrollTo(0, y); }
+    var page = root(), html = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!kind || !document.startViewTransition || !page || page.hidden || document.hidden || reduce) { update(); return; }
+    html.dataset.vt = kind;
+    // The change itself must never wait on the animation: if the browser
+    // hasn't started it within 300ms (paused frames, a stalled tab), skip
+    // it and change the screen anyway -- once.
+    var changed = false;
+    function changeOnce() { if (!changed) { changed = true; update(); } }
+    var vt = document.startViewTransition(changeOnce);
+    setTimeout(function () { if (!changed) { vt.skipTransition(); changeOnce(); } }, 300);
+    vt.finished.finally(function () { delete html.dataset.vt; });
+  }
+  function renderNow() {
     var el = root();
     if (!el) return;
     // A password-reset email link lands here with a recovery session already
@@ -297,7 +329,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       '<div class="fc-tabpanel"' + (activeTab === "awards" ? "" : " hidden") + ' id="fcPanelAwards"></div>';
 
     var back = document.getElementById("fcBack");
-    if (back) back.addEventListener("click", function () { activeTab = lastMainTab; render(); window.scrollTo(0, 0); });
+    if (back) back.addEventListener("click", function () { activeTab = lastMainTab; render(); });
     el.querySelectorAll(".fc-tab, .fc-titlebar-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         if (btn.dataset.tab === activeTab && window.RaumeStudy.shared.scrollToTopFirst()) return;

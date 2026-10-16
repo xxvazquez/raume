@@ -5780,6 +5780,31 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 @media print { .undo-toast { display: none; } }
 
+/* Screen changes (bootstrap.js render): a View Transition. The bars hold
+   still -- each is its own transition layer -- while the page moves: a
+   pushed screen slides in from the right over the one it came from, which
+   eases a third of the way left and dims; Back runs it in reverse. As a
+   session ends, the review card turns into the wrap-up (the two share a
+   name), the rest cross-fading. html[data-vt] says which; Reduce Motion
+   never starts one (and these rules sit behind no-preference too). The
+   names apply only while a change runs: a named element is a backdrop
+   root, which would stop the top bar's glass blurring what's under it. */
+html[data-vt] .site-nav { view-transition-name: tab-bar; }
+html[data-vt] .masthead { view-transition-name: top-bar; }
+html[data-vt] .compact-title { view-transition-name: small-title; }
+html[data-vt="done"] :is(.fc-review-card, .fc-session-done) { view-transition-name: session-card; }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-vt="push"]::view-transition-old(root) { animation: vt-under-left .38s cubic-bezier(.2, .8, .2, 1) both; }
+  html[data-vt="push"]::view-transition-new(root) { animation: vt-in-right .38s cubic-bezier(.2, .8, .2, 1) both; }
+  html[data-vt="pop"]::view-transition-old(root) { animation: vt-out-right .34s cubic-bezier(.2, .8, .2, 1) both; z-index: 1; }
+  html[data-vt="pop"]::view-transition-new(root) { animation: vt-back-from-left .34s cubic-bezier(.2, .8, .2, 1) both; }
+  html[data-vt="done"]::view-transition-group(session-card) { animation-duration: .32s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+}
+@keyframes vt-in-right { from { transform: translateX(100%); } }
+@keyframes vt-out-right { to { transform: translateX(100%); } }
+@keyframes vt-under-left { to { transform: translateX(-30%); opacity: .6; } }
+@keyframes vt-back-from-left { from { transform: translateX(-30%); opacity: .6; } }
+
 /* Scroll edges, as in iOS 26: content sliding under a floating bar
    dissolves into it instead of meeting a hard cut. The top bars' glass
    fades out over its last 10px (a mask on the blur layer itself, so the

@@ -307,7 +307,10 @@ their cards then.
 
 Five segments — Dashboard, Kana, Puzzles, Games, Library. **Settings** and **Help**
 sit at the top right, beside the title, and open as their own screen with a
-**‹ Practice** back button.
+**‹ Practice** back button. As in iOS, a screen like that slides in from the
+right and Back slides it away, returning you to where you were; a finished
+session's last card turns into the wrap-up. (Where the browser can't
+animate it, or Reduce Motion is on, the screen simply changes.)
 
 | Screen | What it does |
 | --- | ------------ |
