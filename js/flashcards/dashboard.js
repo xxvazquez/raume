@@ -178,6 +178,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Card progress") + stateBreakdownChart(stats) + "</div>" +
       '<div class="fc-viz-card">' + vizTitle("Reviews this week") + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
       '<div class="fc-viz-card">' + vizTitle("Due next 7 days") + dueForecastHtml(dueForecast(now)) + "</div>" +
+      trendsHtml(now) +
       kanaCardHtml(now) +
       puzzlesCardHtml(now) +
       gamesCardHtml(now) +
@@ -211,6 +212,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var TITLE_TILES = {
     "Card progress": ["slate", '<rect x="5.5" y="3" width="10" height="12.5" rx="1.8"/><path d="M3 5.5v9.2c0 1 .8 1.8 1.8 1.8h7.7"/>'],
     "Reviews this week": ["blue", '<path d="M4 15V9M9 15V4M14 15v-4"/>'],
+    "Trends": ["green", '<path d="M2.5 13.5 7 9l3 3 5.5-6.5"/><path d="M11.5 5.5h4v4"/>'],
     "Due next 7 days": ["indigo", '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>'],
     "Kana": ["orange", "あ"],
     "Puzzles": ["teal", '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>'],
@@ -938,6 +940,121 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     });
     weeklyActivity = last7DaysFromCounts(counts);
   }
+
+  // -----------------------------------------------------------------------
+  // Trends, as in Fitness: your last 90 days against your year (or all the
+  // time since you started, if that's shorter), one row per measure with an
+  // arrow -- reviews a day, recall (of cards already in review, how many
+  // you remembered), and study days a week. Real counts from the review
+  // history only: nothing appears until there are 120 days of it to
+  // compare, and recall waits for enough reviews to mean something.
+  // Day totals are { date: [reviews, of cards in review, remembered] } --
+  // guest mode keeps them in the cache (store.noteReviewDay); signed in,
+  // they're counted from a year of review_logs, fetched once a day.
+  // -----------------------------------------------------------------------
+  var TREND_RECENT = 90, TREND_LONG = 365, TREND_MIN_DAYS = 120, TREND_MIN_RECALL = 30;
+  var trendDays = null, trendDaysKey = null, trendLoading = false; // trendDays false = couldn't load
+  function trendKey() {
+    var user = currentUser();
+    return (user ? user.id : "") + "|" + localDateStr(new Date());
+  }
+  async function loadTrendDays() {
+    var days = {};
+    var add = function (ts, state, rating) {
+      var v = days[localDateStr(new Date(ts))] || (days[localDateStr(new Date(ts))] = [0, 0, 0]);
+      v[0]++;
+      if (state === 2) { v[1]++; if (rating > 1) v[2]++; }
+    };
+    var client = getClient(), user = currentUser();
+    var since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - (TREND_LONG - 1));
+    var res = await dataOps.fetchAllRows(function () { return client.from("review_logs").select("rating, state, reviewed_at, client_review_id").eq("user_id", user.id).gte("reviewed_at", since.toISOString()); });
+    if (res.error) throw res.error;
+    var synced = {};
+    res.data.forEach(function (row) {
+      if (row.client_review_id) synced[row.client_review_id] = true;
+      add(row.reviewed_at, row.state, row.rating);
+    });
+    (getCache().logsOutbox || []).forEach(function (e) {
+      if (!synced[e.clientReviewId]) add(e.logFields.review, e.logFields.state, e.logFields.rating);
+    });
+    return days;
+  }
+  // Guest: straight from the cache. Signed in: the fetched year, or null
+  // while it loads (the card says so, then fills in).
+  function currentTrendDays() {
+    if (isGuestMode()) return getCache().reviewDays || {};
+    var key = trendKey();
+    if (trendDaysKey !== key && !trendLoading) {
+      trendLoading = true;
+      loadTrendDays().then(function (d) { trendDays = d; }, function () { trendDays = false; })
+        .then(function () { trendDaysKey = key; trendLoading = false; rerender(); });
+    }
+    return trendDaysKey === key ? trendDays : null;
+  }
+  function computeTrends(days, now) {
+    var dates = Object.keys(days).filter(function (d) { return days[d][0] > 0; }).sort();
+    var today = localDateStr(now);
+    var dayMs = 86400000;
+    var span = dates.length ? Math.round((Date.parse(today + "T12:00:00") - Date.parse(dates[0] + "T12:00:00")) / dayMs) + 1 : 0;
+    if (span < TREND_MIN_DAYS) return { span: span };
+    function tally(len) {
+      var t = { len: len, n: 0, rv: 0, ok: 0, studied: 0 };
+      for (var i = 0; i < len; i++) {
+        var d = new Date(now); d.setDate(d.getDate() - i);
+        var v = days[localDateStr(d)];
+        if (v && v[0]) { t.n += v[0]; t.rv += v[1]; t.ok += v[2]; t.studied++; }
+      }
+      return t;
+    }
+    var r = tally(TREND_RECENT), l = tally(Math.min(TREND_LONG, span));
+    // Within 5% (2 points for recall) reads as steady, not a flicker of an arrow.
+    function dir(a, b, eps) { return Math.abs(a - b) <= eps ? "steady" : a > b ? "up" : "down"; }
+    var perDay = [r.n / r.len, l.n / l.len], week = [r.studied / r.len * 7, l.studied / l.len * 7];
+    var rows = [
+      { key: "reviews", name: "Reviews a day", recent: perDay[0], year: perDay[1], dir: dir(perDay[0], perDay[1], perDay[1] * 0.05), fmt: fmtRate },
+      r.rv >= TREND_MIN_RECALL && l.rv >= TREND_MIN_RECALL
+        ? { key: "recall", name: "Recall", recent: r.ok / r.rv * 100, year: l.ok / l.rv * 100, dir: dir(r.ok / r.rv * 100, l.ok / l.rv * 100, 2), fmt: function (x) { return Math.round(x) + "%"; } }
+        : { key: "recall", name: "Recall", none: true },
+      { key: "days", name: "Study days a week", recent: week[0], year: week[1], dir: dir(week[0], week[1], week[1] * 0.05), fmt: function (x) { return (Math.round(x * 10) / 10).toLocaleString(); } }
+    ];
+    return { span: span, rows: rows };
+  }
+  function fmtRate(x) { return x < 10 ? (Math.round(x * 10) / 10).toLocaleString() : Math.round(x).toLocaleString(); }
+  var TREND_TILES = { reviews: "blue", recall: "indigo", days: "green" };
+  var TREND_ARROWS = {
+    up: '<path d="M9 14.5v-11M4.5 8 9 3.5 13.5 8"/>',
+    down: '<path d="M9 3.5v11M4.5 10 9 14.5 13.5 10"/>',
+    steady: '<path d="M3.5 9h11M10 4.5 14.5 9 10 13.5"/>'
+  };
+  var TREND_WORDS = { up: "Up from", down: "Down from", steady: "Steady at" };
+  function trendsHtml(now) {
+    var days = currentTrendDays();
+    var body, shown = false;
+    if (days === false) body = '<p class="fc-note">Trends read your review history from your account — they’ll show once raume can reach it.</p>';
+    else if (!days) body = '<p class="fc-note">Loading…</p>';
+    else {
+      var t = computeTrends(days, now);
+      if (!t.rows) {
+        body = '<p class="fc-note">Trends compare your last 90 days with your year, once there are ' + TREND_MIN_DAYS +
+          " days to compare" + (t.span ? " — " + t.span + (t.span === 1 ? " day" : " days") + " so far." : ".") + "</p>";
+      } else {
+        shown = true;
+        body = '<ul class="fc-trends">' + t.rows.map(function (row) {
+          // Down is grey, as in Fitness -- and the arrow and words say it too.
+          var tile = row.none ? "slate" : row.dir === "down" ? "slate" : TREND_TILES[row.key];
+          var arrow = row.none ? '<path d="M5 9h8"/>' : TREND_ARROWS[row.dir];
+          var sub = row.none ? "Not enough reviews yet"
+            : TREND_WORDS[row.dir] + " " + row.fmt(row.year) + " over the year";
+          return '<li class="fc-trend" data-trend="' + row.key + '" data-dir="' + (row.none ? "none" : row.dir) + '">' +
+            '<span class="fc-trend-tile" data-tile="' + tile + '"><svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + arrow + "</svg></span>" +
+            '<span class="fc-trend-tx"><span class="fc-trend-name">' + esc(row.name) + '</span><span class="fc-trend-sub">' + esc(sub) + "</span></span>" +
+            '<span class="fc-trend-val">' + (row.none ? "—" : esc(row.fmt(row.recent))) + "</span></li>";
+        }).join("") + "</ul>";
+      }
+    }
+    return '<div class="fc-viz-card fc-viz-wide fc-trends-card">' +
+      '<div class="fc-trends-head">' + vizTitle("Trends") + (shown ? '<span class="fc-trends-span">Last 90 days</span>' : "") + "</div>" + body + "</div>";
+  }
   // Labels are plain HTML, not SVG <text> -- an SVG scales *everything*
   // inside it, text included, to fill its container (that's what stretched
   // a 9px label into something enormous on a narrow phone screen where the
@@ -1571,6 +1688,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var base = fsrsRowFields(card);
     var baseReps = card.reps; // captured before mutation -- the sync guard's version number
     var wasNew = card.state === 0; // captured before mutation -- see bumpNewToday below
+    var wasReview = card.state === 2; // likewise -- Trends' recall counts only cards already in review
     var result = applyRating(scheduler, base, now, ratingName);
     Object.assign(card, result.card);
     // Counts against today's new-card allowance the moment a new card is
@@ -1587,6 +1705,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
         rating: ratingNum, wrong: ratingNum === 1 || session.correct === false
       });
       if (c.reviewLogs.length > 1000) c.reviewLogs = c.reviewLogs.slice(-1000);
+      store.noteReviewDay(c, localDateStr(now), wasReview, ratingNum > 1);
     } else {
       c.logsOutbox.push({
         clientReviewId: uuid(), cardId: cardId, baseCard: { reps: baseReps },

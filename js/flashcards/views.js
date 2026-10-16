@@ -120,6 +120,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Awards</span><span class="help-desc">Medals for streaks, reviews, words, kana, kanji, puzzles and games. Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
       '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news: more reviews than last week, or a new best Match pace.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
+      '<li><span class="help-term">Trends</span><span class="help-desc">Your last 90 days against your year: reviews, recall, study days. After 120 days of study.</span></li>' +
       '<li><span class="help-term">Kana</span><span class="help-desc">Kana cards started, and how many to study now.</span></li>' +
       '<li><span class="help-term">Puzzles</span><span class="help-desc">Every game you finish or puzzle you solve: accuracy, best pace, games this week and the latest few.</span></li>' +
       '<li><span class="help-term">Kanji</span><span class="help-desc">How many kanji you’ve marked as known.</span></li>' +

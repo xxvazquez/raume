@@ -341,6 +341,7 @@ From the top:
 Then, under **Details**:
 
 - **Card progress**, **Reviews this week** and **Due next 7 days**
+- **Trends** — as in Fitness: your last 90 days against your year (or the time since you started), each with an arrow and its year figure in words — **reviews a day**, **recall** (of cards already in review, the share you remembered) and **study days a week**. Word cards only, and only real counts: nothing shows until there are 120 days of history, and recall waits for 30 reviews in each stretch. Down is grey, as in Fitness
 - **Kana** — how many of your chosen kana you've started, how many are ready, and a button straight to it
 - **Puzzles** and **Games** — solved / played, your day streak, the last three (each with its result), and **See stats**. A puzzle revealed in full doesn't count
 - **Kanji** — how many of the N5 kanji you've marked Known

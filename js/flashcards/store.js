@@ -190,7 +190,7 @@ window.RaumeStudy.flashcards.store = (function () {
     };
   }
   function emptyCache(userId) {
-    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, journey: cleanJourney(null), pendingSettings: {}, lastSyncedAt: null };
+    return { schemaVersion: CACHE_SCHEMA_VERSION, userId: userId || null, cards: {}, logsOutbox: [], reviewLogs: [], reviewDays: {}, settings: defaultSettings(), day: null, pausedTables: [], leechKept: {}, journey: cleanJourney(null), pendingSettings: {}, lastSyncedAt: null };
   }
   function isValidCardRecord(c) {
     return c && typeof c.id === "string" && typeof c.vocabId === "string" && DIRECTIONS.indexOf(c.direction) !== -1 &&
@@ -217,6 +217,12 @@ window.RaumeStudy.flashcards.store = (function () {
       // vocab id, the rating and whether the typed answer was wrong. Capped so
       // it can't grow forever; older {date}-only entries are still valid.
       reviewLogs: Array.isArray(raw.reviewLogs) ? raw.reviewLogs.filter(function (e) { return e && typeof e.date === "string"; }).slice(-1000) : [],
+      // Guest mode's day-by-day totals for the Dashboard's Trends, kept for a
+      // year and a bit (reviewLogs above is capped by count, which a busy
+      // learner fills in weeks): { "2026-10-16": [reviews, of cards already
+      // in review, of those remembered] }. An older cache starts from its
+      // reviewLogs -- the day's count only, nothing invented for the rest.
+      reviewDays: cleanReviewDays(raw.reviewDays, raw.reviewLogs),
       settings: mergeSettings(raw.settings),
       // New cards introduced today, so the daily allowance holds across
       // multiple sessions in one day, not just within a single queue build --
@@ -294,6 +300,33 @@ window.RaumeStudy.flashcards.store = (function () {
   var saveListeners = [];
   function onSave(fn) { saveListeners.push(fn); }
   function announceSave() { saveListeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
+  var REVIEW_DAYS_KEPT = 400;
+  function cleanReviewDays(raw, logs) {
+    var out = {};
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+      Object.keys(raw).forEach(function (d) {
+        var v = raw[d];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d) && Array.isArray(v) && v.length === 3 && v.every(function (n) { return typeof n === "number" && n >= 0; })) out[d] = v.slice();
+      });
+    } else if (Array.isArray(logs)) {
+      logs.forEach(function (e) {
+        if (!e || typeof e.date !== "string") return;
+        (out[e.date] || (out[e.date] = [0, 0, 0]))[0]++;
+      });
+    }
+    var keys = Object.keys(out).sort();
+    keys.slice(0, Math.max(0, keys.length - REVIEW_DAYS_KEPT)).forEach(function (d) { delete out[d]; });
+    return out;
+  }
+  // One review into guest mode's day totals (see validateCache).
+  function noteReviewDay(c, dateStr, wasReview, remembered) {
+    if (!c.reviewDays) c.reviewDays = {};
+    var v = c.reviewDays[dateStr] || (c.reviewDays[dateStr] = [0, 0, 0]);
+    v[0]++;
+    if (wasReview) { v[1]++; if (remembered) v[2]++; }
+    var keys = Object.keys(c.reviewDays);
+    if (keys.length > REVIEW_DAYS_KEPT) delete c.reviewDays[keys.sort()[0]];
+  }
   function saveCache() {
     if (!cache) return; // just reset for a new account -- nothing loaded to save
     var key = cacheKey();
@@ -479,7 +512,7 @@ window.RaumeStudy.flashcards.store = (function () {
     getLeechKept: getLeechKept, keepLeech: keepLeech, unkeepLeech: unkeepLeech,
     mergeLeechKept: mergeLeechKept, cleanLeechKept: cleanLeechKept,
     cleanJourney: cleanJourney, mergeJourney: mergeJourney,
-    loadCache: loadCache, saveCache: saveCache, onSave: onSave, getCache: getCache, resetCacheForUser: resetCacheForUser,
+    loadCache: loadCache, saveCache: saveCache, onSave: onSave, noteReviewDay: noteReviewDay, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,
     resetKanaCacheForUser: resetKanaCacheForUser,

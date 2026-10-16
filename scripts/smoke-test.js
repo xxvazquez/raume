@@ -4536,6 +4536,38 @@ async function main() {
 
   }
   if (want("flashcards")) {
+  console.log("Flashcards: Trends");
+  await (async () => {
+    const fcNs = window.RaumeStudy.flashcards, c = fcNs.store.getCache();
+    const saved = JSON.stringify(c.reviewDays || {});
+    const today = fcNs.store.localDateStr(new Date());
+    check("each guest review adds to today's Trends totals", (c.reviewDays[today] || [0])[0] > 0);
+    const dash = () => { document.querySelector('.fc-tab[data-tab="dashboard"]').click(); return document.querySelector("#fcPanelDashboard .fc-trends-card"); };
+    c.reviewDays = { [today]: [5, 0, 0] };
+    fcNs.render(); await flush();
+    check("with under 120 days of history, Trends says how far along it is instead of showing arrows", (() => {
+      const card = dash();
+      return !!card && !card.querySelector(".fc-trend") && /120 days/.test(card.textContent) && /1 day so far/.test(card.textContent);
+    })());
+    // 200 days: the last 90 busier (20 a day, every day) than before (10, every other day).
+    c.reviewDays = {};
+    for (let i = 0; i < 200; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      if (i < 90) c.reviewDays[fcNs.store.localDateStr(d)] = [20, 10, 9];
+      else if (i % 2 === 0) c.reviewDays[fcNs.store.localDateStr(d)] = [10, 10, 6];
+    }
+    fcNs.render(); await flush();
+    check("with enough history: reviews a day, recall and study days a week, each up with its year figure in words", (() => {
+      const rows = [...dash().querySelectorAll(".fc-trend")];
+      const by = k => rows.find(r => r.dataset.trend === k);
+      return rows.length === 3 && ["reviews", "recall", "days"].every(k => by(k) && by(k).dataset.dir === "up")
+        && by("reviews").querySelector(".fc-trend-val").textContent === "20" && /^Up from \d/.test(by("reviews").querySelector(".fc-trend-sub").textContent)
+        && by("recall").querySelector(".fc-trend-val").textContent === "90%";
+    })());
+    c.reviewDays = JSON.parse(saved);
+    fcNs.render(); await flush();
+  })();
+
   console.log("Flashcards: Settings tab");
   fcOpenPushed("settings");
   check("Settings card titles are sentence case, like the Help tab's", (() => {

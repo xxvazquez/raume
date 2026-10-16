@@ -5089,6 +5089,27 @@ mark.fc-diff-co {
 .fc-leech-meta { flex-basis: 100%; color: var(--muted); font-size: var(--fs-micro); }
 .fc-leech-actions { display: flex; gap: 8px; flex: 0 0 auto; }
 
+/* Trends (Fitness): your last 90 days against your year. One 52px row per
+   measure -- a round tile with the arrow (the measure's hue going up or
+   steady, grey going down, as in Fitness; the arrow's direction and the
+   grey line say it in words too), the measure over "Up from 35 over the
+   year", and the 90-day value trailing large. Hairlines inset past the tile. */
+.fc-trends-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.fc-trends-head .fc-viz-title { margin: 0; }
+.fc-trends-span { color: var(--muted); font-size: var(--fs-small); }
+.fc-trends { margin: 0; padding: 0; list-style: none; }
+.fc-trend { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 0; }
+.fc-trend + .fc-trend::before { content: ""; position: absolute; top: 0; left: 42px; right: 0; border-top: 1px solid var(--row-line); }
+.fc-trend-tile {
+  flex: 0 0 auto; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  color: #fff; background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000);
+}
+.fc-trend-tx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.fc-trend-name { color: var(--ink); font-size: var(--fs-body); }
+.fc-trend-sub { color: var(--muted); font-size: var(--fs-small); }
+.fc-trend-val { flex: 0 0 auto; color: var(--ink); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.fc-trend[data-dir="none"] .fc-trend-val { color: var(--faint); }
+
 /* Words to Review -- a real, sortable, printable vocabulary table, but on the
    dashboard it should read as one more quiet card, not a full vocabulary-page
    section. Strip the filled header strip, the category chip and the heavy
