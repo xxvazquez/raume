@@ -210,6 +210,15 @@ window.RaumeStudy.customize = (function () {
       "</li>";
   }
 
+  // Swipe one of your words left to Delete it -- the row's own trash button
+  // (deleted at once, with Undo). See shared.swipeRows.
+  window.RaumeStudy.shared.swipeRows({
+    rows: "#customizePage .cv-owned-row:not(.cv-owned-row-edit):not(.cv-owned-row-empty)",
+    action: function (row) {
+      var btn = row.querySelector(".cv-del-row");
+      return btn ? { label: "Delete", tone: "destructive", button: btn } : null;
+    }
+  });
   function ownedRowsHtml(rows) {
     return rows.length
       ? rows.map(function (r) {

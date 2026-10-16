@@ -282,6 +282,91 @@ window.RaumeStudy.shared = (function () {
     return close;
   }
 
+  // Swipe a list row left for its action, as in Mail: the row slides and the
+  // action shows behind it on the right -- let go past halfway and it stays
+  // open (tap the action, or anywhere else to close); a long swipe runs it
+  // at once. Always the same as a button the row already shows, so the
+  // swipe is only a shortcut. Touch and pen only (a mouse has the button);
+  // a gesture that starts at the screen's left edge is the system's back
+  // swipe, and one that goes more up/down than sideways is a scroll -- both
+  // are left alone (rows are touch-action: pan-y, so scrolling never waits).
+  // The slide is drawn through one constructed sheet, never a style attribute.
+  // o: { rows: selector, action(row) -> { label, tone: "destructive" |
+  //      "pause" | "", button } or null } -- `button` is the row's own control.
+  var swipeSheet = null, swipeOpen = null;
+  function swipeSet(px) {
+    if (!swipeSheet) return;
+    swipeSheet.replaceSync(".swipe-live { transform: translateX(" + Math.round(px) + "px); }");
+  }
+  function swipeClose(instant) {
+    var row = swipeOpen;
+    swipeOpen = null;
+    if (!row) return;
+    row.classList.toggle("swipe-settle", !instant);
+    swipeSet(0);
+    setTimeout(function () {
+      if (swipeOpen === row) return;
+      row.classList.remove("swipe-live", "swipe-settle");
+      var act = row.querySelector(".swipe-action");
+      if (act) act.remove();
+    }, instant ? 0 : 260);
+  }
+  function swipeRows(o) {
+    if (!swipeSheet && "adoptedStyleSheets" in document) {
+      try { swipeSheet = new CSSStyleSheet(); document.adoptedStyleSheets = document.adoptedStyleSheets.concat([swipeSheet]); } catch (e) { swipeSheet = false; }
+    }
+    if (!swipeSheet) return;
+    var ACTION_W = 88, EDGE = 24;
+    var g = null;
+    document.addEventListener("pointerdown", function (e) {
+      if (swipeOpen && !swipeOpen.contains(e.target)) swipeClose();
+      if (e.pointerType === "mouse" || e.clientX < EDGE) return;
+      var row = e.target.closest && e.target.closest(o.rows);
+      if (!row || e.target.closest("input, textarea, select")) return;
+      var a = o.action(row);
+      if (!a) return;
+      g = { row: row, a: a, x: e.clientX, y: e.clientY, dx: 0, axis: null, base: swipeOpen === row ? -ACTION_W : 0 };
+    }, { passive: true });
+    document.addEventListener("pointermove", function (e) {
+      if (!g) return;
+      var dx = e.clientX - g.x, dy = e.clientY - g.y;
+      if (!g.axis) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        g.axis = Math.abs(dx) > Math.abs(dy) * 1.3 ? "x" : "y";
+        if (g.axis === "y") { g = null; return; }
+        if (swipeOpen && swipeOpen !== g.row) swipeClose(true);
+        var row = g.row;
+        if (!row.querySelector(".swipe-action")) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "swipe-action" + (g.a.tone ? " swipe-" + g.a.tone : "");
+          btn.textContent = g.a.label;
+          var target = g.a.button;
+          btn.addEventListener("click", function (ev) { ev.stopPropagation(); swipeClose(true); target.click(); });
+          row.appendChild(btn);
+        }
+        row.classList.remove("swipe-settle");
+        row.classList.add("swipe-live");
+        swipeOpen = row;
+      }
+      g.dx = Math.min(0, g.base + dx);
+      swipeSet(g.dx);
+    }, { passive: true });
+    function end() {
+      if (!g) return;
+      var gest = g;
+      g = null;
+      if (gest.axis !== "x") return;
+      var row = gest.row, w = row.getBoundingClientRect().width;
+      if (gest.dx < -w * 0.6) { swipeClose(true); gest.a.button.click(); return; }
+      if (gest.dx < -ACTION_W / 2) { row.classList.add("swipe-settle"); swipeSet(-ACTION_W); swipeOpen = row; return; }
+      swipeClose();
+    }
+    document.addEventListener("pointerup", end, { passive: true });
+    document.addEventListener("pointercancel", function () { if (g && g.axis !== "x") g = null; else end(); }, { passive: true });
+    window.addEventListener("scroll", function () { if (swipeOpen && !g) swipeClose(); }, { passive: true });
+  }
+
   // The study cards' Check button: an arrow at the trailing end of the
   // answer line, like Messages' send. Return still checks; this is the
   // visible way to. It never takes focus from the field (a phone's keyboard
@@ -304,5 +389,5 @@ window.RaumeStudy.shared = (function () {
     return true;
   }
 
-  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, undoToast: undoToast, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, undoToast: undoToast, swipeRows: swipeRows, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
 })();

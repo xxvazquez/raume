@@ -4552,6 +4552,12 @@ async function main() {
 
   }
   if (want("flashcards")) {
+  check("Library and Words you've added rows swipe like Mail: vertical scrolling stays the browser's, and each swipe is a row's own button", (() => {
+    const pan = allCssRules.find(r => r.selectorText === "#fcPanelManage .fc-manage-row, #customizePage .cv-owned-row");
+    const action = allCssRules.find(r => r.selectorText === ".swipe-action");
+    return typeof window.RaumeStudy.shared.swipeRows === "function"
+      && !!pan && pan.style.touchAction === "pan-y" && !!action && action.style.position === "absolute";
+  })());
   console.log("Flashcards: Trends");
   await (async () => {
     const fcNs = window.RaumeStudy.flashcards, c = fcNs.store.getCache();

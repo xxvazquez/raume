@@ -473,6 +473,15 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
+- **Swipe actions** (`shared.swipeRows`): a Library word or one of your own
+  words slides left on a touch screen to show its action, an 88px block on
+  the right edge in white text — red Delete, orange Pause, the section tone
+  for Add / Restore — exactly the row's own button. Past halfway it stays
+  open (tap it, or anywhere else to close); past 60% it runs at once, as in
+  Mail. A gesture from the left 24px is the system back swipe and one more
+  vertical than sideways is a scroll — rows are `touch-action: pan-y`, so
+  scrolling never waits. Drawn through a constructed sheet; settles in
+  .25s, snaps with reduced motion; a mouse keeps the buttons.
 - **Context menu** (`.row-menu`, `interactions.js` `openRowMenu`): holding a
   reference row (450ms, cancelled by any 8px move or a scroll) or
   right-clicking it opens iOS's context menu — the page dims and blurs, a

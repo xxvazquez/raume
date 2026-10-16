@@ -148,7 +148,7 @@ button's menu.
 | **Add a word** | To any table, built-in or your own. |
 | **Import a list** | Pasted text or a `.csv` / `.txt` file, one word per line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return` — or three columns copied from a spreadsheet. Rows that don't parse are skipped and listed with the reason. |
 | **New table** | Needs an account. Guests can still add words to existing tables. |
-| **Words you've added** | Edit or delete your words — a delete happens at once with **Undo**, which puts the word back with its flashcards; deleting a whole table asks first. Searchable; sorts by date added or A–Z. |
+| **Words you've added** | Edit or delete your words (on a phone, swipe one left for **Delete**) — a delete happens at once with **Undo**, which puts the word back with its flashcards; deleting a whole table asks first. Searchable; sorts by date added or A–Z. |
 
 Custom words work everywhere — furigana, search, print, audio, every
 flashcard direction. Changes save immediately and sync when signed in.
@@ -326,7 +326,7 @@ animate it, or Reduce Motion is on, the screen simply changes.)
 | **Games** | Match / Listening / Kana tiles / Odd one out / Speed sort / Word chain from your words ([below](#games)) |
 | **Awards** | Every award, grouped Streaks / Reviews / Words / Kana / Kanji / Puzzles / Games — opened from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — opened from the setup screen's *Stats*, ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
-| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words |
+| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words — on a phone, swipe a word left for its Pause / Add / Restore, as in Mail (a long swipe does it at once) |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. **App icon › Badge** (where the browser can show one — an installed app on iPhone, Mac or Windows) puts the cards Study now and Kana hold on the app's icon, like Mail's unread count; it's off until you turn it on, per device, and an iPhone asks to allow notifications first. It recounts while raume is open, so a closed app's badge can read low, never high. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
 | **Help** | Adding & pausing, Library icons, reviewing, each tab, syncing, backup |
 

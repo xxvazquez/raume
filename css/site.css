@@ -5787,6 +5787,27 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 @media print { .undo-toast { display: none; } }
 
+/* Swipe actions (shared.js swipeRows), as in Mail: the row slides left over
+   its action, an 88px block of colour on the right edge -- red Delete,
+   orange Pause, the tint otherwise -- in white text. The lists clip it;
+   rows keep vertical scrolling to the browser (pan-y). Settles in .25s;
+   reduced motion snaps. */
+#fcPanelManage .fc-manage-row, #customizePage .cv-owned-row { touch-action: pan-y; }
+#fcPanelManage .fc-manage-list, #customizePage .cv-owned-list { overflow: hidden; overflow: clip; }
+.swipe-live { position: relative; background: var(--paper); z-index: 1; }
+.swipe-settle { transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+.swipe-action {
+  position: absolute; top: 0; bottom: 0; left: 100%; width: 88px;
+  appearance: none; border: 0; cursor: pointer;
+  background: color-mix(in srgb, var(--section) 62%, #000); color: #fff;
+  font: 500 var(--fs-small)/1.2 var(--font-ui);
+}
+/* Fixed, not the theme's state tones: those turn pale in dark mode, and
+   the label is white on the fill in both. */
+.swipe-destructive { background: #c4443a; }
+.swipe-pause { background: color-mix(in srgb, var(--tile-orange) 72%, #000); }
+@media (prefers-reduced-motion: reduce) { .swipe-settle { transition: none; } }
+
 /* A word's context menu (interactions.js openRowMenu), as iOS shows one:
    the page dims and blurs, the word lifts into a white preview card beside
    where it was -- the Japanese large with its furigana, romaji, English --
