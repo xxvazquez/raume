@@ -49,7 +49,10 @@
   function readTextSize() {
     var html = document.documentElement;
     html.style.font = "-apple-system-body";
-    var px = parseFloat(window.getComputedStyle(html).fontSize);
+    // Only WebKit knows the font; anywhere else (a browser that only looks
+    // like an iPad) it's rejected, and the size read would be a default.
+    var known = !!html.style.font;
+    var px = known ? parseFloat(window.getComputedStyle(html).fontSize) : 0;
     html.removeAttribute("style");
     var dt = px > 0 ? Math.min(1.35, Math.max(0.88, px / 17)) : 1;
     sheet.replaceSync(":root { --dt: " + (Math.round(dt * 100) / 100) + "; }");
