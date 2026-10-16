@@ -805,6 +805,61 @@ body {
 }
 .search-box.has-value .clear-search { display: block; }
 
+/* Recent searches: an iOS search "Recent" list dropping from the empty,
+   focused field -- glass like the other menus, 44px rows with a hairline
+   between, a 44pt remove target per row and Clear in the header. A dropdown
+   on a phone too: a bottom sheet would sit under the keyboard. It sits in
+   the field's label, so it's exactly the field's width on a wider screen. */
+.search-box { position: relative; }
+.search-recents {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  max-height: 60vh;
+  max-height: 60dvh;
+  overflow: auto;
+  padding: 4px 0 6px;
+  background: var(--paper);
+  border-radius: var(--radius-menu);
+  box-shadow: var(--shadow-menu);
+}
+.search-recents[hidden] { display: none; }
+.recents-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 0 16px; }
+.recents-title { margin: 0; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.recents-clear {
+  min-height: 44px; padding: 0 12px; border: 0; background: transparent;
+  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--section-strong); cursor: pointer;
+}
+.recents-list { margin: 0; padding: 0; list-style: none; }
+.recents-row { position: relative; display: flex; align-items: center; }
+.recents-row + .recents-row::before {
+  content: ""; position: absolute; top: 0; left: 41px; right: 0;
+  border-top: .5px solid var(--line);
+}
+.recents-go {
+  flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 0 0 0 16px; border: 0; background: transparent;
+  text-align: left; font: 400 var(--fs-nav)/1.3 var(--font-ui); color: var(--ink); cursor: pointer;
+}
+.recents-go svg { flex: 0 0 auto; color: var(--faint); }
+.recents-q { min-width: 0; overflow-wrap: anywhere; }
+.recents-remove {
+  flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; background: transparent; color: var(--faint); cursor: pointer;
+}
+@media (hover: hover) {
+  .recents-go:hover { background: var(--section-soft); color: var(--section-strong); }
+  .recents-remove:hover { color: var(--ink); }
+}
+.recents-go:active { background: var(--section-soft); }
+/* A phone's field is narrow beside Tables | Options: the list takes the
+   whole bar's width instead (it then hangs off .vocab-bar). */
+@media (max-width: 640px) {
+  .search-box { position: static; }
+}
+
 /* A switch is "on" in the deep section tone in light, and the mid tone in dark
    (the deep one is a pale tint there, which would wash out the white thumb). */
 /* The selected segment: set on body, where the section tone is defined. */
@@ -882,7 +937,7 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
   box-shadow: var(--shadow-menu);
 }
 .options-grab { display: none; }
-.vocab-toolbar.options-open, .vocab-toolbar.tindex-open { z-index: 70; }
+.vocab-toolbar.options-open, .vocab-toolbar.tindex-open, .vocab-toolbar.recents-open { z-index: 70; }
 /* iOS list header: 13px sentence-case secondary text, not tracked caps. */
 .opt-head { margin: 0; padding: 12px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .opt-group:not(:has(.opt-head)) { padding-top: 12px; }
@@ -5174,12 +5229,12 @@ mark.fc-diff-co {
   :root[data-theme="dark"] { --glass-bg: color-mix(in srgb, var(--paper) 58%, transparent); }
 }
 .glass-surface,
-.options-sheet, .tindex-menu, .section-menu-list {
+.options-sheet, .tindex-menu, .section-menu-list, .search-recents {
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
 /* Menus and popovers: glass, a hairline edge, the one soft float shadow. */
-.tindex-menu, .section-menu-list {
+.tindex-menu, .section-menu-list, .search-recents {
   background: var(--glass-bg);
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
 }
@@ -5218,7 +5273,7 @@ mark.fc-diff-co {
   .site-nav-link.active { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--section-strong); }
 }
 @media print {
-  .options-sheet, .tindex-menu, .section-menu-list, .page-vocab .vocab-toolbar::before {
+  .options-sheet, .tindex-menu, .section-menu-list, .search-recents, .page-vocab .vocab-toolbar::before {
     -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
 }

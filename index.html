@@ -71,6 +71,7 @@
         <svg class="search-icon" viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>
         <input id="tableSearch" type="search" aria-label="Search vocabulary" aria-controls="vocabulary" placeholder="Search" autocomplete="off">
         <button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button>
+        <div class="search-recents" id="searchRecents" role="region" aria-label="Recent searches" hidden></div>
       </label>
       <div class="bar-capsule">
         <nav id="tableIndex" class="table-index" aria-label="Jump to a table"></nav>
@@ -138,6 +139,7 @@
       <summary><span class="help-tile" data-tile="blue" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg></span><span class="help-sum"><h3>Finding words</h3><span class="help-sub">Search, tables, sort</span></span></summary>
       <ul class="help-rows">
         <li><span class="help-term">Search</span><span class="help-desc">Japanese, kana, romaji or English, every section at once. Press <kbd>/</kbd> to jump in.</span></li>
+        <li><span class="help-term">Recent searches</span><span class="help-desc">Tap the empty field for your last few; × removes one, Clear removes all.</span></li>
         <li><span class="help-term">+ on a result</span><span class="help-desc">Adds the word to your flashcards. Tap the ✓ again to pause it.</span></li>
         <li><span class="help-term">Tables</span><span class="help-desc">Lists every table in the section — tap one to go there.</span></li>
         <li><span class="help-term">Sort</span><span class="help-desc">The chevron in the English header sorts A–Z or Z–A.</span></li>

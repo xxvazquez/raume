@@ -318,7 +318,12 @@ and Help.
   capsule beside it — never grey, never translucent glass (glass read grey
   over the grey ground). Segmented controls: a faint track (`--seg-track`,
   ink 6%) with the selected segment raised in white on the same lift. Its text is 13.5px everywhere, just under the 14px
-  rows it searches; the placeholder ends in "…" when the field is narrow. The glyph comes from a default per shipped table, or — for a table of your own —
+  rows it searches; the placeholder ends in "…" when the field is narrow. Focusing the empty field drops a **Recent** list under it (`.search-recents`):
+  a glass menu exactly the field's width (the whole bar's on a phone, where the
+  field is narrow), a 13px grey "Recent" header with a plain tinted **Clear**,
+  then 44px rows — faint magnifier, the query, a 44pt **×** — on inset
+  hairlines. A dropdown at every width: a bottom sheet would sit under the
+  phone keyboard. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one.
   The category name is a quiet label above its card. Scoped to `#vocabulary` /

@@ -924,6 +924,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
 
     let preSearch = null;
+    let lastSearchRows = 0;
     function runSearch() {
       // An iPhone keyboard types a curly apostrophe (o’clock); the tables use '.
       const q = input.value.trim().replace(/[‘’ʼ`´]/g, "'").toLocaleLowerCase();
@@ -1029,6 +1030,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         preSearch = null;
       }
       count.textContent = q ? totalRows + ' matching row' + (totalRows === 1 ? '' : 's') + ' · ' + totalTables + ' table' + (totalTables === 1 ? '' : 's') : '';
+      lastSearchRows = totalRows;
+      syncRecents();
       if (vocab.updatePoliteVisibility) vocab.updatePoliteVisibility();
       if (q) { if (vocab.updateAdjLegend) vocab.updateAdjLegend(); }
       else if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
@@ -1073,9 +1076,108 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     document.getElementById('clearSearch').addEventListener('click', function () {
       input.value = ''; runSearch(); input.focus();
     });
+    // Recent searches, as in iOS search: focusing the empty field lists the
+    // last few lookups under it, each removable, with Clear for all of
+    // them. A query is kept once it was really used -- Enter, a tap on a
+    // result, or leaving the field -- and only if it found something, so
+    // the half-typed text on the way to it never lands in the list. This
+    // device only: it's a convenience, not part of your study record.
+    const RECENTS_KEY = 'raume-recent-searches';
+    const RECENTS_MAX = 8;
+    const recentsEl = document.getElementById('searchRecents');
+    function readRecents() {
+      try {
+        const list = JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]');
+        return Array.isArray(list) ? list.filter(s => typeof s === 'string' && s).slice(0, RECENTS_MAX) : [];
+      } catch (e) { return []; }
+    }
+    function writeRecents(list) {
+      try {
+        if (list.length) localStorage.setItem(RECENTS_KEY, JSON.stringify(list));
+        else localStorage.removeItem(RECENTS_KEY);
+      } catch (e) {}
+    }
+    function rememberSearch() {
+      const q = input.value.trim();
+      if (!q || !lastSearchRows) return;
+      const key = q.toLocaleLowerCase();
+      writeRecents([q].concat(readRecents().filter(s => s.toLocaleLowerCase() !== key)).slice(0, RECENTS_MAX));
+    }
+    function renderRecents(list) {
+      const esc = window.RaumeStudy.shared.escapeHtml;
+      recentsEl.innerHTML =
+        '<div class="recents-head"><h3 class="recents-title" id="recentsTitle">Recent</h3>' +
+        '<button type="button" class="recents-clear">Clear</button></div>' +
+        '<ul class="recents-list" aria-labelledby="recentsTitle">' + list.map(function (s, i) {
+          return '<li class="recents-row">' +
+            '<button type="button" class="recents-go" data-i="' + i + '">' +
+              '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>' +
+              '<span class="recents-q">' + esc(s) + '</span></button>' +
+            '<button type="button" class="recents-remove" data-i="' + i + '" aria-label="Remove ' + esc(s) + '">' +
+              '<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 4l10 10M14 4 4 14"/></svg></button>' +
+          '</li>';
+        }).join('') + '</ul>';
+    }
+    function hideRecents() {
+      if (!recentsEl || recentsEl.hidden) return;
+      recentsEl.hidden = true;
+      recentsEl.closest('.vocab-toolbar').classList.remove('recents-open');
+    }
+    function syncRecents() {
+      if (!recentsEl) return;
+      const list = input.value.trim() || document.activeElement !== input ? [] : readRecents();
+      if (!list.length) { hideRecents(); return; }
+      renderRecents(list);
+      recentsEl.hidden = false;
+      recentsEl.closest('.vocab-toolbar').classList.add('recents-open');
+    }
+    if (recentsEl) {
+      // Keep the field focused (and a phone keyboard up) through a tap on
+      // the list; a recent itself then puts the keyboard away to show results.
+      recentsEl.addEventListener('mousedown', function (event) { event.preventDefault(); });
+      recentsEl.addEventListener('click', function (event) {
+        const list = readRecents();
+        const go = event.target.closest('.recents-go');
+        const remove = event.target.closest('.recents-remove');
+        if (go) {
+          input.value = list[Number(go.dataset.i)] || '';
+          hideRecents();
+          runSearch();
+          input.blur();
+        } else if (remove) {
+          list.splice(Number(remove.dataset.i), 1);
+          writeRecents(list);
+          input.focus();
+          syncRecents();
+        } else if (event.target.closest('.recents-clear')) {
+          writeRecents([]);
+          input.focus();
+          hideRecents();
+        }
+      });
+      recentsEl.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') { input.focus(); hideRecents(); }
+      });
+      // Focus leaving both the field and the list closes it (Tab moves from
+      // one into the other without closing).
+      const closeIfFocusLeft = function () {
+        setTimeout(function () {
+          const a = document.activeElement;
+          if (a !== input && !recentsEl.contains(a)) hideRecents();
+        }, 0);
+      };
+      recentsEl.addEventListener('focusout', closeIfFocusLeft);
+      input.addEventListener('focusout', closeIfFocusLeft);
+      input.addEventListener('focus', syncRecents);
+    }
+    input.addEventListener('blur', rememberSearch);
+    vocabHost.addEventListener('click', function () {
+      if (document.body.classList.contains('is-searching')) rememberSearch();
+    });
     input.addEventListener('keydown', function (event) {
       if (event.key === 'Enter') {
         if (searchQueued) queuedSearch();
+        rememberSearch();
         const first = document.querySelector('.table-section:not(.search-hidden) tbody tr:not(.search-hidden)');
         if (first) first.scrollIntoView({ block: 'center' });
       } else if (event.key === 'Escape') {

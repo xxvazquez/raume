@@ -1178,6 +1178,37 @@ async function main() {
     count("");
     return straight > 0 && curly === straight;
   })());
+  // Recents live in localStorage, which this harness can't always reach
+  // (see storageUsable); without it the list just never opens.
+  if (!storageUsable) check("recent searches stay closed (and nothing throws) without localStorage", (() => {
+    const input = document.getElementById("tableSearch");
+    input.focus(); input.value = "water"; input.dispatchEvent(new window.Event("input", { bubbles: true })); input.blur();
+    input.value = ""; input.dispatchEvent(new window.Event("input", { bubbles: true })); input.focus();
+    const closed = document.getElementById("searchRecents").hidden;
+    input.blur();
+    return closed;
+  })());
+  else check("recent searches: a used query that found something is kept (not a miss), lists under the empty focused field, and removes one at a time", (() => {
+    const input = document.getElementById("tableSearch");
+    const panel = document.getElementById("searchRecents");
+    const type = q => { input.value = q; input.dispatchEvent(new window.Event("input", { bubbles: true })); };
+    window.localStorage.removeItem("raume-recent-searches");
+    input.focus();
+    const emptyHidden = panel.hidden;
+    type("water"); input.blur();
+    input.focus(); type("xqzvj"); input.blur();
+    input.focus(); type("rice");
+    input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    type("");
+    const listed = [...panel.querySelectorAll(".recents-q")].map(n => n.textContent);
+    const shown = !panel.hidden;
+    panel.querySelector('.recents-remove[aria-label="Remove water"]').click();
+    const after = [...panel.querySelectorAll(".recents-q")].map(n => n.textContent);
+    panel.querySelector(".recents-clear").click();
+    input.blur();
+    const cleared = readLocalStorage("raume-recent-searches") === null && panel.hidden;
+    return emptyHidden && shown && listed.join("|") === "rice|water" && after.join("|") === "rice" && cleared;
+  })());
   check("search finds a verb's polite form, a kanji word by its kana reading, romaji typed without long vowels or in keyboard spellings, and English only where a word starts", (() => {
     const input = document.getElementById("tableSearch");
     const firstJp = q => {
