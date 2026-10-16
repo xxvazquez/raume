@@ -10,12 +10,10 @@
 // best-effort nudge at the service worker so its own precache is current
 // too (offline support for whatever just got fetched, not just this load).
 //
-// A known v1 limitation: this only checks the *document's* scroll position,
-// not whether the touch started inside some nested scrollable panel (the
-// mobile table-index sheet, a horizontally-scrolled table). Pulling down
-// from inside one of those, while the page itself is scrolled to the top,
-// will hijack the gesture. Accepted for now rather than special-casing
-// every nested scroll area in the app.
+// Only a drag on the page itself counts. One that starts inside an open
+// sheet or other fixed overlay, a drawing surface (touch-action: none --
+// the writing pad's downward strokes used to reload the app mid-kanji), or
+// a nested area that scrolls on its own belongs to that, never to this.
 window.RaumeStudy = window.RaumeStudy || {};
 (function () {
   "use strict";
@@ -56,6 +54,19 @@ window.RaumeStudy = window.RaumeStudy || {};
     textEl.textContent = label || "";
   }
 
+  // True when the touch starts inside something that owns its own vertical
+  // drag: a fixed overlay (any open sheet, menu or scrim), an element with
+  // touch-action: none, or a scroller that actually overflows.
+  function insideOwnGesture(node) {
+    for (var el = node; el && el.nodeType === 1 && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      var cs = window.getComputedStyle(el);
+      if (cs.position === "fixed" || cs.touchAction === "none") return true;
+      if ((/auto|scroll/.test(cs.overflowY) && el.scrollHeight > el.clientHeight) ||
+          (/auto|scroll/.test(cs.overflowX) && el.scrollWidth > el.clientWidth)) return true;
+    }
+    return false;
+  }
+
   function onTouchStart(e) {
     // Ignore a new gesture while a refresh is already in flight (busy) --
     // the page is about to reload out from under it regardless. Also never
@@ -68,7 +79,7 @@ window.RaumeStudy = window.RaumeStudy || {};
     // already on one of these, so refusing to track from there costs
     // nothing and guarantees this code can never compete with a tap.
     var onControl = e.target.closest && e.target.closest('button, a, [role="button"], .kr, .particle[data-r], .jpword[data-romaji]');
-    if (onControl || window.scrollY > 0 || e.touches.length !== 1 || state === "busy") {
+    if (onControl || window.scrollY > 0 || e.touches.length !== 1 || state === "busy" || insideOwnGesture(e.target)) {
       startY = null;
       return;
     }

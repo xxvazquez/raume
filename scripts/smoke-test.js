@@ -147,6 +147,27 @@ async function main() {
       touch("touchend", null, { target: jpword });
       return !!jpword && !document.querySelector(".pull-refresh") && !bigDrift.defaultPrevented;
     })());
+    // A pull that starts inside something owning its own drag -- an open
+    // sheet (fixed), the writing pad (touch-action: none), a nested
+    // scroller that overflows -- belongs to that, never to the page. The
+    // probes are removed straight after, so the no-[style] check below holds.
+    [["an open sheet (a fixed overlay)", el => { el.style.position = "fixed"; }],
+     ["the writing pad (touch-action: none)", el => { el.style.touchAction = "none"; }],
+     ["a nested scroller that overflows", el => {
+       el.style.overflowY = "auto";
+       Object.defineProperty(el, "scrollHeight", { value: 500 });
+       Object.defineProperty(el, "clientHeight", { value: 100 });
+     }]].forEach(([what, setUp]) => {
+      const host = document.createElement("div"), inner = document.createElement("span");
+      setUp(host);
+      host.appendChild(inner);
+      document.body.appendChild(host);
+      touch("touchstart", 0, { target: inner });
+      const pull = touch("touchmove", 90, { target: inner });
+      touch("touchend", null, { target: inner });
+      host.remove();
+      check("a pull starting inside " + what + " is left alone -- no bar, default not prevented", !document.querySelector(".pull-refresh") && !pull.defaultPrevented);
+    });
     touch("touchstart", 0);
     touch("touchmove", 20);
     check("a small pull shows the bar in its neutral 'pulling' state", (() => {
