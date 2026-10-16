@@ -325,6 +325,20 @@ window.RaumeStudy.customVocab = (function () {
     if (remote && ids && ids.length) { try { remote.deleteRows(ids); } catch (e) { console.warn("custom vocab: delete sync failed", e); } }
   }
   function deleteRow(id) { return deleteRows([id]); }
+  // Undo a delete: the same rows back under their own ids and places, so
+  // any flashcards made from them (kept by id, never deleted with the word)
+  // pick up exactly where they were. A row whose table has gone stays gone.
+  function restoreRows(rows) {
+    var c = load(), have = {};
+    c.rows.forEach(function (r) { have[r.id] = true; });
+    var back = (rows || []).filter(function (r) { return r && !have[r.id] && tableExists(r.tableId); });
+    if (!back.length) return [];
+    c.rows = c.rows.concat(back);
+    persist();
+    refreshApp();
+    if (remote) { try { remote.addRows(back); } catch (e) { console.warn("custom vocab: row sync failed", e); } }
+    return back;
+  }
 
   function deleteTable(id) {
     var c = load();
@@ -380,7 +394,7 @@ window.RaumeStudy.customVocab = (function () {
     applyToDataset: applyToDataset,
     addRow: addRow, addRows: addRows, updateRow: updateRow,
     createTable: createTable,
-    deleteRow: deleteRow, deleteRows: deleteRows, deleteTable: deleteTable,
+    deleteRow: deleteRow, deleteRows: deleteRows, restoreRows: restoreRows, deleteTable: deleteTable,
     setRemote: setRemote, applyRemote: applyRemote, onChange: onChange,
     isSignedIn: isSignedIn, tableExists: tableExists,
     customTables: customTables, customRows: customRows, hasAny: hasAny,

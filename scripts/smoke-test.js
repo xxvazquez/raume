@@ -1555,6 +1555,14 @@ async function main() {
   const firstRow = drinksSectionManage.querySelector("tbody tr");
   firstRow.querySelector(".row-hide-btn").click();
   check("clicking the eye hides that row", firstRow.classList.contains("row-hidden"));
+  check("...and offers Undo, which brings it straight back", (() => {
+    const toast = document.querySelector(".undo-toast");
+    const ok = !!toast && toast.getAttribute("role") === "status" && /Row hidden/.test(toast.textContent);
+    toast.querySelector(".undo-toast-btn").click();
+    const back = !firstRow.classList.contains("row-hidden") && drinksSectionManage.querySelector(".rows-hidden-status").hidden;
+    firstRow.querySelector(".row-hide-btn").click();
+    return ok && back && firstRow.classList.contains("row-hidden");
+  })());
   const status = drinksSectionManage.querySelector(".rows-hidden-status");
   check("the status line appears and reports the count", status.hidden === false && status.querySelector(".rows-hidden-count").textContent === "1 row hidden");
   status.querySelector(".show-all-rows").click();
@@ -1810,6 +1818,7 @@ async function main() {
   hideSec.querySelector(".hide-table-btn").click();
   check("the table's ⋯ menu has Hide table, and it hides the table (stored with the other table customisations)",
     hideTc.isHidden(hideId) && hideSec.classList.contains("user-hidden") && window.getComputedStyle(hideSec).display === "none");
+  check("...with Undo offered", /Table hidden/.test((document.querySelector(".undo-toast") || {}).textContent || ""));
   check("...parked after every visible table, so it never splits a group's rounded card",
     [...document.querySelectorAll("#vocabulary .table-section")].pop() === hideSec);
   check("...dropped from the Tables directory", !document.querySelector('#tindexMenu a[data-target="' + hideId + '"]'));
@@ -1906,17 +1915,17 @@ async function main() {
       return !!tr && !!tr.querySelector("ruby rt") && /eggplant/.test(tr.textContent);
     })());
     const delBtn = () => document.querySelector('#customizePage .cv-del-row[data-row="' + made.id + '"]');
-    check("deleting your own word asks first with the iOS action sheet, not the browser's confirm -- Cancel keeps it", (() => {
+    check("deleting your own word happens at once with Undo (no sheet), and Undo puts it back under the same id", (() => {
       if (!delBtn()) return false;
       delBtn().click();
-      const sheet = document.querySelector(".ios-confirm");
-      const ok = !!sheet && /Delete this word\?/.test(sheet.textContent) && document.getElementById("iosConfirmGo").textContent === "Delete Word"
-        && document.activeElement === document.getElementById("iosConfirmCancel");
-      document.getElementById("iosConfirmCancel").click();
-      return ok && !document.querySelector(".ios-confirm") && vegTable.rows.some(r => r.id === made.id);
+      const toast = document.querySelector(".undo-toast");
+      const gone = !document.querySelector(".ios-confirm") && !vegTable.rows.some(r => r.id === made.id)
+        && !!toast && /Word deleted/.test(toast.textContent);
+      toast.querySelector(".undo-toast-btn").click();
+      return gone && vegTable.rows.some(r => r.id === made.id) && !!document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
     })());
-    if (delBtn()) { delBtn().click(); document.getElementById("iosConfirmGo").click(); } else cvNs.deleteRow(made.id);
-    check("Delete Word removes it again, restoring the dataset", vegTable.rows.length === before
+    if (delBtn()) delBtn().click(); else cvNs.deleteRow(made.id);
+    check("deleting it again removes it, restoring the dataset", vegTable.rows.length === before
       && !window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[made.id]);
   }
   check("the Customize page has a Your vocabulary block", !!document.querySelector("#customizePage .cv-section"));
@@ -2188,6 +2197,7 @@ async function main() {
     const before = { queue: sched.buildQueue(new Date()).length, total: sched.computeStats(new Date()).total };
     doneTable.querySelector('[data-table-action="remove-table"]').click();
     await flush();
+    check("Pause table offers Undo", /Table paused/.test((document.querySelector(".undo-toast") || {}).textContent || ""));
     check("the table is now in pausedTables, its cards untouched", () =>
       store.isTablePaused(doneTableId) && sched.computeStats(new Date()).total === 0 && sched.buildQueue(new Date()).length === 0
       && Object.keys(store.getCache().cards).length > 0);
@@ -2465,7 +2475,8 @@ async function main() {
       fcNs.render();
       document.querySelector("[data-leech-pause]").click();
       await flush();
-      check("Pause archives the word's cards but keeps their lapse history", wordCards().every(c => c.active === false) && word.lapses === sched.LEECH_LAPSES + 4);
+      check("Pause archives the word's cards but keeps their lapse history, and offers Undo", wordCards().every(c => c.active === false) && word.lapses === sched.LEECH_LAPSES + 4
+        && /Word paused/.test((document.querySelector(".undo-toast") || {}).textContent || ""));
       check("a paused word is no longer a leech and the card is gone", sched.leechWords().length === 0 && !leechCard());
     } finally {
       restore();

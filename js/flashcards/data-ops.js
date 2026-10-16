@@ -889,31 +889,26 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // What js/flashcards/bootstrap.js's customVocab.setRemote() ops actually
   // call: try once immediately (so a same-session change syncs with no
   // visible delay), and only fall back to the persisted outbox -- retried
-  // later -- if that attempt fails, instead of dropping the change.
-  function customVocabAddRowsQueued(rows) {
-    return customVocabAddRows(rows).catch(function (e) {
-      console.warn("Flashcards: could not sync new words, will retry", e);
-      queueCvOp("addRows", rows);
-    });
+  // later -- if that attempt fails, instead of dropping the change. Sends
+  // go one at a time, and behind anything already queued: an Undo puts a
+  // deleted word back under its old id, so its delete must never land after
+  // the re-add.
+  var cvChain = Promise.resolve();
+  function sendCvOp(op, payload, what) {
+    function run() {
+      if (myCvOutbox().length) { queueCvOp(op, payload); return syncCvOutbox(); }
+      return runCvOp({ op: op, payload: payload }).catch(function (e) {
+        console.warn("Flashcards: could not sync " + what + ", will retry", e);
+        queueCvOp(op, payload);
+      });
+    }
+    cvChain = cvChain.then(run, run);
+    return cvChain;
   }
-  function customVocabDeleteRowsQueued(ids) {
-    return customVocabDeleteRows(ids).catch(function (e) {
-      console.warn("Flashcards: could not sync a deleted word, will retry", e);
-      queueCvOp("deleteRows", ids);
-    });
-  }
-  function customVocabAddTableQueued(t) {
-    return customVocabAddTable(t).catch(function (e) {
-      console.warn("Flashcards: could not sync a new table, will retry", e);
-      queueCvOp("addTable", t);
-    });
-  }
-  function customVocabDeleteTableQueued(id, rowIds) {
-    return customVocabDeleteTable(id, rowIds).catch(function (e) {
-      console.warn("Flashcards: could not sync a deleted table, will retry", e);
-      queueCvOp("deleteTable", { id: id, rowIds: rowIds });
-    });
-  }
+  function customVocabAddRowsQueued(rows) { return sendCvOp("addRows", rows, "new words"); }
+  function customVocabDeleteRowsQueued(ids) { return sendCvOp("deleteRows", ids, "a deleted word"); }
+  function customVocabAddTableQueued(t) { return sendCvOp("addTable", t, "a new table"); }
+  function customVocabDeleteTableQueued(id, rowIds) { return sendCvOp("deleteTable", { id: id, rowIds: rowIds }, "a deleted table"); }
 
   // Table customisations push the whole current object every time (last-
   // edit-wins, idempotent), so there's no op log to replay -- just a dirty

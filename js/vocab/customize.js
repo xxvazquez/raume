@@ -624,12 +624,14 @@ window.RaumeStudy.customize = (function () {
       if (e.target.closest && e.target.closest(".cv-import-btn")) { runImport(host); return; }
       var delRow = e.target.closest && e.target.closest(".cv-del-row");
       if (delRow && cv()) {
+        // One word goes at once, with Undo (as in Mail) -- a whole table
+        // still asks first, below.
         var rowId = delRow.dataset.row;
-        window.RaumeStudy.shared.confirmSheet({
-          title: "Delete this word?",
-          message: "This can’t be undone.",
-          confirm: "Delete Word",
-          onConfirm: function () { cv().deleteRow(rowId); }
+        var gone = cv().customRows().filter(function (r) { return r.id === rowId; });
+        cv().deleteRow(rowId);
+        window.RaumeStudy.shared.undoToast({
+          message: "Word deleted",
+          onUndo: function () { cv().restoreRows(gone); }
         });
         return;
       }

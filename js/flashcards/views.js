@@ -82,6 +82,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Add</span><span class="help-desc">A single word, or a whole table from Library or a search result.</span></li>' +
       '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps every bit of progress. Paused words collect under Archived.</span></li>' +
       '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back exactly as it was.</span></li>' +
+      '<li><span class="help-term">Undo</span><span class="help-desc">Right after a pause, Undo at the bottom of the screen takes it back.</span></li>' +
       '<li><span class="help-term">Nothing is deleted</span><span class="help-desc">Scheduling and review history are kept for good.</span></li>' +
       '<li><span class="help-term">Your own words</span><span class="help-desc">Add them under Customize › Your vocabulary, then study them like any other.</span></li>' +
       '</ul>' +
@@ -426,6 +427,14 @@ window.RaumeStudy.flashcards.views = (function () {
       invalidateInsights();
       rerender();
       refreshRowToggleButtons();
+      // A pause is one tap from the Library or a search result -- easy to
+      // make by mistake, so it offers Undo (the same as Restore).
+      if (action === "remove") {
+        window.RaumeStudy.shared.undoToast({
+          message: "Word paused",
+          onUndo: function () { return runVocabAction("restore", vocabId); }
+        });
+      }
     } catch (e) {
       if (btn) btn.disabled = false;
       if (label) label.textContent = originalLabel;
@@ -464,6 +473,17 @@ window.RaumeStudy.flashcards.views = (function () {
       invalidateInsights();
       rerender();
       refreshRowToggleButtons();
+      if (action === "remove-table") {
+        window.RaumeStudy.shared.undoToast({
+          message: "Table paused",
+          onUndo: async function () {
+            await withTimeout(setTablePaused(tableId, false), "update");
+            invalidateInsights();
+            rerender();
+            refreshRowToggleButtons();
+          }
+        });
+      }
     } catch (e) {
       btn.textContent = originalText;
       btn.disabled = false;

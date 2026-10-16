@@ -242,6 +242,46 @@ window.RaumeStudy.shared = (function () {
     document.getElementById("iosConfirmCancel").focus();
   }
 
+  // Undo, as in Mail: a small glass capsule near the bottom after an action
+  // that's easy to make by mistake -- what happened, and Undo. It stays for
+  // six seconds (the clock stops while the pointer or focus is on it), a new
+  // one replaces the last, and it's announced without moving focus.
+  // o: { message, onUndo } -- onUndo may return a promise; a failed undo
+  // says so in the same capsule instead of vanishing.
+  var undoTimer = null;
+  function undoToast(o) {
+    var old = document.querySelector(".undo-toast");
+    if (old) old.remove();
+    clearTimeout(undoTimer);
+    var el = document.createElement("div");
+    el.className = "undo-toast";
+    el.setAttribute("role", "status");
+    el.innerHTML = '<span class="undo-toast-msg">' + escapeHtml(o.message) + "</span>" +
+      '<button type="button" class="undo-toast-btn">Undo</button>';
+    document.body.appendChild(el);
+    var held = false;
+    function close() { clearTimeout(undoTimer); if (el.isConnected) el.remove(); }
+    function arm() { clearTimeout(undoTimer); if (!held) undoTimer = setTimeout(close, 6000); }
+    function hold(on) { held = on; arm(); }
+    el.addEventListener("mouseenter", function () { hold(true); });
+    el.addEventListener("mouseleave", function () { hold(el.contains(document.activeElement)); });
+    el.addEventListener("focusin", function () { hold(true); });
+    el.addEventListener("focusout", function (e) { hold(!!(e.relatedTarget && el.contains(e.relatedTarget))); });
+    var btn = el.querySelector(".undo-toast-btn");
+    btn.addEventListener("click", function () {
+      btn.disabled = true;
+      var undone;
+      try { undone = Promise.resolve(o.onUndo()); } catch (e) { undone = Promise.reject(e); }
+      undone.then(close, function (e) {
+        el.querySelector(".undo-toast-msg").textContent = "Couldn’t undo — " + ((e && e.message) || "check your connection.");
+        btn.remove();
+        held = false; arm();
+      });
+    });
+    arm();
+    return close;
+  }
+
   // The study cards' Check button: an arrow at the trailing end of the
   // answer line, like Messages' send. Return still checks; this is the
   // visible way to. It never takes focus from the field (a phone's keyboard
@@ -264,5 +304,5 @@ window.RaumeStudy.shared = (function () {
     return true;
   }
 
-  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, undoToast: undoToast, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
 })();

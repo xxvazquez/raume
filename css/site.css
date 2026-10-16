@@ -5658,7 +5658,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .fc-st-best .set-label { min-width: 0; }
 
 /* iOS confirmation (shared.js confirmSheet -- Reset stats, Restore a backup,
-   deleting your own words / tables): an action sheet up from the bottom on a
+   deleting one of your own tables): an action sheet up from the bottom on a
    phone -- a glass group holding the optional semibold title, the grey
    message and the red destructive button, and Cancel as its own solid group
    under it; a centred alert of the same parts on a wide window. The page
@@ -5693,3 +5693,36 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .ios-confirm { justify-content: center; align-items: center; }
   .ios-confirm-sheet { width: 320px; padding: 0; animation: none; }
 }
+
+/* Undo (shared.js undoToast -- Hide row, Hide table, Pause, deleting one of
+   your own words): a glass capsule centred near the bottom, as in Mail --
+   what happened on the left, a tinted Undo on the right. On a phone it
+   floats just above the tab bar. Rises in; reduced motion just shows it. */
+.undo-toast {
+  position: fixed; z-index: 190; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 4px;
+  width: max-content; max-width: calc(100vw - 32px);
+  padding: 0 4px 0 18px; min-height: 44px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+  font: 400 var(--fs-nav)/1.3 var(--font-ui); color: var(--ink);
+  animation: undo-toast-in .2s ease-out;
+}
+.undo-toast-msg { min-width: 0; padding: 8px 0; }
+.undo-toast-btn {
+  flex: 0 0 auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px;
+  background: transparent; cursor: pointer;
+  font: 600 var(--fs-nav)/1 var(--font-ui); color: var(--section-strong);
+}
+.undo-toast-btn:active { background: var(--section-soft); }
+.undo-toast-btn:disabled { opacity: .5; cursor: default; }
+.undo-toast:not(:has(.undo-toast-btn)) { padding-right: 18px; }
+@keyframes undo-toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .undo-toast { animation: none; } }
+@media (max-width: 640px) {
+  .undo-toast { bottom: calc(var(--tabbar-h) + var(--tabbar-gap) + 10px); }
+}
+@media print { .undo-toast { display: none; } }

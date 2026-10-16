@@ -1281,8 +1281,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       } else if ((el = t.closest('.row-hide-btn'))) {
         event.stopPropagation();
         const section = el.closest('.table-section');
-        el.closest('tr').classList.add('row-hidden');
+        const row = el.closest('tr');
+        row.classList.add('row-hidden');
         updateHiddenStatus(section);
+        window.RaumeStudy.shared.undoToast({
+          message: 'Row hidden',
+          onUndo: function () { row.classList.remove('row-hidden'); updateHiddenStatus(section); }
+        });
       } else if ((el = t.closest('.show-all-rows'))) {
         event.stopPropagation();
         const section = el.closest('.table-section');
@@ -1294,7 +1299,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       } else if ((el = t.closest('.hide-table-btn'))) {
         event.stopPropagation();
         closeSectionMenus();
-        if (window.RaumeStudy.tableCustom) window.RaumeStudy.tableCustom.setHidden(el.dataset.hideTable, true); // onChange -> reflow
+        const tc = window.RaumeStudy.tableCustom, hideId = el.dataset.hideTable;
+        if (tc) {
+          tc.setHidden(hideId, true); // onChange -> reflow
+          window.RaumeStudy.shared.undoToast({
+            message: 'Table hidden',
+            onUndo: function () { tc.setHidden(hideId, false); }
+          });
+        }
       } else if (t.closest('.fc-add-table-btn') || t.closest('.section-menu-list .section-icon-btn')) {
         closeSectionMenus();
       }

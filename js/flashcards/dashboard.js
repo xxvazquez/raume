@@ -1654,9 +1654,19 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     try {
       if (pause) {
         pause.disabled = true;
-        await dataOps.archiveVocab(pause.dataset.leechPause);
+        var leechId = pause.dataset.leechPause;
+        await dataOps.archiveVocab(leechId);
         await dataOps.refreshData();
         invalidateInsights();
+        window.RaumeStudy.shared.undoToast({
+          message: "Word paused",
+          onUndo: async function () {
+            await dataOps.addVocab(leechId);
+            await dataOps.refreshData();
+            invalidateInsights();
+            rerender();
+          }
+        });
       } else {
         await dataOps.keepLeech(keep.dataset.leechKeep, Number(keep.dataset.lapses) || 0);
       }

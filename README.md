@@ -95,6 +95,7 @@ Grammatical **particles are blue and bold** everywhere.
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
 | **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. |
 | **Hide a row** | The eye icon marks a word as known for now. **Show all** brings them back. |
+| **Undo** | Hiding a row or a table, pausing a word or a table, and deleting one of your own words each show a small **Undo** bar at the bottom for a few seconds (it stays while you point at it). |
 
 ### Options
 
@@ -146,7 +147,7 @@ button's menu.
 | **Add a word** | To any table, built-in or your own. |
 | **Import a list** | Pasted text or a `.csv` / `.txt` file, one word per line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return` — or three columns copied from a spreadsheet. Rows that don't parse are skipped and listed with the reason. |
 | **New table** | Needs an account. Guests can still add words to existing tables. |
-| **Words you've added** | Edit or delete your words (an action sheet asks before a delete). Searchable; sorts by date added or A–Z. |
+| **Words you've added** | Edit or delete your words — a delete happens at once with **Undo**, which puts the word back with its flashcards; deleting a whole table asks first. Searchable; sorts by date added or A–Z. |
 
 Custom words work everywhere — furigana, search, print, audio, every
 flashcard direction. Changes save immediately and sync when signed in.
@@ -322,7 +323,8 @@ sit at the top right, beside the title, and open as their own screen with a
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused
 table just stops appearing in reviews until you resume it. FSRS state and
-history are always kept.
+history are always kept. Right after a pause, **Undo** at the bottom of the
+screen takes it back.
 
 ### Dashboard
 
