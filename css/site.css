@@ -5759,6 +5759,35 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 @media print { .undo-toast { display: none; } }
 
+/* Scroll edges, as in iOS 26: content sliding under a floating bar
+   dissolves into it instead of meeting a hard cut. The top bars' glass
+   fades out over its last 10px (a mask on the blur layer itself, so the
+   pinned table title right under the search band is never washed over) --
+   only the lowest bar fades: over the reference pages the search band sits
+   right under the small title / desktop bar, and those two meet flush;
+   on a phone, the strip behind the floating tab bar blurs and veils the
+   rows passing under it, strongest at the bottom edge. Neither takes a
+   tap. A running review hides the tab bar, and its veil with it. */
+.page-vocab .vocab-toolbar::before,
+body:not(:has(#vocabPage:not([hidden]))) .masthead::before,
+body.title-collapsed:not(:has(#vocabPage:not([hidden]))) .compact-title {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent);
+}
+@media (max-width: 640px) {
+  body::after {
+    content: ""; position: fixed; left: 0; right: 0; bottom: 0; z-index: 49;
+    height: calc(var(--tabbar-h) + var(--tabbar-gap) + 28px);
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--group-ground) 70%, transparent));
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 60%);
+    mask-image: linear-gradient(to bottom, transparent, #000 60%);
+  }
+  body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))::after { display: none; }
+}
+@media print { body::after { display: none; } }
+
 /* ==========================================================================
    Accessibility display settings, as iOS honours them
    ========================================================================== */
@@ -5772,6 +5801,9 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .page-vocab .vocab-toolbar::before, .masthead::before,
   body.title-collapsed .compact-title { background: var(--group-ground); }
   .ios-confirm-group { background: var(--paper); }
+  /* No see-through scroll edges either. */
+  .page-vocab .vocab-toolbar::before, body .masthead::before, body.title-collapsed .compact-title { -webkit-mask-image: none !important; mask-image: none !important; }
+  body::after { display: none; }
   @media (min-width: 641px) and (max-width: 899px) { .site-nav { background: var(--group-ground); } }
 }
 /* Increase Contrast: the same quiet palette, one firm step stronger --

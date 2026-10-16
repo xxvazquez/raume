@@ -459,6 +459,15 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
+- **Scroll edges** (iOS 26): content passing under a floating bar dissolves
+  into it rather than meeting a hard line. The lowest top bar's glass layer
+  fades out over its last 10px with a mask (the search band on the
+  reference pages; the small phone title or the desktop top bar elsewhere —
+  stacked bars meet flush, and the mask sits on the blur layer, never over
+  the pinned table title below). On a phone a `body::after` veil behind the
+  floating tab bar blurs (6px) and washes the rows passing under it toward
+  the ground, strongest at the bottom edge; no taps, gone during a review
+  (the tab bar is too) and in print. Reduce Transparency removes both.
 - **Accessibility display settings** (the block at the very end of
   `css/site.css`): **Reduce Transparency**
   (`prefers-reduced-transparency: reduce`) turns every glass surface solid —
