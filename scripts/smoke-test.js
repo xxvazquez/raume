@@ -663,7 +663,8 @@ async function main() {
   })());
   check("the review prompt is sized up from the generic .fc-prompt", (() => {
     const rule = allCssRules.find(r => r.selectorText === ".fc-review-card .fc-prompt");
-    return !!rule && parseInt(rule.style.fontSize, 10) >= 24;
+    // Sizes scale with the iPhone's text size: calc(32px * var(--dt)).
+    return !!rule && parseFloat(rule.style.fontSize.replace(/^calc\(/, "")) >= 24;
   })());
   check("speaker buttons stay hidden until a Japanese voice is confirmed available", (() => {
     const base = allCssRules.find(r => r.selectorText === ".jp-speak-btn");
@@ -1604,7 +1605,8 @@ async function main() {
     const printBase = printRules.find(r => r.selectorText === "html .vocab:not(.vocab-sentences)");
     const td = printRules.find(r => r.selectorText === ".vocab td");
     return !!screenBase && !!printBase && !!td
-      && parseFloat(printBase.style.getPropertyValue("--row-top")) > parseFloat(screenBase.style.getPropertyValue("--row-top"))
+      // the screen value scales with the iPhone's text size: calc(13px * var(--dt))
+      && parseFloat(printBase.style.getPropertyValue("--row-top")) > parseFloat(screenBase.style.getPropertyValue("--row-top").trim().replace(/^calc\(/, ""))
       && !td.style.paddingTop && !td.style.padding
       && !printRules.some(r => r.selectorText === ".vocab td.jp");
   })());

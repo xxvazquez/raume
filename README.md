@@ -173,6 +173,11 @@ The **account button** (the person icon) opens one menu:
 | **Appearance** | System / Light / Dark — phone only, likewise |
 | **Sign out** | Signed in only — its one place, at every screen size. If something hasn't synced yet, it asks first |
 
+**Text size.** On an iPhone or iPad the app follows the system text size
+(Settings › Display & Brightness › Text Size): the tables, cards and lists
+grow or shrink with it, up to about a third larger — print stays at its own
+size.
+
 **Screen sizes.** On a phone the sections are a tab bar at the bottom, each
 screen starts with a large title (scroll past it and a small copy stays at the top, as in any iOS app), and the account button sits round beside it.
 On a tablet the top icons carry captions. On desktop the sections sit in a

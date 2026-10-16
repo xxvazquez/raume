@@ -13,6 +13,19 @@ sections below cover each part of it.
 
 ## Type
 
+**Dynamic Type.** On an iPhone or iPad the type follows the system text size,
+as an iOS app's does: `js/theme-init.js` reads WebKit's `-apple-system-body`
+(17px at the default size) and sets `--dt` = its size ÷ 17, held between .88
+and 1.35 — the accessibility sizes stop at 1.35, as an iOS app's bars do, so
+44px rows and capsule controls still hold their text. Every `--fs-*` token,
+the phone's table sizes, category headers, the review prompt and the
+reference rows' shared first-line geometry (`--row-top` / `--l1` /
+`--en-lh`) are `× var(--dt)`, so word, speaker, English and row icons stay on
+one line at any size; furigana (`.58em`) follows its word. `--dt` lives in a
+constructed stylesheet (no `style` attribute), is re-read on returning to
+the app, is 1 everywhere else, and is pinned to 1 in print. Tab-bar labels
+and fixed glyphs keep their size, as iOS's do.
+
 - **Space Grotesk** is used in exactly one place — the `raume` wordmark in the
   desktop top bar (the phone has no wordmark row).
 - **Inter** is everything else. Both are self-hosted (SIL OFL); there is no
@@ -28,7 +41,8 @@ sections below cover each part of it.
   step above the field; `--fs-subhead` alone also sizes non-heading content like
   the flashcard review card's answer text, so it can't just move) ·
   `--fs-section-title` 19 · `--fs-page-title` 22, plus `--fs-jp` / `--fs-romaji`
-  for the Japanese text itself) is shared by the reference and Flashcards
+  for the Japanese text itself — each `calc(N px * var(--dt))`, see Dynamic
+  Type below) is shared by the reference and Flashcards
   sides — a size that
   duplicates a token is written as the token. Labels are **sentence case**,
   everywhere — no ALL-CAPS labels at all (the masthead is the wordmark alone).

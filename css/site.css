@@ -216,19 +216,24 @@
   --nav-h: 39px;
   --vocab-toolbar-h: 54px; /* .vocab-toolbar's height at every width */
 
+  /* The iPhone's text size (Settings › Display & Brightness › Text Size):
+     js/theme-init.js sets --dt from it on iOS -- 1 at the default size,
+     .88 to 1.35 either side -- and every type token below, plus the
+     reference rows' line geometry, scales by it. 1 everywhere else. */
+  --dt: 1;
   /* One type scale for the whole page. Restrained sizes, weight 400 the
      default everywhere, 500 only for a genuinely active/selected state. */
-  --fs-body: 14.5px;
-  --fs-page-title: 22px; /* the one page title in the app -- Flashcards; the reference side has none by design */
-  --fs-section-title: 19px;
-  --fs-nav: 14px;
-  --fs-nav-sub: 13px;
-  --fs-jp: 18.5px;
-  --fs-romaji: 11.5px;
-  --fs-english: 13.5px;
-  --fs-small: 13px;
-  --fs-micro: 11.5px;
-  --fs-subhead: 15px; /* card / section sub-headings inside Flashcards */
+  --fs-body: calc(14.5px * var(--dt));
+  --fs-page-title: calc(22px * var(--dt)); /* the one page title in the app -- Flashcards; the reference side has none by design */
+  --fs-section-title: calc(19px * var(--dt));
+  --fs-nav: calc(14px * var(--dt));
+  --fs-nav-sub: calc(13px * var(--dt));
+  --fs-jp: calc(18.5px * var(--dt));
+  --fs-romaji: calc(11.5px * var(--dt));
+  --fs-english: calc(13.5px * var(--dt));
+  --fs-small: calc(13px * var(--dt));
+  --fs-micro: calc(11.5px * var(--dt));
+  --fs-subhead: calc(15px * var(--dt)); /* card / section sub-headings inside Flashcards */
   /* A card/section heading that sits directly above a text input -- every
      text input is forced to 16px on a touch screen (the shared rule further
      down) so iOS/WebKit doesn't zoom the page on focus, which left a
@@ -236,7 +241,7 @@
      Its own token, not a bump to --fs-subhead itself, since that also sizes
      non-heading content (the flashcard review card's answer text) that has
      nothing to do with this. */
-  --fs-card-heading: 17px;
+  --fs-card-heading: calc(17px * var(--dt));
 
   /* One sans family everywhere -- wordmark, titles, navigation, tables,
      controls. No serif. Japanese keeps its own stack, --font-jp below. */
@@ -1173,7 +1178,7 @@ body.selftest-mode .selftest-hint { display: block; }
 /* iOS / macOS list-header voice: a step smaller than the rows beneath it, in
    secondary grey, inset to line up with the row content -- the header labels
    the group, the rows are what you read. */
-.page-vocab .cat-heading { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+.page-vocab .cat-heading { font-size: calc(12px * var(--dt)); font-weight: 500; letter-spacing: 0; color: var(--muted); }
 .page-vocab .vocab-toolbar { border-bottom: 0; background: var(--group-ground); }
 
 /* Decorative empty-icon "+" placeholder reads as an add button; drop it. */
@@ -2464,7 +2469,7 @@ body.ja-voice-ready .jp-speak-btn {
    wrapped English line -- sits below that line and grows the row downward
    without moving it. */
 .vocab:not(.vocab-sentences) {
-  --row-top: 13px; --l1: 28px; --en-lh: 18px; --row-bottom: 5px;
+  --row-top: calc(13px * var(--dt)); --l1: calc(28px * var(--dt)); --en-lh: calc(18px * var(--dt)); --row-bottom: 5px;
 }
 .vocab:not(.vocab-sentences) td {
   vertical-align: top; padding-top: var(--row-top); padding-bottom: var(--row-bottom);
@@ -2998,8 +3003,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      in the column's 36% share; Meaning steps down too (English phrases
      wrap). The base 36/64 split already gives Meaning enough room now that
      romaji isn't a column fighting it for width. */
-  .vocab td.jp { font-size: 16px; }
-  .vocab td:nth-child(2) { font-size: 12.5px; }
+  .vocab td.jp { font-size: calc(16px * var(--dt)); }
+  .vocab td:nth-child(2) { font-size: calc(12.5px * var(--dt)); }
 }
 
 /* The reference pages' screen title -- an h1, so every page has one real entry
@@ -3032,7 +3037,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     /* The sticky search bar stops under the compact-title bar's height
        (reserved for good, so nothing moves when the small title appears). */
     --compact-h: calc(44px + env(safe-area-inset-top, 0px));
-    --nav-h: calc(var(--compact-h) + 1px); --tabbar-h: 58px; --fs-large-title: 28px;
+    --nav-h: calc(var(--compact-h) + 1px); --tabbar-h: 58px; --fs-large-title: calc(28px * var(--dt));
     /* Above the home indicator where there is one, 12px off the edge where not. */
     --tabbar-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 12px));
   }
@@ -3119,6 +3124,8 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 
 /* --- Print: a clean A4 reference sheet ------------------------- */
 @media print {
+  /* Paper is set at the design sizes, whatever the phone's text size. */
+  :root { --dt: 1 !important; }
   /* An open table's title row is sticky on screen, offset by the nav +
      search bar and bled over the card's side padding. On paper it must sit
      in flow at its own place -- a leftover `top` pushed it down over the
@@ -4553,7 +4560,7 @@ mark.fc-diff-co {
    rules so those, at equal specificity, still win for the Kana drill (their
    own sizes -- unaffected). */
 /* The prompt is the one thing on the card -- iOS large-title scale. */
-.fc-review-card .fc-prompt { font-size: 32px; line-height: 1.25; margin-bottom: 22px; }
+.fc-review-card .fc-prompt { font-size: calc(32px * var(--dt)); line-height: 1.25; margin-bottom: 22px; }
 
 /* Kana tab. The review card reuses every .fc-review-* / .fc-rating-* rule
    above; only the prompt glyph and the group picker need their own styling.
