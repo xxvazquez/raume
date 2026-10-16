@@ -473,6 +473,17 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
+- **Context menu** (`.row-menu`, `interactions.js` `openRowMenu`): holding a
+  reference row (450ms, cancelled by any 8px move or a scroll) or
+  right-clicking it opens iOS's context menu — the page dims and blurs, a
+  white preview card lifts beside the row (the Japanese 1.3× with its
+  furigana, romaji, English — only what the row shows), and a 14px-radius
+  glass menu of 44px rows sits under it (label left, glyph right): Play,
+  Copy, Add to flashcards / Pause in flashcards, Hide row. Each is the row's
+  own control, so it adds no hidden gesture. Placed through a constructed
+  sheet (never a `style` attribute); focus goes to the first item, ↑ / ↓
+  move, Escape or the scrim closes; touch screens get no system callout or
+  text selection on rows. Kanji tiles keep their sheet.
 - **Scroll edges** (iOS 26): content passing under a floating bar dissolves
   into it rather than meeting a hard line. The lowest top bar's glass layer
   fades out over its last 10px with a mask (the search band on the

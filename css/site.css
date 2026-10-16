@@ -5787,6 +5787,54 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 @media print { .undo-toast { display: none; } }
 
+/* A word's context menu (interactions.js openRowMenu), as iOS shows one:
+   the page dims and blurs, the word lifts into a white preview card beside
+   where it was -- the Japanese large with its furigana, romaji, English --
+   and the actions sit under it in a glass menu: 44px rows, label left and
+   glyph right, hairlines between. Pops in; reduced motion just shows it. */
+.row-menu { position: fixed; inset: 0; z-index: 180; }
+.row-menu-scrim {
+  position: absolute; inset: 0; background: rgba(12, 14, 20, .18);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.row-menu-stack {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(300px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 10px;
+  animation: row-menu-in .18s cubic-bezier(.2, .8, .2, 1);
+}
+.row-menu-stack.row-menu-placed { transform: translateX(-50%); }
+.row-menu-preview {
+  padding: 16px 18px; border-radius: var(--radius-card); background: var(--paper);
+  box-shadow: var(--glass-shadow);
+}
+.row-menu-jp { font-size: calc(var(--fs-jp) * 1.3); line-height: 1.5; color: var(--ink); }
+.row-menu-jp .jpword { font-size: inherit; }
+.row-menu-ro { margin-top: 2px; font-size: var(--fs-small); font-style: italic; color: var(--romaji); }
+.row-menu-en { margin-top: 6px; font-size: var(--fs-body); color: var(--ink-2); }
+.row-menu-list {
+  border-radius: 14px; overflow: hidden; background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+}
+.row-menu-item {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  min-height: 44px; padding: 0 16px; text-align: left;
+  font: 400 var(--fs-body)/1.2 var(--font-ui); color: var(--ink);
+}
+.row-menu-item + .row-menu-item { border-top: .5px solid var(--row-line); }
+.row-menu-item:hover, .row-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
+.row-menu-item:active { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+@keyframes row-menu-in { from { opacity: 0; scale: .94; } }
+@media (prefers-reduced-motion: reduce) { .row-menu-stack { animation: none; } }
+/* A hold on a row opens the menu, not the system's callout or a text
+   selection (Copy is in the menu). Touch screens only -- a mouse still
+   selects text. */
+@media (hover: none) {
+  #vocabulary tbody tr { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+}
+@media print { .row-menu { display: none; } }
+
 /* Screen changes (bootstrap.js render): a View Transition. The bars hold
    still -- each is its own transition layer -- while the page moves: a
    pushed screen slides in from the right over the one it came from, which
@@ -5857,6 +5905,7 @@ body.title-collapsed:not(:has(#vocabPage:not([hidden]))) .compact-title {
   /* No see-through scroll edges either. */
   .page-vocab .vocab-toolbar::before, body .masthead::before, body.title-collapsed .compact-title { -webkit-mask-image: none !important; mask-image: none !important; }
   body::after { display: none; }
+  .row-menu-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(12, 14, 20, .4); }
   @media (min-width: 641px) and (max-width: 899px) { .site-nav { background: var(--group-ground); } }
 }
 /* Increase Contrast: the same quiet palette, one firm step stronger --

@@ -94,6 +94,7 @@ Grammatical **particles are blue and bold** everywhere.
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
 | **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. |
+| **Hold a word** | Hold a row (or right-click it) for its menu, as in iOS: the word in a small preview, then **Play**, **Copy** (the Japanese), **Add to flashcards** / **Pause in flashcards** and **Hide row** — the row's own speaker, + / ✓ and eye, as a bigger target. The preview shows only what the row shows, so a hidden column or Cover answers stays hidden. |
 | **Hide a row** | The eye icon marks a word as known for now. **Show all** brings them back. |
 | **Undo** | Hiding a row or a table, pausing a word or a table, and deleting one of your own words each show a small **Undo** bar at the bottom for a few seconds (it stays while you point at it). |
 

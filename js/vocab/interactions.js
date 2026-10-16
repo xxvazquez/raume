@@ -430,6 +430,142 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
   });
 
+  /* A word's context menu, as iOS shows one: hold a reference row (or
+     right-click it) and the word lifts into a small preview with its
+     actions under it -- Play, Copy, Add to flashcards (or Pause), Hide. A
+     bigger target for the row's own controls, never the only way in: each
+     action is the row's speaker, + / ✓ or eye doing exactly what it does,
+     and Copy puts the Japanese on the clipboard. The preview shows only
+     what the row shows -- a hidden column, or Cover answers' blank, stays
+     hidden. A hold that moves (a scroll) never opens it; the hold's own
+     tap is swallowed so it doesn't also reveal the romaji. Kanji tiles keep
+     their own sheet. */
+  const ROW_MENU_HOLD_MS = 450;
+  let rowMenu = null, rowMenuSheet = null;
+  function closeRowMenu() {
+    if (!rowMenu) return;
+    const { el, opener } = rowMenu;
+    rowMenu = null;
+    el.remove();
+    document.removeEventListener('keydown', rowMenuKey, true);
+    if (opener && opener.isConnected && opener.focus) opener.focus({ preventScroll: true });
+  }
+  function rowMenuKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeRowMenu(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const items = [...rowMenu.el.querySelectorAll('.row-menu-item')];
+    const i = items.indexOf(document.activeElement);
+    const next = items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length];
+    if (next) { e.preventDefault(); next.focus(); }
+  }
+  function rowMenuRow(t) {
+    const tr = t && t.closest && t.closest('#vocabulary tbody tr[data-vocab-id]');
+    return tr && !tr.classList.contains('kanji-tile') && !tr.closest('.vocab-kanji') ? tr : null;
+  }
+  function openRowMenu(tr) {
+    closeRowMenu();
+    const esc = window.RaumeStudy.shared.escapeHtml;
+    const body = document.body.classList;
+    const speak = tr.querySelector('.jp-speak-btn');
+    const fcBtn = tr.querySelector('.fc-toggle-btn');
+    const hideBtn = tr.querySelector('.row-hide-btn');
+    const jpCell = tr.querySelector('td.jp');
+    const jpWord = jpCell && jpCell.querySelector('.jpword');
+    const romaji = jpWord && jpWord.dataset.romaji;
+    const enCell = tr.querySelector('td:nth-child(2) .meaning-text');
+    const showJp = !body.contains('hide-japanese');
+    const showEn = !body.contains('hide-english') && !(body.contains('selftest-mode') && !tr.classList.contains('revealed'));
+    const jpHtml = jpWord ? jpWord.cloneNode(true) : null;
+    if (jpHtml) jpHtml.querySelectorAll('mark').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+    const added = fcBtn && fcBtn.classList.contains('fc-added');
+    const items = [];
+    if (speak && body.contains('ja-voice-ready')) items.push(['play', 'Play', '<path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/>']);
+    if (jpWord) items.push(['copy', 'Copy', '<rect x="6" y="6" width="9" height="9" rx="2"/><path d="M12 6V4.5A1.5 1.5 0 0 0 10.5 3h-6A1.5 1.5 0 0 0 3 4.5v6A1.5 1.5 0 0 0 4.5 12H6"/>']);
+    if (fcBtn) items.push(['fc', added ? 'Pause in flashcards' : 'Add to flashcards', added ? '<path d="M7 4.5v9M11 4.5v9"/>' : '<path d="M9 4v10M4 9h10"/>']);
+    if (hideBtn) items.push(['hide', 'Hide row', '<path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/>']);
+    const el = document.createElement('div');
+    el.className = 'row-menu';
+    el.innerHTML = '<div class="row-menu-scrim"></div>' +
+      '<div class="row-menu-stack" role="dialog" aria-modal="true" aria-label="Word actions">' +
+        '<div class="row-menu-preview">' +
+          (showJp && jpHtml ? '<div class="row-menu-jp" lang="ja"></div>' : '') +
+          (romaji ? '<div class="row-menu-ro">' + esc(romaji) + '</div>' : '') +
+          (showEn && enCell ? '<div class="row-menu-en">' + esc(enCell.textContent.trim()) + '</div>' : '') +
+        '</div>' +
+        '<div class="row-menu-list" role="menu">' + items.map(it =>
+          '<button type="button" class="row-menu-item" role="menuitem" data-act="' + it[0] + '">' + esc(it[1]) +
+          '<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + it[2] + '</svg></button>'
+        ).join('') + '</div>' +
+      '</div>';
+    const jpSlot = el.querySelector('.row-menu-jp');
+    if (jpSlot) { jpHtml.classList.remove('jp-romaji-on'); jpHtml.querySelectorAll('.jp-romaji-line').forEach(n => n.remove()); jpSlot.appendChild(jpHtml); }
+    document.body.appendChild(el);
+    // Lift the stack next to the row it came from, kept on screen.
+    const stack = el.querySelector('.row-menu-stack');
+    const r = tr.getBoundingClientRect(), h = stack.offsetHeight, vh = window.innerHeight;
+    const top = Math.max(16, Math.min(r.top, vh - h - 16));
+    // Placed through a constructed sheet, not a style attribute (the CSP).
+    if (!rowMenuSheet && 'adoptedStyleSheets' in document) {
+      try { rowMenuSheet = new CSSStyleSheet(); document.adoptedStyleSheets = document.adoptedStyleSheets.concat([rowMenuSheet]); } catch (e) { rowMenuSheet = false; }
+    }
+    if (rowMenuSheet) { rowMenuSheet.replaceSync('.row-menu-stack.row-menu-placed { top: ' + Math.round(top) + 'px; }'); stack.classList.add('row-menu-placed'); }
+    rowMenu = { el, opener: document.activeElement !== document.body ? document.activeElement : null };
+    el.querySelector('.row-menu-scrim').addEventListener('click', closeRowMenu);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    el.querySelector('.row-menu-list').addEventListener('click', function (e) {
+      const item = e.target.closest('.row-menu-item');
+      if (!item) return;
+      const act = item.dataset.act;
+      closeRowMenu();
+      if (act === 'play') speak.click();
+      else if (act === 'fc') fcBtn.click();
+      else if (act === 'hide') hideBtn.click();
+      else if (act === 'copy') {
+        const c = jpWord.cloneNode(true);
+        c.querySelectorAll('rt, rp, .jp-romaji-line, .visually-hidden').forEach(n => n.remove());
+        const text = c.textContent.replace(/\s+/g, '');
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(function () {});
+      }
+    });
+    document.addEventListener('keydown', rowMenuKey, true);
+    const first = el.querySelector('.row-menu-item');
+    if (first) first.focus({ preventScroll: true });
+  }
+  vocab.openRowMenu = openRowMenu;
+  (function () {
+    let hold = null, swallowClick = false;
+    function cancelHold() { if (hold) { clearTimeout(hold.timer); hold = null; } }
+    document.addEventListener('pointerdown', function (e) {
+      cancelHold();
+      if (e.pointerType === 'mouse' || e.button) return;
+      const tr = rowMenuRow(e.target);
+      if (!tr || e.target.closest('button, a, input')) return;
+      hold = { x: e.clientX, y: e.clientY, timer: setTimeout(function () {
+        hold = null; swallowClick = true; openRowMenu(tr);
+      }, ROW_MENU_HOLD_MS) };
+    }, { passive: true });
+    document.addEventListener('pointermove', function (e) {
+      if (hold && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > 8) cancelHold();
+    }, { passive: true });
+    ['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, cancelHold, { passive: true }));
+    window.addEventListener('scroll', cancelHold, { passive: true });
+    // The hold's own tap mustn't reach the row (it would reveal the romaji).
+    document.addEventListener('click', function (e) {
+      if (!swallowClick) return;
+      swallowClick = false;
+      if (!e.target.closest('.row-menu')) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    // Right-click on a computer; a hold on Android also arrives as this.
+    document.addEventListener('contextmenu', function (e) {
+      if (rowMenu) { e.preventDefault(); return; }
+      const tr = rowMenuRow(e.target);
+      if (!tr || e.target.closest('a, input')) return;
+      e.preventDefault();
+      cancelHold();
+      openRowMenu(tr);
+    });
+  })();
+
   function showStandalonePage(which) {
     closeKanjiSheet();
     var ids = { vocab: 'vocabPage', flashcards: 'flashcardsPage', customize: 'customizePage', help: 'helpPage' };

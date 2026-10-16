@@ -1573,6 +1573,20 @@ async function main() {
   const firstRow = drinksSectionManage.querySelector("tbody tr");
   firstRow.querySelector(".row-hide-btn").click();
   check("clicking the eye hides that row", firstRow.classList.contains("row-hidden"));
+  firstRow.classList.remove("row-hidden");
+  check("holding (or right-clicking) a row opens its context menu -- a preview and Copy / Add to flashcards / Hide row -- and Hide row there is the eye", (() => {
+    firstRow.querySelector("td:nth-child(2)").dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+    const menu = document.querySelector(".row-menu");
+    const acts = menu ? [...menu.querySelectorAll(".row-menu-item")].map(b => b.dataset.act) : [];
+    const ok = !!menu && menu.querySelector('[role="dialog"]') && !!menu.querySelector(".row-menu-preview .jpword")
+      && ["copy", "fc", "hide"].every(a => acts.includes(a)) && document.activeElement === menu.querySelector(".row-menu-item")
+      && document.querySelectorAll("[style]").length === 0;
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const closed = !document.querySelector(".row-menu");
+    firstRow.querySelector("td:nth-child(2)").dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+    document.querySelector('.row-menu-item[data-act="hide"]').click();
+    return ok && closed && !document.querySelector(".row-menu") && firstRow.classList.contains("row-hidden");
+  })());
   check("...and offers Undo, which brings it straight back", (() => {
     const toast = document.querySelector(".undo-toast");
     const ok = !!toast && toast.getAttribute("role") === "status" && /Row hidden/.test(toast.textContent);
