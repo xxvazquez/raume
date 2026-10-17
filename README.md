@@ -409,8 +409,10 @@ scrolls sideways.
 
 - Tap a square or a clue and type. Typing follows the word's direction; tap a
   crossing square again to switch. The bar above the grid shows the clue
-  you're on (it appears once you pick a square; the ⓘ beside Check has the
-  how-to). In a kana grid a hardware keyboard types romaji, as a Japanese
+  you're on (a quiet prompt until you pick a square, so the grid never
+  shifts; the ⓘ beside Check has the how-to). A filled square takes a new
+  letter in place, and moving on never makes the page lurch — it scrolls
+  only when the next square is out of sight. In a kana grid a hardware keyboard types romaji, as a Japanese
   keyboard does — "ka" fills か, "kya" きゃ across two squares, "nn" ん. A
   square turns green the moment it's right, and the last right square
   solves the puzzle. Keys: arrows move (across the way you're typing, the

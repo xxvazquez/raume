@@ -3565,10 +3565,10 @@ async function main() {
     return items.join("|") === "New puzzle|How to play|Reveal puzzle|Clear answers|Save as PDF|Stats"
       && !menu.querySelector("select, #fcXwSource") && menu.querySelector(".section-menu-list").hidden;
   })());
-  check("the clue bar stays hidden until a square is picked -- ⋯ › How to play opens a short note, Escape closes it", (() => {
+  check("the clue bar holds its place from the start (a quiet prompt until a square is picked, so the grid never moves) -- ⋯ › How to play opens a short note, Escape closes it", (() => {
     const bar = document.querySelector("#fcPanelCrosswords .fc-xw-current");
     const pop = document.getElementById("fcXwTipPop");
-    if (!bar.hidden || bar.textContent || !pop.hidden) return false;
+    if (bar.hidden || !bar.classList.contains("fc-xw-current-idle") || !/Tap a square/.test(bar.textContent) || !pop.hidden) return false;
     document.getElementById("fcXwHowto").click();
     const opened = !pop.hidden && /Tap a square/.test(pop.textContent);
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" }));
@@ -3646,6 +3646,16 @@ async function main() {
     const next = document.activeElement;
     const down = li.dataset.dir === "down";
     return ok && next.dataset.r === String(down ? r + 1 : r) && next.dataset.c === String(down ? c : c + 1);
+  })());
+  check("a square that already holds a letter takes the next one typed in its place (beforeinput), then focus moves on", (() => {
+    const li = document.querySelector('#fcPanelCrosswords .fc-xw-cluerows li[data-dir="across"]')
+      || document.querySelector("#fcPanelCrosswords .fc-xw-cluerows li");
+    li.click();
+    const start = document.activeElement;
+    start.value = "q";
+    const ev = new window.InputEvent("beforeinput", { data: "z", inputType: "insertText", bubbles: true, cancelable: true });
+    start.dispatchEvent(ev);
+    return ev.defaultPrevented && start.value === "z" && document.activeElement !== start;
   })());
   document.getElementById("fcXwReset").click();
 

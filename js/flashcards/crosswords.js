@@ -2597,7 +2597,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // same as any iOS word-game grid.
   function gridHtml(p, arroword, romajiMode) {
     var langAttr = romajiMode ? "" : ' lang="ja"';
-    var maxLen = romajiMode ? "1" : "2";
     var rows = [];
     for (var r = 0; r < p.rows; r++) {
       var cells = [];
@@ -2606,7 +2605,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (p.grid[k] !== undefined) {
           var num = !arroword && p.numbers[k] ? '<span class="fc-xw-num">' + p.numbers[k] + "</span>" : "";
           cells.push('<div class="fc-xw-cell fc-xw-cell-letter">' + num +
-            '<input class="fc-xw-cell-input" type="text" inputmode="text"' + langAttr + ' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="' + maxLen + '" data-r="' + r + '" data-c="' + c + '" aria-label="Row ' + (r + 1) + ", column " + (c + 1) + '">' +
+            '<input class="fc-xw-cell-input" type="text" inputmode="text"' + langAttr + ' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-r="' + r + '" data-c="' + c + '" aria-label="Row ' + (r + 1) + ", column " + (c + 1) + '">' +
             "</div>");
         } else if (p.clueCells[k]) {
           var cc = p.clueCells[k];
@@ -2675,7 +2674,35 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var r = +input.dataset.r, c = +input.dataset.c;
       return dir === "down" ? inputAt(r + sign, c) : inputAt(r, c + sign);
     }
-    function go(el) { if (el) { el.focus(); el.select(); } }
+    // Moving to a square never lets the browser scroll for it: WebKit
+    // re-centres every newly focused field above the keyboard, so the page
+    // lurched on each letter. Instead the page moves only when the square
+    // (with the clue bar, where both fit) is actually out of sight.
+    function go(el) {
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      reveal(el);
+    }
+    function reveal(el) {
+      var wrap = el.closest(".fc-xw-gridwrap"), cell = el.closest(".fc-xw-cell");
+      if (wrap && wrap.scrollWidth > wrap.clientWidth) {
+        var w = wrap.getBoundingClientRect(), r0 = cell.getBoundingClientRect();
+        if (r0.left < w.left) wrap.scrollLeft -= w.left - r0.left + 8;
+        else if (r0.right > w.right) wrap.scrollLeft += r0.right - w.right + 8;
+      }
+      var vv = window.visualViewport, r = cell.getBoundingClientRect();
+      var top = (vv ? vv.offsetTop : 0) + 12, bottom = (vv ? vv.offsetTop + vv.height : window.innerHeight) - 12;
+      // The pinned top bar (wide window) and, keyboard down, the floating
+      // tab bar (phone) cover the page's edges.
+      var head = document.querySelector(".masthead"), bar = document.querySelector(".site-nav");
+      if (head && getComputedStyle(head).position === "sticky") top = Math.max(top, head.getBoundingClientRect().bottom + 12);
+      if (vv && vv.height > window.innerHeight - 100 && bar && getComputedStyle(bar).position === "fixed") bottom = Math.min(bottom, bar.getBoundingClientRect().top - 8);
+      var upTo = currentEl ? Math.min(currentEl.getBoundingClientRect().top, r.top) : r.top;
+      if (r.bottom - upTo <= bottom - top) upTo = Math.max(upTo, r.bottom - (bottom - top));
+      else upTo = r.top;
+      var dy = upTo < top ? upTo - top : r.bottom > bottom ? r.bottom - bottom : 0;
+      if (dy) window.scrollBy(0, dy);
+    }
     function placementsAt(key) {
       return p.placements.filter(function (pl) { return cellsForPlacement(pl).indexOf(key) !== -1; });
     }
@@ -2704,7 +2731,6 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         var label = arroword ? (pl.dir === "down" ? "Down" : "Across") : pl.number + " " + (pl.dir === "down" ? "Down" : "Across");
         currentEl.innerHTML = '<span class="fc-xw-current-label">' + label + "</span>" + '<span class="fc-xw-current-clue">' + esc(pl.clue) + "</span>";
         currentEl.classList.remove("fc-xw-current-idle");
-        currentEl.hidden = false;
       }
     }
     function focusAt(key, d) {
@@ -2779,40 +2805,80 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       setActive(input);
     });
 
-    // IME composition (typing kana via romaji on a hardware keyboard) fires
-    // several "input" events before the character is actually committed --
-    // auto-advancing mid-composition would fling focus to the next cell
-    // before the reader is done typing. Wait for compositionend; a direct
-    // kana keyboard/tap (no composition) still fires a plain "input".
+    // Typing goes through beforeinput rather than the field's own editing:
+    // a square that already holds a letter (a crossing word's, a wrong
+    // guess) takes the new one in its place wherever the caret sits, which
+    // a one-character field can't do on its own -- and select() to make
+    // room doesn't work on iPhone, so filled squares used to swallow keys.
+    //
+    // IME composition (a Japanese keyboard's romaji or flick input) can't be
+    // cancelled and fires several "input" events before the kana is
+    // committed -- auto-advancing mid-composition would fling focus to the
+    // next square before the reader is done. Wait for compositionend and
+    // take what it committed (several kana run on along the word).
     var composing = false;
     gridEl.addEventListener("compositionstart", function () { composing = true; });
-    gridEl.addEventListener("compositionend", function (e) { composing = false; afterType(e.target); });
+    gridEl.addEventListener("compositionend", function (e) {
+      composing = false;
+      var input = e.target.closest(".fc-xw-cell-input");
+      if (input) typeText(input, e.data || input.value.slice(-1));
+    });
+    gridEl.addEventListener("beforeinput", function (e) {
+      var input = e.target.closest(".fc-xw-cell-input");
+      if (!input || composing || e.isComposing || e.inputType !== "insertText" || !e.data) return;
+      e.preventDefault();
+      typeText(input, e.data);
+    });
+    // Anything that still edits the field itself (autofill, a deletion,
+    // a keyboard without beforeinput): keep its last character.
+    gridEl.addEventListener("input", function (e) {
+      var input = e.target.closest(".fc-xw-cell-input");
+      if (!input || composing || e.isComposing || /Composition/.test(e.inputType || "")) return;
+      var v = input.value;
+      if (!v) { clearVerdict(input); if (pend && pend.input === input) pend = null; return; }
+      typeText(input, kanaGrid && /[a-z]/i.test(v) ? v.replace(/[^a-z'\-]/gi, "").slice(-1) : v.slice(-1));
+    });
 
-    function afterType(input) {
+    // The keyboard coming up (or the window resizing) can leave the square
+    // you're on, or its clue, under it: once it settles, bring them back.
+    var vvTimer = null;
+    function onViewport() {
+      if (!gridEl.isConnected) { window.visualViewport.removeEventListener("resize", onViewport); return; }
+      window.clearTimeout(vvTimer);
+      vvTimer = window.setTimeout(function () {
+        var a = document.activeElement;
+        if (a && gridEl.contains(a) && a.classList.contains("fc-xw-cell-input")) reveal(a);
+      }, 150);
+    }
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewport);
+
+    function typeText(input, text) {
       clearVerdict(input);
+      text = text.replace(/\s+/g, "").toLowerCase();
       // Romaji into a kana square from a keyboard that skipped keydown
-      // (Android's sends "Unidentified"): the same conversion.
-      if (kanaGrid && /[a-z]/i.test(input.value)) {
-        var typed = input.value.toLowerCase().replace(/[^a-z'\-]/g, "").slice(-1);
-        var buf = (pend && pend.input === input ? pend.buf : "") + typed;
+      // (iPhone's software keyboard sends some letters only as input).
+      if (kanaGrid && /[a-z]/.test(text)) {
+        var buf = (pend && pend.input === input ? pend.buf : "") + text.replace(/[^a-z'\-]/g, "");
         input.value = "";
         feedRomaji(input, buf);
         return;
       }
-      if (input.value.length > 1) input.value = input.value.slice(-1);
-      // Lowercase as typed -- only meaningful for a romaji answer (kana
-      // passes through toLowerCase untouched), so this is safe in every mode.
-      input.value = input.value.toLowerCase();
-      verdict(input);
-      if (!input.value) return;
+      if (!text) return;
+      if (pend && pend.input === input) pend = null;
+      // Several characters at once (a committed run of kana, a predictive
+      // suggestion) fill the word's squares in turn.
+      var chars = Array.from(text), at = input;
+      for (var i = 0; i < chars.length && at; i++) {
+        if (i) at = step(at, 1);
+        if (!at) break;
+        at.value = kanaGrid ? kanaFor(chars[i]) : chars[i];
+        verdict(at);
+        if (i === chars.length - 1) input = at;
+      }
       // Letter cells in a line are always one word (fits() never lets two
       // words run end to end), so the next cell along is still this word.
       go(step(input, 1));
     }
-    gridEl.addEventListener("input", function (e) {
-      var input = e.target.closest(".fc-xw-cell-input");
-      if (input && !composing) afterType(input);
-    });
 
     // The nearest square in a direction, past clue and blank squares.
     function inputToward(input, dr, dc) {
@@ -3411,7 +3477,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch
         ? '<div class="fc-xw-gridwrap">' + wordSearchGridHtml(p, romajiMode) + "</div>"
-        : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite" hidden></p>' +
+        : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start</p>' +
           '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
           gridHtml(p, arroword, romajiMode) + "</div></div>") +
       '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : arroword ? "" : clueListHtml(p)) + notesHtml() + "</div>" +

@@ -996,7 +996,10 @@ textarea as tall as the list, no border, no Save, section-tone caret — the
 free space beside a short word list rather than an over-wide one (a word
 search's list is held to 300px); where it wraps under the lists it spans
 their full width, edges aligned. It belongs to the puzzle (blank on New
-puzzle) and isn't on a phone or in print. The clue bar only shows once a square is picked — the
+puzzle) and isn't on a phone or in print. The clue bar is there from the start (a muted "Tap a square or a clue to
+start" until one is picked), so the first tap never pushes the grid down; moving square to
+square focuses without the browser's scroll, and the page moves only to bring a hidden square
+(and its clue bar) back into view — the
 how-to lives behind a bare ⓘ beside Check (a small glass popover), not as a
 standing line. The grid draws only the letter squares — white with a
 hairline, blanks are the page ground — shrinking to a 24px floor before it
