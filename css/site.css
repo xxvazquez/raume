@@ -2366,7 +2366,9 @@ body.ja-voice-ready .jp-speak-btn {
 .vocab tbody tr:focus-within .jp-speak-btn,
 .jp-speak-btn:focus-visible { opacity: 1; }
 .jp-speak-btn:hover { color: var(--accent-dark); }
-.fc-review-card .jp-speak-btn { opacity: .55; position: relative; }
+/* Out of the line, so the word itself is what's centred on the card -- the
+   speaker hangs just after it instead of pushing it left. */
+.fc-review-card .jp-speak-btn { opacity: .55; position: absolute; font-size: inherit; margin-top: calc(.7em - 8.5px); }
 /* The glyph stays small beside the word; the tap area doesn't (44pt). */
 .fc-review-card .jp-speak-btn::after { content: ""; position: absolute; inset: -13px; }
 @media (hover: none) {
@@ -3938,6 +3940,19 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-fb-hot .fc-fb-hot-lbl { display: inline; animation: fc-fb-rise .3s ease-out both; }
 /* On a phone the label would crowd the title: the glow says it alone. */
 @media (max-width: 420px) { .fc-fb-hot .fc-fb-hot-lbl { display: none; } }
+/* A phone's toolbar has Hint, pause, the streak, the count and ⋯ beside the
+   game's name: the streak goes down to its bare dots (the glow still marks
+   a hot streak) and the gaps tighten, so the name reads in full instead of
+   "W…". */
+@media (max-width: 420px) {
+  .fc-xw-actions, .fc-xw-actions-end { gap: 6px; }
+  .fc-xw-actions .fc-btn.fc-xw-hint { padding: 7px 12px; }
+  .fc-xw-actions .fc-fb-streak { padding: 0 2px; gap: 3px; background: none; box-shadow: none; }
+  .fc-xw-actions .fc-xw-title { font-size: 16px; }
+  .fc-xw-actions .fc-fb-streak.fc-fb-hot { padding: 0 8px; background: color-mix(in srgb, var(--section) 14%, var(--paper)); }
+  .fc-xw-actions .fc-ws-count { padding: 0; }
+  .fc-xw-actions .fc-mt-pause-btn { width: 28px; }
+}
 @keyframes fc-fb-wash { to { transform: scale(1); } }
 @keyframes fc-fb-press { 35% { transform: scale(.95); } }
 @keyframes fc-fb-shake { 18% { transform: translateX(-8px); } 36% { transform: translateX(7px); } 54% { transform: translateX(-4px); } 72% { transform: translateX(2px); } }

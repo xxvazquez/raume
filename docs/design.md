@@ -91,7 +91,7 @@ and fixed glyphs keep their size, as iOS's do.
   label (15px 500, its interval 12px under it) coloured only in its own tone;
   the usual choice (Good after a right answer, Again after a miss) reads
   full-strength, the other three at reduced (not faint) opacity — same weight.
-  The speaker glyph beside the prompt stays small but takes a 44pt tap area. The card is top-anchored (no re-centring
+  The speaker glyph beside the prompt stays small but takes a 44pt tap area, and hangs out of the line so the word itself — not word + speaker — is what's centred. The card is top-anchored (no re-centring
   when the answer drops in), and a `<progress>` bar under the meta line shows
   the session. On a phone the chrome (meta line, padding, rating row, the
   "stage" panel) tightens but the prompt keeps its full size and air. Past

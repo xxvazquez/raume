@@ -474,7 +474,7 @@ your finger; the right answer washes green from its middle out and a ✓ draws
 itself in its corner (a ring around it if you picked another), a wrong pick
 washes red with a short shake and a ✕, and the English rises into place. In
 Listening, Kana tiles, Odd one out and Word chain, five small dots beside the
-counter fill with each right answer in a row — the fifth glows once and says
+counter (bare dots on a phone, to leave the game's name room) fill with each right answer in a row — the fifth glows once and says
 "5 in a row" — and a miss empties them. No sounds, points or confetti;
 with reduced motion on, it's all a plain change of state.
 
