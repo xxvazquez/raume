@@ -736,8 +736,8 @@ window.RaumeStudy.flashcards.views = (function () {
         if (!parsed.ok) { showError(parsed.error); return; }
         var sm = parsed.summary;
         var when = sm.exportedAt && !isNaN(Date.parse(sm.exportedAt)) ? " from " + new Date(sm.exportedAt).toLocaleDateString() : "";
-        var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + sm.cards + " cards)"];
-        if (sm.kanaCards) parts.push(sm.kanaCards + " Kana cards");
+        var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + sm.cards + " card" + (sm.cards === 1 ? "" : "s") + ")"];
+        if (sm.kanaCards) parts.push(sm.kanaCards + " Kana card" + (sm.kanaCards === 1 ? "" : "s"));
         if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
         if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
         if (sm.knownKanji) parts.push(sm.knownKanji + " known kanji");
