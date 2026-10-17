@@ -2662,14 +2662,13 @@ async function main() {
     return document.querySelectorAll(".fc-review-card .fc-prompt-small").length === 0
       && document.querySelectorAll(".fc-review-card .fc-prompt").length === 1;
   })());
-  check("the reveal shows one field of context (meaning/reading), not just the answer -- the reading sits under the word for Japanese -> English, the meaning line under the answer for the other three directions", (() => {
+  check("the reveal shows one field of context (meaning/reading), not just the answer -- for Japanese -> English the English answer itself, with no second kana line under a word whose furigana already reads it; the meaning line under the answer for the other three directions", (() => {
     const direction = (document.querySelector(".fc-review-progress") || {}).textContent || "";
     if (direction.indexOf("Japanese → English") === 0) {
-      // ...unless the word is kana-only (レモン) -- then it is its own reading.
       const readingEl = document.querySelector(".fc-prompt-reading");
-      const word = document.querySelector(".fc-review-card .fc-prompt").textContent.trim();
-      if (/^[\u3040-\u30ff\s]+$/.test(word)) return !!readingEl && readingEl.hidden;
-      return !!readingEl && !readingEl.hidden && readingEl.textContent.trim().length > 0;
+      const prompt = document.querySelector(".fc-review-card .fc-prompt");
+      const answer = document.querySelector(".fc-stage-expected, .fc-stage-compare .fc-answer-right");
+      return !!readingEl && (readingEl.hidden || !prompt.querySelector("ruby")) && !!answer && answer.textContent.trim().length > 0;
     }
     const meaningEl = document.querySelector(".fc-stage-meaning");
     // A Japanese meaning line keeps its furigana, like Japanese everywhere else.

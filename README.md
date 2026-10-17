@@ -302,8 +302,10 @@ their cards then.
 <details>
 <summary><b>What the answer reveals</b></summary>
 
-- Japanese → English shows the word's reading under it once checked — not for
-  kana-only words like レモン, where it would just repeat the word.
+- Japanese → English shows the English answer right under the word once
+  checked — a miss shows the right meaning first, then what you typed. A word's
+  furigana already gives its reading, so no second kana line is added; only a
+  bare kanji card (山) shows its reading under it.
 - Romaji and English prompts reveal the Japanese under the answer once
   checked, with its furigana — Japanese never appears without it.
 

@@ -84,9 +84,9 @@ and fixed glyphs keep their size, as iOS's do.
   and a phone's on-screen keyboard doesn't close) and what you typed becomes
   one quiet secondary line below the answer — never struck through, which
   was hard to read (a one-letter romaji slip gets the same letter-level
-  marks as the answer above it). Japanese → English shows the reading under
-  the word once checked, except for a kana-only word (レモン), which is its
-  own reading. The ratings are a plain text action row — no pills, no
+  marks as the answer above it). Japanese → English adds no kana line under
+  a word (its furigana already reads it — a second line only pushed the
+  English answer down); only a bare kanji card shows its reading there. The ratings are a plain text action row — no pills, no
   track, no key chip — a hairline above marking them off from the card, each
   label (15px 500, its interval 12px under it) coloured only in its own tone;
   the usual choice (Good after a right answer, Again after a miss) reads

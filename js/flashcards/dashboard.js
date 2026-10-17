@@ -1516,12 +1516,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     promptEl.innerHTML = prompt.html || esc(prompt.text) +
       (prompt.note ? '<span class="fc-prompt-note">' + esc(prompt.note) + "</span>" : "");
 
-    // The reading, right under the word -- only Japanese -> English needs it
-    // (Japanese -> Romaji already tests the reading itself), and only once
-    // checked, so it can't be used to dodge the meaning question above it.
-    // A kana-only word (レモン, りんご) is its own reading -- nothing to add.
+    // The reading, right under the word -- only for a kanji card's bare
+    // character (Japanese -> English), and only once checked, so it can't
+    // be used to dodge the meaning question above it. A word's prompt
+    // already carries its furigana, so a second kana line under it said
+    // nothing new and pushed the English answer -- what a miss needs to
+    // show -- down the card.
     var readingEl = shell.querySelector(".fc-prompt-reading");
-    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en" &&
+    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en" && entry.kanji &&
       !!entry.jpReading && entry.jpReading !== entry.jpPlain;
     readingEl.hidden = !showReading;
     readingEl.textContent = showReading ? entry.jpReading : "";
