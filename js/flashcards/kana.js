@@ -414,7 +414,9 @@ window.RaumeStudy.flashcards.kana = (function () {
       // goes anywhere once checked, so echoing it again just below was
       // showing the same word twice on screen at once.
       '<span class="fc-verdict-badge fc-verdict-badge-' + (session.correct ? "ok" : "bad") + '">' + (session.correct ? VERDICT_OK_ICON : VERDICT_BAD_ICON) + "</span>" +
-      '<div class="fc-stage">' + stageHtml + "</div>" +
+      '<div class="fc-stage">' + stageHtml +
+      // A sokuon word is a word: its meaning, as a word card's reveal has it.
+      (item.english ? '<div class="fc-stage-meaning"><span class="fc-answer-label">English</span>' + esc(item.english) + "</div>" : "") + "</div>" +
       ratingRowHtml(session.correct === false) +
       "</div>";
 
@@ -422,7 +424,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (resultEl) resultEl.setAttribute("aria-label",
       (session.correct ? "Correct." : "Not quite.") +
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
-      " Answer: " + expected + ".");
+      " Answer: " + expected + "." + (item.english ? " English: " + item.english + "." : ""));
     dyn.querySelectorAll(".fc-rating-btn").forEach(function (btn) {
       btn.addEventListener("click", function () { rate(btn.dataset.rating); });
     });

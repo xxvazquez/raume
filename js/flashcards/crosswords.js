@@ -2026,7 +2026,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var kanji = w.written !== w.answer;
     return '<span class="fc-wc-chip' + (isNew ? " fc-wc-chip-new" : "") + '">' +
       '<span class="fc-wc-chip-w" lang="ja">' + (kanji ? esc(w.written) : marked) + "</span>" +
-      (kanji ? '<span class="fc-wc-chip-r" lang="ja">' + marked + "</span>" : "") + "</span>";
+      (kanji ? '<span class="fc-wc-chip-r" lang="ja">' + marked + "</span>" : "") +
+      '<span class="fc-wc-chip-en">' + esc(w.clue) + "</span></span>";
   }
   var SEND_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14.5v-11M4.5 8 9 3.5 13.5 8"/></svg>';
   var WC_RULES = "A word ending in ー counts its kana before it (コーヒー → ひ), a final small ゃゅょ counts as its big kana (でんしゃ → や), and か is not が. A word ending in ん ends the chain, so it can’t be played.";
@@ -2157,7 +2158,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
     function setup() { return setupKey(total, "kana|type"); }
     function chainLineHtml() {
-      return '<p class="fc-wc-chain" lang="ja">' + trail.map(function (w) { return esc(w.written); }).join(" → ") + "</p>";
+      return '<p class="fc-wc-chain">' + trail.map(function (w) { return '<span lang="ja">' + esc(w.written) + '</span> <span class="fc-wc-chain-en">' + esc(w.clue) + "</span>"; }).join(" → ") + "</p>";
     }
     function missedHtml() {
       return missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {

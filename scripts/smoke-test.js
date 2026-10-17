@@ -3260,7 +3260,7 @@ async function main() {
     !!zasshi && !!matchi && kh.checkKana(zasshi, "zassi") && kh.checkKana(matchi, "macchi") && kh.checkKana(matchi, "matchi")
     && !kh.checkKana(zasshi, "zasi") && !kh.checkKana(matchi, "machi"));
   const sokuon = kd.itemsFor(["hira-sokuon"]);
-  check("sokuon is drilled as short doubled-consonant words", sokuon.length > 3 && sokuon.every(it => it.word && it.kana.length > 1 && /[a-z]/.test(it.romaji)));
+  check("sokuon is drilled as short doubled-consonant words, each with its English", sokuon.concat(kd.itemsFor(["kata-sokuon"])).every(it => it.word && it.kana.length > 1 && /[a-z]/.test(it.romaji) && /^[a-z]/.test(it.english)));
 
   document.querySelector('.fc-tab[data-tab="kana"]').click();
   check("the Kana tab opens on a group picker with a Study button", !!document.getElementById("fcKanaStart") && document.querySelectorAll("#fcPanelKana .fc-kana-group-cb").length === 10);
@@ -4355,7 +4355,7 @@ async function main() {
     const p = xw.state.puzzle;
     const menu = [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|");
     return !!p.start && wcEl(".fc-wc-kana").textContent === p.start.tail && !document.querySelector("#fcPanelGames .fc-oo-word")
-      && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 1 && !!wcEl(".fc-wc-field") && !!document.getElementById("fcXwHint")
+      && document.querySelectorAll("#fcPanelGames .fc-wc-chip").length === 1 && wcEl(".fc-wc-chip-en").textContent === p.start.clue && !!wcEl(".fc-wc-field") && !!document.getElementById("fcXwHint")
       && !document.querySelector('#fcPanelGames [data-pick="script"]') && /^New game\|Skip this link\|How to play/.test(menu)
       && document.querySelectorAll("#fcPanelGames [style]").length === 0;
   })());

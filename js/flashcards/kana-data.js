@@ -40,9 +40,17 @@ window.RaumeStudy.flashcards.kanaData = (function () {
     "びゃ", "びゅ", "びょ", "ぴゃ", "ぴゅ", "ぴょ"
   ];
   // Sokuon has no reading alone -- drill it in short words where the っ / ッ
-  // doubles the next consonant. These are already in their final script.
+  // doubles the next consonant. These are already in their final script;
+  // each carries its meaning, shown once answered (a word is never left
+  // without its English).
   var SOKUON_HIRA = ["きって", "がっこう", "ざっし", "きっぷ", "けっこん", "ちょっと", "いっぱい", "しゅっぱつ"];
   var SOKUON_KATA = ["コップ", "ベッド", "サッカー", "マッチ", "スリッパ", "バッグ", "チケット", "ネックレス"];
+  var WORD_ENGLISH = {
+    "きって": "stamp", "がっこう": "school", "ざっし": "magazine", "きっぷ": "ticket",
+    "けっこん": "marriage", "ちょっと": "a little", "いっぱい": "full, a lot", "しゅっぱつ": "departure",
+    "コップ": "cup, glass", "ベッド": "bed", "サッカー": "soccer", "マッチ": "match",
+    "スリッパ": "slippers", "バッグ": "bag", "チケット": "ticket", "ネックレス": "necklace"
+  };
 
   // Extra accepted spellings, keyed by the Hepburn romaji the trainer shows.
   var ALT_BY_ROMAJI = {
@@ -85,7 +93,7 @@ window.RaumeStudy.flashcards.kanaData = (function () {
     var answers = def.words
       ? [romaji]
       : uniq([romaji].concat(ALT_BY_ROMAJI[romaji] || []).concat(ALT_BY_KANA[kana] || []));
-    return { id: def.id + ":" + kana, kana: kana, romaji: romaji, answers: answers, script: def.script, groupId: def.id, word: !!def.words };
+    return { id: def.id + ":" + kana, kana: kana, romaji: romaji, answers: answers, script: def.script, groupId: def.id, word: !!def.words, english: def.words ? WORD_ENGLISH[kana] || "" : "" };
   }
 
   var itemCache = null;

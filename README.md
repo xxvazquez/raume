@@ -367,7 +367,8 @@ now (started / not started under it) and **Study now**. Below it, choose groups
 (**gojūon, dakuten, handakuten, yōon, sokuon**, for each script). Each card
 shows a kana and you type its reading in romaji; a few alternates like `si` /
 `shi` are accepted (a sokuon word takes every keyboard spelling a word card
-does — `zassi`, `macchi`), and vowel length counts.
+does — `zassi`, `macchi`), and vowel length counts. A sokuon word shows its
+English once answered (きって, stamp).
 
 It uses the same review card as the word flashcards, with its own FSRS
 settings.
@@ -597,7 +598,7 @@ with reduced motion on, it's all a plain change of state.
 - しりとり: each word starts with the kana the one before it ends on, and
   you **type** it — nothing to pick from, so you have to recall a word.
   The chain so far runs along the top (each word as it's written, its
-  reading under kanji, the kana it links on underlined); under it, "Starts
+  reading under kanji, its English, the kana it links on underlined); under it, "Starts
   with や" in large kana, with the last word and its English.
 - Type in romaji and it turns into kana as you go, like a Japanese
   keyboard: `ya` → や, `shi` / `si` → し, a doubled consonant → っ
@@ -618,7 +619,7 @@ with reduced motion on, it's all a plain change of state.
 - **Hint** (beside ⏸) shows the English of one word that would work; ⋯ ›
   *Skip this link* plays one for you. *Words* is the number of links; a link
   counts as right only with no miss, hint or skip. At the end: the score,
-  the whole chain on one line, and the links you missed. Hints show in its
+  the whole chain on one line (each word with its English), and the links you missed. Hints show in its
   Stats.
 
 </details>

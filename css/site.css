@@ -3861,6 +3861,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-wc-chip-w { font-size: 17px; line-height: 1.25; color: var(--ink); }
 .fc-wc-chip-r { font-size: 11px; color: var(--muted); }
+.fc-wc-chip-en { font-size: 11px; line-height: 1.3; color: var(--muted); white-space: nowrap; }
+.fc-wc-chain-en { color: var(--muted); font-size: var(--fs-small); }
 .fc-wc-chip u { text-decoration: underline 2px var(--section); text-underline-offset: 3px; }
 .fc-wc-chip-new { animation: fc-wc-in .3s cubic-bezier(.2, .8, .2, 1); }
 @keyframes fc-wc-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
