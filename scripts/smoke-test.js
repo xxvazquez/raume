@@ -1378,8 +1378,8 @@ async function main() {
 
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
-  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Notes / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
+    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Notes|Customize tables|Help|Support raume"
     && acctMenu.querySelector('[data-menu-go="signout"]').hidden
     && acctMenu.querySelector('a[href="https://ko-fi.com/raume"]').rel === "noopener"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
@@ -2037,6 +2037,65 @@ async function main() {
   helpBtn.click();
   check("clicking the help button again returns to the reference", document.getElementById("vocabPage").hidden === false && document.getElementById("helpPage").hidden === true);
   window.location.hash = "";
+
+  console.log("Notes page (the reader's own class notes)");
+  const notesBtn = document.getElementById("notesToggle");
+  check("the masthead has a Notes button, captioned, and the phone's account menu a Notes row", !!notesBtn
+    && notesBtn.getAttribute("aria-label") === "Notes" && /Notes/.test(notesBtn.textContent)
+    && !!document.querySelector('#accountMenu [data-menu-go="notes"][data-phone-only]'));
+  check("the Notes page starts hidden", document.getElementById("notesPage").hidden === true);
+  notesBtn.click();
+  check("clicking it shows Notes, says #notes and marks the button active", document.getElementById("notesPage").hidden === false
+    && document.getElementById("vocabPage").hidden === true && window.location.hash === "#notes" && notesBtn.classList.contains("active"));
+  check("signed out, it explains notes are private to an account and offers Sign in -- no Add", (() => {
+    const p = document.getElementById("notesPage");
+    return /private to your account/.test(p.textContent) && !!document.getElementById("notesSignIn") && !document.getElementById("notesAdd");
+  })());
+  check("no inline style attribute on the Notes page", document.querySelectorAll("#notesPage [style]").length === 0);
+  window.location.hash = "#notes/abc";
+  await new Promise(r => setTimeout(r, 0)); // jsdom delivers popstate as its own task
+  check("#notes/<id> routes to the reader with a ‹ Notes back button", document.body.dataset.activePage === "notes" && !!document.getElementById("notesBack"));
+  notesBtn.click();
+  check("clicking Notes again returns to the reference", document.getElementById("vocabPage").hidden === false && document.getElementById("notesPage").hidden === true);
+  window.location.hash = "";
+  (() => {
+    const nh = window.RaumeStudy.notes.__testHooks;
+    const lesson = '<html><head><meta name="raume-note" content="1"><meta name="raume-note-date" content="2026-11-21">' +
+      '<title>Lesson 14 · Places</title><style>body{color:red}</style><script>window.__ran=1</script></head><body><article class="rn">' +
+      '<section class="rn-sec" data-tile="blue" style="color:red" onclick="window.__ran=1">' +
+      '<div class="rn-st rn-ans"><div class="rn-jp"><ruby>町<rt>まち</rt></ruby>です</div><div class="rn-ro">machi desu</div><div class="rn-en">It’s a town.</div></div>' +
+      '<img src="x" onerror="window.__ran=1"><a href="javascript:alert(1)">link text</a><iframe src="https://example.com"></iframe>' +
+      '<svg viewBox="0 0 80 50" onload="window.__ran=1"><circle class="pk-dot" cx="4" cy="4" r="2"/></svg></section></article></body></html>';
+    const d = nh.describeFile(lesson, "whatever.html", 0);
+    check("a lesson note names itself and its date (<title>, raume-note-date)", d.title === "Lesson 14 · Places" && d.date === "2026-11-21");
+    check("any other file is named after the file, dated by it", (() => {
+      const o = nh.describeFile("<p>hi</p>", "Week 3.html", new Date(2026, 10, 7).getTime());
+      return o.title === "Week 3" && o.date === "2026-11-07";
+    })());
+    const parser = new window.DOMParser();
+    check("only a file marked raume-note with an article.rn counts as a lesson note", nh.isLessonNote(parser.parseFromString(lesson, "text/html"))
+      && !nh.isLessonNote(parser.parseFromString('<article class="rn"></article>', "text/html")));
+    const host = document.getElementById("notesPage");
+    const spot = document.createElement("p");
+    host.appendChild(spot);
+    nh.showLessonHtml(lesson, spot);
+    const rn = host.querySelector(".rn");
+    check("a lesson note is drawn into raume's own page as .rn, its text intact", !!rn && /machi desu/.test(rn.textContent) && !!rn.querySelector("ruby rt"));
+    check("...with nothing that runs, loads or styles itself: no script, style, iframe, img, link, on* or style=\"\"", !!rn
+      && !rn.querySelector("script, style, iframe, img, a") && !rn.querySelector("[style], [onclick], [onload], [onerror]")
+      && !window.__ran && /link text/.test(rn.textContent));
+    check("...keeping its classes, tile hue and simple drawings", !!rn && !!rn.querySelector('.rn-sec[data-tile="blue"]') && !!rn.querySelector("svg circle.pk-dot[cx]"));
+    check("each Japanese line plays (a labelled button)", !!rn && rn.querySelector(".rn-jp").getAttribute("role") === "button" && /^Play /.test(rn.querySelector(".rn-jp").getAttribute("aria-label")));
+    if (rn) rn.remove();
+    const plain = nh.cleanNote('<html><head><style>h2{color:red}</style><script>x()</script><meta http-equiv="refresh" content="0;url=https://example.com"></head>' +
+      '<body onload="x()"><h2 style="color:blue">Hi</h2><a href="https://example.com">out</a><a href="#s2">in</a><a href="other.html">rel</a><a href="javascript:x()">js</a></body></html>');
+    check("any other note keeps its own styles for the sealed frame but loses scripts, refreshes and handlers", !!plain.querySelector("head style")
+      && !plain.querySelector("script, meta") && !plain.body.hasAttribute("onload") && plain.querySelector("h2").getAttribute("style") === "color:blue");
+    check("...its web links open in Safari, in-note links stay, dead links read as text", (() => {
+      const a = [...plain.querySelectorAll("a")];
+      return a[0].target === "_blank" && /noopener/.test(a[0].rel) && a[1].target === "_self" && !a[2].hasAttribute("href") && !a[3].hasAttribute("href");
+    })());
+  })();
 
   }
   if (want("flashcards")) {

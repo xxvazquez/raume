@@ -25,7 +25,7 @@ cooking or studying, and for printing clean A4 study sheets.
   - [Sections](#sections) · [Kanji](#kanji) · [Finding things](#finding-things) ·
     [Reading the tables](#reading-the-tables) · [Options](#options) ·
     [Grammar notes](#grammar-notes) · [Customising](#customising) ·
-    [Around the app](#around-the-app)
+    [Class notes](#class-notes) · [Around the app](#around-the-app)
 - [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
     [Screens](#screens) · [Dashboard](#dashboard) · [Kana trainer](#kana-trainer) ·
@@ -152,12 +152,34 @@ button's menu.
 Custom words work everywhere — furigana, search, print, audio, every
 flashcard direction. Changes save immediately and sync when signed in.
 
+### Class notes
+
+The **Notes** page — masthead page icon; on a phone, the account button's
+menu. Your own class notes as HTML files, **private to your account**: they
+live only in your Supabase project behind Row Level Security, never in Git
+or on the public site. Needs an account.
+
+| | |
+| --- | --- |
+| **Add** | Pick one or more `.html` files (on iPhone, from Files). Up to 5 MB each. |
+| **By date** | Newest lesson first, under a header per month. A note's date is its lesson date (below), else the file's date; **Lesson date** in its **⋯** menu changes it. |
+| **Lesson notes** | Files made with `scripts/note_kit.py` are drawn as raume screens — its cards, type and dark mode. Tap the Japanese (the speaker) to hear it. **Quiz** covers the Japanese you should produce; **⋯** › **Romaji** / **English** / **Furigana** cover or hide those lines. A covered item uncovers on a tap. |
+| **Any other HTML** | Shown as it was written — its own styles — in a sealed frame where nothing in it can run. Links to the web open in Safari. |
+| **⋯ on a note** | Rename, Lesson date, Replace with a new file, Delete (asks first; removed on every device). |
+| **Offline** | Every note is kept on the device too, so the list and the notes open without a connection. Signing out removes that copy. |
+
+Writing a lesson note: a lesson file builds its sections from the kit's
+components (formula, tiles, Q/A lists, tips, position pictograms) and calls
+`render()` with the lesson's date, e.g. `python3 private-notes/lesson14.py`.
+Keep lesson files out of the repo — `private-notes/` is gitignored for them.
+
 ### Around the app
 
 | | |
 | --- | --- |
 | **Print** | A4 at three scopes: one table (its printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
 | **Theme** | **System → Light → Dark**, applied before the first paint. |
+| **Notes** | The page icon at the top: your class notes — see [Class notes](#class-notes). |
 | **Help** | The **?** at the top: four topics (Finding words, Reading, Options, Making it yours) as short one-line rows, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)). Practice has its own Help screen; on a phone, the account menu's **Help** opens whichever fits the screen you're on. |
 | **Version** | A quiet line at the foot of every page: the deployed commit and its date (**Local build** in a checkout). |
 | **Sync dot** | On the person icon: **green** = everything synced, **amber** = offline or something hasn't reached your account yet. |
@@ -168,7 +190,7 @@ The **account button** (the person icon) opens one menu:
 | --- | --- |
 | *(header)* | Who you're signed in as, and whether you're synced |
 | **Account** | Practice — or **Sign in** for a guest, straight to the sign-in screen |
-| **Customize tables** · **Help** | Phone only; wider windows have their own icons |
+| **Notes** · **Customize tables** · **Help** | Phone only; wider windows have their own icons |
 | **Support raume** | Ko-fi, in a new tab |
 | **Appearance** | System / Light / Dark — phone only, likewise |
 | **Sign out** | Signed in only — its one place, at every screen size. If something hasn't synced yet, it asks first |
@@ -663,6 +685,7 @@ never mix.
 | First visit | Starts with the Fruits table added, so the Dashboard, study and Puzzles have something to show | Your own deck |
 | Backup | Settings › Back up & restore (on iPhone the share sheet: Save to Files, AirDrop, Mail) | The account is the backup |
 | Custom tables | — | Yes |
+| Class notes | — | Yes — private to the account, kept on the device for offline |
 | New accounts | — | Off by default: the project's sign-ups are closed and `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |
 
 - **Local-first** — reviews, settings, your streak, customisations and

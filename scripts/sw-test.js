@@ -179,6 +179,8 @@ const REFERENCE_SHELL = [
   "vendor/supabase.js",
 ];
 const FLASHCARDS_SHELL = ["js/flashcards/store.js", "js/flashcards/vocab-index.js", "js/flashcards/scheduling.js", "js/flashcards/data-ops.js", "js/flashcards/backup.js", "js/flashcards/puzzle-runs.js", "js/flashcards/write-card.js", "js/flashcards/dashboard.js", "js/flashcards/views.js", "js/flashcards/kana-data.js", "js/flashcards/kana.js", "js/flashcards/crosswords.js", "js/flashcards/puzzle-pdf.js", "js/flashcards/puzzle-stats.js", "js/flashcards/bootstrap.js"];
+// The Notes screen (loads last, beside the reference shell).
+const NOTES_SHELL = ["js/notes.js"];
 
 async function main() {
   const V1 = "sha-one-0000000000000000000000000000000000";
@@ -199,7 +201,7 @@ async function main() {
   check("manifest is precached", cache.entries.has(resolveUrl("manifest.webmanifest")));
   check("the self-hosted Inter font is precached (bare URL)", cache.entries.has(resolveUrl("fonts/InterVariable.woff2")));
   check("the self-hosted Space Grotesk wordmark font is precached (bare URL)", cache.entries.has(resolveUrl("fonts/SpaceGrotesk.woff2")));
-  REFERENCE_SHELL.concat(FLASHCARDS_SHELL).forEach((p) => {
+  REFERENCE_SHELL.concat(FLASHCARDS_SHELL, NOTES_SHELL).forEach((p) => {
     check("precached under its exact ?v= URL: " + p, cache.entries.has(resolveUrl(p + "?v=" + V1)));
     check("NOT precached under a bare (unversioned) URL: " + p, !cache.entries.has(resolveUrl(p)));
   });
@@ -215,6 +217,14 @@ async function main() {
   for (const p of REFERENCE_SHELL) {
     const res = await sw1.handleFetch(assetRequest(p + "?v=" + V1));
     check("offline hit for reference asset: " + p, !!res && typeof (await res.text()) === "string");
+  }
+
+  check("the Notes frame page is precached (unversioned key)", cache.entries.has(resolveUrl("notes-frame.html")));
+  const frameNav = await sw1.handleFetch({ url: resolveUrl("notes-frame.html"), mode: "navigate", method: "GET" });
+  check("offline, the Notes frame opens as itself, never the app shell", !!frameNav && (await frameNav.text()).includes("notes-frame-base"));
+  for (const p of NOTES_SHELL) {
+    const res = await sw1.handleFetch(assetRequest(p + "?v=" + V1));
+    check("offline hit for notes asset: " + p, !!res && (await res.text()).length > 0);
   }
 
   console.log("Offline: the Flashcards path loads from cache");
@@ -246,7 +256,7 @@ async function main() {
   const readAsset = (p) => (edited.has(p) ? fs.readFileSync(path.join(ROOT, p), "utf8") + "\n// edited" : fs.readFileSync(path.join(ROOT, p)));
   const deployA = stamp(INDEX_SOURCE, SW_SOURCE, readAsset);
   const pageUrls = (html) => [...html.matchAll(/(?:src|href)="([^"]+\?v=[^"]+)"/g)].map((m) => m[1]);
-  check("every asset URL the stamped page requests carries a content hash, none the token", pageUrls(deployA.html).length === REFERENCE_SHELL.length + FLASHCARDS_SHELL.length
+  check("every asset URL the stamped page requests carries a content hash, none the token", pageUrls(deployA.html).length === REFERENCE_SHELL.length + FLASHCARDS_SHELL.length + NOTES_SHELL.length
     && pageUrls(deployA.html).every((u) => /\?v=[0-9a-f]{12}$/.test(u)));
   const H1 = "sha-hash-a000000000000000000000000000000000";
   const swA = loadServiceWorker(H1, storage, deployA.sw);

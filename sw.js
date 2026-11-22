@@ -33,6 +33,7 @@ const UNVERSIONED = [
   'icons/apple-touch-icon.png',
   'fonts/InterVariable.woff2',
   'fonts/SpaceGrotesk.woff2',
+  'notes-frame.html',
 ];
 
 // Requested by the browser WITH ?v=<hash> (see the <script>/<link> tags in
@@ -75,6 +76,7 @@ const VERSIONED = [
   'js/flashcards/puzzle-pdf.js',
   'js/flashcards/puzzle-stats.js',
   'js/flashcards/bootstrap.js',
+  'js/notes.js',
   'js/sw-register.js',
 ];
 
@@ -86,7 +88,7 @@ const NAV_TIMEOUT_MS = 3000;
 // asset URLs. Everything else that's already cached under the same URL is
 // reused -- a versioned URL's bytes never change, and the unversioned icons
 // and fonts are refreshed by stale-while-revalidate whenever they're used.
-const ALWAYS_FETCH = ['./', 'index.html', 'manifest.webmanifest'];
+const ALWAYS_FETCH = ['./', 'index.html', 'manifest.webmanifest', 'notes-frame.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -148,6 +150,9 @@ self.addEventListener('fetch', (event) => {
   const isVersioned = url.searchParams.has('v');
 
   if (isNavigation) {
+    // The Notes screen's sealed frame (notes-frame.html) is a page load of
+    // its own: offline it must get itself back, never the app's shell.
+    const shell = url.pathname.endsWith('/notes-frame.html') ? 'notes-frame.html' : 'index.html';
     // Network-first: always try to get the latest page (and therefore the
     // latest versioned asset URLs) when online; fall back to the cached
     // shell when offline -- or when the network is too slow to answer: a
@@ -164,10 +169,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(new Promise((resolve, reject) => {
       let settled = false;
       const settle = (res) => { if (!settled && res) { settled = true; resolve(res); } return !!res; };
-      const timer = setTimeout(() => { caches.match('index.html').then(settle); }, NAV_TIMEOUT_MS);
+      const timer = setTimeout(() => { caches.match(shell).then(settle); }, NAV_TIMEOUT_MS);
       network.then((res) => { clearTimeout(timer); settle(res); }, () => {
         clearTimeout(timer);
-        caches.match('index.html').then((hit) => { if (!settle(hit) && !settled) reject(new Error('offline')); });
+        caches.match(shell).then((hit) => { if (!settle(hit) && !settled) reject(new Error('offline')); });
       });
     }));
     event.waitUntil(network.catch(() => {}));

@@ -523,22 +523,22 @@ and Help.
   phone's), the utility glyphs trailing; the sticky search bar stops under it
   (`--nav-h: 64px`). **641–899px** the tabs keep their own row under the
   masthead, a sticky glass band (`--nav-h: 45px`). The phone keeps its bottom
-  tab bar. The four masthead controls — account, help,
+  tab bar. The five masthead controls — account, notes, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
   targets: no box, no outline. On a tablet (`hover: none`) each glyph gets a 10px
-  caption under it — Account / Help / Customize / the current theme — since a
+  caption under it — Account / Notes / Help / Customize / the current theme — since a
   tooltip can't explain it there. **On a phone (≤640px) the masthead is App
   Store style**: no wordmark row, the large screen title is the top of every
   screen, and one 34px round white account button (`--control-lift`, the sync
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
   menu of words: who you are + sync state, Account (reads "Sign in" for a guest
-  and opens the sign-in screen) / Customize tables / Help,
+  and opens the sign-in screen) / Notes / Customize tables / Help,
   and Appearance as a System / Light / Dark segmented control that applies at
   once, then — signed in — a separated **Sign out** row in the coral
   `--wrong-strong`, iOS's destructive position at the bottom. Wider windows
   open the same menu under the account glyph, minus the rows their own glyphs
-  already are (`data-phone-only`: Customize tables, Help, Appearance). Because
+  already are (`data-phone-only`: Notes, Customize tables, Help, Appearance). Because
   the menu says who you are and holds Sign out, Practice has no "Signed in
   as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
@@ -547,7 +547,7 @@ and Help.
   are spelled out in the Options sheet's **Row icons** group — iOS subtitle
   cells: the glyph in its own column, a 15px name, one 13px grey line under it,
   the hairline starting at the words. Standard iOS glyphs
-  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
+  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Notes, Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
   amber when offline or something's queued, the glyph tinting to match). The
@@ -768,6 +768,31 @@ and Help.
     the import format) lives in an `.info-panel` (an unboxed footnote) toggled
     by an adjacent `.info-btn` — a bare "i" glyph that takes the accent tint
     while open — instead of sitting on the page unconditionally.
+- **The Notes page** (`.page-notes`, `js/notes.js`) is an inset-grouped list
+  like Help: a month list header over a white card of 44px rows (indigo
+  document tile, the note's name, its lesson date in grey, a chevron), newest
+  first; **Add** is a tinted text bar button with a plus at the title's
+  trailing edge. Its title stays on screen at every width (no top-bar tab
+  names it). A note opens as a pushed screen: "‹ Notes", the note's name as
+  the large title, then one row — the lesson date left, **Quiz** (a white
+  capsule that fills in the tile tone while on) and ⋯ right, clear of the
+  phone's account button. ⋯ holds Romaji / English / Furigana as checkmark
+  items, a ground-coloured band, then Rename / Lesson date / Replace / Delete
+  (red). Name and date edits use the iOS alert with a field and a tinted,
+  semibold confirm (`.ios-confirm-field`, `.ios-confirm-go`).
+- **Lesson notes** (`.rn`, made by `scripts/note_kit.py`) are a raume
+  screen, not a document: numbered section heads (an 18px title, a 26px dot
+  in the section's tile hue, the Japanese subtitle in grey), list-header
+  sub-heads, and everything on white surfaces — formula cards, explainer
+  cards, tips (a tile-hue dot leads each), tile grids (4 or 3 across, 2 on a
+  phone) and hairline Q/A lists that stack on a phone. Every Japanese item
+  stacks Japanese with furigana, romaji (italic, `--romaji`) and English; its
+  Japanese line ends in a small faint speaker, so tap-to-hear shows. Colour
+  is only the section's tile hue (highlights, slots, dots); the lesson
+  kit's pink becomes clay. Quiz and the Romaji / English switches blur
+  what they cover (5px, 55%), and a tap uncovers the whole item; reduced
+  motion drops the fade. Non-lesson HTML is shown as its author made it,
+  in a white rounded sheet (always light) sized to the note.
 - **The masthead Help page** (`.page-help`) is a short menu of four disclosure
   rows in one white card (see the type-scale note above) — no rules between
   bullets, no ALL-CAPS headings, nothing open until tapped. Under it, a

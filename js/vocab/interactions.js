@@ -196,6 +196,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (gear) gear.classList.toggle('active', page === 'customize');
     const help = document.getElementById('helpToggle');
     if (help) help.classList.toggle('active', page === 'help');
+    const notes = document.getElementById('notesToggle');
+    if (notes) notes.classList.toggle('active', page === 'notes');
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
@@ -284,10 +286,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     setHash('table-' + id, opts.fromRoute);
   }
 
-  // The reference (#vocabPage) plus three standalone pages that sit alongside
-  // the nav sections -- Flashcards, and the masthead's Customize and Help
-  // utility screens. Exactly one is visible; `which` is 'vocab' | 'flashcards'
-  // | 'customize' | 'help'.
+  // The reference (#vocabPage) plus four standalone pages that sit alongside
+  // the nav sections -- Flashcards, and the masthead's Notes, Customize and
+  // Help utility screens. Exactly one is visible; `which` is 'vocab' |
+  // 'flashcards' | 'notes' | 'customize' | 'help'.
   // The kanji detail sheet (#kanjiSheet): tap -- or Enter on -- a tile in a
   // Kanji table to open it; a centred card on a wide screen, a bottom sheet
   // on a phone. Built fresh from the data each time (render.js
@@ -568,7 +570,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
   function showStandalonePage(which) {
     closeKanjiSheet();
-    var ids = { vocab: 'vocabPage', flashcards: 'flashcardsPage', customize: 'customizePage', help: 'helpPage' };
+    var ids = { vocab: 'vocabPage', flashcards: 'flashcardsPage', notes: 'notesPage', customize: 'customizePage', help: 'helpPage' };
     Object.keys(ids).forEach(function (k) {
       var el = document.getElementById(ids[k]);
       if (el) el.hidden = k !== which;
@@ -603,6 +605,22 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     markActiveNav(null);
     setHash('customize', opts.fromRoute);
     window.scrollTo({ top: 0 });
+  };
+
+  // The Notes page -- the reader's own class notes (#notes), one open at
+  // #notes/<id>. A utility screen off the masthead, not a nav item;
+  // js/notes.js owns everything inside it. opts.noteId opens that note.
+  vocab.showNotesPage = function (opts) {
+    opts = opts || {};
+    if (vocab.clearSearchQuery) vocab.clearSearchQuery();
+    document.body.dataset.activeSection = '';
+    document.body.dataset.activePage = 'notes';
+    showStandalonePage('notes');
+    markActiveNav(null);
+    setHash(opts.noteId ? 'notes/' + encodeURIComponent(opts.noteId) : 'notes', opts.fromRoute);
+    window.scrollTo({ top: 0 });
+    var notesPage = document.getElementById('notesPage');
+    if (window.RaumeStudy.notes && notesPage) window.RaumeStudy.notes.render(notesPage, { noteId: opts.noteId });
   };
 
   // The Help page -- a static "how this works" rundown of the reference side,
@@ -663,6 +681,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (h === 'practice' || h === 'flashcards') { vocab.showFlashcardsPage({ fromRoute: true }); return; }
     if (h === 'customize') { vocab.showCustomizePage({ fromRoute: true }); return; }
     if (h === 'help') { vocab.showHelpPage({ fromRoute: true }); return; }
+    if (h === 'notes') { vocab.showNotesPage({ fromRoute: true }); return; }
+    const note = h.match(/^notes\/(.+)$/);
+    if (note) { vocab.showNotesPage({ noteId: decodeURIComponent(note[1]), fromRoute: true }); return; }
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }
     // #travel: a section since folded into Vocabulary -- falls through to it.
     if (h === 'grammar' || h === 'kanji') { showSection(h, { fromRoute: true }); return; }
@@ -1517,6 +1538,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         else vocab.showCustomizePage();
       });
     }
+    const notesToggle = document.getElementById('notesToggle');
+    if (notesToggle) {
+      notesToggle.addEventListener('click', function () {
+        if (document.body.dataset.activePage === 'notes') showSection('vocabulary');
+        else vocab.showNotesPage();
+      });
+    }
     const helpToggle = document.getElementById('helpToggle');
     if (helpToggle) {
       helpToggle.addEventListener('click', function () {
@@ -1722,7 +1750,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     // The account menu (index.html #accountMenu): who you are and the sync
     // state (filled in by js/flashcards/bootstrap.js), Account, Support and
-    // Sign out -- plus, on a phone, Customize tables / Help (the pages the
+    // Sign out -- plus, on a phone, Notes / Customize tables / Help (the pages the
     // wider masthead's glyphs open) and Appearance as a System / Light /
     // Dark switch that applies at once and leaves the menu open. Closes on
     // an outside tap or Escape.
@@ -1743,6 +1771,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (!go) return;
         setAccountMenu(false);
         if (go.dataset.menuGo === 'account') openAccount();
+        else if (go.dataset.menuGo === 'notes') vocab.showNotesPage();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
         else if (go.dataset.menuGo === 'help') {
           // Help for the screen you're on: on Practice, the Flashcards Help

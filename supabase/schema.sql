@@ -234,7 +234,25 @@ create table if not exists public.custom_rows (
   updated_at timestamptz not null default now()
 );
 
+-- Class notes (the Notes screen, js/notes.js): HTML files the reader
+-- uploads, private to their account. The file's whole text lives in `html`;
+-- the list only ever selects the other columns. note_date is the lesson's
+-- date -- the list is ordered by it. Capped at 5 MB a note (the app refuses
+-- larger files before uploading).
+create table if not exists public.notes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title text not null,
+  note_date date not null default current_date,
+  html text not null,
+  size integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint notes_html_size check (octet_length(html) <= 5242880)
+);
+
 create index if not exists custom_tables_user_idx on public.custom_tables (user_id);
+create index if not exists notes_user_idx on public.notes (user_id);
 create index if not exists custom_rows_user_idx on public.custom_rows (user_id);
 
 alter table public.flashcards enable row level security;
@@ -244,6 +262,7 @@ alter table public.kana_cards enable row level security;
 alter table public.kana_review_logs enable row level security;
 alter table public.custom_tables enable row level security;
 alter table public.custom_rows enable row level security;
+alter table public.notes enable row level security;
 
 -- drop-then-create (rather than a bare `create policy`) so this file can be
 -- re-run after a change like the one above without erroring on policies
@@ -274,4 +293,8 @@ create policy "custom_tables: owner full access" on public.custom_tables
 
 drop policy if exists "custom_rows: owner full access" on public.custom_rows;
 create policy "custom_rows: owner full access" on public.custom_rows
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "notes: owner full access" on public.notes;
+create policy "notes: owner full access" on public.notes
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

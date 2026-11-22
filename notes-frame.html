@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<!--
+  The sealed page a class note is shown in (js/notes.js). The Notes screen
+  loads it in an <iframe sandbox="allow-same-origin allow-popups
+  allow-popups-to-escape-sandbox"> -- no allow-scripts, so nothing in a note
+  can ever run -- and copies the note's styles and body in. This page's own
+  policy is the one the note's markup is checked against: its <style> blocks
+  and style="" attributes work here (raume's own page forbids them), but no
+  script loads, and it can reach nothing but images, fonts and stylesheets.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline' https:; img-src data: blob: https:; font-src data: https:; media-src data: blob: https:; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light">
+<title>Note</title>
+<style id="notes-frame-base">
+/* A plain, readable page for a note that brings no styles of its own.
+   Everything sits in :where() so any rule in the note wins. */
+:where(html) { background: #fff; color: #1d1d1f; color-scheme: light; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow: hidden; }
+:where(body) { margin: 0; padding: 20px; font: 400 16px/1.55 -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Helvetica Neue", sans-serif; overflow-wrap: break-word; }
+:where(img, svg, video) { max-width: 100%; height: auto; }
+:where(table) { border-collapse: collapse; max-width: 100%; }
+:where(th, td) { padding: 4px 8px; border: 1px solid #d8dbe2; vertical-align: top; }
+:where(pre) { overflow-x: auto; white-space: pre-wrap; }
+:where(a) { color: #3a5bb8; }
+:where(h1) { font-size: 1.6em; line-height: 1.25; margin: 0 0 .6em; }
+:where(h2) { font-size: 1.3em; line-height: 1.3; margin: 1.4em 0 .5em; }
+:where(h3) { font-size: 1.1em; margin: 1.2em 0 .4em; }
+:where(ruby rt) { font-size: .55em; }
+</style>
+</head><body></body></html>

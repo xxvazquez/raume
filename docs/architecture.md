@@ -26,7 +26,7 @@ Update **all** of these or `npm test` fails:
 
 1. `index.html` — the `<script defer>` tag *and* the load-order comment block
 2. `sw.js` — the `VERSIONED` precache list
-3. `scripts/sw-test.js` — `REFERENCE_SHELL` or `FLASHCARDS_SHELL`
+3. `scripts/sw-test.js` — `REFERENCE_SHELL`, `FLASHCARDS_SHELL` or `NOTES_SHELL`
 4. `package.json` — add a `node --check` to the `validate` script
 
 ## Data and storage model
@@ -47,7 +47,7 @@ flowchart LR
         LS[("localStorage<br/>raume-flashcards-guest-v1 / raume-kana-v1<br/>raume-custom-vocab-guest-v1")]
     end
     subgraph account["Signed-in mode"]
-        SB[("Supabase Postgres<br/>flashcards / review_logs / flashcard_settings<br/>kana_cards / kana_review_logs<br/>custom_tables / custom_rows")]
+        SB[("Supabase Postgres<br/>flashcards / review_logs / flashcard_settings<br/>kana_cards / kana_review_logs<br/>custom_tables / custom_rows / notes")]
         Cache[("localStorage<br/>read-through cache + offline outbox")]
     end
 
@@ -76,9 +76,9 @@ flowchart LR
   flag stuck and block every future retry; a review whose card no longer exists
   on the server (FK violation) is dropped rather than wedging the queue. The two
   modes never mix.
-- The schema is [`supabase/schema.sql`](../supabase/schema.sql) — seven tables
+- The schema is [`supabase/schema.sql`](../supabase/schema.sql) — eight tables
   (`flashcards`, `review_logs`, `flashcard_settings`, `kana_cards`,
-  `kana_review_logs`, `custom_tables`, `custom_rows`), all under RLS.
+  `kana_review_logs`, `custom_tables`, `custom_rows`, `notes`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
   knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
@@ -162,10 +162,49 @@ flowchart LR
   individually after. Sign-in unions the two lists (a device's pauses aren't
   dropped).
 
+### Class notes
+
+`js/notes.js` (`RaumeStudy.notes`, the `#notes` page; one note at
+`#notes/<id>`). Signed-in only: each note is one row of the `notes` table —
+`title`, `note_date` (the lesson's date; the list sorts by it, newest first,
+grouped by month), `size`, and the file's whole text in `html` (≤ 5 MB, a
+check constraint). The list selects every column but `html`, through
+`fetchAllRows`. There is no outbox: adding, renaming, re-dating, replacing
+and deleting need a connection and say so when they fail.
+
+- **Device copy** — IndexedDB `raume-notes`, store `notes`, one record per
+  note per account (`key` = `<user id>:<note id>`): the list's columns plus
+  `html` once fetched. After each list load every note's text is fetched in
+  the background, so the whole set opens offline; a note whose `updated_at`
+  changed drops its stale text. Offline, the list comes from this copy.
+  Signing out (or switching account) deletes the previous account's records.
+- **Lesson notes** — a file with `<meta name="raume-note">` and an
+  `article.rn` (made by `scripts/note_kit.py`) is drawn into the page itself
+  after an allowlist pass: text markup, ruby and simple SVG shapes only, and
+  only `class`, `lang`, `data-tile` (a known tile hue), ARIA labels and SVG
+  geometry attributes — scripts, styles, `style=""`, `on*`, links, images and
+  embeds go. Its look is `.rn` in `css/site.css`; its study controls
+  (`raume-notes-study` in `localStorage`), tap-to-reveal and tap-to-hear
+  (`shared.speech`) are `notes.js`.
+- **Any other HTML** — never enters the page. It's copied into
+  `notes-frame.html` inside `<iframe sandbox="allow-same-origin allow-popups
+  allow-popups-to-escape-sandbox">`: no `allow-scripts`, so nothing in it can
+  run, and the frame's own CSP (`script-src 'none'`, styles and https/data
+  images and fonts allowed) is what the note's `<style>` and `style=""` are
+  checked against. `allow-same-origin` only lets the app write the note in
+  and measure it; the frame is sized to the note through a constructed
+  stylesheet (no `style=""`). From `file://` the frame can't be reached, and
+  the reader says so.
+- **Writing lesson notes** — `scripts/note_kit.py` (components: `stack`,
+  `lst`, `tiles`, `tip(s)`, `two`, `formula`, `kinds`, `slot`, `cols2`,
+  `section`, the position pictograms in `PICT`; `render(out, date, eyebrow,
+  title, desc, sections)`). Lesson files are personal content: they live in
+  `private-notes/` (gitignored) or outside the repo, never in Git.
+
 ### Reading all of an account's rows
 
 Supabase (PostgREST) returns **at most 1000 rows per request**. Every "load all
-my rows" read — `flashcards`, `kana_cards`, `custom_tables`, `custom_rows`, and
+my rows" read — `flashcards`, `kana_cards`, `custom_tables`, `custom_rows`, `notes`, and
 the dashboard's `review_logs` windows — goes through `dataOps.fetchAllRows`,
 which pages with `.order("id").range()` until a short page comes back. A plain
 `.select()` silently stopped at 1000: past that, newly added cards were saved
@@ -210,7 +249,7 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-games-setup` — the
 Puzzles and Games setup screens' last choices (`{ puzzles, games }`, each mode /
-source / tables / script / size / sortBy; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-rings-shown` — the date
+source / tables / script / size / sortBy; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-notes-study` — a lesson note's Romaji / English / Furigana / Quiz choices (browser-local; the notes themselves live in IndexedDB `raume-notes`, see Class notes), `raume-rings-shown` — the date
 the Dashboard's rings last drew up from nothing (once a day; browser-local)), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
@@ -373,6 +412,9 @@ js/
     kana.js              the Kana tab
     crosswords.js        the Puzzles + Games tabs: crossword/arroword/word search generator, play + print; Match, Listening
     bootstrap.js         app shell + init
+  notes.js              the Notes page: the reader's class notes (Supabase + IndexedDB),
+                        lesson notes drawn natively, any other HTML in the sealed frame
+notes-frame.html        the sealed page a non-lesson note is shown in (its own CSP, no scripts)
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
                         verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
@@ -390,7 +432,9 @@ manifest.webmanifest    PWA manifest
 favicon.png             48px favicon (index.html links this, not logo.png)
 icons/                  PWA app icons — see scripts/generate-icons.py
 logo.png                master mark; source art for the favicon + icons, not served
-scripts/                vocab validator, id + icon + audio generators, smoke + SW tests
+scripts/                vocab validator, id + icon + audio generators, smoke + SW tests,
+                        note_kit.py (builds lesson notes for the Notes page)
+private-notes/          gitignored: your own lesson files and the notes they build
 ```
 
 ## Pronunciation audio
@@ -464,7 +508,9 @@ Installable and offline-capable once visited.
 - Opening the app is network-first (the newest page names the newest asset
   URLs), but waits at most 3 s (`NAV_TIMEOUT_MS`): on a weak signal it opens
   the cached shell instead of sitting blank, and the late answer still
-  refreshes the cache for next time.
+  refreshes the cache for next time. `notes-frame.html` (the Notes page's
+  sealed frame) is precached and is a page load of its own: offline it falls
+  back to itself, never to the app shell.
 - App icons and the favicon are generated from `logo.png` (the master mark, a
   circular sun-over-water motif) by `scripts/generate-icons.py`: cropped to its
   bounding box, padded square, centred on an opaque `#f4f6f8` tile — 192/512

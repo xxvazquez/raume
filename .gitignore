@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 CLAUDE.md
 PLAN.md
+
+# The reader's own lesson notes (scripts/note_kit.py) -- private, never committed.
+private-notes/

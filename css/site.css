@@ -1144,6 +1144,7 @@ body.selftest-mode .selftest-hint { display: block; }
 .page-vocab,
 .page-flashcards,
 .page-customize,
+.page-notes,
 .page-help {
   background: var(--group-ground);
   border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
@@ -1471,6 +1472,212 @@ body.icon-picker-open { overflow: hidden; }
     border-bottom: 0;
   }
 }
+
+/* --- Notes page (#notes, js/notes.js) ------------------------------ */
+/* The reader's class notes: an iOS inset-grouped list -- a list header per
+   month, a white card of 44px rows (indigo document tile, the note's name,
+   its lesson date under it, a chevron), newest first -- and, pushed from a
+   row, the note itself under a "‹ Notes" back button with Quiz and ⋯. A
+   lesson note is drawn in raume's own style (.rn below); any other note
+   sits in a white sheet (notes-frame.html, always light: it's the note's
+   own page), as tall as the note, so the screen scrolls as one. */
+.page-notes > * { max-width: 760px; }
+.page-notes h1 { font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink); overflow-wrap: anywhere; }
+.notes-titlebar { align-items: center; }
+.notes-titlebar h1 { min-width: 0; }
+.notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.notes-add svg { display: block; }
+.notes-tools { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; margin: -6px -10px -6px auto; }
+.notes-quiz[aria-pressed="true"] { box-shadow: none; }
+.notes-quiz[hidden], .notes-check-item[hidden] { display: none; }
+.notes-menu .section-menu-btn { width: 44px; height: 44px; }
+.notes-flash { margin: 4px 16px 10px; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
+.notes-flash[hidden] { display: none; }
+.notes-flash-error { color: var(--wrong-strong); }
+.notes-loading { margin: 18px 16px; color: var(--muted); font-size: var(--fs-small); }
+.notes-group-head { margin: 22px 16px 6px; }
+.notes-titlebar + .notes-flash[hidden] + .notes-group-head,
+.notes-titlebar + .notes-flash[hidden] + .notes-card { margin-top: 12px; }
+.notes-card { list-style: none; margin: 0; padding: 0; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+.notes-card > li { position: relative; }
+.notes-card > li + li::before { content: ""; position: absolute; top: 0; left: 58px; right: 0; border-top: 1px solid var(--row-line); }
+.notes-row {
+  appearance: none; border: 0; background: transparent; cursor: pointer; width: 100%;
+  position: relative; display: flex; align-items: center; min-height: 44px; padding: 8px 40px 8px 16px;
+  text-align: left; color: var(--ink); font: inherit;
+}
+.notes-row::after {
+  content: ""; position: absolute; right: 18px; top: 50%; width: 7px; height: 7px; margin-top: -4px;
+  border-right: 1.6px solid var(--faint); border-bottom: 1.6px solid var(--faint); transform: rotate(-45deg);
+}
+.notes-row:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.notes-row:active { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
+.notes-row:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; border-radius: var(--radius-card); }
+.notes-row .set-tile svg { display: block; }
+.notes-row-tx { display: flex; flex-direction: column; min-width: 0; }
+.notes-row-title { font: 400 15px/1.3 var(--font-ui); color: var(--ink); overflow-wrap: anywhere; }
+.notes-row-sub { margin-top: 1px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.notes-empty {
+  margin-top: 14px; padding: 28px 24px; background: var(--paper); border-radius: var(--radius-card);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.notes-empty .help-tile { width: 44px; height: 44px; border-radius: 11px; }
+.notes-empty-title { margin: 12px 0 4px; font: 600 16px/1.3 var(--font-ui); color: var(--ink); }
+.notes-empty-sub { margin: 0 0 16px; max-width: 34em; color: var(--muted); font-size: var(--fs-small); line-height: 1.45; text-wrap: pretty; }
+.notes-empty .fc-btn { min-height: 44px; padding: 0 22px; }
+/* The reader's second row: the lesson date, then Quiz and ⋯ trailing --
+   clear of the account button that holds the top corner on a phone. */
+.notes-reader-bar { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 0 0 12px; }
+.notes-reader-date { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+.notes-menu-danger, .section-menu-list .notes-menu-danger .menu-item-ic { color: var(--wrong-strong); }
+.section-menu-list .notes-menu-danger:hover, .section-menu-list .notes-menu-danger:hover .menu-item-ic { color: var(--wrong-strong); }
+.note-frame {
+  display: block; width: 100%; height: 60vh; margin-top: 6px; border: 0;
+  border-radius: var(--radius-card); background: #fff; color-scheme: light;
+  box-shadow: var(--control-lift);
+}
+.note-frame[hidden] { display: none; }
+.notes-file-input { display: none; }
+
+/* A lesson note (scripts/note_kit.py), drawn as a raume screen: numbered
+   sections with a tile-hue dot, the iOS list-header voice for sub-heads,
+   white cards of hairline rows, tile grids, tinted tips and formulas. Every
+   Japanese item stacks Japanese (with furigana), romaji, English; each
+   Japanese line carries a small speaker -- tap to hear. Quiz covers the
+   Japanese you should produce, Romaji / English off cover those lines;
+   a covered item uncovers on a tap. Colour comes only from the section's
+   tile hue (--rn), so it follows light and dark like everything else. */
+.rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 12%, var(--paper)); color: var(--ink); }
+.rn [data-tile] { --rn: var(--tile); --rn-soft: color-mix(in srgb, var(--tile) 12%, var(--paper)); --rn-strong: color-mix(in srgb, var(--tile) 80%, var(--ink)); }
+.rn ruby rt { font-size: 11px; color: var(--muted); font-weight: 400; }
+.rn b, .rn strong { font-weight: 600; }
+.rn-hl { color: var(--rn-strong); }
+.rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
+.rn-x { color: var(--wrong-strong); white-space: nowrap; }
+.rn-top { margin: 0 0 22px; }
+/* The screen's own title (the note's name) already says these. */
+.rn-top h1, .rn-eyebrow { display: none; }
+.rn-desc { margin: 0; color: var(--ink-2); font-size: var(--fs-body); line-height: 1.45; text-wrap: pretty; }
+.rn-sec { margin: 0 0 30px; scroll-margin-top: 120px; }
+.rn-sec-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font: 600 18px/1.25 var(--font-ui); color: var(--ink); }
+.rn-sec-num {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font: 600 13px/1 var(--font-ui);
+}
+.rn-sub { font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.rn-h3 { margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+/* Japanese / romaji / English */
+.rn-tag { font: 500 12px/1.3 var(--font-ui); color: var(--muted); margin-bottom: 2px; }
+.rn-jp { font-size: calc(var(--fs-jp, 17px) * 1); line-height: 1.75; font-weight: 400; }
+.rn-st .rn-jp { cursor: pointer; border-radius: 6px; transition: background-color .2s; }
+.rn-st .rn-jp::after {
+  content: ""; display: inline-block; width: 13px; height: 13px; margin-left: 6px; vertical-align: -1px;
+  background: var(--faint);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 7v4h3l4 3V4L5 7H2Z'/%3E%3Cpath d='M12 6.3a3 3 0 0 1 0 5.4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 7v4h3l4 3V4L5 7H2Z'/%3E%3Cpath d='M12 6.3a3 3 0 0 1 0 5.4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.rn-st .rn-jp:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+.rn-st .rn-jp.rn-speaking { background: var(--rn-soft); }
+.rn-ro { font-size: var(--fs-small); color: var(--romaji, var(--muted)); font-style: italic; line-height: 1.35; }
+.rn-en { font-size: var(--fs-small); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
+.rn-ro:empty, .rn-en:empty { display: none; }
+/* Cards and list rows */
+.rn-card { background: var(--paper); border-radius: var(--radius-card); }
+.rn-pad { padding: 14px 16px; }
+.rn-list { background: var(--paper); border-radius: var(--radius-card); padding: 0 16px; }
+.rn-r { display: grid; column-gap: 14px; align-items: start; padding: 11px 0; }
+.rn-r + .rn-r { border-top: 1px solid var(--row-line); }
+.rn-qa .rn-r { grid-template-columns: 30px 1.4fr 1fr; }
+.rn-one .rn-r { grid-template-columns: 30px 1fr; }
+.rn-qa.rn-labelled .rn-r { grid-template-columns: 64px 1fr 1fr; }
+.rn-hdr { padding: 10px 0 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.rn-lead { text-align: center; padding-top: 2px; }
+.rn-lead.rn-em { font-size: 20px; line-height: 1.3; }
+.rn-lead.rn-num {
+  width: 24px; height: 24px; margin: 3px auto 0; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--rn-soft); color: var(--rn-strong); font: 600 12px/1 var(--font-ui);
+}
+.rn-lead.rn-lbl { text-align: left; padding-top: 5px; font: 600 var(--fs-small)/1.3 var(--font-ui); color: var(--rn-strong); }
+.rn-cols2 .rn-list { column-count: 2; column-gap: 28px; }
+.rn-cols2 .rn-r { break-inside: avoid; }
+.rn-cols2 .rn-r + .rn-r { border-top: 0; }
+.rn-cols2 .rn-r { border-bottom: 1px solid var(--row-line); }
+/* Tiles */
+.rn-tiles { display: grid; gap: 8px; }
+.rn-c3 { grid-template-columns: repeat(3, 1fr); }
+.rn-c4 { grid-template-columns: repeat(4, 1fr); }
+.rn-tile { background: var(--paper); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; min-width: 0; }
+.rn-ic { font-size: 22px; line-height: 1; margin-bottom: 6px; }
+.rn-ic svg { display: block; margin: 0 auto 2px; }
+.rn-tile:has(svg) { text-align: center; }
+/* Position pictograms */
+.rn .pk { fill: var(--paper); stroke: var(--ink); stroke-width: 1.2; }
+.rn .pk-line { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.rn .pk-on { fill: var(--tile-orange); stroke: var(--ink); stroke-width: 1.2; }
+.rn .pk-dot { fill: var(--tile-orange); }
+.rn .pk-dash { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.rn .pk-halo { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 2; }
+/* Formula */
+.rn-formula { background: var(--paper); border-radius: var(--radius-card); padding: 14px 16px; }
+.rn-fl { display: grid; grid-template-columns: 22px 1fr; align-items: baseline; }
+.rn-fl + .rn-fl { margin-top: 10px; }
+.rn-lab { font: 600 13px/1 var(--font-ui); color: var(--rn-strong); }
+.rn-fj { font-size: 19px; line-height: 1.6; }
+.rn-fr { font-size: var(--fs-small); color: var(--muted); }
+.rn-fj s { color: var(--faint); }
+.rn-slot {
+  display: inline-block; padding: 0 7px; margin: 0 2px; border-radius: 7px; line-height: 1.5;
+  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font-size: .82em; font-weight: 500;
+}
+/* Two-up, tips */
+.rn-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.rn-two.rn-flush { margin: 0 0 10px; }
+.rn-kind { font: 600 15px/1.3 var(--font-ui); }
+.rn-kind-sub { margin-bottom: 8px; font-size: var(--fs-small); color: var(--muted); }
+.rn-tips { display: grid; gap: 8px; margin-top: 10px; }
+.rn-two .rn-tips { margin-top: 0; }
+.rn-tip {
+  display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start;
+  background: var(--paper); border-radius: 16px; padding: 10px 14px; font-size: var(--fs-body); line-height: 1.45;
+}
+.rn-sec > .rn-tip { margin-top: 10px; }
+.rn-dot {
+  width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font: 600 12px/1 var(--font-ui);
+}
+/* Study modes: covered lines blur until tapped */
+.rn-no-furigana rt { visibility: hidden; }
+.rn-no-romaji .rn-st:not(.rn-shown) .rn-ro, .rn-no-romaji .rn-fr,
+.rn-no-english .rn-st:not(.rn-shown) .rn-en,
+.rn-quiz .rn-st.rn-ans:not(.rn-shown) .rn-jp, .rn-quiz .rn-st.rn-ans:not(.rn-shown) .rn-ro {
+  filter: blur(5px); opacity: .55; cursor: pointer; -webkit-user-select: none; user-select: none; transition: filter .2s, opacity .2s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rn-st .rn-jp, .rn-no-romaji .rn-ro, .rn-no-english .rn-en, .rn-quiz .rn-jp { transition: none; }
+}
+@media (max-width: 700px) {
+  .rn-c4, .rn-c3 { grid-template-columns: repeat(2, 1fr); }
+  .rn-two { grid-template-columns: 1fr; }
+  .rn-qa .rn-r, .rn-qa.rn-labelled .rn-r { grid-template-columns: 30px 1fr; row-gap: 8px; }
+  .rn-qa.rn-labelled .rn-r { grid-template-columns: 64px 1fr; }
+  .rn-qa .rn-r > .rn-st:nth-child(3) { grid-column: 2; }
+  .rn-qa .rn-hdr { display: none; }
+  .rn-cols2 .rn-list { column-count: 1; }
+}
+/* A name / class field in the iOS alert (notes.js fieldSheet): the field
+   under the message, a tinted (not red) confirm button. */
+.ios-confirm-field {
+  display: block; width: 100%; box-sizing: border-box; margin: 12px 0 2px; padding: 9px 12px;
+  border: 0; border-radius: 10px; background: var(--paper); box-shadow: var(--control-lift);
+  color: var(--ink); font: 400 15px/1.3 var(--font-ui); text-align: left;
+}
+.ios-confirm-field:focus { outline: 2px solid var(--section); outline-offset: 0; }
+.ios-confirm-go {
+  appearance: none; border: 0; width: 100%; min-height: 56px; cursor: pointer; background: transparent;
+  font: 600 17px/1.2 var(--font-ui); color: var(--accent-strong);
+}
+.ios-confirm-go:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ios-confirm-go:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
 
 /* --- Customize page (#customize) ---------------------------------- */
 /* The ground spans the whole sheet; the content keeps its reading width. */
@@ -2030,6 +2237,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .section-menu-list .print-menu-item,
 .section-menu-list .print-scope,
 .section-menu-list .fc-xw-menu-item,
+.section-menu-list .notes-menu-item,
 .section-menu-list .hide-table-btn {
   appearance: none;
   border: 0;
@@ -2058,6 +2266,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .section-menu-list .print-menu-item:hover,
 .section-menu-list .print-scope:hover,
 .section-menu-list .fc-xw-menu-item:hover,
+.section-menu-list .notes-menu-item:hover,
 .section-menu-list .hide-table-btn:hover { background: var(--accent-soft); color: var(--accent-strong); }
 .section-menu-list .section-icon-btn:hover .menu-item-ic,
 .section-menu-list .fc-add-table-btn:hover .menu-item-ic,
@@ -2070,17 +2279,21 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
    group -- the tick leads, a blank slot keeps the labels aligned when a
    column is hidden, and a ground-coloured band sets the group off from the
    actions below it. */
-.section-menu-list .col-menu-item {
+.section-menu-list .col-menu-item,
+.section-menu-list .notes-check-item {
   appearance: none; border: 0; background: transparent; width: 100%;
   display: flex; align-items: center; gap: 8px; text-align: left;
   padding: 12px 14px 12px 10px; border-radius: 0; color: var(--ink);
   font: 400 var(--fs-subhead)/1.3 var(--font-ui); cursor: pointer; white-space: nowrap;
 }
-.section-menu-list .col-menu-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.section-menu-list .col-menu-item:hover,
+.section-menu-list .notes-check-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
 .section-menu-list .menu-item-check { flex: 0 0 14px; display: flex; color: var(--accent-strong); }
 .section-menu-list .menu-item-check svg { display: block; }
-.section-menu-list .col-menu-item[aria-checked="false"] .menu-item-check { visibility: hidden; }
-.section-menu-list .col-menu-item + :not(.col-menu-item) { border-top: 6px solid var(--group-ground); }
+.section-menu-list .col-menu-item[aria-checked="false"] .menu-item-check,
+.section-menu-list .notes-check-item[aria-checked="false"] .menu-item-check { visibility: hidden; }
+.section-menu-list .col-menu-item + :not(.col-menu-item),
+.section-menu-list .notes-check-item:not([hidden]) + :not(.notes-check-item) { border-top: 6px solid var(--group-ground); }
 @media (max-width: 700px) {
   .controls .section-menu ~ .print-icon-btn { display: none; }
   .section-menu-list .print-menu-item { display: flex; }
@@ -3074,7 +3287,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      rounded corner under a short list. */
   html, body { background: var(--group-ground); }
   .app-frame { background: transparent; }
-  .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
+  .page-vocab, .page-flashcards, .page-customize, .page-notes, .page-help { border-radius: 0; }
   /* A running session hides the bar, so give its space back. */
   body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done)) { padding-bottom: 0; }
   /* Large screen titles: the screens that have a title carry it big. Undoes
@@ -3111,7 +3324,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   @media (prefers-reduced-motion: reduce) { .compact-title { transition: none; } }
   body.is-searching { --nav-h: 1px; }
   body.is-searching .compact-title { display: none; }
-  body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1 {
+  body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1, body .page-notes h1 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
   }
@@ -5368,7 +5581,7 @@ mark.fc-diff-co {
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; background: transparent; }
   /* width: 100% -- auto margins stop a grid item stretching (desktop below). */
   .app-frame > .app { width: 100%; max-width: 1180px; margin: 0 auto; }
-  .page-vocab, .page-flashcards, .page-customize, .page-help { border-radius: 0; }
+  .page-vocab, .page-flashcards, .page-customize, .page-notes, .page-help { border-radius: 0; }
   /* Tablet: the tabs keep their own row under the masthead, pinned as a
      glass band once content scrolls under it. No fixed-position children,
      so the blur can sit on the nav itself. */
@@ -5431,7 +5644,8 @@ mark.fc-diff-co {
 .fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
 .fc-titlebar:not(.fc-titlebar-pushed) { margin-bottom: 16px; }
 @media (min-width: 641px) {
-  .fc-titlebar:not(.fc-titlebar-pushed) > h1 {
+  /* (Notes keeps its title: no top-bar tab names it.) */
+  .fc-titlebar:not(.fc-titlebar-pushed):not(.notes-titlebar) > h1 {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
@@ -5637,7 +5851,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
     position: absolute; top: 18px; right: 16px; z-index: 55;
     padding: 0; background: transparent;
   }
-  .masthead .wordmark, #helpToggle, #customizeToggle, #themeToggle { display: none; }
+  .masthead .wordmark, #notesToggle, #helpToggle, #customizeToggle, #themeToggle { display: none; }
   .masthead-right { margin: 0; }
   .masthead .masthead-account {
     width: 34px; height: 34px; min-width: 0; padding: 0; border-radius: 50%;
@@ -5655,6 +5869,8 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .screen-title, .cz-intro h1, .page-help h1 { padding-right: 48px; }
   .fc-titlebar:not(.fc-titlebar-pushed) .fc-titlebar-actions { margin-right: 46px; }
   .fc-titlebar-pushed h1 { padding-right: 48px; }
+  .notes-titlebar > .notes-add { margin-right: 46px; }
+  .notes-titlebar h1 { padding-right: 0; }
   .account-menu { top: calc(100% + 8px); right: 0; }
 }
 .account-menu-who { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--row-line); color: var(--muted); font-size: var(--fs-small); }
