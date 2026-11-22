@@ -236,9 +236,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 43 table sections", sections.length === 43);
+  check("renders 49 table sections", sections.length === 49);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 862 vocabulary rows", totalRows === 862);
+  check("renders 932 vocabulary rows", totalRows === 932);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
     r.selectorText === "body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji" && r.style.display === "none"));
   check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
@@ -1696,7 +1696,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 43 tables", czRows.length === 43);
+  check("it lists every one of the 49 tables", czRows.length === 49);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {

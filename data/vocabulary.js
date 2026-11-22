@@ -286,6 +286,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0705","type":"word","jp":[{"kanji":"青","reading":"あお"},{"text":"い"}],"romaji":"aoi","english":"blue","adj":"i"},
     {"id":"v0706","type":"word","jp":[{"kanji":"黄色","reading":"きいろ"},{"text":"い"}],"romaji":"kiiroi","english":"yellow","adj":"i"},
     {"id":"v0707","type":"word","jp":[{"kanji":"茶色","reading":"ちゃいろ"},{"text":"い"}],"romaji":"chairoi","english":"brown","adj":"i"},
+    {"id":"v1013","type":"word","jp":[{"kanji":"怖","reading":"こわ"},{"text":"い"}],"romaji":"kowai","english":"scary","adj":"i"},
     ]
   },
   {
@@ -864,6 +865,21 @@ window.RaumeStudy.data = { vocabularyTables: [
     ]
   },
   {
+    id: 53,
+    title: "People",
+    category: "People & Daily Life",
+    rows: [
+    {"id":"v1014","type":"word","jp":[{"kanji":"私","reading":"わたし"}],"romaji":"watashi","english":"I / me"},
+    {"id":"v1015","type":"word","jp":[{"kanji":"私","reading":"わたし"},{"text":"たち"}],"romaji":"watashitachi","english":"we / us"},
+    {"id":"v1016","type":"word","jp":[{"text":"あなた"}],"romaji":"anata","english":"you"},
+    {"id":"v1017","type":"word","jp":[{"kanji":"人","reading":"ひと"}],"romaji":"hito","english":"person"},
+    {"id":"v1018","type":"word","jp":[{"kanji":"人","reading":"ひと"},{"text":"たち"}],"romaji":"hitotachi","english":"people"},
+    {"id":"v1019","type":"word","jp":[{"kanji":"友達","reading":"ともだち"}],"romaji":"tomodachi","english":"friend"},
+    {"id":"v1020","type":"word","jp":[{"kanji":"彼氏","reading":"かれし"}],"romaji":"kareshi","english":"boyfriend"},
+    {"id":"v1021","type":"word","jp":[{"kanji":"彼女","reading":"かのじょ"}],"romaji":"kanojo","english":"girlfriend"},
+    ]
+  },
+  {
     id: 35,
     title: "Body & Health",
     category: "People & Daily Life",
@@ -923,6 +939,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0898","type":"word","jp":[{"kanji":"大使館","reading":"たいしかん"}],"romaji":"taishikan","english":"embassy"},
     {"id":"v0899","type":"word","jp":[{"kanji":"映画館","reading":"えいがかん"}],"romaji":"eigakan","english":"cinema / movie theater"},
     {"id":"v0793","type":"word","jp":[{"text":"ホテル"}],"romaji":"hoteru","english":"hotel"},
+    {"id":"v1022","type":"word","jp":[{"kanji":"山","reading":"やま"}],"romaji":"yama","english":"mountain"},
     ]
   },
   {
@@ -975,6 +992,38 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0804","type":"word","jp":[{"kanji":"西","reading":"にし"}],"romaji":"nishi","english":"west"},
     {"id":"v0805","type":"word","jp":[{"kanji":"南","reading":"みなみ"}],"romaji":"minami","english":"south"},
     {"id":"v0806","type":"word","jp":[{"kanji":"北","reading":"きた"}],"romaji":"kita","english":"north"},
+    {"id":"v1023","type":"word","jp":[{"kanji":"近","reading":"ちか"},{"text":"く"}],"romaji":"chikaku","english":"near / nearby"},
+    {"id":"v1024","type":"word","jp":[{"kanji":"間","reading":"あいだ"}],"romaji":"aida","english":"between"},
+    ]
+  },
+  {
+    id: 58,
+    title: "Countries & Capitals",
+    category: "Around Town",
+    rows: [
+    {"id":"v1025","type":"word","jp":[{"kanji":"首都","reading":"しゅと"}],"romaji":"shuto","english":"capital city"},
+    {"id":"v1026","type":"word","jp":[{"kanji":"日本","reading":"にほん"}],"romaji":"nihon","english":"Japan"},
+    {"id":"v1027","type":"word","jp":[{"kanji":"東京","reading":"とうきょう"}],"romaji":"tōkyō","english":"Tokyo","enNote":"capital of Japan"},
+    {"id":"v1028","type":"word","jp":[{"text":"アメリカ"}],"romaji":"amerika","english":"USA / America"},
+    {"id":"v1029","type":"word","jp":[{"text":"ワシントンDC"}],"romaji":"washinton dī shī","english":"Washington, D.C.","enNote":"capital of the USA"},
+    {"id":"v1030","type":"word","jp":[{"text":"アルゼンチン"}],"romaji":"aruzenchin","english":"Argentina"},
+    {"id":"v1031","type":"word","jp":[{"text":"ブエノスアイレス"}],"romaji":"buenosu airesu","english":"Buenos Aires","enNote":"capital of Argentina"},
+    {"id":"v1032","type":"word","jp":[{"text":"インド"}],"romaji":"indo","english":"India"},
+    {"id":"v1033","type":"word","jp":[{"text":"ニューデリー"}],"romaji":"nyū derī","english":"New Delhi","enNote":"capital of India"},
+    {"id":"v1034","type":"word","jp":[{"text":"エジプト"}],"romaji":"ejiputo","english":"Egypt"},
+    {"id":"v1035","type":"word","jp":[{"text":"カイロ"}],"romaji":"kairo","english":"Cairo","enNote":"capital of Egypt"},
+    {"id":"v1036","type":"word","jp":[{"text":"オーストラリア"}],"romaji":"ōsutoraria","english":"Australia"},
+    {"id":"v1037","type":"word","jp":[{"text":"キャンベラ"}],"romaji":"kyanbera","english":"Canberra","enNote":"capital of Australia"},
+    {"id":"v1038","type":"word","jp":[{"text":"オランダ"}],"romaji":"oranda","english":"Netherlands"},
+    {"id":"v1039","type":"word","jp":[{"text":"アムステルダム"}],"romaji":"amusuterudamu","english":"Amsterdam","enNote":"capital of the Netherlands"},
+    {"id":"v1040","type":"word","jp":[{"text":"カナダ"}],"romaji":"kanada","english":"Canada"},
+    {"id":"v1041","type":"word","jp":[{"text":"オタワ"}],"romaji":"otawa","english":"Ottawa","enNote":"capital of Canada"},
+    {"id":"v1042","type":"word","jp":[{"text":"スウェーデン"}],"romaji":"suwēden","english":"Sweden"},
+    {"id":"v1043","type":"word","jp":[{"text":"ストックホルム"}],"romaji":"sutokkuhorumu","english":"Stockholm","enNote":"capital of Sweden"},
+    {"id":"v1044","type":"word","jp":[{"text":"ポーランド"}],"romaji":"pōrando","english":"Poland"},
+    {"id":"v1045","type":"word","jp":[{"text":"ワルシャワ"}],"romaji":"warushawa","english":"Warsaw","enNote":"capital of Poland"},
+    {"id":"v1046","type":"word","jp":[{"text":"マレーシア"}],"romaji":"marēshia","english":"Malaysia"},
+    {"id":"v1047","type":"word","jp":[{"text":"クアラルンプール"}],"romaji":"kuararunpūru","english":"Kuala Lumpur","enNote":"capital of Malaysia"},
     ]
   },
   {
@@ -999,6 +1048,71 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0476","type":"word","jp":[{"kanji":"電気","reading":"でんき"}],"romaji":"denki","english":"electricity / light"},
     {"id":"v0442","type":"word","jp":[{"kanji":"洗濯","reading":"せんたく"}],"romaji":"sentaku","english":"laundry / washing"},
     {"id":"v0440","type":"word","jp":[{"kanji":"音","reading":"おと"}],"romaji":"oto","english":"sound"},
+    {"id":"v1048","type":"word","jp":[{"text":"うち"}],"romaji":"uchi","english":"home / my house"},
+    {"id":"v1049","type":"word","jp":[{"kanji":"一軒家","reading":"いっけんや"}],"romaji":"ikkenya","english":"detached house"},
+    {"id":"v1050","type":"word","jp":[{"text":"アパート"}],"romaji":"apāto","english":"apartment"},
+    {"id":"v1051","type":"word","jp":[{"kanji":"玄関","reading":"げんかん"}],"romaji":"genkan","english":"entrance hall"},
+    {"id":"v1052","type":"word","jp":[{"kanji":"庭","reading":"にわ"}],"romaji":"niwa","english":"garden / yard"},
+    {"id":"v1053","type":"word","jp":[{"text":"テーブル"}],"romaji":"tēburu","english":"table"},
+    {"id":"v1054","type":"word","jp":[{"text":"いす"}],"romaji":"isu","english":"chair"},
+    {"id":"v1055","type":"word","jp":[{"kanji":"机","reading":"つくえ"}],"romaji":"tsukue","english":"desk"},
+    {"id":"v1056","type":"word","jp":[{"kanji":"棚","reading":"たな"}],"romaji":"tana","english":"shelf"},
+    {"id":"v1057","type":"word","jp":[{"text":"ソファ"}],"romaji":"sofa","english":"sofa"},
+    {"id":"v1058","type":"word","jp":[{"text":"テレビ"}],"romaji":"terebi","english":"TV / television"},
+    ]
+  },
+  {
+    id: 54,
+    title: "Everyday Things",
+    category: "People & Daily Life",
+    rows: [
+    {"id":"v1059","type":"word","jp":[{"kanji":"本","reading":"ほん"}],"romaji":"hon","english":"book"},
+    {"id":"v1060","type":"word","jp":[{"text":"かばん"}],"romaji":"kaban","english":"bag"},
+    {"id":"v1061","type":"word","jp":[{"kanji":"時計","reading":"とけい"}],"romaji":"tokei","english":"watch / clock"},
+    {"id":"v1062","type":"word","jp":[{"kanji":"写真","reading":"しゃしん"}],"romaji":"shashin","english":"photo"},
+    {"id":"v1063","type":"word","jp":[{"kanji":"人形","reading":"にんぎょう"}],"romaji":"ningyō","english":"doll"},
+    {"id":"v1064","type":"word","jp":[{"kanji":"箱","reading":"はこ"}],"romaji":"hako","english":"box"},
+    ]
+  },
+  {
+    id: 55,
+    title: "Free Time",
+    category: "People & Daily Life",
+    rows: [
+    {"id":"v1065","type":"word","jp":[{"kanji":"音楽","reading":"おんがく"}],"romaji":"ongaku","english":"music"},
+    {"id":"v1066","type":"word","jp":[{"kanji":"映画","reading":"えいが"}],"romaji":"eiga","english":"movie / film"},
+    {"id":"v1067","type":"word","jp":[{"text":"スポーツ"}],"romaji":"supōtsu","english":"sports"},
+    {"id":"v1068","type":"word","jp":[{"text":"ゲーム"}],"romaji":"gēmu","english":"game / video game"},
+    ]
+  },
+  {
+    id: 56,
+    title: "Animals",
+    category: "People & Daily Life",
+    rows: [
+    {"id":"v1069","type":"word","jp":[{"kanji":"犬","reading":"いぬ"}],"romaji":"inu","english":"dog"},
+    {"id":"v1070","type":"word","jp":[{"kanji":"猫","reading":"ねこ"}],"romaji":"neko","english":"cat"},
+    {"id":"v1071","type":"word","jp":[{"kanji":"鳥","reading":"とり"}],"romaji":"tori","english":"bird"},
+    ]
+  },
+  {
+    id: 57,
+    title: "Greetings & Expressions",
+    category: "People & Daily Life",
+    rows: [
+    {"id":"v1072","type":"word","jp":[{"text":"おはようございます"}],"romaji":"ohayō gozaimasu","english":"good morning"},
+    {"id":"v1073","type":"word","jp":[{"text":"こんにちは"}],"romaji":"konnichiwa","english":"hello / good afternoon"},
+    {"id":"v1074","type":"word","jp":[{"text":"こんばんは"}],"romaji":"konbanwa","english":"good evening"},
+    {"id":"v1075","type":"word","jp":[{"text":"さようなら"}],"romaji":"sayōnara","english":"goodbye"},
+    {"id":"v1076","type":"word","jp":[{"text":"はじめまして"}],"romaji":"hajimemashite","english":"nice to meet you"},
+    {"id":"v1077","type":"word","jp":[{"text":"よろしくお"},{"kanji":"願","reading":"ねが"},{"text":"いします"}],"romaji":"yoroshiku onegai shimasu","english":"pleased to meet you","enNote":"after introducing yourself"},
+    {"id":"v1078","type":"word","jp":[{"text":"ありがとうございます"}],"romaji":"arigatō gozaimasu","english":"thank you"},
+    {"id":"v0812","type":"word","jp":[{"text":"お"},{"kanji":"願","reading":"ねが"},{"text":"いします"}],"romaji":"onegai shimasu","english":"please","enNote":"asking for something"},
+    {"id":"v0813","type":"word","jp":[{"text":"すみません"}],"romaji":"sumimasen","english":"excuse me / sorry"},
+    {"id":"v1079","type":"word","jp":[{"text":"はい"}],"romaji":"hai","english":"yes"},
+    {"id":"v1080","type":"word","jp":[{"text":"いいえ"}],"romaji":"iie","english":"no"},
+    {"id":"v1081","type":"word","jp":[{"text":"もしもし"}],"romaji":"moshimoshi","english":"hello","enNote":"on the phone"},
+    {"id":"v1082","type":"word","jp":[{"text":"わかりました"}],"romaji":"wakarimashita","english":"I understand / got it"},
     ]
   },
   {
@@ -1011,8 +1125,6 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0809","type":"word","jp":[{"kanji":"喫茶店","reading":"きっさてん"}],"romaji":"kissaten","english":"café / coffee shop"},
     {"id":"v0810","type":"word","jp":[{"text":"いただきます"}],"romaji":"itadakimasu","english":"said before eating"},
     {"id":"v0811","type":"word","jp":[{"text":"ごちそうさまでした"}],"romaji":"gochisōsama deshita","english":"said after eating"},
-    {"id":"v0812","type":"word","jp":[{"text":"お"},{"kanji":"願","reading":"ねが"},{"text":"いします"}],"romaji":"onegai shimasu","english":"please","enNote":"asking for something"},
-    {"id":"v0813","type":"word","jp":[{"text":"すみません"}],"romaji":"sumimasen","english":"excuse me / sorry"},
     ]
   },
   {
