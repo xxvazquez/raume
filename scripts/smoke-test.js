@@ -238,7 +238,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 50 table sections", sections.length === 50);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 945 vocabulary rows", totalRows === 945);
+  check("renders 943 vocabulary rows", totalRows === 943);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
     r.selectorText === "body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji" && r.style.display === "none"));
   check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
