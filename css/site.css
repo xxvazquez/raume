@@ -2516,10 +2516,13 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
      (6 kana + the speaker icon, e.g. チャーシュー) overflow their flex-shrunk
      box and paint straight through it instead of wrapping under it.
      Kinsoku (strict): when it does wrap, ー and small kana never start the
-     second line -- チャー / シュー, never チャーシュ / ー. */
+     second line -- チャー / シュー, never チャーシュ / ー. Balanced, so the
+     second line never holds one stray kana: アムステ / ルダム, not
+     アムステルダ / ム. */
   white-space: normal;
   overflow-wrap: anywhere;
   line-break: strict;
+  text-wrap: balance;
 }
 .jpword { vertical-align: middle; }
 .jpword ruby { ruby-position: over; ruby-align: start; }
