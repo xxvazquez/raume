@@ -669,7 +669,7 @@ window.RaumeStudy.notes = (function () {
       var tb = hostEl.querySelector("#notesTitle");
       if (tb) tb.setAttribute("aria-label", "Rename “" + note.title + "”");
       var when = hostEl.querySelector(".notes-reader-date");
-      if (when) when.textContent = longDate(note.note_date);
+      if (when) when.textContent = readerDate(note);
     }, function (err) {
       flash = { text: "Couldn’t save — " + problem(err), error: true };
       rerender();
@@ -809,6 +809,29 @@ window.RaumeStudy.notes = (function () {
         }).join("") + "</ul>";
     }).join("");
   }
+  // A note named by its date says it again on the line under it -- there the
+  // lesson's topic (its first heading, from the device copy) reads better,
+  // the way Notes shows a preview line. Filled in once the copy answers.
+  function topicOf(html) {
+    var doc = parse(html);
+    var h = doc.querySelector(".rn-top h1, main.page .top h1, h1");
+    return h ? h.textContent.replace(/\s+/g, " ").trim() : "";
+  }
+  function showTopics(host) {
+    var u = user();
+    if (!u || !notes) return;
+    deviceList(u.id).then(function (have) {
+      have.forEach(function (rec) {
+        var note = findNote(rec.id);
+        if (!note || rec.html == null || note.title !== lessonName(note.note_date)) return;
+        var topic = topicOf(rec.html);
+        var row = host.querySelector('.notes-row[data-note="' + rec.id + '"] .notes-row-sub');
+        if (topic && row) row.textContent = topic;
+      });
+    });
+  }
+  // The date under the title -- unless the title already is it.
+  function readerDate(note) { return note.title === lessonName(note.note_date) ? "" : longDate(note.note_date); }
   function menuItem(action, label, danger) {
     return '<button type="button" class="notes-menu-item' + (danger ? " notes-menu-danger" : "") + '" role="menuitem" data-note-action="' + action + '">' +
       '<span class="menu-item-ic" aria-hidden="true">' + MENU_ICONS[action] + '</span><span class="menu-item-tx">' + label + "</span></button>";
@@ -827,7 +850,7 @@ window.RaumeStudy.notes = (function () {
       // The title is the rename control, as a document's title is on iOS.
       '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
       '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
-      '<div class="notes-reader-bar"><p class="notes-reader-date">' + esc(longDate(note.note_date)) + "</p>" +
+      '<div class="notes-reader-bar"><p class="notes-reader-date">' + esc(readerDate(note)) + "</p>" +
       '<div class="notes-tools">' +
       // Quiz: the study action you take mid-note, so it's a button of its
       // own; the display options it pairs with sit in ⋯. Both show only for
@@ -883,6 +906,7 @@ window.RaumeStudy.notes = (function () {
     } else {
       shownId = null;
       host.innerHTML = '<div class="notes-wrap">' + listHtml() + "</div>";
+      showTopics(host);
       // Back from a note: the list where you left it.
       if (wasNote && !opts.keepScroll) window.scrollTo(0, listScroll);
     }

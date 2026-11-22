@@ -3456,7 +3456,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   @media (prefers-reduced-motion: reduce) { .compact-title { transition: none; } }
   body.is-searching { --nav-h: 1px; }
   body.is-searching .compact-title { display: none; }
-  body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1, body .page-notes h1 {
+  body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1, body .page-notes .notes-titlebar h1 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
   }
