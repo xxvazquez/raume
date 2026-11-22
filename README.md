@@ -53,10 +53,10 @@ python3 -m http.server
 
 | Section        | What's in it |
 | -------------- | ------------ |
-| **Vocabulary** | The landing page: Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life (family, body & health, weather & seasons), Time & Calendar |
+| **Vocabulary** | The landing page: Around Town (places, shops, transport, directions), Food & Ingredients, Kitchen & Dining (with eating out), Numbers & Counting, People & Daily Life (family, body & health, home, weather & seasons), Time & Calendar |
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
 | **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
-| **Travel**     | Signs, places, shopping, transport, toilets, laundry, hotels, labels, garbage, restaurants |
+| **Travel**     | Beyond-N5 words for getting by in Japan: signs, shopping, stations, toilets, laundry, hotels, labels, garbage, restaurants (the N5 words live under Vocabulary and Grammar) |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
 Grammatical **particles are blue and bold** everywhere.

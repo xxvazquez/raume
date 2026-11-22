@@ -254,7 +254,7 @@ and Help.
   square with a white glyph, filled in a soft, muted hue **per content category**
   (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
   `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
-  purple, Travel `#5fa0a2` teal, People & Daily Life
+  purple, Travel and Around Town `#5fa0a2` teal, People & Daily Life
   `#bb7f74` clay, N5 Kanji `#8493a3` slate). The tile key is
   `data-tile` on the `.table-section` (and the Customize row), resolved in
   `render.js` `tableTile()`: the reader's pick, else the category's, else — a
@@ -695,7 +695,7 @@ and Help.
     hairline. As in iOS Settings a row is plain ink with its table count as a
     trailing secondary value and a chevron that points right while closed and
     turns down when open (`.disclosure-caret`, shared by every collapsible row
-    on the page) — no coloured marker bars. A section with more than one category (Vocabulary's four)
+    on the page) — no coloured marker bars. A section with more than one category (Vocabulary's six)
     is itself collapsible — closing it hides all four at once — with its
     eyebrow above them; a section that's just one category sharing the
     section's own name (Grammar, Travel) skips the redundant

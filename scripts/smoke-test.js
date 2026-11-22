@@ -236,7 +236,7 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 47 table sections", sections.length === 47);
+  check("renders 52 table sections", sections.length === 52);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 990 vocabulary rows", totalRows === 990);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
@@ -510,7 +510,7 @@ async function main() {
     const godanIchidan = rows.filter(r => !r.cells[1].querySelector(".verb-badge-irregular"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
-    return badgeOk && rows.length === 79 && document.querySelectorAll(".vocab .adj-note").length === 0
+    return badgeOk && rows.length === 83 && document.querySelectorAll(".vocab .adj-note").length === 0
       && irr.length === 6 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
@@ -1049,7 +1049,7 @@ async function main() {
 
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
-  check("a sub-heading per Vocabulary category (Food & Ingredients / Kitchen & Dining / Numbers & Counting / People & Daily Life / Time & Calendar)", catHeads.length === 5);
+  check("a sub-heading per Vocabulary category (Around Town / Food & Ingredients / Kitchen & Dining / Numbers & Counting / People & Daily Life / Time & Calendar)", catHeads.length === 6);
   check("sub-headings are visible on the Vocabulary page", catHeads.every(h => !h.classList.contains("page-hidden")));
   check("the reading column and its category rules share one width cap", (() => {
     const mw = el => window.getComputedStyle(el).maxWidth;
@@ -1103,7 +1103,7 @@ async function main() {
     const tables = [...document.querySelectorAll('.table-section[data-section="vocabulary"]')];
     return links.length === tables.length && links.every(a => document.getElementById('table-' + a.dataset.target));
   })());
-  check("the Vocabulary panel groups links by category (5 groups, 5 labels)", vocPanel.querySelectorAll('.tindex-cat-group').length === 5 && vocPanel.querySelectorAll('.tindex-cat').length === 5);
+  check("the Vocabulary panel groups links by category (6 groups, 6 labels)", vocPanel.querySelectorAll('.tindex-cat-group').length === 6 && vocPanel.querySelectorAll('.tindex-cat').length === 6);
   check("category labels are plain text, not expand/collapse buttons", [...vocPanel.querySelectorAll('.tindex-cat')].every(c => c.tagName !== "BUTTON" && !c.hasAttribute("aria-expanded")));
   check("the Grammar panel is a single ungrouped list (no category label)", (() => {
     const g = document.querySelector('#tableIndex .tindex-panel[data-section="grammar"]');
@@ -1697,7 +1697,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 47 tables", czRows.length === 47);
+  check("it lists every one of the 52 tables", czRows.length === 52);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
@@ -2640,7 +2640,12 @@ async function main() {
   const answerInput = document.getElementById("fcAnswerInput");
   check("the answer field is named with its prompt for a screen reader", (() => {
     const al = answerInput.getAttribute("aria-label") || "";
-    const promptText = (document.querySelector(".fc-prompt") || {}).textContent || "x";
+    // The prompt's text without its furigana (<rt>) or speaker -- the label
+    // names the word itself.
+    const promptEl = document.querySelector(".fc-prompt");
+    const bare = promptEl ? promptEl.cloneNode(true) : null;
+    if (bare) bare.querySelectorAll("rt, rp, .jp-speak-btn, .fc-prompt-note").forEach(n => n.remove());
+    const promptText = (bare && bare.textContent) || "x";
     return /^(Type the English meaning|Type the romaji reading): /.test(al) && al.indexOf(promptText.trim()) !== -1;
   })());
   answerInput.value = "definitely-not-right";

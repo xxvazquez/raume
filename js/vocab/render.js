@@ -718,7 +718,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // green, a plane table teal). "" means the plain section tone.
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
-    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal',
+    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Around Town': 'teal',
     'People & Daily Life': 'clay', 'N5 Kanji': 'slate'
   };
   function tableTile(id, category) {
