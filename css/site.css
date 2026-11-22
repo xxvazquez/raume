@@ -982,22 +982,28 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
 .opt-switch::before {
   content: "";
   position: absolute; right: 16px; top: 50%;
-  width: 34px; height: 20px; margin-top: -10px;
-  border-radius: 10px;
+  /* The same 51 x 31 iOS switch as Settings (.set-switch) -- one switch
+     app-wide. The thumb sits 2px inside the track at either end: off at
+     16 + 51 - 2 - 27 = 38px from the row's edge, on at 16 + 2 = 18px (it
+     used to sit 12px outside the track's left end when off). */
+  width: 51px; height: 31px; margin-top: -15.5px;
+  border-radius: 999px;
   background: var(--switch-off);
   transition: background .15s ease;
 }
 .opt-switch::after {
   content: "";
-  position: absolute; right: 46px; top: 50%;
-  width: 16px; height: 16px; margin-top: -8px;
+  position: absolute; right: 38px; top: 50%;
+  width: 27px; height: 27px; margin-top: -13.5px;
   border-radius: 50%;
   background: var(--switch-thumb);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
   transition: right .15s ease;
 }
 .opt-switch.active::before { background: var(--switch-on); }
-.opt-switch.active::after { right: 20px; }
+.opt-switch.active::after { right: 18px; }
+.opt-switch { padding-right: 80px; } /* the label clears the 51px switch */
+@media (prefers-reduced-motion: reduce) { .opt-switch::before, .opt-switch::after { transition: none; } }
 .expand-bar.search-hidden { display: none; }
 /* Footnote under the list: what the badges mean, only for a table that has them. */
 .opt-foot { padding: 0 16px; }
