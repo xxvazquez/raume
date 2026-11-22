@@ -236,7 +236,7 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 50 table sections", sections.length === 50);
+  check("renders 51 table sections", sections.length === 51);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 943 vocabulary rows", totalRows === 943);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
@@ -1723,7 +1723,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 50 tables", czRows.length === 50);
+  check("it lists every one of the 51 tables", czRows.length === 51);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
