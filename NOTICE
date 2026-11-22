@@ -8,7 +8,7 @@ First-party code and content
 ----------------------------
 
 Code: the source code in this repository is licensed under the PolyForm
-Noncommercial License 1.0.0 — see LICENSE. In short: you may use, study,
+Noncommercial License 1.0.0 — see LICENSE.md. In short: you may use, study,
 self-host, modify, and share it for any noncommercial purpose (personal
 study, research, teaching, hobby projects). Commercial use is not granted.
 
@@ -26,22 +26,29 @@ Name and marks
 --------------
 
 "raume", the raume wordmark, and the logo (logo.png / icons/) are not
-licensed under LICENSE. Noncommercial use of the software does not grant any
-right to use the name, wordmark, or logo, or to present a modified copy in a
-way that implies endorsement by or affiliation with the project or its author.
+licensed under LICENSE.md or LICENSE-CONTENT.md. Noncommercial use of the
+software does not grant any right to use the name, wordmark, or logo, or to
+present a modified copy in a way that implies endorsement by or affiliation
+with the project or its author.
 
 
-Bundled third-party components (unaffected by LICENSE)
------------------------------------------------------
+Bundled third-party components (not covered by LICENSE.md or LICENSE-CONTENT.md)
+---------------------------------------------------------------------------------
 
-  vendor/ts-fsrs.js          MIT   — vendor/ts-fsrs.LICENSE.txt
-  vendor/supabase.js         MIT   — vendor/supabase.LICENSE.txt
-  js/vocab/icons.js          ISC   — icon paths adapted from Lucide, vendor/lucide.LICENSE.txt
-  fonts/InterVariable.woff2  OFL 1.1 — fonts/Inter.LICENSE.txt
-  fonts/SpaceGrotesk.woff2   OFL 1.1 — fonts/SpaceGrotesk.LICENSE.txt
-  data/kanji-strokes.js      CC BY-SA 3.0 — data/kanji-strokes.LICENSE.txt
-  data/kana-strokes.js       Stroke order adapted from KanjiVG
-                             (http://kanjivg.tagaini.net), copyright (C)
-                             2009/2010/2011 Ulrich Apel. These two files alone
-                             are distributed under CC BY-SA 3.0
-                             (http://creativecommons.org/licenses/by-sa/3.0/)
+  vendor/ts-fsrs.js          MIT          vendor/ts-fsrs.LICENSE.txt
+  vendor/supabase.js         MIT          vendor/supabase.LICENSE.txt
+  js/vocab/icons.js          ISC          icon paths adapted from Lucide,
+                                          vendor/lucide.LICENSE.txt
+  fonts/InterVariable.woff2  OFL 1.1      fonts/Inter.LICENSE.txt
+  fonts/SpaceGrotesk.woff2   OFL 1.1      fonts/SpaceGrotesk.LICENSE.txt
+  data/kanji-strokes.js      CC BY-SA 3.0 data/kanji-strokes.LICENSE.txt
+  data/kana-strokes.js       CC BY-SA 3.0 data/kanji-strokes.LICENSE.txt
+
+  Stroke order in the two data/ files is adapted from KanjiVG
+  (http://kanjivg.tagaini.net), copyright (C) 2009/2010/2011 Ulrich Apel,
+  and those two files alone are distributed under CC BY-SA 3.0
+  (http://creativecommons.org/licenses/by-sa/3.0/).
+
+  audio/*.mp3                Generated with VOICEVOX
+                             (https://voicevox.hiroshiba.jp/),
+                             voice VOICEVOX:四国めたん

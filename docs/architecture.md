@@ -573,7 +573,7 @@ tables. The sheet's *Words with* list is computed, not stored
 `data/kanji-strokes.js` (`RaumeStudy.data.kanjiStrokes`: per kanji, `p` the stroke
 paths in order on KanjiVG's 109x109 grid, `n` each stroke number's position). That
 file is adapted from KanjiVG, CC BY-SA 3.0 — with `data/kana-strokes.js` (same
-shape, `p` only; written cards), the only files not under LICENSE
+shape, `p` only; written cards), the only files not under LICENSE.md
 (`data/kanji-strokes.LICENSE.txt`, NOTICE; credited with links under the drawing,
 on the Help page and in README). Keep that attribution wherever the data is shown;
 it loads right after `vocabulary.js` (which assigns `RaumeStudy.data`). The smoke

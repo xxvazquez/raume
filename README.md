@@ -744,7 +744,7 @@ that changed; the service worker keeps the rest offline.
 
 ## License
 
-The **code** is under the [PolyForm Noncommercial License 1.0.0](LICENSE); the
+The **code** is under the [PolyForm Noncommercial License 1.0.0](LICENSE.md); the
 original **content** — the curated vocabulary and kanji tables and the
 explanations (Help, ⓘ notes, these docs) — is under
 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md). Either way you may use, study, share and
