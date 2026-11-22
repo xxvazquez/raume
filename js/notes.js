@@ -400,10 +400,26 @@ window.RaumeStudy.notes = (function () {
     var jp = e.target.closest(".rn-st .rn-jp");
     if (jp) speak(jp);
   }
-  function speak(el) {
+  // What a Japanese line says: each kanji as its furigana reading, as the
+  // reference tables' speakers do -- a voice reading the bare kanji can
+  // pick the wrong reading (上 alone as "jō").
+  function spokenText(el) {
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll("ruby").forEach(function (ruby) {
+      var reading = Array.prototype.map.call(ruby.querySelectorAll("rt"), function (rt) { return rt.textContent; }).join("");
+      if (!reading) { ruby.querySelectorAll("rp").forEach(function (n) { n.remove(); }); reading = ruby.textContent; }
+      ruby.replaceWith(document.createTextNode(reading));
+    });
+    return clone.textContent.replace(/[●Ｘ]/g, "").replace(/\s+/g, " ").trim();
+  }
+  // What it shows: the line without its furigana.
+  function shownText(el) {
     var clone = el.cloneNode(true);
     clone.querySelectorAll("rt, rp").forEach(function (n) { n.remove(); });
-    var text = clone.textContent.replace(/[●Ｘ]/g, "").replace(/\s+/g, " ").trim();
+    return clone.textContent.replace(/\s+/g, " ").trim();
+  }
+  function speak(el) {
+    var text = spokenText(el);
     if (!text || text === "—" || !shared.speech) return;
     hostEl.querySelectorAll(".rn-speaking").forEach(function (n) { n.classList.remove("rn-speaking"); });
     el.classList.add("rn-speaking");
@@ -420,7 +436,7 @@ window.RaumeStudy.notes = (function () {
       jp.setAttribute("lang", "ja");
       jp.setAttribute("role", "button");
       jp.setAttribute("tabindex", "0");
-      jp.setAttribute("aria-label", "Play " + jp.textContent.replace(/\s+/g, " ").trim());
+      jp.setAttribute("aria-label", "Play " + shownText(jp));
     });
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);

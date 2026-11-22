@@ -2135,6 +2135,13 @@ async function main() {
       && !window.__ran && /link text/.test(rn.textContent));
     check("...keeping its classes, tile hue and simple drawings", !!rn && !!rn.querySelector('.rn-sec[data-tile="blue"]') && !!rn.querySelector("svg circle.pk-dot[cx]"));
     check("each Japanese line plays (a labelled button)", !!rn && rn.querySelector(".rn-jp").getAttribute("role") === "button" && /^Play /.test(rn.querySelector(".rn-jp").getAttribute("aria-label")));
+    check("...saying each kanji by its furigana, labelled without it", (() => {
+      const jp = rn && rn.querySelector(".rn-jp"), speech = window.RaumeStudy.shared.speech, orig = speech.speak;
+      let said = null;
+      speech.speak = t => { said = t; };
+      try { jp.click(); } finally { speech.speak = orig; }
+      return said === "まちです" && jp.getAttribute("aria-label") === "Play 町です";
+    })());
     if (rn) rn.remove();
     const plain = nh.cleanNote('<html><head><style>h2{color:red}</style><script>x()</script><meta http-equiv="refresh" content="0;url=https://example.com"></head>' +
       '<body onload="x()"><h2 style="color:blue">Hi</h2><a href="https://example.com">out</a><a href="#s2">in</a><a href="other.html">rel</a><a href="javascript:x()">js</a></body></html>');

@@ -1621,6 +1621,7 @@ body.icon-picker-open { overflow: hidden; }
 .rn-cols2 .rn-r { border-bottom: 1px solid var(--row-line); }
 /* Tiles */
 .rn-tiles { display: grid; gap: 8px; }
+.rn-c2 { grid-template-columns: repeat(2, 1fr); }
 .rn-c3 { grid-template-columns: repeat(3, 1fr); }
 .rn-c4 { grid-template-columns: repeat(4, 1fr); }
 .rn-tile { background: var(--paper); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; min-width: 0; }

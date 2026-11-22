@@ -790,12 +790,17 @@ and Help.
   (red). Name and date edits use the iOS alert with a field and a tinted,
   semibold confirm (`.ios-confirm-field`, `.ios-confirm-go`).
 - **Lesson notes** (`.rn`, made by `scripts/note_kit.py`) are a raume
-  screen, not a document: numbered section heads (an 18px title, a 26px dot
-  in the section's tile hue, the Japanese subtitle in grey), list-header
+  screen, not a document, and every note has the same shape: sections in
+  one order, each kind in its own tile hue and named in its grey subtitle
+  (Grammar blue, Conversation teal, Vocabulary green, Practice orange, Watch
+  out clay, Reference slate — so a colour never stands alone). Numbered
+  section heads (an 18px title, a 26px dot in the section's tile hue, the
+  kind and the Japanese subtitle in grey), list-header
   sub-heads, and everything on white surfaces — formula cards, explainer
-  cards, tips (a tile-hue dot leads each), tile grids (4 or 3 across, 2 on a
+  cards, tips (a tile-hue dot leads each), tile grids (4, 3 or 2 across, 2 on a
   phone) and hairline Q/A lists that stack on a phone. Every Japanese item
-  stacks Japanese with furigana, romaji (italic, `--romaji`) and English; its
+  stacks Japanese with furigana (particles bold blue, `.particle`, as
+  everywhere in raume), romaji (italic, `--romaji`) and English; its
   Japanese line ends in a small faint speaker, so tap-to-hear shows. Colour
   is only the section's tile hue (highlights, slots, dots); the lesson
   kit's pink becomes clay. Quiz and the Romaji / English switches blur

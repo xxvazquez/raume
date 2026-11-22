@@ -204,9 +204,18 @@ and deleting need a connection and say so when they fail.
 - **Writing lesson notes** — `scripts/note_kit.py` (components: `stack`,
   `lst`, `tiles`, `tip(s)`, `two`, `formula`, `kinds`, `slot`, `cols2`,
   `section`, the position pictograms in `PICT`; `render(out, date, title,
-  desc, sections)`). A lesson note is named by its date — "Sat, Nov 21st
-  2026" (`lesson_name`) — in its `<title>` and eyebrow; `title` is the
-  lesson's topic, shown over the description. Lesson files are personal content: they live in
+  desc, sections)`). Every note has one shape: `section(kind, …)` takes a
+  kind from `OUTLINE` — grammar, conversation, vocabulary, practice, watch,
+  reference — which fixes its place, colour and the word in its header;
+  `render()` orders and numbers the sections. Japanese is written as raume's
+  own words are: `漢字(かんじ)` for furigana, `[は]` for a particle (`r()` /
+  `p()` in an f-string). Before writing, `render()` checks every Japanese
+  line — furigana on each kanji, and the romaji spells the kana (Hepburn,
+  particles は / へ / を as wa / e / o, ō = ou = oo) — and stops with a list
+  of problems; `stack(..., check=False)` exempts one line. A lesson note is
+  named by its date — "Sat, Nov 21st 2026" (`lesson_name`) — in its
+  `<title>` and eyebrow; `title` is the lesson's topic, shown over the
+  description. Lesson files are personal content: they live in
   `private-notes/` (gitignored) or outside the repo, never in Git.
 
 ### Reading all of an account's rows
