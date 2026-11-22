@@ -236,9 +236,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 49 table sections", sections.length === 49);
+  check("renders 50 table sections", sections.length === 50);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 932 vocabulary rows", totalRows === 932);
+  check("renders 945 vocabulary rows", totalRows === 945);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
     r.selectorText === "body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji" && r.style.display === "none"));
   check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
@@ -418,10 +418,12 @@ async function main() {
     const input = document.getElementById("tableSearch");
     input.value = "adjective";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    const hits = document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
+    // Only Sentence Patterns says "adjective" out loud (its grey notes); the
+    // hidden い/な notes on Adjectives rows must not match.
+    const hits = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)')];
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return hits === 0;
+    return hits.length > 0 && hits.every(tr => tr.closest(".table-section").querySelector(".section-title-text").textContent === "Sentence Patterns");
   })());
   check("every Japanese cell is marked lang=\"ja\"", [...document.querySelectorAll("td.jp")].every(td => td.getAttribute("lang") === "ja"));
   // A kanji tile has none -- its sheet carries the speaker.
@@ -1105,7 +1107,8 @@ async function main() {
     const g = document.querySelector('#tableIndex .tindex-panel[data-section="grammar"]');
     return g && g.querySelectorAll('.tindex-cat-group').length === 0 && g.querySelectorAll('.tindex-cat').length === 0 && !!g.querySelector('.tindex-list');
   })());
-  check("a section with many tables is marked for the two-column layout", vocPanel.classList.contains("tindex-panel--wide") && !document.querySelector('#tableIndex .tindex-panel[data-section="grammar"]').classList.contains("tindex-panel--wide"));
+  check("a section with more than five tables is marked for the two-column layout", vocPanel.classList.contains("tindex-panel--wide")
+    && document.querySelector('#tableIndex .tindex-panel[data-section="grammar"]').classList.contains("tindex-panel--wide") === (document.querySelectorAll('.table-section[data-section="grammar"]').length > 5));
   check("clicking the trigger opens the menu", (() => {
     document.querySelector(".tindex-trigger").click();
     return tindexMenu.hidden === false && document.querySelector(".tindex-trigger").getAttribute("aria-expanded") === "true";
@@ -1696,7 +1699,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 49 tables", czRows.length === 49);
+  check("it lists every one of the 50 tables", czRows.length === 50);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
