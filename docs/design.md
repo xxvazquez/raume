@@ -158,7 +158,6 @@ clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
 - `--sec-vocabulary` — slate-blue (`#4F7389`)
 - `--sec-grammar` — mauve (`#875A78`)
 - `--sec-kanji` — ochre (`#8D7550`)
-- `--sec-travel` — sage (`#5F8175`)
 - `--sec-flashcards` — lavender (`#82799B`), the same as the primary accent
 
 The five hues sit well over 20° apart (the smoke test enforces it), light and
@@ -254,7 +253,7 @@ and Help.
   square with a white glyph, filled in a soft, muted hue **per content category**
   (`--tile`, set on `.table-section[data-category]`: Food `#74a087` green, Kitchen
   `#c8905a` orange, Numbers `#7093be` blue, Time `#8487c0` indigo, Grammar `#9c7fb6`
-  purple, Travel and Around Town `#5fa0a2` teal, People & Daily Life
+  purple, Around Town `#5fa0a2` teal, People & Daily Life
   `#bb7f74` clay, N5 Kanji `#8493a3` slate). The tile key is
   `data-tile` on the `.table-section` (and the Customize row), resolved in
   `render.js` `tableTile()`: the reader's pick, else the category's, else — a
@@ -519,7 +518,7 @@ and Help.
   the `--group-ground` runs edge to edge like the phone, and the content keeps
   a centred 1180px column (`.app-frame > .app`). **≥900px the masthead is one
   sticky glass bar** (64px; blur on a `::before` layer): the wordmark leading,
-  the five sections as a white floating capsule (`--control-lift`) laid over
+  the four sections as a white floating capsule (`--control-lift`) laid over
   its centre (both share the frame's first grid row, so the markup is the
   phone's), the utility glyphs trailing; the sticky search bar stops under it
   (`--nav-h: 64px`). **641–899px** the tabs keep their own row under the
@@ -588,7 +587,7 @@ and Help.
   (Flashcards, Customize, the masthead Help) set it at `--fs-large-title` (28px,
   weight 600) instead of `--fs-page-title`; the reference pages' own `<h1>`,
   `showSection()` keeps in step with the active section (Vocabulary / Grammar /
-  Travel), as an iOS large title names each tab's screen. On screen at
+  Kanji), as an iOS large title names each tab's screen. On screen at
   phone width only — the desktop top nav already names the section visually —
   but *visually-hidden*, not `display: none`, above 641px: `display: none`
   would drop it from the accessibility tree too, leaving desktop with no
@@ -696,14 +695,14 @@ and Help.
     trailing secondary value and a chevron that points right while closed and
     turns down when open (`.disclosure-caret`, shared by every collapsible row
     on the page) — no coloured marker bars. A section with more than one category (Vocabulary's six)
-    is itself collapsible — closing it hides all four at once — with its
+    is itself collapsible — closing it hides all of them at once — with its
     eyebrow above them; a section that's just one category sharing the
-    section's own name (Grammar, Travel) skips the redundant
+    section's own name (Grammar) skips the redundant
     eyebrow-then-identical-row and renders as a single merged heading instead
     (`.cz-group-title-solo`), sized and weighted identically to the eyebrow
     (`--fs-subhead`/500) since both are playing the same "top of a section"
     role and need to read as one consistent level, not two different sizes.
-    The 3 top-level rows (Vocabulary/Grammar/Travel) sit inside one
+    The 3 top-level rows (Vocabulary/Grammar/Kanji) sit inside one
     shared card (`.cz-groups`), iOS Settings grouped-list style — each row's
     own bottom hairline is the only separator between rows (no divider after
     the last row). A name reads as the row's plain ink title (the shipped name

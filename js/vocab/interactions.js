@@ -1,6 +1,6 @@
 // Vocabulary page -- interaction half of RaumeStudy.vocab.
 //
-// Section routing (Vocabulary / Grammar / Kanji / Travel / Practice), the
+// Section routing (Vocabulary / Grammar / Kanji / Practice), the
 // per-table accordion and overflow menus, print, cross-section search, the
 // column-visibility filter, the top navigation and the casual/polite toggle.
 // Augments the RaumeStudy.vocab object that js/vocab/render.js creates. Loaded
@@ -179,7 +179,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.updateOptionsDot = updateOptionsDot;
 
-  /* The four main study areas. Vocabulary / Grammar / Travel each render a set
+  /* The four main study areas. Vocabulary / Grammar / Kanji each render a set
      of table-sections (Vocabulary keeps its content-category sub-headings);
      Flashcards is its own page. Search is the one thing that reaches across
      section boundaries -- it reveals matches everywhere, then restores the
@@ -199,7 +199,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
-  // #kanji / #travel / #practice / #table-N) so a section or a specific
+  // #kanji / #practice / #table-N) so a section or a specific
   // table can be bookmarked, shared and survive a reload. `fromRoute` = we're
   // already responding to a hash, so don't push it again.
   function setHash(h, fromRoute) {
@@ -664,7 +664,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (h === 'customize') { vocab.showCustomizePage({ fromRoute: true }); return; }
     if (h === 'help') { vocab.showHelpPage({ fromRoute: true }); return; }
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }
-    if (h === 'grammar' || h === 'kanji' || h === 'travel') { showSection(h, { fromRoute: true }); return; }
+    // #travel: a section since folded into Vocabulary -- falls through to it.
+    if (h === 'grammar' || h === 'kanji') { showSection(h, { fromRoute: true }); return; }
     showSection('vocabulary', { fromRoute: true });
   }
   vocab.routeFromHash = routeFromHash;

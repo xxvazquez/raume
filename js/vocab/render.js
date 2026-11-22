@@ -262,16 +262,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.
   var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
-  // The main study areas. Grammar, the N5 kanji and Travel are promoted out
-  // of the general vocabulary list into their own top-level sections;
-  // everything else lives under Vocabulary, still grouped by its category.
+  // The main study areas. Grammar and the N5 kanji are promoted out of the
+  // general vocabulary list into their own top-level sections; everything
+  // else lives under Vocabulary, still grouped by its category.
   function sectionOf(category) {
     if (category === 'Grammar') return 'grammar';
     if (category === 'N5 Kanji') return 'kanji';
-    if (category === 'Travel') return 'travel';
     return 'vocabulary';
   }
-  var SECTION_ORDER = ['vocabulary', 'grammar', 'kanji', 'travel'];
+  var SECTION_ORDER = ['vocabulary', 'grammar', 'kanji'];
   vocab.sectionOf = sectionOf;
   function rowHideButton() {
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row">' + EYE_ICON + '</button>';
@@ -718,7 +717,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // green, a plane table teal). "" means the plain section tone.
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
-    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Travel': 'teal', 'Around Town': 'teal',
+    'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Around Town': 'teal',
     'People & Daily Life': 'clay', 'N5 Kanji': 'slate'
   };
   function tableTile(id, category) {
@@ -812,13 +811,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return { name: name, tables: orderTables(name, byName[name]) };
     });
   }
-  // The five-item top navigation: the four reference sections plus
+  // The four-item top navigation: the three reference sections plus
   // Practice. Fixed -- it never changes with the data.
   function renderNav() {
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
       '<a class="site-nav-link" href="#kanji" data-section="kanji">Kanji</a>' +
-      '<a class="site-nav-link" href="#travel" data-section="travel">Travel</a>' +
       '<a class="site-nav-link" href="#practice" data-page="flashcards">Practice</a>';
   }
   // The internal table index: a visual directory that stands in for a
@@ -829,7 +827,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Panels with more than a handful of tables are marked --wide so CSS flows
   // them into two columns.
   function renderTableIndex(tables) {
-    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var panels = SECTION_ORDER.map(function (sec) {
       var groups = groupByCategory(bySection[sec], sec);
@@ -873,12 +871,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // Assemble #vocabulary: every table, grouped section -> category -> table
   // (categories and tables alphabetical). The Vocabulary section carries a
-  // quiet category sub-heading before each of its groups; Grammar and Travel
+  // quiet category sub-heading before each of its groups; Grammar and Kanji
   // are a single category, so they get none. Headings and sections all start
   // page-hidden; routing (interactions.js -> showSection) reveals one section
   // at a time.
   function renderAll(tables) {
-    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [] };
     tables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var html = '';
     SECTION_ORDER.forEach(function (sec) {
@@ -958,7 +956,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.isUserHidden = isUserHidden;
   function reflowLayout() {
     if (!host || !vocabularyTables) return;
-    var bySection = { vocabulary: [], grammar: [], kanji: [], travel: [] };
+    var bySection = { vocabulary: [], grammar: [], kanji: [] };
     vocabularyTables.forEach(function (t) { bySection[sectionOf(t.category)].push(t); });
     var ordered = [], parked = [];
     // Headings and sections are the host's direct children -- look them up

@@ -64,7 +64,7 @@ window.RaumeStudy.customize = (function () {
   }
   var czDetailsOpen = loadOpenState();
 
-  var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", kanji: "Kanji", travel: "Travel" };
+  var SECTION_LABEL = { vocabulary: "Vocabulary", grammar: "Grammar", kanji: "Kanji" };
 
   // Words you've added: live search + sort, kept across a re-render the same
   // way cvTarget is (plain module vars, not one-shot).
@@ -88,14 +88,14 @@ window.RaumeStudy.customize = (function () {
       ' title="Drag to reorder, or use the Up and Down arrow keys">' + DRAG_ICON + "</button>";
   }
 
-  // Section (fixed: Vocabulary / Grammar / Travel) > category (custom order,
+  // Section (fixed: Vocabulary / Grammar / Kanji) > category (custom order,
   // then A-Z) > table (custom order, then A-Z) -- the exact sequence the
   // vocabulary page and the table directory now lay out in.
   function grouped() {
-    var bySec = { vocabulary: [], grammar: [], kanji: [], travel: [] };
+    var bySec = { vocabulary: [], grammar: [], kanji: [] };
     tables().forEach(function (t) { bySec[V().sectionOf(t.category)].push(t); });
     var out = [];
-    ["vocabulary", "grammar", "kanji", "travel"].forEach(function (sec) {
+    ["vocabulary", "grammar", "kanji"].forEach(function (sec) {
       var byCat = {};
       bySec[sec].forEach(function (t) {
         var c = t.category || "Tables";
@@ -333,7 +333,7 @@ window.RaumeStudy.customize = (function () {
   // grouped() is flat (section, then category, in order) -- bucket it back
   // into runs of consecutive same-section entries so each section can carry
   // its own eyebrow label and colour. A section with exactly one category
-  // sharing the section's own name (Grammar, Travel today -- each
+  // sharing the section's own name (Grammar today -- it
   // ships as a single category literally called "Grammar" etc.) skips the
   // redundant eyebrow-then-identical-row and renders as one merged heading
   // instead; Vocabulary's three real subcategories keep both levels, since
@@ -371,7 +371,7 @@ window.RaumeStudy.customize = (function () {
         return '<details class="cz-group" data-open-key="' + esc("cat:" + g.section + "|" + g.name) + '" data-category="' + esc(g.name) + '">' +
           summary + '<ul class="cz-list">' + rows + "</ul></details>";
       }).join("");
-      // A solo section (Grammar, Travel) is already one collapsible
+      // A solo section (Grammar) is already one collapsible
       // row -- nothing to wrap. A multi-category section (Vocabulary) gets
       // an outer collapsible too, so collapsing it hides every category at
       // once instead of having to close each one individually.

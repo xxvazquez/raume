@@ -86,7 +86,6 @@
   --sec-vocabulary: #4f7389;   --sec-vocabulary-soft: #e3ebef;   --sec-vocabulary-strong: #395767;
   --sec-grammar:    #875a78;   --sec-grammar-soft:    #f0e5ec;   --sec-grammar-strong:    #6a4460;
   --sec-kanji:      #8d7550;   --sec-kanji-soft:      #efe9df;   --sec-kanji-strong:      #66522f;
-  --sec-travel:     #5f8175;   --sec-travel-soft:     #e4ece8;   --sec-travel-strong:    #456056;
   --sec-flashcards: #82799b;   --sec-flashcards-soft: #e9e7f1;   --sec-flashcards-strong: #574d73;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
@@ -292,7 +291,6 @@
   --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
   --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
   --sec-kanji:      #c2a87e;   --sec-kanji-soft:      #302a21;   --sec-kanji-strong:      #dbc6a2;
-  --sec-travel:     #8bb0a4;   --sec-travel-soft:     #212f2b;   --sec-travel-strong:    #aed0c5;
   --sec-flashcards: #a99fc4;   --sec-flashcards-soft: #2b2937;   --sec-flashcards-strong: #c6bfda;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
@@ -347,9 +345,6 @@ body[data-active-section="grammar"] {
 }
 body[data-active-section="kanji"] {
   --section: var(--sec-kanji); --section-soft: var(--sec-kanji-soft); --section-strong: var(--sec-kanji-strong);
-}
-body[data-active-section="travel"] {
-  --section: var(--sec-travel); --section-soft: var(--sec-travel-soft); --section-strong: var(--sec-travel-strong);
 }
 body[data-active-page="flashcards"] {
   --section: var(--sec-flashcards); --section-soft: var(--sec-flashcards-soft); --section-strong: var(--sec-flashcards-strong);
@@ -511,7 +506,7 @@ body {
 }
 
 /* --- Horizontal navigation --------------------------------------- */
-/* Five short items -- padding/font tighten at <=640px (below) so they still
+/* Four short items -- padding/font tighten at <=640px (below) so they still
    fit on one line down to a 360px-wide phone. overflow-x is a safety net
    below that, for narrower devices or extreme zoom. A plain bar closed by one
    hairline (the iOS nav-bar edge, which is what keeps the sticky bar legible
@@ -549,7 +544,6 @@ body {
 .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
 .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
 .site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); }
-.site-nav-link[data-section="travel"]:hover { color: var(--sec-travel); }
 .site-nav-link[data-page="flashcards"]:hover { color: var(--sec-flashcards); }
 .site-nav-link.active {
   color: var(--section-strong);
@@ -617,7 +611,7 @@ body {
 .tindex-menu[hidden] { display: none; }
 .tindex-grab { display: none; }
 .tindex-panel[hidden], .tindex-panel.page-hidden { display: none; }
-/* Wide panels (Vocabulary, Travel) flow their tables into two columns so a
+/* Wide panels (Vocabulary, Kanji) flow their tables into two columns so a
    long section stays compact; a short one (Grammar) keeps a single column.
    The menu is `width: max-content`, so it shrink-wraps whichever panel is
    showing. */
@@ -1056,7 +1050,7 @@ body.selftest-mode .selftest-hint { display: block; }
 /* --- Table section --------------------------------------------- */
 /* Not a card: no border, no fill, no shadow -- a titled group of rules.
    Indented so each table reads as a subsection of the CATEGORY (or, in
-   Grammar / Travel, of the page title) above it -- chapter -> subsection
+   Grammar / Kanji, of the page title) above it -- chapter -> subsection
    -> rows -- without a box or a heavier heading. */
 .table-section {
   margin: 0 0 20px;
@@ -1264,8 +1258,8 @@ body.selftest-mode .selftest-hint { display: block; }
 /* Icon tile (iOS Settings style): a small rounded square with a white glyph,
    filled in a soft, muted hue. Each table's hue is a key (data-tile, set in
    js/vocab/render.js): its own pick, else its content category's (Food green,
-   Kitchen orange, Numbers blue, Time indigo, Grammar purple, Travel teal,
-   Phrases amber), else its icon group's. The hues are dusty mid-tones, not
+   Kitchen orange, Numbers blue, Time indigo, Grammar purple, Around Town teal),
+   else its icon group's. The hues are dusty mid-tones, not
    system-bright, so they sit with the app's cool palette; the colour is the
    only colour in a row. No key = the section tone. Dark mode dims the fill a
    touch so the tile doesn't glare. */
@@ -1522,11 +1516,11 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
    closed by an inset hairline -- no marker bars, as in iOS Settings.
 
    A section eyebrow sits above a run of categories that belong to it
-   (Vocabulary's four today). A section with a single category sharing its
-   own name (Grammar, Phrases, Travel) skips the eyebrow and renders as one
+   (Vocabulary's six today). A section with a single category sharing its
+   own name (Grammar) skips the eyebrow and renders as one
    merged heading instead (customize.js sectionRuns()) -- showing "Grammar"
    then a "Grammar" row right under it said the same thing twice. */
-/* The 4 top-level rows (Vocabulary/Grammar/Phrases/Travel) used to each
+/* The top-level rows (Vocabulary/Grammar/Kanji) used to each
    carry a 30px top margin plus their own full-width divider -- enough
    chrome that every row read as its own floating panel instead of one
    list. .cz-groups is the single card that now holds all 4 (iOS Settings
@@ -3025,7 +3019,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 /* --- Phone: the main nav becomes an iOS 26 tab bar ---------------------
    At phone width the same #siteNav (nothing added, nothing removed -- same
    links, same taps) floats over the content as a Liquid Glass capsule:
-   inset 16px from the sides, just above the home indicator, five
+   inset 16px from the sides, just above the home indicator, four
    icon-over-label tabs, the selected one on a rounded highlight in its
    section tone (the glass itself is in the Liquid Glass section below). The
    icons are CSS masks on ::before (data: SVGs, allowed by the CSP's img-src)
@@ -3066,14 +3060,13 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     -webkit-mask-position: center; mask-position: center;
     -webkit-mask-size: contain; mask-size: contain;
   }
-  /* All five from the same Lucide-derived family as js/vocab/icons.js's own
+  /* All four from the same Lucide-derived family as js/vocab/icons.js's own
      picker (24x24 grid, 1.7 stroke, round caps/joins) -- a plain closed book
      and a bullet list, not the mismatched open-book / drawn-letter "T" this
      used to be, so the row reads as one icon set instead of a grab-bag. */
   .site-nav-link[data-section="vocabulary"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="grammar"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="kanji"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); }
-  .site-nav-link[data-section="travel"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { font-weight: 400; }
   .table-section { scroll-margin-top: calc(var(--compact-h) + 92px); }
@@ -5386,7 +5379,7 @@ mark.fc-diff-co {
   }
 }
 /* Desktop: one glass top bar, like an iPadOS 26 / macOS window -- the
-   wordmark leading, the five sections as a white floating capsule in the
+   wordmark leading, the four sections as a white floating capsule in the
    middle, the utility glyphs trailing -- pinned while you scroll, so the
    sections are always one click away. The masthead and #siteNav share the
    first grid row (the nav laid over the masthead's centre), so the markup

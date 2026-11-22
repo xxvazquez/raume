@@ -236,9 +236,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 52 table sections", sections.length === 52);
+  check("renders 43 table sections", sections.length === 43);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 990 vocabulary rows", totalRows === 990);
+  check("renders 862 vocabulary rows", totalRows === 862);
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
     r.selectorText === "body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji" && r.style.display === "none"));
   check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
@@ -390,11 +390,7 @@ async function main() {
     const romajiOf = r => { const w = r.querySelector(".jpword[data-romaji]"); return w ? w.dataset.romaji : ""; };
     const mochiRow = [...taste.querySelectorAll("tbody tr")].find(r => romajiOf(r) === "mochimochi");
     const mochiUntagged = mochiRow && !mochiRow.cells[0].classList.contains("adj-i") && !mochiRow.cells[0].classList.contains("adj-na");
-    // A lone adjective sitting in an otherwise-noun table still gets tagged:
-    // 危険 (na-adj) in Signs, Doors & Places.
-    const kikenRow = [...document.querySelectorAll("#vocabulary tbody tr")].find(r => romajiOf(r) === "kiken");
-    const kikenTagged = kikenRow && kikenRow.cells[0].classList.contains("adj-na");
-    return labelsOk && !verbsTagged && tasteTagged && mochiUntagged && kikenTagged;
+    return labelsOk && !verbsTagged && tasteTagged && mochiUntagged;
   })());
   check("the legend explaining the two colours is aria-hidden (real semantics live in the per-row note, not this)", (() => {
     const legend = document.querySelector(".adj-legend");
@@ -645,7 +641,7 @@ async function main() {
       let hue = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
       return (hue * 60 + 360) % 360;
     };
-    const sections = ["vocabulary", "grammar", "travel", "flashcards"];
+    const sections = ["vocabulary", "grammar", "kanji", "flashcards"];
     // The regression this guards: Vocabulary and Flashcards once sat 5° apart.
     const wellSpread = (rule) => {
       if (!rule) return false;
@@ -1036,16 +1032,16 @@ async function main() {
       && [...r.cssRules].some(x => x.selectorText === ".site-nav-link::before"));
     if (!phone) return false;
     const rules = [...phone.cssRules].map(x => x.selectorText || "");
-    return ["vocabulary", "grammar", "kanji", "travel"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
+    return ["vocabulary", "grammar", "kanji"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
       && rules.some(t => t.includes('data-page="flashcards"') && t.includes("::before"))
-      && document.querySelectorAll("#siteNav .site-nav-link").length === 5;
+      && document.querySelectorAll("#siteNav .site-nav-link").length === 4;
   })());
   check("the Vocabulary nav link starts active", document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
   check("Grammar tables belong to the grammar section", [...document.querySelectorAll('.table-section[data-category="Grammar"]')].every(s => s.dataset.section === "grammar"));
-  check("Travel tables belong to the travel section", [...document.querySelectorAll('.table-section[data-category="Travel"]')].every(s => s.dataset.section === "travel"));
+  check("there's no Travel section any more", !document.querySelector('.table-section[data-category="Travel"], .table-section[data-section="travel"], .site-nav-link[data-section="travel"]'));
   check("there's no Phrases section any more", !document.querySelector('.table-section[data-category="Phrases"], .site-nav-link[data-section="phrases"]'));
-  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "N5 Kanji", "Travel"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
+  check("every other category belongs to the vocabulary section", [...document.querySelectorAll(".table-section")].filter(s => !["Grammar", "N5 Kanji"].includes(s.dataset.category)).every(s => s.dataset.section === "vocabulary"));
 
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
@@ -1122,8 +1118,8 @@ async function main() {
 
   console.log("Top navigation");
   const navLinks = [...document.querySelectorAll("#siteNav .site-nav-link")];
-  check("nav is Vocabulary / Grammar / Kanji / Travel / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Kanji Travel Practice");
-  check("the four reference sections carry data-section", navLinks.slice(0, 4).map(l => l.dataset.section).join(",") === "vocabulary,grammar,kanji,travel");
+  check("nav is Vocabulary / Grammar / Kanji / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Kanji Practice");
+  check("the three reference sections carry data-section", navLinks.slice(0, 3).map(l => l.dataset.section).join(",") === "vocabulary,grammar,kanji");
   check("last nav item is Practice, at #practice", navLinks[navLinks.length - 1].dataset.page === "flashcards" && navLinks[navLinks.length - 1].getAttribute("href") === "#practice");
   check("no category is a top-level nav item", !navLinks.some(l => l.dataset.category));
 
@@ -1360,6 +1356,9 @@ async function main() {
   window.location.hash = "";
   window.dispatchEvent(new window.Event("popstate"));
   check("an empty hash routes back to Vocabulary", document.body.dataset.activeSection === "vocabulary");
+  window.location.hash = "#travel";
+  window.dispatchEvent(new window.Event("popstate"));
+  check("an old #travel link lands on Vocabulary", document.body.dataset.activeSection === "vocabulary");
 
   console.log("Theme toggle (System / Light / Dark cycle)");
   const themeBtn = document.getElementById("themeToggle");
@@ -1405,8 +1404,8 @@ async function main() {
   check("its section siblings are collapsed", [...document.querySelectorAll('.table-section[data-section="grammar"]')].filter(s => s !== verbsSec).every(s => s.classList.contains("collapsed")));
   check("picking a table closes the menu", document.getElementById("tindexMenu").hidden === true);
 
-  document.querySelector('#siteNav .site-nav-link[data-section="travel"]').click();
-  check("Travel shows the travel section's tables", [...document.querySelectorAll('.table-section[data-category="Travel"]')].every(s => !s.classList.contains("page-hidden")));
+  document.querySelector('#siteNav .site-nav-link[data-section="kanji"]').click();
+  check("Kanji shows the kanji section's tables", [...document.querySelectorAll('.table-section[data-section="kanji"]')].every(s => !s.classList.contains("page-hidden")));
   check("Grammar tables are hidden again", document.querySelector('.table-section[data-category="Grammar"]').classList.contains("page-hidden"));
 
   console.log("The wordmark routes back to Vocabulary");
@@ -1524,8 +1523,8 @@ async function main() {
     return wasExpandAll && grammarIndependent && vocabRestored;
   })());
   check("a section you've never touched still lands with every table collapsed", (() => {
-    document.querySelector('#siteNav .site-nav-link[data-section="travel"]').click();
-    const t = [...document.querySelectorAll('.table-section[data-section="travel"]:not(.page-hidden)')];
+    document.querySelector('#siteNav .site-nav-link[data-section="kanji"]').click();
+    const t = [...document.querySelectorAll('.table-section[data-section="kanji"]:not(.page-hidden)')];
     const ok = t.length > 1 && t.every(s => s.classList.contains("collapsed"));
     document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
     return ok;
@@ -1697,7 +1696,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 52 tables", czRows.length === 52);
+  check("it lists every one of the 43 tables", czRows.length === 43);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
@@ -2739,18 +2738,18 @@ async function main() {
     return vi.checkAnswer(idx.v0635, "jp-en", "1 oclock") && !vi.checkAnswer(idx.v0635, "jp-en", "2 oclock")
       && !!deepFry && vi.checkAnswer(deepFry, "jp-en", "deep fry") && !!stirFry && vi.checkAnswer(stirFry, "jp-en", "stirfry");
   })());
-  check("ん typed nn before a vowel or y counts (kinnen, honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
+  check("ん typed nn before a vowel or y counts (honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
-    return vi.checkAnswer(idx.v0361, "jp-ro", "kinnen") && vi.checkAnswer(idx.v0900, "jp-ro", "honnya")
-      && vi.checkAnswer(idx.v0556, "jp-ro", "kinnyoubi") && vi.checkAnswer(idx.v0361, "jp-ro", "kinen")
-      && vi.checkAnswer(idx.v0361, "jp-ro", "kin'en");
+    return vi.checkAnswer(idx.v0900, "jp-ro", "honnya")
+      && vi.checkAnswer(idx.v0556, "jp-ro", "kinnyoubi") && vi.checkAnswer(idx.v0900, "jp-ro", "honya")
+      && vi.checkAnswer(idx.v0900, "jp-ro", "hon'ya");
   })());
-  check("a Japanese keyboard's spellings count (mittu, sasimi, tyousyoku, huraipan, tempura) and は / へ / を typed ha / he / wo, but a missing っ still doesn't", (() => {
+  check("a Japanese keyboard's spellings count (mittu, sasimi, houtyou, huraipan, tempura) and は / へ / を typed ha / he / wo, but a missing っ still doesn't", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
     return vi.checkAnswer(idx.v0711, "jp-ro", "mittu") && vi.checkAnswer(idx.v0094, "jp-ro", "sasimi")
-      && vi.checkAnswer(idx.v0469, "jp-ro", "tyousyoku") && vi.checkAnswer(idx.v0048, "jp-ro", "huraipan")
+      && vi.checkAnswer(idx.v0050, "jp-ro", "houtyou") && vi.checkAnswer(idx.v0048, "jp-ro", "huraipan")
       && vi.checkAnswer(idx.v0080, "jp-ro", "tempura") && vi.checkAnswer(idx.v0029, "jp-ro", "syouyu")
       && vi.checkAnswer(idx.v0081, "jp-ro", "gyuudonn")
       && vi.checkAnswer(idx.v0229, "jp-ro", "wo") && vi.checkAnswer(idx.v0227, "jp-ro", "ha") && vi.checkAnswer(idx.v0235, "jp-ro", "he")
@@ -3439,7 +3438,9 @@ async function main() {
     const cards = window.RaumeStudy.flashcards.store.getCache().cards;
     const saved = Object.assign({}, cards);
     Object.keys(cards).forEach(k => { delete cards[k]; });
-    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    // The longest table of plain words -- verbs have no single written form,
+    // so a Match in the written script can't use them.
+    const biggest = window.RaumeStudy.data.vocabularyTables.filter(t => t.rows.every(r => r.type === "word")).sort((a, b) => b.rows.length - a.rows.length)[0];
     const ids = xw.tableWordPool([biggest.id]).slice(0, 20).map(w => w.id);
     ids.forEach((id, i) => {
       cards[id + ":jp-en"] = { id: id + ":jp-en", vocabId: id, direction: "jp-en", active: true,
