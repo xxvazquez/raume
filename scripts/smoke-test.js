@@ -1992,6 +1992,24 @@ async function main() {
       .map(h => h.firstChild ? h.firstChild.textContent : h.textContent);
     return heads.includes("Add a word") && heads.includes("Import a list") && !heads.includes("New table");
   })());
+  // Signed in (stub remote): a table just created becomes the target of
+  // both Add a word and Import, so its first words land in it.
+  cvNs.setRemote({ addRows() {}, deleteRows() {}, addTable() {}, deleteTable() {} });
+  gear.click(); gear.click(); // reopen so it renders signed-in
+  document.querySelector("#customizePage .cv-new-title").value = "Positions";
+  document.querySelector("#customizePage .cv-new-btn").click();
+  const newTable = cvNs.customTables().find(t => t.title === "Positions");
+  check("creating a table selects it in Add a word and Import", !!newTable
+    && document.querySelector("#customizePage .cv-add-target").value === newTable.id
+    && document.querySelector("#customizePage .cv-import-target").value === newTable.id);
+  if (newTable) {
+    document.querySelector("#customizePage .cv-add-input").value = "上(うえ), ue, above";
+    document.querySelector("#customizePage .cv-add-btn").click();
+    check("...and a word added straight after goes into it", cvNs.customRows().some(r => r.tableId === newTable.id && r.romaji === "ue"));
+    cvNs.deleteTable(newTable.id);
+  }
+  cvNs.setRemote(null);
+  gear.click(); gear.click();
 
   gear.click();
   check("clicking the gear again returns to the vocabulary view", document.getElementById("vocabPage").hidden === false && document.getElementById("customizePage").hidden === true);

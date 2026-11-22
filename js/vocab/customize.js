@@ -764,7 +764,14 @@ window.RaumeStudy.customize = (function () {
     if (!title || !title.value.trim()) { if (title) title.focus(); return; }
     var name = title.value, category = catf ? catf.value : "";
     cvMutate(host, function () {
-      try { cv().createTable(name, category); pendingFocus = ".cv-add-input"; }
+      try {
+        // The new table becomes where Add a word / Import put things next
+        // -- otherwise the pickers stay on whatever they last held and the
+        // first words meant for it land in some other table.
+        var made = cv().createTable(name, category);
+        cvTarget.add = cvTarget.import = made.id;
+        pendingFocus = ".cv-add-input";
+      }
       catch (err) { window.alert(err.message); }
     });
   }
