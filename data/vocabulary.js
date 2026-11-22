@@ -853,7 +853,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1092","type":"word","jp":[{"kanji":"駅","reading":"えき"},{"p":"は"},{"text":"ホテル"},{"p":"の"},{"text":"となり"},{"p":"に"},{"text":"あります。"}],"romaji":"Eki wa hoteru no tonari ni arimasu.","english":"The station is next to the hotel.","pattern":"where something is: X は place の position に あります"},
     {"id":"v1093","type":"word","jp":[{"text":"ねこ"},{"p":"は"},{"text":"つくえ"},{"p":"の"},{"kanji":"下","reading":"した"},{"p":"に"},{"text":"います。"}],"romaji":"Neko wa tsukue no shita ni imasu.","english":"The cat is under the desk.","pattern":"います for people and animals, あります for things"},
     {"id":"v1094","type":"word","jp":[{"text":"いえ"},{"p":"に"},{"text":"テレビ"},{"p":"が"},{"kanji":"二","reading":"ふた"},{"text":"つあります。"}],"romaji":"Ie ni terebi ga futatsu arimasu.","english":"There are two TVs in my house.","pattern":"what is there: place に X が あります"},
-    {"id":"v1095","type":"word","jp":[{"text":"わたし"},{"p":"の"},{"kanji":"友","reading":"とも"},{"text":"だち"},{"p":"は"},{"text":"おもしろい"},{"kanji":"人","reading":"ひと"},{"text":"たちです。"}],"romaji":"Watashi no tomodachi wa omoshiroi hitotachi desu.","english":"My friends are funny people.","pattern":"〜たち: more than one person (人たち, 私たち)"},
+    {"id":"v1095","type":"word","jp":[{"text":"わたし"},{"p":"の"},{"kanji":"友","reading":"とも"},{"text":"だち"},{"p":"は"},{"text":"おもしろい"},{"kanji":"人","reading":"ひと"},{"text":"たちです。"}],"romaji":"Watashi no tomodachi wa omoshiroi hitotachi desu.","english":"My friends are funny people.","pattern":"〜たち: more than one person (人たち, わたしたち)"},
     ]
   },
   {
@@ -1246,7 +1246,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0971","type":"kanji","jp":[{"kanji":"駅","reading":"えき"}],"romaji":"eki","english":"station","on":["エキ"],"kun":[],"example":{"jp":[{"kanji":"駅前","reading":"えきまえ"}],"english":"in front of the station"},"strokes":14,"radical":{"r":"馬","name":"うまへん","en":"horse"}},
     {"id":"v0972","type":"kanji","jp":[{"kanji":"店","reading":"みせ"}],"romaji":"mise / ten","english":"shop","on":["テン"],"kun":["みせ"],"example":{"jp":[{"kanji":"喫茶店","reading":"きっさてん"}],"english":"café"},"strokes":8,"radical":{"r":"广","name":"まだれ","en":"building"}},
     {"id":"v0973","type":"kanji","jp":[{"kanji":"社","reading":"しゃ"}],"romaji":"sha / ja","english":"company / shrine","on":["シャ","ジャ"],"kun":[],"example":{"jp":[{"kanji":"神社","reading":"じんじゃ"}],"english":"Shinto shrine"},"strokes":7,"radical":{"r":"礻","name":"しめすへん","en":"altar"}},
-    {"id":"v0974","type":"kanji","jp":[{"kanji":"国","reading":"くに"}],"romaji":"kuni / koku / goku","english":"country","on":["コク","ゴク"],"kun":["くに"],"example":{"jp":[{"kanji":"中国","reading":"ちゅうごく"}],"english":"China"},"strokes":8,"radical":{"r":"囗","name":"くにがまえ","en":"enclosure"}},
+    {"id":"v0974","type":"kanji","jp":[{"kanji":"国","reading":"くに"}],"romaji":"kuni / koku","english":"country","on":["コク"],"kun":["くに"],"example":{"jp":[{"kanji":"中国","reading":"ちゅうごく"}],"english":"China"},"strokes":8,"radical":{"r":"囗","name":"くにがまえ","en":"enclosure"}},
     {"id":"v0975","type":"kanji","jp":[{"kanji":"道","reading":"みち"}],"romaji":"michi / dō","english":"road / way","on":["ドウ"],"kun":["みち"],"example":{"jp":[{"kanji":"水道","reading":"すいどう"}],"english":"tap water / water supply"},"strokes":12,"radical":{"r":"辶","name":"しんにょう","en":"moving on"}},
     ]
   },
