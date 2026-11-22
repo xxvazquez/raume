@@ -805,7 +805,9 @@ window.RaumeStudy.notes = (function () {
           return '<li><button type="button" class="notes-row" data-note="' + esc(n.id) + '">' +
             '<span class="set-tile" data-tile="indigo" aria-hidden="true">' + DOC_ICON + "</span>" +
             '<span class="notes-row-tx"><span class="notes-row-title">' + esc(n.title) + "</span>" +
-            '<span class="notes-row-sub">' + esc(shortDate(n.note_date)) + "</span></span></button></li>";
+            // A note named by its date doesn't repeat it: its topic fills
+            // this line (showTopics) once this device holds a copy.
+            '<span class="notes-row-sub">' + esc(n.title === lessonName(n.note_date) ? "Lesson notes" : shortDate(n.note_date)) + "</span></span></button></li>";
         }).join("") + "</ul>";
     }).join("");
   }
