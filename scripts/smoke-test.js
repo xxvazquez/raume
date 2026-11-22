@@ -1611,6 +1611,19 @@ async function main() {
       && allCssRules.some(r => r.selectorText && r.selectorText.includes("tr.known-row") && r.selectorText.includes("::after")));
     const label2 = menuAct("known");
     check("...and Mark as not known takes it back off", label2 === "Mark as not known" && !row.classList.contains("known-row"));
+    const hl = document.getElementById("progressHlToggle");
+    hl.click();
+    const off = document.body.classList.contains("no-progress-hl") && hl.getAttribute("aria-pressed") === "false"
+      && !document.getElementById("optionsDot").hidden;
+    hl.click();
+    console.log("DBG", off, document.body.classList.contains("no-progress-hl"), document.getElementById("optionsDot").hidden, allCssRules.filter(r => r.selectorText && r.selectorText.includes("tricky-row")).map(r=>r.selectorText).join(" || "));
+    check("Options › Highlight progress turns the green / amber off and on (a dot while off)", off
+      && !document.body.classList.contains("no-progress-hl") && document.getElementById("optionsDot").hidden
+      && allCssRules.some(r => r.selectorText && r.selectorText.includes("body:not(.no-progress-hl)") && r.selectorText.includes("tr.tricky-row")));
+    const irr = document.querySelector("#vocabulary tr.irregular-row td");
+    const irrRule = allCssRules.find(r => r.selectorText === ".irregular-row td");
+    check("an irregular row is red text with no wash", !!irr && !!irrRule && /var\(--irregular-ink\)/.test(irrRule.style.color)
+      && !allCssRules.some(r => r.selectorText === ".irregular-row td" && r.style.background));
   })();
 
   console.log("Hiding a row");
@@ -2493,6 +2506,29 @@ async function main() {
       window.localStorage.setItem("raume-kanji-known", JSON.stringify(all));
     } catch (e) { /* no usable localStorage here */ }
     return before && after && overridden;
+  })());
+  check("a word you keep forgetting (2 lapses) turns amber as tricky, unless it's Known", (() => {
+    const cards = window.RaumeStudy.flashcards.store.getCache().cards;
+    const card = Object.values(cards).find(c => c.active);
+    if (!card) return false;
+    const was = { lapses: card.lapses };
+    const row = () => document.querySelector('#vocabulary tbody tr[data-vocab-id="' + card.vocabId + '"]');
+    window.RaumeStudy.vocab.refreshKnownRows();
+    const before = !row().classList.contains("tricky-row");
+    card.lapses = 2;
+    window.RaumeStudy.vocab.refreshKnownRows();
+    const after = row().classList.contains("tricky-row");
+    console.log("DBG2", before, after, row() && row().className, card.vocabId, window.RaumeStudy.vocab.isWordKnown(card.vocabId));
+    window.RaumeStudy.knownKanji.setKnown(card.vocabId, true);
+    const knownWins = !row().classList.contains("tricky-row") && row().classList.contains("known-row");
+    Object.assign(card, was);
+    try {
+      const all = JSON.parse(window.localStorage.getItem("raume-kanji-known") || "{}");
+      delete all[card.vocabId];
+      window.localStorage.setItem("raume-kanji-known", JSON.stringify(all));
+    } catch (e) { /* no usable localStorage here */ }
+    window.RaumeStudy.vocab.refreshKnownRows();
+    return before && after && knownWins;
   })());
 
   console.log("Flashcards: guest-mode backup & restore");

@@ -140,8 +140,8 @@ Functional roles, each one job — all muted:
 - **ochre** (`--fc-hard` / `-soft` / `-strong`) — one job only: the rating row's
   Hard button, which needs a fourth hue distinct from Again (coral), Good (sage)
   and Easy (lavender). Also the Learning segment of the Card-progress bar;
-- a slate wash (`--irregular-bg` / `--irregular-ink`) marks irregular-verb rows
-  (printed as the wash alone — no edge bar against the table's frame);
+- red text (`--irregular-ink`, no wash) marks irregular rows — printed too —
+  leaving the row's background for progress (known green / tricky amber);
 - the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`) behind
   only the matched run — romaji included — never an underline or a whole-cell bar.
   While searching on a phone the account button steps aside so the search bar has the top.
@@ -346,8 +346,11 @@ and Help.
 - **Known words** (`tr.known-row`): the row stays exactly as it is on a
   soft pastel green (`--known-bg`: the table-tile green at 14% on paper, 22%
   in dark) with a 12px ✓ in `--right-strong` after the Japanese, announced as
-  "Known" — never colour alone, never hidden. It wins over the irregular
-  wash, and print leaves it out.
+  "Known" — never colour alone, never hidden. Print leaves it out.
+- **Tricky words** (`tr.tricky-row`): the same, in the Hard rating's amber
+  (`--tricky-bg`: `--fc-hard` at 20% on paper, 24% in dark) with a 12px **!**
+  in `--fc-hard-strong`, announced as "Tricky". Known wins. Options › Study ›
+  **Highlight progress** turns both washes off together (`body.no-progress-hl`).
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
   Patterns, or a custom table of your own sentences): stacked rows, not two columns —
   the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし

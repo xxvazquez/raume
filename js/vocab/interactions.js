@@ -172,7 +172,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const cl = document.body.classList;
     const pt = document.getElementById('politeToggle');
     const changed = cl.contains('hide-japanese') || cl.contains('hide-furigana') || cl.contains('hide-english')
-      || cl.contains('selftest-mode') || (cl.contains('show-polite') && !!pt && !pt.hidden);
+      || cl.contains('selftest-mode') || cl.contains('no-progress-hl') || (cl.contains('show-polite') && !!pt && !pt.hidden);
     dot.hidden = !changed;
     const btn = document.getElementById('optionsBtn');
     if (btn) btn.setAttribute('aria-label', changed ? 'Options (some changed)' : 'Options');
@@ -331,10 +331,26 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // counts when all its cards are. Flashcards loads later, so it's read at
   // repaint time only.
   const MATURE_DAYS = 21;
-  function masteredVocab() {
+  // Tricky words: ones that aren't sticking -- a card of the word forgotten
+  // twice after you'd learned it (FSRS lapses), or rated Again / Hard so
+  // often it sits near the top of FSRS's difficulty scale (8 of 10, after a
+  // few reviews, so one bad first day doesn't count). Amber, unless Known.
+  const TRICKY_LAPSES = 2, TRICKY_DIFFICULTY = 8, TRICKY_MIN_REPS = 3;
+  function activeFlashcards() {
     const fc = window.RaumeStudy.flashcards;
-    let cards = null;
-    try { cards = fc && fc.store && fc.store.hasActiveSession && fc.store.hasActiveSession() ? fc.store.getCache().cards : null; } catch (e) { cards = null; }
+    try { return fc && fc.store && fc.store.hasActiveSession && fc.store.hasActiveSession() ? fc.store.getCache().cards : null; } catch (e) { return null; }
+  }
+  function trickyVocab(cards) {
+    const out = {};
+    if (!cards) return out;
+    Object.keys(cards).forEach(function (k) {
+      const c = cards[k];
+      if (!c || !c.active) return;
+      if ((c.lapses || 0) >= TRICKY_LAPSES || ((c.reps || 0) >= TRICKY_MIN_REPS && c.difficulty >= TRICKY_DIFFICULTY)) out[c.vocabId] = true;
+    });
+    return out;
+  }
+  function masteredVocab(cards) {
     const out = {}, all = {}, meaning = {};
     if (!cards) return out;
     Object.keys(cards).forEach(function (k) {
@@ -351,13 +367,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const kk = window.RaumeStudy.knownKanji;
     const e = kk && kk.entry ? kk.entry(id) : null;
     if (e) return !!e.k;
-    return !!(mastered || masteredVocab())[id];
+    return !!(mastered || masteredVocab(activeFlashcards()))[id];
   }
   vocab.isWordKnown = function (id) { return wordKnown(id); };
   function refreshKnownRows() {
-    const mastered = masteredVocab();
+    const cards = activeFlashcards();
+    const mastered = masteredVocab(cards), tricky = trickyVocab(cards);
     document.querySelectorAll('#vocabulary tbody tr[data-vocab-id]:not(.kanji-tile)').forEach(function (tr) {
-      tr.classList.toggle('known-row', wordKnown(tr.dataset.vocabId, mastered));
+      const known = wordKnown(tr.dataset.vocabId, mastered);
+      tr.classList.toggle('known-row', known);
+      tr.classList.toggle('tricky-row', !known && !!tricky[tr.dataset.vocabId]);
     });
   }
   vocab.refreshKnownRows = refreshKnownRows;
@@ -1977,6 +1996,29 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
     }
     updatePoliteVisibility();
+
+    // Highlight progress: the known-green / tricky-amber row washes, on by
+    // default. Off hides both at once (body.no-progress-hl) for a clean
+    // table; rows keep their classes, so switching back on is instant.
+    const PROGRESS_HL_KEY = 'raume-highlight-progress';
+    const progressToggle = document.getElementById('progressHlToggle');
+    function applyProgressHl(on) {
+      document.body.classList.toggle('no-progress-hl', !on);
+      if (progressToggle) {
+        progressToggle.classList.toggle('active', on);
+        progressToggle.setAttribute('aria-pressed', String(on));
+      }
+      try { localStorage.setItem(PROGRESS_HL_KEY, on ? '1' : '0'); } catch (e) {}
+      updateOptionsDot();
+    }
+    if (progressToggle) {
+      let startHl = true;
+      try { startHl = localStorage.getItem(PROGRESS_HL_KEY) !== '0'; } catch (e) {}
+      applyProgressHl(startHl);
+      progressToggle.addEventListener('click', function () {
+        applyProgressHl(document.body.classList.contains('no-progress-hl'));
+      });
+    }
 
     // "Cover answers" (id/class keep the older "selftest" name): a session-only
     // study aid, not persisted, like Expand all. body.selftest-mode blanks the

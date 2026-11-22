@@ -261,6 +261,7 @@ kept until the next backup or a minute later. It resolves `"shared"`,
 ### localStorage keys
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
+`raume-highlight-progress` — the Options sheet's Highlight progress switch, `'0'` = off,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,
 `raume-kana-*`, `raume-customize-open-v1` — which of the Customize page's
 collapsible sections a reader has open, keyed per item, browser-local only

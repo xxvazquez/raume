@@ -98,6 +98,7 @@
           <div class="opt-list">
             <button type="button" class="opt-row opt-switch" id="selftestToggle" aria-pressed="false" title="Cover the English column — tap a row to reveal its answer">Cover answers</button>
             <button type="button" class="opt-row opt-switch" id="politeToggle" aria-pressed="false" title="Switch verb tables between the plain form and the polite 〜ます form">Show polite</button>
+            <button type="button" class="opt-row opt-switch active" id="progressHlToggle" aria-pressed="true" title="Known words in green, tricky words in amber">Highlight progress</button>
           </div>
         </div>
         <div class="opt-group expand-bar">
@@ -164,11 +165,12 @@
       </ul>
     </details>
     <details class="help-group">
-      <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, cover, polite, print</span></span></summary>
+      <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, cover, polite, highlight, print</span></span></summary>
       <ul class="help-rows">
         <li><span class="help-term">Japanese · Furigana · English</span><span class="help-desc">Switch any of them off. A dot on Options means something is changed.</span></li>
         <li><span class="help-term">Cover answers</span><span class="help-desc">Blanks the English — tap a row to check yourself.</span></li>
         <li><span class="help-term">Show polite</span><span class="help-desc">Verb tables switch to the 〜ます form.</span></li>
+        <li><span class="help-term">Highlight progress</span><span class="help-desc">Turns the green of known words and the amber of tricky ones on or off.</span></li>
         <li><span class="help-term">Expand all</span><span class="help-desc">Opens every table in the section.</span></li>
         <li><span class="help-term">Print</span><span class="help-desc">One table (its ⋯ menu), the section, or everything, as A4.</span></li>
       </ul>
@@ -178,6 +180,8 @@
       <ul class="help-rows">
         <li><span class="help-term">Hold a word</span><span class="help-desc">Or right-click it: Play, Copy, Add to flashcards, Mark as known, Hide row.</span></li>
         <li><span class="help-term">Known words</span><span class="help-desc">Soft green with a ✓, still fully visible. Mark them yourself, or they turn green once you’ve known their meaning in flashcards for three weeks.</span></li>
+        <li><span class="help-term">Tricky words</span><span class="help-desc">Soft amber with a !, for words you keep forgetting in flashcards.</span></li>
+        <li><span class="help-term">Irregular words</span><span class="help-desc">Their text is red.</span></li>
         <li><span class="help-term">Hide a row</span><span class="help-desc">The eye icon. <strong>Show all</strong> brings rows back.</span></li>
         <li><span class="help-term">Hide a table</span><span class="help-desc">A table’s ⋯ menu › Hide table. Customize › Show brings it back.</span></li>
         <li><span class="help-term">Undo</span><span class="help-desc">After hiding, pausing or deleting a word, Undo at the bottom takes it back.</span></li>
