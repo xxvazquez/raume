@@ -5607,10 +5607,17 @@ mark.fc-diff-co {
    glyph, and the text buttons drawn 30-32px tall (the Flashcards segments,
    Settings / Help, the Puzzles links) -- on a tablet these desktop-sized
    controls take a finger too. */
+/* (The search bar's Tables / Options, the kanji sheet's buttons and speakers,
+   the small ⓘ and Library's table chevron joined after a tap-target audit --
+   each drew a 16-36pt box.) */
 .fc-btn, .masthead-gear, .sort-button, .vocab tbody .jp-speak-btn, .row-hide-btn, .fc-toggle-btn,
-.print-one, .fc-tab, .fc-titlebar-btn, .fc-back, .fc-pz-link { position: relative; }
+.print-one, .fc-tab, .fc-titlebar-btn, .fc-back, .fc-pz-link,
+.tindex-trigger, .options-btn, .ks-close, .ks-info, .ks-known, .ks-replay, .ks-write, #kanjiSheet .jp-speak-btn,
+.fc-stat-info, .fc-manage-table-toggle { position: relative; }
 .fc-btn::after, .masthead-gear::after, .sort-button::after, .vocab tbody .jp-speak-btn::after, .row-hide-btn::after, .fc-toggle-btn::after,
-.print-one::after, .fc-tab::after, .fc-titlebar-btn::after, .fc-back::after, .fc-pz-link::after {
+.print-one::after, .fc-tab::after, .fc-titlebar-btn::after, .fc-back::after, .fc-pz-link::after,
+.tindex-trigger::after, .options-btn::after, .ks-close::after, .ks-info::after, .ks-known::after, .ks-replay::after, .ks-write::after,
+#kanjiSheet .jp-speak-btn::after, .fc-stat-info::after, .fc-manage-table-toggle::after {
   content: ""; position: absolute;
   top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px));
   left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px));
