@@ -171,8 +171,9 @@ window.RaumeStudy.customize = (function () {
     return (jp || []).map(function (s) { return s.kanji ? s.kanji + "(" + s.reading + ")" : (s.text || ""); }).join("");
   }
 
-  // <select> of every table a custom row can be attached to: built-in tables
-  // grouped by category, then the reader's own custom tables.
+  // <select> of every table a custom row can be attached to, grouped by
+  // category in the vocabulary page's own order -- the reader's own tables
+  // sit in their category beside the built-in ones, where they look for them.
   function targetSelect(cls, selected) {
     selected = selected == null ? "" : String(selected);
     var opt = function (val, label) {
@@ -182,17 +183,10 @@ window.RaumeStudy.customize = (function () {
     grouped().forEach(function (g) {
       opts += '<optgroup label="' + esc(g.name) + '">';
       g.tables.forEach(function (t) {
-        if (t.__custom) return; // custom tables get their own group below
         opts += opt(String(t.id), V().tableTitle ? V().tableTitle(t.id, t.title) : t.title);
       });
       opts += "</optgroup>";
     });
-    var mine = cv() ? cv().customTables() : [];
-    if (mine.length) {
-      opts += '<optgroup label="Your tables">';
-      mine.forEach(function (t) { opts += opt(t.id, V().tableTitle ? V().tableTitle(t.id, t.title) : t.title); });
-      opts += "</optgroup>";
-    }
     return '<select class="' + cls + '">' + opts + "</select>";
   }
 

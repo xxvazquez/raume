@@ -2002,6 +2002,11 @@ async function main() {
   check("creating a table selects it in Add a word and Import", !!newTable
     && document.querySelector("#customizePage .cv-add-target").value === newTable.id
     && document.querySelector("#customizePage .cv-import-target").value === newTable.id);
+  check("...listed under its own category in the picker, not a group at the bottom", (() => {
+    const o = newTable && document.querySelector('#customizePage .cv-add-target option[value="' + newTable.id + '"]');
+    return !!o && o.parentNode.label === newTable.category
+      && !document.querySelector('#customizePage .cv-add-target optgroup[label="Your tables"]');
+  })());
   if (newTable) {
     document.querySelector("#customizePage .cv-add-input").value = "上(うえ), ue, above";
     document.querySelector("#customizePage .cv-add-btn").click();
