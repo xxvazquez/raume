@@ -39,7 +39,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   },
   {
     id: 39,
-    title: "People & Age",
+    title: "Counting People & Age",
     category: "Numbers & Counting",
     rows: [
     {"id":"v0720","type":"word","jp":[{"text":"〜"},{"kanji":"人","reading":"にん"}],"romaji":"~nin","english":"people","enNote":"counting three or more"},
@@ -1011,7 +1011,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0804","type":"word","jp":[{"kanji":"西","reading":"にし"}],"romaji":"nishi","english":"west"},
     {"id":"v0805","type":"word","jp":[{"kanji":"南","reading":"みなみ"}],"romaji":"minami","english":"south"},
     {"id":"v0806","type":"word","jp":[{"kanji":"北","reading":"きた"}],"romaji":"kita","english":"north"},
-    {"id":"v1023","type":"word","jp":[{"text":"ちかく"}],"romaji":"chikaku","english":"near / nearby"},
+    {"id":"v1023","type":"word","jp":[{"text":"ちかく"}],"romaji":"chikaku","english":"nearby","enNote":"the area near a place"},
     {"id":"v1024","type":"word","jp":[{"kanji":"間","reading":"あいだ"}],"romaji":"aida","english":"between"},
     ]
   },
@@ -1133,6 +1133,8 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1076","type":"word","jp":[{"text":"はじめまして"}],"romaji":"hajimemashite","english":"nice to meet you"},
     {"id":"v1077","type":"word","jp":[{"text":"よろしくおねがいします"}],"romaji":"yoroshiku onegai shimasu","english":"pleased to meet you","enNote":"after introducing yourself"},
     {"id":"v1078","type":"word","jp":[{"text":"ありがとうございます"}],"romaji":"arigatō gozaimasu","english":"thank you"},
+    {"id":"v0810","type":"word","jp":[{"text":"いただきます"}],"romaji":"itadakimasu","english":"said before eating"},
+    {"id":"v0811","type":"word","jp":[{"text":"ごちそうさまでした"}],"romaji":"gochisōsama deshita","english":"said after eating"},
     {"id":"v0812","type":"word","jp":[{"text":"おねがいします"}],"romaji":"onegai shimasu","english":"please","enNote":"asking for something"},
     {"id":"v0813","type":"word","jp":[{"text":"すみません"}],"romaji":"sumimasen","english":"excuse me / sorry"},
     {"id":"v1079","type":"word","jp":[{"text":"はい"}],"romaji":"hai","english":"yes"},
@@ -1149,8 +1151,6 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0807","type":"word","jp":[{"text":"レストラン"}],"romaji":"resutoran","english":"restaurant"},
     {"id":"v0808","type":"word","jp":[{"kanji":"食堂","reading":"しょくどう"}],"romaji":"shokudō","english":"cafeteria / dining hall"},
     {"id":"v0809","type":"word","jp":[{"kanji":"喫茶店","reading":"きっさてん"}],"romaji":"kissaten","english":"café / coffee shop"},
-    {"id":"v0810","type":"word","jp":[{"text":"いただきます"}],"romaji":"itadakimasu","english":"said before eating"},
-    {"id":"v0811","type":"word","jp":[{"text":"ごちそうさまでした"}],"romaji":"gochisōsama deshita","english":"said after eating"},
     ]
   },
   {
