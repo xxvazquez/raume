@@ -1592,6 +1592,27 @@ async function main() {
   const headerLabels = [...countersSection.querySelectorAll("thead th")].map(th => th.textContent.replace(/[↕↓↑]/g, "").trim());
   check("columns are Japanese → English (romaji lives in the Japanese cell now)", JSON.stringify(headerLabels) === JSON.stringify(["Japanese", "English"]));
 
+  console.log("Known words");
+  (() => {
+    const sec = document.querySelector('.table-section[data-table="1"]');
+    const row = sec.querySelectorAll("tbody tr")[1];
+    const id = row.dataset.vocabId;
+    const menuAct = act => {
+      row.querySelector("td:nth-child(2)").dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+      const item = document.querySelector('.row-menu-item[data-act="' + act + '"]');
+      const label = item ? item.textContent.trim() : "";
+      if (item) item.click();
+      return label;
+    };
+    check("a word you haven't marked (and never studied) isn't green", !row.classList.contains("known-row"));
+    const label = menuAct("known");
+    check("its hold menu offers Mark as known, which turns the row green with a ✓ -- still fully visible", label === "Mark as known"
+      && row.classList.contains("known-row") && !row.classList.contains("row-hidden") && window.RaumeStudy.knownKanji.isKnown(id)
+      && allCssRules.some(r => r.selectorText && r.selectorText.includes("tr.known-row") && r.selectorText.includes("::after")));
+    const label2 = menuAct("known");
+    check("...and Mark as not known takes it back off", label2 === "Mark as not known" && !row.classList.contains("known-row"));
+  })();
+
   console.log("Hiding a row");
   const drinksSectionManage = document.querySelector('.table-section[data-table="1"]');
   const firstEyeBtn = drinksSectionManage.querySelector(".row-hide-btn");
@@ -2450,6 +2471,29 @@ async function main() {
   const totalTileAfter = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
   check("adding a word in guest mode updates the count with zero network calls", totalTileAfter === "4");
   if (storageUsable) check("its data actually lives in localStorage (not just in-memory)", /"active":true/.test(readLocalStorage("raume-flashcards-guest-v1") || ""));
+
+  console.log("Flashcards: words you've mastered turn green on their own");
+  check("a word turns green once its Japanese -> English card is mature (3+ weeks), and your own Mark as not known still wins", (() => {
+    const cards = window.RaumeStudy.flashcards.store.getCache().cards;
+    const card = Object.values(cards).find(c => c.active && c.direction === "jp-en");
+    if (!card) return false;
+    const was = { state: card.state, stability: card.stability };
+    const row = () => document.querySelector('#vocabulary tbody tr[data-vocab-id="' + card.vocabId + '"]');
+    window.RaumeStudy.vocab.refreshKnownRows();
+    const before = !row().classList.contains("known-row");
+    Object.assign(card, { state: 2, stability: 30 });
+    window.RaumeStudy.vocab.refreshKnownRows();
+    const after = row().classList.contains("known-row");
+    window.RaumeStudy.knownKanji.setKnown(card.vocabId, false);
+    const overridden = !row().classList.contains("known-row");
+    Object.assign(card, was);
+    try {
+      const all = JSON.parse(window.localStorage.getItem("raume-kanji-known") || "{}");
+      delete all[card.vocabId];
+      window.localStorage.setItem("raume-kanji-known", JSON.stringify(all));
+    } catch (e) { /* no usable localStorage here */ }
+    return before && after && overridden;
+  })());
 
   console.log("Flashcards: guest-mode backup & restore");
   const backupApi = window.RaumeStudy.flashcards.backup;

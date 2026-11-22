@@ -322,8 +322,54 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.closeKanjiSheet = closeKanjiSheet;
   // A Known change -- here or synced from another device -- repaints the
   // tiles and the open sheet's button in place.
+  // Known words: a soft green wash and a ✓ on every row you know, nothing
+  // hidden. You know a word if you said so (the hold menu's Mark as known /
+  // not known, kept in RaumeStudy.knownKanji with the kanji) -- or, if you
+  // never said either way, once you understand it on sight for good: its
+  // Japanese -> English card is mature, remembered three weeks or more (FSRS
+  // stability >= 21 days, in review). A word studied without that card
+  // counts when all its cards are. Flashcards loads later, so it's read at
+  // repaint time only.
+  const MATURE_DAYS = 21;
+  function masteredVocab() {
+    const fc = window.RaumeStudy.flashcards;
+    let cards = null;
+    try { cards = fc && fc.store && fc.store.hasActiveSession && fc.store.hasActiveSession() ? fc.store.getCache().cards : null; } catch (e) { cards = null; }
+    const out = {}, all = {}, meaning = {};
+    if (!cards) return out;
+    Object.keys(cards).forEach(function (k) {
+      const c = cards[k];
+      if (!c || !c.active) return;
+      const mature = c.state === 2 && c.stability >= MATURE_DAYS;
+      all[c.vocabId] = (all[c.vocabId] === undefined ? true : all[c.vocabId]) && mature;
+      if (c.direction === 'jp-en') meaning[c.vocabId] = mature;
+    });
+    Object.keys(all).forEach(function (id) { out[id] = id in meaning ? meaning[id] : all[id]; });
+    return out;
+  }
+  function wordKnown(id, mastered) {
+    const kk = window.RaumeStudy.knownKanji;
+    const e = kk && kk.entry ? kk.entry(id) : null;
+    if (e) return !!e.k;
+    return !!(mastered || masteredVocab())[id];
+  }
+  vocab.isWordKnown = function (id) { return wordKnown(id); };
+  function refreshKnownRows() {
+    const mastered = masteredVocab();
+    document.querySelectorAll('#vocabulary tbody tr[data-vocab-id]:not(.kanji-tile)').forEach(function (tr) {
+      tr.classList.toggle('known-row', wordKnown(tr.dataset.vocabId, mastered));
+    });
+  }
+  vocab.refreshKnownRows = refreshKnownRows;
+  document.addEventListener('DOMContentLoaded', function () {
+    refreshKnownRows();
+    const fc = window.RaumeStudy.flashcards;
+    if (fc && fc.store && fc.store.onSave) fc.store.onSave(refreshKnownRows); // a review can make a word mature
+  });
+
   if (window.RaumeStudy.knownKanji) {
     window.RaumeStudy.knownKanji.onChange(function () {
+      refreshKnownRows();
       const kk = window.RaumeStudy.knownKanji;
       document.querySelectorAll('tr.kanji-tile[data-vocab-id]').forEach(function (tile) {
         tile.classList.toggle('kanji-known', kk.isKnown(tile.dataset.vocabId));
@@ -484,6 +530,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (speak && body.contains('ja-voice-ready')) items.push(['play', 'Play', '<path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/>']);
     if (jpWord) items.push(['copy', 'Copy', '<rect x="6" y="6" width="9" height="9" rx="2"/><path d="M12 6V4.5A1.5 1.5 0 0 0 10.5 3h-6A1.5 1.5 0 0 0 3 4.5v6A1.5 1.5 0 0 0 4.5 12H6"/>']);
     if (fcBtn) items.push(['fc', added ? 'Pause in flashcards' : 'Add to flashcards', added ? '<path d="M7 4.5v9M11 4.5v9"/>' : '<path d="M9 4v10M4 9h10"/>']);
+    const known = wordKnown(tr.dataset.vocabId);
+    items.push(['known', known ? 'Mark as not known' : 'Mark as known', known ? '<path d="M4 9.5l3.2 3L14 5.5"/><path d="M3 15 15 3"/>' : '<path d="M4 9.5l3.2 3L14 5.5"/>']);
     if (hideBtn) items.push(['hide', 'Hide row', '<path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/>']);
     const el = document.createElement('div');
     el.className = 'row-menu';
@@ -522,6 +570,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (act === 'play') speak.click();
       else if (act === 'fc') fcBtn.click();
       else if (act === 'hide') hideBtn.click();
+      else if (act === 'known' && window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.setKnown(tr.dataset.vocabId, !wordKnown(tr.dataset.vocabId));
       else if (act === 'copy') {
         const c = jpWord.cloneNode(true);
         c.querySelectorAll('rt, rp, .jp-romaji-line, .visually-hidden').forEach(n => n.remove());

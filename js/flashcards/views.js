@@ -740,7 +740,7 @@ window.RaumeStudy.flashcards.views = (function () {
         if (sm.kanaCards) parts.push(sm.kanaCards + " Kana card" + (sm.kanaCards === 1 ? "" : "s"));
         if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
         if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
-        if (sm.knownKanji) parts.push(sm.knownKanji + " known kanji");
+        if (sm.knownKanji) parts.push(sm.knownKanji + " marked known");
         if (sm.puzzleGames) parts.push(sm.puzzleGames + " puzzle game" + (sm.puzzleGames === 1 ? "" : "s"));
         window.RaumeStudy.shared.confirmSheet({
           title: "Restore the backup" + when + "?",
@@ -772,6 +772,8 @@ window.RaumeStudy.flashcards.views = (function () {
       btn.title = added ? "Pause (keeps its progress — add it back anytime)" : "Add to flashcards";
       btn.setAttribute("aria-label", btn.title);
     });
+    // The mode's cards just changed, so which words are mastered may have too.
+    if (window.RaumeStudy.vocab.refreshKnownRows) window.RaumeStudy.vocab.refreshKnownRows();
   }
   document.addEventListener("click", function (event) {
     var btn = event.target.closest && event.target.closest(".fc-toggle-btn");

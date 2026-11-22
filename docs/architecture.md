@@ -289,10 +289,13 @@ best, a style's best, Match's fastest round of a size) and each style's latest
 reset marker — a record only goes by being beaten or reset;
 signed in, the whole log is pushed best-effort to `flashcard_settings.puzzle_runs`
 and merged back on sign-in by id), `raume-kanji-write-outline` — Write it's Outline switch (browser-local),
-`raume-kanji-known` — kanji marked Known
-([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`):
+`raume-kanji-known` — kanji *and words* marked Known
+([`js/vocab/kanji-known.js`](../js/vocab/kanji-known.js), `RaumeStudy.knownKanji`;
+the name predates words):
 `{ vocabId: { k: 1|0, t: ms } }`, an un-mark kept as `k: 0` so a merge can tell
-it from never-marked; signed in, each change is pushed best-effort to
+it from never-marked — for a word that `k: 0` is also what overrides the
+automatic green (a word with no entry is Known once its jp-en flashcard is
+mature: in review, stability ≥ 21 days; `interactions.js refreshKnownRows`); signed in, each change is pushed best-effort to
 `flashcard_settings.known_kanji` and `fetchAllFromServer()` merges per kanji,
 newest change winning). Installs from
 before the `sakura` → `raume` rename are migrated once by
@@ -407,7 +410,7 @@ js/
     icons.js             curated line-icon set (a Lucide subset)
     icon-picker.js       the reusable icon picker
     table-custom.js      per-table names / icons / order
-    kanji-known.js       kanji marked Known (green tiles)
+    kanji-known.js       kanji and words marked Known (green tiles / rows)
     custom-vocab.js      the reader's own rows / tables, merged into the dataset
     kanji-write.js       the kanji sheet's Write it pad (stroke-order practice + judge)
     customize.js         the Customize page

@@ -3220,6 +3220,25 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .irregular-row .furigana { color: var(--irregular-ink) !important; }
 .irregular-row .irr { font-weight: 500; }
 
+/* Known words (interactions.js refreshKnownRows): the row stays exactly as
+   it is, on a soft pastel green -- the table-tile green, barely there -- with
+   a small ✓ after the Japanese, so it's never colour alone (and the ✓ is
+   announced as "Known"). Wins over the irregular wash: what you know is the
+   newer fact. Screen only -- a printed sheet is for studying. */
+:root { --known-bg: color-mix(in srgb, var(--tile-green) 14%, var(--paper)); --known-ink: var(--right-strong); }
+:root[data-theme="dark"] { --known-bg: color-mix(in srgb, var(--tile-green) 22%, var(--paper)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --known-bg: color-mix(in srgb, var(--tile-green) 22%, var(--paper)); } }
+@media screen {
+  #vocabulary tbody tr.known-row > td { background: var(--known-bg) !important; }
+  #vocabulary tr.known-row td.jp > .jp-line > .jpword::after,
+  #vocabulary tr.known-row td.jp .verb-form-plain .jpword::after {
+    content: "" / "Known"; display: inline-block; width: 12px; height: 12px; margin-left: 5px; vertical-align: 1px;
+    background: var(--known-ink);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9.5l3.2 3L14 5.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9.5l3.2 3L14 5.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+}
+
 /* Search match: a warm muted-terracotta highlight -- the one warm note on
    the page, so a hit is unmistakable against the cool greys. No bold. */
 mark.search-hit {

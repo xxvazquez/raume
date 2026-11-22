@@ -1,6 +1,9 @@
-// Kanji the reader has marked "Known" in the Kanji section's detail sheet --
-// their tiles turn green, so what's still to learn stands out. Keyed by the
-// kanji row's permanent vocab id, never a copy of its content.
+// Rows the reader has marked "Known" -- kanji in the Kanji section's detail
+// sheet (their tiles turn green) and words from a row's hold menu (the row
+// gets a soft green wash and a ✓, js/vocab/interactions.js), so what's still
+// to learn stands out. Keyed by the row's permanent vocab id, never a copy of
+// its content. (The name and the account column, known_kanji, date from
+// when only kanji could be marked.)
 // localStorage is the immediate source of truth; while signed in each change
 // is also pushed to the account (flashcard_settings.known_kanji, see
 // js/flashcards/data-ops.js + bootstrap.js) and merged back on sign-in.
@@ -37,6 +40,9 @@ window.RaumeStudy.knownKanji = (function () {
   function getAll() { return JSON.parse(JSON.stringify(load())); }
 
   function isKnown(id) { var e = load()[String(id)]; return !!(e && e.k); }
+  // The reader's own say on a row, either way, or null if they never marked
+  // it -- a word's flashcards decide it then.
+  function entry(id) { var e = load()[String(id)]; return e ? { k: e.k, t: e.t } : null; }
   function count() { var all = load(); return Object.keys(all).filter(function (id) { return all[id].k; }).length; }
   function setKnown(id, known) {
     load()[String(id)] = { k: known ? 1 : 0, t: Date.now() };
@@ -65,7 +71,7 @@ window.RaumeStudy.knownKanji = (function () {
   function setRemotePush(fn) { remotePush = fn; }
 
   return {
-    isKnown: isKnown, count: count, setKnown: setKnown, getAll: getAll, sanitize: clean,
+    isKnown: isKnown, entry: entry, count: count, setKnown: setKnown, getAll: getAll, sanitize: clean,
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush,
     STORAGE_KEY: KEY
   };

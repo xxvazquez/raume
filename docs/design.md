@@ -343,6 +343,11 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
+- **Known words** (`tr.known-row`): the row stays exactly as it is on a
+  soft pastel green (`--known-bg`: the table-tile green at 14% on paper, 22%
+  in dark) with a 12px ✓ in `--right-strong` after the Japanese, announced as
+  "Known" — never colour alone, never hidden. It wins over the irregular
+  wash, and print leaves it out.
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
   Patterns, or a custom table of your own sentences): stacked rows, not two columns —
   the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし
