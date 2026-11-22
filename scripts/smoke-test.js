@@ -4833,13 +4833,13 @@ async function main() {
     && fc.normalizeAnswer("satou", true) === fc.normalizeAnswer("satō", true)
     && fc.normalizeAnswer("gakkou", true) === fc.normalizeAnswer("gakkō", true));
   check("normalizeAnswer strips a leading ~ for romaji (counters)", fc.normalizeAnswer("~ko", true) === "ko");
-  check("romaji ignores apostrophes, hyphens and word breaks: kin'en / kinen / kin’en, shabu-shabu / shabu shabu", (() => {
+  check("romaji ignores apostrophes, hyphens and word breaks: hon'ya / honya / hon’ya, shabu-shabu / shabu shabu", (() => {
     const idx = fc.getVocabIndex();
-    const kinen = Object.values(idx).find(e => e.romajiDisplay === "kin'en");
+    const honya = Object.values(idx).find(e => e.romajiDisplay === "hon'ya");
     const shabu = Object.values(idx).find(e => e.romajiDisplay === "shabu-shabu");
-    return !!kinen && !!shabu && ["kin'en", "kinen", "kin’en", "Kin en"].every(t => fc.checkAnswer(kinen, "en-ro", t))
+    return !!honya && !!shabu && ["hon'ya", "honya", "hon’ya", "Hon ya"].every(t => fc.checkAnswer(honya, "en-ro", t))
       && ["shabu-shabu", "shabu shabu", "shabushabu"].every(t => fc.checkAnswer(shabu, "en-ro", t))
-      && !fc.checkAnswer(kinen, "en-ro", "kinin");
+      && !fc.checkAnswer(honya, "en-ro", "hanya");
   })());
   check("an iPhone's curly apostrophe is a right English answer (1 o’clock)", (() => {
     const e = Object.values(fc.getVocabIndex()).find(x => /^1 o'clock/.test(x.englishDisplay || ""));
