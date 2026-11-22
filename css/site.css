@@ -3360,7 +3360,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 /* --- Phone: the main nav becomes an iOS 26 tab bar ---------------------
    At phone width the same #siteNav (nothing added, nothing removed -- same
    links, same taps) floats over the content as a Liquid Glass capsule:
-   inset 16px from the sides, just above the home indicator, four
+   inset 12px from the sides, just above the home indicator, five
    icon-over-label tabs, the selected one on a rounded highlight in its
    section tone (the glass itself is in the Liquid Glass section below). The
    icons are CSS masks on ::before (data: SVGs, allowed by the CSP's img-src)
@@ -3384,7 +3384,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   }
   .site-nav {
     position: fixed; top: auto; z-index: 50;
-    left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right)); bottom: var(--tabbar-gap);
+    /* 12px in, not 16: five tabs need the width -- "Vocabulary" kept a few
+       px from its highlight's edges on a 375pt iPhone at 16 (Laura). */
+    left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: var(--tabbar-gap);
     height: var(--tabbar-h); gap: 0; padding: 4px;
     align-items: stretch; overflow: visible;
     border: 0; border-radius: 999px;
@@ -3392,8 +3394,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link {
     flex: 1 1 0; min-width: 0;
     flex-direction: column; justify-content: center; gap: 2px;
-    padding: 4px 3px 3px; border-radius: 999px; background: none;
-    font-size: 10.5px; letter-spacing: 0; color: var(--muted); /* iOS tab labels are ~10pt */
+    padding: 4px 2px 3px; border-radius: 999px; background: none;
+    font-size: 10px; letter-spacing: -.01em; color: var(--muted); /* iOS 26 tab labels are 10pt */
+    white-space: nowrap;
   }
   .site-nav-link::before {
     content: ""; width: 24px; height: 24px; background: currentColor;

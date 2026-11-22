@@ -570,7 +570,7 @@ and Help.
   3px underline; the rest are plain secondary text. The capsule is the one place
   a section tone is spent on the chrome. That is the layout from 641px up.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS 26 tab bar**: a
-  floating Liquid Glass capsule (`position: fixed`), 16px in from the sides and
+  floating Liquid Glass capsule (`position: fixed`), 12px in from the sides (five tabs need the width; labels 10px) and
   just above the home indicator (`--tabbar-gap`: the bottom safe-area inset less
   12px, at least 12px), 58px tall with 4px inside. Its glass is the system's —
   `--glass-bg` with `--glass-blur`, the bright top rim, the hairline edge, the one
