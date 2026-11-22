@@ -1573,10 +1573,10 @@ body.icon-picker-open { overflow: hidden; }
 /* The screen's title is the note's name (its date), so the eyebrow that
    repeats it goes; the lesson's topic heads the description. */
 .rn-eyebrow { display: none; }
-.rn-top h1 { margin: 0 0 4px; font: 600 20px/1.25 var(--font-ui); color: var(--ink); }
+.rn-top h1 { margin: 0 0 4px; font: 600 var(--fs-section-title)/1.25 var(--font-ui); color: var(--ink); }
 .rn-desc { margin: 0; color: var(--ink-2); font-size: var(--fs-body); line-height: 1.45; text-wrap: pretty; }
 .rn-sec { margin: 0 0 30px; scroll-margin-top: 120px; }
-.rn-sec-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font: 600 18px/1.25 var(--font-ui); color: var(--ink); }
+.rn-sec-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font: 600 var(--fs-card-heading)/1.25 var(--font-ui); color: var(--ink); }
 .rn-sec-num {
   flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font: 600 13px/1 var(--font-ui);
@@ -1584,8 +1584,10 @@ body.icon-picker-open { overflow: hidden; }
 .rn-sub { font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .rn-h3 { margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 /* Japanese / romaji / English */
-.rn-tag { font: 500 12px/1.3 var(--font-ui); color: var(--muted); margin-bottom: 2px; }
-.rn-jp { font-size: calc(var(--fs-jp, 17px) * 1); line-height: 1.75; font-weight: 400; }
+.rn-tag { font: 500 var(--fs-micro)/1.3 var(--font-ui); color: var(--muted); margin-bottom: 2px; }
+/* Type is the reference tables': their Japanese font and size, romaji
+   caption and English (and their phone step-down, below). */
+.rn-jp { font-family: var(--font-jp); font-size: var(--fs-jp); line-height: 1.75; font-weight: 400; }
 .rn-st .rn-jp { cursor: pointer; border-radius: 6px; transition: background-color .2s; }
 .rn-st .rn-jp::after {
   content: ""; display: inline-block; width: 13px; height: 13px; margin-left: 6px; vertical-align: -1px;
@@ -1595,8 +1597,8 @@ body.icon-picker-open { overflow: hidden; }
 }
 .rn-st .rn-jp:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 .rn-st .rn-jp.rn-speaking { background: var(--rn-soft); }
-.rn-ro { font-size: var(--fs-small); color: var(--romaji, var(--muted)); font-style: italic; line-height: 1.35; }
-.rn-en { font-size: var(--fs-small); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
+.rn-ro { font-size: var(--fs-romaji); color: var(--romaji, var(--muted)); font-style: italic; line-height: 1.3; }
+.rn-en { font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
 .rn-ro:empty, .rn-en:empty { display: none; }
 /* Cards and list rows */
 .rn-card { background: var(--paper); border-radius: var(--radius-card); }
@@ -1640,8 +1642,8 @@ body.icon-picker-open { overflow: hidden; }
 .rn-fl { display: grid; grid-template-columns: 22px 1fr; align-items: baseline; }
 .rn-fl + .rn-fl { margin-top: 10px; }
 .rn-lab { font: 600 13px/1 var(--font-ui); color: var(--rn-strong); }
-.rn-fj { font-size: 19px; line-height: 1.6; }
-.rn-fr { font-size: var(--fs-small); color: var(--muted); }
+.rn-fj { font-family: var(--font-jp); font-size: var(--fs-jp); line-height: 1.6; }
+.rn-fr { font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); }
 .rn-fj s { color: var(--faint); }
 .rn-slot {
   display: inline-block; padding: 0 7px; margin: 0 2px; border-radius: 7px; line-height: 1.5;
@@ -1650,7 +1652,7 @@ body.icon-picker-open { overflow: hidden; }
 /* Two-up, tips */
 .rn-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 .rn-two.rn-flush { margin: 0 0 10px; }
-.rn-kind { font: 600 15px/1.3 var(--font-ui); }
+.rn-kind { font: 600 var(--fs-subhead)/1.3 var(--font-ui); }
 .rn-kind-sub { margin-bottom: 8px; font-size: var(--fs-small); color: var(--muted); }
 .rn-tips { display: grid; gap: 8px; margin-top: 10px; }
 .rn-two .rn-tips { margin-top: 0; }
@@ -1681,6 +1683,10 @@ body.icon-picker-open { overflow: hidden; }
   .rn-qa .rn-r > .rn-st:nth-child(3) { grid-column: 2; }
   .rn-qa .rn-hdr { display: none; }
   .rn-cols2 .rn-list { column-count: 1; }
+}
+@media (max-width: 640px) {
+  .rn-jp, .rn-fj { font-size: calc(16px * var(--dt)); }
+  .rn-en { font-size: calc(12.5px * var(--dt)); }
 }
 /* A name / class field in the iOS alert (notes.js fieldSheet): the field
    under the message, a tinted (not red) confirm button. */
