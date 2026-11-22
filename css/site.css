@@ -86,6 +86,7 @@
   --sec-vocabulary: #4f7389;   --sec-vocabulary-soft: #e3ebef;   --sec-vocabulary-strong: #395767;
   --sec-grammar:    #875a78;   --sec-grammar-soft:    #f0e5ec;   --sec-grammar-strong:    #6a4460;
   --sec-kanji:      #8d7550;   --sec-kanji-soft:      #efe9df;   --sec-kanji-strong:      #66522f;
+  --sec-notes:      #5f8175;   --sec-notes-soft:      #e4ece8;   --sec-notes-strong:      #456056;
   --sec-flashcards: #82799b;   --sec-flashcards-soft: #e9e7f1;   --sec-flashcards-strong: #574d73;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
@@ -291,6 +292,7 @@
   --sec-vocabulary: #83a7bd;   --sec-vocabulary-soft: #222d34;   --sec-vocabulary-strong: #a9c6d6;
   --sec-grammar:    #bd93ad;   --sec-grammar-soft:    #32262e;   --sec-grammar-strong:    #d8b6cb;
   --sec-kanji:      #c2a87e;   --sec-kanji-soft:      #302a21;   --sec-kanji-strong:      #dbc6a2;
+  --sec-notes:      #8bb0a4;   --sec-notes-soft:      #212f2b;   --sec-notes-strong:      #aed0c5;
   --sec-flashcards: #a99fc4;   --sec-flashcards-soft: #2b2937;   --sec-flashcards-strong: #c6bfda;
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
@@ -345,6 +347,9 @@ body[data-active-section="grammar"] {
 }
 body[data-active-section="kanji"] {
   --section: var(--sec-kanji); --section-soft: var(--sec-kanji-soft); --section-strong: var(--sec-kanji-strong);
+}
+body[data-active-page="notes"] {
+  --section: var(--sec-notes); --section-soft: var(--sec-notes-soft); --section-strong: var(--sec-notes-strong);
 }
 body[data-active-page="flashcards"] {
   --section: var(--sec-flashcards); --section-soft: var(--sec-flashcards-soft); --section-strong: var(--sec-flashcards-strong);
@@ -544,6 +549,7 @@ body {
 .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
 .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
 .site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); }
+.site-nav-link[data-page="notes"]:hover { color: var(--sec-notes); }
 .site-nav-link[data-page="flashcards"]:hover { color: var(--sec-flashcards); }
 .site-nav-link.active {
   color: var(--section-strong);
@@ -1475,7 +1481,7 @@ body.icon-picker-open { overflow: hidden; }
 
 /* --- Notes page (#notes, js/notes.js) ------------------------------ */
 /* The reader's class notes: an iOS inset-grouped list -- a list header per
-   month, a white card of 44px rows (indigo document tile, the note's name,
+   month (the nav's Notes tab, in the sage notes tone), a white card of 44px rows (indigo document tile, the note's name,
    its lesson date under it, a chevron), newest first -- and, pushed from a
    row, the note itself under a "‹ Notes" back button with Quiz and ⋯. A
    lesson note is drawn in raume's own style (.rn below); any other note
@@ -1485,7 +1491,7 @@ body.icon-picker-open { overflow: hidden; }
 .page-notes h1 { font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink); overflow-wrap: anywhere; }
 .notes-titlebar { align-items: center; }
 .notes-titlebar h1 { min-width: 0; }
-.notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; margin-left: auto; }
 .notes-add svg { display: block; }
 .notes-tools { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; margin: -6px -10px -6px auto; }
 .notes-quiz[aria-pressed="true"] { box-shadow: none; }
@@ -3280,6 +3286,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav-link[data-section="vocabulary"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="grammar"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='8' x2='21' y1='6' y2='6'/%3E%3Cline x1='8' x2='21' y1='12' y2='12'/%3E%3Cline x1='8' x2='21' y1='18' y2='18'/%3E%3Cline x1='3' x2='3.01' y1='6' y2='6'/%3E%3Cline x1='3' x2='3.01' y1='12' y2='12'/%3E%3Cline x1='3' x2='3.01' y1='18' y2='18'/%3E%3C/svg%3E"); }
   .site-nav-link[data-section="kanji"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 6 6'/%3E%3Cpath d='m4 14 6-6 2-3'/%3E%3Cpath d='M2 5h12'/%3E%3Cpath d='M7 2h1'/%3E%3Cpath d='m22 22-5-10-5 10'/%3E%3Cpath d='M14 18h6'/%3E%3C/svg%3E"); }
+  .site-nav-link[data-page="notes"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3Cpath d='M16 13H8'/%3E%3Cpath d='M16 17H8'/%3E%3Cpath d='M10 9H8'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3Cpath d='M16 13H8'/%3E%3Cpath d='M16 17H8'/%3E%3Cpath d='M10 9H8'/%3E%3C/svg%3E"); }
   .site-nav-link[data-page="flashcards"]::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E"); }
   .site-nav-link.active { font-weight: 400; }
   .table-section { scroll-margin-top: calc(var(--compact-h) + 92px); }
@@ -5644,8 +5651,7 @@ mark.fc-diff-co {
 .fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
 .fc-titlebar:not(.fc-titlebar-pushed) { margin-bottom: 16px; }
 @media (min-width: 641px) {
-  /* (Notes keeps its title: no top-bar tab names it.) */
-  .fc-titlebar:not(.fc-titlebar-pushed):not(.notes-titlebar) > h1 {
+  .fc-titlebar:not(.fc-titlebar-pushed) > h1 {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
@@ -5851,7 +5857,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
     position: absolute; top: 18px; right: 16px; z-index: 55;
     padding: 0; background: transparent;
   }
-  .masthead .wordmark, #notesToggle, #helpToggle, #customizeToggle, #themeToggle { display: none; }
+  .masthead .wordmark, #helpToggle, #customizeToggle, #themeToggle { display: none; }
   .masthead-right { margin: 0; }
   .masthead .masthead-account {
     width: 34px; height: 34px; min-width: 0; padding: 0; border-radius: 50%;

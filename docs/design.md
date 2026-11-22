@@ -518,27 +518,27 @@ and Help.
   the `--group-ground` runs edge to edge like the phone, and the content keeps
   a centred 1180px column (`.app-frame > .app`). **≥900px the masthead is one
   sticky glass bar** (64px; blur on a `::before` layer): the wordmark leading,
-  the four sections as a white floating capsule (`--control-lift`) laid over
+  the five tabs (Vocabulary, Grammar, Kanji, Notes, Practice) as a white floating capsule (`--control-lift`) laid over
   its centre (both share the frame's first grid row, so the markup is the
   phone's), the utility glyphs trailing; the sticky search bar stops under it
   (`--nav-h: 64px`). **641–899px** the tabs keep their own row under the
   masthead, a sticky glass band (`--nav-h: 45px`). The phone keeps its bottom
-  tab bar. The five masthead controls — account, notes, help,
+  tab bar. The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
   targets: no box, no outline. On a tablet (`hover: none`) each glyph gets a 10px
-  caption under it — Account / Notes / Help / Customize / the current theme — since a
+  caption under it — Account / Help / Customize / the current theme — since a
   tooltip can't explain it there. **On a phone (≤640px) the masthead is App
   Store style**: no wordmark row, the large screen title is the top of every
   screen, and one 34px round white account button (`--control-lift`, the sync
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
   menu of words: who you are + sync state, Account (reads "Sign in" for a guest
-  and opens the sign-in screen) / Notes / Customize tables / Help,
+  and opens the sign-in screen) / Customize tables / Help,
   and Appearance as a System / Light / Dark segmented control that applies at
   once, then — signed in — a separated **Sign out** row in the coral
   `--wrong-strong`, iOS's destructive position at the bottom. Wider windows
   open the same menu under the account glyph, minus the rows their own glyphs
-  already are (`data-phone-only`: Notes, Customize tables, Help, Appearance). Because
+  already are (`data-phone-only`: Customize tables, Help, Appearance). Because
   the menu says who you are and holds Sign out, Practice has no "Signed in
   as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
@@ -547,7 +547,7 @@ and Help.
   are spelled out in the Options sheet's **Row icons** group — iOS subtitle
   cells: the glyph in its own column, a 15px name, one 13px grey line under it,
   the hairline starting at the words. Standard iOS glyphs
-  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Notes, Customize, Help) shows
+  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
   amber when offline or something's queued, the glyph tinting to match). The
@@ -768,12 +768,13 @@ and Help.
     the import format) lives in an `.info-panel` (an unboxed footnote) toggled
     by an adjacent `.info-btn` — a bare "i" glyph that takes the accent tint
     while open — instead of sitting on the page unconditionally.
-- **The Notes page** (`.page-notes`, `js/notes.js`) is an inset-grouped list
+- **The Notes tab** (`.page-notes`, `js/notes.js`; Travel's old slot and
+  sage tone, `--sec-notes`, a document glyph in the phone tab bar) is an inset-grouped list
   like Help: a month list header over a white card of 44px rows (indigo
   document tile, the note's name, its lesson date in grey, a chevron), newest
   first; **Add** is a tinted text bar button with a plus at the title's
-  trailing edge. Its title stays on screen at every width (no top-bar tab
-  names it). A note opens as a pushed screen: "‹ Notes", the note's name as
+  trailing edge. Like Practice, its list title is the phone's large title
+  and is visually hidden on a wider window (the top bar names it). A note opens as a pushed screen: "‹ Notes", the note's name as
   the large title, then one row — the lesson date left, **Quiz** (a white
   capsule that fills in the tile tone while on) and ⋯ right, clear of the
   phone's account button. ⋯ holds Romaji / English / Furigana as checkmark

@@ -56,6 +56,7 @@ python3 -m http.server
 | **Vocabulary** | The landing page: Around Town (places, shops, transport, directions), Food & Ingredients, Kitchen & Dining (with eating out), Numbers & Counting, People & Daily Life (family, body & health, home, weather & seasons), Time & Calendar |
 | **Grammar**    | Adjectives, Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど) |
 | **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
+| **Notes**      | Your own class notes, private to your account — see [Class notes](#class-notes) |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
 Grammatical **particles are blue and bold** everywhere.
@@ -154,8 +155,7 @@ flashcard direction. Changes save immediately and sync when signed in.
 
 ### Class notes
 
-The **Notes** page — masthead page icon; on a phone, the account button's
-menu. Your own class notes as HTML files, **private to your account**: they
+The **Notes** tab (where Travel used to be). Your own class notes as HTML files, **private to your account**: they
 live only in your Supabase project behind Row Level Security, never in Git
 or on the public site. Needs an account.
 
@@ -179,7 +179,6 @@ Keep lesson files out of the repo — `private-notes/` is gitignored for them.
 | --- | --- |
 | **Print** | A4 at three scopes: one table (its printer icon), this section, or the whole reference (both in Options). Collapsed tables still print. |
 | **Theme** | **System → Light → Dark**, applied before the first paint. |
-| **Notes** | The page icon at the top: your class notes — see [Class notes](#class-notes). |
 | **Help** | The **?** at the top: four topics (Finding words, Reading, Options, Making it yours) as short one-line rows, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)). Practice has its own Help screen; on a phone, the account menu's **Help** opens whichever fits the screen you're on. |
 | **Version** | A quiet line at the foot of every page: the deployed commit and its date (**Local build** in a checkout). |
 | **Sync dot** | On the person icon: **green** = everything synced, **amber** = offline or something hasn't reached your account yet. |
@@ -190,7 +189,7 @@ The **account button** (the person icon) opens one menu:
 | --- | --- |
 | *(header)* | Who you're signed in as, and whether you're synced |
 | **Account** | Practice — or **Sign in** for a guest, straight to the sign-in screen |
-| **Notes** · **Customize tables** · **Help** | Phone only; wider windows have their own icons |
+| **Customize tables** · **Help** | Phone only; wider windows have their own icons |
 | **Support raume** | Ko-fi, in a new tab |
 | **Appearance** | System / Light / Dark — phone only, likewise |
 | **Sign out** | Signed in only — its one place, at every screen size. If something hasn't synced yet, it asks first |

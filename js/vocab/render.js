@@ -817,6 +817,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<a class="site-nav-link" href="#vocabulary" data-section="vocabulary">Vocabulary</a>' +
       '<a class="site-nav-link" href="#grammar" data-section="grammar">Grammar</a>' +
       '<a class="site-nav-link" href="#kanji" data-section="kanji">Kanji</a>' +
+      '<a class="site-nav-link" href="#notes" data-page="notes">Notes</a>' +
       '<a class="site-nav-link" href="#practice" data-page="flashcards">Practice</a>';
   }
   // The internal table index: a visual directory that stands in for a

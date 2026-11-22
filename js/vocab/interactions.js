@@ -187,17 +187,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function markActiveNav(sectionName) {
     const page = document.body.dataset.activePage;
     document.querySelectorAll('#siteNav .site-nav-link').forEach(function (link) {
-      const on = link.dataset.page === 'flashcards'
-        ? page === 'flashcards'
-        : (page !== 'flashcards' && link.dataset.section === sectionName);
+      // A page tab (Notes, Practice) is on while its page is; a section
+      // tab while the reference shows that section.
+      const on = link.dataset.page
+        ? page === link.dataset.page
+        : (page !== 'flashcards' && page !== 'notes' && link.dataset.section === sectionName);
       link.classList.toggle('active', on);
     });
     const gear = document.getElementById('customizeToggle');
     if (gear) gear.classList.toggle('active', page === 'customize');
     const help = document.getElementById('helpToggle');
     if (help) help.classList.toggle('active', page === 'help');
-    const notes = document.getElementById('notesToggle');
-    if (notes) notes.classList.toggle('active', page === 'notes');
   }
 
   // Reflect the current view in the URL hash (#vocabulary / #grammar /
@@ -287,8 +287,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   // The reference (#vocabPage) plus four standalone pages that sit alongside
-  // the nav sections -- Flashcards, and the masthead's Notes, Customize and
-  // Help utility screens. Exactly one is visible; `which` is 'vocab' |
+  // the nav sections -- Notes and Flashcards (nav tabs), and the masthead's
+  // Customize and Help utility screens. Exactly one is visible; `which` is 'vocab' |
   // 'flashcards' | 'notes' | 'customize' | 'help'.
   // The kanji detail sheet (#kanjiSheet): tap -- or Enter on -- a tile in a
   // Kanji table to open it; a centred card on a wide screen, a bottom sheet
@@ -608,8 +608,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   };
 
   // The Notes page -- the reader's own class notes (#notes), one open at
-  // #notes/<id>. A utility screen off the masthead, not a nav item;
-  // js/notes.js owns everything inside it. opts.noteId opens that note.
+  // #notes/<id>; a nav tab (where Travel was). js/notes.js owns everything
+  // inside it. opts.noteId opens that note.
   vocab.showNotesPage = function (opts) {
     opts = opts || {};
     if (vocab.clearSearchQuery) vocab.clearSearchQuery();
@@ -1524,6 +1524,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         event.preventDefault();
         if (link.classList.contains('active') && window.RaumeStudy.shared.scrollToTopFirst()) return;
         if (link.dataset.page === 'flashcards') { if (vocab.showFlashcardsPage) vocab.showFlashcardsPage(); }
+        else if (link.dataset.page === 'notes') vocab.showNotesPage(); // from a note: back to the list
         else if (link.dataset.section) showSection(link.dataset.section);
       });
     });
@@ -1536,13 +1537,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       customizeToggle.addEventListener('click', function () {
         if (document.body.dataset.activePage === 'customize') showSection('vocabulary');
         else vocab.showCustomizePage();
-      });
-    }
-    const notesToggle = document.getElementById('notesToggle');
-    if (notesToggle) {
-      notesToggle.addEventListener('click', function () {
-        if (document.body.dataset.activePage === 'notes') showSection('vocabulary');
-        else vocab.showNotesPage();
       });
     }
     const helpToggle = document.getElementById('helpToggle');
@@ -1750,7 +1744,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     // The account menu (index.html #accountMenu): who you are and the sync
     // state (filled in by js/flashcards/bootstrap.js), Account, Support and
-    // Sign out -- plus, on a phone, Notes / Customize tables / Help (the pages the
+    // Sign out -- plus, on a phone, Customize tables / Help (the pages the
     // wider masthead's glyphs open) and Appearance as a System / Light /
     // Dark switch that applies at once and leaves the menu open. Closes on
     // an outside tap or Escape.
@@ -1771,7 +1765,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (!go) return;
         setAccountMenu(false);
         if (go.dataset.menuGo === 'account') openAccount();
-        else if (go.dataset.menuGo === 'notes') vocab.showNotesPage();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
         else if (go.dataset.menuGo === 'help') {
           // Help for the screen you're on: on Practice, the Flashcards Help

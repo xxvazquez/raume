@@ -1033,8 +1033,8 @@ async function main() {
     if (!phone) return false;
     const rules = [...phone.cssRules].map(x => x.selectorText || "");
     return ["vocabulary", "grammar", "kanji"].every(sec => rules.some(t => t.includes('data-section="' + sec + '"') && t.includes("::before")))
-      && rules.some(t => t.includes('data-page="flashcards"') && t.includes("::before"))
-      && document.querySelectorAll("#siteNav .site-nav-link").length === 4;
+      && ["notes", "flashcards"].every(pg => rules.some(t => t.includes('data-page="' + pg + '"') && t.includes("::before")))
+      && document.querySelectorAll("#siteNav .site-nav-link").length === 5;
   })());
   check("the Vocabulary nav link starts active", document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
   check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
@@ -1118,7 +1118,7 @@ async function main() {
 
   console.log("Top navigation");
   const navLinks = [...document.querySelectorAll("#siteNav .site-nav-link")];
-  check("nav is Vocabulary / Grammar / Kanji / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Kanji Practice");
+  check("nav is Vocabulary / Grammar / Kanji / Notes / Practice", navLinks.map(l => l.textContent) .join(" ") === "Vocabulary Grammar Kanji Notes Practice");
   check("the three reference sections carry data-section", navLinks.slice(0, 3).map(l => l.dataset.section).join(",") === "vocabulary,grammar,kanji");
   check("last nav item is Practice, at #practice", navLinks[navLinks.length - 1].dataset.page === "flashcards" && navLinks[navLinks.length - 1].getAttribute("href") === "#practice");
   check("no category is a top-level nav item", !navLinks.some(l => l.dataset.category));
@@ -1378,8 +1378,8 @@ async function main() {
 
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
-  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Notes / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Notes|Customize tables|Help|Support raume"
+  check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
+    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
     && acctMenu.querySelector('[data-menu-go="signout"]').hidden
     && acctMenu.querySelector('a[href="https://ko-fi.com/raume"]').rel === "noopener"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
@@ -2039,14 +2039,14 @@ async function main() {
   window.location.hash = "";
 
   console.log("Notes page (the reader's own class notes)");
-  const notesBtn = document.getElementById("notesToggle");
-  check("the masthead has a Notes button, captioned, and the phone's account menu a Notes row", !!notesBtn
-    && notesBtn.getAttribute("aria-label") === "Notes" && /Notes/.test(notesBtn.textContent)
-    && !!document.querySelector('#accountMenu [data-menu-go="notes"][data-phone-only]'));
+  const notesBtn = document.querySelector('#siteNav .site-nav-link[data-page="notes"]');
+  check("Notes is a nav tab (where Travel was), not a masthead glyph or account-menu row", !!notesBtn
+    && !document.getElementById("notesToggle") && !document.querySelector('#accountMenu [data-menu-go="notes"]'));
   check("the Notes page starts hidden", document.getElementById("notesPage").hidden === true);
   notesBtn.click();
-  check("clicking it shows Notes, says #notes and marks the button active", document.getElementById("notesPage").hidden === false
-    && document.getElementById("vocabPage").hidden === true && window.location.hash === "#notes" && notesBtn.classList.contains("active"));
+  check("tapping it shows Notes, says #notes and marks only the Notes tab active", document.getElementById("notesPage").hidden === false
+    && document.getElementById("vocabPage").hidden === true && window.location.hash === "#notes" && notesBtn.classList.contains("active")
+    && document.querySelectorAll("#siteNav .site-nav-link.active").length === 1 && document.body.dataset.activePage === "notes");
   check("signed out, it explains notes are private to an account and offers Sign in -- no Add", (() => {
     const p = document.getElementById("notesPage");
     return /private to your account/.test(p.textContent) && !!document.getElementById("notesSignIn") && !document.getElementById("notesAdd");
@@ -2056,7 +2056,9 @@ async function main() {
   await new Promise(r => setTimeout(r, 0)); // jsdom delivers popstate as its own task
   check("#notes/<id> routes to the reader with a ‹ Notes back button", document.body.dataset.activePage === "notes" && !!document.getElementById("notesBack"));
   notesBtn.click();
-  check("clicking Notes again returns to the reference", document.getElementById("vocabPage").hidden === false && document.getElementById("notesPage").hidden === true);
+  check("tapping the Notes tab from a note goes back to the list", window.location.hash === "#notes" && !document.getElementById("notesBack"));
+  document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
+  check("Vocabulary takes you back to the reference", document.getElementById("vocabPage").hidden === false && document.getElementById("notesPage").hidden === true);
   window.location.hash = "";
   (() => {
     const nh = window.RaumeStudy.notes.__testHooks;

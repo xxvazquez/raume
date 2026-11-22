@@ -1,8 +1,7 @@
 // The Notes screen (RaumeStudy.notes) -- the reader's own class notes, as
 // HTML files they add, kept private to their account and listed by lesson
-// date. A utility screen off the masthead (#notes, one note at
-// #notes/<id>), like Customize and Help; routing and show/hide live in
-// js/vocab/interactions.js.
+// date. A nav tab (#notes, one note at #notes/<id>), where Travel was;
+// routing and show/hide live in js/vocab/interactions.js.
 //
 // Storage: the Supabase `notes` table (supabase/schema.sql), one row per
 // note holding the file's whole text, behind the same owner-only row-level

@@ -164,7 +164,7 @@ flowchart LR
 
 ### Class notes
 
-`js/notes.js` (`RaumeStudy.notes`, the `#notes` page; one note at
+`js/notes.js` (`RaumeStudy.notes`, the Notes tab at `#notes`; one note at
 `#notes/<id>`). Signed-in only: each note is one row of the `notes` table —
 `title`, `note_date` (the lesson's date; the list sorts by it, newest first,
 grouped by month), `size`, and the file's whole text in `html` (≤ 5 MB, a
