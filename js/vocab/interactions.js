@@ -2023,7 +2023,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       closePop();
       if (popBlocked()) return;
       const row = btn.closest('tr');
-      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge]')] : [];
+      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge], .row-badges [data-pattern]')] : [];
       if (!badges.length) return;
       pop = document.createElement('div');
       pop.className = 'role-pop role-pop-list';
@@ -2032,6 +2032,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       badges.forEach(function (b) {
         const line = document.createElement('div');
         line.className = 'role-pop-line';
+        if (b.dataset.pattern) { line.textContent = b.dataset.pattern; pop.appendChild(line); return; } // a sentence's pattern: words only
         line.appendChild(badgeGlyph(b));
         const role = b.dataset.role || b.dataset.usage || (b.dataset.badge + '-adjective');
         line.appendChild(document.createTextNode(' ' + role));

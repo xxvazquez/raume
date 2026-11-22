@@ -418,12 +418,15 @@ async function main() {
     const input = document.getElementById("tableSearch");
     input.value = "adjective";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    // Only Sentence Patterns says "adjective" out loud (its grey notes); the
-    // hidden い/な notes on Adjectives rows must not match.
-    const hits = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)')];
+    const hits = document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return hits.length > 0 && hits.every(tr => tr.closest(".table-section").querySelector(".section-title-text").textContent === "Sentence Patterns");
+    return hits === 0;
+  })());
+  check("a Sentence Patterns row reads Japanese + English only; its pattern waits behind the row's ⓘ", (() => {
+    const sec = [...document.querySelectorAll(".table-section")].find(s => s.querySelector(".section-title-text").textContent === "Sentence Patterns");
+    const tr = sec && sec.querySelector("tbody tr");
+    return !!tr && !tr.querySelector(".meaning-note") && !!tr.querySelector(".row-badges [data-pattern]") && !!tr.querySelector(".row-info-btn");
   })());
   check("every Japanese cell is marked lang=\"ja\"", [...document.querySelectorAll("td.jp")].every(td => td.getAttribute("lang") === "ja"));
   // A kanji tile has none -- its sheet carries the speaker.

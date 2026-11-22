@@ -338,7 +338,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // button) + English, two columns, no separate Romaji column.
   function wordRow(row) {
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row), row.enNote) + '</tr>';
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row) + patternBadge(row), row.enNote) + '</tr>';
+  }
+  // row.pattern -- the grammar a Sentence Patterns example shows ("な-adjective
+  // + な + noun"). An explanation, so it waits behind the row's ⓘ with the
+  // other grammar notes instead of crowding the English under the sentence.
+  function patternBadge(row) {
+    return row.pattern ? '<span class="pattern-note" data-pattern="' + esc(row.pattern) + '"><span class="visually-hidden">' + esc(row.pattern) + '</span></span>' : '';
   }
   // forms[0] is the plain/dictionary form, forms[1] the polite (-masu) form --
   // tag each so CSS can tint the two consistently down the Japanese column

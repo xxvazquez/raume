@@ -343,12 +343,14 @@ and Help.
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.
-- **Sentence tables** (`tableClass: "vocab-sentences"` — a custom table of your
-  own sentences): stacked rows, not two columns —
+- **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
+  Patterns, or a custom table of your own sentences): stacked rows, not two columns —
   the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
-  secondary grey, romaji on tap between them, speaker and hide glyphs at the
-  trailing edge of each line; no column headers (authored order, nothing to sort).
+  in the meaning colour (`--ink-2`; secondary grey read too faint), alone on its
+  line — a pattern example's grammar (`row.pattern`) waits behind the row's ⓘ,
+  never as grey text beside the English — romaji on tap between them, speaker
+  and hide glyphs at the trailing edge of each line; no column headers (authored order, nothing to sort).
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never
