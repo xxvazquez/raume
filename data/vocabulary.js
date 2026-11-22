@@ -21,6 +21,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 38,
     title: "Counting Things",
+    ordered: true,
     category: "Numbers & Counting",
     rows: [
     {"id":"v0708","type":"word","jp":[{"text":"〜"},{"text":"つ"}],"romaji":"~tsu","english":"general counter for things","enNote":"one to nine"},
@@ -40,6 +41,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 39,
     title: "Counting People & Age",
+    ordered: true,
     category: "Numbers & Counting",
     rows: [
     {"id":"v0720","type":"word","jp":[{"text":"〜"},{"kanji":"人","reading":"にん"}],"romaji":"~nin","english":"people","enNote":"counting three or more"},
@@ -455,6 +457,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 9,
     title: "Particles",
+    ordered: true,
     category: "Grammar",
     rows: [
     {"id":"v0227","type":"word","jp":[{"p":"は"}],"romaji":"wa","english":"topic / contrast"},
@@ -700,6 +703,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 27,
     title: "Today, Yesterday & Tomorrow",
+    ordered: true,
     category: "Time & Calendar",
     rows: [
     {"id":"v0605","type":"word","jp":[{"kanji":"一昨日","reading":"おととい"}],"romaji":"ototoi","english":"day before yesterday"},
@@ -713,28 +717,30 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 28,
     title: "Weeks, Months & Years",
+    ordered: true,
     category: "Time & Calendar",
     rows: [
     {"id":"v0611","type":"word","jp":[{"kanji":"先週","reading":"せんしゅう"}],"romaji":"senshū","english":"last week"},
     {"id":"v0612","type":"word","jp":[{"kanji":"今週","reading":"こんしゅう"}],"romaji":"konshū","english":"this week"},
     {"id":"v0613","type":"word","jp":[{"kanji":"来週","reading":"らいしゅう"}],"romaji":"raishū","english":"next week"},
+    {"id":"v0814","type":"word","jp":[{"kanji":"再来週","reading":"さらいしゅう"}],"romaji":"saraishū","english":"the week after next"},
     {"id":"v0614","type":"word","jp":[{"kanji":"毎週","reading":"まいしゅう"}],"romaji":"maishū","english":"every week"},
     {"id":"v0615","type":"word","jp":[{"kanji":"先月","reading":"せんげつ"}],"romaji":"sengetsu","english":"last month"},
     {"id":"v0616","type":"word","jp":[{"kanji":"今月","reading":"こんげつ"}],"romaji":"kongetsu","english":"this month"},
     {"id":"v0617","type":"word","jp":[{"kanji":"来月","reading":"らいげつ"}],"romaji":"raigetsu","english":"next month"},
     {"id":"v0618","type":"word","jp":[{"kanji":"毎月","reading":"まいつき"}],"romaji":"maitsuki","english":"every month"},
+    {"id":"v0815","type":"word","jp":[{"kanji":"一昨年","reading":"おととし"}],"romaji":"ototoshi","english":"the year before last"},
     {"id":"v0619","type":"word","jp":[{"kanji":"去年","reading":"きょねん"}],"romaji":"kyonen","english":"last year"},
     {"id":"v0620","type":"word","jp":[{"kanji":"今年","reading":"ことし"}],"romaji":"kotoshi","english":"this year"},
     {"id":"v0621","type":"word","jp":[{"kanji":"来年","reading":"らいねん"}],"romaji":"rainen","english":"next year"},
-    {"id":"v0622","type":"word","jp":[{"kanji":"毎年","reading":"まいとし / まいねん"}],"romaji":"maitoshi / mainen","english":"every year","irregular":true},
-    {"id":"v0814","type":"word","jp":[{"kanji":"再来週","reading":"さらいしゅう"}],"romaji":"saraishū","english":"the week after next"},
-    {"id":"v0815","type":"word","jp":[{"kanji":"一昨年","reading":"おととし"}],"romaji":"ototoshi","english":"the year before last"},
     {"id":"v0816","type":"word","jp":[{"kanji":"再来年","reading":"さらいねん"}],"romaji":"sarainen","english":"the year after next"},
+    {"id":"v0622","type":"word","jp":[{"kanji":"毎年","reading":"まいとし / まいねん"}],"romaji":"maitoshi / mainen","english":"every year","irregular":true},
     ]
   },
   {
     id: 29,
     title: "Time of Day",
+    ordered: true,
     category: "Time & Calendar",
     rows: [
     {"id":"v0623","type":"word","jp":[{"kanji":"朝","reading":"あさ"}],"romaji":"asa","english":"morning"},
@@ -747,9 +753,9 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0630","type":"word","jp":[{"kanji":"今","reading":"いま"}],"romaji":"ima","english":"now"},
     {"id":"v0631","type":"word","jp":[{"kanji":"今朝","reading":"けさ"}],"romaji":"kesa","english":"this morning"},
     {"id":"v0632","type":"word","jp":[{"kanji":"今晩","reading":"こんばん"}],"romaji":"konban","english":"tonight / this evening"},
+    {"id":"v0817","type":"word","jp":[{"text":"ゆうべ"}],"romaji":"yūbe","english":"last night / yesterday evening"},
     {"id":"v0633","type":"word","jp":[{"kanji":"毎朝","reading":"まいあさ"}],"romaji":"maiasa","english":"every morning"},
     {"id":"v0634","type":"word","jp":[{"kanji":"毎晩","reading":"まいばん"}],"romaji":"maiban","english":"every night"},
-    {"id":"v0817","type":"word","jp":[{"text":"ゆうべ"}],"romaji":"yūbe","english":"last night / yesterday evening"},
     ]
   },
   {
@@ -804,6 +810,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 32,
     title: "Question Words",
+    ordered: true,
     category: "Grammar",
     rows: [
     {"id":"v0818","type":"word","jp":[{"kanji":"何","reading":"なに"}],"romaji":"nani","english":"what"},
@@ -821,6 +828,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 33,
     title: "This, That & Over There",
+    ordered: true,
     category: "Grammar",
     rows: [
     {"id":"v0828","type":"word","jp":[{"text":"これ"}],"romaji":"kore","english":"this / this one","enNote":"near me"},
@@ -859,6 +867,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 34,
     title: "Family",
+    ordered: true,
     category: "People & Daily Life",
     rows: [
     {"id":"v0840","type":"word","jp":[{"kanji":"家族","reading":"かぞく"}],"romaji":"kazoku","english":"family"},
@@ -1124,6 +1133,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   {
     id: 57,
     title: "Greetings & Expressions",
+    ordered: true,
     category: "People & Daily Life",
     rows: [
     {"id":"v1072","type":"word","jp":[{"text":"おはようございます"}],"romaji":"ohayō gozaimasu","english":"good morning"},

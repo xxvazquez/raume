@@ -93,7 +93,7 @@ Grammatical **particles are blue and bold** everywhere.
 | **Sentence tables** | (A table of your own sentences) Japanese on its own line, English under it, romaji on tap. |
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
-| **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. |
+| **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. Tables open A–Z, except those taught as a sequence — counting (ひとつ, ふたつ…), days and years (おととい → きのう → きょう), time of day, こ・そ・あ・ど, particles, question words, family and greetings — which open in that order. |
 | **Known words** | A word you know gets a soft green wash and a ✓ — nothing is hidden. Mark it yourself from its hold menu, or it turns green on its own once you've known its meaning in flashcards for three weeks (its Japanese → English card is mature). **Mark as not known** always wins over that. Synced with your account like Known kanji. |
 | **Tricky words** | A word that isn't sticking gets a soft amber wash and a small **!** — one of its flashcards forgotten twice after you'd learned it, or rated Again / Hard so often FSRS rates it near the hardest. Known wins over it. |
 | **Irregular words** | Exceptions (irregular verbs, Numbers' 4 / 7 / 9) are written in red, with no wash, so the green or amber of your progress shows on them too. |

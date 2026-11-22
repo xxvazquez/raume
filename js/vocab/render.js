@@ -653,8 +653,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
     // authored order -- a run of sentences reads in the order it was written.
     // Kanji tables keep theirs too: 一 二 三 in order, not eight, five, four.
+    // So does a table marked `ordered` -- a sequence taught in its own order
+    // (ひとつ ふたつ みっつ, おととい きのう きょう, これ それ あれ), which
+    // A-Z by English would scramble.
     var sentences = t.tableClass === 'vocab-sentences';
-    var authored = sentences || t.tableClass === 'vocab-kanji';
+    var authored = sentences || t.tableClass === 'vocab-kanji' || !!t.ordered;
     var rows = authored ? t.rows.slice() : t.rows.slice().sort(byEnglish);
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
