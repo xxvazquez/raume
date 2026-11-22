@@ -171,23 +171,158 @@ window.RaumeStudy.customize = (function () {
     return (jp || []).map(function (s) { return s.kanji ? s.kanji + "(" + s.reading + ")" : (s.text || ""); }).join("");
   }
 
-  // <select> of every table a custom row can be attached to, grouped by
-  // category in the vocabulary page's own order -- the reader's own tables
-  // sit in their category beside the built-in ones, where they look for them.
-  function targetSelect(cls, selected) {
-    selected = selected == null ? "" : String(selected);
-    var opt = function (val, label) {
-      return '<option value="' + esc(val) + '"' + (val === selected ? " selected" : "") + ">" + esc(label) + "</option>";
-    };
-    var opts = "";
+  // ---- table picker ------------------------------------------------------
+  // Where Add a word / Import put things: a pop-up row (the table's tile, its
+  // name, ⌃⌄) that opens a searchable sheet -- with a couple of hundred
+  // tables a native picker is too long to scroll and can't be typed into.
+  // The sheet: Cancel + title, a search field (matches a table's name or its
+  // category's), Recent (the last few picked on this device), then every
+  // table under its category in the vocabulary page's own order -- the
+  // reader's own tables beside the built-in ones, where they look for them.
+  var RECENT_KEY = "raume-table-picker-recent";
+  var RECENT_MAX = 4;
+  var LIST_GLYPH = '<svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h8"/></svg>';
+  var CHECK_GLYPH = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
+  var UPDOWN_GLYPH = '<svg viewBox="0 0 10 16" width="10" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6l3-3 3 3M2 10l3 3 3-3"/></svg>';
+  var SEARCH_GLYPH = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.8"/><path d="M10.6 10.6l3.4 3.4"/></svg>';
+
+  // Held in memory too, so Recent still works for the session when storage
+  // is unavailable.
+  var recent = null;
+  function loadRecent() {
+    if (recent) return recent;
+    try {
+      var a = JSON.parse(window.localStorage.getItem(RECENT_KEY) || "[]");
+      recent = Array.isArray(a) ? a.map(String) : [];
+    } catch (e) { recent = []; }
+    return recent;
+  }
+  function rememberRecent(id) {
+    recent = [id].concat(loadRecent().filter(function (x) { return x !== id; })).slice(0, RECENT_MAX);
+    try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch (e) {}
+  }
+  function titleOfTable(t) { return V().tableTitle ? V().tableTitle(t.id, t.title) : t.title; }
+  function findTable(id) {
+    if (id == null || id === "") return null;
+    return tables().filter(function (t) { return String(t.id) === String(id); })[0] || null;
+  }
+  // The table Add a word / Import will use: the last one picked, else the
+  // first table in page order.
+  function targetId(kind) {
+    var t = findTable(cvTarget[kind]);
+    if (t) return String(t.id);
+    var g = grouped()[0];
+    return g && g.tables[0] ? String(g.tables[0].id) : "";
+  }
+  function tableTileHtml(t) {
+    var tile = V().tableTile ? V().tableTile(t.id, t.category) : "";
+    var hasIcon = V().tableIconValue ? !!V().tableIconValue(t.id) : true;
+    return '<span class="tpick-tile"' + (tile ? ' data-tile="' + esc(tile) + '"' : "") + ' aria-hidden="true">' +
+      (hasIcon ? iconSlot(t.id) : LIST_GLYPH) + "</span>";
+  }
+  function targetButton(kind, label) {
+    var t = findTable(targetId(kind));
+    var name = t ? titleOfTable(t) : "No tables";
+    return '<div class="cv-field"><span aria-hidden="true">' + esc(label) + "</span>" +
+      '<button type="button" class="cv-table-btn" data-kind="' + kind + '" data-value="' + esc(t ? String(t.id) : "") + '"' +
+      ' aria-haspopup="dialog" aria-label="' + esc(label + ": " + name) + '">' +
+      (t ? tableTileHtml(t) : "") + '<span class="cv-table-name">' + esc(name) + "</span>" +
+      '<span class="cv-table-chev">' + UPDOWN_GLYPH + "</span></button></div>";
+  }
+
+  function pickerRowsHtml(list, selected) {
+    return '<ul class="tpick-list">' + list.map(function (t) {
+      var on = String(t.id) === selected;
+      return '<li><button type="button" class="tpick-row" data-id="' + esc(String(t.id)) + '"' + (on ? ' aria-current="true"' : "") + ">" +
+        tableTileHtml(t) + '<span class="tpick-name">' + esc(titleOfTable(t)) + "</span>" +
+        (on ? '<span class="tpick-check">' + CHECK_GLYPH + '<span class="visually-hidden">Selected</span></span>' : "") +
+        "</button></li>";
+    }).join("") + "</ul>";
+  }
+  function pickerBodyHtml(query, selected) {
+    var q = query.trim().toLowerCase();
+    var out = "";
+    if (!q) {
+      var recent = loadRecent().map(findTable).filter(Boolean);
+      if (recent.length) out += '<h3 class="tpick-cat">Recent</h3>' + pickerRowsHtml(recent, selected);
+    }
+    var any = false;
     grouped().forEach(function (g) {
-      opts += '<optgroup label="' + esc(g.name) + '">';
-      g.tables.forEach(function (t) {
-        opts += opt(String(t.id), V().tableTitle ? V().tableTitle(t.id, t.title) : t.title);
+      var catHit = !!q && g.name.toLowerCase().indexOf(q) !== -1;
+      var list = g.tables.filter(function (t) {
+        return !q || catHit || titleOfTable(t).toLowerCase().indexOf(q) !== -1;
       });
-      opts += "</optgroup>";
+      if (!list.length) return;
+      any = true;
+      out += '<h3 class="tpick-cat">' + esc(g.name) + "</h3>" + pickerRowsHtml(list, selected);
     });
-    return '<select class="' + cls + '">' + opts + "</select>";
+    if (!any) out = '<p class="tpick-empty">No tables match “' + esc(query.trim()) + "”.</p>";
+    return out;
+  }
+
+  function openTablePicker(host, kind) {
+    var old = document.querySelector(".tpick");
+    if (old) old.remove();
+    var opener = document.activeElement;
+    var selected = targetId(kind);
+    var root = document.createElement("div");
+    root.className = "tpick";
+    root.innerHTML = '<div class="tpick-scrim"></div>' +
+      '<div class="tpick-sheet" role="dialog" aria-modal="true" aria-labelledby="tpickTitle" tabindex="-1">' +
+      '<div class="tpick-head"><button type="button" class="tpick-cancel">Cancel</button>' +
+      '<h2 class="tpick-title" id="tpickTitle">' + (kind === "import" ? "Import into" : "Add to") + "</h2><span></span></div>" +
+      '<label class="tpick-search-field"><span class="tpick-search-glyph">' + SEARCH_GLYPH + "</span>" +
+      '<input type="search" class="tpick-search" placeholder="Search tables" aria-label="Search tables" autocomplete="off" spellcheck="false" enterkeyhint="go"></label>' +
+      '<div class="tpick-body">' + pickerBodyHtml("", selected) + "</div></div>";
+    document.body.appendChild(root);
+    document.body.classList.add("tpick-open");
+    var body = root.querySelector(".tpick-body");
+    var search = root.querySelector(".tpick-search");
+
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      root.remove();
+      document.body.classList.remove("tpick-open");
+      if (opener && opener.focus && document.contains(opener)) opener.focus();
+    }
+    function pick(id) {
+      cvTarget[kind] = id;
+      rememberRecent(id);
+      // Swap just the pop-up row -- a full render() would wipe a word or a
+      // list already typed into the fields beside it.
+      var label = kind === "import" ? "Into table" : "Table";
+      host.querySelectorAll('.cv-table-btn[data-kind="' + kind + '"]').forEach(function (b) {
+        b.parentNode.outerHTML = targetButton(kind, label);
+      });
+      opener = host.querySelector('.cv-table-btn[data-kind="' + kind + '"]');
+      close();
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    root.querySelector(".tpick-scrim").addEventListener("click", close);
+    root.querySelector(".tpick-cancel").addEventListener("click", close);
+    body.addEventListener("click", function (e) {
+      var row = e.target.closest && e.target.closest(".tpick-row");
+      if (row) pick(row.dataset.id);
+    });
+    search.addEventListener("input", function () {
+      body.innerHTML = pickerBodyHtml(search.value, selected);
+      body.scrollTop = 0;
+    });
+    // Return takes the first match, so a typed name is one keystroke away.
+    search.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      var first = body.querySelector(".tpick-row");
+      if (first) pick(first.dataset.id);
+    });
+    // Open on the current table (past Recent, in its category). A pointer
+    // device types straight away; on touch the search field is one tap, so
+    // the keyboard doesn't cover the list before you've seen it.
+    var cur = body.querySelectorAll('.tpick-row[aria-current="true"]');
+    if (cur.length && cur[cur.length - 1].scrollIntoView) cur[cur.length - 1].scrollIntoView({ block: "center" });
+    if (window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) search.focus();
+    else root.querySelector(".tpick-sheet").focus();
   }
 
   // In-place edit form for one custom-vocab row, same single-line format as
@@ -288,7 +423,7 @@ window.RaumeStudy.customize = (function () {
 
       '<details class="cv-card" data-open-key="add">' +
       '<summary class="cv-card-summary disclosure-caret">Add a word</summary>' +
-      '<label class="cv-field"><span>Table</span>' + targetSelect("cv-add-target", cvTarget.add) + "</label>" +
+      targetButton("add", "Table") +
       '<label class="cv-field"><span>Word</span>' +
       '<input type="text" class="cv-add-input" autocomplete="off" spellcheck="false" placeholder="帰(かえ)る, kaeru, to return"></label>' +
       '<div class="cv-preview" hidden></div>' +
@@ -308,7 +443,7 @@ window.RaumeStudy.customize = (function () {
       '<summary class="cv-card-summary disclosure-caret">Import a list' + infoButtonHtml("import", cvInfoImportOpen, "Import format") + "</summary>" +
       infoPanelHtml("import", cvInfoImportOpen,
         '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code> (same furigana format as above). The English column may contain commas. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>') +
-      '<label class="cv-field"><span>Into table</span>' + targetSelect("cv-import-target", cvTarget.import) + "</label>" +
+      targetButton("import", "Into table") +
       '<textarea class="cv-import-text" rows="5" spellcheck="false" placeholder="茄子(なす),nasu,eggplant&#10;人参(にんじん),ninjin,carrot">' + esc(cvImportLeftover || "") + "</textarea>" +
       '<div class="cv-add-actions">' +
       '<label class="cv-file-btn">Choose a .csv / .txt file…<input type="file" class="cv-import-file" accept=".csv,.txt,text/csv,text/plain"></label>' +
@@ -594,6 +729,8 @@ window.RaumeStudy.customize = (function () {
       }
     });
     host.addEventListener("click", function (e) {
+      var tableBtn = e.target.closest && e.target.closest(".cv-table-btn");
+      if (tableBtn) { openTablePicker(host, tableBtn.dataset.kind); return; }
       if (e.target.closest && e.target.closest(".cz-drag-handle")) {
         // A category's handle sits inside its <summary> -- without this the
         // click would also toggle the <details> open/closed as a side effect.
@@ -664,8 +801,6 @@ window.RaumeStudy.customize = (function () {
     });
     host.addEventListener("change", function (e) {
       if (e.target.classList.contains("cv-import-file")) readImportFile(host, e.target);
-      if (e.target.classList.contains("cv-add-target")) cvTarget.add = e.target.value;
-      if (e.target.classList.contains("cv-import-target")) cvTarget.import = e.target.value;
       if (e.target.classList.contains("cv-owned-sort-select")) { cvOwnedSort = e.target.value; updateOwnedList(host); }
     });
     host.addEventListener("keydown", function (e) {
@@ -722,11 +857,10 @@ window.RaumeStudy.customize = (function () {
   }
   function addWord(host) {
     var input = host.querySelector(".cv-add-input");
-    var target = host.querySelector(".cv-add-target");
-    if (!input || !target) return;
+    if (!input) return;
     var p = firstParsed(input.value.trim());
     if (p.error) { cvFlash = { scope: "add", ok: false, text: p.error }; render(host); return; }
-    var tableId = target.value;
+    var tableId = targetId("add");
     cvTarget.add = tableId;
     cvMutate(host, function () {
       try {
@@ -781,10 +915,9 @@ window.RaumeStudy.customize = (function () {
   }
   function runImport(host) {
     var ta = host.querySelector(".cv-import-text");
-    var target = host.querySelector(".cv-import-target");
-    if (!ta || !target) return;
+    if (!ta) return;
     var res = cv().parseImport(ta.value);
-    var tableId = target.value;
+    var tableId = targetId("import");
     cvTarget.import = tableId;
     cvMutate(host, function () {
       var added = 0;

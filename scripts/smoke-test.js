@@ -1996,18 +1996,49 @@ async function main() {
   cvNs.setRemote({ addRows() {}, deleteRows() {}, addTable() {}, deleteTable() {} });
   gear.click(); gear.click(); // reopen so it renders signed-in
   document.querySelector("#customizePage .cv-new-title").value = "Positions";
+  document.querySelector("#customizePage .cv-new-cat").value = "Grammar";
   document.querySelector("#customizePage .cv-new-btn").click();
   const newTable = cvNs.customTables().find(t => t.title === "Positions");
+  const tableBtn = kind => document.querySelector('#customizePage .cv-table-btn[data-kind="' + kind + '"]');
   check("creating a table selects it in Add a word and Import", !!newTable
-    && document.querySelector("#customizePage .cv-add-target").value === newTable.id
-    && document.querySelector("#customizePage .cv-import-target").value === newTable.id);
-  check("...listed under its own category in the picker, not a group at the bottom", (() => {
-    const o = newTable && document.querySelector('#customizePage .cv-add-target option[value="' + newTable.id + '"]');
-    return !!o && o.parentNode.label === newTable.category
-      && !document.querySelector('#customizePage .cv-add-target optgroup[label="Your tables"]');
-  })());
+    && tableBtn("add").dataset.value === newTable.id && tableBtn("import").dataset.value === newTable.id
+    && /Positions/.test(tableBtn("add").textContent) && tableBtn("add").getAttribute("aria-haspopup") === "dialog");
   if (newTable) {
+    const sheet = () => document.querySelector(".tpick");
+    const rows = () => [...document.querySelectorAll(".tpick .tpick-row")];
+    const type = v => { const f = document.querySelector(".tpick-search"); f.value = v; f.dispatchEvent(new window.Event("input", { bubbles: true })); };
     document.querySelector("#customizePage .cv-add-input").value = "上(うえ), ue, above";
+    tableBtn("add").click();
+    check("the Table row opens a searchable table sheet", !!sheet() && sheet().querySelector('[role="dialog"][aria-modal="true"]')
+      && !!document.querySelector(".tpick-search") && rows().length > 20);
+    check("...your own table sits under its own category, ticked as current", (() => {
+      const r = rows().find(b => b.dataset.id === newTable.id);
+      const list = r && r.closest(".tpick-list");
+      return !!r && list.previousElementSibling.textContent === "Grammar" && r.getAttribute("aria-current") === "true"
+        && !!r.querySelector(".tpick-check");
+    })());
+    type("posit");
+    check("...typing narrows it to matching tables", rows().length >= 1 && rows().some(b => b.dataset.id === newTable.id)
+      && rows().every(b => /posit/i.test(b.textContent) || /posit/i.test(b.closest(".tpick-list").previousElementSibling.textContent)));
+    type("grammar");
+    check("...a category name matches all its tables", rows().some(b => b.dataset.id === newTable.id) && rows().length > 1);
+    type("zzzzqq");
+    check("...and says so when nothing matches", rows().length === 0 && /No tables match/.test(document.querySelector(".tpick-body").textContent));
+    type("");
+    rows().find(b => b.dataset.id === "1").click();
+    check("picking a table closes the sheet and updates only that row", !sheet() && tableBtn("add").dataset.value === "1"
+      && tableBtn("import").dataset.value === newTable.id
+      && document.querySelector("#customizePage .cv-add-input").value === "上(うえ), ue, above");
+    tableBtn("add").click();
+    check("...and it shows under Recent next time", document.querySelector(".tpick-cat").textContent === "Recent"
+      && document.querySelector(".tpick-list .tpick-row").dataset.id === "1");
+    type("positions");
+    document.querySelector(".tpick-search").dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    check("Return in the search picks the first match", !sheet() && tableBtn("add").dataset.value === newTable.id);
+    tableBtn("import").click();
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    check("Escape closes the sheet without changing anything", !sheet() && tableBtn("import").dataset.value === newTable.id
+      && !document.body.classList.contains("tpick-open"));
     document.querySelector("#customizePage .cv-add-btn").click();
     check("...and a word added straight after goes into it", cvNs.customRows().some(r => r.tableId === newTable.id && r.romaji === "ue"));
     cvNs.deleteTable(newTable.id);

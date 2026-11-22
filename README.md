@@ -145,8 +145,8 @@ button's menu.
 
 | | |
 | --- | --- |
-| **Add a word** | To any table, built-in or your own. |
-| **Import a list** | Pasted text or a `.csv` / `.txt` file, one word per line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return` — or three columns copied from a spreadsheet. Rows that don't parse are skipped and listed with the reason. |
+| **Add a word** | To any table, built-in or your own. The **Table** row opens a sheet you can type in to find a table by its name or category; your last few picks sit at the top under **Recent**, and a table you just created is picked for you. |
+| **Import a list** | Pasted text or a `.csv` / `.txt` file, one word per line: `japanese(furigana),romaji,english`, e.g. `帰(かえ)る,kaeru,to return` — or three columns copied from a spreadsheet. Rows that don't parse are skipped and listed with the reason. **Into table** uses the same searchable sheet. |
 | **New table** | Needs an account. Guests can still add words to existing tables. |
 | **Words you've added** | Edit or delete your words (on a phone, swipe one left for **Delete**) — a delete happens at once with **Undo**, which puts the word back with its flashcards; deleting a whole table asks first. Searchable; sorts by date added or A–Z. |
 

@@ -420,6 +420,13 @@ and Help.
     faint text until hover) and *plain* (the Options sheet's **Expand
     all** / **Print…** rows and its trigger: tint text, no box, dim on hover/press
     instead of an underline).
+  - **Table picker** (`.cv-table-btn` → `.tpick`, Customize › Add a word /
+    Import a list): a choice among up to a few hundred tables is never a native
+    picker wheel (it can't be searched). It's a pop-up row in the field fill —
+    the table's tile, its name, ⌃⌄ — opening a glass sheet (bottom sheet on a
+    phone, centred on a wide window): Cancel + title, a white search capsule
+    (table or category name; Return takes the first match), Recent, then each
+    category as an inset-grouped card of 44px tile rows, a ✓ on the current one.
   - **Title menu** (`.fc-xw-title`, Puzzle / Game stats): the screen's subject as
     17px text + a small tint chevron, a native `<select>` laid invisibly over
     it (UIKit's navigation title menu). In play on Puzzles / Games the same
