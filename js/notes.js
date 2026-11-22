@@ -781,12 +781,12 @@ window.RaumeStudy.notes = (function () {
     if (u && !notes && !loading) loadList();
     if (openId) {
       var note = findNote(openId);
-      host.innerHTML = readerHtml(note);
+      host.innerHTML = '<div class="notes-wrap">' + readerHtml(note) + "</div>";
       shownId = note ? openId : null;
       if (note) showInReader(note);
     } else {
       shownId = null;
-      host.innerHTML = listHtml();
+      host.innerHTML = '<div class="notes-wrap">' + listHtml() + "</div>";
       // Back from a note: the list where you left it.
       if (wasNote && !opts.keepScroll) window.scrollTo(0, listScroll);
     }
