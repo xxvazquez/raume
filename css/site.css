@@ -982,19 +982,20 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
 .opt-switch::before {
   content: "";
   position: absolute; right: 16px; top: 50%;
-  /* The same 51 x 31 iOS switch as Settings (.set-switch) -- one switch
-     app-wide. The thumb sits 2px inside the track at either end: off at
-     16 + 51 - 2 - 27 = 38px from the row's edge, on at 16 + 2 = 18px (it
-     used to sit 12px outside the track's left end when off). */
-  width: 51px; height: 31px; margin-top: -15.5px;
+  /* The same compact switch as Settings (.set-switch) -- one switch
+     app-wide, 42 x 26: iOS's shape, a size that sits quietly in a 44px row
+     (51 x 31 read as oversized here -- Laura). The thumb sits 2px inside the
+     track at either end: off at 16 + 42 - 2 - 22 = 34px from the row's
+     edge, on at 16 + 2 = 18px. */
+  width: 42px; height: 26px; margin-top: -13px;
   border-radius: 999px;
   background: var(--switch-off);
   transition: background .15s ease;
 }
 .opt-switch::after {
   content: "";
-  position: absolute; right: 38px; top: 50%;
-  width: 27px; height: 27px; margin-top: -13.5px;
+  position: absolute; right: 34px; top: 50%;
+  width: 22px; height: 22px; margin-top: -11px;
   border-radius: 50%;
   background: var(--switch-thumb);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
@@ -1002,7 +1003,7 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
 }
 .opt-switch.active::before { background: var(--switch-on); }
 .opt-switch.active::after { right: 18px; }
-.opt-switch { padding-right: 80px; } /* the label clears the 51px switch */
+.opt-switch { padding-right: 72px; } /* the label clears the 42px switch */
 @media (prefers-reduced-motion: reduce) { .opt-switch::before, .opt-switch::after { transition: none; } }
 .expand-bar.search-hidden { display: none; }
 /* Footnote under the list: what the badges mean, only for a table that has them. */
@@ -2265,15 +2266,15 @@ body.tpick-open { overflow: hidden; }
 .set-row:has(.set-num:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
 .set-unit { font-size: 15px; }
 .set-switch {
-  appearance: none; flex: 0 0 auto; width: 51px; height: 31px; margin: 0; border: 0; border-radius: 999px;
+  appearance: none; flex: 0 0 auto; width: 42px; height: 26px; margin: 0; border: 0; border-radius: 999px;
   background: var(--switch-off); cursor: pointer; position: relative; transition: background .15s ease;
 }
 .set-switch::after {
-  content: ""; position: absolute; left: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%;
+  content: ""; position: absolute; left: 2px; top: 2px; width: 22px; height: 22px; border-radius: 50%;
   background: var(--switch-thumb); box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s ease;
 }
 .set-switch:checked { background: var(--switch-on); }
-.set-switch:checked::after { transform: translateX(20px); }
+.set-switch:checked::after { transform: translateX(16px); }
 .set-action {
   appearance: none; border: 0; background: transparent; text-align: left;
   color: var(--section-strong); justify-content: flex-start;
