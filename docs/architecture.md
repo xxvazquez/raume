@@ -203,8 +203,10 @@ and deleting need a connection and say so when they fail.
   the reader says so.
 - **Writing lesson notes** — `scripts/note_kit.py` (components: `stack`,
   `lst`, `tiles`, `tip(s)`, `two`, `formula`, `kinds`, `slot`, `cols2`,
-  `section`, the position pictograms in `PICT`; `render(out, date, eyebrow,
-  title, desc, sections)`). Lesson files are personal content: they live in
+  `section`, the position pictograms in `PICT`; `render(out, date, title,
+  desc, sections)`). A lesson note is named by its date — "Sat, Nov 21st
+  2026" (`lesson_name`) — in its `<title>` and eyebrow; `title` is the
+  lesson's topic, shown over the description. Lesson files are personal content: they live in
   `private-notes/` (gitignored) or outside the repo, never in Git.
 
 ### Reading all of an account's rows

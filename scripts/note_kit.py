@@ -12,6 +12,7 @@ keep them in private-notes/ (gitignored) or anywhere outside it.
 
     python3 private-notes/lesson14.py
 """
+import datetime
 import html
 import pathlib
 import unicodedata
@@ -172,11 +173,21 @@ PICT = {
 
 
 # ── page ────────────────────────────────────────────────────
-def render(out_html, date, eyebrow, title, desc, sections):
+def lesson_name(date):
+    """2026-11-21 -> "Sat, Nov 21st 2026": what a lesson note is called."""
+    d = datetime.date.fromisoformat(date)
+    n = d.day
+    suffix = "th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{d:%a}, {d:%b} {n}{suffix} {d.year}"
+
+
+def render(out_html, date, title, desc, sections, eyebrow=None):
     """date: the lesson's date, YYYY-MM-DD -- the Notes list is ordered by it.
-    eyebrow: a short series name, "Lesson 14". The note's name in raume (its
-    title, and its row in the list) is "<eyebrow> · <title>"."""
-    name = f"{eyebrow} · {title}"
+    The note is named by its date ("Sat, Nov 21st 2026", or `eyebrow` if
+    given): that is its title in raume and its row in the list; `title` is
+    the lesson's topic, the heading over the description."""
+    eyebrow = eyebrow or lesson_name(date)
+    name = eyebrow
     page = f"""<!doctype html>
 <html lang="en">
 <head>

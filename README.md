@@ -172,7 +172,8 @@ or on the public site. Needs an account.
 
 Writing a lesson note: a lesson file builds its sections from the kit's
 components (formula, tiles, Q/A lists, tips, position pictograms) and calls
-`render()` with the lesson's date, e.g. `python3 private-notes/lesson14.py`.
+`render()` with the lesson's date — the note is named by it, e.g. "Sat, Nov
+21st 2026" — for example `python3 private-notes/lesson14.py`.
 Keep lesson files out of the repo — `private-notes/` is gitignored for them.
 
 ### Around the app
