@@ -22,6 +22,9 @@ Every note has the same shape, so lessons read alike side by side:
   (particles as wa / e / o, long vowels as ō or ou). It stops with a list of
   what to fix. stack(..., check=False) skips one line on purpose.
 
+Notes are Japanese and English only -- never Polish: class material that
+arrives with Polish glosses or translations keeps just the English.
+
 Lesson files hold the reader's own notes, so they never go in the repo:
 keep them in private-notes/ (gitignored) or anywhere outside it.
 
