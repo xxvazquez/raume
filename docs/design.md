@@ -782,7 +782,8 @@ and Help.
   first; **Add** is a tinted text bar button with a plus at the title's
   trailing edge. Like Practice, its list title is the phone's large title
   and is visually hidden on a wider window (the top bar names it). A note opens as a pushed screen: "‹ Notes", the note's name as
-  the large title, then one row — the lesson date left, **Quiz** (a white
+  the large title — itself the Rename control, a faint pencil after it, as a
+  document's title is on iOS — then one row — the lesson date left, **Quiz** (a white
   capsule that fills in the tile tone while on) and ⋯ right, clear of the
   phone's account button. ⋯ holds Romaji / English / Furigana as checkmark
   items, a ground-coloured band, then Rename / Lesson date / Replace / Delete

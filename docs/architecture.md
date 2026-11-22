@@ -186,6 +186,12 @@ and deleting need a connection and say so when they fail.
   embeds go. Its look is `.rn` in `css/site.css`; its study controls
   (`raume-notes-study` in `localStorage`), tap-to-reveal and tap-to-hear
   (`shared.speech`) are `notes.js`.
+- **Older lesson pages** — a page from the standalone lesson kit
+  (`main.page` with `.st .jp` stacks and a `.tb-group` of `data-pref`
+  buttons) is converted on open (`fromKit`): its classes mapped to `rn-*`,
+  each `c-<colour>` section to `data-tile` (pink → clay), the section heads
+  rebuilt, the toolbar, styles, script and how-to line dropped — then drawn
+  as a lesson note. On upload it's named "Lesson N · <its h1>".
 - **Any other HTML** — never enters the page. It's copied into
   `notes-frame.html` inside `<iframe sandbox="allow-same-origin allow-popups
   allow-popups-to-escape-sandbox">`: no `allow-scripts`, so nothing in it can

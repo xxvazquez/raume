@@ -2099,11 +2099,27 @@ async function main() {
       '<div class="rn-st rn-ans"><div class="rn-jp"><ruby>町<rt>まち</rt></ruby>です</div><div class="rn-ro">machi desu</div><div class="rn-en">It’s a town.</div></div>' +
       '<img src="x" onerror="window.__ran=1"><a href="javascript:alert(1)">link text</a><iframe src="https://example.com"></iframe>' +
       '<svg viewBox="0 0 80 50" onload="window.__ran=1"><circle class="pk-dot" cx="4" cy="4" r="2"/></svg></section></article></body></html>';
+    const parser0 = html => new window.DOMParser().parseFromString(html, "text/html");
     const d = nh.describeFile(lesson, "whatever.html", 0);
     check("a lesson note names itself and its date (<title>, raume-note-date)", d.title === "Lesson 14 · Places" && d.date === "2026-11-21");
     check("any other file is named after the file, dated by it", (() => {
       const o = nh.describeFile("<p>hi</p>", "Week 3.html", new Date(2026, 10, 7).getTime());
       return o.title === "Week 3" && o.date === "2026-11-07";
+    })());
+    const kitOriginal = '<html><head><title>Japanese · Lesson 9</title><style>.page{zoom:1.32}</style></head><body>' +
+      '<nav class="toolbar"><div class="tb-group"><button data-pref="romaji">Romaji</button></div></nav><main class="page">' +
+      '<header class="top"><div class="eyebrow">Japanese · Lesson 9</div><h1>At the station</h1><p class="desc">Trains.</p><p class="howto">Tap to hear.</p></header>' +
+      '<section class="c-pink" id="s1"><div class="sec-head"><span class="sec-num">1</span><h2>Where<span class="sub">どこ</span></h2></div>' +
+      '<div class="card list qa"><div class="r"><div class="lead em">🚉</div><div class="st"><div class="jp">えき</div><div class="ro">eki</div><div class="en">station</div></div></div></div></section>' +
+      '</main><script>x()</script></body></html>';
+    check("an original lesson-kit page is recognised and named after its lesson and topic", nh.isKitOriginal(parser0(kitOriginal))
+      && nh.describeFile(kitOriginal, "Japanese-Lesson-9.html", 0).title === "Lesson 9 · At the station");
+    check("...and turned into a lesson note: rn classes, the section's hue (pink as clay), its head rebuilt, no toolbar, script or how-to line", (() => {
+      const d = nh.fromKit(kitOriginal);
+      const sec = d.querySelector("article.rn section.rn-sec");
+      return !!sec && sec.getAttribute("data-tile") === "clay" && sec.querySelector(".rn-sec-head .rn-sec-num").textContent === "1"
+        && sec.querySelector(".rn-sec-head .rn-sub").textContent === "どこ" && !!d.querySelector(".rn-list.rn-qa .rn-r .rn-st .rn-jp")
+        && !d.querySelector(".toolbar, script, .howto, .st, .card") && !!d.querySelector(".rn-top h1");
     })());
     const parser = new window.DOMParser();
     check("only a file marked raume-note with an article.rn counts as a lesson note", nh.isLessonNote(parser.parseFromString(lesson, "text/html"))

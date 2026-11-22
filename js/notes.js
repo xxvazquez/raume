@@ -237,6 +237,7 @@ window.RaumeStudy.notes = (function () {
   function describeFile(html, fileName, lastModified) {
     var doc = parse(html);
     var title = (doc.title || "").trim() || String(fileName || "Untitled").replace(/\.x?html?$/i, "");
+    if (isKitOriginal(doc)) title = kitTitle(doc) || title;
     var date = metaContent(doc, "raume-note-date");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = isoDate(lastModified ? new Date(lastModified) : new Date());
     return { title: title.slice(0, 200), date: date };
@@ -260,6 +261,77 @@ window.RaumeStudy.notes = (function () {
   var SVG_ATTRS = ("viewbox width height d x y cx cy r rx ry x1 y1 x2 y2 points transform").split(" ");
   var TILES = { blue: 1, green: 1, orange: 1, purple: 1, teal: 1, indigo: 1, amber: 1, clay: 1, slate: 1 };
   function isLessonNote(doc) { return !!doc.querySelector('meta[name="raume-note"]') && !!doc.querySelector("article.rn"); }
+
+  // The reader's lesson pages from before raume drew them (the standalone
+  // lesson kit: a .toolbar of study buttons, main.page, .st stacks, its own
+  // zoomed stylesheet and script). The same content in other class names:
+  // turned into a lesson note here so it reads -- and studies -- like one
+  // instead of sitting in the frame at its own size with dead buttons.
+  var KIT_CLASSES = {
+    st: "rn-st", ans: "rn-ans", tag: "rn-tag", jp: "rn-jp", ro: "rn-ro", en: "rn-en", card: "rn-card", pad: "rn-pad",
+    list: "rn-list", qa: "rn-qa", one: "rn-one", r: "rn-r", hdr: "rn-hdr", lead: "rn-lead", em: "rn-em", num: "rn-num", lbl: "rn-lbl",
+    cols2: "rn-cols2", tiles: "rn-tiles", c3: "rn-c3", c4: "rn-c4", tile: "rn-tile", ic: "rn-ic", formula: "rn-formula", fl: "rn-fl",
+    lab: "rn-lab", fj: "rn-fj", fr: "rn-fr", slot: "rn-slot", two: "rn-two", kind: "rn-kind", "kind-sub": "rn-kind-sub",
+    tips: "rn-tips", tip: "rn-tip", dot: "rn-dot", ok: "rn-ok", x: "rn-x", hl: "rn-hl",
+    pk: "pk", "pk-line": "pk-line", "pk-on": "pk-on", "pk-dot": "pk-dot", "pk-dash": "pk-dash", "pk-halo": "pk-halo"
+  };
+  var KIT_HUES = { blue: "blue", green: "green", orange: "orange", purple: "purple", teal: "teal", pink: "clay" };
+  function isKitOriginal(doc) {
+    return !doc.querySelector("article.rn") && !!doc.querySelector("main.page .st .jp") && !!doc.querySelector(".tb-group [data-pref]");
+  }
+  // "Japanese · Lesson 14" + "Describing & locating things" ->
+  // "Lesson 14 · Describing & locating things" (every note here is Japanese).
+  function kitTitle(doc) {
+    var eyebrow = doc.querySelector("main.page .top .eyebrow"), h1 = doc.querySelector("main.page .top h1");
+    var a = eyebrow ? eyebrow.textContent.replace(/^\s*Japanese\s*·\s*/i, "").trim() : "";
+    var b = h1 ? h1.textContent.trim() : "";
+    return [a, b].filter(Boolean).join(" · ");
+  }
+  function fromKit(doc) {
+    var main = doc.querySelector("main.page");
+    var top = main.querySelector(".top");
+    if (top) {
+      top.className = "rn-top";
+      top.querySelectorAll(".howto").forEach(function (el) { el.remove(); }); // the speaker glyphs say it now
+      var eb = top.querySelector(".eyebrow"); if (eb) eb.className = "rn-eyebrow";
+      var desc = top.querySelector(".desc"); if (desc) desc.className = "rn-desc";
+    }
+    main.querySelectorAll("section").forEach(function (sec) {
+      var hue = (sec.className.match(/\bc-(\w+)/) || [])[1];
+      sec.className = "rn-sec";
+      if (KIT_HUES[hue]) sec.setAttribute("data-tile", KIT_HUES[hue]);
+      var head = sec.querySelector(":scope > .sec-head");
+      if (!head) return;
+      var h2 = doc.createElement("h2");
+      h2.className = "rn-sec-head";
+      var num = head.querySelector(".sec-num"), title = head.querySelector("h2"), sub = title && title.querySelector(".sub");
+      if (sub) sub.remove();
+      h2.innerHTML = '<span class="rn-sec-num" aria-hidden="true"></span><span></span><span class="rn-sub"></span>';
+      h2.children[0].textContent = num ? num.textContent : "";
+      if (title) while (title.firstChild) h2.children[1].appendChild(title.firstChild);
+      if (sub) while (sub.firstChild) h2.children[2].appendChild(sub.firstChild);
+      head.replaceWith(h2);
+    });
+    main.querySelectorAll("h3").forEach(function (h) { h.className = "rn-h3"; });
+    main.querySelectorAll(".list.qa").forEach(function (l) { if (l.querySelector(".lbl")) l.classList.add("rn-labelled"); });
+    main.querySelectorAll("[class]").forEach(function (el) {
+      if (/^rn-/.test(el.className) || el.classList.contains("rn-labelled")) {
+        if (!el.classList.contains("rn-labelled")) return;
+      }
+      var keep = [];
+      Array.prototype.forEach.call(el.classList, function (c) {
+        if (/^rn-/.test(c)) keep.push(c);
+        else if (KIT_CLASSES[c]) keep.push(KIT_CLASSES[c]);
+      });
+      el.setAttribute("class", keep.join(" "));
+    });
+    var article = doc.createElement("article");
+    article.className = "rn";
+    while (main.firstChild) article.appendChild(main.firstChild);
+    doc.body.innerHTML = "";
+    doc.body.appendChild(article);
+    return doc;
+  }
   function cleanLesson(doc) {
     var root = doc.querySelector("article.rn");
     (function walk(el) {
@@ -572,9 +644,11 @@ window.RaumeStudy.notes = (function () {
       flash = null;
       // In the reader only its title and date change -- the note stays
       // where you were reading it.
-      var h1 = openId === note.id && hostEl && hostEl.querySelector(".notes-titlebar h1");
+      var h1 = openId === note.id && hostEl && hostEl.querySelector(".notes-title-tx");
       if (!h1) { rerender(); return; }
       h1.textContent = note.title;
+      var tb = hostEl.querySelector("#notesTitle");
+      if (tb) tb.setAttribute("aria-label", "Rename “" + note.title + "”");
       var when = hostEl.querySelector(".notes-reader-date");
       if (when) when.textContent = longDate(note.note_date);
     }, function (err) {
@@ -731,7 +805,9 @@ window.RaumeStudy.notes = (function () {
         '<p class="notes-loading" role="status">' + (notes ? "This note isn’t in your account any more." : "Loading…") + "</p>";
     }
     return head +
-      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1>' + esc(note.title) + "</h1></div>" +
+      // The title is the rename control, as a document's title is on iOS.
+      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
+      '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
       '<div class="notes-reader-bar"><p class="notes-reader-date">' + esc(longDate(note.note_date)) + "</p>" +
       '<div class="notes-tools">' +
       // Quiz: the study action you take mid-note, so it's a button of its
@@ -753,7 +829,8 @@ window.RaumeStudy.notes = (function () {
       var status = document.getElementById("notesReaderStatus");
       if (openId !== want || !status) return;
       var doc = parse(rec.html);
-      if (isLessonNote(doc)) {
+      if (isKitOriginal(doc)) fromKit(doc);
+      if (isLessonNote(doc) || doc.querySelector("article.rn")) {
         hostEl.querySelectorAll("#notesQuiz, [data-study]").forEach(function (el) { el.hidden = false; });
         showLesson(doc, status);
       } else {
@@ -816,6 +893,7 @@ window.RaumeStudy.notes = (function () {
         if (fc.openAccount) fc.openAccount();
         return;
       }
+      if (t.closest("#notesTitle")) { var named = findNote(openId); if (named) rename(named); return; }
       if ((el = t.closest("[data-note-action]"))) {
         closeMenu(el);
         var note = findNote(openId);
@@ -843,6 +921,7 @@ window.RaumeStudy.notes = (function () {
     render: render,
     __testHooks: {
       cleanNote: cleanNote, fillFrame: fillFrame, describeFile: describeFile, isLessonNote: isLessonNote,
+      isKitOriginal: isKitOriginal, fromKit: function (html) { return fromKit(parse(html)); },
       // Draws a lesson note from its HTML into a placeholder, as the reader does.
       showLessonHtml: function (html, into) { hostEl = hostEl || into.parentElement; showLesson(parse(html), into); }
     }

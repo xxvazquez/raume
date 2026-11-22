@@ -1492,6 +1492,14 @@ body.icon-picker-open { overflow: hidden; }
 .page-notes h1 { font-size: 20px; font-weight: 600; margin: 0 0 6px; color: var(--ink); overflow-wrap: anywhere; }
 .notes-titlebar { align-items: center; }
 .notes-titlebar h1 { min-width: 0; }
+/* A note's title renames it: the title itself, with a small pencil after it. */
+.notes-title {
+  appearance: none; border: 0; background: none; padding: 0; margin: 0; cursor: pointer;
+  font: inherit; color: inherit; letter-spacing: inherit; text-align: left;
+}
+.notes-title-pen { display: inline-block; width: .62em; height: .62em; margin-left: .3em; vertical-align: .05em; color: var(--faint); }
+.notes-title:hover .notes-title-pen, .notes-title:focus-visible .notes-title-pen { color: var(--section-strong); }
+.notes-title:focus-visible { outline: 2px solid var(--section); outline-offset: 3px; border-radius: 6px; }
 .notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; margin-left: auto; }
 .notes-add svg { display: block; }
 .notes-tools { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; margin: -6px -10px -6px auto; }
@@ -1562,8 +1570,10 @@ body.icon-picker-open { overflow: hidden; }
 .rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
 .rn-x { color: var(--wrong-strong); white-space: nowrap; }
 .rn-top { margin: 0 0 22px; }
-/* The screen's own title (the note's name) already says these. */
-.rn-top h1, .rn-eyebrow { display: none; }
+/* The screen's title is the note's name (its date), so the eyebrow that
+   repeats it goes; the lesson's topic heads the description. */
+.rn-eyebrow { display: none; }
+.rn-top h1 { margin: 0 0 4px; font: 600 20px/1.25 var(--font-ui); color: var(--ink); }
 .rn-desc { margin: 0; color: var(--ink-2); font-size: var(--fs-body); line-height: 1.45; text-wrap: pretty; }
 .rn-sec { margin: 0 0 30px; scroll-margin-top: 120px; }
 .rn-sec-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font: 600 18px/1.25 var(--font-ui); color: var(--ink); }

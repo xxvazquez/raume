@@ -164,7 +164,9 @@ or on the public site. Needs an account.
 | **Add** | Pick one or more `.html` files (on iPhone, from Files). Up to 5 MB each. |
 | **By date** | Newest lesson first, under a header per month. A note's date is its lesson date (below), else the file's date; **Lesson date** in its **⋯** menu changes it. |
 | **Lesson notes** | Files made with `scripts/note_kit.py` are drawn as raume screens — its cards, type and dark mode. Tap the Japanese (the speaker) to hear it. **Quiz** covers the Japanese you should produce; **⋯** › **Romaji** / **English** / **Furigana** cover or hide those lines. A covered item uncovers on a tap. |
+| **Older lesson pages** | Pages from the standalone lesson kit (their own Romaji / English / Furigana / Quiz toolbar) are recognised and drawn the same way, named "Lesson N · topic". |
 | **Any other HTML** | Shown as it was written — its own styles — in a sealed frame where nothing in it can run. Links to the web open in Safari. |
+| **Rename** | Tap the note's title (the pencil), or ⋯ › Rename. |
 | **⋯ on a note** | Rename, Lesson date, Replace with a new file, Delete (asks first; removed on every device). |
 | **Offline** | Every note is kept on the device too, so the list and the notes open without a connection. Signing out removes that copy. |
 
