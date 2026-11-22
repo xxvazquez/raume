@@ -191,7 +191,7 @@ and deleting need a connection and say so when they fail.
   buttons) is converted on open (`fromKit`): its classes mapped to `rn-*`,
   each `c-<colour>` section to `data-tile` (pink → clay), the section heads
   rebuilt, the toolbar, styles, script and how-to line dropped — then drawn
-  as a lesson note. On upload it's named "Lesson N · <its h1>".
+  as a lesson note. On upload it's named by its date, like the kit's notes ("Sat, Nov 21st 2026").
 - **Any other HTML** — never enters the page. It's copied into
   `notes-frame.html` inside `<iframe sandbox="allow-same-origin allow-popups
   allow-popups-to-escape-sandbox">`: no `allow-scripts`, so nothing in it can

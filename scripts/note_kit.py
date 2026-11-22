@@ -28,7 +28,7 @@ arrives with Polish glosses or translations keeps just the English.
 Lesson files hold the reader's own notes, so they never go in the repo:
 keep them in private-notes/ (gitignored) or anywhere outside it.
 
-    python3 private-notes/lesson14.py
+    python3 private-notes/2026-11-21.py
 """
 import datetime
 import html

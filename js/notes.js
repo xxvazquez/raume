@@ -237,9 +237,10 @@ window.RaumeStudy.notes = (function () {
   function describeFile(html, fileName, lastModified) {
     var doc = parse(html);
     var title = (doc.title || "").trim() || String(fileName || "Untitled").replace(/\.x?html?$/i, "");
-    if (isKitOriginal(doc)) title = kitTitle(doc) || title;
     var date = metaContent(doc, "raume-note-date");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = isoDate(lastModified ? new Date(lastModified) : new Date());
+    // Lesson pages are named by their date, like the ones note_kit.py makes.
+    if (isKitOriginal(doc)) title = lessonName(date);
     return { title: title.slice(0, 200), date: date };
   }
   function isoDate(d) {
@@ -279,13 +280,15 @@ window.RaumeStudy.notes = (function () {
   function isKitOriginal(doc) {
     return !doc.querySelector("article.rn") && !!doc.querySelector("main.page .st .jp") && !!doc.querySelector(".tb-group [data-pref]");
   }
-  // "Japanese · Lesson 14" + "Describing & locating things" ->
-  // "Lesson 14 · Describing & locating things" (every note here is Japanese).
-  function kitTitle(doc) {
-    var eyebrow = doc.querySelector("main.page .top .eyebrow"), h1 = doc.querySelector("main.page .top h1");
-    var a = eyebrow ? eyebrow.textContent.replace(/^\s*Japanese\s*·\s*/i, "").trim() : "";
-    var b = h1 ? h1.textContent.trim() : "";
-    return [a, b].filter(Boolean).join(" · ");
+  // 2026-11-21 -> "Sat, Nov 21st 2026" (scripts/note_kit.py lesson_name).
+  function lessonName(iso) {
+    var d = dateOf(iso);
+    if (!d) return "Lesson";
+    var n = d.getDate(), m = n % 100;
+    var suffix = m >= 11 && m <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[n % 10] || "th";
+    var wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
+    var mo = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()];
+    return wd + ", " + mo + " " + n + suffix + " " + d.getFullYear();
   }
   function fromKit(doc) {
     var main = doc.querySelector("main.page");

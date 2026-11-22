@@ -164,7 +164,7 @@ or on the public site. Needs an account.
 | **Add** | Pick one or more `.html` files (on iPhone, from Files). Up to 5 MB each. |
 | **By date** | Newest lesson first, under a header per month. A note's date is its lesson date (below), else the file's date; **Lesson date** in its **⋯** menu changes it. |
 | **Lesson notes** | Files made with `scripts/note_kit.py` are drawn as raume screens — its cards, type and dark mode — and all share one shape: Grammar, Conversation, Vocabulary, Practice, Watch out and Reference sections, always in that order and colour, with particles in bold blue. The kit checks the furigana and romaji before it writes a note. Tap the Japanese (the speaker) to hear it, read from its furigana. **Quiz** covers the Japanese you should produce; **⋯** › **Romaji** / **English** / **Furigana** cover or hide those lines. A covered item uncovers on a tap. |
-| **Older lesson pages** | Pages from the standalone lesson kit (their own Romaji / English / Furigana / Quiz toolbar) are recognised and drawn the same way, named "Lesson N · topic". |
+| **Older lesson pages** | Pages from the standalone lesson kit (their own Romaji / English / Furigana / Quiz toolbar) are recognised and drawn the same way, named by their date, like "Sat, Nov 21st 2026". |
 | **Any other HTML** | Shown as it was written — its own styles — in a sealed frame where nothing in it can run. Links to the web open in Safari. |
 | **Rename** | Tap the note's title (the pencil), or ⋯ › Rename. |
 | **⋯ on a note** | Rename, Lesson date, Replace with a new file, Delete (asks first; removed on every device). |
@@ -173,7 +173,7 @@ or on the public site. Needs an account.
 Writing a lesson note: a lesson file builds its sections from the kit's
 components (formula, tiles, Q/A lists, tips, position pictograms) and calls
 `render()` with the lesson's date — the note is named by it, e.g. "Sat, Nov
-21st 2026" — for example `python3 private-notes/lesson14.py`.
+21st 2026" — for example `python3 private-notes/2026-11-21.py`.
 Keep lesson files out of the repo — `private-notes/` is gitignored for them.
 
 ### Around the app

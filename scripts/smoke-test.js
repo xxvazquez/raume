@@ -2094,14 +2094,14 @@ async function main() {
   (() => {
     const nh = window.RaumeStudy.notes.__testHooks;
     const lesson = '<html><head><meta name="raume-note" content="1"><meta name="raume-note-date" content="2026-11-21">' +
-      '<title>Lesson 14 · Places</title><style>body{color:red}</style><script>window.__ran=1</script></head><body><article class="rn">' +
+      '<title>Sat, Nov 21st 2026</title><style>body{color:red}</style><script>window.__ran=1</script></head><body><article class="rn">' +
       '<section class="rn-sec" data-tile="blue" style="color:red" onclick="window.__ran=1">' +
       '<div class="rn-st rn-ans"><div class="rn-jp"><ruby>町<rt>まち</rt></ruby>です</div><div class="rn-ro">machi desu</div><div class="rn-en">It’s a town.</div></div>' +
       '<img src="x" onerror="window.__ran=1"><a href="javascript:alert(1)">link text</a><iframe src="https://example.com"></iframe>' +
       '<svg viewBox="0 0 80 50" onload="window.__ran=1"><circle class="pk-dot" cx="4" cy="4" r="2"/></svg></section></article></body></html>';
     const parser0 = html => new window.DOMParser().parseFromString(html, "text/html");
     const d = nh.describeFile(lesson, "whatever.html", 0);
-    check("a lesson note names itself and its date (<title>, raume-note-date)", d.title === "Lesson 14 · Places" && d.date === "2026-11-21");
+    check("a lesson note names itself and its date (<title>, raume-note-date)", d.title === "Sat, Nov 21st 2026" && d.date === "2026-11-21");
     check("any other file is named after the file, dated by it", (() => {
       const o = nh.describeFile("<p>hi</p>", "Week 3.html", new Date(2026, 10, 7).getTime());
       return o.title === "Week 3" && o.date === "2026-11-07";
@@ -2112,8 +2112,8 @@ async function main() {
       '<section class="c-pink" id="s1"><div class="sec-head"><span class="sec-num">1</span><h2>Where<span class="sub">どこ</span></h2></div>' +
       '<div class="card list qa"><div class="r"><div class="lead em">🚉</div><div class="st"><div class="jp">えき</div><div class="ro">eki</div><div class="en">station</div></div></div></div></section>' +
       '</main><script>x()</script></body></html>';
-    check("an original lesson-kit page is recognised and named after its lesson and topic", nh.isKitOriginal(parser0(kitOriginal))
-      && nh.describeFile(kitOriginal, "Japanese-Lesson-9.html", 0).title === "Lesson 9 · At the station");
+    check("an original lesson-kit page is recognised and named by its date, never a lesson number", nh.isKitOriginal(parser0(kitOriginal))
+      && nh.describeFile(kitOriginal, "Japanese-Lesson-9.html", new Date(2026, 10, 12).getTime()).title === "Thu, Nov 12th 2026");
     check("...and turned into a lesson note: rn classes, the section's hue (pink as clay), its head rebuilt, no toolbar, script or how-to line", (() => {
       const d = nh.fromKit(kitOriginal);
       const sec = d.querySelector("article.rn section.rn-sec");
