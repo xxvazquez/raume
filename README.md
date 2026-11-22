@@ -320,6 +320,9 @@ their cards then.
 - The right answer in the wrong language — the romaji on a card that asks for
   the English, or the English on a romaji card — isn't graded: the card says
   which one it wants and the field stays open for another go.
+- English → Romaji can't always say which word it wants (*easy*: やさしい /
+  かんたん), so typing another word with that meaning isn't graded either: the
+  card asks for another one.
 - Romaji → English can't tell words spelled alike apart (*atsui*: 暑い / 熱い /
   厚い), so any of their meanings counts, and the reveal lists the others
   under **Same sound**.

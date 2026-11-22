@@ -101,6 +101,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Checking</span><span class="help-desc">Type the answer, then press Return or tap ↑ to check it; rate it Again, Hard, Good or Easy — 1–4 on a keyboard.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
       '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
+      '<li><span class="help-term">Another word</span><span class="help-desc">Another word that also fits the English (kantan for “easy” when the card wants yasashii) isn’t marked wrong — try again.</span></li>' +
       '<li><span class="help-term">Notes</span><span class="help-desc">The grey line under a meaning (“before a noun”) is a hint — type just the meaning.</span></li>' +
       '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man.</span></li>' +
       '<li><span class="help-term">Same sound</span><span class="help-desc">Romaji like atsui can be several words — any of their meanings counts.</span></li>' +

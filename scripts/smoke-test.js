@@ -5064,6 +5064,13 @@ async function main() {
       && fc.otherLanguageHint(kaeru, "jp-en", "leave") === ""
       && fc.otherLanguageHint(kaeru, "jp-ro", "kaeri") === "";
   })());
+  check("another word that fits the English prompt gets a hint, not a grade (easy: kantan)", (() => {
+    const easy = Object.values(vocabIndex).find(e => e.englishDisplay === "easy" && e.romajiDisplay === "yasashii");
+    return !!easy && !fc.checkAnswer(easy, "en-ro", "kantan")
+      && /another one/.test(fc.otherWordHint(easy, "en-ro", "kantan"))
+      && fc.otherWordHint(easy, "en-ro", "takai") === ""
+      && fc.otherWordHint(easy, "jp-ro", "kantan") === "";
+  })());
   const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "hear / listen / ask");
   check("multi-answer English fields accept any listed alternative", !!listenEntry && fc.checkAnswer(listenEntry, "jp-en", "listen") && fc.checkAnswer(listenEntry, "jp-en", "ask"));
   check("multi-answer English fields still reject an unlisted word", !fc.checkAnswer(listenEntry, "jp-en", "speak"));

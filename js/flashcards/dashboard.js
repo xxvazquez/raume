@@ -26,7 +26,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   var getVocabIndex = vidx.getVocabIndex, promptFor = vidx.promptFor, askLabelFor = vidx.askLabelFor;
   var answerPlaceholderFor = vidx.answerPlaceholderFor, expectedDisplayFor = vidx.expectedDisplayFor;
   var contextDisplayFor = vidx.contextDisplayFor, homophonesOf = vidx.homophonesOf;
-  var checkAnswer = vidx.checkAnswer, otherLanguageHint = vidx.otherLanguageHint, getRawVocabRow = vidx.getRawVocabRow;
+  var checkAnswer = vidx.checkAnswer, otherLanguageHint = vidx.otherLanguageHint, otherWordHint = vidx.otherWordHint, getRawVocabRow = vidx.getRawVocabRow;
   var answerCompareHtml = vidx.answerCompareHtml;
   var writeCard = fc.writeCard;
   var getClient = dataOps.getClient, currentUser = dataOps.currentUser;
@@ -1283,7 +1283,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.correct = checkAnswer(entry, card.direction, input.value);
     // Right answer, wrong language: say which one the card wants and keep the
     // field open (text selected, ready to overtype) -- no grade, no reveal.
-    session.hint = session.correct ? "" : otherLanguageHint(entry, card.direction, input.value);
+    // Another word that also fits the English prompt gets the same treatment.
+    session.hint = session.correct ? ""
+      : otherLanguageHint(entry, card.direction, input.value) || otherWordHint(entry, card.direction, input.value);
     if (session.hint) {
       if (!syncReviewCard()) rerender();
       input.select();

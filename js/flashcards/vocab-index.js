@@ -329,6 +329,22 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return entry.romajiUsable && entry.romajiAnswers.indexOf(normalizeAnswer(input, true)) !== -1
       ? "That’s the reading — type the English meaning." : "";
   }
+  // An English prompt can't always say which word it wants: "easy" is
+  // やさしい and かんたん, "go out" でかける and でる. Typing the other one
+  // is knowing the language, not a lapse -- it gets a hint and another go,
+  // like the wrong-language case above.
+  function otherWordHint(entry, direction, input) {
+    if (direction !== "en-ro") return "";
+    var norm = normalizeAnswer(input, true);
+    if (!norm) return "";
+    var index = getVocabIndex();
+    var shared = Object.keys(index).some(function (id) {
+      var other = index[id];
+      if (other === entry || other.kanji || !other.romajiUsable || other.romajiAnswers.indexOf(norm) === -1) return false;
+      return other.englishAnswers.some(function (a) { return entry.englishAnswers.indexOf(a) !== -1; });
+    });
+    return shared ? "That word means this too — this card wants another one." : "";
+  }
 
   var esc = window.RaumeStudy.shared.escapeHtml;
 
@@ -454,7 +470,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
-    otherLanguageHint: otherLanguageHint, homophonesOf: homophonesOf,
+    otherLanguageHint: otherLanguageHint, otherWordHint: otherWordHint, homophonesOf: homophonesOf,
     answerCompareHtml: answerCompareHtml,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow
