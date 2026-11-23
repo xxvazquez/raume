@@ -61,6 +61,7 @@ window.RaumeStudy.notes = (function () {
     rename: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.3 3.7 14.3 5.7 6 14H4v-2z"/></svg>',
     date: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="13" height="12" rx="2"/><path d="M2.5 7.5h13M6 2v3M12 2v3"/></svg>',
     replace: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a6 6 0 0 1 10.3-4.2L15 6.5M15 2.8v3.7h-3.7M15 9a6 6 0 0 1-10.3 4.2L3 11.5M3 15.2v-3.7h3.7"/></svg>',
+    practice: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
     delete: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h12M7 5V3.3h4V5M4.6 5l.8 10h7.2l.8-10M7.6 8v4.5M10.4 8v4.5"/></svg>'
   };
 
@@ -653,6 +654,119 @@ window.RaumeStudy.notes = (function () {
     input.click();
   }
   function isHtmlFile(file) { return /\.x?html?$/i.test(file.name) || /html/.test(file.type || ""); }
+  // ---------------------------------------------------------------------
+  // A lesson note's words, into Practice
+  // ---------------------------------------------------------------------
+  // Flashcards only ever point at a word raume has, so a note's words are
+  // matched to raume's own rows: by how the word is written (行く, あかるい),
+  // or -- for a line in kana -- by its reading when exactly one raume word
+  // reads that way. A pair line (あかるい ↔ くらい) gives both words.
+  // Sentences match nothing and are left out; kanji and sentence tables too.
+  var wordMap = null;
+  function normWord(s) { return String(s || "").replace(/[〜~\s。．.!！?？]/g, ""); }
+  function buildWordMap() {
+    var byForm = {}, byReading = {};
+    (window.RaumeStudy.data && window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
+      if (t.tableClass === "vocab-kanji" || t.tableClass === "vocab-sentences") return;
+      t.rows.forEach(function (row) {
+        if (!row.id) return;
+        var jps = row.type === "verb-pair" ? (row.forms || []).map(function (f) { return f.jp; }) : [row.jp];
+        jps.forEach(function (jp) {
+          if (!jp) return;
+          // A counter (〜人 にん) matches only when no plain word is written
+          // the same: 人 alone is ひと, "person".
+          var counter = /^[〜~]/.test(jp.map(function (g) { return g.text || ""; }).join(""));
+          var form = normWord(jp.map(function (g) { return g.kanji || g.text || g.p || ""; }).join(""));
+          var reading = normWord(jp.map(function (g) { return g.kanji ? g.reading : (g.text || g.p || ""); }).join(""));
+          if (form && (!byForm[form] || (byForm[form].counter && !counter))) byForm[form] = { id: row.id, counter: counter };
+          if (reading && !counter) (byReading[reading] = byReading[reading] || {})[row.id] = true;
+        });
+      });
+    });
+    return { byForm: byForm, byReading: byReading };
+  }
+  var PAIR_SPLIT = /[、,↔⇔→←⇒⟷⟶/／・|]+/;
+  function noteWordIds() { return wordIdsIn(hostEl && hostEl.querySelector(".rn")); }
+  function wordIdsIn(body) {
+    if (!body) return [];
+    wordMap = buildWordMap(); // fresh each time: your own words may have synced in since
+    var seen = {}, ids = [];
+    body.querySelectorAll(".rn-jp").forEach(function (el) {
+      var shown = shownText(el).split(PAIR_SPLIT), spoken = spokenText(el).split(PAIR_SPLIT);
+      shown.forEach(function (piece, i) {
+        var form = normWord(piece), reading = normWord(spoken.length === shown.length ? spoken[i] : "");
+        var id = wordMap.byForm[form] && wordMap.byForm[form].id;
+        if (!id && reading && wordMap.byReading[reading]) {
+          var hits = Object.keys(wordMap.byReading[reading]);
+          if (hits.length === 1) id = hits[0];
+        }
+        if (id && !seen[id]) { seen[id] = true; ids.push(id); }
+      });
+    });
+    return ids;
+  }
+  function wordLabel(id) {
+    var row = fc.vocabIndex && fc.vocabIndex.getRawVocabRow ? fc.vocabIndex.getRawVocabRow(id) : null;
+    var jp = row ? (row.type === "verb-pair" ? row.forms[0].jp : row.jp) : null;
+    return jp ? jp.map(function (g) { return g.kanji || g.text || g.p || ""; }).join("") : "";
+  }
+  function practiceSheet() {
+    var ids = noteWordIds();
+    var state = fc.vocabState || function () { return "none"; };
+    var fresh = ids.filter(function (id) { return state(id) === "none"; });
+    var had = ids.length - fresh.length;
+    var names = fresh.slice(0, 8).map(wordLabel).filter(Boolean).join("、") + (fresh.length > 8 ? " and " + (fresh.length - 8) + " more" : "");
+    var message = !ids.length ? "None of this note’s words are in raume’s tables yet."
+      : !fresh.length ? "All " + ids.length + " of this note’s words that raume has are already in Practice."
+      : fresh.length + " new word" + (fresh.length === 1 ? "" : "s") + " from this note: " + names + "." +
+        (had ? " " + had + " more " + (had === 1 ? "is" : "are") + " already in Practice." : "");
+    var old = document.querySelector(".ios-confirm");
+    if (old) old.remove();
+    var opener = document.activeElement;
+    var host = document.createElement("div");
+    host.className = "ios-confirm";
+    host.innerHTML = '<div class="ios-confirm-scrim"></div>' +
+      '<div class="ios-confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="notesPracticeTitle">' +
+      '<div class="ios-confirm-group"><div class="ios-confirm-msg">' +
+      '<p class="ios-confirm-title" id="notesPracticeTitle">Add words to Practice</p><p lang="ja">' + esc(message) + "</p></div>" +
+      (fresh.length ? '<button type="button" class="ios-confirm-go" id="notesPracticeGo">Add ' + fresh.length + " Word" + (fresh.length === 1 ? "" : "s") + "</button>" : "") +
+      "</div>" +
+      '<button type="button" class="ios-confirm-cancel">' + (fresh.length ? "Cancel" : "OK") + "</button></div>";
+    document.body.appendChild(host);
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      host.remove();
+      if (opener && opener.focus && document.contains(opener)) opener.focus();
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
+    host.querySelector(".ios-confirm-cancel").addEventListener("click", close);
+    var go = host.querySelector("#notesPracticeGo");
+    if (go) go.addEventListener("click", function () {
+      go.disabled = true;
+      go.textContent = "Adding…";
+      Promise.resolve(fc.addWords ? fc.addWords(fresh) : 0).then(function (n) {
+        close();
+        say(n ? "Added " + n + " word" + (n === 1 ? "" : "s") + " to Practice." : "Sign in to Practice to add words.", !n);
+      }, function (err) {
+        close();
+        say("Couldn’t add the words — " + problem(err), true);
+      });
+    });
+    (go || host.querySelector(".ios-confirm-cancel")).focus();
+  }
+  // A one-line status under the note's title, without redrawing the note.
+  function say(text, error) {
+    var line = hostEl && hostEl.querySelector(".notes-flash");
+    if (!line) return;
+    line.textContent = text;
+    line.classList.toggle("notes-flash-error", !!error);
+    line.hidden = false;
+    clearTimeout(say.timer);
+    say.timer = setTimeout(function () { line.hidden = true; }, 4000);
+  }
+
   // + Add: an iOS action sheet asking where the notes come from, then the
   // file picker -- each choice is a tap, so the picker may still open from it.
   function addSheet() {
@@ -932,8 +1046,8 @@ window.RaumeStudy.notes = (function () {
     return (m ? '<span class="notes-reader-mark" data-tile="' + m.tile + '">' + m.icon + esc(m.label) + "</span>" : "") +
       (m && date ? " · " : "") + esc(date);
   }
-  function menuItem(action, label, danger) {
-    return '<button type="button" class="notes-menu-item' + (danger ? " notes-menu-danger" : "") + '" role="menuitem" data-note-action="' + action + '">' +
+  function menuItem(action, label, danger, lessonOnly) {
+    return '<button type="button" class="notes-menu-item' + (danger ? " notes-menu-danger" : "") + '" role="menuitem" data-note-action="' + action + '"' + (lessonOnly ? " data-lesson-only hidden" : "") + ">" +
       '<span class="menu-item-ic" aria-hidden="true">' + MENU_ICONS[action] + '</span><span class="menu-item-tx">' + label + "</span></button>";
   }
   // One of the "Mark as" choices: tick leading (like the study checks), the
@@ -968,6 +1082,7 @@ window.RaumeStudy.notes = (function () {
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Note options">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
       checkItem("romaji", "Romaji") + checkItem("english", "English") + checkItem("furigana", "Furigana") +
+      menuItem("practice", "Add words to Practice", false, true) +
       '<p class="notes-menu-head" role="presentation">Mark as</p>' +
       MARK_ORDER.map(function (k) { return markItem(k, note); }).join("") +
       menuItem("rename", "Rename") + menuItem("date", "Lesson date") + menuItem("replace", "Replace with a new file") + menuItem("delete", "Delete", true) +
@@ -983,7 +1098,7 @@ window.RaumeStudy.notes = (function () {
       var doc = parse(rec.html);
       if (isKitOriginal(doc)) fromKit(doc);
       if (isLessonNote(doc) || doc.querySelector("article.rn")) {
-        hostEl.querySelectorAll("#notesQuiz, [data-study]").forEach(function (el) { el.hidden = false; });
+        hostEl.querySelectorAll("#notesQuiz, [data-study], [data-lesson-only]").forEach(function (el) { el.hidden = false; });
         showLesson(doc, status);
       } else {
         showInFrame(rec.html, status);
@@ -1064,7 +1179,7 @@ window.RaumeStudy.notes = (function () {
         closeMenu(el);
         var note = findNote(openId);
         if (!note) return;
-        ({ rename: rename, date: redate, replace: replace, delete: remove })[el.dataset.noteAction](note);
+        ({ rename: rename, date: redate, replace: replace, delete: remove, practice: practiceSheet })[el.dataset.noteAction](note);
       }
     });
   }
@@ -1086,7 +1201,7 @@ window.RaumeStudy.notes = (function () {
   return {
     render: render,
     __testHooks: {
-      cleanNote: cleanNote, fillFrame: fillFrame, describeFile: describeFile, isLessonNote: isLessonNote,
+      cleanNote: cleanNote, fillFrame: fillFrame, describeFile: describeFile, isLessonNote: isLessonNote, wordIdsIn: wordIdsIn,
       isKitOriginal: isKitOriginal, fromKit: function (html) { return fromKit(parse(html)); },
       // Draws a lesson note from its HTML into a placeholder, as the reader does.
       showLessonHtml: function (html, into) { hostEl = hostEl || into.parentElement; showLesson(parse(html), into); }

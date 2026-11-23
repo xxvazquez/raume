@@ -827,8 +827,21 @@ window.RaumeStudy.flashcards.views = (function () {
   // this whole module.
   window.RaumeStudy.flashcards.refreshRowToggleButtons = refreshRowToggleButtons;
 
+  // Adds a batch of words from outside Practice (a lesson note's words,
+  // js/notes.js) and refreshes everything that shows them -- the same steps as
+  // Add table above, minus the button.
+  async function addWords(vocabIds) {
+    if (!hasActiveSession() || !vocabIds.length) return 0;
+    await addVocabs(vocabIds);
+    await refreshData();
+    invalidateInsights();
+    refreshRowToggleButtons();
+    var activeTab = window.RaumeStudy.flashcards.getActiveTab();
+    if (activeTab === "dashboard" || activeTab === "manage") rerender();
+    return vocabIds.length;
+  }
   return {
     renderManage: renderManage, renderSettings: renderSettings, renderHelp: renderHelp,
-    refreshRowToggleButtons: refreshRowToggleButtons
+    refreshRowToggleButtons: refreshRowToggleButtons, addWords: addWords, vocabState: vocabState
   };
 })();

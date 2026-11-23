@@ -176,7 +176,8 @@ or on the public site. Needs an account.
 | **Any other HTML** | Shown as it was written — its own styles — in a sealed frame where nothing in it can run. Links to the web open in Safari. |
 | **Mark as** | ⋯ › **Mark as** tags where a note comes from: **Sakura** (a cherry blossom), **WSJJ** (a wave) or **Mine** (a panda). The list shows it as the note's icon and the note shows it under its title; choosing it again clears it. Once any note is marked, **All · Sakura · WSJJ · Mine** above the list filters it. Synced with the note. |
 | **Rename** | Tap the note's title (the pencil), or ⋯ › Rename. |
-| **⋯ on a note** | Mark as, Rename, Lesson date, Replace with a new file, Delete (asks first; removed on every device). |
+| **Add words to Practice** | In a lesson note, ⋯ › **Add words to Practice** finds the note's words that raume's tables have — matched by how they're written, or by their kana when only one raume word reads that way; both words of a pair like あかるい ↔ くらい — and adds the new ones in one go, saying how many and which. Words already in Practice (or paused) are left as they are; sentences are skipped. |
+| **⋯ on a note** | Add words to Practice (lesson notes), Mark as, Rename, Lesson date, Replace with a new file, Delete (asks first; removed on every device). |
 | **Offline** | Every note is kept on the device too, so the list and the notes open without a connection. Signing out removes that copy. |
 
 Writing a lesson note: a lesson file builds its sections from the kit's

@@ -2215,6 +2215,13 @@ async function main() {
         && sec.querySelector(".rn-sec-head .rn-sub").textContent === "どこ" && !!d.querySelector(".rn-list.rn-qa .rn-r .rn-st .rn-jp")
         && !d.querySelector(".toolbar, script, .howto, .st, .card") && !!d.querySelector(".rn-top h1");
     })());
+    check("a lesson note's words match raume's own rows: by kanji form, by a unique kana reading, both words of a pair, 人 as ひと not the counter, sentences left out", (() => {
+      const box = document.createElement("article");
+      box.className = "rn";
+      box.innerHTML = ['<ruby>人<rt>ひと</rt></ruby>', 'あかるい ↔ くらい', '<ruby>行<rt>い</rt></ruby>く', '<ruby>町<rt>まち</rt></ruby>はしずかです。']
+        .map(h => '<div class="rn-st"><div class="rn-jp">' + h + "</div></div>").join("");
+      return nh.wordIdsIn(box).join() === "v1017,v0668,v0669,v0141";
+    })());
     const parser = new window.DOMParser();
     check("only a file marked raume-note with an article.rn counts as a lesson note", nh.isLessonNote(parser.parseFromString(lesson, "text/html"))
       && !nh.isLessonNote(parser.parseFromString('<article class="rn"></article>', "text/html")));

@@ -514,6 +514,9 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       onConfirm: function () { signOut(); }
     });
   };
+  // For js/notes.js: add a lesson note's words, and ask where a word stands.
+  S.addWords = views.addWords;
+  S.vocabState = views.vocabState;
   S.setActiveTab = function (t) { activeTab = t; };
   S.getActiveTab = function () { return activeTab; };
 

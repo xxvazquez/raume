@@ -815,7 +815,9 @@ and Help.
   document's title is on iOS — then one row — the lesson date left, **Quiz** (a white
   capsule that fills in the tile tone while on) and ⋯ right, clear of the
   phone's account button (the mark's glyph and name lead that line). ⋯ holds Romaji / English / Furigana as checkmark
-  items, a ground-coloured band, a grey "Mark as" header over Sakura / WSJJ /
+  items, a ground-coloured band, **Add words to Practice** (Practice's cards
+  glyph; opens an iOS action sheet naming the new words and their count, with
+  Add N Words / Cancel), a grey "Mark as" header over Sakura / WSJJ /
   Mine (tick leading, the mark's glyph trailing in its hue; the ticked one
   again clears it), another band, then Rename / Lesson date / Replace / Delete
   (red). Name and date edits use the iOS alert with a field and a tinted,
