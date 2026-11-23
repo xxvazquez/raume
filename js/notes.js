@@ -68,7 +68,7 @@ window.RaumeStudy.notes = (function () {
   // (a wave, from its seaside art) -- or the reader's own (a panda). Muted
   // tile hues: no pink, so the blossom sits on clay.
   var MARKS = {
-    sakura: { label: "Sakura", tile: "clay", icon: '<svg viewBox="0 0 18 18" width="17" height="17" fill="currentColor" aria-hidden="true">' +
+    sakura: { label: "Sakura", tile: "clay", icon: '<svg viewBox="1.6 1.6 14.8 14.8" width="17" height="17" fill="currentColor" aria-hidden="true">' +
       // Five rounded petals, each with the blossom's notch at its tip.
       [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ' 9 9)" d="M9 8.4C6.6 7.3 5.9 4.4 7.1 1.9L9 3.3l1.9-1.4c1.2 2.5.5 5.4-1.9 6.5z"/>'; }).join("") +
       '</svg>' },
