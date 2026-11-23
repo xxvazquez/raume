@@ -167,8 +167,10 @@ flowchart LR
 `js/notes.js` (`RaumeStudy.notes`, the Notes tab at `#notes`; one note at
 `#notes/<id>`). Signed-in only: each note is one row of the `notes` table —
 `title`, `note_date` (the lesson's date; the list sorts by it, newest first,
-grouped by month), `size`, and the file's whole text in `html` (≤ 5 MB, a
-check constraint). The list selects every column but `html`, through
+grouped by month), `size`, `source` (the mark: `sakura` / `wsjj` / `mine`,
+or null; a later `add column`, so an account whose database predates it
+still loads its notes, just without marks, until `supabase/schema.sql` is
+re-run), and the file's whole text in `html` (≤ 5 MB, a check constraint). The list selects every column but `html`, through
 `fetchAllRows`. There is no outbox: adding, renaming, re-dating, replacing
 and deleting need a connection and say so when they fail.
 

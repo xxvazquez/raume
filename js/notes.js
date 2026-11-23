@@ -32,7 +32,13 @@ window.RaumeStudy.notes = (function () {
 
   var MAX_BYTES = 5 * 1024 * 1024; // matches the notes_html_size check
   var STUDY_KEY = "raume-notes-study";
-  var META = "id,title,note_date,size,created_at,updated_at";
+  var META_BASE = "id,title,note_date,size,created_at,updated_at";
+  // `source` (the mark: Sakura / WSJJ / mine) is a later column -- an account
+  // whose database hasn't had supabase/schema.sql re-run yet lacks it, and
+  // the notes still load, just without marks (sourceMissing).
+  var sourceMissing = false;
+  function META() { return sourceMissing ? META_BASE : META_BASE + ",source"; }
+  function isMissingSource(err) { return !sourceMissing && /\bsource\b/.test(String(err && err.message || "")); }
 
   var hostEl = null;
   var openId = null;          // the note on screen, or null for the list
@@ -56,6 +62,24 @@ window.RaumeStudy.notes = (function () {
     replace: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a6 6 0 0 1 10.3-4.2L15 6.5M15 2.8v3.7h-3.7M15 9a6 6 0 0 1-10.3 4.2L3 11.5M3 15.2v-3.7h3.7"/></svg>',
     delete: '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h12M7 5V3.3h4V5M4.6 5l.8 10h7.2l.8-10M7.6 8v4.5M10.4 8v4.5"/></svg>'
   };
+
+  // Where a note comes from, shown as its list tile: a class at Sakura (the
+  // school's cherry blossom), one at WSJJ -- the Warsaw School of Japanese
+  // (a wave, from its seaside art) -- or the reader's own (a panda). Muted
+  // tile hues: no pink, so the blossom sits on clay.
+  var MARKS = {
+    sakura: { label: "Sakura", tile: "clay", icon: '<svg viewBox="0 0 18 18" width="17" height="17" fill="currentColor" aria-hidden="true">' +
+      // Five rounded petals, each with the blossom's notch at its tip.
+      [0, 72, 144, 216, 288].map(function (a) { return '<path transform="rotate(' + a + ' 9 9)" d="M9 8.4C6.6 7.3 5.9 4.4 7.1 1.9L9 3.3l1.9-1.4c1.2 2.5.5 5.4-1.9 6.5z"/>'; }).join("") +
+      '</svg>' },
+    wsjj: { label: "WSJJ", tile: "blue", icon: '<svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      // A cresting wave (波) over a ripple line.
+      '<path d="M2.2 12.6C2.6 7.6 6 4.4 10 4.4c3 0 5.2 1.9 5.2 4.2 0 1.6-1.2 2.7-2.6 2.7-1.2 0-2.1-.9-2.1-2 0-.9.7-1.6 1.6-1.6"/>' +
+      '<path d="M1.8 15.6c1.1 0 1.1-.9 2.3-.9s1.1.9 2.3.9 1.1-.9 2.3-.9 1.1.9 2.3.9 1.1-.9 2.3-.9 1.1.9 2.3.9"/></svg>' },
+    mine: { label: "Mine", tile: "slate", icon: '<svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="4.6" cy="5.2" r="2.1" fill="currentColor" stroke="none"/><circle cx="13.4" cy="5.2" r="2.1" fill="currentColor" stroke="none"/><circle cx="9" cy="10" r="6"/><ellipse cx="6.7" cy="9.6" rx="1.3" ry="1.8" transform="rotate(25 6.7 9.6)" fill="currentColor" stroke="none"/><ellipse cx="11.3" cy="9.6" rx="1.3" ry="1.8" transform="rotate(-25 11.3 9.6)" fill="currentColor" stroke="none"/><path d="M8.2 12.6h1.6" stroke-linecap="round"/></svg>' }
+  };
+  var MARK_ORDER = ["sakura", "wsjj", "mine"];
+  function markOf(note) { return note && MARKS[note.source] ? MARKS[note.source] : null; }
 
   function vocab() { return window.RaumeStudy.vocab || {}; }
   function user() { return dataOps && dataOps.currentUser ? dataOps.currentUser() : null; }
@@ -144,18 +168,22 @@ window.RaumeStudy.notes = (function () {
   // The account's notes
   // ---------------------------------------------------------------------
   function metaOf(n) {
-    return { id: n.id, title: n.title, note_date: n.note_date, size: n.size, created_at: n.created_at, updated_at: n.updated_at };
+    return { id: n.id, title: n.title, note_date: n.note_date, size: n.size, created_at: n.created_at, updated_at: n.updated_at, source: n.source || null };
   }
   function loadList() {
     var u = user(), c = client();
     if (!u || !c || loading) return;
     loading = true;
     var uid = u.id;
-    timed(dataOps.fetchAllRows(function () { return c.from("notes").select(META).eq("user_id", uid); }), "Loading your notes")
-      .then(function (res) {
-        if (res.error) throw res.error;
-        return res.data;
-      })
+    var fetchList = function () {
+      return timed(dataOps.fetchAllRows(function () { return c.from("notes").select(META()).eq("user_id", uid); }), "Loading your notes")
+        .then(function (res) {
+          if (res.error && isMissingSource(res.error)) { sourceMissing = true; return fetchList(); }
+          if (res.error) throw res.error;
+          return res.data;
+        });
+    };
+    fetchList()
       .then(function (rows) {
         if (!user() || user().id !== uid) return;
         notes = rows; listFor = uid; offline = false;
@@ -189,7 +217,7 @@ window.RaumeStudy.notes = (function () {
     var u = user(), c = client();
     if (!u || !c) return Promise.reject(new Error("sign in to open your notes."));
     var uid = u.id;
-    return timed(c.from("notes").select(META + ",html").eq("id", id).single(), "Loading the note").then(function (res) {
+    return timed(c.from("notes").select(META() + ",html").eq("id", id).single(), "Loading the note").then(function (res) {
       if (res.error) throw res.error;
       return devicePut(uid, res.data).then(function () { return res.data; });
     });
@@ -633,7 +661,7 @@ window.RaumeStudy.notes = (function () {
           var size = byteLength(html);
           if (size > MAX_BYTES) { problems.push("“" + file.name + "” is over 5 MB"); return; }
           var d = describeFile(html, file.name, file.lastModified);
-          return timed(c.from("notes").insert({ title: d.title, note_date: d.date, html: html, size: size }).select(META).single(), "Adding a note")
+          return timed(c.from("notes").insert({ title: d.title, note_date: d.date, html: html, size: size }).select(META()).single(), "Adding a note")
             .then(function (res) {
               if (res.error) throw res.error;
               added++;
@@ -655,7 +683,7 @@ window.RaumeStudy.notes = (function () {
     var u = user(), c = client();
     if (!u || !c) return;
     var uid = u.id;
-    timed(c.from("notes").update(fields).eq("id", note.id).select(META).single(), "Saving the note").then(function (res) {
+    timed(c.from("notes").update(fields).eq("id", note.id).select(META()).single(), "Saving the note").then(function (res) {
       if (res.error) throw res.error;
       Object.assign(note, res.data);
       return deviceGet(uid, note.id).then(function (rec) { if (rec) return devicePut(uid, Object.assign(rec, res.data)); });
@@ -669,7 +697,10 @@ window.RaumeStudy.notes = (function () {
       var tb = hostEl.querySelector("#notesTitle");
       if (tb) tb.setAttribute("aria-label", "Rename “" + note.title + "”");
       var when = hostEl.querySelector(".notes-reader-date");
-      if (when) when.textContent = readerDate(note);
+      if (when) when.innerHTML = readerMetaHtml(note);
+      hostEl.querySelectorAll("[data-note-mark]").forEach(function (b) {
+        b.setAttribute("aria-checked", String(b.dataset.noteMark === note.source));
+      });
     }, function (err) {
       flash = { text: "Couldn’t save — " + problem(err), error: true };
       rerender();
@@ -696,7 +727,7 @@ window.RaumeStudy.notes = (function () {
       (isHtmlFile(file) ? readFile(file) : Promise.reject(new Error("“" + file.name + "” isn’t an HTML file"))).then(function (html) {
         var size = byteLength(html);
         if (size > MAX_BYTES) throw new Error("“" + file.name + "” is over 5 MB");
-        return timed(c.from("notes").update({ html: html, size: size, updated_at: new Date().toISOString() }).eq("id", note.id).select(META).single(), "Replacing the note")
+        return timed(c.from("notes").update({ html: html, size: size, updated_at: new Date().toISOString() }).eq("id", note.id).select(META()).single(), "Replacing the note")
           .then(function (res) {
             if (res.error) throw res.error;
             Object.assign(note, res.data);
@@ -803,8 +834,10 @@ window.RaumeStudy.notes = (function () {
       return '<h2 class="help-head notes-group-head">' + esc(label) + "</h2>" +
         '<ul class="notes-card" aria-label="' + esc(label) + '">' + byMonth[k].map(function (n) {
           return '<li><button type="button" class="notes-row" data-note="' + esc(n.id) + '">' +
-            '<span class="set-tile" data-tile="indigo" aria-hidden="true">' + DOC_ICON + "</span>" +
-            '<span class="notes-row-tx"><span class="notes-row-title">' + esc(n.title) + "</span>" +
+            (markOf(n) ? '<span class="set-tile" data-tile="' + markOf(n).tile + '" aria-hidden="true">' + markOf(n).icon + "</span>"
+              : '<span class="set-tile" data-tile="indigo" aria-hidden="true">' + DOC_ICON + "</span>") +
+            '<span class="notes-row-tx"><span class="notes-row-title">' + esc(n.title) +
+            (markOf(n) ? '<span class="visually-hidden">, ' + esc(markOf(n).label) + "</span>" : "") + "</span>" +
             // A note named by its date doesn't repeat it: its topic fills
             // this line (showTopics) once this device holds a copy.
             '<span class="notes-row-sub">' + esc(n.title === lessonName(n.note_date) ? "Lesson notes" : shortDate(n.note_date)) + "</span></span></button></li>";
@@ -834,9 +867,24 @@ window.RaumeStudy.notes = (function () {
   }
   // The date under the title -- unless the title already is it.
   function readerDate(note) { return note.title === lessonName(note.note_date) ? "" : longDate(note.note_date); }
+  // The line under the title: the note's mark (its glyph + name), then the
+  // date unless the title already is it.
+  function readerMetaHtml(note) {
+    var m = markOf(note), date = readerDate(note);
+    return (m ? '<span class="notes-reader-mark" data-tile="' + m.tile + '">' + m.icon + esc(m.label) + "</span>" : "") +
+      (m && date ? " · " : "") + esc(date);
+  }
   function menuItem(action, label, danger) {
     return '<button type="button" class="notes-menu-item' + (danger ? " notes-menu-danger" : "") + '" role="menuitem" data-note-action="' + action + '">' +
       '<span class="menu-item-ic" aria-hidden="true">' + MENU_ICONS[action] + '</span><span class="menu-item-tx">' + label + "</span></button>";
+  }
+  // One of the "Mark as" choices: tick leading (like the study checks), the
+  // mark's glyph trailing. Choosing the ticked one again clears the mark.
+  function markItem(key, note) {
+    var m = MARKS[key];
+    return '<button type="button" class="notes-mark-item" role="menuitemradio" aria-checked="' + (note.source === key) + '" data-note-mark="' + key + '">' +
+      '<span class="menu-item-check">' + CHECK_ICON + '</span><span class="menu-item-tx">' + esc(m.label) + "</span>" +
+      '<span class="notes-mark-ic" data-tile="' + m.tile + '" aria-hidden="true">' + m.icon + "</span></button>";
   }
   function checkItem(key, label) {
     return '<button type="button" class="notes-check-item" role="menuitemcheckbox" aria-checked="' + !!study[key] + '" data-study="' + key + '" hidden>' +
@@ -852,7 +900,7 @@ window.RaumeStudy.notes = (function () {
       // The title is the rename control, as a document's title is on iOS.
       '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
       '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
-      '<div class="notes-reader-bar"><p class="notes-reader-date">' + esc(readerDate(note)) + "</p>" +
+      '<div class="notes-reader-bar"><p class="notes-reader-date">' + readerMetaHtml(note) + "</p>" +
       '<div class="notes-tools">' +
       // Quiz: the study action you take mid-note, so it's a button of its
       // own; the display options it pairs with sit in ⋯. Both show only for
@@ -862,6 +910,8 @@ window.RaumeStudy.notes = (function () {
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Note options">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
       checkItem("romaji", "Romaji") + checkItem("english", "English") + checkItem("furigana", "Furigana") +
+      '<p class="notes-menu-head" role="presentation">Mark as</p>' +
+      MARK_ORDER.map(function (k) { return markItem(k, note); }).join("") +
       menuItem("rename", "Rename") + menuItem("date", "Lesson date") + menuItem("replace", "Replace with a new file") + menuItem("delete", "Delete", true) +
       "</div></div></div></div>" +
       flashHtml() +
@@ -939,6 +989,18 @@ window.RaumeStudy.notes = (function () {
         return;
       }
       if (t.closest("#notesTitle")) { var named = findNote(openId); if (named) rename(named); return; }
+      if ((el = t.closest("[data-note-mark]"))) {
+        closeMenu(el);
+        var marked = findNote(openId);
+        if (!marked) return;
+        if (sourceMissing) {
+          flash = { text: "Marks need one database update: run supabase/schema.sql in Supabase, then reload.", error: true };
+          rerender();
+          return;
+        }
+        patch(marked, { source: marked.source === el.dataset.noteMark ? null : el.dataset.noteMark });
+        return;
+      }
       if ((el = t.closest("[data-note-action]"))) {
         closeMenu(el);
         var note = findNote(openId);

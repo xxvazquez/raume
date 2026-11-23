@@ -253,6 +253,10 @@ create table if not exists public.notes (
 
 create index if not exists custom_tables_user_idx on public.custom_tables (user_id);
 create index if not exists notes_user_idx on public.notes (user_id);
+-- Where a note comes from, shown as its list icon: a class at Sakura, one at
+-- WSJJ, or the reader's own. Null = unmarked.
+alter table public.notes add column if not exists source text
+  check (source in ('sakura', 'wsjj', 'mine'));
 create index if not exists custom_rows_user_idx on public.custom_rows (user_id);
 
 alter table public.flashcards enable row level security;

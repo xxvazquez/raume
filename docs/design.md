@@ -788,15 +788,19 @@ and Help.
 - **The Notes tab** (`.page-notes`, `js/notes.js`; Travel's old slot and
   sage tone, `--sec-notes`, a document glyph in the phone tab bar) is an inset-grouped list
   like Help: a month list header over a white card of 44px rows (indigo
-  document tile, the note's name, its lesson date in grey, a chevron), newest
+  document tile — or the note's mark: a cherry blossom on clay for Sakura,
+  a wave on blue for WSJJ, a panda on slate for your own — the note's name,
+  its lesson date in grey, a chevron), newest
   first; **Add** is a tinted text bar button with a plus at the title's
   trailing edge. Like Practice, its list title is the phone's large title
   and is visually hidden on a wider window (the top bar names it). A note opens as a pushed screen: "‹ Notes", the note's name as
   the large title — itself the Rename control, a faint pencil after it, as a
   document's title is on iOS — then one row — the lesson date left, **Quiz** (a white
   capsule that fills in the tile tone while on) and ⋯ right, clear of the
-  phone's account button. ⋯ holds Romaji / English / Furigana as checkmark
-  items, a ground-coloured band, then Rename / Lesson date / Replace / Delete
+  phone's account button (the mark's glyph and name lead that line). ⋯ holds Romaji / English / Furigana as checkmark
+  items, a ground-coloured band, a grey "Mark as" header over Sakura / WSJJ /
+  Mine (tick leading, the mark's glyph trailing in its hue; the ticked one
+  again clears it), another band, then Rename / Lesson date / Replace / Delete
   (red). Name and date edits use the iOS alert with a field and a tinted,
   semibold confirm (`.ios-confirm-field`, `.ios-confirm-go`).
 - **Lesson notes** (`.rn`, made by `scripts/note_kit.py`) are a raume
