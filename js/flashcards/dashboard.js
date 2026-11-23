@@ -600,7 +600,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var inDeck = {};
     studyableCards().forEach(function (c) { inDeck[c.vocabId] = true; });
     var cols = [];
-    if (kana) cols.push(["kana", "Kana started", kana.started, kana.total]);
+    // Every basic kana, hiragana and katakana -- not just the groups ticked on
+    // the Kana tab, so unticking one never shrinks what you've done (the same
+    // count as the Hiragana / Katakana awards).
+    var kanaAll = fc.kana && fc.kana.scriptProgress
+      ? ["hiragana", "katakana"].map(fc.kana.scriptProgress).reduce(function (t, p) { return { started: t.started + p.started, total: t.total + p.total }; }, { started: 0, total: 0 })
+      : null;
+    if (kanaAll) cols.push(["kana", "Kana started", kanaAll.started, kanaAll.total]);
+    else if (kana) cols.push(["kana", "Kana started", kana.started, kana.total]);
     if (kj) cols.push(["kanji", "Kanji known", kj.known, kj.total]);
     cols.push(["manage", "Words mastered", Object.keys(masteredWords()).length, Object.keys(inDeck).length]);
     var left = LEVEL_WORDS - into;

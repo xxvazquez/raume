@@ -3311,11 +3311,12 @@ async function main() {
     F.render();
     const panel = document.getElementById("fcPanelDashboard");
     const journey = panel.querySelector(".fc-dash-stats.fc-journey");
-    check("the journey card: Level 2 from 26 words mastered, 24 to the next, then Kana / Kanji / Words and the three tiles",
+    check("the journey card: Level 2 from 26 words mastered, 24 to the next, then Kana (of all 208 basic kana) / Kanji / Words and the three tiles",
       !!journey && /^Level 2$/.test(journey.querySelector(".fc-journey-level").textContent)
       && /^24 words to Level 3$/.test(journey.querySelector(".fc-journey-next").textContent)
       && [...journey.querySelectorAll(".fc-journey-lbl")].map(l => l.textContent).join("|") === "Kana started|Kanji known|Words mastered"
       && /^26\/30$/.test(journey.querySelectorAll(".fc-journey-val")[2].textContent)
+      && /\/208$/.test(journey.querySelectorAll(".fc-journey-val")[0].textContent)
       && journey.querySelectorAll(".fc-stat-tile").length === 3);
     const today = fcStore.localDateStr(now);
     check("an award unlocks the day it's earned and is noted in the synced journey (25 words mastered; 100 reviews from 30 cards x 4 reps)",
