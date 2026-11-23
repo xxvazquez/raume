@@ -3388,6 +3388,13 @@ async function main() {
       const tile = tiles.find(t => /^Retention/.test(t.querySelector(".fc-stat-label").textContent));
       return !!tile && tile.classList.contains("fc-stat-attention") && !tile.classList.contains("fc-stat-tile-pending");
     })());
+    check("...and says so beyond the colour: a down arrow, words for VoiceOver, and the target in its ⓘ", (() => {
+      const tile = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")].find(t => /^Retention/.test(t.querySelector(".fc-stat-label").textContent));
+      const note = document.getElementById("fcRetentionNote");
+      return !!tile && !!tile.querySelector(".fc-stat-value .fc-stat-below")
+        && /below your 90% target/.test(tile.querySelector(".fc-stat-value .visually-hidden")?.textContent || "")
+        && !!note && /below your 90% target/.test(note.textContent);
+    })());
     check("what Retention means waits behind its ⓘ, shown only on tap", (() => {
       const info = document.querySelector("#fcPanelDashboard .fc-stat-info");
       const note = document.getElementById("fcRetentionNote");

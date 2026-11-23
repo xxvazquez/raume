@@ -4380,6 +4380,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    has slipped under the Settings target. */
 .fc-stat-tile { position: relative; padding: 0; }
 .fc-stat-attention .fc-stat-value { color: var(--warn-strong); }
+/* ...with a down arrow, so the dip isn't told by colour alone. */
+.fc-stat-below { vertical-align: -1px; margin-right: 2px; }
 .fc-stat-value { display: block; font-size: var(--fs-section-title); font-weight: 500; color: var(--ink); line-height: 1.2; }
 /* The glyph sits on the label's first line; a wrapped label grows down. */
 .fc-stat-label { display: flex; align-items: flex-start; gap: 4px; margin-top: 3px; color: var(--muted); font-size: var(--fs-micro); line-height: 1.4; }

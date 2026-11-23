@@ -120,6 +120,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // flag it once it's meaningfully below what Settings asks FSRS to aim for,
     // so the tile isn't flickering color over nothing.
     var retentionLow = !retentionPending && stats.estimatedRetention < settings.fsrs_request_retention - 0.02;
+    var retentionTarget = Math.round(settings.fsrs_request_retention * 100);
     var now = new Date();
     if (weeklyActivity === null && !weeklyActivityLoading) {
       weeklyActivityLoading = true;
@@ -154,9 +155,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var tilesHtml = '<div class="fc-stats-grid fc-stats-grid-3 fc-journey-stats">' +
       statTile(stats.total, "Total cards") +
       statTile(stats.reviewsCompleted, "Reviews") +
-      statTile(retentionText, "Retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null) +
+      statTile(retentionText, "Retention", retentionLow ? "attention" : null, retentionPending, stats.estimatedRetention != null,
+        retentionLow ? "below your " + retentionTarget + "% target" : "") +
       "</div>" +
-      (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note" id="fcRetentionNote" hidden>FSRS’s forecast of how likely you are to recall your reviewed cards — not a measured pass rate.</p>');
+      (stats.estimatedRetention == null ? "" : '<p class="fc-note fc-retention-note" id="fcRetentionNote" hidden>FSRS’s forecast of how likely you are to recall your reviewed cards — not a measured pass rate.' +
+        (retentionLow ? " It’s below your " + retentionTarget + "% target (Settings › Desired retention)." : "") + "</p>");
     panel.innerHTML =
       // Today's rings beside their legend, then what a session holds now
       // and the button that starts it, on one row.
@@ -247,7 +250,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Day streak": "orange", "Total cards": "blue", "Reviews": "green", "Retention": "indigo",
     "Games played": "purple", "Puzzles solved": "teal"
   };
-  function statTile(value, label, variant, pending, info) {
+  // `below`: why a figure is flagged ("below your 90% target") -- a down
+  // arrow beside it and the words for VoiceOver, so the state never rests
+  // on the coral alone.
+  var BELOW_ARROW = '<svg class="fc-stat-below" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.5v11M4.5 10l4.5 4.5 4.5-4.5"/></svg>';
+  function statTile(value, label, variant, pending, info, below) {
     var cls = (variant ? " fc-stat-" + variant : "") + (pending ? " fc-stat-tile-pending" : "");
     var glyph = STAT_GLYPH_PATHS[label]
       ? '<svg class="fc-stat-glyph"' + (STAT_HUES[label] ? ' data-tile="' + STAT_HUES[label] + '"' : "") + ' viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + STAT_GLYPH_PATHS[label] + "</svg>"
@@ -260,7 +267,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       var cut = text.lastIndexOf(" ") + 1;
       text = text.slice(0, cut) + '<span class="fc-stat-label-end">' + text.slice(cut) + infoBtn + "</span>";
     }
-    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + esc(value) + '</span><span class="fc-stat-label">' + glyph + '<span class="fc-stat-label-text">' + text + "</span></span></div>";
+    var valueHtml = below ? BELOW_ARROW + esc(value) + '<span class="visually-hidden"> (' + esc(below) + ")</span>" : esc(value);
+    return '<div class="fc-stat-tile' + cls + '"><span class="fc-stat-value">' + valueHtml + '</span><span class="fc-stat-label">' + glyph + '<span class="fc-stat-label-text">' + text + "</span></span></div>";
   }
 
   // --- Dashboard: Today's progress, Next review, Missed today, Words to Review ---
