@@ -280,8 +280,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // after finding a word, and a permanent third icon on every row was judged
   // clutter. Its state (plus / green check) and click are owned by
   // js/flashcards/views.js (refreshRowToggleButtons + the delegated handler).
+  // Add / in your flashcards: a + and, once added, the Practice tab's own
+  // cards glyph (its front card filled) in Practice's tone -- never a ✓,
+  // which would read as the known mark on the same row.
   var FC_TOGGLE_ADD = '<svg class="fc-ic-add" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
-  var FC_TOGGLE_ADDED = '<svg class="fc-ic-added" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3.2L14 5.8"/></svg>';
+  var FC_TOGGLE_ADDED = '<svg class="fc-ic-added" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" fill="currentColor"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
   function flashcardToggle(vocabId) {
     if (!vocabId) return '';
     return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-pressed="false" aria-label="Add to flashcards">' + FC_TOGGLE_ADD + FC_TOGGLE_ADDED + '</button>';

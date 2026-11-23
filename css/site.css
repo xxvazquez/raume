@@ -3781,10 +3781,11 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-toggle-btn[aria-pressed="true"] .fc-ic-add { display: none; }
 .fc-toggle-btn[aria-pressed="true"] .fc-ic-added { display: block; }
 .fc-toggle-btn:hover { color: var(--accent-dark) !important; }
-/* Already in your deck -- green, matching "in flashcards" everywhere else
-   (the Manage status glyph, the dashboard). Quiet enough not to speckle the
-   table, clear enough to pick out the rows you've added. */
-.fc-toggle-btn[aria-pressed="true"] { color: var(--right-strong) !important; }
+/* Already in your flashcards: the Practice tab's cards glyph in Practice's
+   own tone -- green is the known-word mark, so this stays clear of it.
+   Quiet enough not to speckle the table, clear enough to pick out the rows
+   you've added. */
+.fc-toggle-btn[aria-pressed="true"] { color: var(--sec-flashcards) !important; }
 .vocab tbody tr:hover .row-hide-btn,
 .vocab tbody tr:focus-within .row-hide-btn,
 .row-hide-btn:focus-visible { opacity: 1; }
