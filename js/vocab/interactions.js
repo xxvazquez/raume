@@ -881,13 +881,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         // Each form's whole reading in hiragana -- furigana in place of its
         // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
         readings: jpwords.map(readingOf),
-        romaji: jpwords.map(w => expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase()),
+        // A word with two readings (四: "yon / shi") is each one on its own:
+        // "yon" typed is an exact match, ranked above yōniku, which only
+        // starts with it.
+        romaji: jpwords.map(w => alternativesOf(expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase())),
         // ...and folded (see foldRomaji): whole, and each of its words --
         // kin'en also as kinnen (kanaRomaji.romajiSpellings).
         romajiFolded: jpwords.map(w => {
           const spellings = window.RaumeStudy.kanaRomaji.romajiSpellings(w.dataset.romaji);
           return {
-            whole: spellings.map(fold),
+            whole: spellings.reduce((all, r) => all.concat(alternativesOf(r)), []).map(fold),
             words: spellings.reduce((all, r) => all.concat(String(r).split(/[\s-]+/).map(fold)), [])
           };
         }),
@@ -905,6 +908,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     else setTimeout(warmIndex, 1500);
     input.addEventListener('focus', warmIndex);
 
+    // "yon / shi" -> the whole, then each reading: both are right.
+    function alternativesOf(r) {
+      const parts = String(r).split(' / ');
+      return parts.length > 1 ? [String(r)].concat(parts) : [String(r)];
+    }
     // Text is already lower-cased in the index.
     function rankOf(t, q, prefixOnly) {
       if (!t) return null;
@@ -1042,9 +1050,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // has to be a whole reading or word: "koohii" is kōhī, but "see" folds
       // to "se" and would otherwise start every sen, sensei and sētā, above
       // "to see" itself.
-      info.romaji.forEach((t, i) => {
+      info.romaji.forEach((alts, i) => {
         const folded = info.romajiFolded[i];
-        const r = [rankOf(t, qx.expanded, prefixOnly),
+        const r = [bestOf(alts, t => rankOf(t, qx.expanded, prefixOnly)),
           qx.folded && folded.whole.includes(qx.folded) ? 0 : null,
           qx.folded && (qx.foldedWhole ? folded.words.includes(qx.folded)
             : folded.whole.concat(folded.words).some(f => f.startsWith(qx.folded))) ? 1 : null

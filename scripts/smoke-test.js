@@ -1289,6 +1289,15 @@ async function main() {
     meanings("");
     return /^see/.test(see[0] || "") && !see.includes("1,000") && sit.length === 1 && sit[0] === "sit down" && koohii.includes("coffee");
   })());
+  check("one of a word's two readings typed whole is an exact match: yon finds 四 (yon / shi) before 羊肉 (yōniku)", (() => {
+    const input = document.getElementById("tableSearch");
+    input.value = "yon";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const found = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) .meaning-text')].map(m => m.textContent.trim());
+    input.value = "";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return /^(4|four)$/.test(found[0] || "") && found.indexOf("lamb / mutton") > 0;
+  })());
   check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "ookii";
