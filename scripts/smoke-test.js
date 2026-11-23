@@ -61,6 +61,15 @@ function check(label, cond) {
 // asserting on the DOM right after can read a stale render. A real macrotask
 // tick (not just a microtask) guarantees every pending render has landed.
 function flush() { return new Promise((resolve) => setTimeout(resolve, 0)); }
+// Playing a whole game waits out its "see what you got" pause after every
+// answer (about a second, 10-15 times a game) -- real for a learner, dead
+// time for a test that checks the game moves on, not how long it lingers.
+// Inside fastGamePauses(window, ...) those pauses fire almost at once.
+async function fastGamePauses(win, run) {
+  const real = win.setTimeout;
+  win.setTimeout = (fn, ms, ...rest) => real(fn, ms >= 300 && ms <= 5000 ? 5 : ms, ...rest);
+  try { return await run(); } finally { win.setTimeout = real; }
+}
 
 async function main() {
   const url = "file://" + path.resolve("index.html");
@@ -4349,7 +4358,7 @@ async function main() {
   document.querySelector("#fcPanelGames .fc-ls-next").click();
   check("Next moves on and says the next word, the counter's number rolling up", lsCount() === "2 / " + lsQ().length && spoken[spoken.length - 1] === lsQ()[1].word.speak
     && !!document.querySelector("#fcLsCount .fc-fb-roll"));
-  for (let i = 1; i < lsQ().length; i++) {
+  await fastGamePauses(window, async () => { for (let i = 1; i < lsQ().length; i++) {
     const q = lsQ()[i];
     lsChoices()[q.choices.indexOf(q.word)].click();
     if (i === 1) {
@@ -4366,7 +4375,7 @@ async function main() {
       if (document.querySelector("#fcPanelGames .fc-mt-done") || lsCount().startsWith((i + 2) + " /")) break;
       await new Promise(r => setTimeout(r, 25));
     }
-  }
+  } });
   check("a finished Listening game keeps the word you got wrong as missed", (() => {
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("listening").pop();
     return !!last && last.missed.join() === String(lsQ()[0].word.id) && /\|\d+$/.test(last.setup);
@@ -4441,13 +4450,13 @@ async function main() {
     document.querySelector("#fcPanelGames .fc-ls-next").click();
     return ok && ktQ() !== ktFirst.word.clue;
   })());
-  for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+  await fastGamePauses(window, async () => { for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
     ktCur().chars.forEach(ktTap);
     for (let waited = 0; waited < 3000; waited += 25) {
       if (document.querySelector("#fcPanelGames .fc-mt-done") || !document.querySelector("#fcPanelGames .fc-kt-right")) break;
       await new Promise(r => setTimeout(r, 25));
     }
-  }
+  } });
   check("a right spelling moves on by itself; the end scores first-time words, lists the one to spell again, and logs a kanatiles game", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const n = xw.state.puzzle.questions.length;
@@ -4493,14 +4502,14 @@ async function main() {
       && / is .+ — the rest are .+\./.test(reveal) && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
   })());
   document.querySelector("#fcPanelGames .fc-ls-next").click();
-  for (let k = 0; k < 40 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+  await fastGamePauses(window, async () => { for (let k = 0; k < 40 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
     const before = document.getElementById("fcLsCount").textContent;
     document.querySelector('#fcPanelGames .fc-oo-word[data-i="' + ooQ().odd + '"]').click();
     for (let waited = 0; waited < 4000; waited += 25) {
       if (document.querySelector("#fcPanelGames .fc-mt-done") || document.getElementById("fcLsCount").textContent !== before) break;
       await new Promise(r => setTimeout(r, 25));
     }
-  }
+  } });
   check("a right pick moves on by itself; the end scores it, lists the odd one you missed, and logs an oddone game", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const n = xw.state.puzzle.questions.length;
