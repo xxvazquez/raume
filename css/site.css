@@ -4003,7 +4003,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    A picked tile takes the section ring; a right pair washes sage and then
    goes invisible in place (visibility, so no tile moves under a finger); a
    wrong pair washes coral with a small shake. */
-.fc-mt { max-width: 640px; }
+/* Centred in Practice's 900px column on a wide window (iPad), under the
+   full-width toolbar, rather than hugging its left edge. */
+.fc-mt { max-width: 640px; margin-inline: auto; }
 .fc-mt-round { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-micro); }
 .fc-mt-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .fc-mt-col { display: flex; flex-direction: column; gap: 8px; }
@@ -4120,7 +4122,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    with a big round ▶ in the section tint, the word appearing under it once
    answered; four choices under it as Match's tiles (2x2, one column on a
    narrow phone); Next only after a wrong answer. */
-.fc-ls { max-width: 640px; }
+.fc-ls { max-width: 640px; margin-inline: auto; } /* centred, as Match */
 .fc-ls-card {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 22px 16px 18px; border-radius: var(--radius-card); background: var(--paper);
@@ -5851,7 +5853,7 @@ mark.fc-diff-co {
    trailing only what you use mid-play: Hint, Check (or the count / clock)
    and ⋯ -- New puzzle on a phone, How to play, Reveal / Clear / Save as
    PDF, Stats. */
-.fc-gs { max-width: 560px; }
+.fc-gs { max-width: 560px; margin-inline: auto; } /* centred in the 900px column on iPad, as the boards it starts */
 .fc-gs .help-head:first-child { margin-top: 0; }
 .fc-gs-mode { min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
 .fc-gs-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }

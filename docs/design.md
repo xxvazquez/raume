@@ -453,7 +453,9 @@ and Help.
     a search field. No native `<select>` — its menu looked different on every
     platform and beside Words from's sheet; keyboard focus lights the row in
     the section tone, never an inset ring the card's corners would cut),
-    then a filled 50px **Start** capsule, centred, and a Stats row. Never a
+    then a filled 50px **Start** capsule, centred, and a Stats row. On a
+    wide window (iPad) the 560px setup and the 640px game boards centre in
+    Practice's 900px column under the full-width toolbar. Never a
     row of pills over the content (Laura, 2026-09-28).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
