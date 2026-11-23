@@ -442,7 +442,11 @@ window.RaumeStudy.notes = (function () {
       if (!reading) { ruby.querySelectorAll("rp").forEach(function (n) { n.remove(); }); reading = ruby.textContent; }
       ruby.replaceWith(document.createTextNode(reading));
     });
-    return clone.textContent.replace(/[●Ｘ]/g, "").replace(/\s+/g, " ").trim();
+    // A pair's arrow or slash (あかるい ↔ くらい) is a pause, not a word --
+    // the voice otherwise reads the symbol's name between the two.
+    return clone.textContent.replace(/[●Ｘ]/g, "")
+      .replace(/\s*[↔⇔→←⇒⟷⟶/／・|]+\s*/g, "、")
+      .replace(/\s+/g, " ").replace(/^、+|、+$/g, "").trim();
   }
   // What it shows: the line without its furigana.
   function shownText(el) {
