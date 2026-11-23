@@ -1711,6 +1711,10 @@ body.icon-picker-open { overflow: hidden; }
 }
 .ios-confirm-go:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .ios-confirm-go:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
+/* + Add's "where are they from?" sheet (notes.js addSheet): one choice per
+   row, the mark's glyph in its hue before the name, hairlines between. */
+.notes-add-mark { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 400; }
+.notes-add-mark + .notes-add-mark { border-top: 1px solid var(--row-line); }
 
 /* --- Customize page (#customize) ---------------------------------- */
 /* The ground spans the whole sheet; the content keeps its reading width. */

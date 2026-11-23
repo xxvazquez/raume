@@ -648,7 +648,45 @@ window.RaumeStudy.notes = (function () {
     input.click();
   }
   function isHtmlFile(file) { return /\.x?html?$/i.test(file.name) || /html/.test(file.type || ""); }
-  function upload(files) {
+  // + Add: an iOS action sheet asking where the notes come from, then the
+  // file picker -- each choice is a tap, so the picker may still open from it.
+  function addSheet() {
+    if (sourceMissing) { pickFiles(true, function (files) { upload(files, null); }); return; }
+    var old = document.querySelector(".ios-confirm");
+    if (old) old.remove();
+    var opener = document.activeElement;
+    var host = document.createElement("div");
+    host.className = "ios-confirm";
+    host.innerHTML = '<div class="ios-confirm-scrim"></div>' +
+      '<div class="ios-confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="notesAddTitle">' +
+      '<div class="ios-confirm-group"><div class="ios-confirm-msg">' +
+      '<p class="ios-confirm-title" id="notesAddTitle">Add notes</p><p>Where are they from? You can change it later in ⋯.</p></div>' +
+      MARK_ORDER.map(function (k) {
+        return '<button type="button" class="ios-confirm-go notes-add-mark" data-add-mark="' + k + '">' +
+          '<span class="notes-mark-ic" data-tile="' + MARKS[k].tile + '" aria-hidden="true">' + MARKS[k].icon + "</span>" + esc(MARKS[k].label) + "</button>";
+      }).join("") +
+      '<button type="button" class="ios-confirm-go notes-add-mark" data-add-mark="">No mark</button></div>' +
+      '<button type="button" class="ios-confirm-cancel">Cancel</button></div>';
+    document.body.appendChild(host);
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      host.remove();
+      if (opener && opener.focus && document.contains(opener)) opener.focus();
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
+    host.querySelector(".ios-confirm-cancel").addEventListener("click", close);
+    host.querySelectorAll("[data-add-mark]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var mark = b.dataset.addMark || null;
+        close();
+        pickFiles(true, function (files) { upload(files, mark); });
+      });
+    });
+    host.querySelector("[data-add-mark]").focus();
+  }
+  function upload(files, source) {
     var u = user(), c = client();
     if (!u || !c) return;
     var uid = u.id, added = 0, problems = [];
@@ -661,7 +699,9 @@ window.RaumeStudy.notes = (function () {
           var size = byteLength(html);
           if (size > MAX_BYTES) { problems.push("“" + file.name + "” is over 5 MB"); return; }
           var d = describeFile(html, file.name, file.lastModified);
-          return timed(c.from("notes").insert({ title: d.title, note_date: d.date, html: html, size: size }).select(META()).single(), "Adding a note")
+          var row = { title: d.title, note_date: d.date, html: html, size: size };
+          if (source && !sourceMissing) row.source = source;
+          return timed(c.from("notes").insert(row).select(META()).single(), "Adding a note")
             .then(function (res) {
               if (res.error) throw res.error;
               added++;
@@ -979,7 +1019,7 @@ window.RaumeStudy.notes = (function () {
       var t = e.target, el;
       if (!t || !t.closest) return;
       if ((el = t.closest(".notes-row"))) { openNote(el.dataset.note); return; }
-      if (t.closest("#notesAdd, [data-notes-add]")) { pickFiles(true, upload); return; }
+      if (t.closest("#notesAdd, [data-notes-add]")) { addSheet(); return; }
       if (t.closest("#notesBack")) { back(); return; }
       if (t.closest("#notesQuiz")) { setStudy("quiz", !study.quiz); return; }
       if ((el = t.closest("[data-study]"))) { setStudy(el.dataset.study, !study[el.dataset.study]); return; }

@@ -792,7 +792,9 @@ and Help.
   a wave on blue for WSJJ, a panda on slate for your own — the note's name,
   its lesson date in grey, a chevron), newest
   first; **Add** is a tinted text bar button with a plus at the title's
-  trailing edge. Like Practice, its list title is the phone's large title
+  trailing edge, opening an iOS action sheet — "Where are they from?":
+  Sakura / WSJJ / Mine (each with its glyph in its hue) / No mark, then
+  Cancel — before the file picker. Like Practice, its list title is the phone's large title
   and is visually hidden on a wider window (the top bar names it). A note opens as a pushed screen: "‹ Notes", the note's name as
   the large title — itself the Rename control, a faint pencil after it, as a
   document's title is on iOS — then one row — the lesson date left, **Quiz** (a white
