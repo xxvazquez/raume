@@ -50,6 +50,7 @@ window.RaumeStudy.notes = (function () {
   var flash = null;           // one-shot status line under the title
   var listScroll = 0;         // where the list was when a note opened
   var cameFromList = false;   // Back pops history rather than pushing #notes
+  var markFilter = "";        // the Notes list's filter: "" (all) or a mark
 
   var DOC_ICON = '<svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 1.8h6l3 3v11.4h-9z"/><path d="M10.5 1.8v3h3M6.8 9h4.4M6.8 12h4.4"/></svg>';
   var PLUS_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5v11M3.5 9h11"/></svg>';
@@ -863,13 +864,26 @@ window.RaumeStudy.notes = (function () {
         "Add an HTML file — notes from class, a handout, a summary. Only you can see them.",
         '<button type="button" class="fc-btn fc-btn-primary" data-notes-add>Add notes</button>');
     }
+    // Once any note is marked, a segmented control filters the list by mark.
+    var marked = notes.some(function (n) { return markOf(n); });
+    if (!marked) markFilter = "";
+    var shown = markFilter ? notes.filter(function (n) { return n.source === markFilter; }) : notes;
+    var filterHtml = marked
+      ? '<div class="fc-tabs notes-filter" role="tablist" aria-label="Show notes from">' +
+        [["", "All"]].concat(MARK_ORDER.map(function (k) { return [k, MARKS[k].label]; })).map(function (f) {
+          return '<button type="button" class="fc-tab' + (markFilter === f[0] ? " active" : "") + '" role="tab" aria-selected="' + (markFilter === f[0]) + '" data-note-filter="' + f[0] + '">' + esc(f[1]) + "</button>";
+        }).join("") + "</div>"
+      : "";
+    if (!shown.length) {
+      return head + filterHtml + '<p class="notes-filter-empty">No ' + esc(MARKS[markFilter] ? MARKS[markFilter].label : "") + " notes yet.</p>";
+    }
     var months = [], byMonth = {};
-    notes.slice().sort(byDate).forEach(function (n) {
+    shown.slice().sort(byDate).forEach(function (n) {
       var k = String(n.note_date || "").slice(0, 7);
       if (!byMonth[k]) { byMonth[k] = []; months.push(k); }
       byMonth[k].push(n);
     });
-    return head + months.map(function (k) {
+    return head + filterHtml + months.map(function (k) {
       var label = monthLabel(byMonth[k][0].note_date);
       return '<h2 class="help-head notes-group-head">' + esc(label) + "</h2>" +
         '<ul class="notes-card" aria-label="' + esc(label) + '">' + byMonth[k].map(function (n) {
@@ -1020,6 +1034,7 @@ window.RaumeStudy.notes = (function () {
       if (!t || !t.closest) return;
       if ((el = t.closest(".notes-row"))) { openNote(el.dataset.note); return; }
       if (t.closest("#notesAdd, [data-notes-add]")) { addSheet(); return; }
+      if ((el = t.closest("[data-note-filter]"))) { markFilter = el.dataset.noteFilter; rerender(); return; }
       if (t.closest("#notesBack")) { back(); return; }
       if (t.closest("#notesQuiz")) { setStudy("quiz", !study.quiz); return; }
       if ((el = t.closest("[data-study]"))) { setStudy(el.dataset.study, !study[el.dataset.study]); return; }

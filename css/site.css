@@ -1550,6 +1550,9 @@ body.icon-picker-open { overflow: hidden; }
    clear of the account button that holds the top corner on a phone. */
 .notes-reader-bar { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 0 0 12px; }
 .notes-reader-date { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+/* The Notes list's filter by mark: the app's segmented control. */
+.notes-filter { margin: 0 0 14px; }
+.notes-filter-empty { margin: 24px 0; text-align: center; color: var(--muted); font-size: var(--fs-small); }
 /* The note's mark on the line under its title: its glyph in its hue. */
 .notes-reader-mark { display: inline-flex; align-items: center; gap: 5px; }
 .notes-reader-mark svg { width: 15px; height: 15px; color: var(--tile); }
