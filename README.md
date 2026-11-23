@@ -98,6 +98,7 @@ Grammatical **particles are blue and bold** everywhere.
 | **Tricky words** | A word that isn't sticking gets a soft amber wash — one of its flashcards forgotten twice after you'd learned it, or rated Again / Hard so often FSRS rates it near the hardest. Known wins over it. |
 | **Irregular words** | Exceptions (irregular verbs, Numbers' 4 / 7 / 9) are written in red, with no wash, so the green or amber of your progress shows on them too. |
 | **Hold a word** | Hold a row (or right-click it) for its menu, as in iOS: the word in a small preview, then **Play**, **Copy** (the Japanese), **Add to flashcards** / **Pause in flashcards**, **Mark as known** / **Mark as not known** and **Hide row** — the row's own speaker, flashcards toggle and eye, as a bigger target. The preview shows only what the row shows, so a hidden column or Cover answers stays hidden. |
+| **What an icon is** | Rest the pointer on any icon-only button (mouse or iPad trackpad) and its name appears under it; on a touch screen, touch and hold it to see the name, and let go without it acting — a plain tap still acts. |
 | **Hide a row** | The eye icon marks a word as known for now. **Show all** brings them back. |
 | **Undo** | Hiding a row or a table, pausing a word or a table, and deleting one of your own words each show a small **Undo** bar at the bottom for a few seconds (it stays while you point at it). |
 

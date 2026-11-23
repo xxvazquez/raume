@@ -6210,6 +6210,26 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 @media print { .undo-toast { display: none; } }
 
+/* An icon's name (shared.js iconTips): a small glass label under a glyph the
+   pointer rests on, or above one a finger holds -- the iPadOS pointer
+   tooltip, same material as the Undo capsule. Placed by the script's own
+   sheet; never takes a tap. Holding a glyph shows this instead of iOS's
+   link/image callout or a text selection. */
+.icon-tip {
+  position: fixed; z-index: 200; max-width: min(240px, calc(100vw - 16px));
+  padding: 5px 10px; border-radius: 10px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
+  font: 400 12px/1.35 var(--font-ui); color: var(--ink);
+  pointer-events: none;
+  animation: icon-tip-in .12s ease-out;
+}
+@keyframes icon-tip-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .icon-tip { animation: none; } }
+@media print { .icon-tip { display: none; } }
+:is(button, a[href], [role="button"])[aria-label] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
 /* Swipe actions (shared.js swipeRows), as in Mail: the row slides left over
    its action, an 88px block of colour on the right edge -- red Delete,
    orange Pause, the tint otherwise -- in white text. The lists clip it;

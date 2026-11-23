@@ -570,7 +570,14 @@ and Help.
   the hairline starting at the words. The row washes get the same treatment
   in a **Row colours** group under it — a 16px rounded swatch of each wash
   (Known, Tricky) and a red *Aa* (Irregular) in the glyph column. Standard iOS glyphs
-  (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
+  (⋯, ×, chevrons) may stay bare. Every icon-only control also names itself
+  (`shared.js` iconTips, `.icon-tip`): the pointer resting on it half a second
+  shows its title / `aria-label` in a small glass label under it (the iPadOS
+  pointer tooltip — the Undo capsule's material, 12px, radius 10, no caret;
+  moving straight on to the next glyph shows that one at once), and a finger
+  holding it shows the same label above it, like the Large Content Viewer on
+  an iOS tab bar — letting go then doesn't act. So every new icon-only
+  control needs an `aria-label`; one with words on it is left alone. The page a glyph opens (Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
   amber when offline or something's queued, the glyph tinting to match). The

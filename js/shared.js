@@ -367,6 +367,104 @@ window.RaumeStudy.shared = (function () {
     window.addEventListener("scroll", function () { if (swipeOpen && !g) swipeClose(); }, { passive: true });
   }
 
+  // What an icon means, the way iPadOS and the Mac say it: rest the pointer
+  // on any control drawn as a bare glyph and its name appears in a small
+  // glass label under it after half a second (moving straight on to the next
+  // glyph shows that one at once). A finger has no hover, so -- like the
+  // Large Content Viewer on an iOS tab bar -- touching and holding a glyph
+  // shows its name while it's held, and letting go then does nothing; a
+  // plain tap still acts. The name is the control's own: its title (taken
+  // over so the browser's tooltip doesn't show too), else its aria-label.
+  // Controls with words on them already say what they are and are left alone.
+  // Placed through one constructed sheet, never a style attribute.
+  var TIP_TARGETS = 'button, a[href], [role="button"], [role="tab"], [role="menuitem"], [role="img"][aria-label], [data-tip]';
+  function iconLabel(el) {
+    if (!el || el.disabled) return "";
+    var text = el.innerText != null ? el.innerText : el.textContent;
+    if (String(text || "").trim()) return "";
+    if (el.hasAttribute("title")) {
+      if (el.title) el.setAttribute("data-tip", el.title);
+      el.removeAttribute("title");
+    }
+    return (el.getAttribute("data-tip") || el.getAttribute("aria-label") || "").trim();
+  }
+  (function iconTips() {
+    if (!("adoptedStyleSheets" in document) || !window.PointerEvent) return;
+    var sheet;
+    try { sheet = new CSSStyleSheet(); document.adoptedStyleSheets = document.adoptedStyleSheets.concat([sheet]); } catch (e) { return; }
+    var tip = null, owner = null, pending = null, timer = 0, warmUntil = 0, hold = null, swallowClick = 0;
+    function hide() {
+      clearTimeout(timer);
+      pending = null;
+      if (tip && owner) warmUntil = Date.now() + 400;
+      if (tip) tip.remove();
+      tip = owner = null;
+    }
+    // Under the glyph with a mouse; above it for a finger, which covers
+    // what's below. Flips side when there's no room, kept on screen.
+    function show(el, label, above) {
+      hide();
+      tip = document.createElement("div");
+      tip.className = "icon-tip";
+      tip.setAttribute("aria-hidden", "true");
+      tip.textContent = label;
+      document.body.appendChild(tip);
+      var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, gap = above ? 14 : 8;
+      var left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+      var top = above ? r.top - h - gap : r.bottom + gap;
+      if (top < 8) top = r.bottom + gap;
+      else if (top + h > window.innerHeight - 8) top = r.top - h - gap;
+      sheet.replaceSync(".icon-tip { left: " + Math.round(left) + "px; top: " + Math.round(top) + "px; }");
+      owner = el;
+    }
+    document.addEventListener("pointerover", function (e) {
+      if (e.pointerType !== "mouse") return;
+      var el = e.target.closest && e.target.closest(TIP_TARGETS);
+      if (el && (el === owner || el === pending)) return;
+      if (!el) { if ((owner || pending) && !(owner || pending).contains(e.target)) hide(); return; }
+      var label = iconLabel(el);
+      var warm = !!tip || Date.now() < warmUntil;
+      hide();
+      if (!label) return;
+      if (warm) show(el, label, false);
+      else {
+        pending = el;
+        timer = setTimeout(function () { if (el.isConnected && el.matches(":hover")) show(el, label, false); }, 500);
+      }
+    });
+    document.addEventListener("pointerout", function (e) {
+      if (e.pointerType !== "mouse") return;
+      var el = e.target.closest && e.target.closest(TIP_TARGETS);
+      if (el && !el.contains(e.relatedTarget)) hide();
+    });
+    document.addEventListener("pointerdown", function (e) {
+      hide();
+      if (e.pointerType === "mouse" || !e.isPrimary) return;
+      var el = e.target.closest && e.target.closest(TIP_TARGETS);
+      var label = el && iconLabel(el);
+      if (!label) return;
+      hold = { el: el, x: e.clientX, y: e.clientY };
+      timer = setTimeout(function () { if (hold && hold.el === el) { show(el, label, true); hold.shown = true; } }, 500);
+    }, { passive: true });
+    document.addEventListener("pointermove", function (e) {
+      if (hold && !hold.shown && Math.abs(e.clientX - hold.x) + Math.abs(e.clientY - hold.y) > 10) { hold = null; clearTimeout(timer); }
+    }, { passive: true });
+    function release() {
+      if (hold && hold.shown) swallowClick = Date.now() + 600;
+      hold = null;
+      hide();
+    }
+    document.addEventListener("pointerup", release, { passive: true });
+    document.addEventListener("pointercancel", release, { passive: true });
+    // A held glyph that's let go is a look, not a tap.
+    document.addEventListener("click", function (e) {
+      if (Date.now() < swallowClick) { swallowClick = 0; e.preventDefault(); e.stopPropagation(); }
+    }, true);
+    document.addEventListener("contextmenu", function (e) { if (hold) e.preventDefault(); });
+    window.addEventListener("scroll", hide, { passive: true, capture: true });
+    document.addEventListener("keydown", hide);
+  })();
+
   // The study cards' Check button: an arrow at the trailing end of the
   // answer line, like Messages' send. Return still checks; this is the
   // visible way to. It never takes focus from the field (a phone's keyboard
@@ -389,5 +487,5 @@ window.RaumeStudy.shared = (function () {
     return true;
   }
 
-  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, undoToast: undoToast, swipeRows: swipeRows, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
+  return { escapeHtml: escapeHtml, speech: speech, confirmSheet: confirmSheet, undoToast: undoToast, swipeRows: swipeRows, iconLabel: iconLabel, CHECK_BUTTON_HTML: CHECK_BUTTON_HTML, keepFieldFocus: keepFieldFocus, scrollToTopFirst: scrollToTopFirst };
 })();

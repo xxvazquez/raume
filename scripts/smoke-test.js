@@ -493,6 +493,17 @@ async function main() {
   // style="" attribute gets silently dropped by the browser (not an error) --
   // easy to introduce by accident and easy to miss without a check like this.
   check("no element relies on an inline style=\"\" attribute (blocked by CSP style-src)", document.querySelectorAll("[style]").length === 0);
+  check("an icon-only control names itself (its title, taken over from the browser's tooltip, else its aria-label); a worded one doesn't", (() => {
+    const label = window.RaumeStudy.shared.iconLabel;
+    const help = document.createElement("button");
+    help.setAttribute("aria-label", "Help"); help.title = "Open Help"; help.innerHTML = "<svg></svg>";
+    const speak = document.createElement("button");
+    speak.setAttribute("aria-label", "Play pronunciation");
+    const worded = document.createElement("button");
+    worded.setAttribute("aria-label", "Options"); worded.textContent = "Options";
+    return label(help) === "Open Help" && !help.hasAttribute("title") && label(help) === "Open Help"
+      && label(speak) === "Play pronunciation" && label(worded) === "";
+  })());
   check("い-adj and な-adj are capsule badges in two different, distinctly-saturated tokens (no edge bar, not tinted text)", (() => {
     const iRule = allCssRules.find(r => r.selectorText === ".adj-badge-i");
     const naRule = allCssRules.find(r => r.selectorText === ".adj-badge-na");
