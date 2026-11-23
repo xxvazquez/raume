@@ -154,7 +154,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // tableId: Listening draws its wrong choices from the same table first;
       // speak: the exact reading the speaker buttons play (it keys the
       // prerendered clip), 〜 and all.
-      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, tableId: entry.tableId, speak: entry.jpReading });
+      // romajiShown: the romaji as the tables print it (ōi, not the typeable
+      // grid spelling ooi) -- for the games you tap rather than type.
+      var shownRomaji = romaji ? String(entry.romajiDisplay).split(" / ")[0].replace(/^~/, "").trim() : "";
+      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, romajiShown: shownRomaji || null, tableId: entry.tableId, speak: entry.jpReading });
     });
     return pool;
   }
@@ -2357,7 +2360,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // romaji can make two readings spell the same.
     var seen = {};
     var candidates = eligible.map(function (w) {
-      var answer = state.script === "romaji" ? w.romaji
+      // Tapped games show the romaji as written (ōi); a grid or a typed
+      // answer needs the plain-letter spelling (ooi).
+      var tapped = state.mode === "match" || state.mode === "oddone" || state.mode === "speedsort";
+      var answer = state.script === "romaji" ? (tapped && w.romajiShown ? w.romajiShown : w.romaji)
         : state.script === "native" ? writtenForm(w)
         : scriptedAnswer(w.answer, state.script);
       return { id: w.id, clue: w.clue, answer: answer, tableId: w.tableId, weight: w.weight };
