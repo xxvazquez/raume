@@ -54,7 +54,7 @@ python3 -m http.server
 | Section        | What's in it |
 | -------------- | ------------ |
 | **Vocabulary** | The landing page — words, grouped by topic: Around Town (places, shops, transport, directions, countries, capital cities), Food & Ingredients, Kitchen & Dining (with eating out), Numbers & Counting, People & Daily Life (family, people, body & health, weather & seasons, home, everyday things, free time, animals, greetings & expressions), Time & Calendar |
-| **Grammar**    | How words change and join, as a Japanese class splits it from vocabulary: Adjectives (い / な), Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど), and Sentence Patterns — whole example sentences with their English; the ⓘ on each names the pattern it shows (どんな, 〜くない / 〜じゃない, あります / います, の + position + に) |
+| **Grammar**    | How words change and join, as a Japanese class splits it from vocabulary: Adjectives (い / な), Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど), Sentence Patterns — whole example sentences with their English; the ⓘ on each names the pattern it shows (どんな, 〜くない / 〜じゃない, あります / います, の + position + に) — and Verb Forms, one example sentence per form: 〜ます, 〜ません, 〜ました, 〜ませんでした, 〜てください, 〜ています and 〜て、〜 |
 | **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
 | **Notes**      | Your own class notes, private to your account — see [Class notes](#class-notes) |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
@@ -119,7 +119,10 @@ bottom sheet on a phone. A dot on it means something is off its default.
 
 A row with grammar to explain carries an **ⓘ** beside the hide eye instead of
 a strip of badges: tap it for one popover listing each note, led by its tinted
-badge. It's hidden while the English is hidden or covered, so it can't give
+badge. A verb's ⓘ also lists its **Forms**: polite negative, past and past
+negative (〜ません, 〜ました, 〜ませんでした) and the て-form, worked out from
+its group — 行く's is 行って, and 来る's carries its changed reading, 来(き)て.
+It's hidden while the English is hidden or covered, so it can't give
 the answer away.
 
 | Badge | Meaning | Outlined when… |

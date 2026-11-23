@@ -2124,7 +2124,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       closePop();
       if (popBlocked()) return;
       const row = btn.closest('tr');
-      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge], .row-badges [data-pattern]')] : [];
+      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge], .row-badges [data-pattern], .row-badges [data-forms]')] : [];
       if (!badges.length) return;
       pop = document.createElement('div');
       pop.className = 'role-pop role-pop-list';
@@ -2134,6 +2134,24 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const line = document.createElement('div');
         line.className = 'role-pop-line';
         if (b.dataset.pattern) { line.textContent = b.dataset.pattern; pop.appendChild(line); return; } // a sentence's pattern: words only
+        if (b.dataset.forms) {
+          // A verb's forms (render.js verbForms): a quiet header, then one
+          // line each -- the form, then what it is.
+          line.className = 'role-pop-line role-pop-head';
+          line.textContent = 'Forms';
+          pop.appendChild(line);
+          JSON.parse(b.dataset.forms).forEach(function (f) {
+            const fl = document.createElement('div');
+            fl.className = 'role-pop-line role-pop-form';
+            const jp = document.createElement('span');
+            jp.className = 'role-pop-form-jp';
+            jp.textContent = f[0];
+            fl.appendChild(jp);
+            fl.appendChild(document.createTextNode(' ' + f[1]));
+            pop.appendChild(fl);
+          });
+          return;
+        }
         line.appendChild(badgeGlyph(b));
         const role = b.dataset.role || b.dataset.usage || (b.dataset.badge + '-adjective');
         line.appendChild(document.createTextNode(' ' + role));

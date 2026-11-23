@@ -3728,6 +3728,12 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
 /* The ⓘ popover: one line per grammar note on the row. */
 .role-pop-list { max-width: min(300px, calc(100vw - 16px)); }
 .role-pop-line + .role-pop-line { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--row-line); }
+/* A verb's forms in its ⓘ (render.js verbForms): a quiet "Forms" header, then
+   one line per form -- the Japanese, then what it is in grey -- with no rules
+   between them, so the four read as one group under the grammar lines. */
+.role-pop-head { color: var(--muted); font-size: 12px; }
+.role-pop-line.role-pop-form { margin-top: 3px; padding-top: 0; border-top: 0; color: var(--muted); }
+.role-pop-form-jp { margin-right: 6px; color: var(--ink); font-size: 15px; }
 .role-pop::after {
   content: ""; position: absolute; left: var(--arrow-x, 50%); bottom: -5px; width: 10px; height: 10px;
   margin-left: -5px; background: var(--paper); transform: rotate(45deg); border-radius: 0 0 3px 0;

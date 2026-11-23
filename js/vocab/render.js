@@ -245,6 +245,39 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       '"' + (row.usageNote ? ' data-usage=""' : '') + ' data-badge="' + meta.badge + '" data-reading="' + meta.reading + '" data-role="' + esc(role) +
       '" aria-label="' + esc(meta.reading + ' — ' + role) + '" aria-expanded="false"></button>';
   }
+  // The forms an N5 learner meets next, worked out from the polite form so the
+  // kanji stay exactly as written (来ます -> 来ません; 来 keeps its き):
+  // ません / ました / ませんでした swap the ます, and the て-form follows the
+  // verb's group -- a ru-verb or irregular verb adds て to the stem, a u-verb
+  // changes by its last sound (い・ち・り -> って, み・び・に -> んで,
+  // き -> いて, ぎ -> いで, し -> して), and 行く is the one exception (行って).
+  // Shown in the row's ⓘ, one per line.
+  var TE_GODAN = { 'い': 'って', 'ち': 'って', 'り': 'って', 'み': 'んで', 'び': 'んで', 'に': 'んで', 'き': 'いて', 'ぎ': 'いで', 'し': 'して' };
+  function verbForms(row) {
+    var polite = row.forms && row.forms[1];
+    if (!polite || !row.verbClass) return null;
+    // A kanji read differently from the dictionary form (来る く -> 来ます き)
+    // carries its reading, or 来て would read as くて.
+    var plainReading = {};
+    (row.forms[0].jp || []).forEach(function (g) { if (g.kanji) plainReading[g.kanji] = g.reading; });
+    var word = polite.jp.map(function (g) {
+      if (g.kanji) return g.kanji + (plainReading[g.kanji] && plainReading[g.kanji] !== g.reading ? '(' + g.reading + ')' : '');
+      return g.text || g.p || '';
+    }).join('');
+    if (!/ます$/.test(word)) return null;
+    var stem = word.slice(0, -2), te;
+    if (row.verbClass !== 'godan') te = stem + 'て';
+    else if (/行き$/.test(stem)) te = stem.slice(0, -1) + 'って';
+    else if (TE_GODAN[stem.slice(-1)]) te = stem.slice(0, -1) + TE_GODAN[stem.slice(-1)];
+    else return null;
+    return [[stem + 'ません', 'negative'], [stem + 'ました', 'past'], [stem + 'ませんでした', 'past negative'], [te, 'て-form']];
+  }
+  vocab.verbForms = verbForms;
+  function verbFormsNote(row) {
+    var forms = verbForms(row);
+    return forms ? '<span class="verb-forms-note" data-forms="' + esc(JSON.stringify(forms)) + '"><span class="visually-hidden">' +
+      esc(forms.map(function (f) { return f[1] + ': ' + f[0]; }).join(', ')) + '</span></span>' : '';
+  }
   function verbNote(row) {
     var meta = VERB_CLASS_META[row.verbClass];
     if (!meta) return '';
@@ -355,7 +388,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row), row.enNote) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row) + verbFormsNote(row), row.enNote) + '</tr>';
   }
   // A kanji row (the Kanji section): drawn as a tile in a grid -- the
   // character large, its meaning small under it (css/site.css .vocab-kanji).
@@ -707,7 +740,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     38: 'calculator', 39: 'cake', 40: 'wallet',
     41: 'hash', 42: 'calendar', 43: 'users', 44: 'compass', 45: 'mountain', 46: 'zap', 47: 'sparkles',
     48: 'shopping-bag', 49: 'bus', 50: 'signpost', 51: 'home', 52: 'utensils', 53: 'smile',
-    54: 'box', 55: 'dice', 56: 'paw', 57: 'hand', 58: 'globe', 59: 'message', 60: 'landmark'
+    54: 'box', 55: 'dice', 56: 'paw', 57: 'hand', 58: 'globe', 59: 'message', 60: 'landmark', 61: 'arrow-right'
   };
   // The icon a table shows: the reader's pick, else the shipped default, else --
   // for a table of their own -- one suggested from its name (see icons.suggest),
