@@ -11,7 +11,7 @@ cooking or studying, and for printing clean A4 study sheets.
 |                 |                                                                  |
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar and Kanji tables — furigana, search, audio, print |
-| **Practice**    | Flashcards: FSRS-6 spaced repetition, up to six directions per word (two handwritten), daily streak |
+| **Practice**    | Flashcards: FSRS-6 spaced repetition, up to six directions per word (two handwritten) plus verb forms for verbs, daily streak |
 | **Kana**        | A separate hiragana / katakana drill                             |
 | **Puzzles**     | Crosswords, arrowords and word searches from your words |
 | **Games**       | A timed Match game, Listening, Kana tiles, Odd one out, Speed sort and Word chain from your words |
@@ -236,9 +236,12 @@ flashcards**, or single words from **Library** or a search result.
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
 - Each word becomes up to six cards: **JP → EN · JP → Romaji · Romaji → EN ·
   EN → Romaji**, plus two handwritten ones, **EN → Japanese (kana)** and
-  **EN → Japanese (kanji)**. You never type Japanese. **Study directions** in
-  Settings picks which ones you get; the handwritten two are off until you
-  turn them on.
+  **EN → Japanese (kanji)** — and a verb gets one more, **Verb → its forms**:
+  the verb asks for one of its forms (〜ません, 〜ました, 〜ませんでした or the
+  て-form, a different one each time it comes up), typed in romaji; the reveal
+  shows the form with its furigana and plays it. You never type Japanese.
+  **Study directions** in Settings picks which ones you get; the handwritten
+  two and verb forms are off until you turn them on.
 - A session mixes everything due (plus learning steps due within 20 minutes)
   with the day's new cards, in a fresh random order every time. Each word's
   directions are dealt one per round, each round reshuffled, so the same word

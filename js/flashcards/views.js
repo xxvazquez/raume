@@ -112,6 +112,7 @@ window.RaumeStudy.flashcards.views = (function () {
       (window.RaumeStudy.flashcards.appBadge && window.RaumeStudy.flashcards.appBadge.supported
         ? '<li><span class="help-term">Badge</span><span class="help-desc">Settings › App icon puts the number of cards to study on raume’s icon.</span></li>' : '') +
       '<li><span class="help-term">Writing</span><span class="help-desc">English → Japanese, off until you turn it on: write the word on the pad stroke by stroke — in kana (みず), or with its kanji (水). Show answer if you’re stuck.</span></li>' +
+      '<li><span class="help-term">Verb forms</span><span class="help-desc">Off until you turn it on: a verb asks for one of its forms — ません, ました, ませんでした or the て-form, a different one each time. Type it in romaji.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +
@@ -592,7 +593,7 @@ window.RaumeStudy.flashcards.views = (function () {
     var k = getKanaFsrs();
     panel.innerHTML =
       setGroup("Study directions", DIRECTIONS.map(function (d) {
-        return '<label class="set-row fc-direction-check"><input type="checkbox" data-direction="' + d + '" class="fc-dir-checkbox" ' + (s.enabled_directions[d] !== false ? "checked" : "") + ">" + esc(DIRECTION_LABEL[d]) + "</label>";
+        return '<label class="set-row fc-direction-check"><input type="checkbox" data-direction="' + d + '" class="fc-dir-checkbox" ' + ((store.isOptInDirection(d) ? s.enabled_directions[d] === true : s.enabled_directions[d] !== false) ? "checked" : "") + ">" + esc(DIRECTION_LABEL[d]) + "</label>";
       }).join(""), "Study now only draws from the ticked directions. Turning one off keeps its cards and progress.") +
       '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div>' +
       setGroup("Word cards",

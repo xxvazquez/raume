@@ -95,6 +95,86 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "en-wk" ? entry.writeKanjiChars : direction === "en-wr" ? entry.writeChars : null;
   }
 
+  // A verb's forms for the Verb → its forms cards (jp-vf), each as the review
+  // card needs it: written with furigana, its kana reading (what plays), and
+  // its romaji. All come from the polite form -- swap the ます, or turn the
+  // stem into the て-form by the verb's group -- so the kanji keep their
+  // reading as written (来ます -> 来(き)て). The same rules as the forms in a
+  // verb's ⓘ (js/vocab/render.js verbForms).
+  var VF_LABELS = ["negative", "past", "past negative", "て-form"];
+  var TE_KANA = { "い": "って", "ち": "って", "り": "って", "み": "んで", "び": "んで", "に": "んで", "き": "いて", "ぎ": "いで", "し": "して" };
+  function teRomaji(stem, iku) {
+    if (iku) return stem.slice(0, -2) + "tte";
+    var m;
+    if ((m = /^(.*)chi$/.exec(stem))) return m[1] + "tte";
+    if ((m = /^(.*)shi$/.exec(stem))) return stem + "te";
+    if ((m = /^(.*)ri$/.exec(stem))) return m[1] + "tte";
+    if ((m = /^(.*)[mbn]i$/.exec(stem))) return m[1] + "nde";
+    if ((m = /^(.*)ki$/.exec(stem))) return m[1] + "ite";
+    if ((m = /^(.*)gi$/.exec(stem))) return m[1] + "ide";
+    if ((m = /^(.*[aiueoāīūēō])i$/.exec(stem))) return m[1] + "tte";
+    return null;
+  }
+  function verbFormsOf(row, jpHtmlFn, jpReadingFn) {
+    var polite = row.forms[1];
+    if (!polite || !/masu$/.test(polite.romaji) || !row.verbClass) return null;
+    var last = polite.jp[polite.jp.length - 1];
+    if (!last || last.kanji || !/ます$/.test(last.text || "")) return null;
+    var godan = row.verbClass === "godan";
+    var iku = godan && polite.jp.some(function (g) { return g.kanji === "行"; });
+    var stemJp = polite.jp.slice(0, -1).concat((last.text || "").length > 2 ? [{ text: last.text.slice(0, -2) }] : []);
+    var stemRo = polite.romaji.slice(0, -4);
+    var stemKana = jpReadingFn(polite.jp).replace(/ます$/, "");
+    var teKana, teRo;
+    if (!godan) { teKana = stemKana + "て"; teRo = stemRo + "te"; }
+    else if (iku) { teKana = stemKana.slice(0, -1) + "って"; teRo = teRomaji(stemRo, true); }
+    else if (TE_KANA[stemKana.slice(-1)]) { teKana = stemKana.slice(0, -1) + TE_KANA[stemKana.slice(-1)]; teRo = teRomaji(stemRo, false); }
+    if (!teKana || !teRo) return null;
+    // The て-form's written word: a ru / irregular verb keeps its stem; a
+    // u-verb swaps the stem's last kana (書き -> 書い + て).
+    function written(tail, dropLast) {
+      var segs = stemJp.slice();
+      if (dropLast) {
+        var end = segs[segs.length - 1];
+        if (!end || end.kanji || !end.text) return null;
+        segs = segs.slice(0, -1).concat(end.text.length > 1 ? [{ text: end.text.slice(0, -1) }] : []);
+      }
+      return segs.concat([{ text: tail }]);
+    }
+    var teTail = !godan ? "て" : iku ? "って" : TE_KANA[stemKana.slice(-1)];
+    var teJp = written(teTail, godan);
+    if (!teJp) return null;
+    var parts = [
+      [written("ません"), stemKana + "ません", stemRo + "masen"],
+      [written("ました"), stemKana + "ました", stemRo + "mashita"],
+      [written("ませんでした"), stemKana + "ませんでした", stemRo + "masen deshita"],
+      [teJp, teKana, teRo]
+    ];
+    return parts.map(function (p, i) {
+      return { label: VF_LABELS[i], html: jpHtmlFn(p[0]), plain: jpPlainOf(p[0]), reading: p[1], romaji: p[2] };
+    });
+  }
+  // What a Verb → its forms card shows and accepts this review: the verb's
+  // dictionary form asking for one form -- a different one each time it
+  // comes up (its review count picks it) -- checked as a romaji card. Any
+  // other card is itself.
+  function cardView(entry, card) {
+    if (!card || card.direction !== "jp-vf" || !entry || !entry.verbForms) return { entry: entry, direction: card ? card.direction : "" };
+    var f = entry.verbForms[(card.reps || 0) % entry.verbForms.length];
+    var view = Object.create(entry);
+    var plainForm = String(entry.jpPromptHtml).split('<span class="fc-jp-slash">')[0];
+    view.jpPromptHtml = plainForm + '<span class="fc-prompt-note fc-vf-ask" lang="en">→ ' + f.label + "</span>";
+    view.askLabel = "Type its " + f.label + " in romaji";
+    view.romajiDisplay = f.romaji;
+    view.romajiAnswerDisplays = [f.romaji];
+    view.romajiAnswers = window.RaumeStudy.kanaRomaji.romajiSpellings(f.romaji).map(function (v) { return normalizeAnswer(v, true); });
+    view.jpReading = f.reading;
+    view.jpPlain = f.plain;
+    view.jpInlineHtml = '<span class="jpword">' + f.html + "</span>";
+    view.formLabel = f.label;
+    return { entry: view, direction: "jp-ro" };
+  }
+
   var vocabIndex = null;
   function buildVocabIndex() {
     var index = {};
@@ -167,6 +247,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiAnswerDisplays = entry.romajiUsable
             ? row.forms.map(function (f) { return f.romaji; })
             : [];
+          entry.verbForms = entry.romajiUsable ? verbFormsOf(row, jpHtmlFn, jpReadingFn) : null;
         } else {
           // A kanji row's prompt is the bare character: furigana over it
           // would hand a jp-ro card its answer.
@@ -244,7 +325,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function directionsForEntry(entry) {
     if (entry.kanji) return entry.romajiUsable ? ["jp-en", "jp-ro"] : ["jp-en"];
     if (!entry.romajiUsable) return ["jp-en"];
-    return DIRECTIONS.filter(function (d) { return !isWriteDirection(d) || !!writeCharsFor(entry, d); });
+    return DIRECTIONS.filter(function (d) {
+      if (d === "jp-vf") return !!entry.verbForms;
+      return !isWriteDirection(d) || !!writeCharsFor(entry, d);
+    });
   }
 
   function promptFor(entry, direction) {
@@ -252,7 +336,8 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     if (direction === "ro-en") return { text: entry.romajiDisplay };
     return { text: entry.englishDisplay, note: entry.englishNote }; // en-ro, en-wr, en-wk
   }
-  function askLabelFor(direction) {
+  function askLabelFor(direction, entry) {
+    if (entry && entry.askLabel) return entry.askLabel;
     if (direction === "en-wr") return "Write it in kana";
     if (direction === "en-wk") return "Write it with its kanji";
     return direction === "jp-en" || direction === "ro-en" ? "Type the English meaning" : "Type the romaji reading";
@@ -472,7 +557,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
-    otherLanguageHint: otherLanguageHint, otherWordHint: otherWordHint, homophonesOf: homophonesOf,
+    otherLanguageHint: otherLanguageHint, otherWordHint: otherWordHint, homophonesOf: homophonesOf, cardView: cardView,
     answerCompareHtml: answerCompareHtml,
     normalizeAnswer: normalizeAnswer, isRomajiUsable: isRomajiUsable,
     getRawVocabRow: getRawVocabRow

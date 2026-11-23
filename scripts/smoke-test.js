@@ -3182,7 +3182,7 @@ async function main() {
       && Object.values(idx).filter(e => !e.kanji && /[一-鿏々]/.test(e.jpPlain)).every(e => [...e.jpPlain].every(ch => !/[一-鿏々]/.test(ch) || !!window.RaumeStudy.data.kanjiStrokes[ch])));
     await fcx.dataOps.addVocabs(["v0015"]);
     Object.keys(c.cards).forEach(id => { if (c.cards[id].direction === "en-wr" && c.cards[id].vocabId === "v0015") delete c.cards[id]; });
-    check("writing is off by default", saved.settings.enabled_directions["en-wr"] === false);
+    check("writing and verb forms are off by default", saved.settings.enabled_directions["en-wr"] === false && saved.settings.enabled_directions["jp-vf"] === false);
     await fcx.dataOps.saveDirectionSettings({ "jp-en": false, "jp-ro": false, "ro-en": false, "en-ro": false, "en-wr": true, "en-wk": false });
     const wr = Object.values(c.cards).filter(x => x.vocabId === "v0015" && x.direction === "en-wr");
     check("switching it on gives words already in study their writing card, once", wr.length === 1 && wr[0].active);
@@ -4971,8 +4971,8 @@ async function main() {
       && document.querySelectorAll("#fcPanelSettings .set-info").length >= 3 && shown && foot.hidden;
   })());
   const dirChecks = [...document.querySelectorAll(".fc-dir-checkbox")];
-  check("all 6 directions are offered as a setting", dirChecks.length === 6);
-  check("the four typed ones are on by default, the two written ones off", dirChecks.every(cb => cb.checked === !/^en-w/.test(cb.dataset.direction)));
+  check("all 7 directions are offered as a setting", dirChecks.length === 7);
+  check("the four typed ones are on by default, the two written ones and verb forms off", dirChecks.every(cb => cb.checked === !/^en-w|^jp-vf$/.test(cb.dataset.direction)));
   const fcChange = el => el.dispatchEvent(new window.Event("change", { bubbles: true }));
   check("there's no Save button -- changes save as you make them, as in iOS Settings", !document.getElementById("fcSaveSettings"));
   for (const cb of dirChecks.filter(x => x.checked)) { cb.checked = false; fcChange(cb); await flush(); }
@@ -5146,6 +5146,21 @@ async function main() {
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");
   check("the Numbers table now carries real romaji (not kana), so the row is romaji-usable", !!numberEntry && numberEntry.romajiUsable === true);
   check("...so the four typed directions are offered for it", JSON.stringify(fc.directionsForEntry(numberEntry).filter(d => !/^en-w/.test(d))) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
+  check("a verb offers Verb → its forms (jp-vf); a noun doesn't", fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu")).indexOf("jp-vf") !== -1
+    && fc.directionsForEntry(beerEntry).indexOf("jp-vf") === -1
+    && window.RaumeStudy.flashcards.store.DIRECTION_LABEL["jp-vf"] === "Verb → its forms");
+  check("a Verb → its forms card asks a different form each review and checks it as romaji (行く: past negative, then the て-form 行って)", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const iku = Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu");
+    const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 3 });
+    const kuru = vi.cardView(Object.values(vocabIndex).find(e => e.romajiDisplay === "kuru / kimasu"), { direction: "jp-vf", reps: 3 });
+    return pastNeg.direction === "jp-ro" && /past negative/.test(pastNeg.entry.askLabel)
+      && fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasen deshita") && fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasendeshita")
+      && !fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasen")
+      && fc.checkAnswer(te.entry, "jp-ro", "itte") && te.entry.jpReading === "いって" && te.entry.jpPlain === "行って"
+      && kuru.entry.jpReading === "きて" && fc.checkAnswer(kuru.entry, "jp-ro", "kite")
+      && vi.cardView(iku, { direction: "jp-en", reps: 2 }).entry === iku;
+  })());
   check("a kana word offers the typed four and kana writing (no kanji to write)", JSON.stringify(fc.directionsForEntry(beerEntry)) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr"]));
   check("the jp-en/jp-ro prompt for a word entry carries a speaker button keyed to its reading", (() => {
     const prompt = fc.promptFor(beerEntry, "jp-en");

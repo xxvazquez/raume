@@ -1295,12 +1295,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!card || !entry || !input || store.isWriteDirection(card.direction)) return; // writing checks itself
     session.write = null;
     session.userAnswer = input.value;
-    session.correct = checkAnswer(entry, card.direction, input.value);
+    // A Verb → its forms card checks as a romaji card for this review's form.
+    var view = vidx.cardView(entry, card), dir = view.direction;
+    entry = view.entry;
+    session.correct = checkAnswer(entry, dir, input.value);
     // Right answer, wrong language: say which one the card wants and keep the
     // field open (text selected, ready to overtype) -- no grade, no reveal.
     // Another word that also fits the English prompt gets the same treatment.
     session.hint = session.correct ? ""
-      : otherLanguageHint(entry, card.direction, input.value) || otherWordHint(entry, card.direction, input.value);
+      : otherLanguageHint(entry, dir, input.value) || otherWordHint(entry, dir, input.value);
     if (session.hint) {
       if (!syncReviewCard()) rerender();
       input.select();
@@ -1513,8 +1516,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var cur = session && currentReviewCard();
     if (!shell || !cur) return false;
     var card = cur.card, entry = cur.entry;
-    var prompt = promptFor(entry, card.direction);
-    var context = contextDisplayFor(entry, card.direction);
+    // A Verb → its forms card is shown and checked as a romaji card for the
+    // form this review asks (vocab-index.js cardView); its label stays its own.
+    var view = vidx.cardView(entry, card), dir = view.direction;
+    entry = view.entry;
+    var prompt = promptFor(entry, dir);
+    var context = contextDisplayFor(entry, dir);
 
     shell.querySelector(".fc-review-progress").textContent =
       DIRECTION_LABEL[card.direction] + " · " + (session.index + 1) + " / " + session.queue.length;
@@ -1540,7 +1547,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // nothing new and pushed the English answer -- what a miss needs to
     // show -- down the card.
     var readingEl = shell.querySelector(".fc-prompt-reading");
-    var showReading = session.checked && prompt.lang === "ja" && card.direction === "jp-en" && entry.kanji &&
+    var showReading = session.checked && prompt.lang === "ja" && dir === "jp-en" && entry.kanji &&
       !!entry.jpReading && entry.jpReading !== entry.jpPlain;
     readingEl.hidden = !showReading;
     readingEl.textContent = showReading ? entry.jpReading : "";
@@ -1548,8 +1555,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var input = shell.querySelector("#fcAnswerInput");
     // Name the field with the prompt it belongs to, so a screen-reader user
     // dropped onto it between cards knows what they're answering.
-    input.setAttribute("aria-label", askLabelFor(card.direction) + ": " + (prompt.text || entry.jpPlain));
-    input.placeholder = answerPlaceholderFor(card.direction);
+    input.setAttribute("aria-label", askLabelFor(dir, entry) + ": " + (prompt.text || entry.jpPlain));
+    input.placeholder = answerPlaceholderFor(dir);
     input.value = session.userAnswer || "";
     var form = shell.querySelector("#fcAnswerForm");
     var dyn = shell.querySelector(".fc-review-dynamic");
@@ -1557,20 +1564,20 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // A writing card has no field: hide it (dropping a phone keyboard) and
     // put the pad there instead -- until checked, when the answer below says
     // it all (the squares would only repeat it).
-    var writing = store.isWriteDirection(card.direction);
+    var writing = store.isWriteDirection(dir);
     var writeHost = shell.querySelector(".fc-write-host");
     if (form) form.hidden = writing;
     if (writeHost) {
       writeHost.hidden = !writing || session.checked;
       if (writing) {
         if (document.activeElement === input) input.blur();
-        writeCard.mount(writeHost, writeKey(card), vidx.writeCharsFor(entry, card.direction), writeDone);
+        writeCard.mount(writeHost, writeKey(card), vidx.writeCharsFor(entry, dir), writeDone);
       } else {
         writeHost.innerHTML = "";
       }
     }
     if (writing) {
-      dyn.innerHTML = session.checked ? writeVerdictHtml(entry, card.direction, context) + ratingRowHtml() + "</div>" : "";
+      dyn.innerHTML = session.checked ? writeVerdictHtml(entry, dir, context) + ratingRowHtml() + "</div>" : "";
       wireRatings(dyn);
       return true;
     }
@@ -1587,12 +1594,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
     if (form) form.classList.add("fc-answer-form-checked");
-    var expected = expectedDisplayFor(entry, card.direction);
+    var expected = expectedDisplayFor(entry, dir);
     // Wrong answers get a real letter-level comparison (romaji targets) or a
     // plain typed-vs-correct pair (English targets, which accept several
     // synonyms -- diffing characters against just one of them isn't fair).
     // Correct answers need none of that -- just the answer, once, restated.
-    var cmp = session.correct ? null : answerCompareHtml(entry, card.direction, session.userAnswer);
+    var cmp = session.correct ? null : answerCompareHtml(entry, dir, session.userAnswer);
     // The ANSWER is the focus -- big, first thing the eye lands on. What you
     // typed is one quiet line below it, never struck through (hard to read):
     // the romaji diff marks the bad letters (cmp.marked), and otherwise the
@@ -1606,12 +1613,12 @@ window.RaumeStudy.flashcards.dashboard = (function () {
           '<div class="fc-stage-typed">' + ((session.userAnswer || "").trim() ? "You wrote “" + cmp.youHtml + "”" : "No answer") + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
     // An English answer's note ("before a noun") sits right under it.
-    if ((card.direction === "jp-en" || card.direction === "ro-en") && entry.englishNote) {
+    if ((dir === "jp-en" || dir === "ro-en") && entry.englishNote) {
       stageHtml += '<div class="fc-stage-note">' + esc(entry.englishNote) + "</div>";
     }
     // A Romaji -> English prompt can't tell namesakes apart (any of their
     // meanings was accepted) -- so the reveal names the others, kanji first.
-    var sameSound = card.direction === "ro-en" ? homophonesOf(entry) : [];
+    var sameSound = dir === "ro-en" ? homophonesOf(entry) : [];
     var sameSoundHtml = sameSound.length
       ? '<div class="fc-stage-meaning fc-stage-homophones"><span class="fc-answer-label">Same sound</span>' +
         sameSound.map(function (h) {
@@ -1627,7 +1634,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // showing the same word twice on screen at once.
       '<span class="fc-verdict-badge fc-verdict-badge-' + verdictKind + '">' + verdictIcon + "</span>" +
       '<div class="fc-stage">' + stageHtml +
-        (card.direction === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + sameSoundHtml + "</div>" +
+        (dir === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + sameSoundHtml + "</div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy sit at reduced opacity -- still one click away (typos
       // happen), just not the default read.
@@ -1639,7 +1646,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (session.correct ? "" : " You typed " + (session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "nothing") + ".") +
       " " + context.label + ": " + context.value + "." +
       (sameSound.length ? " Same sound: " + sameSound.map(function (h) { return h.jpPlain + ", " + h.englishFull; }).join("; ") + "." : "") +
-      " Answer: " + expected + (entry.englishNote && (card.direction === "jp-en" || card.direction === "ro-en") ? ", " + entry.englishNote : "") + ".");
+      " Answer: " + expected + (entry.englishNote && (dir === "jp-en" || dir === "ro-en") ? ", " + entry.englishNote : "") + ".");
     wireRatings(dyn);
     return true;
   }

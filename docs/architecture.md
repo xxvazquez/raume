@@ -135,7 +135,15 @@ flowchart LR
   flashcard progress. Deleting a custom row/table is a real delete (no learning
   history on the content itself to keep).
 - Each vocab entry maps to up to six independently scheduled cards (jp-en,
-  jp-ro, ro-en, en-ro, en-wr, en-wk), never Japanese-to-type. Rows whose romaji is still kana
+  jp-ro, ro-en, en-ro, en-wr, en-wk), plus **jp-vf** (Verb → its forms) for a
+  verb, never Japanese-to-type. A jp-vf card is one card per verb: each review
+  asks the form `card.reps % 4` picks (〜ません / 〜ました / 〜ませんでした /
+  て-form), shown and checked as a jp-ro card by `vocab-index.js` `cardView`
+  (a derived entry whose romaji answers, reading and written form are that
+  form's; `entry.verbForms` holds all four, worked out from the polite form).
+  Off by default like the writing ones (`store.isOptInDirection`); its column
+  is `enabled_jp_vf` and its cards need the widened direction check in
+  `supabase/schema.sql`. Rows whose romaji is still kana
   get jp-en only. **en-wr** / **en-wk** (English → Japanese (kana) / (kanji))
   ask for the word handwritten on a pad (`js/flashcards/write-card.js`), judged
   stroke by stroke with `kanjiWrite.judge` against `data/kana-strokes.js` and

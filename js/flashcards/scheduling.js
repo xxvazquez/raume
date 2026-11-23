@@ -109,12 +109,16 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     var index = vidx.getVocabIndex();
     return activeCards().filter(function (card) {
       if (enabled[card.direction] === false) return false;
+      // An opt-in direction (writing, verb forms) counts only when switched
+      // on -- settings saved before it existed don't mention it at all.
+      if (store.isOptInDirection(card.direction) && enabled[card.direction] !== true) return false;
       // A card whose word left the dataset (a removed table, or a custom
       // word not loaded yet) has nothing to show -- skip it, don't jam the queue.
       var entry = index[card.vocabId];
       // A written card whose word can no longer be written that way (its
       // reading changed) has nothing to ask either.
       if (entry && store.isWriteDirection(card.direction) && !vidx.writeCharsFor(entry, card.direction)) return false;
+      if (entry && card.direction === "jp-vf" && !entry.verbForms) return false;
       return !!entry && !store.isTablePaused(entry.tableId);
     });
   }

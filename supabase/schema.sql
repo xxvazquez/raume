@@ -103,9 +103,12 @@ alter table public.flashcard_settings add column if not exists enabled_en_ro boo
 -- name for the inline check above, so a re-run lands on the same constraint.
 alter table public.flashcard_settings add column if not exists enabled_en_wr boolean not null default false;
 alter table public.flashcard_settings add column if not exists enabled_en_wk boolean not null default false;
+-- jp-vf: a verb -> one of its forms (ません, ました, ませんでした, the
+-- て-form), typed in romaji; also off until switched on.
+alter table public.flashcard_settings add column if not exists enabled_jp_vf boolean not null default false;
 alter table public.flashcards drop constraint if exists flashcards_direction_check;
 alter table public.flashcards add constraint flashcards_direction_check
-  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk'));
+  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk', 'jp-vf'));
 
 -- Per-table personalisation for the vocabulary page (the icon you pick for a
 -- table header, keyed by the table's permanent id). Not a flashcards concept
