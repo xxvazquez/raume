@@ -453,7 +453,7 @@ supabase/schema.sql     Postgres tables + Row Level Security
 sw.js                   service worker (offline app shell)
 manifest.webmanifest    PWA manifest
 favicon.png             48px favicon (index.html links this, not logo.png)
-icons/                  PWA app icons — see scripts/generate-icons.py
+icons/                  PWA app icons — see scripts/generate-icons.py; launch/ = iOS launch images (generate-launch-images.py)
 logo.png                master mark; source art for the favicon + icons, not served
 scripts/                vocab validator, id + icon + audio generators, smoke + SW tests,
                         note_kit.py (builds lesson notes for the Notes page)
@@ -521,7 +521,12 @@ Installable and offline-capable once visited.
   precaches the app shell and caches versioned assets as you browse.
 - **iOS / Safari** — Share → Add to Home Screen. The `apple-touch-icon` and
   `apple-mobile-web-app-*` tags in `index.html` handle the icon, name, and
-  chrome-less launch.
+  chrome-less launch. The `apple-touch-startup-image` links (one per iPhone /
+  iPad screen size, light and dark) show raume's ground colour while the app
+  starts instead of a white page -- iOS saves the matching one when the app is
+  added to the Home Screen, so an existing install needs re-adding to get it.
+  Plain colour, no logo (Apple's launch-screen guidance); built by
+  `scripts/generate-launch-images.py` into `icons/launch/`.
 - The service-worker cache is named `raume-<sha>` — one per deploy, previous one
   dropped on activate. Installing a new deploy copies every file whose URL
   (content hash) didn't change over from the previous cache, and the icons and
@@ -549,6 +554,7 @@ npm install && npm test     # render the page in jsdom and exercise it; runs the
 node scripts/smoke-test.js games   # just one area: reference | flashcards | games
 npm run generate:vocab-ids  # assign ids to any new vocab rows
 npm run generate:icons      # rebuild the favicon + PWA icons from logo.png (Pillow + NumPy)
+npm run generate:launch     # rebuild icons/launch/ (--group-ground launch images; re-run after changing it or adding a device size)
 npm run vendor:libs         # re-copy the vendored libs after a version bump
 ```
 

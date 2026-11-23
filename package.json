@@ -8,6 +8,7 @@
     "test": "node scripts/smoke-test.js && node scripts/sw-test.js",
     "generate:vocab-ids": "node scripts/generate-vocab-ids.js",
     "generate:icons": "python3 scripts/generate-icons.py",
+    "generate:launch": "python3 scripts/generate-launch-images.py",
     "vendor:libs": "cp node_modules/ts-fsrs/dist/index.umd.js vendor/ts-fsrs.js && cp node_modules/ts-fsrs/LICENSE vendor/ts-fsrs.LICENSE.txt && cp node_modules/@supabase/supabase-js/dist/umd/supabase.js vendor/supabase.js && cp node_modules/@supabase/supabase-js/LICENSE vendor/supabase.LICENSE.txt"
   },
   "devDependencies": {
