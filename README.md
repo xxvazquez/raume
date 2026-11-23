@@ -610,7 +610,7 @@ with reduced motion on, it's all a plain change of state.
 <summary><b>Speed sort</b></summary>
 
 - Words one at a time, large, against the clock: tap the bucket each one
-  belongs in. **Sort by** (in ⋯) picks the buckets — *Tables* (two or three
+  belongs in. **Sort by** (on the setup screen) picks the buckets — *Tables* (two or three
   of your tables, from different categories where possible), *Adjectives*
   (い / な) or *Verbs* (u-verb / ru-verb, plus irregular when there are
   some). Only the sorts your words can fill are offered.
