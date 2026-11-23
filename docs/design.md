@@ -345,11 +345,13 @@ and Help.
   (`--page-bg` under `--paper`), as on iOS.
 - **Known words** (`tr.known-row`): the row stays exactly as it is on a
   soft pastel green (`--known-bg`: the table-tile green at 14% on paper, 22%
-  in dark) with a 12px ✓ in `--right-strong` after the Japanese, announced as
-  "Known" — never colour alone, never hidden. Print leaves it out.
+  in dark), nothing hidden; the cell is announced as "Known"
+  (`aria-description`). No glyph beside the word — the wash is enough, and
+  the Options sheet's **Row colours** group names it (a ✓ / ! there also
+  took the `.jpword::after` the tapped romaji draws into). Print leaves it out.
 - **Tricky words** (`tr.tricky-row`): the same, in the Hard rating's amber
-  (`--tricky-bg`: `--fc-hard` at 20% on paper, 24% in dark) with a 12px **!**
-  in `--fc-hard-strong`, announced as "Tricky". Known wins. Options › Study ›
+  (`--tricky-bg`: `--fc-hard` at 20% on paper, 24% in dark), announced as
+  "Tricky". Known wins. Options › Study ›
   **Highlight progress** turns both washes off together (`body.no-progress-hl`).
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
   Patterns, or a custom table of your own sentences): stacked rows, not two columns —
@@ -563,7 +565,9 @@ and Help.
   (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, ⓘ, +, ⋯)
   are spelled out in the Options sheet's **Row icons** group — iOS subtitle
   cells: the glyph in its own column, a 15px name, one 13px grey line under it,
-  the hairline starting at the words. Standard iOS glyphs
+  the hairline starting at the words. The row washes get the same treatment
+  in a **Row colours** group under it — a 16px rounded swatch of each wash
+  (Known, Tricky) and a red *Aa* (Irregular) in the glyph column. Standard iOS glyphs
   (⋯, ×, chevrons) may stay bare. The page a glyph opens (Customize, Help) shows
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,

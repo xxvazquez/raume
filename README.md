@@ -94,8 +94,8 @@ Grammatical **particles are blue and bold** everywhere.
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
 | **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. Tables open A–Z, except those taught as a sequence — counting (ひとつ, ふたつ…), days and years (おととい → きのう → きょう), time of day, こ・そ・あ・ど, particles, question words, family and greetings — which open in that order. |
-| **Known words** | A word you know gets a soft green wash and a ✓ — nothing is hidden. Mark it yourself from its hold menu, or it turns green on its own once you've known its meaning in flashcards for three weeks (its Japanese → English card is mature). **Mark as not known** always wins over that. Synced with your account like Known kanji. |
-| **Tricky words** | A word that isn't sticking gets a soft amber wash and a small **!** — one of its flashcards forgotten twice after you'd learned it, or rated Again / Hard so often FSRS rates it near the hardest. Known wins over it. |
+| **Known words** | A word you know gets a soft green wash — nothing is hidden. Mark it yourself from its hold menu, or it turns green on its own once you've known its meaning in flashcards for three weeks (its Japanese → English card is mature). **Mark as not known** always wins over that. Synced with your account like Known kanji. |
+| **Tricky words** | A word that isn't sticking gets a soft amber wash — one of its flashcards forgotten twice after you'd learned it, or rated Again / Hard so often FSRS rates it near the hardest. Known wins over it. |
 | **Irregular words** | Exceptions (irregular verbs, Numbers' 4 / 7 / 9) are written in red, with no wash, so the green or amber of your progress shows on them too. |
 | **Hold a word** | Hold a row (or right-click it) for its menu, as in iOS: the word in a small preview, then **Play**, **Copy** (the Japanese), **Add to flashcards** / **Pause in flashcards**, **Mark as known** / **Mark as not known** and **Hide row** — the row's own speaker, flashcards toggle and eye, as a bigger target. The preview shows only what the row shows, so a hidden column or Cover answers stays hidden. |
 | **Hide a row** | The eye icon marks a word as known for now. **Show all** brings them back. |
@@ -113,7 +113,7 @@ bottom sheet on a phone. A dot on it means something is off its default.
 | **Show polite** | Switches verbs to 〜ます. Only appears while the Verbs table is open. |
 | **Highlight progress** | The green of known words and the amber of tricky ones, on (the default) or off together. Irregular words stay red. |
 | **Expand all · Print** | Open every table; print the section or everything. |
-| **Legends** | The badges on screen, and **Row icons** — each glyph (speaker, hide, ⓘ, +, ⋯) named, with one short line on what it does. |
+| **Legends** | The badges on screen, **Row icons** — each glyph (speaker, hide, ⓘ, +, ⋯) named, with one short line on what it does — and **Row colours**: Known green, Tricky amber, Irregular red. |
 
 ### Grammar notes
 

@@ -375,8 +375,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const mastered = masteredVocab(cards), tricky = trickyVocab(cards);
     document.querySelectorAll('#vocabulary tbody tr[data-vocab-id]:not(.kanji-tile)').forEach(function (tr) {
       const known = wordKnown(tr.dataset.vocabId, mastered);
+      const isTricky = !known && !!tricky[tr.dataset.vocabId];
       tr.classList.toggle('known-row', known);
-      tr.classList.toggle('tricky-row', !known && !!tricky[tr.dataset.vocabId]);
+      tr.classList.toggle('tricky-row', isTricky);
+      // The wash is the only mark on screen, so say it to VoiceOver.
+      const jp = tr.querySelector('td.jp');
+      if (jp) {
+        if (known || isTricky) jp.setAttribute('aria-description', known ? 'Known' : 'Tricky');
+        else jp.removeAttribute('aria-description');
+      }
     });
   }
   vocab.refreshKnownRows = refreshKnownRows;

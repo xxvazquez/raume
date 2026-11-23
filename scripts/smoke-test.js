@@ -1641,11 +1641,19 @@ async function main() {
     };
     check("a word you haven't marked (and never studied) isn't green", !row.classList.contains("known-row"));
     const label = menuAct("known");
-    check("its hold menu offers Mark as known, which turns the row green with a ✓ -- still fully visible", label === "Mark as known"
+    check("its hold menu offers Mark as known, which turns the row green -- still fully visible, announced as Known", label === "Mark as known"
       && row.classList.contains("known-row") && !row.classList.contains("row-hidden") && window.RaumeStudy.knownKanji.isKnown(id)
-      && allCssRules.some(r => r.selectorText && r.selectorText.includes("tr.known-row") && r.selectorText.includes("::after")));
+      && row.querySelector("td.jp").getAttribute("aria-description") === "Known");
+    check("a Known / Tricky row draws no glyph over the word's ::after, so tapping it still shows the romaji",
+      !allCssRules.some(r => r.selectorText && /tr\.(known|tricky)-row/.test(r.selectorText) && r.selectorText.includes("jpword::after")));
+    check("Options › Row colours names Known, Tricky and Irregular, each with its swatch", (() => {
+      const g = [...document.querySelectorAll("#optionsSheet .opt-group")].find(x => (x.querySelector(".opt-head") || {}).textContent === "Row colours");
+      const names = g ? [...g.querySelectorAll(".opt-legend-name")].map(n => n.textContent) : [];
+      return names.join() === "Known,Tricky,Irregular" && g.querySelectorAll(".opt-swatch").length === 3;
+    })());
     const label2 = menuAct("known");
-    check("...and Mark as not known takes it back off", label2 === "Mark as not known" && !row.classList.contains("known-row"));
+    check("...and Mark as not known takes it back off", label2 === "Mark as not known" && !row.classList.contains("known-row")
+      && !row.querySelector("td.jp").hasAttribute("aria-description"));
     const hl = document.getElementById("progressHlToggle");
     hl.click();
     const off = document.body.classList.contains("no-progress-hl") && hl.getAttribute("aria-pressed") === "false"
