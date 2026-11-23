@@ -2500,7 +2500,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     kanatiles: "Spell the word from kana tiles",
     oddone: "Spot the word that doesn’t belong",
     speedsort: "Sort each word into its bucket, fast",
-    wordchain: "Each word starts on the kana the last one ended"
+    wordchain: "Each word starts on the kana the last one ended on"
   };
   var CHECK_ICON = '<svg class="fc-gs-check" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 7.5 13.5 14.5 5"/></svg>';
   // Script, Word count, Sort by: the same row as Words from -- the value
