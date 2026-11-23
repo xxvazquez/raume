@@ -885,7 +885,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0852","type":"word","jp":[{"kanji":"妹","reading":"いもうと"}],"romaji":"imōto","english":"my younger sister"},
     {"id":"v0853","type":"word","jp":[{"kanji":"妹","reading":"いもうと"},{"text":"さん"}],"romaji":"imōtosan","english":"someone's younger sister"},
     {"id":"v0854","type":"word","jp":[{"kanji":"兄弟","reading":"きょうだい"}],"romaji":"kyōdai","english":"brothers and sisters / siblings"},
-    {"id":"v0855","type":"word","jp":[{"kanji":"子供","reading":"こども"}],"romaji":"kodomo","english":"child / children"},
+    {"id":"v0855","type":"word","jp":[{"kanji":"子","reading":"こ"},{"text":"ども"}],"romaji":"kodomo","english":"child / children"},
     {"id":"v0856","type":"word","jp":[{"text":"おじいさん"}],"romaji":"ojīsan","english":"grandfather / old man"},
     {"id":"v0857","type":"word","jp":[{"text":"おばあさん"}],"romaji":"obāsan","english":"grandmother / old woman"},
     {"id":"v0858","type":"word","jp":[{"text":"おじさん"}],"romaji":"ojisan","english":"uncle / middle-aged man"},
