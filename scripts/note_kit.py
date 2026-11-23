@@ -4,8 +4,8 @@ A lesson file imports this kit, builds its sections from these components
 and calls render(). The result is one HTML file to add on the Notes screen
 (Notes › Add): plain markup in rn-* classes with no styles or scripts of its
 own -- raume supplies the look (css/site.css, .rn), dark mode, the study
-controls (Quiz, Romaji / English / Furigana), tap-to-reveal and
-tap-to-hear (js/notes.js). Opened anywhere else it is readable, unstyled.
+controls (Quiz, English / Furigana), tap-for-romaji, tap-to-reveal and
+the speakers (js/notes.js). Opened anywhere else it is readable, unstyled.
 
 Every note has the same shape, so lessons read alike side by side:
 
@@ -259,8 +259,9 @@ def lst(rows, cols="qa", head=None, lead="em"):
 
 
 def tiles(items, n=4, az=False):
-    """items: [(icon or '', jp, romaji, english)], n = 2, 3 or 4 a row (two
-    on a phone). az=True sorts by romaji."""
+    """items: [(icon or '', jp, romaji, english)]: a word list, drawn as one
+    card with a row per word. n (2, 3 or 4) is no longer used for layout and
+    is only checked. az=True sorts by romaji."""
     if n not in (2, 3, 4):
         raise ValueError(f"tiles: n is 2, 3 or 4, not {n!r}")
     if az:

@@ -826,22 +826,29 @@ and Help.
   screen, not a document, and every note has the same shape: sections in
   one order, each kind in its own tile hue and named in its grey subtitle
   (Grammar blue, Conversation teal, Vocabulary green, Practice orange, Watch
-  out clay, Reference slate — so a colour never stands alone). Numbered
-  section heads (a `--fs-card-heading` title, a 26px dot in the section's tile hue, the
-  kind and the Japanese subtitle in grey), list-header
-  sub-heads, and everything on white surfaces — formula cards, explainer
-  cards, tips (a tile-hue dot leads each), tile grids (4, 3 or 2 across, 2 on a
-  phone) and hairline Q/A lists that stack on a phone. Every Japanese item
-  stacks Japanese with furigana (particles bold blue, `.particle`, as
-  everywhere in raume), romaji (italic, `--romaji`) and English, in the
-  reference tables' own type — `--font-jp` at `--fs-jp` (16px on a phone),
-  `--fs-romaji`, `--fs-english` (12.5px on a phone) — so a note reads at
-  the same size as the rest of raume; its
-  Japanese line ends in a small faint speaker, so tap-to-hear shows. Colour
-  is only the section's tile hue (highlights, slots, dots); the lesson
-  kit's pink becomes clay. Quiz and the Romaji / English switches blur
-  what they cover (5px, 55%), and a tap uncovers the whole item; reduced
-  motion drops the fade. Non-lesson HTML is shown as its author made it,
+  out clay, Reference slate — so a colour never stands alone). Section
+  heads are headings, not badges: the number in the section's hue and the
+  title on one line (`--fs-section-title`, under the lesson topic's 22px),
+  the kind and the Japanese subtitle in grey under the title, 40px between
+  sections. Sub-heads are list headers. No card per item: a word list
+  (`tiles`) is one inset-grouped card read like a reference table — a
+  hairline row per word (the hairline starts past the picture), its
+  picture in a leading column, the Japanese and speaker first with the
+  English trailing (from halfway across on a wide window), one column at
+  every width so it reads top to bottom; a list whose Japanese runs long
+  (pairs, phrases) puts the English under it on a phone. Explainer and
+  formula cards set side by side become one card with a hairline between
+  them. Tips are lesson text, so ink with their tile-hue dot and no box.
+  Formula cards and hairline Q/A lists (stacked on a phone) stay. Every
+  Japanese item is Japanese with furigana (particles bold blue,
+  `.particle`, as everywhere in raume) and the reference tables' speaker
+  button, then English, in the tables' own type — `--font-jp` at `--fs-jp`
+  (16px on a phone), `--fs-english` (12.5px on a phone); as in the
+  tables, tapping the Japanese opens its romaji (italic, `--romaji`) as a
+  caption under it, one at a time. Colour is only the section's tile hue
+  (highlights, slots, dots); the lesson kit's pink becomes clay. Quiz and
+  the English switch blur what they cover (5px, 55%), and a tap uncovers
+  the whole item; reduced motion drops the fade. Non-lesson HTML is shown as its author made it,
   in a white rounded sheet (always light) sized to the note.
 - **The masthead Help page** (`.page-help`) is a short menu of four disclosure
   rows in one white card (see the type-scale note above) — no rules between

@@ -32,6 +32,8 @@ window.RaumeStudy.notes = (function () {
 
   var MAX_BYTES = 5 * 1024 * 1024; // matches the notes_html_size check
   var STUDY_KEY = "raume-notes-study";
+  // The reference tables' speaker glyph (js/vocab/render.js).
+  var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
   var META_BASE = "id,title,note_date,size,created_at,updated_at";
   // `source` (the mark: Sakura / WSJJ / mine) is a later column -- an account
   // whose database hasn't had supabase/schema.sql re-run yet lacks it, and
@@ -391,7 +393,7 @@ window.RaumeStudy.notes = (function () {
     return root;
   }
   var study = (function () {
-    var d = { romaji: true, english: true, furigana: true, quiz: false };
+    var d = { english: true, furigana: true, quiz: false };
     try { Object.assign(d, JSON.parse(localStorage.getItem(STUDY_KEY) || "{}")); } catch (e) {}
     return d;
   })();
@@ -399,7 +401,6 @@ window.RaumeStudy.notes = (function () {
   function applyStudy() {
     var body = hostEl && hostEl.querySelector(".rn");
     if (!body) return;
-    body.classList.toggle("rn-no-romaji", !study.romaji);
     body.classList.toggle("rn-no-english", !study.english);
     body.classList.toggle("rn-no-furigana", !study.furigana);
     body.classList.toggle("rn-quiz", !!study.quiz);
@@ -418,20 +419,38 @@ window.RaumeStudy.notes = (function () {
     if (!el || !el.closest(".rn")) return false;
     var body = el.closest(".rn"), st = el.closest(".rn-st");
     if (st && st.classList.contains("rn-shown")) return false;
-    if (el.classList.contains("rn-ro") || el.classList.contains("rn-fr")) return body.classList.contains("rn-no-romaji");
     if (el.classList.contains("rn-en")) return body.classList.contains("rn-no-english");
     if (el.classList.contains("rn-jp")) return body.classList.contains("rn-quiz") && !!st && st.classList.contains("rn-ans");
     return false;
   }
-  // Tap a covered line to uncover its whole item; tap the Japanese to hear it.
+  // The speaker plays its line; a covered item uncovers on a tap; tapping
+  // the Japanese opens its romaji under it, as in the reference tables --
+  // one at a time, closed by tapping it again or anywhere else.
+  var romajiOpen = null;
+  function setRomaji(st) {
+    if (romajiOpen && romajiOpen !== st) {
+      romajiOpen.classList.remove("rn-ro-on");
+      var prev = romajiOpen.querySelector(".rn-jp");
+      if (prev) prev.setAttribute("aria-expanded", "false");
+    }
+    romajiOpen = st && st !== romajiOpen ? st : null;
+    if (st) {
+      st.classList.toggle("rn-ro-on", romajiOpen === st);
+      st.querySelector(".rn-jp").setAttribute("aria-expanded", String(romajiOpen === st));
+    }
+  }
   function onLessonClick(e) {
+    var btn = e.target.closest(".rn-jl .jp-speak-btn");
+    // Stopped here: the reference tables' document-wide speaker handler
+    // would otherwise also fire for this shared class, with no text.
+    if (btn) { e.stopPropagation(); speak(btn.parentNode.querySelector(".rn-jp")); return; }
     var st = e.target.closest(".rn-st");
     if (st && !st.classList.contains("rn-shown")) {
-      var covered = Array.prototype.some.call(st.querySelectorAll(".rn-jp, .rn-ro, .rn-en"), hidden);
+      var covered = Array.prototype.some.call(st.querySelectorAll(".rn-jp, .rn-en"), hidden);
       if (covered) { st.classList.add("rn-shown"); return; }
     }
     var jp = e.target.closest(".rn-st .rn-jp");
-    if (jp) speak(jp);
+    setRomaji(jp && jp.hasAttribute("aria-expanded") ? st : null);
   }
   // What a Japanese line says: each kanji as its furigana reading, as the
   // reference tables' speakers do -- a voice reading the bare kanji can
@@ -468,12 +487,29 @@ window.RaumeStudy.notes = (function () {
     var body = document.createElement("div");
     body.className = "rn";
     Array.prototype.slice.call(root.childNodes).forEach(function (n) { body.appendChild(document.importNode(n, true)); });
-    // Each Japanese line says it plays (the tap is only a bigger target for this).
+    // Each Japanese line gets the reference tables' speaker beside it, and
+    // opens its romaji on a tap when it has one.
+    romajiOpen = null;
     body.querySelectorAll(".rn-st .rn-jp").forEach(function (jp) {
       jp.setAttribute("lang", "ja");
-      jp.setAttribute("role", "button");
-      jp.setAttribute("tabindex", "0");
-      jp.setAttribute("aria-label", "Play " + shownText(jp));
+      var line = document.createElement("div");
+      line.className = "rn-jl";
+      jp.parentNode.insertBefore(line, jp);
+      line.appendChild(jp);
+      line.insertAdjacentHTML("beforeend", '<button type="button" class="jp-speak-btn" aria-label="' + esc("Play " + shownText(jp)) + '">' + SPEAKER_ICON + "</button>");
+      var ro = line.nextElementSibling;
+      if (ro && ro.classList.contains("rn-ro") && ro.textContent.trim()) {
+        jp.setAttribute("role", "button");
+        jp.setAttribute("tabindex", "0");
+        jp.setAttribute("aria-expanded", "false");
+      }
+    });
+    // A list whose Japanese runs long (pairs like あかるい ↔ くらい, phrases)
+    // can't share its line with the English on a phone: the whole list
+    // stacks the English under the Japanese, like the sentence tables.
+    body.querySelectorAll(".rn-tiles").forEach(function (list) {
+      var long = Array.prototype.some.call(list.querySelectorAll(".rn-jp"), function (jp) { return shownText(jp).length > 8; });
+      list.classList.toggle("rn-tiles-long", long);
     });
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
@@ -1081,7 +1117,7 @@ window.RaumeStudy.notes = (function () {
       '<div class="section-menu notes-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Note options">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
-      checkItem("romaji", "Romaji") + checkItem("english", "English") + checkItem("furigana", "Furigana") +
+      checkItem("english", "English") + checkItem("furigana", "Furigana") +
       menuItem("practice", "Add words to Practice", false, true) +
       '<p class="notes-menu-head" role="presentation">Mark as</p>' +
       MARK_ORDER.map(function (k) { return markItem(k, note); }).join("") +

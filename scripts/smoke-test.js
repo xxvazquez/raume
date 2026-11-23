@@ -2235,13 +2235,26 @@ async function main() {
       && !rn.querySelector("script, style, iframe, img, a") && !rn.querySelector("[style], [onclick], [onload], [onerror]")
       && !window.__ran && /link text/.test(rn.textContent));
     check("...keeping its classes, tile hue and simple drawings", !!rn && !!rn.querySelector('.rn-sec[data-tile="blue"]') && !!rn.querySelector("svg circle.pk-dot[cx]"));
-    check("each Japanese line plays (a labelled button)", !!rn && rn.querySelector(".rn-jp").getAttribute("role") === "button" && /^Play /.test(rn.querySelector(".rn-jp").getAttribute("aria-label")));
+    check("each Japanese line has the tables' speaker beside it, labelled with what it plays", !!rn
+      && /^Play /.test(rn.querySelector(".rn-jl .jp-speak-btn").getAttribute("aria-label")) && !rn.querySelector(".rn-jp[aria-label]"));
     check("...saying each kanji by its furigana, labelled without it", (() => {
-      const jp = rn && rn.querySelector(".rn-jp"), speech = window.RaumeStudy.shared.speech, orig = speech.speak;
+      const btn = rn && rn.querySelector(".rn-jl .jp-speak-btn"), speech = window.RaumeStudy.shared.speech, orig = speech.speak;
       let said = null;
       speech.speak = t => { said = t; };
-      try { jp.click(); } finally { speech.speak = orig; }
-      return said === "まちです" && jp.getAttribute("aria-label") === "Play 町です";
+      try { btn.click(); } finally { speech.speak = orig; }
+      return said === "まちです" && btn.getAttribute("aria-label") === "Play 町です";
+    })());
+    check("tapping the Japanese opens its romaji under it and closes it again, as in the tables -- it doesn't play", (() => {
+      const jp = rn && rn.querySelector(".rn-jp"), st = jp && jp.closest(".rn-st"), speech = window.RaumeStudy.shared.speech, orig = speech.speak;
+      let said = null;
+      speech.speak = t => { said = t; };
+      try {
+        const closed = !st.classList.contains("rn-ro-on") && jp.getAttribute("aria-expanded") === "false" && jp.getAttribute("role") === "button";
+        jp.click();
+        const open = st.classList.contains("rn-ro-on") && jp.getAttribute("aria-expanded") === "true";
+        rn.click();
+        return closed && open && !st.classList.contains("rn-ro-on") && said === null;
+      } finally { speech.speak = orig; }
     })());
     if (rn) rn.remove();
     const plain = nh.cleanNote('<html><head><style>h2{color:red}</style><script>x()</script><meta http-equiv="refresh" content="0;url=https://example.com"></head>' +
