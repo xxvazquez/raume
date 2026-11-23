@@ -5433,6 +5433,13 @@ mark.fc-diff-co {
   color: var(--ink);
 }
 .fc-jp-slash { color: var(--faint); padding: 0 2px; }
+/* A verb pair's two forms (勉強する / 勉強します): each form wraps as a whole,
+   so a narrow card puts the second form on its own line instead of leaving
+   す alone. Its speaker stays in the line, after its own form -- hung out of
+   the line (as a single word's is) it ran over the slash and the next
+   form's furigana. */
+.fc-jp-form { display: inline-block; white-space: nowrap; }
+.fc-review-card .fc-jp-form .jp-speak-btn { position: static; margin-top: 0; vertical-align: middle; }
 /* One supporting line: romaji (muted italic) · English (legible ink). */
 .fc-missed-gloss { flex: 0 1 auto; min-width: 0; font-size: var(--fs-small); line-height: 1.4; }
 .fc-missed-ro { color: var(--muted); font-style: italic; }

@@ -122,8 +122,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           // reference control): both casual and polite are accepted answers
           // for every verb-pair card today, so the prompt should show both,
           // regardless of what the reference page's toggle is set to.
+          // Each form and its speaker are one unit: a line breaks between
+          // the forms, never inside one (勉強しま / す).
           entry.jpPromptHtml = row.forms.map(function (f) {
-            return '<span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp));
+            return '<span class="fc-jp-form"><span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp)) + "</span>";
           }).join('<span class="fc-jp-slash"> / </span>');
           // The dictionary (plain) form's reading, regardless of which form
           // show-polite currently displays -- good enough for the reveal's
