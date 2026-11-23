@@ -1238,14 +1238,16 @@ async function main() {
     input.blur();
     return closed;
   })());
-  else check("recent searches: a used query that found something is kept (not a miss), lists under the empty focused field, and removes one at a time", (() => {
+  else check("recent searches: a used query that found something is kept (Return or a tap on a result; not a miss, not one just left half-typed), lists under the empty focused field, and removes one at a time", (() => {
     const input = document.getElementById("tableSearch");
     const panel = document.getElementById("searchRecents");
     const type = q => { input.value = q; input.dispatchEvent(new window.Event("input", { bubbles: true })); };
     window.localStorage.removeItem("raume-recent-searches");
     input.focus();
     const emptyHidden = panel.hidden;
-    type("water"); input.blur();
+    type("water");
+    document.querySelector("#vocabulary tbody tr:not(.search-hidden) td:nth-child(2)").click(); input.blur();
+    input.focus(); type("ric"); input.blur();
     input.focus(); type("xqzvj"); input.blur();
     input.focus(); type("rice");
     input.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));

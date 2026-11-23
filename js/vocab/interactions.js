@@ -1444,7 +1444,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       input.addEventListener('focusout', closeIfFocusLeft);
       input.addEventListener('focus', syncRecents);
     }
-    input.addEventListener('blur', rememberSearch);
+    // Kept only once used -- Return, or a tap on a result -- as iOS does:
+    // leaving the field (a tab, a scroll that drops the keyboard) mid-word
+    // used to save half-typed queries like "on".
     vocabHost.addEventListener('click', function () {
       if (document.body.classList.contains('is-searching')) rememberSearch();
     });
