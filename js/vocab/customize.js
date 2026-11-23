@@ -330,7 +330,7 @@ window.RaumeStudy.customize = (function () {
   function editRowHtml(r) {
     var text = segmentsToText(r.jp) + ", " + r.romaji + ", " + r.english;
     return '<li class="cv-owned-row cv-owned-row-edit">' +
-      '<input type="text" class="cv-edit-input" data-row="' + esc(r.id) + '" autocomplete="off" spellcheck="false" value="' + esc(text) + '">' +
+      '<input type="text" class="cv-edit-input" data-row="' + esc(r.id) + '" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="' + esc(text) + '">' +
       '<span class="cv-owned-actions">' +
       '<button type="button" class="cv-btn cv-edit-save" data-row="' + esc(r.id) + '">Save</button>' +
       '<button type="button" class="cv-edit-cancel">Cancel</button>' +
@@ -425,7 +425,7 @@ window.RaumeStudy.customize = (function () {
       '<summary class="cv-card-summary disclosure-caret">Add a word</summary>' +
       targetButton("add", "Table") +
       '<label class="cv-field"><span>Word</span>' +
-      '<input type="text" class="cv-add-input" autocomplete="off" spellcheck="false" placeholder="帰(かえ)る, kaeru, to return"></label>' +
+      '<input type="text" class="cv-add-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="帰(かえ)る, kaeru, to return"></label>' +
       '<div class="cv-preview" hidden></div>' +
       '<div class="cv-add-actions"><button type="button" class="cv-btn cv-add-btn">Add word</button>' +
       '<span role="status" aria-live="polite">' + flashHtml("add") + "</span></div>" +
