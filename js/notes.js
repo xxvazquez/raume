@@ -60,6 +60,7 @@ window.RaumeStudy.notes = (function () {
   var PLUS_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5v11M3.5 9h11"/></svg>';
   var BACK_ICON = '<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>';
   var SEARCH_ICON = '<svg class="search-icon" viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>';
+  var SEARCH_GLYPH = '<svg viewBox="0 0 18 18" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="14" cy="9" r="1.45"/></svg>';
   var CHECK_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>';
   var MENU_ICONS = {
@@ -409,7 +410,7 @@ window.RaumeStudy.notes = (function () {
     body.classList.toggle("rn-quiz", !!study.quiz);
     hostEl.querySelectorAll("[data-study]").forEach(function (b) { b.setAttribute("aria-checked", String(!!study[b.dataset.study])); });
     var quiz = hostEl.querySelector("#notesQuiz");
-    if (quiz) { quiz.setAttribute("aria-pressed", String(!!study.quiz)); quiz.classList.toggle("fc-btn-primary", !!study.quiz); }
+    if (quiz) { quiz.setAttribute("aria-pressed", String(!!study.quiz)); }
   }
   function setStudy(key, on) {
     study[key] = on;
@@ -530,7 +531,7 @@ window.RaumeStudy.notes = (function () {
     applyStudy();
     var find = hostEl && hostEl.querySelector("#notesFind");
     if (find) {
-      find.closest(".notes-find").hidden = false;
+      find.closest(".notes-findbar").hidden = !noteQuery;
       find.value = noteQuery;
       findInNote(noteQuery);
     }
@@ -1371,19 +1372,17 @@ window.RaumeStudy.notes = (function () {
   function readerHtml(note) {
     var head = '<button type="button" class="fc-back" id="notesBack">' + BACK_ICON + "Notes</button>";
     if (!note) {
+      head = '<div class="notes-nav">' + head + "</div>";
       return head + '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1>Note</h1></div>' + flashHtml() +
         '<p class="notes-loading" role="status">' + (notes ? "This note isn’t in your account any more." : "Loading…") + "</p>";
     }
-    return head +
-      // The title is the rename control, as a document's title is on iOS.
-      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
-      '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
-      '<div class="notes-reader-bar"><p class="notes-reader-date">' + readerMetaHtml(note) + "</p>" +
-      '<div class="notes-tools">' +
-      // Quiz: the study action you take mid-note, so it's a button of its
-      // own; the display options it pairs with sit in ⋯. Both show only for
-      // a lesson note (showLesson unhides them).
-      '<button type="button" class="fc-btn notes-quiz" id="notesQuiz" aria-pressed="false" hidden>Quiz</button>' +
+    // As in Notes, the bar holds the note's actions: back on the left; Quiz
+    // (the study action you take mid-note, a plain tinted word that shows
+    // when it's on), Search this note and ⋯ trailing. Quiz and Search show
+    // only for a lesson note (showLesson unhides them).
+    return '<div class="notes-nav">' + head + '<div class="notes-tools">' +
+      '<button type="button" class="fc-titlebar-btn notes-quiz" id="notesQuiz" aria-pressed="false" hidden>Quiz</button>' +
+      '<button type="button" class="notes-tool" id="notesFindBtn" aria-label="Search this note" hidden>' + SEARCH_GLYPH + "</button>" +
       '<div class="section-menu notes-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Note options">' + MENU_ICON + "</button>" +
       '<div class="section-menu-list" role="menu" hidden>' +
@@ -1393,11 +1392,17 @@ window.RaumeStudy.notes = (function () {
       MARK_ORDER.map(function (k) { return markItem(k, note); }).join("") +
       menuItem("rename", "Rename") + menuItem("date", "Lesson date") + menuItem("replace", "Replace with a new file") + menuItem("delete", "Delete", true) +
       "</div></div></div></div>" +
+      // The title is the rename control, as a document's title is on iOS;
+      // where it's from (its mark) and its date sit in one grey line under it.
+      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
+      '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
+      '<p class="notes-reader-date">' + readerMetaHtml(note) + "</p>" +
       flashHtml() +
-      // Search this note: a lesson note's own (showLesson unhides it).
-      '<label class="search-box notes-find" hidden>' + SEARCH_ICON +
-      '<input type="search" id="notesFind" placeholder="Search this note" aria-label="Search this note" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">' +
+      // Search this note: dropped in under the bar by its glyph, Done puts it away.
+      '<div class="notes-findbar" hidden><label class="search-box notes-find">' + SEARCH_ICON +
+      '<input type="search" id="notesFind" placeholder="Search this note" aria-label="Search this note" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="search">' +
       '<button type="button" class="clear-search" data-clear="notesFind" aria-label="Clear search">×</button></label>' +
+      '<button type="button" class="fc-titlebar-btn notes-find-done" id="notesFindDone">Done</button></div>' +
       '<p class="notes-filter-empty" id="notesFindNone" hidden>Nothing in this note matches.</p>' +
       '<p class="notes-loading" role="status" id="notesReaderStatus" data-title="' + esc(note.title) + '">Opening…</p>';
   }
@@ -1409,7 +1414,7 @@ window.RaumeStudy.notes = (function () {
       var doc = parse(rec.html);
       if (isKitOriginal(doc)) fromKit(doc);
       if (isLessonNote(doc) || doc.querySelector("article.rn")) {
-        hostEl.querySelectorAll("#notesQuiz, [data-study], [data-lesson-only]").forEach(function (el) { el.hidden = false; });
+        hostEl.querySelectorAll("#notesQuiz, #notesFindBtn, [data-study], [data-lesson-only]").forEach(function (el) { el.hidden = false; });
         showLesson(doc, status);
       } else {
         showInFrame(rec.html, status);
@@ -1434,6 +1439,7 @@ window.RaumeStudy.notes = (function () {
     var u = user();
     if (u && listFor !== u.id) { notes = null; listFor = null; }
     if (u && !notes && !loading) loadList();
+    host.classList.toggle("notes-reading", !!openId);
     if (openId) {
       var note = findNote(openId);
       host.innerHTML = '<div class="notes-wrap">' + readerHtml(note) + "</div>";
@@ -1488,6 +1494,19 @@ window.RaumeStudy.notes = (function () {
       if ((el = t.closest("[data-note-filter]"))) { markFilter = el.dataset.noteFilter; rerender(); return; }
       if (t.closest("#notesBack")) { back(); return; }
       if (t.closest("#notesQuiz")) { setStudy("quiz", !study.quiz); return; }
+      if (t.closest("#notesFindBtn")) {
+        var bar = hostEl.querySelector(".notes-findbar"), field = hostEl.querySelector("#notesFind");
+        if (bar) bar.hidden = false;
+        if (field) field.focus();
+        return;
+      }
+      if (t.closest("#notesFindDone")) {
+        var fb = hostEl.querySelector(".notes-findbar"), ff = hostEl.querySelector("#notesFind");
+        if (ff) ff.value = "";
+        findInNote("");
+        if (fb) fb.hidden = true;
+        return;
+      }
       if ((el = t.closest("[data-study]"))) { setStudy(el.dataset.study, !study[el.dataset.study]); return; }
       if (t.closest("#notesSignIn")) {
         if (vocab().showFlashcardsPage) vocab().showFlashcardsPage();

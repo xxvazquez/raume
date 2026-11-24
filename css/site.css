@@ -1554,9 +1554,23 @@ body.icon-picker-open { overflow: hidden; }
 .notes-title:focus-visible { outline: 2px solid var(--section); outline-offset: 3px; border-radius: 6px; }
 .notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; margin-left: auto; }
 .notes-add svg { display: block; }
-.notes-tools { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; margin: -6px -10px -6px auto; }
-.notes-quiz[aria-pressed="true"] { box-shadow: none; }
-.notes-quiz[hidden], .notes-check-item[hidden] { display: none; }
+/* The reader's bar, as Notes': ‹ Notes leading; Quiz (a plain tinted word,
+   on a soft capsule of the tint while it's on), the search glyph and ⋯
+   trailing -- clear of the account button that holds the top corner on a
+   phone. */
+.notes-nav { display: flex; align-items: center; min-height: 44px; }
+.notes-nav .fc-back { margin-bottom: 0; }
+.notes-tools { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; margin: 0 -10px 0 auto; }
+.notes-quiz { min-height: 44px; padding: 0 10px; border-radius: 999px; }
+.notes-quiz[aria-pressed="true"] { min-height: 30px; margin: 7px 2px; background: var(--section-soft); font-weight: 600; }
+.notes-tool {
+  appearance: none; border: 0; background: none; cursor: pointer; width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--section-strong);
+}
+.notes-tool:hover { opacity: .7; }
+.notes-tool:active { opacity: .5; }
+.notes-quiz[hidden], .notes-tool[hidden], .notes-check-item[hidden] { display: none; }
+.notes-menu .section-menu-btn { color: var(--section-strong); }
 .notes-menu .section-menu-btn { width: 44px; height: 44px; }
 .notes-flash { margin: 4px 16px 10px; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .notes-flash[hidden] { display: none; }
@@ -1592,10 +1606,20 @@ body.icon-picker-open { overflow: hidden; }
 .notes-empty-title { margin: 12px 0 4px; font: 600 16px/1.3 var(--font-ui); color: var(--ink); }
 .notes-empty-sub { margin: 0 0 16px; max-width: 34em; color: var(--muted); font-size: var(--fs-small); line-height: 1.45; text-wrap: pretty; }
 .notes-empty .fc-btn { min-height: 44px; padding: 0 22px; }
-/* The reader's second row: the lesson date, then Quiz and ⋯ trailing --
-   clear of the account button that holds the top corner on a phone. */
-.notes-reader-bar { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 0 0 12px; }
-.notes-reader-date { margin: 0; color: var(--muted); font-size: var(--fs-small); }
+/* Under the title, one grey line: where the note is from (its mark) and
+   the lesson date when the title isn't it. */
+.notes-reader-date { margin: -2px 0 18px; color: var(--muted); font-size: var(--fs-small); }
+.notes-reader-date:empty { display: none; }
+/* Search this note, dropped in under the bar by its glyph: the field, Done. */
+.notes-findbar { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
+.notes-findbar[hidden] { display: none; }
+.notes-findbar .notes-find { margin: 0; flex: 1 1 auto; }
+.notes-find-done { flex: none; min-height: 44px; font-weight: 600; }
+/* Reading a note, the screen is the page: one white surface from the bar
+   down, as in Notes -- no grey band over a white sheet. */
+.page-notes.notes-reading { background: var(--paper); }
+body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper); }
+.notes-reading .rn { background: none; border-radius: 0; padding: 0 0 30px; margin: 0; }
 /* The Notes list's filter by mark: the app's segmented control. */
 .notes-filter { margin: 0 0 14px; }
 /* Search all notes (the list) and Search this note (the reader): the
@@ -6192,6 +6216,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .fc-titlebar:not(.fc-titlebar-pushed) .fc-titlebar-actions { margin-right: 46px; }
   .fc-titlebar-pushed h1 { padding-right: 48px; }
   .notes-titlebar > .notes-add { margin-right: 46px; }
+  .notes-nav .notes-tools { margin-right: 36px; }
   .notes-titlebar h1 { padding-right: 0; }
   .account-menu { top: calc(100% + 8px); right: 0; }
 }

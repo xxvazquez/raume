@@ -853,9 +853,15 @@ and Help.
   12% larger, the part that changes on a soft chip of the section's hue —
   the hue that marks it in the examples. Tips are text: an orange ⚠ for
   watch out, an amber lightbulb for a tip, else the number on a soft dot.
-  Japanese breaks at its spaces, never inside a word. A note's search
-  capsule (the reference search's) sits above it, the list's above the
-  list; searching hides the outline and leaves only matching rows, opening
+  Japanese breaks at its spaces, never inside a word. Reading a note, the
+  whole screen is that page — `.page-notes.notes-reading` and the ground
+  are `--paper`, so there's no grey band over a white sheet. The bar is
+  Notes': "‹ Notes" leading; Quiz (a plain tinted word, on a soft
+  `--section-soft` capsule while on), a 44pt search glyph and ⋯ trailing
+  (clear of the phone's account button). Under the title one grey line
+  holds the mark and, when the title isn't it, the date. A note's search
+  capsule (the reference search's) drops in under the bar from the glyph,
+  with Done beside it; the list's sits above the list; searching hides the outline and leaves only matching rows, opening
   what they're in. Every
   Japanese item is Japanese with furigana (particles bold blue,
   `.particle`, as everywhere in raume) and the reference tables' speaker
