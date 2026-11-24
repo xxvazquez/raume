@@ -2291,19 +2291,21 @@ async function main() {
       if (rn2) rn2.remove();
       return ok;
     })());
-    check("a section reads as a page heading that folds: its kind's tile, title, \"N · kind\" under it, open to start; tips lead with a glyph", (() => {
+    check("a section reads as a page heading that folds: its kind's tile, title, \"N · kind\" under it, open to start; each idea a labelled row", (() => {
       const spot3 = document.createElement("p");
       host.appendChild(spot3);
       nh.showLessonHtml('<html><head><meta name="raume-note" content="1"></head><body><article class="rn"><section class="rn-sec" data-tile="clay">' +
         '<h2 class="rn-sec-head"><span class="rn-sec-num" aria-hidden="true">1</span><span>Where is it?</span><span class="rn-sub">Watch out</span></h2>' +
         '<div class="rn-st"><div class="rn-jp">まち</div><div class="rn-ro">machi</div><div class="rn-en">town</div></div>' +
-        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">!</span><div>Careful</div></div></section></article></body></html>', spot3);
+        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">!</span><div><b>Watch out:</b> Careful</div></div>' +
+        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">の</span><div>links two nouns</div></div></section></article></body></html>', spot3);
       const rn3 = host.querySelectorAll(".rn")[1];
       const btn = rn3 && rn3.querySelector(".rn-sec-head .rn-sec-btn"), body = rn3 && rn3.querySelector(".rn-sec > .rn-sec-body");
       const ok = !!btn && !!btn.querySelector(".rn-tile-ic svg") && btn.querySelector(".rn-sec-title").textContent === "Where is it?"
         && btn.querySelector(".rn-sub").textContent === "1 · Watch out" && btn.getAttribute("aria-expanded") === "true"
         && btn.getAttribute("aria-controls") === body.id && !body.hidden && !!body.querySelector(".rn-st")
-        && !!body.querySelector(".rn-dot.rn-dot-warn svg");
+        && [...body.querySelectorAll(":scope > .rn-lrow > .rn-lrow-l")].map(l => l.dataset.kind + ":" + l.textContent).join("|") === "example:Example|warn:Watch out|kana:の"
+        && body.querySelectorAll(":scope > .rn-lrow")[1].querySelector(".rn-lrow-c").textContent.trim() === "Careful";
       if (rn3) rn3.remove();
       return ok;
     })());

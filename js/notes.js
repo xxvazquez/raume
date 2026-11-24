@@ -519,8 +519,10 @@ window.RaumeStudy.notes = (function () {
       list.classList.toggle("rn-tiles-pairs", Array.prototype.some.call(list.querySelectorAll(".rn-ic"), function (ic) { return /\s/.test(ic.textContent.trim()); }));
     });
     quietPairs(body);
+    tidyExamples(body);
     makeFolds(body);
     makeSections(body);
+    labelRows(body);
     tipGlyphs(body);
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
@@ -609,6 +611,58 @@ window.RaumeStudy.notes = (function () {
     btn.setAttribute("aria-expanded", String(open));
     inner.hidden = !open;
   }
+  // Inside a section card each idea is a row with its label in a column on
+  // the left, as in Contacts -- Pattern, い-adjective, Watch out, Tip,
+  // Example -- and a hairline under it, so it's clear where each one starts
+  // and ends. Word lists and practice lists keep their own headings.
+  function lrow(label, kind, nodes) {
+    var row = document.createElement("div");
+    row.className = "rn-lrow";
+    row.innerHTML = '<div class="rn-lrow-l" data-kind="' + kind + '">' + label + '</div><div class="rn-lrow-c"></div>';
+    var c = row.lastChild;
+    nodes.forEach(function (n) { c.appendChild(n); });
+    return row;
+  }
+  function tipRow(tip) {
+    var dot = tip.querySelector(".rn-dot"), mark = dot ? dot.textContent.trim() : "";
+    var text = tip.lastElementChild;
+    // ! is a warning, a number a numbered note, kana the word it's about;
+    // any other mark (+, ☎, a picture) is a tip.
+    var isKana = /^[\u3040-\u30ff\u4e00-\u9fff]+$/.test(mark), isNum = /^\d+$/.test(mark);
+    var label = mark === "!" ? "Watch out" : isNum ? "Note " + mark : isKana ? esc(mark) : "Tip";
+    var kind = mark === "!" ? "warn" : isNum ? "note" : isKana ? "kana" : "tip";
+    if (dot) dot.remove();
+    // "Watch out:" said again at the start of the text goes -- the label says it.
+    var lead = text && text.firstElementChild;
+    if (lead && mark === "!" && /^(b|strong)$/i.test(lead.tagName) && /^watch out:?$/i.test(lead.textContent.trim()) && text.firstChild === lead) {
+      lead.remove();
+      text.innerHTML = text.innerHTML.replace(/^\s+/, "");
+    }
+    tip.classList.add("rn-tip-row");
+    return lrow(label, kind, [tip]);
+  }
+  function labelRows(body) {
+    body.querySelectorAll(".rn-sec-body").forEach(function (inner) {
+      Array.prototype.slice.call(inner.children).forEach(function flat(b) {
+        if (b.classList.contains("rn-two") || b.classList.contains("rn-tips")) {
+          Array.prototype.slice.call(b.children).forEach(function (c) { inner.insertBefore(c, b); flat(c); });
+          b.remove();
+          return;
+        }
+        var row = null, spot = document.createComment("");
+        inner.insertBefore(spot, b);
+        if (b.classList.contains("rn-formula")) row = lrow("Pattern", "pattern", [b]);
+        else if (b.classList.contains("rn-tip")) row = tipRow(b);
+        else if (b.classList.contains("rn-card") && b.querySelector(".rn-kind")) {
+          var k = b.querySelector(".rn-kind");
+          var label = k.innerHTML;
+          k.remove();
+          row = lrow(label, "kind", [b]);
+        } else if (b.classList.contains("rn-st") || (b.classList.contains("rn-card") && b.querySelector(".rn-st"))) row = lrow("Example", "example", [b]);
+        if (row) inner.replaceChild(row, spot); else spot.remove();
+      });
+    });
+  }
   // A tip's mark becomes a glyph: ! a warning (orange), + a lightbulb;
   // a number stays a number.
   function tipGlyphs(body) {
@@ -617,6 +671,15 @@ window.RaumeStudy.notes = (function () {
       if (!TIP_GLYPH[mark]) return;
       dot.innerHTML = TIP_GLYPH[mark];
       dot.classList.add(mark === "!" ? "rn-dot-warn" : "rn-dot-tip");
+    });
+  }
+  // Right / wrong examples sit on lines of their own (css), so the spacing
+  // the kit put between them (a full-width space) would only add an empty line.
+  function tidyExamples(body) {
+    body.querySelectorAll(".rn-ok, .rn-x").forEach(function (el) {
+      [el.previousSibling, el.nextSibling].forEach(function (n) {
+        if (n && n.nodeType === 3 && /^[\s\u3000]*$/.test(n.data)) n.remove();
+      });
     });
   }
   // A pair's arrow (あかるい ↔ くらい) is quieter than the words.
@@ -652,7 +715,7 @@ window.RaumeStudy.notes = (function () {
   }
   // What one search hit is: a word, a list row, a tip, a formula line, an
   // explainer card.
-  var UNITS = ".rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-fl, .rn-two > .rn-card, .rn-sec > .rn-card, .rn-sec-body > .rn-card";
+  var UNITS = ".rn-lrow, .rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-fl, .rn-two > .rn-card, .rn-sec > .rn-card, .rn-sec-body > .rn-card";
   function findInNote(q) {
     var body = hostEl && hostEl.querySelector(".rn");
     var box = hostEl && hostEl.querySelector(".notes-find");

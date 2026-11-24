@@ -842,15 +842,20 @@ and Help.
   under a 56px header band in the kind's hue at 20% on white: the 28px
   tile, the title (`--fs-subhead`, the hue mixed into ink) with
   "1 · Grammar · …" in the strong hue under it, and a chevron; the band
-  folds the card. Inside (16px padding) nothing is boxed. A word list, and any list of
+  folds the card (title `--fs-section-title`, band 64px). Inside (16px
+  padding) nothing is boxed: each idea is a row with its label in a 76px
+  column on the left, as in Contacts — Pattern, the explainer's own name
+  (い-adjective), Watch out (orange), Tip (amber), Note N or Example
+  (grey), or the kana a tip is about set at 18px — and a hairline under
+  it, so where one idea ends is always drawn. A right / wrong example
+  (✓ / ✗) is its own 16px Japanese line under the explanation. A word list, and any list of
   eight rows or more, folds under its own 15px semibold heading with a grey
   count and chevron over a hairline, closed until tapped. Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
   faint, the English trailing or from halfway across on a wide window; one
   picture column for every row once a list has pairs). Patterns are set
   12% larger, the part that changes on a soft chip of the section's hue —
-  the hue that marks it in the examples. Tips are text: an orange ⚠ for
-  watch out, an amber lightbulb for a tip, else the number on a soft dot.
+  the hue that marks it in the examples.
   Japanese breaks at its spaces, never inside a word. The bar is
   Notes': "‹ Notes" leading; Quiz (a plain tinted word, on a soft
   `--section-soft` capsule while on), a 44pt search glyph and ⋯ trailing

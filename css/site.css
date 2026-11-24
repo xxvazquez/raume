@@ -1659,6 +1659,10 @@ body.icon-picker-open { overflow: hidden; }
 .rn-hl { color: var(--rn-strong); }
 .rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
 .rn-x { color: var(--wrong-strong); white-space: nowrap; }
+/* A right / wrong example in a note's text is its own line under the
+   explanation, at the Japanese size -- never run on inside the sentence. */
+.rn-lrow-c .rn-ok, .rn-lrow-c .rn-x { display: block; width: fit-content; margin-top: 2px; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; white-space: normal; word-break: keep-all; }
+.rn-lrow-c :not(.rn-ok, .rn-x) + :is(.rn-ok, .rn-x) { margin-top: 8px; }
 .rn-top { margin: 0 0 18px; }
 /* The screen's title is the note's name (its date), so the eyebrow that
    repeats it goes; the lesson's topic heads the description. */
@@ -1678,17 +1682,17 @@ body.icon-picker-open { overflow: hidden; }
 .rn-sec-head { margin: 0; font: inherit; }
 .rn-sec-btn {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; align-items: center; width: 100%;
-  min-height: 56px; padding: 10px 16px; border: 0; background: color-mix(in srgb, var(--rn) 20%, var(--paper)); cursor: pointer; text-align: left;
+  min-height: 64px; padding: 12px 16px; border: 0; background: color-mix(in srgb, var(--rn) 20%, var(--paper)); cursor: pointer; text-align: left;
   color: color-mix(in srgb, var(--rn) 45%, var(--ink));
 }
 .rn-sec-btn:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; border-radius: var(--radius-card); }
-.rn-sec-title { display: block; font: 600 var(--fs-subhead)/1.25 var(--font-ui); }
+.rn-sec-title { display: block; font: 600 var(--fs-section-title)/1.25 var(--font-ui); }
 .rn-sec-btn .rn-sub { display: block; margin-top: 2px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--rn-strong); }
 .rn-sec-btn .rn-chev { color: var(--rn-strong); }
 .rn-chev { flex: none; color: var(--faint); transition: transform .2s ease; }
 [aria-expanded="true"] > .rn-chev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .rn-chev { transition: none; } }
-.rn-sec-body { padding: 12px 16px 16px; }
+.rn-sec-body { padding: 4px 16px 12px; }
 .rn-sec-body[hidden] { display: none; }
 .rn-h3 { margin: 22px 0 4px; font: 600 15px/1.3 var(--font-ui); color: var(--ink); }
 /* Japanese / romaji / English */
@@ -1715,10 +1719,24 @@ body.icon-picker-open { overflow: hidden; }
 .rn-st.rn-ro-on .rn-ro:not(:empty) { display: block; }
 .rn-en { font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
 .rn-ro:empty, .rn-en:empty { display: none; }
-/* Blocks: nothing boxed -- spacing and hairlines only. */
-.rn-sec-body > * + * { margin-top: 14px; }
-.rn-sec-body > .rn-h3 { margin-top: 24px; }
-.rn-sec-body > .rn-h3 + * { margin-top: 4px; }
+/* Blocks: nothing boxed. Each idea is a row with its label in a column on
+   the left (Pattern, い-adjective, Watch out, Tip, Example) and a hairline
+   under it, as in Contacts -- so where one idea ends and the next starts is
+   always drawn. The label's colour says what kind it is: the section's hue
+   for what's taught, orange for watch out, amber for a tip. */
+.rn-sec-body > * + * { margin-top: 0; border-top: 1px solid var(--row-line); }
+.rn-lrow { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 12px; padding: 12px 0; }
+.rn-lrow-l { padding-top: 3px; font: 600 12.5px/1.3 var(--font-ui); color: var(--rn-strong); overflow-wrap: anywhere; }
+.rn-lrow-l[data-kind="warn"] { color: color-mix(in srgb, var(--tile-orange) 85%, var(--ink)); }
+.rn-lrow-l[data-kind="tip"] { color: color-mix(in srgb, var(--tile-amber) 80%, var(--ink)); }
+.rn-lrow-l[data-kind="example"], .rn-lrow-l[data-kind="note"] { color: var(--muted); }
+.rn-lrow-l[data-kind="kana"] { padding-top: 0; font: 600 calc(18px * var(--dt))/1.4 var(--font-jp); }
+.rn-lrow-c > .rn-card, .rn-lrow-c > .rn-tip { margin: 0; }
+.rn-lrow .rn-tip-row { display: block; }
+.rn-sec-body > .rn-h3 { margin: 0; padding: 16px 0 4px; }
+.rn-sec-body > .rn-h3 + * { border-top: 0; }
+.rn-sec-body > .rn-fold { padding: 0; }
+.rn-sec-body > .rn-fold + .rn-fold { border-top: 0; }
 .rn-card { background: none; }
 .rn-pad { padding: 0; }
 .rn-list { padding: 0; }
