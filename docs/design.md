@@ -855,8 +855,9 @@ and Help.
   dialogue) folds under it — a 15px semibold heading with a grey count and
   chevron over a hairline, closed until tapped; the lesson's ideas
   (patterns, rules, tips) always show. A tip is its short rule, then each
-  example on two lines: the Japanese (16px), then "romaji · English" in
-  grey. Word lists read
+  example on its own lines, and a pattern the same: the Japanese, its
+  romaji, its English — three rows, as everywhere in raume (a pattern's
+  older "romaji · English" line is split on the way in). Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
   faint, the English trailing or from halfway across on a wide window; one
   picture column for every row once a list has pairs). Patterns are set

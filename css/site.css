@@ -1659,14 +1659,14 @@ body.icon-picker-open { overflow: hidden; }
 .rn-hl { color: var(--rn-strong); }
 .rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
 .rn-x { color: var(--wrong-strong); white-space: nowrap; }
-/* A tip's examples (note_kit tip(..., ex)): each its own two lines under
-   the rule -- the Japanese at the reading size, then "romaji · English". */
+/* A tip's examples (note_kit tip(..., ex)): each its own lines under the
+   rule, as everywhere in raume -- the Japanese at the reading size, its
+   romaji, its English. */
 .rn-ex { margin-top: 6px; }
 .rn-ex:first-of-type { margin-top: 8px; }
 .rn-ex-jp { display: block; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; word-break: keep-all; }
-.rn-ex-ro { font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); }
-.rn-ex-en { font-size: var(--fs-english); color: var(--ink-2); }
-.rn-ex-ro + .rn-ex-en::before { content: "·"; margin: 0 6px; color: var(--faint); font-style: normal; }
+.rn-ex-ro { display: block; font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); line-height: 1.3; }
+.rn-ex-en { display: block; font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; }
 /* A right / wrong example in a note's text is its own line under the
    explanation, at the Japanese size -- never run on inside the sentence. */
 .rn-lrow-c .rn-ok, .rn-lrow-c .rn-x { display: block; width: fit-content; margin-top: 2px; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; white-space: normal; word-break: keep-all; }
@@ -1815,6 +1815,7 @@ body.icon-picker-open { overflow: hidden; }
 .rn-lab { font: 600 13px/1 var(--font-ui); color: var(--rn-strong); }
 .rn-fj { font-family: var(--font-jp); font-size: calc(var(--fs-jp) * 1.12); line-height: 1.6; }
 .rn-fr { font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); }
+.rn-fe { font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; }
 .rn-fj s { color: var(--faint); }
 .rn-slot {
   display: inline-block; padding: 0 7px; margin: 0 2px; border-radius: 7px; line-height: 1.5;

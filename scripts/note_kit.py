@@ -325,10 +325,14 @@ def two(*blocks, flush=False):
 
 
 def formula(lines):
-    rows = "".join(
-        f'<div class="rn-fl"><span class="rn-lab">{lab}</span><div><div class="rn-fj" lang="ja">{jp}</div><div class="rn-fr">{ro}</div></div></div>'
-        for lab, jp, ro in ((lab, jp_markup(jp), _text(ro)) for lab, jp, ro in lines)
-    )
+    """lines: (label, jp, romaji, english). The older (label, jp, "romaji ·
+    english") still works -- raume splits it onto two lines."""
+    rows = ""
+    for line in lines:
+        lab, jp, ro = line[:3]
+        en = line[3] if len(line) > 3 else ""
+        rows += (f'<div class="rn-fl"><span class="rn-lab">{lab}</span><div><div class="rn-fj" lang="ja">{jp_markup(jp)}</div>'
+                 f'<div class="rn-fr">{_text(ro)}</div>' + (f'<div class="rn-fe">{_text(en)}</div>' if en else "") + "</div></div>")
     return f'<div class="rn-formula">{rows}</div>'
 
 

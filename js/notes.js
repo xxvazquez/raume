@@ -524,6 +524,7 @@ window.RaumeStudy.notes = (function () {
     });
     quietPairs(body);
     tidyExamples(body);
+    splitPatterns(body);
     makeFolds(body);
     makeSections(body);
     labelRows(body);
@@ -695,6 +696,19 @@ window.RaumeStudy.notes = (function () {
       [el.previousSibling, el.nextSibling].forEach(function (n) {
         if (n && n.nodeType === 3 && /^[\s\u3000]*$/.test(n.data)) n.remove();
       });
+    });
+  }
+  // A pattern's second line held "romaji · English" together; they're
+  // two lines, as everywhere in raume: romaji, then English.
+  function splitPatterns(body) {
+    body.querySelectorAll(".rn-fr").forEach(function (fr) {
+      var parts = fr.innerHTML.split(/\s+·\s+/);
+      if (parts.length < 2) return;
+      fr.innerHTML = parts.shift();
+      var en = document.createElement("div");
+      en.className = "rn-fe";
+      en.innerHTML = parts.join(" · ");
+      fr.parentNode.insertBefore(en, fr.nextSibling);
     });
   }
   // A pair's arrow (あかるい ↔ くらい) is quieter than the words.
