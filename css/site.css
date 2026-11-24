@@ -1719,6 +1719,8 @@ body.icon-picker-open { overflow: hidden; }
 .rn-st.rn-ro-on .rn-ro:not(:empty) { display: block; }
 .rn-en { font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
 .rn-ro:empty, .rn-en:empty { display: none; }
+/* A form that doesn't exist: just its English, in grey. */
+.rn-st-none .rn-en { color: var(--muted); font-style: italic; }
 /* Blocks: nothing boxed. Each idea is a row with its label in a column on
    the left (Pattern, い-adjective, Watch out, Tip, Example) and a hairline
    under it, as in Contacts -- so where one idea ends and the next starts is

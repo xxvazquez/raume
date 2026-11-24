@@ -496,6 +496,10 @@ window.RaumeStudy.notes = (function () {
     romajiOpen = null;
     body.querySelectorAll(".rn-st .rn-jp").forEach(function (jp) {
       jp.setAttribute("lang", "ja");
+      // No Japanese (a form that doesn't exist, its English saying so):
+      // nothing to play, so no speaker and no empty line.
+      var said = shownText(jp);
+      if (!said || /^[—–-]+$/.test(said)) { jp.closest(".rn-st").classList.add("rn-st-none"); jp.remove(); return; }
       var line = document.createElement("div");
       line.className = "rn-jl";
       jp.parentNode.insertBefore(line, jp);

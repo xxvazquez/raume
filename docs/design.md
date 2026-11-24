@@ -848,7 +848,9 @@ and Help.
   (い-adjective), Watch out (orange), Tip (amber), Note N or Example
   (grey), or the kana a tip is about set at 18px — and a hairline under
   it, so where one idea ends is always drawn. A right / wrong example
-  (✓ / ✗) is its own 16px Japanese line under the explanation. A word list, and any list of
+  (✓ / ✗) is its own 16px Japanese line under the explanation. A form
+  that doesn't exist (no Japanese, or a bare dash) gets no speaker: just
+  its English, grey italic, saying so. A word list, and any list of
   eight rows or more, folds under its own 15px semibold heading with a grey
   count and chevron over a hairline, closed until tapped. Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
