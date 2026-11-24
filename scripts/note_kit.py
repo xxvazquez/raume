@@ -292,8 +292,27 @@ def tiles(items, n=4, az=False):
     return f'<div class="rn-tiles rn-c{n}">' + "".join(out) + "</div>"
 
 
-def tip(mark, text):
-    return f'<div class="rn-tip"><span class="rn-dot" aria-hidden="true">{mark}</span><div>{text}</div></div>'
+def tip(mark, text, ex=None):
+    """A tip: `text` is the rule, short; `ex` its examples, one per line --
+    (jp, romaji, english) tuples (checked like any Japanese line; romaji or
+    english may be "") or ready markup such as ok() / wrong(). Keep the
+    Japanese out of `text` and in `ex`, so a tip reads rule first, then a
+    line per example, never one run-on sentence."""
+    lines = ""
+    for e in ex or []:
+        if isinstance(e, str):
+            lines += f'<div class="rn-ex">{e}</div>'
+            continue
+        jp, ro, en = e
+        jp = jp_markup(jp)
+        # "ひと → ひとたち" / "hito → hitotachi": each side checked on its own.
+        jps, ros = jp.split("→"), ro.split("→") if ro else []
+        for i, part in enumerate(jps):
+            _check(part.strip(), ros[i].strip() if len(ros) == len(jps) else "")
+        lines += (f'<div class="rn-ex"><span class="rn-ex-jp" lang="ja">{jp}</span>'
+                  + (f'<span class="rn-ex-ro">{_text(ro)}</span>' if ro else "")
+                  + (f'<span class="rn-ex-en">{_text(en)}</span>' if en else "") + "</div>")
+    return f'<div class="rn-tip"><span class="rn-dot" aria-hidden="true">{mark}</span><div>{text}{lines}</div></div>'
 
 
 def tips(*items):

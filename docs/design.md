@@ -850,9 +850,13 @@ and Help.
   it, so where one idea ends is always drawn. A right / wrong example
   (✓ / ✗) is its own 16px Japanese line under the explanation. A form
   that doesn't exist (no Japanese, or a bare dash) gets no speaker: just
-  its English, grey italic, saying so. A word list, and any list of
-  eight rows or more, folds under its own 15px semibold heading with a grey
-  count and chevron over a hairline, closed until tapped. Word lists read
+  its English, grey italic, saying so. One folding rule: whatever has a
+  heading of its own inside a section (a word list, a page of practice, a
+  dialogue) folds under it — a 15px semibold heading with a grey count and
+  chevron over a hairline, closed until tapped; the lesson's ideas
+  (patterns, rules, tips) always show. A tip is its short rule, then each
+  example on two lines: the Japanese (16px), then "romaji · English" in
+  grey. Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
   faint, the English trailing or from halfway across on a wide window; one
   picture column for every row once a list has pairs). Patterns are set

@@ -1659,6 +1659,14 @@ body.icon-picker-open { overflow: hidden; }
 .rn-hl { color: var(--rn-strong); }
 .rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
 .rn-x { color: var(--wrong-strong); white-space: nowrap; }
+/* A tip's examples (note_kit tip(..., ex)): each its own two lines under
+   the rule -- the Japanese at the reading size, then "romaji · English". */
+.rn-ex { margin-top: 6px; }
+.rn-ex:first-of-type { margin-top: 8px; }
+.rn-ex-jp { display: block; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; word-break: keep-all; }
+.rn-ex-ro { font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); }
+.rn-ex-en { font-size: var(--fs-english); color: var(--ink-2); }
+.rn-ex-ro + .rn-ex-en::before { content: "·"; margin: 0 6px; color: var(--faint); font-style: normal; }
 /* A right / wrong example in a note's text is its own line under the
    explanation, at the Japanese size -- never run on inside the sentence. */
 .rn-lrow-c .rn-ok, .rn-lrow-c .rn-x { display: block; width: fit-content; margin-top: 2px; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; white-space: normal; word-break: keep-all; }
@@ -1738,7 +1746,7 @@ body.icon-picker-open { overflow: hidden; }
 .rn-sec-body > .rn-h3 { margin: 0; padding: 16px 0 4px; }
 .rn-sec-body > .rn-h3 + * { border-top: 0; }
 .rn-sec-body > .rn-fold { padding: 0; }
-.rn-sec-body > .rn-fold + .rn-fold { border-top: 0; }
+.rn-sec-body > .rn-fold + * { border-top: 0; }
 .rn-card { background: none; }
 .rn-pad { padding: 0; }
 .rn-list { padding: 0; }

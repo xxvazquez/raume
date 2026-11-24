@@ -212,7 +212,8 @@ and deleting need a connection and say so when they fail.
   stylesheet (no `style=""`). From `file://` the frame can't be reached, and
   the reader says so.
 - **Writing lesson notes** — `scripts/note_kit.py` (components: `stack`,
-  `lst`, `tiles`, `tip(s)`, `two`, `formula`, `kinds`, `slot`, `cols2`,
+  `lst`, `tiles`, `tip(s)` — `tip(mark, rule, ex=[(jp, romaji, english), ok(…), …])`,
+  the rule kept short and each example on its own line — `two`, `formula`, `kinds`, `slot`, `cols2`,
   `section`, the position pictograms in `PICT`; `render(out, date, title,
   desc, sections)`). Every note has one shape: `section(kind, …)` takes a
   kind from `OUTLINE` — grammar, conversation, vocabulary, practice, watch,

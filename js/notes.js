@@ -543,10 +543,8 @@ window.RaumeStudy.notes = (function () {
   }
 
   // Each section is a card whose header band folds it, led by its kind's
-  // tile. Every word list, and any other list eight rows or
-  // longer (a page of practice), folds under its own heading -- name, count,
-  // chevron -- closed until tapped, so the note opens as an outline.
-  var FOLD_AT = 8;
+  // tile; inside it, everything under a heading of its own folds too
+  // (makeFolds), so the note opens as an outline.
   var CHEVRON = '<svg class="rn-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg>';
   function glyph(d) { return '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + "</svg>"; }
   // A section's kind is its hue (note_kit.py KINDS): Grammar, Conversation,
@@ -564,19 +562,30 @@ window.RaumeStudy.notes = (function () {
     "+": glyph('<path d="M6.5 13.5h5M7 16h4M9 2.5a5 5 0 0 0-3 9c.6.5 1 1.2 1 2h4c0-.8.4-1.5 1-2a5 5 0 0 0-3-9Z"/>')
   };
   var foldSeq = 0;
+  // One rule: whatever has a heading of its own inside a section -- a
+  // word list, a page of practice, a dialogue -- folds under it, closed
+  // until tapped; the lesson's ideas (patterns, rules, tips) always show.
+  // A word list with no heading folds too, as "Words".
   function makeFolds(body) {
-    body.querySelectorAll(".rn-tiles, .rn-list").forEach(function (list) {
-      var n = list.querySelectorAll(".rn-tile, .rn-r:not(.rn-hdr)").length;
-      if (n < FOLD_AT && !list.classList.contains("rn-tiles")) return;
+    var blocks = [];
+    body.querySelectorAll(".rn-h3").forEach(function (h) {
+      var next = h.nextElementSibling;
+      if (next && !next.classList.contains("rn-h3")) blocks.push({ block: next, h: h });
+    });
+    body.querySelectorAll(".rn-tiles").forEach(function (list) {
       var block = list.parentElement.classList.contains("rn-cols2") ? list.parentElement : list;
-      var h = block.previousElementSibling;
-      var title = h && h.classList.contains("rn-h3") ? h.innerHTML : (list.classList.contains("rn-tiles") ? "Words" : "Sentences");
-      if (h && h.classList.contains("rn-h3")) h.remove();
+      if (!blocks.some(function (b) { return b.block === block; })) blocks.push({ block: block, h: null });
+    });
+    blocks.forEach(function (b) {
+      var block = b.block, h = b.h;
+      var n = block.querySelectorAll(".rn-tile, .rn-r:not(.rn-hdr)").length;
+      var title = h ? h.innerHTML : "Words";
+      if (h) h.remove();
       var fold = document.createElement("div");
       fold.className = "rn-fold";
       var id = "rnFold" + (++foldSeq);
       fold.innerHTML = '<button type="button" class="rn-fold-head" aria-expanded="false" aria-controls="' + id + '">' +
-        '<span class="rn-fold-title">' + title + '</span><span class="rn-fold-n">' + n + "</span>" + CHEVRON + "</button>" +
+        '<span class="rn-fold-title">' + title + "</span>" + (n ? '<span class="rn-fold-n">' + n + "</span>" : "") + CHEVRON + "</button>" +
         '<div class="rn-fold-body" id="' + id + '" hidden></div>';
       block.parentNode.insertBefore(fold, block);
       fold.querySelector(".rn-fold-body").appendChild(block);
