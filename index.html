@@ -102,6 +102,7 @@
 <div class="compact-title" id="compactTitle" aria-hidden="true"></div>
 <main class="app">
 <section id="vocabPage" class="page page-vocab">
+  <button type="button" class="fc-back vocab-back" id="vocabBack" hidden><svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>Vocabulary</button>
   <h1 class="screen-title" id="screenTitle">Vocabulary</h1>
   <div class="vocab-toolbar">
     <div class="vocab-bar">
@@ -173,6 +174,7 @@
     <span id="searchCount" class="search-count" role="status" aria-live="polite" aria-atomic="true"></span>
     <p id="selftestHint" class="selftest-hint" role="status">Tap a row to reveal its answer; tap again to re-hide.</p>
   </div>
+  <nav class="vocab-home" id="vocabHome" aria-label="Vocabulary categories" hidden></nav>
   <div id="vocabulary"></div>
 </section>
 <section id="flashcardsPage" class="page page-flashcards" hidden>
@@ -189,6 +191,7 @@
         <li><span class="help-term">Search</span><span class="help-desc">Japanese, kana, romaji or English, every section at once. Press <kbd>/</kbd> to jump in.</span></li>
         <li><span class="help-term">Recent searches</span><span class="help-desc">Tap the empty field for your last few; × removes one, Clear removes all.</span></li>
         <li><span class="help-term">+ on a result</span><span class="help-desc">Adds the word to your flashcards; it turns into Practice's cards icon. Tap that again to pause it.</span></li>
+        <li><span class="help-term">Categories</span><span class="help-desc">Vocabulary opens on a square per category; tap one for its tables.</span></li>
         <li><span class="help-term">Tables</span><span class="help-desc">Lists every table in the section — tap one to go there.</span></li>
         <li><span class="help-term">Sort</span><span class="help-desc">The chevron in the English header sorts A–Z or Z–A. Sequences (ひとつ, ふたつ…) open in teaching order.</span></li>
         <li><span class="help-term">Back to top</span><span class="help-desc">Tap the section or tab you’re on to scroll back up.</span></li>

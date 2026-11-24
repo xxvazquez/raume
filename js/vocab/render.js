@@ -940,6 +940,35 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return html;
   }
 
+  // Vocabulary's home: one square per category, as Reminders opens on its
+  // lists -- the category's glyph on its hue, how many tables it holds, its
+  // name. A square opens that category alone (interactions.js), so the
+  // section is a screen of six squares instead of a long scroll of tables.
+  // Follows the reader's category order; a hidden table isn't counted, and
+  // a category with nothing left showing has no square.
+  var CATEGORY_ICON = {
+    'Numbers & Counting': 'hash', 'Food & Ingredients': 'carrot', 'Kitchen & Dining': 'utensils',
+    'Time & Calendar': 'calendar', 'People & Daily Life': 'users', 'Around Town': 'building'
+  };
+  function renderVocabHome(tables) {
+    var ic = window.RaumeStudy.icons;
+    var groups = groupByCategory(tables.filter(function (t) { return sectionOf(t.category) === 'vocabulary' && !isUserHidden(t.id); }), 'vocabulary');
+    return '<ul class="vh-grid">' + groups.map(function (g) {
+      var icon = CATEGORY_ICON[g.name] && ic && ic.has(CATEGORY_ICON[g.name]) ? ic.render(CATEGORY_ICON[g.name]) : tableIconGlyph(g.tables[0].id);
+      var tile = CATEGORY_TILE[g.name] || tableTile(g.tables[0].id, g.name);
+      var n = g.tables.length;
+      return '<li><button type="button" class="vh-tile" data-cat="' + esc(g.name) + '"' + (tile ? ' data-tile="' + tile + '"' : '') +
+        ' aria-label="' + esc(g.name + ', ' + n + (n === 1 ? ' table' : ' tables')) + '">' +
+        '<span class="vh-ic" aria-hidden="true">' + icon + '</span>' +
+        '<span class="vh-n" aria-hidden="true">' + n + '</span>' +
+        '<span class="vh-name" aria-hidden="true">' + esc(g.name) + '</span></button></li>';
+    }).join('') + '</ul>';
+  }
+  var homeHost = document.getElementById('vocabHome');
+  function paintVocabHome() {
+    if (homeHost && vocabularyTables) homeHost.innerHTML = renderVocabHome(vocabularyTables);
+  }
+
   var host = document.getElementById('vocabulary');
   var navHost = document.getElementById('siteNav');
   var indexHost = document.getElementById('tableIndex');
@@ -969,13 +998,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     mergeCustomVocab();
     host.innerHTML = renderAll(vocabularyTables);
     if (indexHost) { indexHost.innerHTML = renderTableIndex(vocabularyTables); lastIndexHtml = null; }
+    paintVocabHome();
     tagOriginalIndex();
     // Every freshly rendered section starts .page-hidden. If the reader is
     // currently on a vocabulary section, re-run routing to reveal it again;
     // if they're on Flashcards / Customize / Help, leave the rebuilt DOM
     // hidden -- normal routing reveals it when they navigate back.
     var active = document.body.dataset.activeSection;
-    if (active && vocab.showSection) vocab.showSection(active, { fromRoute: true });
+    if (active && vocab.showSection) vocab.showSection(active, { fromRoute: true, category: vocab.vocabCategory ? vocab.vocabCategory() : '' });
   }
   vocab.renderAllTables = renderAllTables;
 
@@ -1050,6 +1080,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // keeps its current-table mark).
       if (indexHtml !== lastIndexHtml) { indexHost.innerHTML = indexHtml; lastIndexHtml = indexHtml; }
     }
+    paintVocabHome();
   }
   var lastIndexHtml = null;
   vocab.reflowLayout = reflowLayout;

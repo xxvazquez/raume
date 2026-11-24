@@ -509,6 +509,44 @@ body {
   .masthead-account-dot { top: 5px; right: calc(50% - 15px); }
 }
 
+/* Vocabulary's home (render.js renderVocabHome): a square per category, as
+   Reminders opens on its lists -- the glyph on its hue top left, how many
+   tables top right, the name under them. White content tiles on the ground,
+   two across on a phone, three on a wider window; a square opens its
+   category as a pushed screen (interactions.js applyVocabCategory). */
+.vocab-home { margin-top: 6px; margin-bottom: 24px; }
+.vocab-home[hidden] { display: none; }
+.vh-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 700px) { .vh-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.vh-tile {
+  appearance: none; width: 100%; height: 100%; min-height: 92px; box-sizing: border-box;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: space-between; row-gap: 14px;
+  padding: 12px 14px; border: 0; border-radius: var(--radius-card); background: var(--paper);
+  color: var(--ink); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vh-tile:active { background: color-mix(in srgb, var(--ink) 6%, var(--paper)); }
+.vh-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+.vh-ic {
+  width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
+}
+.vh-ic svg { width: 18px; height: 18px; }
+.vh-n { justify-self: end; align-self: start; font: 600 22px/1.1 var(--font-ui); font-variant-numeric: tabular-nums; color: var(--ink); }
+.vh-name { grid-column: 1 / -1; font: 500 15px/1.25 var(--font-ui); color: var(--ink); }
+/* A category's screen: "‹ Vocabulary" over its title -- on every width,
+   since desktop's top nav only names the section. */
+.page-vocab .vocab-back { display: flex; width: 100%; box-sizing: border-box; margin: 4px auto 2px; }
+.page-vocab .vocab-back[hidden] { display: none; }
+/* On the squares nothing is open, so Options has no Expand all. */
+body[data-active-section="vocabulary"]:not(.vocab-cat-open):not(.is-searching) #expandAllBtn { display: none; }
+@media (min-width: 641px) {
+  body.vocab-cat-open .screen-title {
+    position: static; width: auto; height: auto; margin: 0 auto 12px; padding: 0;
+    overflow: visible; clip: auto; white-space: normal;
+    font: 600 var(--fs-page-title)/1.2 var(--font-ui); letter-spacing: -.01em; color: var(--ink);
+  }
+}
+
 /* --- Horizontal navigation --------------------------------------- */
 /* Four short items -- padding/font tighten at <=640px (below) so they still
    fit on one line down to a 360px-wide phone. overflow-x is a safety net
@@ -1101,7 +1139,8 @@ body.selftest-mode .selftest-hint { display: block; }
 .table-index,
 .page-vocab .vocab-toolbar,
 #vocabulary .table-section,
-#vocabulary .cat-heading {
+#vocabulary .cat-heading,
+.vocab-home, .vocab-back, body.vocab-cat-open .screen-title {
   max-width: var(--reading-w);
   margin-left: auto;
   margin-right: auto;

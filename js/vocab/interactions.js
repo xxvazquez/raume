@@ -22,8 +22,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (scope === 'all') {
       targets = document.querySelectorAll('#vocabulary .table-section');
     } else if (scope === 'section') {
+      // In a category, "this section" is the category on screen.
       const name = document.body.dataset.activeSection || 'vocabulary';
-      targets = document.querySelectorAll('#vocabulary .table-section[data-section="' + name + '"]');
+      targets = [...document.querySelectorAll('#vocabulary .table-section[data-section="' + name + '"]')]
+        .filter(s => !(name === 'vocabulary' && vocabCat) || catOf(s) === vocabCat);
     } else {
       targets = document.querySelectorAll('.table-section[data-table="' + scope + '"]');
     }
@@ -220,6 +222,36 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.applyTableOrder = applyTableOrder;
 
+  // Vocabulary opens on its category squares (render.js renderVocabHome);
+  // a square shows that category alone, as a pushed screen with
+  // "‹ Vocabulary" -- the long scroll of every table becomes six squares.
+  // Search still spans everything, and while it runs the squares step aside.
+  let vocabCat = '', catFromHome = false;
+  function catOf(el) { return el.dataset.category || 'Tables'; }
+  function slugOf(name) { return String(name).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function categoryFromSlug(slug) {
+    const s = [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]')].find(el => slugOf(catOf(el)) === slug);
+    return s ? catOf(s) : '';
+  }
+  function applyVocabCategory() {
+    const body = document.body, onVocab = body.dataset.activeSection === 'vocabulary';
+    const searching = body.classList.contains('is-searching');
+    const cat = onVocab ? vocabCat : '';
+    const home = document.getElementById('vocabHome'), back = document.getElementById('vocabBack'), title = document.getElementById('screenTitle');
+    if (home) home.hidden = !onVocab || !!cat || searching;
+    if (back) back.hidden = !cat || searching;
+    body.classList.toggle('vocab-cat-open', !!cat && !searching);
+    if (title && onVocab) title.textContent = cat || 'Vocabulary';
+    if (!onVocab || searching) return;
+    document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]').forEach(function (s) {
+      s.classList.toggle('page-hidden', catOf(s) !== cat);
+    });
+    // The screen's title names the category, so its heading would repeat it.
+    document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]').forEach(function (h) { h.classList.add('page-hidden'); });
+  }
+  vocab.applyVocabCategory = applyVocabCategory;
+  vocab.vocabCategory = function () { return document.body.dataset.activeSection === 'vocabulary' ? vocabCat : ''; };
+
   function showSection(name, opts) {
     opts = opts || {};
     closeKanjiSheet();
@@ -263,7 +295,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     markActiveNav(name);
     updatePoliteVisibility();
     if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
-    setHash(name, opts.fromRoute);
+    vocabCat = name === 'vocabulary' ? (opts.category || '') : '';
+    if (!vocabCat) catFromHome = false;
+    applyVocabCategory();
+    setHash(vocabCat ? name + '/' + slugOf(vocabCat) : name, opts.fromRoute);
     if (!opts.fromRoute || !/^#table-/.test(location.hash)) window.scrollTo({ top: 0 });
   }
   vocab.showSection = showSection;
@@ -274,7 +309,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     opts = opts || {};
     const section = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');
     if (!section) return;
-    if (document.body.dataset.activeSection !== section.dataset.section) showSection(section.dataset.section, { fromRoute: true });
+    const cat = section.dataset.section === 'vocabulary' ? catOf(section) : '';
+    if (document.body.dataset.activeSection !== section.dataset.section || (cat && vocabCat !== cat)) showSection(section.dataset.section, { fromRoute: true, category: cat });
     expandSection(section);
     collapseSiblingSections(section);
     updatePoliteVisibility(); // opening the Verbs table from a route makes "Show polite" apply
@@ -762,6 +798,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (m && document.getElementById('table-' + m[1])) { goToTable(m[1], { fromRoute: true }); return; }
     // #travel: a section since folded into Vocabulary -- falls through to it.
     if (h === 'grammar' || h === 'kanji') { showSection(h, { fromRoute: true }); return; }
+    const vc = h.match(/^vocabulary\/(.+)$/);
+    if (vc) { showSection('vocabulary', { fromRoute: true, category: categoryFromSlug(vc[1]) }); return; }
     showSection('vocabulary', { fromRoute: true });
   }
   vocab.routeFromHash = routeFromHash;
@@ -1316,6 +1354,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (vocab.updatePoliteVisibility) vocab.updatePoliteVisibility();
       if (q) { if (vocab.updateAdjLegend) vocab.updateAdjLegend(); }
       else if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
+      if (vocab.applyVocabCategory) vocab.applyVocabCategory();
 
       // The best match overall should be first on the page; ties keep table order.
       const children = [...vocabHost.children];
@@ -1545,6 +1584,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         el.setAttribute('aria-expanded', String(willOpen));
         const section = el.closest('.table-section');
         if (section) section.classList.toggle('menu-open', willOpen);
+        return;
+      }
+      if ((el = t.closest('.vh-tile'))) {
+        catFromHome = true;
+        showSection('vocabulary', { category: el.dataset.cat });
+        return;
+      }
+      if (t.closest('#vocabBack')) {
+        // Back to the squares, as a pushed screen's back does: pop the
+        // square's own history entry when that's where it came from.
+        if (catFromHome) { catFromHome = false; history.back(); } else showSection('vocabulary');
         return;
       }
       if ((el = t.closest('.section-toggle'))) {

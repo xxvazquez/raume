@@ -1077,7 +1077,23 @@ async function main() {
       && document.querySelectorAll("#siteNav .site-nav-link").length === 5;
   })());
   check("the Vocabulary nav link starts active", document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').classList.contains("active"));
-  check("only the Vocabulary section's tables are shown", [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden") === (s.dataset.section !== "vocabulary")));
+  check("Vocabulary opens on its category squares, every table tucked away until one is tapped", (() => {
+    const tiles = [...document.querySelectorAll("#vocabHome .vh-tile")];
+    return document.getElementById("vocabHome").hidden === false && tiles.length === 6
+      && tiles.every(t => t.dataset.tile && t.querySelector(".vh-ic svg") && /^\d+$/.test(t.querySelector(".vh-n").textContent) && /tables?$/.test(t.getAttribute("aria-label")))
+      && [...document.querySelectorAll("#vocabulary .table-section")].every(s => s.classList.contains("page-hidden"))
+      && document.getElementById("vocabBack").hidden;
+  })());
+  check("a square opens its category alone, titled and linked, with ‹ Vocabulary back to the squares", (() => {
+    document.querySelector('.vh-tile[data-cat="Food & Ingredients"]').click();
+    const shown = [...document.querySelectorAll("#vocabulary .table-section")].filter(s => !s.classList.contains("page-hidden"));
+    const open = document.getElementById("vocabHome").hidden && shown.length === 7 && shown.every(s => s.dataset.category === "Food & Ingredients")
+      && document.getElementById("screenTitle").textContent === "Food & Ingredients" && window.location.hash === "#vocabulary/food-and-ingredients"
+      && !document.getElementById("vocabBack").hidden && document.body.classList.contains("vocab-cat-open");
+    window.RaumeStudy.vocab.showSection("vocabulary");
+    return open && document.getElementById("vocabHome").hidden === false && document.getElementById("screenTitle").textContent === "Vocabulary"
+      && !document.body.classList.contains("vocab-cat-open");
+  })());
   check("Grammar tables belong to the grammar section", [...document.querySelectorAll('.table-section[data-category="Grammar"]')].every(s => s.dataset.section === "grammar"));
   check("there's no Travel section any more", !document.querySelector('.table-section[data-category="Travel"], .table-section[data-section="travel"], .site-nav-link[data-section="travel"]'));
   check("there's no Phrases section any more", !document.querySelector('.table-section[data-category="Phrases"], .site-nav-link[data-section="phrases"]'));
@@ -1086,7 +1102,7 @@ async function main() {
   console.log("Vocabulary section: content-category sub-headings + table-index dropdown");
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
   check("a sub-heading per Vocabulary category (Around Town / Food & Ingredients / Kitchen & Dining / Numbers & Counting / People & Daily Life / Time & Calendar)", catHeads.length === 6);
-  check("sub-headings are visible on the Vocabulary page", catHeads.every(h => !h.classList.contains("page-hidden")));
+  check("the category sub-headings step aside -- the squares, and a category's own title, name it", catHeads.every(h => h.classList.contains("page-hidden")));
   check("the reading column and its category rules share one width cap", (() => {
     const mw = el => window.getComputedStyle(el).maxWidth;
     const table = mw(document.querySelector("#vocabulary .table-section"));
@@ -1153,7 +1169,7 @@ async function main() {
   })());
   check("clicking outside closes it", (() => { document.body.click(); return tindexMenu.hidden === true; })());
   check("every table lands collapsed, nothing presumed more relevant", (() => {
-    const tables = [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden)')];
+    const tables = [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]')];
     return tables.length > 1 && tables.every(s => s.classList.contains("collapsed"));
   })());
 
@@ -1552,13 +1568,15 @@ async function main() {
   console.log("Expand all / collapse all");
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
   const expandAllBtn = document.getElementById("expandAllBtn");
+  check("Expand all steps aside on the category squares -- there's nothing open to expand", window.getComputedStyle(expandAllBtn).display === "none");
+  document.querySelector('.vh-tile[data-cat="Food & Ingredients"]').click();
   const allCollapsed = () => {
     const tables = [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden)')];
     return tables.length > 1 && tables.every(s => s.classList.contains("collapsed"));
   };
   check("the expand-all control starts as 'Expand all'", !!expandAllBtn && expandAllBtn.textContent === "Expand all" && expandAllBtn.getAttribute("aria-pressed") === "false");
   expandAllBtn.click();
-  check("clicking it expands every visible Vocabulary table", [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden)')].every(s => !s.classList.contains("collapsed")));
+  check("clicking it expands every table in the category", [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden)')].every(s => !s.classList.contains("collapsed")));
   check("...the button flips to 'Collapse all' and body carries expand-all-mode", expandAllBtn.textContent === "Collapse all" && expandAllBtn.getAttribute("aria-pressed") === "true" && document.body.classList.contains("expand-all-mode"));
   expandAllBtn.click();
   check("clicking again collapses every table", allCollapsed() && !document.body.classList.contains("expand-all-mode") && expandAllBtn.textContent === "Expand all");
@@ -1602,6 +1620,7 @@ async function main() {
   check("clicking it turns on the mode and lights the button", document.body.classList.contains("selftest-mode") && selftestBtn.getAttribute("aria-pressed") === "true" && selftestBtn.classList.contains("active"));
   check("...and the hint line appears", window.getComputedStyle(selftestHint).display !== "none" && /tap a row/i.test(selftestHint.textContent));
   check("...and the Options dot lights so a covered table never looks broken", document.getElementById("optionsDot").hidden === false);
+  document.querySelector('.vh-tile[data-cat="Food & Ingredients"]').click();
   const stRow = document.querySelector('#vocabulary .table-section[data-section="vocabulary"]:not(.page-hidden) tbody tr');
   stRow.cells[1].click();
   check("tapping a row reveals it", stRow.classList.contains("revealed"));
