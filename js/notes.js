@@ -662,7 +662,7 @@ window.RaumeStudy.notes = (function () {
     var text = tip.lastElementChild;
     // ! is a warning, a number a numbered note, kana the word it's about;
     // any other mark (+, ☎, a picture) is a tip.
-    var isKana = /^[\u3040-\u30ff\u4e00-\u9fff]+$/.test(mark), isNum = /^\d+$/.test(mark);
+    var isKana = /^[\u3040-\u30ff\u4e00-\u9fff]+$/.test(mark) && !/^[ー・]+$/.test(mark), isNum = /^\d+$/.test(mark);
     var label = mark === "!" ? "Watch out" : isNum ? "Note " + mark : isKana ? esc(mark) : "Tip";
     var kind = mark === "!" ? "warn" : isNum ? "note" : isKana ? "kana" : "tip";
     if (dot) dot.remove();

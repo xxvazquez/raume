@@ -850,7 +850,11 @@ and Help.
   it, so where one idea ends is always drawn. A right / wrong example
   (✓ / ✗) is its own 16px Japanese line under the explanation. A form
   that doesn't exist (no Japanese, or a bare dash) gets no speaker: just
-  its English, grey italic, saying so. One folding rule: whatever has a
+  its English, grey italic, saying so. Every speaker sits at the trailing
+  edge of its Japanese's first line, as in the reference tables, so they
+  line up down a list and never end up alone on a wrapped line (in a word
+  list the English keeps a fixed 40% so the speakers align there too).
+  English is one size everywhere in a note (12.5px on a phone). One folding rule: whatever has a
   heading of its own inside a section (a word list, a page of practice, a
   dialogue) folds under it — a 15px semibold heading with a grey count and
   chevron over a hairline, closed until tapped; the lesson's ideas

@@ -1714,9 +1714,12 @@ body.icon-picker-open { overflow: hidden; }
 /* As in the reference tables: tap the Japanese for its romaji (a caption
    under it; tap again or another word to close), and the speaker beside it
    plays it (notes.js showLesson adds the reference tables' speaker button). */
-.rn-jl { display: flex; align-items: baseline; gap: 2px; }
-.rn-jl .rn-jp { min-width: 0; }
-.rn-jl .jp-speak-btn { flex: none; position: relative; }
+/* As in the reference tables (.jp-line): the speaker sits at the trailing
+   edge of the Japanese's first line, so speakers line up down a list and
+   one never ends up alone on a wrapped line. */
+.rn-jl { display: flex; align-items: baseline; gap: 8px; width: 100%; box-sizing: border-box; }
+.rn-jl .rn-jp { flex: 0 1 auto; min-width: 0; }
+.rn .rn-jl .jp-speak-btn { flex: none; position: relative; margin-left: auto; }
 .rn-jl .jp-speak-btn::after { content: ""; position: absolute; inset: -13px -10px; }
 .rn-st .rn-jp:has(+ .rn-ro:not(:empty)), .rn-jl:has(+ .rn-ro:not(:empty)) .rn-jp { cursor: pointer; }
 .rn-st .rn-jp { border-radius: 6px; transition: background-color .2s; }
@@ -1753,7 +1756,9 @@ body.icon-picker-open { overflow: hidden; }
 .rn-sec-body > .rn-h3 { margin: 0; padding: 16px 0 4px; }
 .rn-sec-body > .rn-h3 + * { border-top: 0; }
 .rn-sec-body > .rn-fold { padding: 0; }
-.rn-sec-body > .rn-fold + * { border-top: 0; }
+/* A closed fold's head already draws the line under it; an open one ends
+   on its list, so the row after it keeps its own line. */
+.rn-sec-body > .rn-fold:has(> .rn-fold-head[aria-expanded="false"]) + * { border-top: 0; }
 .rn-card { background: none; }
 .rn-pad { padding: 0; }
 .rn-list { padding: 0; }
@@ -1784,7 +1789,7 @@ body.icon-picker-open { overflow: hidden; }
 .rn-tile + .rn-tile > .rn-st::before { content: ""; position: absolute; top: -8px; right: 0; left: 0; border-top: 1px solid var(--row-line); }
 .rn-tiles:not(:has(.rn-ic)) .rn-tile { grid-template-columns: minmax(0, 1fr); }
 .rn-tiles-pairs .rn-tile { grid-template-columns: 50px minmax(0, 1fr); }
-.rn-tile > .rn-st { grid-column: -2; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; align-items: baseline; }
+.rn-tile > .rn-st { grid-column: -2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 40%); column-gap: 14px; align-items: baseline; }
 .rn-tile > .rn-st > * { grid-column: 1; }
 .rn-tile > .rn-st > .rn-en { grid-column: 2; grid-row: 1; max-width: 16em; text-align: right; margin-top: 0; }
 .rn-tile > .rn-st:has(> .rn-tag) > .rn-en { grid-row: 2; }
@@ -1900,7 +1905,7 @@ body.icon-picker-open { overflow: hidden; }
 @media (max-width: 640px) {
   .rn-jp, .rn-fj { font-size: calc(16px * var(--dt)); }
   .rn-fj { font-size: calc(17px * var(--dt)); }
-  .rn-en { font-size: calc(12.5px * var(--dt)); }
+  .rn-en, .rn-ex-en, .rn-fe { font-size: calc(12.5px * var(--dt)); }
 }
 /* A name / class field in the iOS alert (notes.js fieldSheet): the field
    under the message, a tinted (not red) confirm button. */
