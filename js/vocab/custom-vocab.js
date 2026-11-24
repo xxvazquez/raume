@@ -300,6 +300,20 @@ window.RaumeStudy.customVocab = (function () {
     return t;
   }
 
+  // File one of the reader's own tables under another category -- an
+  // existing one (it joins that square) or a new name. Blank = the default.
+  function setTableCategory(id, category) {
+    var t = load().tables.filter(function (x) { return x.id === id; })[0];
+    if (!t) throw new Error("That table no longer exists.");
+    var next = String(category || "").trim().slice(0, 60) || DEFAULT_CATEGORY;
+    if (next === t.category) return t;
+    t.category = next;
+    persist();
+    refreshApp();
+    if (remote) { try { remote.addTable(t); } catch (e) { console.warn("custom vocab: table sync failed", e); } }
+    return t;
+  }
+
   // parsed: {segments, romaji, english} from parseFurigana / parseImport --
   // same shape addRow takes, replacing the row's content in place (its id,
   // table, and sort position are untouched).
@@ -393,7 +407,7 @@ window.RaumeStudy.customVocab = (function () {
     parseFurigana: parseFurigana, parseImport: parseImport,
     applyToDataset: applyToDataset,
     addRow: addRow, addRows: addRows, updateRow: updateRow,
-    createTable: createTable,
+    createTable: createTable, setTableCategory: setTableCategory,
     deleteRow: deleteRow, deleteRows: deleteRows, restoreRows: restoreRows, deleteTable: deleteTable,
     setRemote: setRemote, applyRemote: applyRemote, onChange: onChange,
     isSignedIn: isSignedIn, tableExists: tableExists,

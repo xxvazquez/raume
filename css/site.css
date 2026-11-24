@@ -2230,6 +2230,8 @@ body.tpick-open { overflow: hidden; }
 }
 .cv-del-table:hover { color: var(--wrong-strong); }
 .cv-owned-list { list-style: none; margin: 0; padding: 0; }
+/* Your own table's Category, first thing inside it when opened. */
+.cv-table-cat { margin: 8px 0 6px; }
 /* A list row, as in Flashcards › Manage: the Japanese in ink with its romaji
    small and grey beside it (wrapping under it only when there's no room),
    the English on the line below, edit / delete centred on the whole row. */

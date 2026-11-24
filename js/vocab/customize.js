@@ -409,13 +409,32 @@ window.RaumeStudy.customize = (function () {
       var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + esc(titleOf(t)) + "</span>" +
         '<span class="cv-owned-count">' + count + "</span>" +
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
-      return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
+      // Your own table can move to another category (an existing square or
+      // a new name); saved on change, as in Settings.
+      var cat = t.__custom
+        ? '<label class="cv-field cv-table-cat"><span>Category</span><input type="text" class="cv-cat-input" data-table="' + esc(t.id) + '"' +
+          ' value="' + esc(t.category || "") + '" maxlength="60" autocomplete="off" list="cvCategoryList"></label>'
+        : "";
+      return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + cat + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
     }).join("");
+  }
+
+  // The categories a table of yours can join, offered as suggestions in
+  // every Category field (any other name still makes a new one). Not the
+  // Kanji section's -- it holds kanji, not words.
+  function categoryListHtml() {
+    var seen = {}, names = [];
+    tables().forEach(function (t) {
+      var c = t.category;
+      if (c && c !== "N5 Kanji" && !seen[c]) { seen[c] = true; names.push(c); }
+    });
+    names.sort(function (a, b) { return a.localeCompare(b); });
+    return '<datalist id="cvCategoryList">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
   }
 
   function customVocabSection() {
     var signedIn = !!(cv() && cv().isSignedIn());
-    return '<section class="cv-section">' +
+    return '<section class="cv-section">' + categoryListHtml() +
       '<h2>Your vocabulary' + infoButtonHtml("vocab", cvInfoVocabOpen, "About your vocabulary") + "</h2>" +
       infoPanelHtml("vocab", cvInfoVocabOpen,
         '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
@@ -435,7 +454,7 @@ window.RaumeStudy.customize = (function () {
         ? '<details class="cv-card" data-open-key="new">' +
           '<summary class="cv-card-summary disclosure-caret">New table</summary>' +
           '<label class="cv-field"><span>Name</span><input type="text" class="cv-new-title" maxlength="60" autocomplete="off" placeholder="e.g. Restaurant phrases"></label>' +
-          '<label class="cv-field"><span>Category</span><input type="text" class="cv-new-cat" maxlength="60" autocomplete="off" placeholder="My vocabulary"></label>' +
+          '<label class="cv-field"><span>Category</span><input type="text" class="cv-new-cat" maxlength="60" autocomplete="off" list="cvCategoryList" placeholder="e.g. At Home"></label>' +
           '<div class="cv-add-actions"><button type="button" class="cv-btn cv-new-btn">Create table</button></div></details>'
         : "") +
 
@@ -802,6 +821,9 @@ window.RaumeStudy.customize = (function () {
     host.addEventListener("change", function (e) {
       if (e.target.classList.contains("cv-import-file")) readImportFile(host, e.target);
       if (e.target.classList.contains("cv-owned-sort-select")) { cvOwnedSort = e.target.value; updateOwnedList(host); }
+      if (e.target.classList.contains("cv-cat-input") && cv()) {
+        try { cv().setTableCategory(e.target.dataset.table, e.target.value); } catch (err) { window.alert(err.message); }
+      }
     });
     host.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && e.target.classList.contains("cv-add-input")) { e.preventDefault(); addWord(host); }

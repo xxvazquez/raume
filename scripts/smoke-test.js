@@ -2112,6 +2112,20 @@ async function main() {
   document.querySelector("#customizePage .cv-new-cat").value = "Grammar";
   document.querySelector("#customizePage .cv-new-btn").click();
   const newTable = cvNs.customTables().find(t => t.title === "Positions");
+  check("New table's Category suggests the existing categories (not Kanji's)", (() => {
+    const opts = [...document.querySelectorAll("#customizePage #cvCategoryList option")].map(o => o.value);
+    return document.querySelector("#customizePage .cv-new-cat").getAttribute("list") === "cvCategoryList"
+      && opts.includes("Around Town") && opts.includes("Grammar") && !opts.includes("N5 Kanji");
+  })());
+  if (newTable) {
+    const catField = () => document.querySelector('#customizePage .cv-cat-input[data-table="' + newTable.id + '"]');
+    check("your own table shows its Category, editable", !!catField() && catField().value === "Grammar");
+    catField().value = "People & Daily Life";
+    catField().dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("...changing it files the table under that category", cvNs.customTables().find(t => t.id === newTable.id).category === "People & Daily Life");
+    catField().value = "Grammar";
+    catField().dispatchEvent(new window.Event("change", { bubbles: true }));
+  }
   const tableBtn = kind => document.querySelector('#customizePage .cv-table-btn[data-kind="' + kind + '"]');
   check("creating a table selects it in Add a word and Import", !!newTable
     && tableBtn("add").dataset.value === newTable.id && tableBtn("import").dataset.value === newTable.id
