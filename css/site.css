@@ -1831,7 +1831,9 @@ body.icon-picker-open { overflow: hidden; }
 .rn-two:not(:has(> :not(.rn-card, .rn-formula))) { display: block; }
 .rn-two:not(:has(> :not(.rn-card, .rn-formula))) > * + * { margin-top: 14px; }
 .rn-kind { font: 600 var(--fs-subhead)/1.3 var(--font-ui); }
-.rn-kind-sub { margin-bottom: 4px; font-size: var(--fs-small); color: var(--muted); }
+/* An explainer's rule ("goes straight before the noun") is the same kind
+   of text as a tip's rule, so the same size and ink. */
+.rn-kind-sub { margin-bottom: 4px; font-size: var(--fs-body); line-height: 1.5; color: var(--ink); }
 /* Tips are text led by a glyph -- orange ⚠ for watch out, a lightbulb for
    a tip, else the number in the section's hue. */
 .rn-tips { display: grid; gap: 10px; }
