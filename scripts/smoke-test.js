@@ -2291,6 +2291,22 @@ async function main() {
       if (rn2) rn2.remove();
       return ok;
     })());
+    check("a section reads as a page heading that folds: its kind's tile, title, \"N · kind\" under it, open to start; tips lead with a glyph", (() => {
+      const spot3 = document.createElement("p");
+      host.appendChild(spot3);
+      nh.showLessonHtml('<html><head><meta name="raume-note" content="1"></head><body><article class="rn"><section class="rn-sec" data-tile="clay">' +
+        '<h2 class="rn-sec-head"><span class="rn-sec-num" aria-hidden="true">1</span><span>Where is it?</span><span class="rn-sub">Watch out</span></h2>' +
+        '<div class="rn-st"><div class="rn-jp">まち</div><div class="rn-ro">machi</div><div class="rn-en">town</div></div>' +
+        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">!</span><div>Careful</div></div></section></article></body></html>', spot3);
+      const rn3 = host.querySelectorAll(".rn")[1];
+      const btn = rn3 && rn3.querySelector(".rn-sec-head .rn-sec-btn"), body = rn3 && rn3.querySelector(".rn-sec > .rn-sec-body");
+      const ok = !!btn && !!btn.querySelector(".rn-tile-ic svg") && btn.querySelector(".rn-sec-title").textContent === "Where is it?"
+        && btn.querySelector(".rn-sub").textContent === "1 · Watch out" && btn.getAttribute("aria-expanded") === "true"
+        && btn.getAttribute("aria-controls") === body.id && !body.hidden && !!body.querySelector(".rn-st")
+        && !!body.querySelector(".rn-dot.rn-dot-warn svg");
+      if (rn3) rn3.remove();
+      return ok;
+    })());
     check("note search finds a word by its kana, its romaji however it's spelled, and its English -- not by something it doesn't say", (() => {
       const unit = rn.querySelector(".rn-st");
       return nh.matcher("まち")(unit) && nh.matcher("machi")(unit) && nh.matcher("Town")(unit) && nh.matcher("町")(unit) && !nh.matcher("yama")(unit) && nh.matcher("") === null;

@@ -831,31 +831,32 @@ and Help.
   again clears it), another band, then Rename / Lesson date / Replace / Delete
   (red). Name and date edits use the iOS alert with a field and a tinted,
   semibold confirm (`.ios-confirm-field`, `.ios-confirm-go`).
-- **Lesson notes** (`.rn`, made by `scripts/note_kit.py`) are a raume
-  screen, not a document, and every note has the same shape: sections in
+- **Lesson notes** (`.rn`, made by `scripts/note_kit.py`) all have the
+  same shape: sections in
   one order, each kind in its own tile hue and named in its grey subtitle
   (Grammar blue, Conversation teal, Vocabulary green, Practice orange, Watch
-  out clay, Reference slate — so a colour never stands alone). Section
-  heads are headings, not badges: the number in the section's hue and the
-  title on one line (`--fs-section-title`, under the lesson topic's 22px),
-  the kind and the Japanese subtitle in grey under the title, 40px between
-  sections. Sub-heads are list headers. No card per item: a word list
-  (`tiles`) is one inset-grouped card read like a reference table — a
-  hairline row per word (the hairline starts past the picture), its
-  picture in a leading column, the Japanese and speaker first with the
-  English trailing (from halfway across on a wide window), one column at
-  every width so it reads top to bottom; a list whose Japanese runs long
-  (pairs, phrases) puts the English under it on a phone. Explainer and
-  formula cards set side by side become one card with a hairline between
-  them. Nothing in a note is text on the bare ground but headings: tips
-  sit on white too — a group of them one card with hairlines, a lone one
-  its own card — each led by its tile-hue dot. Every word list, and any
-  list of eight rows or more, folds like a reference table: the heading
-  becomes the card's title row (15px name, grey count, chevron that turns),
-  closed until tapped, and folds in a row share one card. A note's search
+  out clay, Reference slate — so a colour never stands alone). Lesson
+  notes are read, so a note is drawn as one page, as Apple Notes is — not
+  an inset-grouped list: a white `--radius-card` sheet (edge to edge on a
+  phone), no cards inside it, hierarchy from type and space. Under the topic
+  (22px) **In this lesson** lists the sections, a 44px row each (tile,
+  number, title; a tap opens and scrolls to it). A section heading is a
+  button: the kind's 28px tile (white glyph on its hue), the title
+  (`--fs-section-title`) with "1 · Grammar · …" in grey under it, and a
+  trailing chevron that folds the section; its content sits under the title
+  (indented past the tile on a wider window). A word list, and any list of
+  eight rows or more, folds under its own 15px semibold heading with a grey
+  count and chevron over a hairline, closed until tapped. Word lists read
+  like a reference table (hairline rows, the picture leading, a pair's ↔
+  faint, the English trailing or from halfway across on a wide window; one
+  picture column for every row once a list has pairs). Patterns are set
+  12% larger, the part that changes on a soft chip of the section's hue —
+  the hue that marks it in the examples. Tips are text: an orange ⚠ for
+  watch out, an amber lightbulb for a tip, else the number on a soft dot.
+  Japanese breaks at its spaces, never inside a word. A note's search
   capsule (the reference search's) sits above it, the list's above the
-  list; searching leaves only matching rows, cards and their headings.
-  Formula cards and hairline Q/A lists (stacked on a phone) stay. Every
+  list; searching hides the outline and leaves only matching rows, opening
+  what they're in. Every
   Japanese item is Japanese with furigana (particles bold blue,
   `.particle`, as everywhere in raume) and the reference tables' speaker
   button, then English, in the tables' own type — `--font-jp` at `--fs-jp`

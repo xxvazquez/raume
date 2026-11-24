@@ -1616,40 +1616,78 @@ body.icon-picker-open { overflow: hidden; }
 .note-frame[hidden] { display: none; }
 .notes-file-input { display: none; }
 
-/* A lesson note (scripts/note_kit.py), drawn as a raume screen: numbered
-   section headings in the section's hue, the iOS list-header voice for
-   sub-heads, white inset-grouped cards of hairline rows (word lists read
-   like a reference table), unboxed tips and formulas. Every Japanese item
-   is Japanese (with furigana) and its speaker, then English; tap the
-   Japanese for its romaji, as in the tables. Quiz covers the Japanese you
-   should produce, English off covers that line; a covered item uncovers on
-   a tap. Colour comes only from the section's
-   tile hue (--rn), so it follows light and dark like everything else. */
-.rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 12%, var(--paper)); color: var(--ink); }
-.rn [data-tile] { --rn: var(--tile); --rn-soft: color-mix(in srgb, var(--tile) 12%, var(--paper)); --rn-strong: color-mix(in srgb, var(--tile) 80%, var(--ink)); }
+/* A lesson note (scripts/note_kit.py) is read, so it is drawn as a page --
+   Apple Notes, not Settings: one white sheet, no cards inside it, hierarchy
+   from type and space. An outline of its sections up top (tap to jump);
+   each section heading leads with its kind's tile (Grammar blue,
+   Conversation teal, Vocabulary green, Practice orange, Watch out clay,
+   Reference slate) and folds what's under it, as Notes' headings do; a word
+   list folds under its own heading, closed until tapped. Word lists read
+   like a reference table (a hairline row per word, its picture leading);
+   patterns are set large with the part that changes on a soft chip in the
+   section's hue, the same hue that marks it in the examples; tips are text
+   led by a glyph (orange ⚠ watch out, a lightbulb, or a number). Every
+   Japanese item is Japanese (with furigana) and its speaker, then English;
+   tap the Japanese for its romaji, as in the tables. Quiz covers the
+   Japanese you should produce, English off covers that line; a covered
+   item uncovers on a tap. Colour comes only from the section's tile hue
+   (--rn), so it follows light and dark like everything else. */
+.rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 14%, var(--paper)); color: var(--ink);
+  background: var(--paper); border-radius: var(--radius-card); padding: 22px 24px 30px; }
+.rn [data-tile] { --rn: var(--tile); --rn-soft: color-mix(in srgb, var(--tile) 14%, var(--paper)); --rn-strong: color-mix(in srgb, var(--tile) 80%, var(--ink)); }
 .rn ruby rt { font-size: 11px; color: var(--muted); font-weight: 400; }
 .rn b, .rn strong { font-weight: 600; }
 .rn-hl { color: var(--rn-strong); }
 .rn-ok { color: var(--right-strong, #2f7d4f); white-space: nowrap; }
 .rn-x { color: var(--wrong-strong); white-space: nowrap; }
-.rn-top { margin: 0 0 22px; }
+.rn-top { margin: 0 0 18px; }
 /* The screen's title is the note's name (its date), so the eyebrow that
    repeats it goes; the lesson's topic heads the description. */
 .rn-eyebrow { display: none; }
 .rn-top h1 { margin: 0 0 4px; font: 600 calc(22px * var(--dt))/1.25 var(--font-ui); color: var(--ink); }
 .rn-desc { margin: 0; color: var(--ink-2); font-size: var(--fs-body); line-height: 1.45; text-wrap: pretty; }
-/* A section reads as a heading, not a badge: its number (in the section's
-   hue) and title on one line, what kind of section it is in grey under the
-   title, and real air before the next one. */
-.rn-sec { margin: 0 0 40px; scroll-margin-top: 120px; }
-.rn-sec-head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; margin: 0 4px 12px; font: 600 var(--fs-section-title)/1.25 var(--font-ui); color: var(--ink); }
-.rn-sec-num { color: var(--rn-strong); font-variant-numeric: tabular-nums; }
-.rn-sub { grid-column: 2; margin-top: 2px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
-.rn-h3 { margin: 22px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+/* In this lesson: one row per section -- its tile, number and title --
+   a tap scrolls to it (and opens it). */
+.rn-toc { margin: 0 0 8px; padding: 0; list-style: none; border-top: 1px solid var(--row-line); }
+.rn-toc li { border-bottom: 1px solid var(--row-line); }
+.rn-toc-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 0;
+  border: 0; background: none; cursor: pointer; text-align: left; font: 400 15px/1.3 var(--font-ui); color: var(--ink);
+}
+.rn-toc-n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.rn-toc-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
+.rn-searching .rn-toc { display: none; }
+/* Section kind tile: the glyph white on the section's hue, as the
+   reference tables' tiles. */
+.rn-tile-ic {
+  flex: none; width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff;
+}
+.rn-tile-ic svg { width: 16px; height: 16px; }
+/* A section: its heading -- tile, title, "1 · Grammar · …" under it, a
+   chevron that folds the section -- then real air before the next one. */
+.rn-sec { margin: 30px 0 0; scroll-margin-top: 120px; }
+.rn-sec-head { margin: 0; font: inherit; }
+.rn-sec-btn {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; align-items: center; width: 100%;
+  padding: 4px 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--ink);
+}
+.rn-sec-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
+.rn-sec-title { display: block; font: 600 var(--fs-section-title)/1.25 var(--font-ui); }
+.rn-sub { display: block; margin-top: 2px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.rn-chev { flex: none; color: var(--faint); transition: transform .2s ease; }
+[aria-expanded="true"] > .rn-chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .rn-chev { transition: none; } }
+.rn-sec-body { padding: 6px 0 0 40px; }
+.rn-sec-body[hidden] { display: none; }
+.rn-h3 { margin: 22px 0 4px; font: 600 15px/1.3 var(--font-ui); color: var(--ink); }
 /* Japanese / romaji / English */
 .rn-tag { font: 500 var(--fs-micro)/1.3 var(--font-ui); color: var(--muted); margin-bottom: 2px; }
 /* Type is the reference tables': their Japanese font and size, romaji
    caption and English (and their phone step-down, below). */
+/* Beginner Japanese is spaced between words, so a line breaks at a space,
+   never inside a word (こうえ / ん); a run too long for the line still wraps. */
+.rn-jp, .rn-fj { word-break: keep-all; overflow-wrap: anywhere; }
 .rn-jp { font-family: var(--font-jp); font-size: var(--fs-jp); line-height: 1.75; font-weight: 400; }
 /* As in the reference tables: tap the Japanese for its romaji (a caption
    under it; tap again or another word to close), and the speaker beside it
@@ -1667,16 +1705,19 @@ body.icon-picker-open { overflow: hidden; }
 .rn-st.rn-ro-on .rn-ro:not(:empty) { display: block; }
 .rn-en { font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; margin-top: 1px; }
 .rn-ro:empty, .rn-en:empty { display: none; }
-/* Cards and list rows */
-.rn-card { background: var(--paper); border-radius: var(--radius-card); }
-.rn-pad { padding: 14px 16px; }
-.rn-list { background: var(--paper); border-radius: var(--radius-card); padding: 0 16px; }
-.rn-r { display: grid; column-gap: 14px; align-items: start; padding: 11px 0; }
+/* Blocks: nothing boxed -- spacing and hairlines only. */
+.rn-sec-body > * + * { margin-top: 14px; }
+.rn-sec-body > .rn-h3 { margin-top: 24px; }
+.rn-sec-body > .rn-h3 + * { margin-top: 4px; }
+.rn-card { background: none; }
+.rn-pad { padding: 0; }
+.rn-list { padding: 0; }
+.rn-r { display: grid; column-gap: 14px; align-items: start; padding: 10px 0; }
 .rn-r + .rn-r { border-top: 1px solid var(--row-line); }
 .rn-qa .rn-r { grid-template-columns: 30px 1.4fr 1fr; }
 .rn-one .rn-r { grid-template-columns: 30px 1fr; }
 .rn-qa.rn-labelled .rn-r { grid-template-columns: 64px 1fr 1fr; }
-.rn-hdr { padding: 10px 0 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.rn-hdr { padding: 6px 0 4px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .rn-lead { text-align: center; padding-top: 2px; }
 .rn-lead.rn-em { font-size: 20px; line-height: 1.3; }
 .rn-lead.rn-num {
@@ -1688,23 +1729,21 @@ body.icon-picker-open { overflow: hidden; }
 .rn-cols2 .rn-r { break-inside: avoid; }
 .rn-cols2 .rn-r + .rn-r { border-top: 0; }
 .rn-cols2 .rn-r { border-bottom: 1px solid var(--row-line); }
-/* Tiles */
-/* A word list is one inset-grouped card, like a reference table: a
-   hairline row per word -- its picture in a leading column, the Japanese
-   (and speaker) on the first line with the English trailing, the romaji
-   caption growing the row downward when tapped. One column at every width,
-   so it always reads top to bottom (kit's c2/c3/c4 no longer apply). */
-.rn-tiles { background: var(--paper); border-radius: var(--radius-card); padding: 0 16px; }
-.rn-tile { display: grid; grid-template-columns: minmax(28px, max-content) minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 10px 0; min-width: 0; }
+/* A word list reads like a reference table: a hairline row per word -- its
+   picture in a leading column, the Japanese (and speaker) first with the
+   English trailing, the romaji caption growing the row downward when
+   tapped. One column at every width, so it reads top to bottom. */
+.rn-tile { display: grid; grid-template-columns: minmax(28px, max-content) minmax(0, 1fr); column-gap: 12px; align-items: start; padding: 8px 0; min-width: 0; }
 /* The hairline starts at the words, past the picture, as in iOS lists. */
 .rn-tile + .rn-tile > .rn-st { position: relative; }
-.rn-tile + .rn-tile > .rn-st::before { content: ""; position: absolute; top: -10px; right: 0; left: 0; border-top: 1px solid var(--row-line); }
+.rn-tile + .rn-tile > .rn-st::before { content: ""; position: absolute; top: -8px; right: 0; left: 0; border-top: 1px solid var(--row-line); }
 .rn-tiles:not(:has(.rn-ic)) .rn-tile { grid-template-columns: minmax(0, 1fr); }
+.rn-tiles-pairs .rn-tile { grid-template-columns: 50px minmax(0, 1fr); }
 .rn-tile > .rn-st { grid-column: -2; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; align-items: baseline; }
 .rn-tile > .rn-st > * { grid-column: 1; }
-.rn-tile .rn-jp { word-break: keep-all; }
 .rn-tile > .rn-st > .rn-en { grid-column: 2; grid-row: 1; max-width: 16em; text-align: right; margin-top: 0; }
 .rn-tile > .rn-st:has(> .rn-tag) > .rn-en { grid-row: 2; }
+.rn-jp .rn-pair { color: var(--faint); }
 /* A wide window has room for the tables' two columns: the English starts
    halfway across, left-aligned, instead of hugging the far edge. */
 @media (min-width: 701px) {
@@ -1724,74 +1763,49 @@ body.icon-picker-open { overflow: hidden; }
 .rn .pk-dot { fill: var(--tile-orange); }
 .rn .pk-dash { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 2; }
 .rn .pk-halo { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 2; }
-/* Formula */
-.rn-formula { background: var(--paper); border-radius: var(--radius-card); padding: 14px 16px; }
+/* A pattern, set large: its Q / A label in the hue, the part that changes
+   on a soft chip of the same hue. */
 .rn-fl { display: grid; grid-template-columns: 22px 1fr; align-items: baseline; }
 .rn-fl + .rn-fl { margin-top: 10px; }
 .rn-lab { font: 600 13px/1 var(--font-ui); color: var(--rn-strong); }
-.rn-fj { font-family: var(--font-jp); font-size: var(--fs-jp); line-height: 1.6; }
+.rn-fj { font-family: var(--font-jp); font-size: calc(var(--fs-jp) * 1.12); line-height: 1.6; }
 .rn-fr { font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); }
 .rn-fj s { color: var(--faint); }
 .rn-slot {
   display: inline-block; padding: 0 7px; margin: 0 2px; border-radius: 7px; line-height: 1.5;
-  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font-size: .82em; font-weight: 500;
+  background: var(--rn-soft); color: var(--rn-strong); font-size: .82em; font-weight: 600;
 }
-/* Two-up, tips */
-.rn-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-/* Explainer cards side by side (い-adjective / な-adjective) are one set:
-   one card with a hairline between them, never two boxes. */
-.rn-two:not(:has(> :not(.rn-card, .rn-formula))) { display: block; background: var(--paper); border-radius: var(--radius-card); padding: 0 16px; }
-.rn-two:not(:has(> :not(.rn-card, .rn-formula))) > * { background: none; border-radius: 0; padding: 12px 0; }
-.rn-two:not(:has(> :not(.rn-card, .rn-formula))) > * + * { border-top: 1px solid var(--row-line); }
-.rn-two.rn-flush { margin: 0 0 10px; }
+/* Two-up blocks stack as one run of text. */
+.rn-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.rn-two:not(:has(> :not(.rn-card, .rn-formula))) { display: block; }
+.rn-two:not(:has(> :not(.rn-card, .rn-formula))) > * + * { margin-top: 14px; }
 .rn-kind { font: 600 var(--fs-subhead)/1.3 var(--font-ui); }
-.rn-kind-sub { margin-bottom: 8px; font-size: var(--fs-small); color: var(--muted); }
-/* Tips sit on white like everything else in the note -- a group of them is
-   one card with a hairline between, a lone one a card of its own. Nothing
-   in a note is text on the bare ground but headings. */
-.rn-tips { margin-top: 10px; background: var(--paper); border-radius: var(--radius-card); padding: 0 16px; }
-.rn-two .rn-tips { margin-top: 0; }
-.rn-tip {
-  display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start;
-  padding: 11px 0; font-size: var(--fs-body); line-height: 1.45;
-}
-.rn-tips > .rn-tip + .rn-tip { border-top: 1px solid var(--row-line); }
-.rn-sec > .rn-tip, .rn-two > .rn-tip { background: var(--paper); border-radius: var(--radius-card); padding: 11px 16px; }
-.rn-sec > .rn-tip { margin-top: 10px; }
+.rn-kind-sub { margin-bottom: 4px; font-size: var(--fs-small); color: var(--muted); }
+/* Tips are text led by a glyph -- orange ⚠ for watch out, a lightbulb for
+   a tip, else the number in the section's hue. */
+.rn-tips { display: grid; gap: 10px; }
+.rn-tip { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; font-size: var(--fs-body); line-height: 1.5; }
 .rn-dot {
-  width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff; font: 600 12px/1 var(--font-ui);
+  width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--rn-soft); color: var(--rn-strong); font: 600 11.5px/1 var(--font-ui);
 }
-/* A long list folds like a reference table: the card's own title row --
-   name, count, chevron (turning as it opens) -- then the list under a
-   hairline. Closed until tapped. */
-.rn-fold { margin-top: 10px; background: var(--paper); border-radius: var(--radius-card); }
-.rn-h3 + .rn-fold, .rn-sec-head + .rn-fold { margin-top: 0; }
-/* Folds in a row are one card of rows, as the reference tables' are. */
-.rn-fold + .rn-fold { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
-.rn-fold + .rn-fold::before { content: ""; display: block; margin: 0 16px; border-top: 1px solid var(--row-line); }
-.rn-fold:has(+ .rn-fold) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.rn-fold + .rn-fold > .rn-fold-head { border-top-left-radius: 0; border-top-right-radius: 0; }
+.rn-dot.rn-dot-warn, .rn-dot.rn-dot-tip { background: none; border-radius: 0; }
+.rn-dot-warn { color: var(--tile-orange); }
+.rn-dot-tip { color: var(--tile-amber); }
+.rn-dot svg { width: 17px; height: 17px; }
+/* A word list (or any list of eight rows or more) folds under its heading:
+   name, count, chevron; closed until tapped. */
 .rn-fold-head {
-  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 10px 16px;
-  border: 0; background: none; border-radius: var(--radius-card); cursor: pointer; text-align: left;
-  font: 400 15px/1.3 var(--font-ui); color: var(--ink);
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 8px 0;
+  border: 0; border-bottom: 1px solid var(--row-line); background: none; cursor: pointer; text-align: left;
+  font: 600 15px/1.3 var(--font-ui); color: var(--ink);
 }
 .rn-fold-title { flex: 1 1 auto; min-width: 0; }
-.rn-fold-n { flex: none; color: var(--muted); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
-.rn-fold-chev { flex: none; color: var(--faint); transition: transform .2s ease; }
-.rn-fold-head[aria-expanded="true"] .rn-fold-chev { transform: rotate(90deg); }
-.rn-fold-head[aria-expanded="true"] { border-radius: var(--radius-card) var(--radius-card) 0 0; }
-.rn-fold-head:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; }
-.rn-fold-body { margin: 0 16px; border-top: 1px solid var(--row-line); }
-.rn-fold-body > .rn-tiles, .rn-fold-body > .rn-list, .rn-fold-body > .rn-cols2 > .rn-list { padding: 0; background: none; border-radius: 0; margin: 0; }
-@media (prefers-reduced-motion: reduce) { .rn-fold-chev { transition: none; } }
-/* Searching a note leaves only what matches (notes.js findInNote); a fold
-   left on its own is a whole card again. */
+.rn-fold-n { flex: none; color: var(--muted); font-weight: 400; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.rn-fold-head:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
+.rn-fold + .rn-fold { margin-top: 0; }
+/* Searching a note leaves only what matches (notes.js findInNote). */
 .rn-searching .rn-miss { display: none; }
-.rn-searching .rn-fold { margin-top: 10px; border-radius: var(--radius-card); }
-.rn-searching .rn-fold::before { display: none; }
-.rn-searching .rn-fold > .rn-fold-head { border-radius: var(--radius-card) var(--radius-card) 0 0; }
 /* Study modes: covered lines blur until tapped */
 .rn-no-furigana rt { visibility: hidden; }
 .rn-no-english .rn-st:not(.rn-shown) .rn-en,
@@ -1810,8 +1824,13 @@ body.icon-picker-open { overflow: hidden; }
   .rn-qa .rn-hdr + .rn-r { border-top: 0; }
   .rn-cols2 .rn-list { column-count: 1; }
 }
+/* A phone: the page runs edge to edge, as Notes does, and the section's
+   content sits under its heading rather than indented past the tile. */
 @media (max-width: 640px) {
+  .rn { margin: 0 -16px; border-radius: 0; padding: 18px 16px 28px; }
+  .rn-sec-body { padding-left: 0; }
   .rn-jp, .rn-fj { font-size: calc(16px * var(--dt)); }
+  .rn-fj { font-size: calc(17px * var(--dt)); }
   .rn-en { font-size: calc(12.5px * var(--dt)); }
 }
 /* A name / class field in the iOS alert (notes.js fieldSheet): the field

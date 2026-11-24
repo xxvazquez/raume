@@ -513,8 +513,15 @@ window.RaumeStudy.notes = (function () {
     body.querySelectorAll(".rn-tiles").forEach(function (list) {
       var long = Array.prototype.some.call(list.querySelectorAll(".rn-jp"), function (jp) { return shownText(jp).length > 8; });
       list.classList.toggle("rn-tiles-long", long);
+      // ...and one with two pictures to a row (a pair) gives every row the
+      // same wider picture column, so the words and English stay in line.
+      list.classList.toggle("rn-tiles-pairs", Array.prototype.some.call(list.querySelectorAll(".rn-ic"), function (ic) { return /\s/.test(ic.textContent.trim()); }));
     });
+    quietPairs(body);
     makeFolds(body);
+    makeSections(body);
+    makeToc(body);
+    tipGlyphs(body);
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
     body.addEventListener("keydown", function (e) {
@@ -529,12 +536,28 @@ window.RaumeStudy.notes = (function () {
     }
   }
 
-  // Every word list, and any other list eight rows or longer (a page of
-  // practice), folds away like a reference table: its heading becomes the
-  // card's own title row, with the count and a chevron, closed until
-  // tapped. A note is read to review, so it opens as an outline.
+  // A note is a page: each section's heading folds what's under it, as a
+  // heading does in Notes, and leads with its kind's tile; an outline of the
+  // sections sits on top. Every word list, and any other list eight rows or
+  // longer (a page of practice), folds under its own heading -- name, count,
+  // chevron -- closed until tapped, so the note opens as an outline.
   var FOLD_AT = 8;
-  var CHEVRON = '<svg class="rn-fold-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg>';
+  var CHEVRON = '<svg class="rn-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg>';
+  function glyph(d) { return '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + "</svg>"; }
+  // A section's kind is its hue (note_kit.py KINDS): Grammar, Conversation,
+  // Vocabulary, Practice, Watch out, Reference.
+  var KIND_GLYPH = {
+    blue: glyph('<path d="M3 14.5 7 3.5l4 11M4.4 10.5h5.2M12.5 9.5c0-1.4 1-2 2-2s1.5.5 1.5 1.5v5.5M16 11.5c-2.5 0-3.5.7-3.5 1.8 0 .9.6 1.4 1.5 1.4 1.2 0 2-.9 2-2.2"/>'),
+    teal: glyph('<path d="M3 4.5h12v8H8.5L5 15.5v-3H3Z"/>'),
+    green: glyph('<path d="M3.5 3.5h4a2 2 0 0 1 1.5.7 2 2 0 0 1 1.5-.7h4v11h-4a1.5 1.5 0 0 0-1.5 1 1.5 1.5 0 0 0-1.5-1h-4Z"/><path d="M9 4.2v11"/>'),
+    orange: glyph('<path d="M11.5 3.5 14.5 6.5 6.5 14.5H3.5v-3Z"/><path d="m10 5 3 3"/>'),
+    clay: glyph('<path d="M9 2.8 16 15H2Z"/><path d="M9 7.5v3.5M9 13.2v.1"/>'),
+    slate: glyph('<path d="M6.5 5h8M6.5 9h8M6.5 13h8M3.5 5h.1M3.5 9h.1M3.5 13h.1"/>')
+  };
+  var TIP_GLYPH = {
+    "!": glyph('<path d="M9 2.8 16 15H2Z"/><path d="M9 7.5v3.5M9 13.2v.1"/>'),
+    "+": glyph('<path d="M6.5 13.5h5M7 16h4M9 2.5a5 5 0 0 0-3 9c.6.5 1 1.2 1 2h4c0-.8.4-1.5 1-2a5 5 0 0 0-3-9Z"/>')
+  };
   var foldSeq = 0;
   function makeFolds(body) {
     body.querySelectorAll(".rn-tiles, .rn-list").forEach(function (list) {
@@ -558,6 +581,81 @@ window.RaumeStudy.notes = (function () {
     fold.querySelector(".rn-fold-head").setAttribute("aria-expanded", String(open));
     fold.querySelector(".rn-fold-body").hidden = !open;
   }
+  // Each section: its heading becomes the fold's button -- the kind's tile,
+  // the title, "1 · Grammar · …" under it, a chevron -- and the rest of it
+  // goes in a body the button opens and closes. Sections start open.
+  function makeSections(body) {
+    body.querySelectorAll(".rn-sec").forEach(function (sec) {
+      var head = sec.querySelector(".rn-sec-head");
+      if (!head) return;
+      var num = head.querySelector(".rn-sec-num"), sub = head.querySelector(".rn-sub");
+      var titleEl = Array.prototype.filter.call(head.children, function (c) { return c !== num && c !== sub; })[0];
+      var id = "rnSec" + (++foldSeq);
+      var tile = sec.getAttribute("data-tile") || "blue";
+      head.innerHTML = '<button type="button" class="rn-sec-btn" aria-expanded="true" aria-controls="' + id + '">' +
+        '<span class="rn-tile-ic" aria-hidden="true">' + (KIND_GLYPH[tile] || KIND_GLYPH.blue) + "</span>" +
+        '<span><span class="rn-sec-title">' + (titleEl ? titleEl.innerHTML : "") + "</span>" +
+        '<span class="rn-sub">' + esc((num ? num.textContent.trim() + " · " : "") + (sub ? sub.textContent.trim() : "")) + "</span></span>" +
+        CHEVRON + "</button>";
+      var inner = document.createElement("div");
+      inner.className = "rn-sec-body";
+      inner.id = id;
+      while (head.nextSibling) inner.appendChild(head.nextSibling);
+      sec.appendChild(inner);
+    });
+  }
+  function setSec(sec, open) {
+    var btn = sec.querySelector(".rn-sec-btn"), inner = sec.querySelector(".rn-sec-body");
+    if (!btn || !inner) return;
+    btn.setAttribute("aria-expanded", String(open));
+    inner.hidden = !open;
+  }
+  // In this lesson: a row per section, its tile, number and title; a tap
+  // opens the section and scrolls to it. Only for a note of three or more.
+  function makeToc(body) {
+    var secs = body.querySelectorAll(".rn-sec");
+    if (secs.length < 3) return;
+    var top = body.querySelector(".rn-top");
+    var toc = document.createElement("ul");
+    toc.className = "rn-toc";
+    toc.setAttribute("aria-label", "In this lesson");
+    Array.prototype.forEach.call(secs, function (sec, i) {
+      var head = sec.querySelector(".rn-sec-btn");
+      if (!head) return;
+      sec.id = sec.id || "rnS" + (++foldSeq);
+      var li = document.createElement("li");
+      li.setAttribute("data-tile", sec.getAttribute("data-tile") || "blue");
+      li.innerHTML = '<button type="button" class="rn-toc-btn" data-sec="' + sec.id + '">' + head.querySelector(".rn-tile-ic").outerHTML +
+        '<span class="rn-toc-n">' + (i + 1) + "</span><span>" + head.querySelector(".rn-sec-title").innerHTML + "</span></button>";
+      toc.appendChild(li);
+    });
+    if (top && top.nextSibling) top.parentNode.insertBefore(toc, top.nextSibling);
+    else body.insertBefore(toc, body.firstChild);
+  }
+  // A tip's mark becomes a glyph: ! a warning (orange), + a lightbulb;
+  // a number stays a number.
+  function tipGlyphs(body) {
+    body.querySelectorAll(".rn-dot").forEach(function (dot) {
+      var mark = dot.textContent.trim();
+      if (!TIP_GLYPH[mark]) return;
+      dot.innerHTML = TIP_GLYPH[mark];
+      dot.classList.add(mark === "!" ? "rn-dot-warn" : "rn-dot-tip");
+    });
+  }
+  // A pair's arrow (あかるい ↔ くらい) is quieter than the words.
+  function quietPairs(body) {
+    body.querySelectorAll(".rn-tile .rn-jp").forEach(function (jp) {
+      Array.prototype.slice.call(jp.childNodes).forEach(function (n) {
+        if (n.nodeType !== 3 || n.data.indexOf("↔") === -1) return;
+        var frag = document.createDocumentFragment();
+        n.data.split("↔").forEach(function (part, i) {
+          if (i) { var a = document.createElement("span"); a.className = "rn-pair"; a.textContent = "↔"; frag.appendChild(a); }
+          frag.appendChild(document.createTextNode(part));
+        });
+        jp.replaceChild(frag, n);
+      });
+    });
+  }
 
   // Search: the reference search's matching -- the Japanese as written,
   // its furigana readings and kana (katakana typed as hiragana too), the
@@ -577,7 +675,7 @@ window.RaumeStudy.notes = (function () {
   }
   // What one search hit is: a word, a list row, a tip, a formula line, an
   // explainer card.
-  var UNITS = ".rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-fl, .rn-two > .rn-card, .rn-sec > .rn-card";
+  var UNITS = ".rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-fl, .rn-two > .rn-card, .rn-sec > .rn-card, .rn-sec-body > .rn-card";
   function findInNote(q) {
     var body = hostEl && hostEl.querySelector(".rn");
     var box = hostEl && hostEl.querySelector(".notes-find");
@@ -587,8 +685,8 @@ window.RaumeStudy.notes = (function () {
     var test = matcher(q);
     body.classList.toggle("rn-searching", !!test);
     body.querySelectorAll(".rn-miss").forEach(function (el) { el.classList.remove("rn-miss"); });
-    body.querySelectorAll(".rn-fold").forEach(function (f) {
-      if (!test && f.dataset.wasOpen != null) { setFold(f, f.dataset.wasOpen === "1"); delete f.dataset.wasOpen; }
+    body.querySelectorAll(".rn-fold, .rn-sec").forEach(function (f) {
+      if (!test && f.dataset.wasOpen != null) { (f.classList.contains("rn-sec") ? setSec : setFold)(f, f.dataset.wasOpen === "1"); delete f.dataset.wasOpen; }
     });
     var hits = 0;
     if (test) {
@@ -600,7 +698,8 @@ window.RaumeStudy.notes = (function () {
       // heading, a whole section.
       body.querySelectorAll(".rn-sec").forEach(function (sec) {
         var any = false;
-        Array.prototype.forEach.call(sec.children, function (b) {
+        var inner = sec.querySelector(".rn-sec-body") || sec;
+        Array.prototype.forEach.call(inner.children, function (b) {
           if (b.classList.contains("rn-sec-head") || b.classList.contains("rn-h3")) return;
           var units = b.matches(UNITS) ? [b] : Array.prototype.slice.call(b.querySelectorAll(UNITS));
           var live = units.some(function (u) { return !u.classList.contains("rn-miss") && !u.closest(".rn-miss"); });
@@ -618,6 +717,10 @@ window.RaumeStudy.notes = (function () {
           if (!next || next.classList.contains("rn-miss")) h.classList.add("rn-miss");
         });
         if (!any) sec.classList.add("rn-miss");
+        else if (inner !== sec) {
+          if (sec.dataset.wasOpen == null) sec.dataset.wasOpen = inner.hidden ? "0" : "1";
+          setSec(sec, true);
+        }
       });
     }
     var none = hostEl.querySelector("#notesFindNone");
@@ -1366,6 +1469,16 @@ window.RaumeStudy.notes = (function () {
       if (!t || !t.closest) return;
       if ((el = t.closest(".notes-row"))) { noteQuery = el.dataset.find ? listQuery : ""; openNote(el.dataset.note); return; }
       if ((el = t.closest(".rn-fold-head"))) { setFold(el.parentElement, el.getAttribute("aria-expanded") !== "true"); return; }
+      if ((el = t.closest(".rn-sec-btn"))) { setSec(el.closest(".rn-sec"), el.getAttribute("aria-expanded") !== "true"); return; }
+      if ((el = t.closest(".rn-toc-btn"))) {
+        var target = document.getElementById(el.dataset.sec);
+        if (target) {
+          setSec(target, true);
+          var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          target.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+        }
+        return;
+      }
       if ((el = t.closest("[data-clear]"))) {
         var field = document.getElementById(el.dataset.clear);
         if (field) { field.value = ""; field.dispatchEvent(new Event("input", { bubbles: true })); field.focus(); }
