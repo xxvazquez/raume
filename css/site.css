@@ -2173,6 +2173,13 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .cv-table-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .cv-table-chev { flex: 0 0 auto; display: flex; color: var(--muted); }
 .cv-table-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; }
+/* Category: a native pop-up row drawn like the Table row -- its value and
+   ⌃⌄ -- opening the system picker (Vocabulary squares, Grammar, New
+   category…). The name field shows only for New category…. */
+.cv-field[hidden] { display: none; }
+.cv-select { position: relative; display: block; }
+.cv-field .cv-select select { appearance: none; -webkit-appearance: none; padding-right: 30px; cursor: pointer; }
+.cv-select .cv-table-chev { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
 /* The table sheet (customize.js openTablePicker): a glass sheet up from the
    bottom on a phone, a centred one on a wide window -- Cancel + title, a

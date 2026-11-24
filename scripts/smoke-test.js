@@ -2109,20 +2109,37 @@ async function main() {
   cvNs.setRemote({ addRows() {}, deleteRows() {}, addTable() {}, deleteTable() {} });
   gear.click(); gear.click(); // reopen so it renders signed-in
   document.querySelector("#customizePage .cv-new-title").value = "Positions";
-  document.querySelector("#customizePage .cv-new-cat").value = "Grammar";
+  check("New table's Category is a pop-up of the real places: each Vocabulary square, Grammar, New category… (not Kanji)", (() => {
+    const sel = document.querySelector("#customizePage select.cv-new-cat");
+    const groups = sel ? [...sel.querySelectorAll("optgroup")].map(g => g.label) : [];
+    const opts = sel ? [...sel.options].map(o => o.value) : [];
+    return !!sel && groups.join() === "Vocabulary,Grammar" && opts.includes("Around Town") && opts.includes("Grammar")
+      && opts.includes("__new") && !opts.includes("N5 Kanji") && sel.value === "My vocabulary"
+      && sel.closest(".cv-cat-field").nextElementSibling.hidden;
+  })());
+  {
+    const sel = document.querySelector("#customizePage select.cv-new-cat");
+    sel.value = "__new";
+    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("...New category… opens a name field", !sel.closest(".cv-cat-field").nextElementSibling.hidden);
+    sel.value = "Grammar";
+    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+  }
   document.querySelector("#customizePage .cv-new-btn").click();
   const newTable = cvNs.customTables().find(t => t.title === "Positions");
-  check("New table's Category suggests the existing categories (not Kanji's)", (() => {
-    const opts = [...document.querySelectorAll("#customizePage #cvCategoryList option")].map(o => o.value);
-    return document.querySelector("#customizePage .cv-new-cat").getAttribute("list") === "cvCategoryList"
-      && opts.includes("Around Town") && opts.includes("Grammar") && !opts.includes("N5 Kanji");
-  })());
+  check("...the table is filed under the picked category", !!newTable && newTable.category === "Grammar");
   if (newTable) {
-    const catField = () => document.querySelector('#customizePage .cv-cat-input[data-table="' + newTable.id + '"]');
+    const catField = () => document.querySelector('#customizePage select.cv-cat-input[data-table="' + newTable.id + '"]');
     check("your own table shows its Category, editable", !!catField() && catField().value === "Grammar");
     catField().value = "People & Daily Life";
     catField().dispatchEvent(new window.Event("change", { bubbles: true }));
     check("...changing it files the table under that category", cvNs.customTables().find(t => t.id === newTable.id).category === "People & Daily Life");
+    catField().value = "__new";
+    catField().dispatchEvent(new window.Event("change", { bubbles: true }));
+    const nameField = catField().closest(".cv-cat-field").nextElementSibling.querySelector(".cv-cat-name");
+    nameField.value = "Places";
+    nameField.dispatchEvent(new window.Event("change", { bubbles: true }));
+    check("...or under a new category typed in", cvNs.customTables().find(t => t.id === newTable.id).category === "Places");
     catField().value = "Grammar";
     catField().dispatchEvent(new window.Event("change", { bubbles: true }));
   }

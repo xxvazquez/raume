@@ -409,32 +409,52 @@ window.RaumeStudy.customize = (function () {
       var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + esc(titleOf(t)) + "</span>" +
         '<span class="cv-owned-count">' + count + "</span>" +
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
-      // Your own table can move to another category (an existing square or
-      // a new name); saved on change, as in Settings.
-      var cat = t.__custom
-        ? '<label class="cv-field cv-table-cat"><span>Category</span><input type="text" class="cv-cat-input" data-table="' + esc(t.id) + '"' +
-          ' value="' + esc(t.category || "") + '" maxlength="60" autocomplete="off" list="cvCategoryList"></label>'
-        : "";
+      // Your own table can move to another category (an existing square, the
+      // Grammar page, or a new name); saved on change, as in Settings.
+      var cat = t.__custom ? categoryFieldHtml("cv-cat-input", t.category, t.id) : "";
       return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + cat + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
     }).join("");
   }
 
-  // The categories a table of yours can join, offered as suggestions in
-  // every Category field (any other name still makes a new one). Not the
-  // Kanji section's -- it holds kanji, not words.
-  function categoryListHtml() {
+  // Category: where a table of yours shows up -- a pop-up row of the
+  // places that exist (each Vocabulary square, the Grammar page), plus New
+  // category… which opens a name field. A free-text box with suggestions
+  // read as a mystery ("which category? what does it do?"). Not the Kanji
+  // section's -- it holds kanji, not words.
+  var NEW_CAT = "__new";
+  function categoryNames() {
     var seen = {}, names = [];
     tables().forEach(function (t) {
       var c = t.category;
-      if (c && c !== "N5 Kanji" && !seen[c]) { seen[c] = true; names.push(c); }
+      if (c && c !== "N5 Kanji" && c !== "Grammar" && !seen[c]) { seen[c] = true; names.push(c); }
     });
-    names.sort(function (a, b) { return a.localeCompare(b); });
-    return '<datalist id="cvCategoryList">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join("") + "</datalist>";
+    var def = cv() ? cv().DEFAULT_CATEGORY : "My vocabulary";
+    if (!seen[def]) names.push(def);
+    return names.sort(function (a, b) { return a.localeCompare(b); });
+  }
+  function categoryFieldHtml(cls, current, tableId) {
+    var cur = current || (cv() ? cv().DEFAULT_CATEGORY : "My vocabulary");
+    var opt = function (n) { return '<option value="' + esc(n) + '"' + (n === cur ? " selected" : "") + ">" + esc(n) + "</option>"; };
+    return '<label class="cv-field cv-cat-field' + (tableId != null ? " cv-table-cat" : "") + '"><span>Category</span>' +
+      '<span class="cv-select"><select class="' + cls + '"' + (tableId != null ? ' data-table="' + esc(tableId) + '"' : "") + ">" +
+      '<optgroup label="Vocabulary">' + categoryNames().map(opt).join("") + "</optgroup>" +
+      '<optgroup label="Grammar">' + opt("Grammar") + "</optgroup>" +
+      '<option value="' + NEW_CAT + '">New category…</option>' +
+      '</select><span class="cv-table-chev">' + UPDOWN_GLYPH + "</span></span></label>" +
+      '<label class="cv-field cv-cat-new" hidden><span>New category name</span>' +
+      '<input type="text" class="cv-cat-name" maxlength="60" autocomplete="off" placeholder="e.g. At Home"' +
+      (tableId != null ? ' data-table="' + esc(tableId) + '"' : "") + "></label>";
+  }
+  // The chosen category, or the typed name when New category… is picked.
+  function categoryValue(select) {
+    if (select.value !== NEW_CAT) return select.value;
+    var name = select.closest(".cv-cat-field").nextElementSibling.querySelector(".cv-cat-name");
+    return name ? name.value.trim() : "";
   }
 
   function customVocabSection() {
     var signedIn = !!(cv() && cv().isSignedIn());
-    return '<section class="cv-section">' + categoryListHtml() +
+    return '<section class="cv-section">' +
       '<h2>Your vocabulary' + infoButtonHtml("vocab", cvInfoVocabOpen, "About your vocabulary") + "</h2>" +
       infoPanelHtml("vocab", cvInfoVocabOpen,
         '<p>Add your own words to any table, or build a table of your own. Write Japanese with each kanji’s reading in parentheses right after it — <code>帰(かえ)る</code>, <code>お茶(ちゃ)</code>, <code>醤油(しょうゆ)</code>. Kana-only words need no parentheses.' +
@@ -454,7 +474,7 @@ window.RaumeStudy.customize = (function () {
         ? '<details class="cv-card" data-open-key="new">' +
           '<summary class="cv-card-summary disclosure-caret">New table</summary>' +
           '<label class="cv-field"><span>Name</span><input type="text" class="cv-new-title" maxlength="60" autocomplete="off" placeholder="e.g. Restaurant phrases"></label>' +
-          '<label class="cv-field"><span>Category</span><input type="text" class="cv-new-cat" maxlength="60" autocomplete="off" list="cvCategoryList" placeholder="e.g. At Home"></label>' +
+          categoryFieldHtml("cv-new-cat", "") +
           '<div class="cv-add-actions"><button type="button" class="cv-btn cv-new-btn">Create table</button></div></details>'
         : "") +
 
@@ -821,8 +841,18 @@ window.RaumeStudy.customize = (function () {
     host.addEventListener("change", function (e) {
       if (e.target.classList.contains("cv-import-file")) readImportFile(host, e.target);
       if (e.target.classList.contains("cv-owned-sort-select")) { cvOwnedSort = e.target.value; updateOwnedList(host); }
-      if (e.target.classList.contains("cv-cat-input") && cv()) {
-        try { cv().setTableCategory(e.target.dataset.table, e.target.value); } catch (err) { window.alert(err.message); }
+      if (e.target.classList.contains("cv-cat-input") || e.target.classList.contains("cv-new-cat")) {
+        var isNew = e.target.value === NEW_CAT;
+        var nameField = e.target.closest(".cv-cat-field").nextElementSibling;
+        nameField.hidden = !isNew;
+        if (isNew) { nameField.querySelector("input").focus(); return; }
+      }
+      var catSel = e.target.classList.contains("cv-cat-input") ? e.target
+        : e.target.classList.contains("cv-cat-name") && e.target.dataset.table
+          ? e.target.closest(".cv-cat-new").previousElementSibling.querySelector("select") : null;
+      if (catSel && cv()) {
+        var catName = categoryValue(catSel);
+        if (catName) { try { cv().setTableCategory(catSel.dataset.table, catName); } catch (err) { window.alert(err.message); } }
       }
     });
     host.addEventListener("keydown", function (e) {
@@ -912,7 +942,8 @@ window.RaumeStudy.customize = (function () {
     var title = host.querySelector(".cv-new-title");
     var catf = host.querySelector(".cv-new-cat");
     if (!title || !title.value.trim()) { if (title) title.focus(); return; }
-    var name = title.value, category = catf ? catf.value : "";
+    var name = title.value, category = catf ? categoryValue(catf) : "";
+    if (catf && catf.value === NEW_CAT && !category) { catf.closest(".cv-cat-field").nextElementSibling.querySelector("input").focus(); return; }
     cvMutate(host, function () {
       try {
         // The new table becomes where Add a word / Import put things next
