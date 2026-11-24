@@ -521,7 +521,6 @@ window.RaumeStudy.notes = (function () {
     quietPairs(body);
     makeFolds(body);
     makeSections(body);
-    makeToc(body);
     tipGlyphs(body);
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
@@ -537,9 +536,8 @@ window.RaumeStudy.notes = (function () {
     }
   }
 
-  // A note is a page: each section's heading folds what's under it, as a
-  // heading does in Notes, and leads with its kind's tile; an outline of the
-  // sections sits on top. Every word list, and any other list eight rows or
+  // Each section is a card whose header band folds it, led by its kind's
+  // tile. Every word list, and any other list eight rows or
   // longer (a page of practice), folds under its own heading -- name, count,
   // chevron -- closed until tapped, so the note opens as an outline.
   var FOLD_AT = 8;
@@ -610,28 +608,6 @@ window.RaumeStudy.notes = (function () {
     if (!btn || !inner) return;
     btn.setAttribute("aria-expanded", String(open));
     inner.hidden = !open;
-  }
-  // In this lesson: a row per section, its tile, number and title; a tap
-  // opens the section and scrolls to it. Only for a note of three or more.
-  function makeToc(body) {
-    var secs = body.querySelectorAll(".rn-sec");
-    if (secs.length < 3) return;
-    var top = body.querySelector(".rn-top");
-    var toc = document.createElement("ul");
-    toc.className = "rn-toc";
-    toc.setAttribute("aria-label", "In this lesson");
-    Array.prototype.forEach.call(secs, function (sec, i) {
-      var head = sec.querySelector(".rn-sec-btn");
-      if (!head) return;
-      sec.id = sec.id || "rnS" + (++foldSeq);
-      var li = document.createElement("li");
-      li.setAttribute("data-tile", sec.getAttribute("data-tile") || "blue");
-      li.innerHTML = '<button type="button" class="rn-toc-btn" data-sec="' + sec.id + '">' + head.querySelector(".rn-tile-ic").outerHTML +
-        '<span class="rn-toc-n">' + (i + 1) + "</span><span>" + head.querySelector(".rn-sec-title").innerHTML + "</span></button>";
-      toc.appendChild(li);
-    });
-    if (top && top.nextSibling) top.parentNode.insertBefore(toc, top.nextSibling);
-    else body.insertBefore(toc, body.firstChild);
   }
   // A tip's mark becomes a glyph: ! a warning (orange), + a lightbulb;
   // a number stays a number.
@@ -1476,15 +1452,6 @@ window.RaumeStudy.notes = (function () {
       if ((el = t.closest(".notes-row"))) { noteQuery = el.dataset.find ? listQuery : ""; openNote(el.dataset.note); return; }
       if ((el = t.closest(".rn-fold-head"))) { setFold(el.parentElement, el.getAttribute("aria-expanded") !== "true"); return; }
       if ((el = t.closest(".rn-sec-btn"))) { setSec(el.closest(".rn-sec"), el.getAttribute("aria-expanded") !== "true"); return; }
-      if ((el = t.closest(".rn-toc-btn"))) {
-        var target = document.getElementById(el.dataset.sec);
-        if (target) {
-          setSec(target, true);
-          var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          target.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
-        }
-        return;
-      }
       if ((el = t.closest("[data-clear]"))) {
         var field = document.getElementById(el.dataset.clear);
         if (field) { field.value = ""; field.dispatchEvent(new Event("input", { bubbles: true })); field.focus(); }

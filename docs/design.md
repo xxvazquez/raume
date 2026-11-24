@@ -836,15 +836,13 @@ and Help.
   one order, each kind in its own tile hue and named in its grey subtitle
   (Grammar blue, Conversation teal, Vocabulary green, Practice orange, Watch
   out clay, Reference slate — so a colour never stands alone). Lesson
-  notes are read, so a note is drawn as one page, as Apple Notes is — not
-  an inset-grouped list: a white `--radius-card` sheet (edge to edge on a
-  phone), no cards inside it, hierarchy from type and space. Under the topic
-  (22px) **In this lesson** lists the sections, a 44px row each (tile,
-  number, title; a tap opens and scrolls to it). A section heading is a
-  button: the kind's 28px tile (white glyph on its hue), the title
-  (`--fs-section-title`) with "1 · Grammar · …" in grey under it, and a
-  trailing chevron that folds the section; its content sits under the title
-  (indented past the tile on a wider window). A word list, and any list of
+  notes sit on raume's grey ground like every screen (an all-white page
+  was tried and read as glare with too little structure): one white
+  `--radius-card` card per section — a chunk, never a box per item —
+  under a 56px header band in the kind's hue at 20% on white: the 28px
+  tile, the title (`--fs-subhead`, the hue mixed into ink) with
+  "1 · Grammar · …" in the strong hue under it, and a chevron; the band
+  folds the card. Inside (16px padding) nothing is boxed. A word list, and any list of
   eight rows or more, folds under its own 15px semibold heading with a grey
   count and chevron over a hairline, closed until tapped. Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
@@ -853,15 +851,13 @@ and Help.
   12% larger, the part that changes on a soft chip of the section's hue —
   the hue that marks it in the examples. Tips are text: an orange ⚠ for
   watch out, an amber lightbulb for a tip, else the number on a soft dot.
-  Japanese breaks at its spaces, never inside a word. Reading a note, the
-  whole screen is that page — `.page-notes.notes-reading` and the ground
-  are `--paper`, so there's no grey band over a white sheet. The bar is
+  Japanese breaks at its spaces, never inside a word. The bar is
   Notes': "‹ Notes" leading; Quiz (a plain tinted word, on a soft
   `--section-soft` capsule while on), a 44pt search glyph and ⋯ trailing
   (clear of the phone's account button). Under the title one grey line
   holds the mark and, when the title isn't it, the date. A note's search
   capsule (the reference search's) drops in under the bar from the glyph,
-  with Done beside it; the list's sits above the list; searching hides the outline and leaves only matching rows, opening
+  with Done beside it; the list's sits above the list; searching leaves only matching rows, opening
   what they're in. Every
   Japanese item is Japanese with furigana (particles bold blue,
   `.particle`, as everywhere in raume) and the reference tables' speaker

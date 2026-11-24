@@ -1615,11 +1615,7 @@ body.icon-picker-open { overflow: hidden; }
 .notes-findbar[hidden] { display: none; }
 .notes-findbar .notes-find { margin: 0; flex: 1 1 auto; }
 .notes-find-done { flex: none; min-height: 44px; font-weight: 600; }
-/* Reading a note, the screen is the page: one white surface from the bar
-   down, as in Notes -- no grey band over a white sheet. */
-.page-notes.notes-reading { background: var(--paper); }
-body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper); }
-.notes-reading .rn { background: none; border-radius: 0; padding: 0 0 30px; margin: 0; }
+
 /* The Notes list's filter by mark: the app's segmented control. */
 .notes-filter { margin: 0 0 14px; }
 /* Search all notes (the list) and Search this note (the reader): the
@@ -1640,24 +1636,23 @@ body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper)
 .note-frame[hidden] { display: none; }
 .notes-file-input { display: none; }
 
-/* A lesson note (scripts/note_kit.py) is read, so it is drawn as a page --
-   Apple Notes, not Settings: one white sheet, no cards inside it, hierarchy
-   from type and space. An outline of its sections up top (tap to jump);
-   each section heading leads with its kind's tile (Grammar blue,
-   Conversation teal, Vocabulary green, Practice orange, Watch out clay,
-   Reference slate) and folds what's under it, as Notes' headings do; a word
-   list folds under its own heading, closed until tapped. Word lists read
-   like a reference table (a hairline row per word, its picture leading);
-   patterns are set large with the part that changes on a soft chip in the
-   section's hue, the same hue that marks it in the examples; tips are text
-   led by a glyph (orange ⚠ watch out, a lightbulb, or a number). Every
-   Japanese item is Japanese (with furigana) and its speaker, then English;
-   tap the Japanese for its romaji, as in the tables. Quiz covers the
-   Japanese you should produce, English off covers that line; a covered
-   item uncovers on a tap. Colour comes only from the section's tile hue
-   (--rn), so it follows light and dark like everything else. */
-.rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 14%, var(--paper)); color: var(--ink);
-  background: var(--paper); border-radius: var(--radius-card); padding: 22px 24px 30px; }
+/* A lesson note (scripts/note_kit.py), on raume's grey ground like every
+   other screen: one white card per section -- a chunk, never a box per
+   item -- under a header band in the soft hue of the section's kind
+   (Grammar blue, Conversation teal, Vocabulary green, Practice orange,
+   Watch out clay, Reference slate): its tile, title, "1 · Grammar" and a
+   chevron that folds the card. The hue means the same thing on the band,
+   the pattern chips and highlights. Inside, nothing is boxed: word lists
+   read like a reference table (a hairline row per word, its picture
+   leading) and fold under their own heading, closed until tapped;
+   patterns are set large with the part that changes on a soft chip; tips
+   are text led by a glyph (orange ⚠ watch out, a lightbulb, or a number).
+   Every Japanese item is Japanese (with furigana) and its speaker, then
+   English; tap the Japanese for its romaji, as in the tables. Quiz covers
+   the Japanese you should produce, English off covers that line; a
+   covered item uncovers on a tap. Colour comes only from the section's
+   tile hue (--rn), so it follows light and dark like everything else. */
+.rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 14%, var(--paper)); color: var(--ink); padding-bottom: 30px; }
 .rn [data-tile] { --rn: var(--tile); --rn-soft: color-mix(in srgb, var(--tile) 14%, var(--paper)); --rn-strong: color-mix(in srgb, var(--tile) 80%, var(--ink)); }
 .rn ruby rt { font-size: 11px; color: var(--muted); font-weight: 400; }
 .rn b, .rn strong { font-weight: 600; }
@@ -1670,17 +1665,6 @@ body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper)
 .rn-eyebrow { display: none; }
 .rn-top h1 { margin: 0 0 4px; font: 600 calc(22px * var(--dt))/1.25 var(--font-ui); color: var(--ink); }
 .rn-desc { margin: 0; color: var(--ink-2); font-size: var(--fs-body); line-height: 1.45; text-wrap: pretty; }
-/* In this lesson: one row per section -- its tile, number and title --
-   a tap scrolls to it (and opens it). */
-.rn-toc { margin: 0 0 8px; padding: 0; list-style: none; border-top: 1px solid var(--row-line); }
-.rn-toc li { border-bottom: 1px solid var(--row-line); }
-.rn-toc-btn {
-  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 0;
-  border: 0; background: none; cursor: pointer; text-align: left; font: 400 15px/1.3 var(--font-ui); color: var(--ink);
-}
-.rn-toc-n { color: var(--muted); font-variant-numeric: tabular-nums; }
-.rn-toc-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
-.rn-searching .rn-toc { display: none; }
 /* Section kind tile: the glyph white on the section's hue, as the
    reference tables' tiles. */
 .rn-tile-ic {
@@ -1688,21 +1672,23 @@ body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper)
   background: color-mix(in srgb, var(--rn) var(--tile-k), #000); color: #fff;
 }
 .rn-tile-ic svg { width: 16px; height: 16px; }
-/* A section: its heading -- tile, title, "1 · Grammar · …" under it, a
-   chevron that folds the section -- then real air before the next one. */
-.rn-sec { margin: 30px 0 0; scroll-margin-top: 120px; }
+/* A section is one card: the header band (tile, title, "1 · Grammar",
+   chevron) in the kind's soft hue, then its content on white. */
+.rn-sec { margin: 14px 0 0; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; scroll-margin-top: 120px; }
 .rn-sec-head { margin: 0; font: inherit; }
 .rn-sec-btn {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; align-items: center; width: 100%;
-  padding: 4px 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--ink);
+  min-height: 56px; padding: 10px 16px; border: 0; background: color-mix(in srgb, var(--rn) 20%, var(--paper)); cursor: pointer; text-align: left;
+  color: color-mix(in srgb, var(--rn) 45%, var(--ink));
 }
-.rn-sec-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
-.rn-sec-title { display: block; font: 600 var(--fs-section-title)/1.25 var(--font-ui); }
-.rn-sub { display: block; margin-top: 2px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+.rn-sec-btn:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; border-radius: var(--radius-card); }
+.rn-sec-title { display: block; font: 600 var(--fs-subhead)/1.25 var(--font-ui); }
+.rn-sec-btn .rn-sub { display: block; margin-top: 2px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--rn-strong); }
+.rn-sec-btn .rn-chev { color: var(--rn-strong); }
 .rn-chev { flex: none; color: var(--faint); transition: transform .2s ease; }
 [aria-expanded="true"] > .rn-chev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .rn-chev { transition: none; } }
-.rn-sec-body { padding: 6px 0 0 40px; }
+.rn-sec-body { padding: 12px 16px 16px; }
 .rn-sec-body[hidden] { display: none; }
 .rn-h3 { margin: 22px 0 4px; font: 600 15px/1.3 var(--font-ui); color: var(--ink); }
 /* Japanese / romaji / English */
@@ -1848,11 +1834,7 @@ body:has(.page-notes.notes-reading:not([hidden])) { --group-ground: var(--paper)
   .rn-qa .rn-hdr + .rn-r { border-top: 0; }
   .rn-cols2 .rn-list { column-count: 1; }
 }
-/* A phone: the page runs edge to edge, as Notes does, and the section's
-   content sits under its heading rather than indented past the tile. */
 @media (max-width: 640px) {
-  .rn { margin: 0 -16px; border-radius: 0; padding: 18px 16px 28px; }
-  .rn-sec-body { padding-left: 0; }
   .rn-jp, .rn-fj { font-size: calc(16px * var(--dt)); }
   .rn-fj { font-size: calc(17px * var(--dt)); }
   .rn-en { font-size: calc(12.5px * var(--dt)); }
