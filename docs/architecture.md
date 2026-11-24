@@ -223,7 +223,9 @@ and deleting need a connection and say so when they fail.
   `p()` in an f-string). Before writing, `render()` checks every Japanese
   line — furigana on each kanji, and the romaji spells the kana (Hepburn,
   particles は / へ / を as wa / e / o, ō = ou = oo) — and stops with a list
-  of problems; `stack(..., check=False)` exempts one line. It also stops
+  of problems; `stack(..., check=False)` exempts one line. It also stops on
+  any kanji outside raume's 102 N5 kanji (read from the N5 Kanji tables in
+  `data/vocabulary.js`) — those words are written in kana. It also stops
   on a word listed in two word lists (`tiles`): a class note lists each
   word once, so it reviews at a glance. A lesson note is
   named by its date — "Sat, Nov 21st 2026" (`lesson_name`) — in its

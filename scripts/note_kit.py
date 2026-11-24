@@ -211,6 +211,12 @@ class _Reading(html.parser.HTMLParser):
 
 _problems = []
 
+# raume's 102 N5 kanji (the N5 Kanji tables in data/vocabulary.js): a lesson
+# note uses only these; a word with any other kanji is written in kana, as a
+# beginner textbook does (じてんしゃ, まち, しずか).
+_N5 = set(re.findall(r'"type":"kanji","jp":\[\{"kanji":"(.)"',
+                     (pathlib.Path(__file__).resolve().parents[1] / "data" / "vocabulary.js").read_text(encoding="utf-8")))
+
 
 def _check(jp, ro):
     rd = _Reading()
@@ -219,6 +225,9 @@ def _check(jp, ro):
     plain = re.sub(r"<[^>]+>", "", jp)
     if rd.bare:
         _problems.append(f"no furigana on {''.join(dict.fromkeys(rd.bare))}: {plain}")
+    beyond = [c for c in dict.fromkeys(_KANJI_RE.findall(re.sub(r"<rt>.*?</rt>", "", jp))) if _N5 and c not in _N5]
+    if beyond:
+        _problems.append(f"{''.join(beyond)} isn't one of raume's N5 kanji -- write the word in kana: {plain}")
     if ro and not rd.bare:
         said = kana_romaji("".join(rd.out))
         if _same_spelling(said) != _same_spelling(html.unescape(re.sub(r"<[^>]+>", "", ro))):
