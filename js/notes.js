@@ -668,7 +668,9 @@ window.RaumeStudy.notes = (function () {
         else if (b.classList.contains("rn-tip")) row = tipRow(b);
         else if (b.classList.contains("rn-card") && b.querySelector(".rn-kind")) {
           var k = b.querySelector(".rn-kind");
-          var label = k.innerHTML;
+          // い-adjective → い-adj. (the textbook abbreviation): the label
+          // column stays as narrow as Pattern / Tip / Watch out.
+          var label = k.innerHTML.replace(/adjective\b/gi, "adj.");
           k.remove();
           row = lrow(label, "kind", [b]);
         } else if (b.classList.contains("rn-st") || (b.classList.contains("rn-card") && b.querySelector(".rn-st"))) row = lrow("Example", "example", [b]);

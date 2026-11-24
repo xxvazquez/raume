@@ -845,7 +845,7 @@ and Help.
   folds the card (title `--fs-section-title`, band 64px). Inside (16px
   padding) nothing is boxed: each idea is a row with its label in a column
   on the left as wide as the section's longest label (a subgrid, ≤96px), as in Contacts — Pattern, the explainer's own name
-  (い-adjective), Watch out (orange), Tip (amber), Note N or Example
+  (い-adjective shortened to い-adj.), Watch out (orange), Tip (amber), Note N or Example
   (grey), or the kana a tip is about set at 18px — and a hairline under
   it, so where one idea ends is always drawn. A right / wrong example
   (✓ / ✗) is its own 16px Japanese line under the explanation. A form
