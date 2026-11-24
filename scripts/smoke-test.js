@@ -2309,6 +2309,11 @@ async function main() {
       if (rn3) rn3.remove();
       return ok;
     })());
+    check("a drawn note numbers what can be edited or deleted (data-eid), so Done can save each change back to the same element", (() => {
+      const jp = rn && rn.querySelector(".rn-jp"), en = rn && rn.querySelector(".rn-en"), st = rn && rn.querySelector(".rn-st");
+      return !!jp && /^\d+$/.test(jp.dataset.eid || "") && /^\d+$/.test(en.dataset.eid || "") && /^\d+$/.test(st.dataset.eid || "")
+        && jp.dataset.eid !== en.dataset.eid;
+    })());
     check("note search finds a word by its kana, its romaji however it's spelled, and its English -- not by something it doesn't say", (() => {
       const unit = rn.querySelector(".rn-st");
       return nh.matcher("まち")(unit) && nh.matcher("machi")(unit) && nh.matcher("Town")(unit) && nh.matcher("町")(unit) && !nh.matcher("yama")(unit) && nh.matcher("") === null;

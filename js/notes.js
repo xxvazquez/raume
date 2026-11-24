@@ -444,6 +444,11 @@ window.RaumeStudy.notes = (function () {
     }
   }
   function onLessonClick(e) {
+    if (e.currentTarget && e.currentTarget.classList && e.currentTarget.classList.contains("rn-editing")) {
+      var del = e.target.closest(".rn-del");
+      if (del) del.parentElement.classList.add("rn-deleted");
+      return;
+    }
     var btn = e.target.closest(".rn-jl .jp-speak-btn");
     // Stopped here: the reference tables' document-wide speaker handler
     // would otherwise also fire for this shared class, with no text.
@@ -486,8 +491,18 @@ window.RaumeStudy.notes = (function () {
     setTimeout(function () { el.classList.remove("rn-speaking"); }, 1200);
     shared.speech.speak(text);
   }
+  // Editing a lesson note changes its own HTML: every piece of text you can
+  // edit, and every row you can delete, is numbered (data-eid) in the parsed
+  // note before it's drawn, so Done can carry the changes back to the same
+  // element and save the note whole. The numbers never reach the saved file.
+  var EDIT_SEL = ".rn-jp, .rn-ro, .rn-en, .rn-fj, .rn-fr, .rn-tip > div:last-child, .rn-kind-sub, .rn-top h1, .rn-desc, .rn-tag";
+  var DEL_SEL = ".rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-formula, .rn-card, .rn-sec > .rn-st";
+  var lesson = null;
   function showLesson(doc, into) {
     var root = cleanLesson(doc);
+    var seq = 0;
+    root.querySelectorAll(EDIT_SEL + ", " + DEL_SEL).forEach(function (el) { el.setAttribute("data-eid", String(++seq)); });
+    lesson = { doc: doc, root: root };
     var body = document.createElement("div");
     body.className = "rn";
     Array.prototype.slice.call(root.childNodes).forEach(function (n) { body.appendChild(document.importNode(n, true)); });
@@ -532,6 +547,11 @@ window.RaumeStudy.notes = (function () {
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
     body.addEventListener("keydown", function (e) {
+      if (body.classList.contains("rn-editing")) {
+        // One line each: Return leaves the line instead of breaking it.
+        if (e.key === "Enter" && e.target.isContentEditable) { e.preventDefault(); e.target.blur(); }
+        return;
+      }
       if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("rn-jp")) { e.preventDefault(); onLessonClick(e); }
     });
     applyStudy();
@@ -723,6 +743,77 @@ window.RaumeStudy.notes = (function () {
         });
         jp.replaceChild(frag, n);
       });
+    });
+  }
+
+  // Edit, as in iOS: the bar's Edit turns the note editable -- every line
+  // of text (romaji shown), and a red ⊖ on each row to delete it -- with
+  // Cancel and Done in the bar. Everything opens while editing; Done saves
+  // the note to the account (and this device), Cancel puts it back.
+  function editBody() { return hostEl && hostEl.querySelector(".rn"); }
+  function editables(body) {
+    return body.querySelectorAll(".rn-jp[data-eid], .rn-ro[data-eid], .rn-en[data-eid], .rn-fj[data-eid], .rn-fr[data-eid], .rn-fe, " +
+      ".rn-kind-sub[data-eid], .rn-top h1[data-eid], .rn-desc[data-eid], .rn-tag[data-eid], .rn-tip > div[data-eid]");
+  }
+  function startEdit() {
+    var body = editBody();
+    if (!body || body.classList.contains("rn-editing")) return;
+    var field = hostEl.querySelector("#notesFind");
+    if (field && field.value) { field.value = ""; findInNote(""); }
+    var bar = hostEl.querySelector(".notes-findbar");
+    if (bar) bar.hidden = true;
+    setRomaji(null);
+    body.querySelectorAll(".rn-sec").forEach(function (sec) { setSec(sec, true); });
+    body.querySelectorAll(".rn-fold").forEach(function (f) { setFold(f, true); });
+    editables(body).forEach(function (el) {
+      el.contentEditable = "plaintext-only";
+      if (el.contentEditable !== "plaintext-only") el.contentEditable = "true";
+      el.setAttribute("spellcheck", "false");
+      el._before = el.innerHTML;
+    });
+    body.querySelectorAll(".rn-lrow, .rn-tile, .rn-r:not(.rn-hdr)").forEach(function (u) {
+      if (u.closest(".rn-r") && u.closest(".rn-r") !== u) return;
+      u.insertAdjacentHTML("beforeend", '<button type="button" class="rn-del" aria-label="Delete this row">' +
+        '<svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="currentColor"/><path d="M6.5 11h9" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button>');
+    });
+    body.classList.add("rn-editing");
+    hostEl.classList.add("notes-editing");
+  }
+  function cleanEdited(el) {
+    var c = el.cloneNode(true);
+    c.querySelectorAll(".rn-pair").forEach(function (p) { p.replaceWith(document.createTextNode(p.textContent)); });
+    c.querySelectorAll("[contenteditable], [data-eid]").forEach(function (n) { n.removeAttribute("contenteditable"); n.removeAttribute("data-eid"); });
+    c.querySelectorAll(".rn-del, .jp-speak-btn").forEach(function (n) { n.remove(); });
+    return c.innerHTML.replace(/<br\s*\/?>/gi, " ").replace(/\u00a0/g, " ");
+  }
+  function finishEdit(save) {
+    var body = editBody(), note = findNote(openId);
+    if (!body || !note || !lesson) return;
+    if (!save) { rerender(); return; }
+    var root = lesson.root, changed = false;
+    function orig(id) { return root.querySelector('[data-eid="' + id + '"]'); }
+    body.querySelectorAll(".rn-deleted").forEach(function (u) {
+      var units = u.matches("[data-eid]") ? [u] : Array.prototype.slice.call(u.querySelectorAll(":scope > .rn-lrow-c > [data-eid]"));
+      units.forEach(function (x) { var o = orig(x.getAttribute("data-eid")); if (o) { o.remove(); changed = true; } });
+    });
+    editables(body).forEach(function (el) {
+      if (el.classList.contains("rn-fe") || el.closest(".rn-deleted")) return;
+      var fe = el.classList.contains("rn-fr") && el.nextElementSibling && el.nextElementSibling.classList.contains("rn-fe") ? el.nextElementSibling : null;
+      if (el.innerHTML === el._before && (!fe || fe.innerHTML === fe._before)) return;
+      var o = orig(el.getAttribute("data-eid"));
+      if (!o) return;
+      o.innerHTML = cleanEdited(el) + (fe ? " · " + cleanEdited(fe) : "");
+      changed = true;
+    });
+    if (!changed) { rerender(); return; }
+    root.querySelectorAll("[data-eid]").forEach(function (n) { n.removeAttribute("data-eid"); });
+    var html = "<!doctype html>\n" + lesson.doc.documentElement.outerHTML;
+    var done = hostEl.querySelector("#notesDone");
+    if (done) done.disabled = true;
+    saveHtml(note, html).then(function () { flash = null; rerender(); }, function (err) {
+      if (done) done.disabled = false;
+      var f = hostEl.querySelector(".notes-flash");
+      if (f) { f.hidden = false; f.className = "notes-flash notes-flash-error"; f.textContent = "Couldn’t save — " + problem(err); }
     });
   }
 
@@ -1246,6 +1337,19 @@ window.RaumeStudy.notes = (function () {
       onConfirm: function (v) { if (/^\d{4}-\d{2}-\d{2}$/.test(v) && v !== note.note_date) patch(note, { note_date: v }); }
     });
   }
+  // A note's new HTML, saved to the account and this device's copy.
+  function saveHtml(note, html) {
+    var u = user(), c = client();
+    if (!u || !c) return Promise.reject(new Error("sign in to save your notes."));
+    var uid = u.id, size = byteLength(html);
+    if (size > MAX_BYTES) return Promise.reject(new Error("the note is over 5 MB"));
+    return timed(c.from("notes").update({ html: html, size: size, updated_at: new Date().toISOString() }).eq("id", note.id).select(META()).single(), "Saving the note")
+      .then(function (res) {
+        if (res.error) throw res.error;
+        Object.assign(note, res.data);
+        return devicePut(uid, Object.assign({}, res.data, { html: html }));
+      });
+  }
   function replace(note) {
     pickFiles(false, function (files) {
       var file = files[0], u = user(), c = client();
@@ -1254,12 +1358,7 @@ window.RaumeStudy.notes = (function () {
       (isHtmlFile(file) ? readFile(file) : Promise.reject(new Error("“" + file.name + "” isn’t an HTML file"))).then(function (html) {
         var size = byteLength(html);
         if (size > MAX_BYTES) throw new Error("“" + file.name + "” is over 5 MB");
-        return timed(c.from("notes").update({ html: html, size: size, updated_at: new Date().toISOString() }).eq("id", note.id).select(META()).single(), "Replacing the note")
-          .then(function (res) {
-            if (res.error) throw res.error;
-            Object.assign(note, res.data);
-            return devicePut(uid, Object.assign({}, res.data, { html: html }));
-          });
+        return saveHtml(note, html);
       }).then(function () { flash = null; rerender(); }, function (err) {
         flash = { text: "Couldn’t replace it — " + problem(err), error: true };
         rerender();
@@ -1449,7 +1548,10 @@ window.RaumeStudy.notes = (function () {
     // when it's on), Search this note and ⋯ trailing. Quiz and Search show
     // only for a lesson note (showLesson unhides them).
     return '<div class="notes-nav">' + head + '<div class="notes-tools">' +
+      '<button type="button" class="fc-titlebar-btn notes-edit-btn" id="notesEdit" hidden>Edit</button>' +
       '<button type="button" class="fc-titlebar-btn notes-quiz" id="notesQuiz" aria-pressed="false" hidden>Quiz</button>' +
+      '<button type="button" class="fc-titlebar-btn notes-editing-btn" id="notesCancel" hidden>Cancel</button>' +
+      '<button type="button" class="fc-titlebar-btn notes-editing-btn notes-done" id="notesDone" hidden>Done</button>' +
       '<button type="button" class="notes-tool" id="notesFindBtn" aria-label="Search this note" hidden>' + SEARCH_GLYPH + "</button>" +
       '<div class="section-menu notes-menu">' +
       '<button type="button" class="section-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Note options">' + MENU_ICON + "</button>" +
@@ -1482,7 +1584,7 @@ window.RaumeStudy.notes = (function () {
       var doc = parse(rec.html);
       if (isKitOriginal(doc)) fromKit(doc);
       if (isLessonNote(doc) || doc.querySelector("article.rn")) {
-        hostEl.querySelectorAll("#notesQuiz, #notesFindBtn, [data-study], [data-lesson-only]").forEach(function (el) { el.hidden = false; });
+        hostEl.querySelectorAll("#notesEdit, #notesQuiz, #notesFindBtn, [data-study], [data-lesson-only]").forEach(function (el) { el.hidden = false; });
         showLesson(doc, status);
       } else {
         showInFrame(rec.html, status);
@@ -1508,6 +1610,7 @@ window.RaumeStudy.notes = (function () {
     if (u && listFor !== u.id) { notes = null; listFor = null; }
     if (u && !notes && !loading) loadList();
     host.classList.toggle("notes-reading", !!openId);
+    host.classList.remove("notes-editing");
     if (openId) {
       var note = findNote(openId);
       host.innerHTML = '<div class="notes-wrap">' + readerHtml(note) + "</div>";
@@ -1552,6 +1655,11 @@ window.RaumeStudy.notes = (function () {
       if (t.closest("#notesAdd, [data-notes-add]")) { addSheet(); return; }
       if ((el = t.closest("[data-note-filter]"))) { markFilter = el.dataset.noteFilter; rerender(); return; }
       if (t.closest("#notesBack")) { back(); return; }
+      if (t.closest("#notesEdit")) { startEdit(); return; }
+      if (t.closest("#notesCancel")) { finishEdit(false); return; }
+      if (t.closest("#notesDone")) { finishEdit(true); return; }
+      // While editing, everything stays open.
+      if (hostEl.classList.contains("notes-editing") && t.closest(".rn-sec-btn, .rn-fold-head")) return;
       if (t.closest("#notesQuiz")) { setStudy("quiz", !study.quiz); return; }
       if (t.closest("#notesFindBtn")) {
         var bar = hostEl.querySelector(".notes-findbar"), field = hostEl.querySelector("#notesFind");

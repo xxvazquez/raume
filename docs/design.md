@@ -867,7 +867,16 @@ and Help.
   Notes': "‹ Notes" leading; Quiz (a plain tinted word, on a soft
   `--section-soft` capsule while on), a 44pt search glyph and ⋯ trailing
   (clear of the phone's account button). Under the title one grey line
-  holds the mark and, when the title isn't it, the date. A note's search
+  holds the mark and, when the title isn't it, the date. **Edit** (a
+  plain tinted word before Quiz, lesson notes only) is iOS's edit mode: the
+  bar trades Edit / Quiz / search / ⋯ and "‹ Notes" for Cancel and a bold
+  Done; every section and list opens; each line of text — Japanese,
+  romaji (shown), English, tip text, the topic — becomes a plain-text field
+  marked by a soft underline in the section's hue (a soft fill while
+  focused; Return leaves the line); each row gets a red ⊖ at its trailing
+  edge that removes it; speakers, Quiz covers and folding step aside. Done
+  writes the changes back into the note's own HTML (each editable element
+  numbered before drawing) and saves it. A note's search
   capsule (the reference search's) drops in under the bar from the glyph,
   with Done beside it; the list's sits above the list; searching leaves only matching rows, opening
   what they're in. Every

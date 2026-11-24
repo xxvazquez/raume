@@ -1850,6 +1850,33 @@ body.icon-picker-open { overflow: hidden; }
 .rn-fold-n { flex: none; color: var(--muted); font-weight: 400; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
 .rn-fold-head:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
 .rn-fold + .rn-fold { margin-top: 0; }
+/* Editing a note (notes.js startEdit): the bar trades Edit / Quiz / search
+   / ⋯ (and ‹ Notes) for Cancel and a bold Done; every line of text shows a
+   soft field under it, romaji included; each row has a red ⊖ at its
+   trailing edge to delete it; speakers, quiz covers and folding step aside. */
+.notes-editing .notes-editing-btn[hidden] { display: inline-flex; }
+.notes-editing :is(#notesEdit, #notesQuiz, #notesFindBtn, .notes-menu) { display: none; }
+.notes-editing #notesBack { visibility: hidden; }
+.notes-tools :is(.notes-editing-btn, .notes-edit-btn) { min-height: 44px; padding: 0 10px; }
+.notes-tools .notes-done { font-weight: 600; }
+.notes-tools .notes-done:disabled { opacity: .45; }
+.rn-editing [contenteditable] {
+  outline: none; border-radius: 6px; cursor: text; -webkit-user-select: text; user-select: text;
+  box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--rn) 35%, var(--paper));
+}
+.rn-editing [contenteditable]:focus { background: var(--rn-soft); box-shadow: inset 0 -2px 0 var(--rn); }
+.rn-editing .rn-st .rn-ro:not(:empty) { display: block; }
+.rn-editing .jp-speak-btn { visibility: hidden; }
+.rn-editing .rn-st .rn-jp, .rn-editing .rn-st .rn-ro, .rn-editing .rn-en { filter: none !important; opacity: 1 !important; }
+.rn-editing :is(.rn-lrow, .rn-tile, .rn-r) { position: relative; padding-right: 36px; }
+.rn-del {
+  position: absolute; top: 8px; right: 0; width: 28px; height: 28px; padding: 3px; border: 0; background: none; cursor: pointer;
+  color: var(--wrong-strong);
+}
+.rn-del::after { content: ""; position: absolute; inset: -8px; }
+.rn-del svg { display: block; }
+.rn-deleted { display: none !important; }
+.rn-editing .rn-sec-btn, .rn-editing .rn-fold-head { cursor: default; }
 /* Searching a note leaves only what matches (notes.js findInNote). */
 .rn-searching .rn-miss { display: none; }
 /* Study modes: covered lines blur until tapped */
