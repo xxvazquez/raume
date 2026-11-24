@@ -258,6 +258,22 @@ def lst(rows, cols="qa", head=None, lead="em"):
     return f'<div class="rn-list rn-{cols}{extra}">{h}{"".join(out)}</div>'
 
 
+# Each word is listed once per note: a class note is for reviewing at a
+# glance, so a word list that repeats another one (the same adjectives again
+# as opposite pairs) is noise. render() stops on a repeat.
+_listed = {}
+
+
+def _note_listed(jp, where):
+    for word in re.split(r"\s*[↔⇔→/／・]\s*", _text(re.sub(r"<[^>]+>", "", jp_markup(jp)))):
+        word = re.sub(r"[（(][^)）]*[)）]|\s", "", word)
+        if not word:
+            continue
+        if word in _listed and _listed[word] != where:
+            _problems.append(f"{word} is listed twice (in “{_listed[word]}” and “{where}”) -- list each word once")
+        _listed.setdefault(word, where)
+
+
 def tiles(items, n=4, az=False):
     """items: [(icon or '', jp, romaji, english)]: a word list, drawn as one
     card with a row per word. n (2, 3 or 4) is no longer used for layout and
@@ -266,6 +282,9 @@ def tiles(items, n=4, az=False):
         raise ValueError(f"tiles: n is 2, 3 or 4, not {n!r}")
     if az:
         items = sorted(items, key=lambda it: az_key(it[2]))
+    where = re.sub(r"<[^>]+>", "", items[0][1]) if items else ""
+    for it in items:
+        _note_listed(it[1], f"the list starting {where}")
     out = []
     for it in items:
         icon = f'<div class="rn-ic" aria-hidden="true">{it[0]}</div>' if it[0] else ""

@@ -2244,6 +2244,24 @@ async function main() {
       try { btn.click(); } finally { speech.speak = orig; }
       return said === "まちです" && btn.getAttribute("aria-label") === "Play 町です";
     })());
+    check("a word list folds like a reference table: its heading becomes the card's title row with the count, closed", (() => {
+      const spot2 = document.createElement("p");
+      host.appendChild(spot2);
+      nh.showLessonHtml('<html><head><meta name="raume-note" content="1"></head><body><article class="rn"><section class="rn-sec" data-tile="green">' +
+        '<h3 class="rn-h3">Places</h3><div class="rn-tiles rn-c4">' +
+        ["まち|machi|town", "やま|yama|mountain"].map(w => { const [jp, ro, en] = w.split("|"); return '<div class="rn-tile"><div class="rn-st rn-ans"><div class="rn-jp">' + jp + '</div><div class="rn-ro">' + ro + '</div><div class="rn-en">' + en + "</div></div></div>"; }).join("") +
+        "</div></section></article></body></html>", spot2);
+      const rn2 = host.querySelectorAll(".rn")[1], f = rn2 && rn2.querySelector(".rn-fold");
+      const ok = !!f && !rn2.querySelector(".rn-h3") && f.querySelector(".rn-fold-title").textContent === "Places"
+        && f.querySelector(".rn-fold-n").textContent === "2" && f.querySelector(".rn-fold-head").getAttribute("aria-expanded") === "false"
+        && f.querySelector(".rn-fold-body").hidden && !!f.querySelector(".rn-fold-body .rn-tiles");
+      if (rn2) rn2.remove();
+      return ok;
+    })());
+    check("note search finds a word by its kana, its romaji however it's spelled, and its English -- not by something it doesn't say", (() => {
+      const unit = rn.querySelector(".rn-st");
+      return nh.matcher("まち")(unit) && nh.matcher("machi")(unit) && nh.matcher("Town")(unit) && nh.matcher("町")(unit) && !nh.matcher("yama")(unit) && nh.matcher("") === null;
+    })());
     check("tapping the Japanese opens its romaji under it and closes it again, as in the tables -- it doesn't play", (() => {
       const jp = rn && rn.querySelector(".rn-jp"), st = jp && jp.closest(".rn-st"), speech = window.RaumeStudy.shared.speech, orig = speech.speak;
       let said = null;

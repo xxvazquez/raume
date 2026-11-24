@@ -222,7 +222,9 @@ and deleting need a connection and say so when they fail.
   `p()` in an f-string). Before writing, `render()` checks every Japanese
   line — furigana on each kanji, and the romaji spells the kana (Hepburn,
   particles は / へ / を as wa / e / o, ō = ou = oo) — and stops with a list
-  of problems; `stack(..., check=False)` exempts one line. A lesson note is
+  of problems; `stack(..., check=False)` exempts one line. It also stops
+  on a word listed in two word lists (`tiles`): a class note lists each
+  word once, so it reviews at a glance. A lesson note is
   named by its date — "Sat, Nov 21st 2026" (`lesson_name`) — in its
   `<title>` and eyebrow; `title` is the lesson's topic, shown over the
   description. Lesson files are personal content: they live in

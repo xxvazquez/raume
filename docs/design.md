@@ -838,7 +838,14 @@ and Help.
   every width so it reads top to bottom; a list whose Japanese runs long
   (pairs, phrases) puts the English under it on a phone. Explainer and
   formula cards set side by side become one card with a hairline between
-  them. Tips are lesson text, so ink with their tile-hue dot and no box.
+  them. Nothing in a note is text on the bare ground but headings: tips
+  sit on white too — a group of them one card with hairlines, a lone one
+  its own card — each led by its tile-hue dot. Every word list, and any
+  list of eight rows or more, folds like a reference table: the heading
+  becomes the card's title row (15px name, grey count, chevron that turns),
+  closed until tapped, and folds in a row share one card. A note's search
+  capsule (the reference search's) sits above it, the list's above the
+  list; searching leaves only matching rows, cards and their headings.
   Formula cards and hairline Q/A lists (stacked on a phone) stay. Every
   Japanese item is Japanese with furigana (particles bold blue,
   `.particle`, as everywhere in raume) and the reference tables' speaker

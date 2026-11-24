@@ -52,11 +52,14 @@ window.RaumeStudy.notes = (function () {
   var flash = null;           // one-shot status line under the title
   var listScroll = 0;         // where the list was when a note opened
   var cameFromList = false;   // Back pops history rather than pushing #notes
-  var markFilter = "";        // the Notes list's filter: "" (all) or a mark
+  var markFilter = "";
+  var listQuery = "";         // the Notes list's search
+  var noteQuery = "";         // the open note's search (carried in from the list's)        // the Notes list's filter: "" (all) or a mark
 
   var DOC_ICON = '<svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 1.8h6l3 3v11.4h-9z"/><path d="M10.5 1.8v3h3M6.8 9h4.4M6.8 12h4.4"/></svg>';
   var PLUS_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5v11M3.5 9h11"/></svg>';
   var BACK_ICON = '<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>';
+  var SEARCH_ICON = '<svg class="search-icon" viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg>';
   var MENU_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="14" cy="9" r="1.45"/></svg>';
   var CHECK_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8"/></svg>';
   var MENU_ICONS = {
@@ -511,12 +514,169 @@ window.RaumeStudy.notes = (function () {
       var long = Array.prototype.some.call(list.querySelectorAll(".rn-jp"), function (jp) { return shownText(jp).length > 8; });
       list.classList.toggle("rn-tiles-long", long);
     });
+    makeFolds(body);
     into.replaceWith(body);
     body.addEventListener("click", onLessonClick);
     body.addEventListener("keydown", function (e) {
       if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("rn-jp")) { e.preventDefault(); onLessonClick(e); }
     });
     applyStudy();
+    var find = hostEl && hostEl.querySelector("#notesFind");
+    if (find) {
+      find.closest(".notes-find").hidden = false;
+      find.value = noteQuery;
+      findInNote(noteQuery);
+    }
+  }
+
+  // Every word list, and any other list eight rows or longer (a page of
+  // practice), folds away like a reference table: its heading becomes the
+  // card's own title row, with the count and a chevron, closed until
+  // tapped. A note is read to review, so it opens as an outline.
+  var FOLD_AT = 8;
+  var CHEVRON = '<svg class="rn-fold-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l5 5-5 5"/></svg>';
+  var foldSeq = 0;
+  function makeFolds(body) {
+    body.querySelectorAll(".rn-tiles, .rn-list").forEach(function (list) {
+      var n = list.querySelectorAll(".rn-tile, .rn-r:not(.rn-hdr)").length;
+      if (n < FOLD_AT && !list.classList.contains("rn-tiles")) return;
+      var block = list.parentElement.classList.contains("rn-cols2") ? list.parentElement : list;
+      var h = block.previousElementSibling;
+      var title = h && h.classList.contains("rn-h3") ? h.innerHTML : (list.classList.contains("rn-tiles") ? "Words" : "Sentences");
+      if (h && h.classList.contains("rn-h3")) h.remove();
+      var fold = document.createElement("div");
+      fold.className = "rn-fold";
+      var id = "rnFold" + (++foldSeq);
+      fold.innerHTML = '<button type="button" class="rn-fold-head" aria-expanded="false" aria-controls="' + id + '">' +
+        '<span class="rn-fold-title">' + title + '</span><span class="rn-fold-n">' + n + "</span>" + CHEVRON + "</button>" +
+        '<div class="rn-fold-body" id="' + id + '" hidden></div>';
+      block.parentNode.insertBefore(fold, block);
+      fold.querySelector(".rn-fold-body").appendChild(block);
+    });
+  }
+  function setFold(fold, open) {
+    fold.querySelector(".rn-fold-head").setAttribute("aria-expanded", String(open));
+    fold.querySelector(".rn-fold-body").hidden = !open;
+  }
+
+  // Search: the reference search's matching -- the Japanese as written,
+  // its furigana readings and kana (katakana typed as hiragana too), the
+  // romaji however it's spelled (kohi finds kōhī), the English.
+  function toHiragana(s) { return String(s).replace(/[\u30a1-\u30f6]/g, function (ch) { return String.fromCharCode(ch.charCodeAt(0) - 0x60); }); }
+  function fold(s) { var kr = window.RaumeStudy.kanaRomaji; return kr && kr.foldRomaji ? kr.foldRomaji(s) : String(s).toLowerCase(); }
+  function matcher(q) {
+    q = String(q || "").trim().toLowerCase();
+    if (!q) return null;
+    var kana = toHiragana(q), latin = /^[a-z0-9'’\-\s\u0101\u012b\u016b\u0113\u014d]+$/.test(q), qf = latin ? fold(q) : "";
+    return function (el) {
+      var text = el.textContent.replace(/\s+/g, " ").toLowerCase();
+      if (text.indexOf(q) !== -1 || toHiragana(text).indexOf(kana) !== -1) return true;
+      if (!qf) return false;
+      return Array.prototype.some.call(el.querySelectorAll(".rn-ro, .rn-fr"), function (r) { return fold(r.textContent).indexOf(qf) !== -1; });
+    };
+  }
+  // What one search hit is: a word, a list row, a tip, a formula line, an
+  // explainer card.
+  var UNITS = ".rn-tile, .rn-r:not(.rn-hdr), .rn-tip, .rn-fl, .rn-two > .rn-card, .rn-sec > .rn-card";
+  function findInNote(q) {
+    var body = hostEl && hostEl.querySelector(".rn");
+    var box = hostEl && hostEl.querySelector(".notes-find");
+    if (!body || !box) return;
+    noteQuery = q;
+    box.classList.toggle("has-value", !!q);
+    var test = matcher(q);
+    body.classList.toggle("rn-searching", !!test);
+    body.querySelectorAll(".rn-miss").forEach(function (el) { el.classList.remove("rn-miss"); });
+    body.querySelectorAll(".rn-fold").forEach(function (f) {
+      if (!test && f.dataset.wasOpen != null) { setFold(f, f.dataset.wasOpen === "1"); delete f.dataset.wasOpen; }
+    });
+    var hits = 0;
+    if (test) {
+      body.querySelectorAll(UNITS).forEach(function (u) {
+        if (u.parentElement.closest(UNITS)) return;
+        if (test(u)) hits++; else u.classList.add("rn-miss");
+      });
+      // Whatever has nothing left in it goes too: a list, a card, its
+      // heading, a whole section.
+      body.querySelectorAll(".rn-sec").forEach(function (sec) {
+        var any = false;
+        Array.prototype.forEach.call(sec.children, function (b) {
+          if (b.classList.contains("rn-sec-head") || b.classList.contains("rn-h3")) return;
+          var units = b.matches(UNITS) ? [b] : Array.prototype.slice.call(b.querySelectorAll(UNITS));
+          var live = units.some(function (u) { return !u.classList.contains("rn-miss") && !u.closest(".rn-miss"); });
+          if (!live) b.classList.add("rn-miss");
+          else {
+            any = true;
+            if (b.classList.contains("rn-fold")) {
+              if (b.dataset.wasOpen == null) b.dataset.wasOpen = b.querySelector(".rn-fold-body").hidden ? "0" : "1";
+              setFold(b, true);
+            }
+          }
+        });
+        sec.querySelectorAll(".rn-h3").forEach(function (h) {
+          var next = h.nextElementSibling;
+          if (!next || next.classList.contains("rn-miss")) h.classList.add("rn-miss");
+        });
+        if (!any) sec.classList.add("rn-miss");
+      });
+    }
+    var none = hostEl.querySelector("#notesFindNone");
+    if (none) none.hidden = !test || hits > 0;
+  }
+
+  // Every note's searchable pieces, from the device copy, kept until the
+  // note changes: a lesson note's words, rows and tips; any other note's
+  // paragraphs.
+  var indexCache = {};
+  function noteIndex(rec) {
+    var hit = indexCache[rec.id];
+    if (hit && hit.updated_at === rec.updated_at) return hit;
+    var doc = parse(rec.html);
+    if (isKitOriginal(doc)) fromKit(doc);
+    var root = doc.querySelector("article.rn");
+    var units = root ? Array.prototype.slice.call(root.querySelectorAll(UNITS)).filter(function (u) { return !u.parentElement.closest(UNITS); })
+      : Array.prototype.slice.call(doc.body ? doc.body.querySelectorAll("p, li, td, h1, h2, h3, h4") : []);
+    var topic = root ? topicOf(rec.html) : "";
+    hit = indexCache[rec.id] = { updated_at: rec.updated_at, units: units, topic: topic };
+    return hit;
+  }
+  // A hit as one line: its Japanese (without furigana) and English.
+  function snippet(u) {
+    var st = u.querySelector(".rn-st");
+    var line = st ? [st.querySelector(".rn-jp"), st.querySelector(".rn-en")].filter(Boolean).map(shownText).filter(Boolean).join(" · ")
+      : shownText(u);
+    return line.length > 80 ? line.slice(0, 79) + "…" : line;
+  }
+  function searchNotes(q) {
+    var res = hostEl && hostEl.querySelector("#notesResults"), groups = hostEl && hostEl.querySelector("#notesGroups");
+    var box = hostEl && hostEl.querySelector(".notes-search");
+    if (!res || !groups) return;
+    listQuery = q;
+    if (box) box.classList.toggle("has-value", !!q);
+    var test = matcher(q), u = user();
+    groups.hidden = !!test;
+    if (!test || !u) { res.hidden = true; res.innerHTML = ""; return; }
+    deviceList(u.id).then(function (have) {
+      if (listQuery !== q) return;
+      var byId = {};
+      have.forEach(function (rec) { byId[rec.id] = rec; });
+      var rows = (notes || []).slice().sort(byDate).map(function (n) {
+        var rec = byId[n.id], idx = rec && rec.html != null ? noteIndex(rec) : { units: [], topic: "" };
+        var found = idx.units.filter(test);
+        var named = test({ textContent: n.title + " " + idx.topic, querySelectorAll: function () { return []; } });
+        return found.length || named ? { n: n, found: found, topic: idx.topic } : null;
+      }).filter(Boolean);
+      res.hidden = false;
+      res.innerHTML = rows.length
+        ? '<h2 class="help-head notes-group-head">' + (rows.length === 1 ? "1 note" : rows.length + " notes") + "</h2>" +
+          '<ul class="notes-card">' + rows.map(function (r) {
+            var sub = r.found.length ? snippet(r.found[0]) + (r.found.length > 1 ? " — and " + (r.found.length - 1) + " more" : "") : (r.topic || shortDate(r.n.note_date));
+            return '<li><button type="button" class="notes-row" data-note="' + esc(r.n.id) + '" data-find="1">' + noteTile(r.n) +
+              '<span class="notes-row-tx"><span class="notes-row-title">' + esc(r.n.title) + "</span>" +
+              '<span class="notes-row-sub" lang="ja">' + esc(sub) + "</span></span></button></li>";
+          }).join("") + "</ul>"
+        : '<p class="notes-filter-empty">No notes have “' + esc(q.trim()) + "”.</p>";
+    });
   }
 
   // ---------------------------------------------------------------------
@@ -963,6 +1123,7 @@ window.RaumeStudy.notes = (function () {
     if (vocab().showNotesPage) vocab().showNotesPage({ noteId: id });
   }
   function back() {
+    noteQuery = "";
     if (cameFromList) { cameFromList = false; history.back(); return; }
     if (vocab().showNotesPage) vocab().showNotesPage();
   }
@@ -1031,26 +1192,32 @@ window.RaumeStudy.notes = (function () {
     if (!shown.length) {
       return head + filterHtml + '<p class="notes-filter-empty">No ' + esc(MARKS[markFilter] ? MARKS[markFilter].label : "") + " notes yet.</p>";
     }
+    var searchHtml = '<label class="search-box notes-search' + (listQuery ? " has-value" : "") + '">' + SEARCH_ICON +
+      '<input type="search" id="notesSearch" placeholder="Search all notes" aria-label="Search all notes" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="' + esc(listQuery) + '">' +
+      '<button type="button" class="clear-search" data-clear="notesSearch" aria-label="Clear search">×</button></label>';
     var months = [], byMonth = {};
     shown.slice().sort(byDate).forEach(function (n) {
       var k = String(n.note_date || "").slice(0, 7);
       if (!byMonth[k]) { byMonth[k] = []; months.push(k); }
       byMonth[k].push(n);
     });
-    return head + filterHtml + months.map(function (k) {
+    return head + searchHtml + '<div id="notesResults" hidden></div><div id="notesGroups">' + filterHtml + months.map(function (k) {
       var label = monthLabel(byMonth[k][0].note_date);
       return '<h2 class="help-head notes-group-head">' + esc(label) + "</h2>" +
         '<ul class="notes-card" aria-label="' + esc(label) + '">' + byMonth[k].map(function (n) {
           return '<li><button type="button" class="notes-row" data-note="' + esc(n.id) + '">' +
-            (markOf(n) ? '<span class="set-tile" data-tile="' + markOf(n).tile + '" aria-hidden="true">' + markOf(n).icon + "</span>"
-              : '<span class="set-tile" data-tile="indigo" aria-hidden="true">' + DOC_ICON + "</span>") +
+            noteTile(n) +
             '<span class="notes-row-tx"><span class="notes-row-title">' + esc(n.title) +
             (markOf(n) ? '<span class="visually-hidden">, ' + esc(markOf(n).label) + "</span>" : "") + "</span>" +
             // A note named by its date doesn't repeat it: its topic fills
             // this line (showTopics) once this device holds a copy.
             '<span class="notes-row-sub">' + esc(n.title === lessonName(n.note_date) ? "Lesson notes" : shortDate(n.note_date)) + "</span></span></button></li>";
         }).join("") + "</ul>";
-    }).join("");
+    }).join("") + "</div>";
+  }
+  function noteTile(n) {
+    return markOf(n) ? '<span class="set-tile" data-tile="' + markOf(n).tile + '" aria-hidden="true">' + markOf(n).icon + "</span>"
+      : '<span class="set-tile" data-tile="indigo" aria-hidden="true">' + DOC_ICON + "</span>";
   }
   // A note named by its date says it again on the line under it -- there the
   // lesson's topic (its first heading, from the device copy) reads better,
@@ -1124,6 +1291,11 @@ window.RaumeStudy.notes = (function () {
       menuItem("rename", "Rename") + menuItem("date", "Lesson date") + menuItem("replace", "Replace with a new file") + menuItem("delete", "Delete", true) +
       "</div></div></div></div>" +
       flashHtml() +
+      // Search this note: a lesson note's own (showLesson unhides it).
+      '<label class="search-box notes-find" hidden>' + SEARCH_ICON +
+      '<input type="search" id="notesFind" placeholder="Search this note" aria-label="Search this note" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">' +
+      '<button type="button" class="clear-search" data-clear="notesFind" aria-label="Clear search">×</button></label>' +
+      '<p class="notes-filter-empty" id="notesFindNone" hidden>Nothing in this note matches.</p>' +
       '<p class="notes-loading" role="status" id="notesReaderStatus" data-title="' + esc(note.title) + '">Opening…</p>';
   }
   function showInReader(note) {
@@ -1168,6 +1340,7 @@ window.RaumeStudy.notes = (function () {
       shownId = null;
       host.innerHTML = '<div class="notes-wrap">' + listHtml() + "</div>";
       showTopics(host);
+      if (listQuery) searchNotes(listQuery);
       // Back from a note: the list where you left it.
       if (wasNote && !opts.keepScroll) window.scrollTo(0, listScroll);
     }
@@ -1184,10 +1357,20 @@ window.RaumeStudy.notes = (function () {
     if (b) b.setAttribute("aria-expanded", "false");
   }
   function wire(host) {
+    host.addEventListener("input", function (e) {
+      if (e.target.id === "notesSearch") searchNotes(e.target.value);
+      else if (e.target.id === "notesFind") findInNote(e.target.value);
+    });
     host.addEventListener("click", function (e) {
       var t = e.target, el;
       if (!t || !t.closest) return;
-      if ((el = t.closest(".notes-row"))) { openNote(el.dataset.note); return; }
+      if ((el = t.closest(".notes-row"))) { noteQuery = el.dataset.find ? listQuery : ""; openNote(el.dataset.note); return; }
+      if ((el = t.closest(".rn-fold-head"))) { setFold(el.parentElement, el.getAttribute("aria-expanded") !== "true"); return; }
+      if ((el = t.closest("[data-clear]"))) {
+        var field = document.getElementById(el.dataset.clear);
+        if (field) { field.value = ""; field.dispatchEvent(new Event("input", { bubbles: true })); field.focus(); }
+        return;
+      }
       if (t.closest("#notesAdd, [data-notes-add]")) { addSheet(); return; }
       if ((el = t.closest("[data-note-filter]"))) { markFilter = el.dataset.noteFilter; rerender(); return; }
       if (t.closest("#notesBack")) { back(); return; }
@@ -1237,7 +1420,7 @@ window.RaumeStudy.notes = (function () {
   return {
     render: render,
     __testHooks: {
-      cleanNote: cleanNote, fillFrame: fillFrame, describeFile: describeFile, isLessonNote: isLessonNote, wordIdsIn: wordIdsIn,
+      cleanNote: cleanNote, fillFrame: fillFrame, matcher: matcher, describeFile: describeFile, isLessonNote: isLessonNote, wordIdsIn: wordIdsIn,
       isKitOriginal: isKitOriginal, fromKit: function (html) { return fromKit(parse(html)); },
       // Draws a lesson note from its HTML into a placeholder, as the reader does.
       showLessonHtml: function (html, into) { hostEl = hostEl || into.parentElement; showLesson(parse(html), into); }
