@@ -244,8 +244,9 @@ and Help.
 - **Vocabulary opens on category squares**, as Reminders opens on its
   lists: a white `--radius-card` tile per category on the ground, two across
   on a phone and three wider, its glyph in a 32px circle on the category's
-  tile hue (top left), the number of tables in 22px semibold (top right) and
-  the name in 15px under them. A square pushes that category's screen —
+  tile hue (top left), the number of tables in 28px bold (top right) and
+  the name in 15px semibold secondary grey under them — Reminders' own
+  balance: the count is the headline, the name its label. A square pushes that category's screen —
   "‹ Vocabulary" over its title (a large title on a phone, the 22px page
   title on desktop and tablet, where the reference otherwise has none), then
   the category's tables as below, without the category header the title
