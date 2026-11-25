@@ -531,7 +531,7 @@ body {
   background: color-mix(in srgb, var(--tile, var(--section)) var(--tile-k), #000); color: #fff;
 }
 .vh-ic svg { width: 18px; height: 18px; }
-.vh-n { justify-self: end; align-self: start; font: 400 20px/1.1 var(--font-ui); letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.vh-n { justify-self: end; align-self: start; font: 400 15px/1.2 var(--font-ui); font-variant-numeric: tabular-nums; color: var(--muted); }
 .vh-name { grid-column: 1 / -1; font: 500 14px/1.25 var(--font-ui); color: var(--muted); }
 /* A category's screen: "‹ Vocabulary" over its title -- on every width,
    since desktop's top nav only names the section. */
