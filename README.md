@@ -330,7 +330,7 @@ their cards then.
 - A meaning written as a list (*job, work* or *he; boyfriend*) takes any one
   of them alone. Commas inside brackets or a number (*1,000*) and in
   sentences stay part of the answer. A meaning's `~` placeholder is never
-  typed: *that ~* takes `that`.
+  typed: *that ~* takes `that`, and a verb's "to" is optional: *to eat* takes `eat`.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
   for `ryōri shimasu`.
 - The right answer in the wrong language — the romaji on a card that asks for

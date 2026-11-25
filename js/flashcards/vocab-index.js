@@ -63,7 +63,13 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function englishAnswerVariants(alt) {
     var full = normalizeAnswer(alt, false);
     var bare = normalizeAnswer(alt.replace(/[（(][^)）]*[)）]/g, " ").replace(/\.\.\.|…/g, " "), false);
-    return bare && bare !== full ? [full, bare] : [full];
+    var out = bare && bare !== full ? [full, bare] : [full];
+    // A verb's "to" is there to read: "to eat" also takes plain "eat".
+    out.slice().forEach(function (v) {
+      var noTo = v.replace(/^to /, "");
+      if (noTo && out.indexOf(noTo) === -1) out.push(noTo);
+    });
+    return out;
   }
 
   function splitAlternatives(s) {
