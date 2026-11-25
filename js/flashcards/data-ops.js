@@ -232,7 +232,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
           return { id: r.id, title: r.title, category: r.category, sort: r.sort_index };
         }),
         rows: (crRes.data || []).map(function (r) {
-          return { id: r.id, tableId: r.target_table, jp: r.jp, romaji: r.romaji, english: r.english, sort: r.sort_index };
+          return { id: r.id, tableId: r.target_table, jp: r.jp, romaji: r.romaji, english: r.english, sort: r.sort_index, verb: r.verb };
         })
       });
     }
@@ -247,9 +247,17 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var client = getClient(), user = currentUser();
     if (!client || !user || !rows || !rows.length) return;
     var payload = rows.map(function (r) {
-      return { id: r.id, user_id: user.id, target_table: String(r.tableId), jp: r.jp, romaji: r.romaji, english: r.english, sort_index: Math.round(r.sort || 0) };
+      return { id: r.id, user_id: user.id, target_table: String(r.tableId), jp: r.jp, romaji: r.romaji, english: r.english, sort_index: Math.round(r.sort || 0), verb: r.verb || null };
     });
     var res = await client.from("custom_rows").upsert(payload, { onConflict: "id" });
+    // An account whose schema predates the verb column (supabase/schema.sql)
+    // still takes the word; its polite form stays on this device until then.
+    if (res.error && /verb/.test(res.error.message || "")) {
+      console.warn("custom vocab: run supabase/schema.sql to sync verb forms");
+      res = await client.from("custom_rows").upsert(payload.map(function (r) {
+        var copy = Object.assign({}, r); delete copy.verb; return copy;
+      }), { onConflict: "id" });
+    }
     if (res.error) throw res.error;
   }
   async function customVocabDeleteRows(ids) {

@@ -126,7 +126,9 @@ flowchart LR
   built-in `v0001`; a custom table's id is `ct-<uuid>`. ids are
   client-generated (offline-safe), so both Supabase tables key on `text`, not
   `uuid`. `custom_rows.target_table` is a built-in table id as text (`"3"`) or a
-  `custom_tables.id`. `applyToDataset()` merges every custom table/row straight
+  `custom_tables.id`. `custom_rows.verb` (jsonb, null for other words) holds a
+  verb's polite form and group — `{ jp, romaji, verbClass }` — and makes the
+  row a `verb-pair` like a built-in verb. `applyToDataset()` merges every custom table/row straight
   into `RaumeStudy.data.vocabularyTables` (marked `__custom`) before the
   reference page renders and again whenever custom vocab changes or syncs, so
   every downstream feature — search, print, furigana, speech, the flashcards

@@ -261,6 +261,9 @@ create index if not exists notes_user_idx on public.notes (user_id);
 alter table public.notes add column if not exists source text
   check (source in ('sakura', 'wsjj', 'mine'));
 create index if not exists custom_rows_user_idx on public.custom_rows (user_id);
+-- A verb of your own carries its polite form and group too:
+-- { jp, romaji, verbClass } (js/vocab/custom-vocab.js). Null for other words.
+alter table public.custom_rows add column if not exists verb jsonb;
 
 alter table public.flashcards enable row level security;
 alter table public.review_logs enable row level security;

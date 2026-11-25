@@ -1322,7 +1322,7 @@ async function main() {
       && shoyu.some(t => t.startsWith("醤油")) && kohi.some(t => t.startsWith("コーヒー")) && mittu.some(t => t.startsWith("三つ"))
       && honnya.some(t => t.startsWith("本屋")) && eat.some(t => t.startsWith("食べる")) && !eat.some(t => t.startsWith("温める"));
   })());
-  check("an English word that folds like romaji doesn't drag in every reading it would start: see finds 見る first and not 千 (sen); sit finds only sit down", (() => {
+  check("an English word that folds like romaji doesn't drag in every reading it would start: see finds 見る first and not 千 (sen); sit finds only to sit down", (() => {
     const input = document.getElementById("tableSearch");
     const meanings = q => {
       input.value = q;
@@ -1331,7 +1331,7 @@ async function main() {
     };
     const see = meanings("see"), sit = meanings("sit"), koohii = meanings("koohii");
     meanings("");
-    return /^see/.test(see[0] || "") && !see.includes("1,000") && sit.length === 1 && sit[0] === "sit down" && koohii.includes("coffee");
+    return /^to see/.test(see[0] || "") && !see.includes("1,000") && sit.length === 1 && sit[0] === "to sit down" && koohii.includes("coffee");
   })());
   check("one of a word's two readings typed whole is an exact match: yon finds 四 (yon / shi) before 羊肉 (yōniku)", (() => {
     const input = document.getElementById("tableSearch");
@@ -2055,6 +2055,20 @@ async function main() {
     check("...cells pasted from a spreadsheet split on their tabs, extra columns left out",
       tabbed.length === 1 && tabbed[0].romaji === "nasu" && tabbed[0].english === "eggplant, aubergine");
     check("...an English value with a comma survives intact", res.rows.some(r => r.english === "sushi, the rice dish"));
+  }
+  {
+    const pairs = cvNs.parseImport("帰(かえ)る / 帰(かえ)ります,kaeru / kaerimasu,to go home\nたべる / たべます,taberu / tabemasu,to eat\nたべる / たべた,taberu / tabeta,to eat").rows;
+    check("a verb imports with its polite form, its group read from the pair (帰ります: u-verb)", pairs.length === 2
+      && pairs[0].verb.verbClass === "godan" && pairs[0].verb.romaji === "kaerimasu" && pairs[1].verb.verbClass === "ichidan");
+    const verbsTable = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Verbs" && t.category === "Grammar");
+    const made = cvNs.addRow(String(verbsTable.id), pairs[0]);
+    const row = verbsTable.rows.find(r => r.id === made.id);
+    const vi = window.RaumeStudy.flashcards.vocabIndex, entry = vi.getVocabIndex()[made.id];
+    check("...it joins the table as a verb pair with Verb → its forms, and takes the meaning with or without its to",
+      !!row && row.type === "verb-pair" && row.forms[1].romaji === "kaerimasu" && !!entry
+      && vi.directionsForEntry(entry).indexOf("jp-vf") !== -1
+      && vi.checkAnswer(entry, "jp-en", "go home") && vi.checkAnswer(entry, "jp-en", "to go home"));
+    cvNs.deleteRow(made.id);
   }
   {
     const vegTable = window.RaumeStudy.data.vocabularyTables.find(t => t.title === "Vegetables");
@@ -3161,7 +3175,7 @@ async function main() {
   check("English typed without its apostrophes or hyphens counts (1 oclock, deep fry, stirfry), but not a different number", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
-    const deepFry = Object.values(idx).find(e => e.englishDisplay === "deep-fry"), stirFry = Object.values(idx).find(e => e.englishDisplay === "stir-fry");
+    const deepFry = Object.values(idx).find(e => e.englishDisplay === "to deep-fry"), stirFry = Object.values(idx).find(e => e.englishDisplay === "to stir-fry");
     return vi.checkAnswer(idx.v0635, "jp-en", "1 oclock") && !vi.checkAnswer(idx.v0635, "jp-en", "2 oclock")
       && !!deepFry && vi.checkAnswer(deepFry, "jp-en", "deep fry") && !!stirFry && vi.checkAnswer(stirFry, "jp-en", "stirfry");
   })());
@@ -5319,7 +5333,7 @@ async function main() {
       && fc.otherWordHint(easy, "en-ro", "takai") === ""
       && fc.otherWordHint(easy, "jp-ro", "kantan") === "";
   })());
-  const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "hear / listen / ask");
+  const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "to hear / to listen / to ask");
   check("multi-answer English fields accept any listed alternative", !!listenEntry && fc.checkAnswer(listenEntry, "jp-en", "listen") && fc.checkAnswer(listenEntry, "jp-en", "ask"));
   check("multi-answer English fields still reject an unlisted word", !fc.checkAnswer(listenEntry, "jp-en", "speak"));
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");

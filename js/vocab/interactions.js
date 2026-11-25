@@ -973,6 +973,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!t) return null;
       if (t === q) return 0;
       if (t.startsWith(q)) return 1;
+      // A verb's "to" isn't the word: "see" finds "to see" first.
+      if (!/^to\b/.test(q) && /^to /.test(t)) {
+        const bare = t.slice(3);
+        if (bare === q) return 0;
+        if (bare.startsWith(q)) return 1;
+      }
       if (prefixOnly) return null;
       for (let at = t.indexOf(q); at !== -1; at = t.indexOf(q, at + 1)) {
         if (!/[\p{L}\p{N}']/u.test(t[at - 1])) return 2;

@@ -6,6 +6,8 @@
 //   japanese(furigana),romaji,english
 // where each kanji run carries its reading in ( ) straight after it --
 // "帰(かえ)る", "お茶(ちゃ)" -> お + 茶(ちゃ), "醤油(しょうゆ)" (one run).
+// A verb can come with its polite form, both columns split by " / ":
+//   帰(かえ)る / 帰(かえ)ります,kaeru / kaerimasu,to go home
 //
 // Storage: Supabase is authoritative. Signed in, localStorage is only a
 // read-through cache of the custom_tables / custom_rows tables; as a guest the
@@ -51,6 +53,15 @@ window.RaumeStudy.customVocab = (function () {
       return null;
     }).filter(Boolean);
   }
+  // A verb of your own carries its polite form too, like the built-in verbs:
+  // verb = { jp: the -masu form's segments, romaji, verbClass }.
+  var VERB_CLASSES = { godan: 1, ichidan: 1, irregular: 1 };
+  function cleanVerb(v) {
+    if (!v || typeof v !== "object" || !VERB_CLASSES[v.verbClass]) return null;
+    var jp = cleanSegments(v.jp), romaji = String(v.romaji || "").trim();
+    return jp.length && romaji ? { jp: jp, romaji: romaji, verbClass: v.verbClass } : null;
+  }
+
   function sanitize(obj) {
     if (!obj || typeof obj !== "object") return blank();
     var tables = (Array.isArray(obj.tables) ? obj.tables : []).filter(function (t) {
@@ -67,7 +78,10 @@ window.RaumeStudy.customVocab = (function () {
       return r && typeof r.id === "string" && typeof r.tableId === "string" &&
         Array.isArray(r.jp) && typeof r.romaji === "string" && typeof r.english === "string";
     }).map(function (r) {
-      return { id: r.id, tableId: r.tableId, jp: cleanSegments(r.jp), romaji: String(r.romaji), english: String(r.english), sort: Number(r.sort) || 0 };
+      var row = { id: r.id, tableId: r.tableId, jp: cleanSegments(r.jp), romaji: String(r.romaji), english: String(r.english), sort: Number(r.sort) || 0 };
+      var verb = cleanVerb(r.verb);
+      if (verb) row.verb = verb;
+      return row;
     }).filter(function (r) { return r.jp.length && r.romaji && r.english; });
     return { tables: tables, rows: rows };
   }
@@ -135,6 +149,27 @@ window.RaumeStudy.customVocab = (function () {
     return { segments: segments };
   }
 
+  // "食(た)べる / 食(た)べます" with "taberu / tabemasu": a verb and its polite
+  // form. Its group follows from the pair -- する / 来る are irregular, a る
+  // verb whose ます form just swaps the る is a ru-verb, the rest u-verbs
+  // (帰る -> 帰ります says u-verb, which the plain form alone can't).
+  function plainOf(segs) { return segs.map(function (s) { return s.kanji || s.text || ""; }).join(""); }
+  function verbClassOf(plain, polite) {
+    if ((/する$/.test(plain) && /します$/.test(polite)) ||
+        (/(くる|来る)$/.test(plain) && /(きます|来ます)$/.test(polite))) return "irregular";
+    if (/る$/.test(plain) && polite === plain.slice(0, -1) + "ます") return "ichidan";
+    return "godan";
+  }
+  function parseVerbPair(jpText, roText) {
+    var jps = jpText.split(/\s*[\/／]\s*/), ros = roText.split(/\s*\/\s*/);
+    if (jps.length !== 2 || ros.length !== 2) return null;
+    var a = parseFurigana(jps[0]), b = parseFurigana(jps[1]);
+    if (a.error) return a;
+    if (b.error) return b;
+    if (!/ます$/.test(plainOf(b.segments)) || !/masu$/i.test(ros[1])) return { error: "a verb pair is its plain form, then its ます form" };
+    return { segments: a.segments, romaji: ros[0], verb: { jp: b.segments, romaji: ros[1], verbClass: verbClassOf(plainOf(a.segments), plainOf(b.segments)) } };
+  }
+
   function isRomajiUsable(s) {
     var fc = window.RaumeStudy.flashcards;
     var fn = fc && fc.vocabIndex && fc.vocabIndex.isRomajiUsable;
@@ -171,13 +206,16 @@ window.RaumeStudy.customVocab = (function () {
         out.skipped.push({ line: idx + 1, raw: line, reason: "a column is empty" });
         return;
       }
-      var fp = parseFurigana(jp);
+      var pair = /[\/／]/.test(jp) ? parseVerbPair(jp, ro) : null;
+      var fp = pair || parseFurigana(jp);
       if (fp.error) { out.skipped.push({ line: idx + 1, raw: line, reason: fp.error }); return; }
       if (!isRomajiUsable(ro)) {
         out.skipped.push({ line: idx + 1, raw: line, reason: "the romaji column has Japanese characters in it" });
         return;
       }
-      out.rows.push({ segments: fp.segments, romaji: ro, english: en });
+      var parsed = { segments: fp.segments, romaji: pair ? pair.romaji : ro, english: en };
+      if (pair) parsed.verb = pair.verb;
+      out.rows.push(parsed);
     });
     return out;
   }
@@ -237,7 +275,13 @@ window.RaumeStudy.customVocab = (function () {
         target = hit[0];
       }
       if (!target) return; // stale target table -- drop quietly
-      target.rows.push({ id: r.id, type: "word", jp: r.jp, romaji: r.romaji, english: r.english, __custom: true });
+      // A verb becomes a verb pair like the built-in ones (both forms in the
+      // table, its group, the Verb -> its forms cards); it keeps jp / romaji
+      // for the lists that show one line per word.
+      target.rows.push(r.verb
+        ? { id: r.id, type: "verb-pair", forms: [{ jp: r.jp, romaji: r.romaji }, { jp: r.verb.jp, romaji: r.verb.romaji }],
+            verbClass: r.verb.verbClass, jp: r.jp, romaji: r.romaji, english: r.english, __custom: true }
+        : { id: r.id, type: "word", jp: r.jp, romaji: r.romaji, english: r.english, __custom: true });
       if (!target.__custom) target.__hasCustomRows = true;
     });
     Object.keys(customById).forEach(function (id) {
@@ -266,11 +310,14 @@ window.RaumeStudy.customVocab = (function () {
   function nextSort() { return Date.now() * 1000 + (sortSeq++ % 1000); }
 
   function toRow(parsed, tableId) {
-    return {
+    var row = {
       id: "cv-" + uuid(), tableId: String(tableId),
       jp: cleanSegments(parsed.segments), romaji: String(parsed.romaji || "").trim(),
       english: String(parsed.english || "").trim(), sort: nextSort()
     };
+    var verb = cleanVerb(parsed.verb);
+    if (verb) row.verb = verb;
+    return row;
   }
 
   // parsedList: [{segments, romaji, english}] from parseFurigana / parseImport.
@@ -336,6 +383,8 @@ window.RaumeStudy.customVocab = (function () {
     row.jp = cleanSegments(parsed.segments);
     row.romaji = String(parsed.romaji || "").trim();
     row.english = String(parsed.english || "").trim();
+    var verb = cleanVerb(parsed.verb);
+    if (verb) row.verb = verb; else delete row.verb;
     persist();
     refreshApp();
     if (remote) { try { remote.addRows([row]); } catch (e) { console.warn("custom vocab: row sync failed", e); } }

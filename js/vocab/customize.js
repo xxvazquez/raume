@@ -328,7 +328,9 @@ window.RaumeStudy.customize = (function () {
   // In-place edit form for one custom-vocab row, same single-line format as
   // "Add a word": japanese(furigana), romaji, english.
   function editRowHtml(r) {
-    var text = segmentsToText(r.jp) + ", " + r.romaji + ", " + r.english;
+    var text = r.forms
+      ? segmentsToText(r.forms[0].jp) + " / " + segmentsToText(r.forms[1].jp) + ", " + r.forms[0].romaji + " / " + r.forms[1].romaji + ", " + r.english
+      : segmentsToText(r.jp) + ", " + r.romaji + ", " + r.english;
     return '<li class="cv-owned-row cv-owned-row-edit">' +
       '<input type="text" class="cv-edit-input" data-row="' + esc(r.id) + '" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="' + esc(text) + '">' +
       '<span class="cv-owned-actions">' +
@@ -355,8 +357,8 @@ window.RaumeStudy.customize = (function () {
           // An iOS list row: the Japanese with its romaji small beside it,
           // the English under, edit / delete centred at the trailing edge.
           return '<li class="cv-owned-row">' +
-            '<span class="cv-owned-main"><span class="cv-owned-jp" lang="ja">' + esc(segmentsToPlain(r.jp)) + "</span>" +
-            '<span class="cv-owned-ro">' + esc(r.romaji) + "</span></span>" +
+            '<span class="cv-owned-main"><span class="cv-owned-jp" lang="ja">' + esc(segmentsToPlain(r.jp) + (r.forms ? " / " + segmentsToPlain(r.forms[1].jp) : "")) + "</span>" +
+            '<span class="cv-owned-ro">' + esc(r.romaji + (r.forms ? " / " + r.forms[1].romaji : "")) + "</span></span>" +
             '<span class="cv-owned-en">' + esc(r.english) + "</span>" +
             '<span class="cv-owned-actions">' +
             '<button type="button" class="cv-edit-row" data-row="' + esc(r.id) + '" aria-label="Edit this word">' + EDIT_ICON + "</button>" +
@@ -480,7 +482,7 @@ window.RaumeStudy.customize = (function () {
       '<details class="cv-card" data-open-key="import">' +
       '<summary class="cv-card-summary disclosure-caret">Import a list' + infoButtonHtml("import", cvInfoImportOpen, "Import format") + "</summary>" +
       infoPanelHtml("import", cvInfoImportOpen,
-        '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code> (same furigana format as above). The English column may contain commas. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>') +
+        '<p class="cv-hint">One word per line, three columns: <code>japanese(furigana),romaji,english</code> (same furigana format as above). The English column may contain commas. A verb can bring its polite form: <code>帰(かえ)る / 帰(かえ)ります,kaeru / kaerimasu,to go home</code>. A first line of <code>japanese,romaji,english</code> is treated as a header. Bad rows are skipped and listed — fix and re-import just those.</p>') +
       targetButton("import", "Into table") +
       '<textarea class="cv-import-text" rows="5" spellcheck="false" placeholder="茄子(なす),nasu,eggplant&#10;人参(にんじん),ninjin,carrot">' + esc(cvImportLeftover || "") + "</textarea>" +
       '<div class="cv-add-actions">' +
@@ -893,8 +895,10 @@ window.RaumeStudy.customize = (function () {
     var p = firstParsed(val);
     if (p.error) { box.className = "cv-preview cv-preview-bad"; box.textContent = p.error; return; }
     box.className = "cv-preview";
-    box.innerHTML = '<span lang="ja">' + V().jpSegmentsHtml(p.row.segments, false) + "</span>" +
-      '<span class="cv-preview-sep">·</span>' + esc(p.row.romaji) +
+    var verb = p.row.verb;
+    box.innerHTML = '<span lang="ja">' + V().jpSegmentsHtml(p.row.segments, false) +
+      (verb ? " / " + V().jpSegmentsHtml(verb.jp, false) : "") + "</span>" +
+      '<span class="cv-preview-sep">·</span>' + esc(p.row.romaji + (verb ? " / " + verb.romaji : "")) +
       '<span class="cv-preview-sep">·</span>' + esc(p.row.english);
   }
   // Search / sort only touch the Words-you've-added list -- swap just that
