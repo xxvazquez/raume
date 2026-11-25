@@ -334,8 +334,8 @@ window.RaumeStudy.customVocab = (function () {
   }
   function addRow(tableId, parsed) { return addRows(tableId, [parsed])[0]; }
 
-  // A category is a square inside a section, so it needs a name and can't
-  // take a section's own -- a "Vocabulary" square on the Vocabulary page
+  // A category is a group inside a section, so it needs a name and can't
+  // take a section's own -- a "Vocabulary" group on the Vocabulary page
   // reads as two names for one idea.
   var SECTION_NAMES = { vocabulary: 1, grammar: 0, kanji: 1, "n5 kanji": 1, notes: 1, practice: 1 };
   function cleanCategory(category) {
@@ -361,7 +361,7 @@ window.RaumeStudy.customVocab = (function () {
   }
 
   // File one of the reader's own tables under another category -- an
-  // existing one (it joins that square) or a new name. Blank = the default.
+  // existing one (it joins that group) or a new name. Blank = the default.
   function setTableCategory(id, category) {
     var t = load().tables.filter(function (x) { return x.id === id; })[0];
     if (!t) throw new Error("That table no longer exists.");

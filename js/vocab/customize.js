@@ -411,7 +411,7 @@ window.RaumeStudy.customize = (function () {
       var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + esc(titleOf(t)) + "</span>" +
         '<span class="cv-owned-count">' + count + "</span>" +
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
-      // Your own table can move to another category (an existing square, the
+      // Your own table can move to another category (an existing group, the
       // Grammar page, or a new name); saved on change, as in Settings.
       var cat = t.__custom ? categoryFieldHtml("cv-cat-input", t.category, t.id) : "";
       return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + cat + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
@@ -419,7 +419,7 @@ window.RaumeStudy.customize = (function () {
   }
 
   // Category: where a table of yours shows up -- a pop-up row of the
-  // places that exist (each Vocabulary square, the Grammar page), plus New
+  // places that exist (each Vocabulary group, the Grammar page), plus New
   // category… which opens a name field. A free-text box with suggestions
   // read as a mystery ("which category? what does it do?"). Not the Kanji
   // section's -- it holds kanji, not words.

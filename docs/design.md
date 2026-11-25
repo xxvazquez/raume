@@ -241,16 +241,6 @@ tone wherever it appears (a vocab heading, the *Jump to a table* list, Practice
 › Library, the Customize page). Card titles are sentence case throughout Settings
 and Help.
 
-- **Vocabulary opens on category squares**, as Reminders opens on its
-  lists: a white `--radius-card` tile per category on the ground, two across
-  on a phone and three wider, its glyph in a 32px circle on the category's
-  tile hue (top left), the number of tables in 15px regular secondary grey (top right; a quiet aside, not a headline) and
-  the name in 14px secondary grey under them — the count leads, the name
-  labels it, neither shouts. A square pushes that category's screen —
-  "‹ Vocabulary" over its title (a large title on a phone, the 22px page
-  title on desktop and tablet, where the reference otherwise has none), then
-  the category's tables as below, without the category header the title
-  now says. Grammar and Kanji, one category each, have no squares.
 - **The reference pages are an iOS inset-grouped list.** One grey ground
   (`--group-ground`) behind the page and white `--radius-card` cards sitting
   directly on it — no borders, no coloured
