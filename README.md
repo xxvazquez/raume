@@ -651,8 +651,11 @@ with reduced motion on, it's all a plain change of state.
   with や" in large kana, with the last word and its English.
 - Type in romaji and it turns into kana as you go, like a Japanese
   keyboard: `ya` → や, `shi` / `si` → し, a doubled consonant → っ
-  (`kitte`), `n'` or `nn` → ん (`onna` → おんな), `-` → ー. Kana or kanji
-  typed with a real Japanese keyboard work too. Return or ↑ answers.
+  (`kitte`), `n'` or `nn` → ん (`onna` → おんな), `-` → ー. A final `n`
+  shows as ん straight away and still turns into な etc. with the next
+  key. The あ | ア switch in the field picks hiragana or katakana
+  (`ko-hi-` → コーヒー). Kana or kanji typed with a real Japanese keyboard
+  work too. Return or ↑ answers.
 - Any word in the whole vocabulary counts, not just *Words from* — a few
   tables rarely have a word for every kana. *Words from* picks the first
   word and the hints. Readings are compared in hiragana, and ー as the vowel

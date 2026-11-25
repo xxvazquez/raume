@@ -2038,7 +2038,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var d = chainDictionary(), kr = window.RaumeStudy.kanaRomaji;
     var at, trail, used, score, missed, help, linkMissed, hinted, game = 0, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
     var total = p.links;
-    var field, msg, needEl, enEl, trailEl;
+    var field, msg, needEl, enEl, trailEl, kata = false, pendN = "", shownN = "";
     function last() { return trail[trail.length - 1]; }
     function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function render() {
@@ -2050,6 +2050,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<p class="fc-ss-count">Starts with</p><p class="fc-wc-kana" lang="ja"></p><p class="fc-wc-en"></p></div>' +
         '<form class="fc-wc-form" autocomplete="off"><input class="fc-wc-field" type="text" lang="ja" aria-label="The next word, in romaji or kana"' +
         ' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">' +
+        '<span class="fc-wc-script" role="group" aria-label="Type in">' +
+        '<button type="button" class="fc-wc-kana-btn" data-kata="0" lang="ja" aria-label="Hiragana" aria-pressed="' + !kata + '">あ</button>' +
+        '<button type="button" class="fc-wc-kana-btn" data-kata="1" lang="ja" aria-label="Katakana" aria-pressed="' + kata + '">ア</button></span>' +
         '<button type="submit" class="fc-wc-go" aria-label="Answer">' + SEND_ICON + "</button></form>" +
         '<p class="fc-wc-msg" aria-live="polite"></p>';
       field = boardEl.querySelector(".fc-wc-field");
@@ -2155,11 +2158,31 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var w = hinted || validWord();
       if (w) link(w, true);
     }
+    // Romaji at the end of the field turns into kana as it's typed, in the
+    // script the あ | ア switch picks. A trailing n shows as ん at once
+    // (the field never holds a stray letter) but is still an n to the next
+    // key, so "na" after it reads な.
     boardEl.addEventListener("input", function (e) {
       if (!e.target.classList.contains("fc-wc-field") || e.isComposing) return;
-      var conv = typedKana(false);
+      var v = field.value;
+      if (pendN && v.length > shownN.length && v.indexOf(shownN) === 0) v = shownN.slice(0, -1) + pendN + v.slice(shownN.length);
+      pendN = shownN = "";
+      var m = /^(.*?)([a-zA-Z'-]*)$/.exec(v), conv = kr.toKana(m[2], false), tail = /n+$/.exec(conv);
+      if (tail) { pendN = tail[0]; conv = conv.slice(0, -pendN.length) + "ん"; }
+      if (kata) conv = toKatakana(conv);
+      conv = m[1] + conv;
+      if (pendN) shownN = conv;
       if (conv !== field.value) field.value = conv;
     });
+    boardEl.addEventListener("click", function (e) {
+      var b = e.target.closest(".fc-wc-kana-btn");
+      if (!b) return;
+      kata = b.getAttribute("data-kata") === "1";
+      boardEl.querySelectorAll(".fc-wc-kana-btn").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      field.focus();
+    });
+    // Keep the keyboard up while switching script.
+    boardEl.addEventListener("mousedown", function (e) { if (e.target.closest(".fc-wc-kana-btn")) e.preventDefault(); });
     boardEl.addEventListener("submit", function (e) { e.preventDefault(); answer(); field.focus(); });
     boardEl.addEventListener("click", function (e) {
       var info = e.target.closest(".fc-wc-info"), pop = boardEl.querySelector(".fc-wc-rules");
@@ -3046,7 +3069,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
+    return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type, and あ | ア picks hiragana or katakana. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."

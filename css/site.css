@@ -4514,6 +4514,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong),
 .fc-oo-word:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong),
 .fc-ss-bucket:disabled:not(.fc-mt-right):not(.fc-mt-wrong):not(.fc-ss-was) { opacity: .45; }
+/* あ | ア: which kana romaji turns into -- a small segmented control in the
+   field, the selected segment on the section-tone wash. */
+.fc-wc-script { flex: none; display: flex; padding: 2px; border-radius: 18px; background: var(--seg-track); box-shadow: var(--control-lift); }
+.fc-wc-kana-btn {
+  appearance: none; border: 0; padding: 0; position: relative; width: 34px; height: 32px; border-radius: 16px;
+  background: transparent; color: var(--muted); font: 400 15px/1 var(--font-ui); cursor: pointer;
+}
+.fc-wc-kana-btn::after { content: ""; position: absolute; inset: -6px -2px; } /* 44pt hit area */
+.fc-wc-kana-btn[aria-pressed="true"] { background: var(--section-soft); color: var(--section-strong); font-weight: 600; }
+.fc-wc-kana-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; }
 .fc-oo-en:not([hidden]) { animation: fc-fb-rise .3s .1s ease-out both; }
 .fc-oo-reveal:not([hidden]), .fc-ls-word:not([hidden]), .fc-kt-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
 /* The question counter's number rolls up into place. */

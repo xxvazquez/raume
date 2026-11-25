@@ -4865,6 +4865,19 @@ async function main() {
     wcType("");
     return ok;
   })());
+  check("a trailing n shows as ん at once but still starts な with the next key; the ア segment types katakana", (() => {
+    wcType("shinbun");
+    const n = wcEl(".fc-wc-field").value === "しんぶん";
+    wcType("kon");
+    wcType(wcEl(".fc-wc-field").value + "a");
+    const na = wcEl(".fc-wc-field").value === "こな";
+    wcEl('.fc-wc-kana-btn[data-kata="1"]').click();
+    wcType("ko-hi-");
+    const kata = wcEl(".fc-wc-field").value === "コーヒー" && wcEl('.fc-wc-kana-btn[data-kata="1"]').getAttribute("aria-pressed") === "true";
+    wcEl('.fc-wc-kana-btn[data-kata="0"]').click();
+    wcType("");
+    return n && na && kata && wcEl('.fc-wc-kana-btn[data-kata="0"]').getAttribute("aria-pressed") === "true";
+  })());
   check("a word with the wrong first kana: \"Needs to start with …\", the field shakes", (() => {
     const wrong = wcDict.all.find(w => w.head !== wcStart.tail && /^[ぁ-ゖ]+$/.test(w.answer));
     wcType(window.RaumeStudy.kanaRomaji.toRomaji(wrong.answer));
