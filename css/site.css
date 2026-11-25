@@ -2278,7 +2278,7 @@ body.tpick-open { overflow: hidden; }
 }
 .cv-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
 .cv-file-btn {
-  flex: 0 0 auto; font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
+  position: relative; flex: 0 0 auto; font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
   border: 0; border-radius: var(--radius-button); padding: 8px 12px; cursor: pointer;
 }
 .cv-file-btn:hover { background: var(--accent-soft); }
@@ -5499,6 +5499,10 @@ mark.fc-diff-co {
    Flashcards additions: Help tab, Manage status dots, and the Dashboard's
    Today / Next review / Missed today / Words to Review sections. All
    reuse the existing card, list and palette language.
+/* The hidden checkbox sits in its own row: with no positioned row it was
+   placed against the Words from sheet, so focusing a ticked table far down
+   the list scrolled the sheet's contents out of sight and the page with it. */
+.fc-kana-group, .fc-direction-check { position: relative; }
    --------------------------------------------------------------------- */
 
 /* Manage status indicator -- one glyph per row, computed from live card state. */
@@ -6165,6 +6169,14 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 /* New puzzle is its own button on a wide window, the menu's first item on
    a phone. */
 .section-menu-list .fc-xw-menu-new { display: none; }
+/* Too little room under the row: the menu opens over it instead
+   (placeMenu), its bottom 8px above row N's top. */
+@media (min-width: 641px) {
+  .fc-gs-words .fc-gs-menu-up { top: auto; bottom: calc(100% + 8px); }
+  .fc-gs-words .fc-gs-menu-at-1.fc-gs-menu-up { bottom: calc(100% - 36px); }
+  .fc-gs-words .fc-gs-menu-at-2.fc-gs-menu-up { bottom: calc(100% - 80px); }
+  .fc-gs-words .fc-gs-menu-at-3.fc-gs-menu-up { bottom: calc(100% - 124px); }
+}
 /* "Several tables…": the checklist as a glass popover under the toolbar
    (the reference pages' Options pattern); on a phone, a bottom sheet. */
 .fc-xw-sheet {

@@ -145,14 +145,14 @@ window.RaumeStudy.iconPicker = (function () {
     host.hidden = false;
     document.body.classList.add("icon-picker-open");
     var s = host.querySelector(".icon-picker-search");
-    if (s && !("ontouchstart" in window)) s.focus();
+    if (s && !("ontouchstart" in window)) s.focus({ preventScroll: true });
   }
   function close() {
     if (!host || host.hidden) return;
     host.hidden = true;
     document.body.classList.remove("icon-picker-open");
     onPick = null; onColor = null;
-    if (opener && opener.focus) opener.focus();
+    if (opener && opener.focus) opener.focus({ preventScroll: true });
     opener = null;
   }
   function finish(value) {

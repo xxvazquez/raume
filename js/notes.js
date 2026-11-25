@@ -1092,7 +1092,7 @@ window.RaumeStudy.notes = (function () {
     function close() {
       document.removeEventListener("keydown", onKey);
       host.remove();
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
@@ -1105,7 +1105,7 @@ window.RaumeStudy.notes = (function () {
       close();
       o.onConfirm(v);
     });
-    field.focus();
+    field.focus({ preventScroll: true });
     if (field.select && field.type === "text") field.select();
   }
 
@@ -1209,7 +1209,7 @@ window.RaumeStudy.notes = (function () {
     function close() {
       document.removeEventListener("keydown", onKey);
       host.remove();
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
@@ -1227,7 +1227,7 @@ window.RaumeStudy.notes = (function () {
         say("Couldn’t add the words — " + problem(err), true);
       });
     });
-    (go || host.querySelector(".ios-confirm-cancel")).focus();
+    (go || host.querySelector(".ios-confirm-cancel")).focus({ preventScroll: true });
   }
   // A one-line status under the note's title, without redrawing the note.
   function say(text, error) {
@@ -1263,7 +1263,7 @@ window.RaumeStudy.notes = (function () {
     function close() {
       document.removeEventListener("keydown", onKey);
       host.remove();
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
@@ -1276,7 +1276,7 @@ window.RaumeStudy.notes = (function () {
         pickFiles(true, function (files) { upload(files, mark); });
       });
     });
-    host.querySelector("[data-add-mark]").focus();
+    host.querySelector("[data-add-mark]").focus({ preventScroll: true });
   }
   function upload(files, source) {
     var u = user(), c = client();

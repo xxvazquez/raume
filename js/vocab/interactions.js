@@ -350,7 +350,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const views = window.RaumeStudy.flashcards && window.RaumeStudy.flashcards.views;
     if (views && views.refreshRowToggleButtons) views.refreshRowToggleButtons();
     kanjiOpener = tile;
-    sheet.querySelector('.ks-close').focus();
+    sheet.querySelector('.ks-close').focus({ preventScroll: true });
   }
   function closeKanjiSheet() {
     const sheet = document.getElementById('kanjiSheet'), scrim = document.getElementById('kanjiScrim');
@@ -360,7 +360,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     sheet.innerHTML = '';
     if (window.RaumeStudy.kanjiWrite) window.RaumeStudy.kanjiWrite.close();
     closeKanjiPop();
-    if (kanjiOpener && kanjiOpener.isConnected && !kanjiOpener.closest('[hidden]')) kanjiOpener.focus();
+    if (kanjiOpener && kanjiOpener.isConnected && !kanjiOpener.closest('[hidden]')) kanjiOpener.focus({ preventScroll: true });
     kanjiOpener = null;
   }
   vocab.closeKanjiSheet = closeKanjiSheet;
@@ -500,7 +500,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const views = window.RaumeStudy.flashcards && window.RaumeStudy.flashcards.views;
         if (views && views.refreshRowToggleButtons) views.refreshRowToggleButtons();
         const w = sheet.querySelector('.ks-write');
-        if (w) w.focus();
+        if (w) w.focus({ preventScroll: true });
       });
       return;
     }
@@ -1656,7 +1656,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!open) return;
       const btn = open.parentElement.querySelector('.section-menu-btn, .print-menu-btn');
       closeSectionMenus();
-      if (btn) btn.focus();
+      if (btn) btn.focus({ preventScroll: true });
     });
 
     // Top navigation -- rendered once by render.js, never rebuilt.
@@ -1729,7 +1729,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.querySelector('.vocab-toolbar').classList.add('tindex-open');
       const items = tindexItems();
       const target = items.find(a => a.classList.contains('current')) || items[0];
-      if (target) requestAnimationFrame(() => target.focus());
+      if (target) requestAnimationFrame(() => target.focus({ preventScroll: true }));
     }
     if (tableIndex) {
       tableIndex.addEventListener('click', function (event) {
@@ -1747,7 +1747,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         closeTableIndexMenu();
         goToTable(link.dataset.target);
         const t = document.querySelector('.tindex-trigger');
-        if (t) t.focus();
+        if (t) t.focus({ preventScroll: true });
       });
       // Arrow-key navigation once the menu is open.
       tableIndex.addEventListener('keydown', function (event) {
@@ -1771,7 +1771,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (menu && !menu.hidden) {
         closeTableIndexMenu();
         const t = document.querySelector('.tindex-trigger');
-        if (t) t.focus();
+        if (t) t.focus({ preventScroll: true });
       }
     });
     vocab.syncTableIndexActive = function (forceId) {
@@ -1802,7 +1802,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         setExpandAll(!document.body.classList.contains('expand-all-mode'));
         closeOptionsSheet();
         const ob = document.getElementById('optionsBtn');
-        if (ob) ob.focus();
+        if (ob) ob.focus({ preventScroll: true });
       });
     }
 
@@ -1819,7 +1819,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         closeSectionMenus();
         setOptionsSheet(true);
         const rows = optionRows();
-        if (rows[0]) rows[0].focus();
+        if (rows[0]) rows[0].focus({ preventScroll: true });
       });
       document.getElementById('optionsScrim').addEventListener('click', closeOptionsSheet);
       optionsSheet.addEventListener('keydown', function (event) {
@@ -1838,7 +1838,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape' || !optionsSheetOpen()) return;
         closeOptionsSheet();
-        optionsBtn.focus();
+        optionsBtn.focus({ preventScroll: true });
       });
     }
 
@@ -1894,7 +1894,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!accountMenu) return;
       accountMenu.hidden = !open;
       if (accountToggle) accountToggle.setAttribute('aria-expanded', String(open));
-      if (open) { const first = accountMenu.querySelector('.account-menu-item'); if (first) first.focus(); }
+      if (open) { const first = accountMenu.querySelector('.account-menu-item'); if (first) first.focus({ preventScroll: true }); }
     }
     vocab.toggleAccountMenu = function () { setAccountMenu(!!accountMenu && accountMenu.hidden); };
     if (accountMenu) {
@@ -1926,7 +1926,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape' || accountMenu.hidden) return;
         setAccountMenu(false);
-        if (accountToggle) accountToggle.focus();
+        if (accountToggle) accountToggle.focus({ preventScroll: true });
       });
       // Crossing the phone width swaps which rows it shows; start fresh.
       if (phoneWidth && phoneWidth.addEventListener) phoneWidth.addEventListener('change', function () { setAccountMenu(false); });

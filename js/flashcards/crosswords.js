@@ -956,7 +956,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     document.getElementById("fcPauseResume").addEventListener("click", handlers.resume);
     document.getElementById("fcPauseRestart").addEventListener("click", handlers.restart);
     document.getElementById("fcPauseEnd").addEventListener("click", handlers.end);
-    document.getElementById("fcPauseResume").focus();
+    document.getElementById("fcPauseResume").focus({ preventScroll: true });
   }
   function hidePauseCard(boardEl) {
     boardEl.classList.remove("fc-mt-paused");
@@ -1273,7 +1273,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         missed.push(q.word);
         var nextBtn = boardEl.querySelector(".fc-ls-next");
         nextBtn.hidden = false;
-        nextBtn.focus();
+        nextBtn.focus({ preventScroll: true });
       }
     }
     function pause() {
@@ -1486,7 +1486,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       boardEl.querySelector(".fc-kt-reveal").hidden = true;
       var nextBtn = boardEl.querySelector(".fc-ls-next");
       nextBtn.hidden = false;
-      nextBtn.focus();
+      nextBtn.focus({ preventScroll: true });
     }
     var pendingNext = false;
     function next() {
@@ -1670,7 +1670,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         missed.push(oddWord);
         var nextBtn = boardEl.querySelector(".fc-ls-next");
         nextBtn.hidden = false;
-        nextBtn.focus();
+        nextBtn.focus({ preventScroll: true });
       }
     }
     function next() {
@@ -1871,7 +1871,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       en.classList.add("fc-ss-en-shown");
       var nextBtn = boardEl.querySelector(".fc-ls-next");
       nextBtn.hidden = false;
-      nextBtn.focus();
+      nextBtn.focus({ preventScroll: true });
       setTimeout(function () {
         if (thisGame !== game || thisAt !== at || !boardEl.isConnected || phase === "done") return;
         if (phase === "paused") pendingNext = true; else next();
@@ -2159,7 +2159,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         return;
       }
       showNeed();
-      field.focus();
+      field.focus({ preventScroll: true });
     }
     // One word that would carry on, Words from's first.
     function validWord() {
@@ -2187,7 +2187,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           (hinted.written !== hinted.answer ? ' <span lang="ja">(' + esc(hinted.answer) + ")</span>" : "") +
           " · " + esc(hinted.clue) + '</span> <span class="fc-wc-msg-more">— type it to go on</span>');
       }
-      field.focus();
+      field.focus({ preventScroll: true });
     }
     function skip() {
       if (locked || done || pausedAt !== null) return;
@@ -2215,11 +2215,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (!b) return;
       kata = b.getAttribute("data-kata") === "1";
       boardEl.querySelectorAll(".fc-wc-kana-btn").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
-      field.focus();
+      field.focus({ preventScroll: true });
     });
     // Keep the keyboard up while switching script.
     boardEl.addEventListener("mousedown", function (e) { if (e.target.closest(".fc-wc-kana-btn")) e.preventDefault(); });
-    boardEl.addEventListener("submit", function (e) { e.preventDefault(); answer(); field.focus(); });
+    boardEl.addEventListener("submit", function (e) { e.preventDefault(); answer(); field.focus({ preventScroll: true }); });
     boardEl.addEventListener("click", function (e) {
       var info = e.target.closest(".fc-wc-info"), pop = boardEl.querySelector(".fc-wc-rules");
       if (info) { pop.hidden = !pop.hidden; info.setAttribute("aria-expanded", String(!pop.hidden)); return; }
@@ -2262,7 +2262,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (done || pausedAt !== null || !boardEl.isConnected) return;
       pausedAt = Date.now();
       showPauseCard(boardEl, Math.min(at + 1, total) + " / " + total, score + " right so far", {
-        resume: function () { pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl); if (field) field.focus(); },
+        resume: function () { pausedMs += Date.now() - pausedAt; pausedAt = null; hidePauseCard(boardEl); if (field) field.focus({ preventScroll: true }); },
         restart: restart,
         end: endEarly
       });
@@ -2651,7 +2651,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         generate();
         rerender();
         var again = currentPanel && currentPanel.querySelector('.fc-gs-radio[value="' + state.mode + '"]');
-        if (again) again.focus();
+        if (again) again.focus({ preventScroll: true });
       });
     });
     document.getElementById("fcGsStart").addEventListener("click", function () {
@@ -3178,6 +3178,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // single-choice menu (openPick, gone with the re-render a pick does).
   // Opening one lands focus on what's picked; closing goes back to its row.
   var openPick = null, tablesQuery = "";
+  // A menu that won't fit under its row opens over it instead, as an iOS
+  // popover flips -- scrolling the page to show it moved the setup up, and
+  // it dropped back down when the menu closed. A phone's is a bottom sheet.
+  function placeMenu(menu, row) {
+    menu.classList.remove("fc-gs-menu-up");
+    if (!row || !window.matchMedia || window.matchMedia("(max-width: 640px)").matches) return;
+    var m = menu.getBoundingClientRect(), r = row.getBoundingClientRect();
+    if (m.bottom > window.innerHeight && r.top - m.height - 8 >= 0) menu.classList.add("fc-gs-menu-up");
+  }
   function setTablesOpen(panel, open) {
     if (open) closePick(panel, false);
     state.tablesOpen = open;
@@ -3186,13 +3195,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     sheet.hidden = !open;
     if (scrim) scrim.hidden = !open;
     if (src) src.setAttribute("aria-expanded", String(open));
+    // Focus never scrolls anything by itself (preventScroll): the list is
+    // brought to the ticked row by hand, so the sheet and the page stay put.
     if (open) {
+      placeMenu(sheet, src);
       if (sheet.scrollIntoView) sheet.scrollIntoView({ block: "nearest" });
-      var first = sheet.querySelector("#fcXwTablePicker input:checked");
-      if (first) first.focus();
+      var list = sheet.querySelector("#fcXwTablePicker"), first = list && list.querySelector("input:checked");
+      if (first) {
+        var row = first.closest("label") || first;
+        list.scrollTop = Math.max(0, row.offsetTop - list.offsetTop - (list.clientHeight - row.offsetHeight) / 2);
+        first.focus({ preventScroll: true });
+      }
     } else {
       filterTables(panel, "");
-      if (src) src.focus();
+      if (src) src.focus({ preventScroll: true });
     }
   }
   function openPickMenu(panel, name) {
@@ -3205,8 +3221,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var scrim = panel.querySelector(".fc-xw-scrim");
     if (scrim) scrim.hidden = false;
     if (row) row.setAttribute("aria-expanded", "true");
+    placeMenu(menu, row);
     if (menu.scrollIntoView) menu.scrollIntoView({ block: "nearest" });
-    (menu.querySelector('[aria-checked="true"]') || menu.querySelector(".fc-gs-opt")).focus();
+    (menu.querySelector('[aria-checked="true"]') || menu.querySelector(".fc-gs-opt")).focus({ preventScroll: true });
   }
   function closePick(panel, refocus) {
     if (!openPick) return;
@@ -3216,7 +3233,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var scrim = panel.querySelector(".fc-xw-scrim");
     if (menu) menu.hidden = true;
     if (scrim && !state.tablesOpen) scrim.hidden = true;
-    if (row) { row.setAttribute("aria-expanded", "false"); if (refocus) row.focus(); }
+    if (row) { row.setAttribute("aria-expanded", "false"); if (refocus) row.focus({ preventScroll: true }); }
   }
   // Search narrows the checklist as you type: a table shows when its name
   // (or its category's) has the words; a category with none left hides.
@@ -3359,7 +3376,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         generate();
         rerender();
         var again = currentPanel && currentPanel.querySelector('.fc-gs-pick[data-pick="' + key + '"]');
-        if (again) again.focus();
+        if (again) again.focus({ preventScroll: true });
       });
     });
     var src = panel.querySelector("#fcXwSource");

@@ -275,7 +275,7 @@ window.RaumeStudy.kanjiWrite = (function () {
     st = { sheet: sheet, vocabId: vocabId, ch: ch, strokes: strokes, i: 0, misses: 0, onStroke: 0, outline: outlinePref(), onBack: onBack };
     render();
     var back = sheet.querySelector(".kw-back");
-    if (back) back.focus();
+    if (back) back.focus({ preventScroll: true });
     return true;
   }
   function isOpen() { return !!st; }

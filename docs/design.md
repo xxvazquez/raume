@@ -487,7 +487,13 @@ and Help.
     outside a verb table; the Expand / Print group while searching).
   - **Menus** (the table ⋯ menu): a glass popover (`--radius-menu`), items
     15px in 12px×14px rows separated by hairlines, label first and its glyph
-    trailing. The ⋯ trigger itself is a bare glyph.
+    trailing. The ⋯ trigger itself is a bare glyph. A popover with no room
+    under its row opens over it instead, as iOS's flip, rather than scrolling
+    the page to show it.
+  - **Nothing jumps.** Opening or closing a menu, sheet or popover, ticking a
+    row, or a re-render never scrolls the page: focus moves with
+    `preventScroll`, and a row hiding its checkbox is `position: relative`
+    so focusing that box can't scroll some outer container.
   - **Checkmark rows** (kana groups, study directions): the row is the tap
     target and a tick appears at the trailing edge. They sit in the Settings card
     model — the card has no side padding and clips its rows, so a row's hover /

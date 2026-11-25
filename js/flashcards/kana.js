@@ -356,7 +356,7 @@ window.RaumeStudy.flashcards.kana = (function () {
 
     syncReviewCard();
     var input = document.getElementById("fcKanaInput");
-    if (input && !session.checked) input.focus();
+    if (input && !session.checked) input.focus({ preventScroll: true });
   }
 
   // Reflect the current session state onto the live review-card shell. Returns
@@ -437,7 +437,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     if (session.index >= session.queue.length || !currentUnit()) return false;
     if (!syncReviewCard()) return false;
     var input = document.getElementById("fcKanaInput");
-    if (input) input.focus(); // within the rating click / keydown, so mobile honours it
+    if (input) input.focus({ preventScroll: true }); // within the rating click / keydown, so mobile honours it
     return true;
   }
 

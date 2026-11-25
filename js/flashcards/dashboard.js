@@ -712,13 +712,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     function close() {
       document.removeEventListener("keydown", onKey);
       host.remove();
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
     host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
     document.getElementById("fcMedalDone").addEventListener("click", close);
-    document.getElementById("fcMedalDone").focus();
+    document.getElementById("fcMedalDone").focus({ preventScroll: true });
   }
   document.addEventListener("click", function (event) {
     var medal = event.target.closest && event.target.closest("[data-award]");
@@ -1538,7 +1538,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
     syncReviewCard();
     var input = document.getElementById("fcAnswerInput");
-    if (input && !session.checked && !input.form.hidden) input.focus();
+    if (input && !session.checked && !input.form.hidden) input.focus({ preventScroll: true });
   }
 
   // Reflect the current session state onto the live review-card shell. Returns
@@ -1724,7 +1724,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!syncReviewCard()) return false;
     var input = document.getElementById("fcAnswerInput");
     // within the rating click / keydown, so mobile honours it; a writing card has no field
-    if (input && !input.form.hidden) input.focus();
+    if (input && !input.form.hidden) input.focus({ preventScroll: true });
     return true;
   }
 

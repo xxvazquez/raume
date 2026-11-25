@@ -283,7 +283,7 @@ window.RaumeStudy.customize = (function () {
       document.removeEventListener("keydown", onKey);
       root.remove();
       document.body.classList.remove("tpick-open");
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function pick(id) {
       cvTarget[kind] = id;
@@ -322,7 +322,7 @@ window.RaumeStudy.customize = (function () {
     var cur = body.querySelectorAll('.tpick-row[aria-current="true"]');
     if (cur.length && cur[cur.length - 1].scrollIntoView) cur[cur.length - 1].scrollIntoView({ block: "center" });
     if (window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) search.focus();
-    else root.querySelector(".tpick-sheet").focus();
+    else root.querySelector(".tpick-sheet").focus({ preventScroll: true });
   }
 
   // In-place edit form for one custom-vocab row, same single-line format as
@@ -1028,7 +1028,7 @@ window.RaumeStudy.customize = (function () {
     if (!wired) { wire(host); wired = true; }
     if (pendingFocus) {
       var el = host.querySelector(pendingFocus);
-      if (el) el.focus();
+      if (el) el.focus({ preventScroll: true });
       pendingFocus = null;
     }
   }

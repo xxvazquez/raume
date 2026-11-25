@@ -232,14 +232,14 @@ window.RaumeStudy.shared = (function () {
     function close() {
       document.removeEventListener("keydown", onKey);
       host.remove();
-      if (opener && opener.focus && document.contains(opener)) opener.focus();
+      if (opener && opener.focus && document.contains(opener)) opener.focus({ preventScroll: true });
     }
     function onKey(e) { if (e.key === "Escape") close(); }
     document.addEventListener("keydown", onKey);
     host.querySelector(".ios-confirm-scrim").addEventListener("click", close);
     document.getElementById("iosConfirmCancel").addEventListener("click", close);
     document.getElementById("iosConfirmGo").addEventListener("click", function () { close(); o.onConfirm(); });
-    document.getElementById("iosConfirmCancel").focus();
+    document.getElementById("iosConfirmCancel").focus({ preventScroll: true });
   }
 
   // Undo, as in Mail: a small glass capsule near the bottom after an action
