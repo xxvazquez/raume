@@ -22,7 +22,9 @@ window.RaumeStudy.customVocab = (function () {
 
   var GUEST_KEY = "raume-custom-vocab-guest-v1";
   var CACHE_KEY = "raume-custom-vocab-cache-v1";
-  var DEFAULT_CATEGORY = "My vocabulary";
+  // Only for a stored table that somehow has no category -- every table is
+  // filed under a category its owner picked.
+  var DEFAULT_CATEGORY = "Other";
 
   // A kanji (CJK ideograph) plus the iteration marks that behave like one
   // inside a word (時々 -> ときどき is a single run).
@@ -285,12 +287,23 @@ window.RaumeStudy.customVocab = (function () {
   }
   function addRow(tableId, parsed) { return addRows(tableId, [parsed])[0]; }
 
+  // A category is a square inside a section, so it needs a name and can't
+  // take a section's own -- a "Vocabulary" square on the Vocabulary page
+  // reads as two names for one idea.
+  var SECTION_NAMES = { vocabulary: 1, grammar: 0, kanji: 1, "n5 kanji": 1, notes: 1, practice: 1 };
+  function cleanCategory(category) {
+    var c = String(category || "").trim().slice(0, 60);
+    if (!c) throw new Error("Choose a category for this table.");
+    if (SECTION_NAMES[c.toLowerCase()]) throw new Error("“" + c + "” is the name of a page. Give the category another name.");
+    return c;
+  }
+
   function createTable(title, category) {
     if (!isSignedIn()) throw new Error("Sign in on the Practice page to create your own tables.");
     var t = {
       id: "ct-" + uuid(),
       title: String(title || "").trim().slice(0, 60) || "Untitled table",
-      category: String(category || "").trim().slice(0, 60) || DEFAULT_CATEGORY,
+      category: cleanCategory(category),
       sort: nextSort()
     };
     load().tables.push(t);
@@ -305,7 +318,7 @@ window.RaumeStudy.customVocab = (function () {
   function setTableCategory(id, category) {
     var t = load().tables.filter(function (x) { return x.id === id; })[0];
     if (!t) throw new Error("That table no longer exists.");
-    var next = String(category || "").trim().slice(0, 60) || DEFAULT_CATEGORY;
+    var next = cleanCategory(category);
     if (next === t.category) return t;
     t.category = next;
     persist();

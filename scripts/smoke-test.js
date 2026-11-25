@@ -2114,7 +2114,7 @@ async function main() {
     const groups = sel ? [...sel.querySelectorAll("optgroup")].map(g => g.label) : [];
     const opts = sel ? [...sel.options].map(o => o.value) : [];
     return !!sel && groups.join() === "Vocabulary,Grammar" && opts.includes("Around Town") && opts.includes("Grammar")
-      && opts.includes("__new") && !opts.includes("N5 Kanji") && sel.value === "My vocabulary"
+      && opts.includes("__new") && !opts.includes("N5 Kanji") && sel.value === "" && !opts.includes("My vocabulary")
       && sel.closest(".cv-cat-field").nextElementSibling.hidden;
   })());
   {
@@ -2124,6 +2124,13 @@ async function main() {
     check("...New category… opens a name field", !sel.closest(".cv-cat-field").nextElementSibling.hidden);
     sel.value = "Grammar";
     sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+  }
+  {
+    const sel = document.querySelector("#customizePage select.cv-new-cat");
+    sel.value = ""; sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    document.querySelector("#customizePage .cv-new-btn").click();
+    check("...Create table without a category makes nothing (Choose… asks for one)", !cvNs.customTables().some(t => t.title === "Positions"));
+    sel.value = "Grammar"; sel.dispatchEvent(new window.Event("change", { bubbles: true }));
   }
   document.querySelector("#customizePage .cv-new-btn").click();
   const newTable = cvNs.customTables().find(t => t.title === "Positions");
@@ -2140,6 +2147,14 @@ async function main() {
     nameField.value = "Places";
     nameField.dispatchEvent(new window.Event("change", { bubbles: true }));
     check("...or under a new category typed in", cvNs.customTables().find(t => t.id === newTable.id).category === "Places");
+    catField().value = "__new";
+    catField().dispatchEvent(new window.Event("change", { bubbles: true }));
+    const nameField2 = catField().closest(".cv-cat-field").nextElementSibling.querySelector(".cv-cat-name");
+    const alerted = []; const realAlert = window.alert; window.alert = m => alerted.push(m);
+    nameField2.value = "vocabulary";
+    nameField2.dispatchEvent(new window.Event("change", { bubbles: true }));
+    window.alert = realAlert;
+    check("...but not a page's own name (Vocabulary): it says so and keeps the table where it was", cvNs.customTables().find(t => t.id === newTable.id).category === "Places" && /name of a page/.test(alerted[0] || ""));
     catField().value = "Grammar";
     catField().dispatchEvent(new window.Event("change", { bubbles: true }));
   }

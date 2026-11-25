@@ -428,15 +428,14 @@ window.RaumeStudy.customize = (function () {
       var c = t.category;
       if (c && c !== "N5 Kanji" && c !== "Grammar" && !seen[c]) { seen[c] = true; names.push(c); }
     });
-    var def = cv() ? cv().DEFAULT_CATEGORY : "My vocabulary";
-    if (!seen[def]) names.push(def);
     return names.sort(function (a, b) { return a.localeCompare(b); });
   }
   function categoryFieldHtml(cls, current, tableId) {
-    var cur = current || (cv() ? cv().DEFAULT_CATEGORY : "My vocabulary");
+    var cur = current || "";
     var opt = function (n) { return '<option value="' + esc(n) + '"' + (n === cur ? " selected" : "") + ">" + esc(n) + "</option>"; };
     return '<label class="cv-field cv-cat-field' + (tableId != null ? " cv-table-cat" : "") + '"><span>Category</span>' +
       '<span class="cv-select"><select class="' + cls + '"' + (tableId != null ? ' data-table="' + esc(tableId) + '"' : "") + ">" +
+      (cur ? "" : '<option value="" disabled selected>Choose…</option>') +
       '<optgroup label="Vocabulary">' + categoryNames().map(opt).join("") + "</optgroup>" +
       '<optgroup label="Grammar">' + opt("Grammar") + "</optgroup>" +
       '<option value="' + NEW_CAT + '">New category…</option>' +
@@ -943,7 +942,7 @@ window.RaumeStudy.customize = (function () {
     var catf = host.querySelector(".cv-new-cat");
     if (!title || !title.value.trim()) { if (title) title.focus(); return; }
     var name = title.value, category = catf ? categoryValue(catf) : "";
-    if (catf && catf.value === NEW_CAT && !category) { catf.closest(".cv-cat-field").nextElementSibling.querySelector("input").focus(); return; }
+    if (catf && !category) { (catf.value === NEW_CAT ? catf.closest(".cv-cat-field").nextElementSibling.querySelector("input") : catf).focus(); return; }
     cvMutate(host, function () {
       try {
         // The new table becomes where Add a word / Import put things next
