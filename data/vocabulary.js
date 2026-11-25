@@ -865,21 +865,6 @@ window.RaumeStudy.data = { vocabularyTables: [
     ]
   },
   {
-    id: 61,
-    title: "Verb Forms",
-    category: "Grammar",
-    tableClass: "vocab-sentences",
-    rows: [
-    {"id":"v1096","type":"word","jp":[{"text":"まいにち、コーヒー"},{"p":"を"},{"kanji":"飲","reading":"の"},{"text":"みます。"}],"romaji":"Mainichi kōhī o nomimasu.","english":"I drink coffee every day.","pattern":"〜ます: polite present — what you do, or will do"},
-    {"id":"v1097","type":"word","jp":[{"text":"にく"},{"p":"は"},{"kanji":"食","reading":"た"},{"text":"べません。"}],"romaji":"Niku wa tabemasen.","english":"I don't eat meat.","pattern":"〜ません: polite negative — ます becomes ません"},
-    {"id":"v1098","type":"word","jp":[{"text":"きのう、えいが"},{"p":"を"},{"kanji":"見","reading":"み"},{"text":"ました。"}],"romaji":"Kinō, eiga o mimashita.","english":"I watched a movie yesterday.","pattern":"〜ました: polite past — ます becomes ました"},
-    {"id":"v1099","type":"word","jp":[{"kanji":"先週","reading":"せんしゅう"},{"p":"は"},{"kanji":"学校","reading":"がっこう"},{"p":"に"},{"kanji":"行","reading":"い"},{"text":"きませんでした。"}],"romaji":"Senshū wa gakkō ni ikimasen deshita.","english":"I didn't go to school last week.","pattern":"〜ませんでした: polite past negative — ます becomes ませんでした"},
-    {"id":"v1100","type":"word","jp":[{"text":"ちょっとまってください。"}],"romaji":"Chotto matte kudasai.","english":"Please wait a moment.","pattern":"〜てください: please do — the て-form + ください"},
-    {"id":"v1101","type":"word","jp":[{"kanji":"今","reading":"いま"},{"text":"、"},{"kanji":"本","reading":"ほん"},{"p":"を"},{"kanji":"読","reading":"よ"},{"text":"んでいます。"}],"romaji":"Ima, hon o yonde imasu.","english":"I'm reading a book now.","pattern":"〜ています: doing it right now — the て-form + います"},
-    {"id":"v1102","type":"word","jp":[{"text":"あさごはん"},{"p":"を"},{"kanji":"食","reading":"た"},{"text":"べて、"},{"kanji":"学校","reading":"がっこう"},{"p":"に"},{"kanji":"行","reading":"い"},{"text":"きます。"}],"romaji":"Asagohan o tabete, gakkō ni ikimasu.","english":"I eat breakfast and go to school.","pattern":"〜て、〜: and then — the て-form joins actions in the order they happen"},
-    ]
-  },
-  {
     id: 34,
     title: "Family",
     ordered: true,
