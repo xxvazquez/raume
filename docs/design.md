@@ -1133,7 +1133,8 @@ watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid
 and the lists below. Wide, the lists share their row with a **notes pad**
 (`.fc-xw-notes`): a "Notes" list header over a plain white `--radius-card`
-textarea as tall as the list, no border, no Save, section-tone caret — the
+textarea a fixed 320px tall (a pad stretched down a 20-row list was one
+blank slab), no border, no Save, section-tone caret — the
 free space beside a short word list rather than an over-wide one (a word
 search's list is held to 300px); where it wraps under the lists it spans
 their full width, edges aligned. It belongs to the puzzle (blank on New
@@ -1153,14 +1154,20 @@ tinted.
 A **word search** swaps Check for a quiet "3 / 15" count — Listening's
 format, short enough for a phone's action row; "3 of 15 words found" for a
 screen reader — (sage once all are found) and draws no cell lines — a lined grid reads as a crossword.
-The letters sit in one white card (`--radius-card`), 34px squares shrinking
-with the row so a 40-word block fits a phone, romaji set in capitals. A found
+The letters sit in one white card (`--radius-card`, 12px inset), 44px
+squares (a full touch target; 20px letters, 18px on a phone) shrinking with
+the row so a 40-word block fits a phone — past ten columns 38px squares and
+smaller letters — romaji set in capitals. Wide, the grid shares one row with
+the list, its card dropped by a list header's height so the two cards' tops
+line up. A found
 word is a soft `--accent` capsule under its letters (SVG lines in cell units,
 so no inline style); the line being dragged is the section tone, a tapped
 first letter a round section-tone fill, and a line that spells nothing gives
 a small shake (none under reduced motion). The list is one inset-grouped
-card headed "Find the Japanese for": the clue, and once found a sage tick
-before it and the reading in grey after it.
+card headed "Find the Japanese for", 44px rows with the hairline inset to
+the text: the English leading, and once found the reading in grey as the
+trailing value and a sage checkmark after it (its slot always held, so
+nothing shifts).
 
 **Match** swaps Check for a quiet tabular clock ("0:12.3", sage when done) —
 with, after each round once a best on the same words exists, a small tabular

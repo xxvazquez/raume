@@ -534,7 +534,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         return '<span class="fc-ws-cell" role="gridcell" tabindex="' + (r === 0 && c === 0 ? "0" : "-1") + '" data-r="' + r + '" data-c="' + c + '">' + esc(ch) + "</span>";
       }).join("") + "</div>";
     }).join("");
-    return '<div class="fc-ws-grid' + (romajiMode ? " fc-ws-romaji" : "") + '" role="grid" aria-label="Word search"' + (romajiMode ? "" : ' lang="ja"') + ">" +
+    // Past ten columns the letters step down a size, so a big grid still
+    // reads as letters rather than a solid block.
+    return '<div class="fc-ws-grid' + (romajiMode ? " fc-ws-romaji" : "") + (p.cols > 10 ? " fc-ws-dense" : "") + '" role="grid" aria-label="Word search"' + (romajiMode ? "" : ' lang="ja"') + ">" +
       '<svg class="fc-ws-marks" viewBox="0 0 ' + p.cols + " " + p.rows + '" preserveAspectRatio="none" aria-hidden="true"></svg>' +
       rows + "</div>";
   }
@@ -546,8 +548,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         var entry = vocabIndex()[pl.id];
         var reading = entry ? String(entry.jpReading || "").replace(/^〜/, "").trim() : "";
         var shown = /[一-龯々]/.test(pl.answer) && reading ? pl.answer + "（" + reading + "）" : pl.answer;
-        return '<li data-i="' + i + '"><span class="fc-ws-tick">' + TICK_ICON + '</span><span class="fc-ws-clue">' + esc(pl.clue) +
-          '</span><span class="fc-ws-answer"' + (/^[a-z]/.test(pl.answer) ? "" : ' lang="ja"') + " hidden>" + esc(shown) + "</span></li>";
+        // iOS list row: the English leading; once found, the Japanese as the
+        // trailing value and a checkmark after it.
+        return '<li data-i="' + i + '"><span class="fc-ws-clue">' + esc(pl.clue) +
+          '</span><span class="fc-ws-answer"' + (/^[a-z]/.test(pl.answer) ? "" : ' lang="ja"') + " hidden>" + esc(shown) + "</span>" +
+          '<span class="fc-ws-tick">' + TICK_ICON + "</span></li>";
       }).join("") + "</ol></div></div>";
   }
 
@@ -2363,7 +2368,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // fits there at full cell size. Otherwise the puzzle stacks (clues below,
   // grid across the whole width) rather than pushing the page sideways.
   // Sizes match .fc-xw-cell / .fc-ws-cell and the 260px + 24px clue column.
-  var GRID_CELL = 40, WS_CELL = 34, SIDE_COLUMN = 284;
+  var GRID_CELL = 40, WS_CELL = 44, WS_CELL_DENSE = 38, SIDE_COLUMN = 284;
   function fitPuzzle() {
     var el = document.querySelector(".fc-xw-puzzle[data-natural]");
     if (!el || !el.clientWidth) return;
@@ -3577,8 +3582,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     panel.innerHTML =
       toolbarHtml() +
       (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
-      '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") +
-      '" data-natural="' + (wordsearch ? p.cols * WS_CELL + 16 : p.cols * GRID_CELL) + '">' +
+      '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + (wordsearch ? " fc-xw-puzzle-ws" : "") +
+      '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * GRID_CELL) + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch
