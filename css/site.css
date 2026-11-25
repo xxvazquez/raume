@@ -228,7 +228,7 @@
   --fs-section-title: calc(19px * var(--dt));
   --fs-nav: calc(14px * var(--dt));
   --fs-nav-sub: calc(13px * var(--dt));
-  --fs-jp: calc(18.5px * var(--dt));
+  --fs-jp: calc(16px * var(--dt));
   --fs-romaji: calc(11.5px * var(--dt));
   --fs-english: calc(13.5px * var(--dt));
   --fs-small: calc(13px * var(--dt));
@@ -2784,9 +2784,9 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
    row's hairline, matching the space under the English. */
 .vocab.vocab-sentences td.jp {
   padding: 20px 14px 2px 14px;
-  /* 18px, not 16: at 16 a reading like わたし is wider than 私は, so the
+  /* 17px, not 16: at 16 a reading like わたし is wider than 私は, so the
      no-touching-readings rule pushed gaps into sentences (私 は, 私 の). */
-  white-space: normal; overflow-wrap: anywhere; font-size: 18px;
+  white-space: normal; overflow-wrap: anywhere; font-size: 17px;
   /* Tighter than the old 2 -- the furigana overhangs (below) instead of
      needing a whole extra line of air. */
   line-height: 1.9;
@@ -3579,7 +3579,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
      in the column's 36% share; Meaning steps down too (English phrases
      wrap). The base 36/64 split already gives Meaning enough room now that
      romaji isn't a column fighting it for width. */
-  .vocab td.jp { font-size: calc(16px * var(--dt)); }
+  .vocab td.jp { font-size: calc(15px * var(--dt)); }
   .vocab td:nth-child(2) { font-size: calc(12.5px * var(--dt)); }
 }
 
