@@ -329,7 +329,7 @@ def words(items):
         _note_listed(jp, "the lesson's words")
         if re.search(r"\s|\[|[,，]", jp) or re.search(f"(?<![{KANJI}])[(（]", jp):
             _problems.append(f"{jp}: a word for its table is one word -- no spaces, particles or (な)")
-        _words.append((jp.replace("（", "(").replace("）", ")"), ro.lower(), en.replace(" · ", " / ")))
+        _words.append((jp.replace("（", "(").replace("）", ")"), ro.lower(), en.replace(" · ", ", ")))
 
 
 def _known_words():

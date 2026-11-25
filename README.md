@@ -327,8 +327,8 @@ their cards then.
 - Several right answers typed together count — `grandfather, old man`,
   `yon / shi` — and a word with two readings (四: *yon / shi*) accepts either
   one alone.
-- A meaning written as a list (*job, work* or *he; boyfriend*) takes any one
-  of them alone. Commas inside brackets or a number (*1,000*) and in
+- A word's meanings are always a comma list (*job, work*), never split by
+  / or ;, and any one of them alone is right. Commas inside brackets or a number (*1,000*) and in
   sentences stay part of the answer. A meaning's `~` placeholder is never
   typed: *that ~* takes `that`, and a verb's "to" is optional: *to eat* takes `eat`.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts

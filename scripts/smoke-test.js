@@ -1340,7 +1340,7 @@ async function main() {
     const found = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden) .meaning-text')].map(m => m.textContent.trim());
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return /^(4|four)$/.test(found[0] || "") && found.indexOf("lamb / mutton") > 0;
+    return /^(4|four)$/.test(found[0] || "") && found.indexOf("lamb, mutton") > 0;
   })());
   check("a reading split over furigana and okurigana is tinted across both (ookii -> おお + きい on 大きい)", (() => {
     const input = document.getElementById("tableSearch");
@@ -5333,7 +5333,7 @@ async function main() {
       && fc.otherWordHint(easy, "en-ro", "takai") === ""
       && fc.otherWordHint(easy, "jp-ro", "kantan") === "";
   })());
-  const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "to hear / to listen / to ask");
+  const listenEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "to hear, to listen, to ask");
   check("multi-answer English fields accept any listed alternative", !!listenEntry && fc.checkAnswer(listenEntry, "jp-en", "listen") && fc.checkAnswer(listenEntry, "jp-en", "ask"));
   check("multi-answer English fields still reject an unlisted word", !fc.checkAnswer(listenEntry, "jp-en", "speak"));
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");
@@ -5359,7 +5359,7 @@ async function main() {
     const prompt = fc.promptFor(beerEntry, "jp-en");
     return prompt.lang === "ja" && /class="jp-speak-btn" data-jp-speak="[^"]+"/.test(prompt.html);
   })());
-  const particleEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "topic / contrast");
+  const particleEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "topic, contrast");
   check("a particle entry's flashcard prompt carries the blue/bold .particle span", () =>
     !!particleEntry && /<span class="particle"[^>]*>は<\/span>/.test(fc.promptFor(particleEntry, "jp-en").html));
   const verbPairEntry = Object.values(vocabIndex).find(e => (e.romajiDisplay || "").includes(" / "));
