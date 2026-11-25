@@ -21,6 +21,10 @@ Every note has the same shape, so lessons read alike side by side:
   Japanese line has furigana, and every romaji line spells its Japanese
   (particles as wa / e / o, long vowels as ō or ou). It stops with a list of
   what to fix. stack(..., check=False) skips one line on purpose.
+- A class note -- render(..., source="sakura" or "wsjj") -- has no word
+  lists: the lesson's words go in words(), and render() writes them to a
+  .csv beside the note for that class's vocabulary table (Customize ›
+  Import a list). See words().
 
 Notes are Japanese and English only -- never Polish: class material that
 arrives with Polish glosses or translations keeps just the English.
@@ -292,6 +296,7 @@ def tiles(items, n=4, az=False):
     if az:
         items = sorted(items, key=lambda it: az_key(it[2]))
     where = re.sub(r"<[^>]+>", "", items[0][1]) if items else ""
+    _tiles_used.append(where)
     for it in items:
         _note_listed(it[1], f"the list starting {where}")
     out = []
@@ -299,6 +304,67 @@ def tiles(items, n=4, az=False):
         icon = f'<div class="rn-ic" aria-hidden="true">{it[0]}</div>' if it[0] else ""
         out.append(f'<div class="rn-tile">{icon}{stack(*it[1:], ans=True)}</div>')
     return f'<div class="rn-tiles rn-c{n}">' + "".join(out) + "</div>"
+
+
+# A class note (Sakura, WSJJ) holds the lesson -- patterns, rules, practice
+# -- and no word lists: its words go to that class's vocabulary table.
+# words() takes them without drawing anything, and render(source=...) writes
+# them to <date>.<source>.csv in raume's Import a list format
+# (japanese(furigana),romaji,english). Sakura's table is the reader's own, so
+# it gets every word of the lesson, even ones raume already has; WSJJ's is a
+# reference table, so it gets only the words raume doesn't have yet. Either
+# way a word already sent by an earlier note of the same class is left out.
+SOURCES = ("sakura", "wsjj")
+_words = []
+_tiles_used = []
+
+
+def words(items):
+    """items: [(jp, romaji, english)] -- the lesson's vocabulary, one word
+    each, Japanese written as in a word list (漢字(かんじ), no particles).
+    Nothing shows in the note."""
+    for jp, ro, en in items:
+        _check(jp_markup(jp), ro)
+        _note_listed(jp, "the lesson's words")
+        if re.search(r"\s|\[|[,，]", jp) or re.search(f"(?<![{KANJI}])[(（]", jp):
+            _problems.append(f"{jp}: a word for its table is one word -- no spaces, particles or (な)")
+        _words.append((jp.replace("（", "(").replace("）", ")"), ro.lower(), en.replace(" · ", " / ")))
+
+
+def _known_words():
+    """raume's own words, as 漢字(かんじ) spellings and as kana readings."""
+    import json
+    spelt, read = set(), set()
+    src = (pathlib.Path(__file__).resolve().parents[1] / "data" / "vocabulary.js").read_text(encoding="utf-8")
+    for line in src.splitlines():
+        line = line.strip().rstrip(",")
+        if not line.startswith('{"id"'):
+            continue
+        row = json.loads(line)
+        if row.get("type") != "word":
+            continue
+        segs = row.get("jp") or []
+        spelt.add("".join(f"{s['kanji']}({s['reading']})" if "kanji" in s else s.get("text", "") for s in segs))
+        read.add("".join(s.get("reading") or s.get("text", "") for s in segs))
+    return spelt, read
+
+
+def _write_words(out_html, date, source):
+    out_dir = pathlib.Path(out_html).parent
+    sent = set()
+    for f in out_dir.glob(f"*.{source}.csv"):
+        if f.name.split(".")[0] < date:
+            sent.update(line.split(",")[0] for line in f.read_text(encoding="utf-8").splitlines()[1:])
+    spelt, read = _known_words() if source == "wsjj" else (set(), set())
+    rows = []
+    for jp, ro, en in _words:
+        kana = _FURIGANA_RE.sub(lambda m: m.group(2), jp)
+        if jp in sent or jp in spelt or (source == "wsjj" and kana in read):
+            continue
+        rows.append(f"{jp},{ro},{en}")
+    out = out_dir / f"{pathlib.Path(out_html).stem}.{source}.csv"
+    out.write_text("japanese,romaji,english\n" + "".join(x + "\n" for x in rows), encoding="utf-8")
+    print(f"{len(rows)} of {len(_words)} words -> {out.name}")
 
 
 def tip(mark, text, ex=None):
@@ -427,13 +493,22 @@ def lesson_name(date):
     return f"{d:%a}, {d:%b} {n}{suffix} {d.year}"
 
 
-def render(out_html, date, title, desc, sections, eyebrow=None):
+def render(out_html, date, title, desc, sections, eyebrow=None, source=None):
     """date: the lesson's date, YYYY-MM-DD -- the Notes list is ordered by it.
     The note is named by its date ("Sat, Nov 21st 2026", or `eyebrow` if
     given): that is its title in raume and its row in the list; `title` is
     the lesson's topic, the heading over the description. sections: from
     section(), in any order -- they're put in OUTLINE order and numbered.
+    source: "sakura" or "wsjj" for a class note -- its words() go to the
+    class's table file (see words()) and it may not have word lists.
     Nothing is written while the Japanese check has problems."""
+    if source is not None and source not in SOURCES:
+        raise ValueError(f"render: source is one of {SOURCES} or None, not {source!r}")
+    if source:
+        _problems.extend(f"the word list starting {w} -- a class note has no word lists: move it into words()"
+                         for w in _tiles_used)
+    elif _words:
+        _problems.append("words() goes in a class note: render(..., source=\"sakura\" or \"wsjj\")")
     if _problems:
         raise SystemExit("Fix these before the note is written:\n" + "\n".join("  - " + x for x in _problems))
     order = {k: i for i, (k, _, _) in enumerate(OUTLINE)}
@@ -458,4 +533,6 @@ def render(out_html, date, title, desc, sections, eyebrow=None):
 </html>
 """
     pathlib.Path(out_html).write_text(page, encoding="utf-8")
+    if source:
+        _write_words(out_html, date, source)
     return page
