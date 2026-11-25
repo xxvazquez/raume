@@ -1062,7 +1062,7 @@ async function main() {
     const phoneRules = allCssRules.filter(r => r.media && /max-width:\s*640px/.test(r.media.mediaText)).flatMap(r => [...r.cssRules]);
     const phone = phoneRules.some(x => x.selectorText === ".site-nav" && x.style.position === "fixed" && x.style.borderRadius === "999px")
       && phoneRules.some(x => x.selectorText === ".site-nav" && /blur/.test(x.style.backdropFilter || x.style.getPropertyValue("-webkit-backdrop-filter")))
-      && phoneRules.some(x => x.selectorText === ".site-nav-link.active" && /color-mix/.test(x.style.background))
+      && phoneRules.some(x => x.selectorText === ".site-nav-link.active" && /--tab-select|color-mix/.test(x.style.background))
       && phoneRules.some(x => x.selectorText === ".site-nav-link" && x.style.borderRadius === "999px");
     return !!base && base.style.position === "sticky" && !!phone
       && /viewport-fit=cover/.test(document.querySelector('meta[name="viewport"]').content);
@@ -1442,7 +1442,8 @@ async function main() {
   console.log("Phone account menu (one masthead button on a phone)");
   const acctMenu = document.getElementById("accountMenu");
   check("the account menu starts hidden and lists Sign in (a guest; Account once signed in) / Customize tables / Help / Support raume + an Appearance switch", !!acctMenu && acctMenu.hidden
-    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+    && [...acctMenu.querySelectorAll(".account-menu-item:not([hidden]):not([data-practice-only])")].map(b => b.textContent.replace(/[›↗]/, "").trim()).join("|") === "Sign in|Customize tables|Help|Support raume"
+    && ![...acctMenu.querySelectorAll("[data-menu-go]:not([data-menu-go=support])")].some(b => /›/.test(b.textContent))
     && acctMenu.querySelector('[data-menu-go="signout"]').hidden
     && acctMenu.querySelector('a[href="https://ko-fi.com/raume"]').rel === "noopener"
     && acctMenu.querySelectorAll("[data-theme-set]").length === 3);
@@ -2867,16 +2868,16 @@ async function main() {
     const legend = document.querySelector("#fcPanelDashboard .fc-breakdown-legend");
     return legend && /New/.test(legend.textContent) && /Learning/.test(legend.textContent) && /Review/.test(legend.textContent);
   })());
-  check("reviews this week: with no reviews it's one line, not an empty chart; otherwise today's column (only) is marked", (() => {
+  check("reviews this week: with no reviews there's no card at all; otherwise today's column (only) is marked", (() => {
     const cols = document.querySelectorAll("#fcPanelDashboard .fc-week-col");
-    if (document.querySelector("#fcPanelDashboard .fc-week-none")) return cols.length === 0;
+    const card = [...document.querySelectorAll("#fcPanelDashboard .fc-viz-card")].find(c => /Reviews this week/.test(c.textContent));
+    if (!card) return cols.length === 0;
     if (cols.length !== 7) return false;
     return cols[6].classList.contains("fc-week-col-today")
       && [...cols].slice(0, 6).every(c => !c.classList.contains("fc-week-col-today"));
   })());
-  check("the dashboard has a Due next 7 days card; with only new cards it says nothing is scheduled instead of drawing a flat chart", (() => {
-    const card = [...document.querySelectorAll("#fcPanelDashboard .fc-viz-card")].find(c => /Due next 7 days/.test(c.textContent));
-    return !!card && !!card.querySelector(".fc-due-none") && !card.querySelector(".fc-due-chart");
+  check("with only new cards there's no Due next 7 days card -- an empty chart is no news", (() => {
+    return ![...document.querySelectorAll("#fcPanelDashboard .fc-viz-card")].some(c => /Due next 7 days/.test(c.textContent));
   })());
   check("due forecast buckets cards by day: overdue folds into Today, later days and beyond 7 days are counted apart", (() => {
     const dash = window.RaumeStudy.flashcards.dashboard;
@@ -2967,10 +2968,11 @@ async function main() {
   console.log("Flashcards: Dashboard with cards but no review history");
   {
     const dash = document.querySelector("#fcPanelDashboard").textContent;
-    check("a zero-review week says so, not just a bare axis", /No reviews yet this week/.test(dash));
-    check("'Missed today' and 'Words to Review' fold into one line until there's history",
-      !document.getElementById("fcWordsToReview") && !/Missed today/.test(dash)
-      && /Words to review/.test(dash) && /Nothing to review yet/.test(dash));
+    check("a zero-review week shows no Reviews this week card, not a bare axis", !/Reviews this week/.test(dash));
+    check("'Missed today' and 'Words to Review' stay away until there's history",
+      !document.getElementById("fcWordsToReview") && !/Missed today/.test(dash) && !/Words to review/.test(dash));
+    check("Study now is the Dashboard's one filled button", document.querySelectorAll("#fcPanelDashboard .fc-btn-primary").length === 1
+      && !!document.querySelector("#fcPanelDashboard #fcStudyNow.fc-btn-primary"));
     check("the rings card always carries its line beside Study now", (() => {
       const line = document.querySelector("#fcPanelDashboard .fc-now-row .fc-rings-line");
       return !!line && line.textContent.trim().length > 0;
@@ -2979,7 +2981,7 @@ async function main() {
       const tile = [...document.querySelectorAll("#fcPanelDashboard .fc-stat-tile")]
         .find(t => /^Retention/.test(t.querySelector(".fc-stat-label").textContent));
       const val = tile && tile.querySelector(".fc-stat-value").textContent;
-      return tile && tile.classList.contains("fc-stat-tile-pending") && val !== "—" && /reviews/i.test(val);
+      return tile && tile.classList.contains("fc-stat-tile-pending") && val === "No data";
     })());
     check("the streak's yesterday is the calendar day before, even just after a clock change (not now minus 24 hours)", (() => {
       const st = window.RaumeStudy.flashcards.store;
@@ -3545,9 +3547,8 @@ async function main() {
     F.render();
     const panel = document.getElementById("fcPanelDashboard");
     const journey = panel.querySelector(".fc-dash-stats.fc-journey");
-    check("the journey card: Level 2 from 26 words mastered, 24 to the next, then Kana (of all 208 basic kana) / Kanji / Words and the three tiles",
-      !!journey && /^Level 2$/.test(journey.querySelector(".fc-journey-level").textContent)
-      && /^24 words to Level 3$/.test(journey.querySelector(".fc-journey-next").textContent)
+    check("the journey card: Kana (of all 208 basic kana) / Kanji / Words and the three tiles -- no invented Level",
+      !!journey && !journey.querySelector(".fc-journey-level") && !/Level/.test(journey.textContent)
       && [...journey.querySelectorAll(".fc-journey-lbl")].map(l => l.textContent).join("|") === "Kana started|Kanji known|Words mastered"
       && /^26\/30$/.test(journey.querySelectorAll(".fc-journey-val")[2].textContent)
       && /\/208$/.test(journey.querySelectorAll(".fc-journey-val")[0].textContent)
@@ -3569,8 +3570,8 @@ async function main() {
     Object.keys(c.cards).forEach(id => { c.cards[id].stability = 2; });
     fcStore.saveCache();
     F.render();
-    check("forgetting words never drops a level -- it counts words ever mastered",
-      /^Level 2$/.test(document.querySelector("#fcPanelDashboard .fc-journey-level").textContent)
+    check("forgetting words never takes back a word award -- the journey counts words ever mastered",
+      Object.keys(c.journey.mastered).length === 26 && !!c.journey.awards["words-25"]
       && /^0\/30$/.test(document.querySelectorAll("#fcPanelDashboard .fc-journey-val")[2].textContent));
     check("the journey merges as a union, the earlier day winning, and a backup keeps it", (() => {
       const m = fcStore.mergeJourney({ mastered: { a: "2026-02-01" }, awards: { x: "2026-03-01", bad: 7 } }, { mastered: { a: "2026-01-01", b: "2026-05-05" }, awards: { x: "2026-04-01" } });
@@ -5225,24 +5226,33 @@ async function main() {
       && document.getElementById("fcKanaRetention").value === "90"
       && document.getElementById("fcKanaNewPerDay").value === "15";
   })());
+  check("Settings numbers are pop-up rows (value + ⌃⌄ over a native picker), not bare typed fields", (() => {
+    const sel = document.getElementById("fcKanaMaxInterval");
+    const row = sel && sel.closest(".set-pick");
+    return sel.tagName === "SELECT" && !!row && !!row.querySelector(".fc-xw-updown")
+      && !document.querySelector("#fcPanelSettings input[type=number]")
+      && row.querySelector(".set-pick-val").textContent === "No limit";
+  })());
   document.getElementById("fcKanaRetention").value = "85";
-  document.getElementById("fcKanaNewPerDay").value = "3";
-  document.getElementById("fcKanaMaxInterval").value = "9999999"; // above the ceiling -> clamps to 36500
+  document.getElementById("fcKanaNewPerDay").value = "5";
+  document.getElementById("fcKanaMaxInterval").value = "365";
   fcChange(document.getElementById("fcKanaMaxInterval"));
   await flush();
-  if (storageUsable) check("the kana knobs persist to the kana cache, independent of the vocab knobs and clamped", (() => {
+  check("picking a value updates the row's shown value", document.getElementById("fcKanaMaxInterval").closest(".set-pick").querySelector(".set-pick-val").textContent === "1 year");
+  if (storageUsable) check("the kana knobs persist to the kana cache, independent of the vocab knobs", (() => {
     const f = (JSON.parse(readLocalStorage("raume-kana-v1") || "{}").fsrs) || {};
-    return f.fsrs_request_retention === 0.85 && f.new_per_day === 3 && f.fsrs_maximum_interval === 36500;
+    return f.fsrs_request_retention === 0.85 && f.new_per_day === 5 && f.fsrs_maximum_interval === 365;
   })());
   fcOpenPushed("settings");
-  check("the clamped kana values are reflected back into the fields", document.getElementById("fcKanaMaxInterval").value === "36500");
+  check("the saved kana values come back in the pickers", document.getElementById("fcKanaMaxInterval").value === "365");
   check("the Kana queue honours the new per-day cap", (() => {
     kh.setGroup("hira-gojuon", true);
     const q = kh.buildQueue(new Date());
-    return q.length > 0 && q.length <= 6; // 3 new + any leftover due/learning, vs 90+ uncapped
+    return q.length > 0 && q.length <= 8; // 5 new + any leftover due/learning, vs 90+ uncapped
   })());
   document.getElementById("fcKanaRetention").value = "90";
   document.getElementById("fcKanaNewPerDay").value = "15";
+  document.getElementById("fcKanaMaxInterval").value = "36500";
   fcChange(document.getElementById("fcKanaNewPerDay")); // restore defaults for later checks
   await flush();
 
@@ -5280,6 +5290,13 @@ async function main() {
   })());
 
   check("the Practice screen carries no \"Signed in as\" status line -- the account menu says it", !document.querySelector(".fc-signed-in-as"));
+  check("on Practice the account menu's Practice settings opens Settings (a phone's title bar keeps no buttons)", (() => {
+    document.getElementById("accountToggle").click();
+    document.querySelector('#accountMenu [data-menu-go="practice-settings"]').click();
+    const ok = !document.getElementById("fcPanelSettings").hidden && document.getElementById("accountMenu").hidden;
+    if (document.getElementById("fcBack")) document.getElementById("fcBack").click();
+    return ok;
+  })());
   check("on Practice the account menu's Help opens the Flashcards Help, not the reference one", (() => {
     document.getElementById("accountToggle").click();
     document.querySelector('#accountMenu [data-menu-go="help"]').click();

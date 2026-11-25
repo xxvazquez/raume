@@ -360,7 +360,8 @@ their cards then.
 ### Screens
 
 Five segments — Dashboard, Kana, Puzzles, Games, Library. **Settings** and **Help**
-sit at the top right, beside the title, and open as their own screen with a
+sit at the top right, beside the title (on a phone, in the account button's
+menu as **Practice settings** and **Help**), and open as their own screen with a
 **‹ Practice** back button. As in iOS, a screen like that slides in from the
 right and Back slides it away, returning you to where you were; a finished
 session's last card turns into the wrap-up. (Where the browser can't
@@ -374,8 +375,8 @@ animate it, or Reduce Motion is on, the screen simply changes.)
 | **Games** | Match / Listening / Kana tiles / Odd one out / Speed sort / Word chain from your words ([below](#games)) |
 | **Awards** | Every award, grouped Streaks / Reviews / Words / Kana / Kanji / Puzzles / Games — opened from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — opened from the setup screen's *Stats*, ⋯ › *Stats*, a finished game's **Stats** button, or a Dashboard card's **See stats** ([below](#stats)) |
-| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, or open it to add or pause single words — on a phone, swipe a word left for its Pause / Add / Restore, as in Mail (a long swipe does it at once) |
-| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. **App icon › Badge** (where the browser can show one — an installed app on iPhone, Mac or Windows) puts the cards Study now and Kana hold on the app's icon, like Mail's unread count; it's off until you turn it on, per device, and an iPhone asks to allow notifications first. It recounts while raume is open, so a closed app's badge can read low, never high. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
+| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, **Add all** a category's remaining tables (its card's last row), or open a table to add or pause single words — on a phone, swipe a word left for its Pause / Add / Restore, as in Mail (a long swipe does it at once) |
+| **Settings** | Study directions and FSRS settings (retention, max interval — months, years or No limit — fuzz, new cards per day, each picked from a list), separately for words and kana. **App icon › Badge** (where the browser can show one — an installed app on iPhone, Mac or Windows) puts the cards Study now and Kana hold on the app's icon, like Mail's unread count; it's off until you turn it on, per device, and an iPhone asks to allow notifications first. It recounts while raume is open, so a closed app's badge can read low, never high. Changes save as you make them. Guests also get **Back up & restore** — one JSON file with cards, kana, table customisations, your own words, Known kanji and finished games |
 | **Help** | Adding & pausing, Library icons, reviewing, each tab, syncing, backup |
 
 **Pausing** keeps everything. A paused word moves to *Archived*; a paused
@@ -392,13 +393,13 @@ From the top:
 | **Today's rings** | Apple Fitness-style: **Review** (cards due today that you've done), **Learn** (new cards met, of your daily number) and **Play** (one finished puzzle or game; more laps the ring), beside how many cards **Study now** holds |
 | **Study from** | Between the rings and Study now, once your flashcards span two tables: **All flashcards** or any one table (a class's list before the lesson). Study now and its count follow it; the rings, stats and Library still count everything. Remembered on this device until you switch back; nothing is paused or changed |
 | **Streak** | Days in a row, this week as seven dots (studied / missed / today half-filled until Review closes) and your best to beat |
-| **Level** | One per 25 words ever mastered (forgetting a word never takes one back), with Kana started (of all 208 basic hiragana and katakana, whichever groups you drill), Kanji known, Words mastered, total cards, reviews and retention (FSRS's forecast, behind its ⓘ; under your target it turns coral with a ↓ arrow, and the ⓘ says so) |
+| **Progress** | Kana started (of all 208 basic hiragana and katakana, whichever groups you drill), Kanji known, Words mastered, total cards, reviews and retention (FSRS's forecast, behind its ⓘ — "No data" until it can forecast; under your target it turns coral with a ↓ arrow, and the ⓘ says so) |
 | **Awards** | Medals for streaks, reviews, words mastered, all the hiragana / katakana, kanji known, puzzles and games, a Match under 2s a pair, a perfect Listening game. The newest six earned and the nearest to go; **Show all** for every one, tap one for what it's for and when you earned it |
 | **Highlights** | One line, only when there's news — reviews up on last week, a new best Match pace |
 
 Then, under **Details**:
 
-- **Card progress**, **Reviews this week** and **Due next 7 days**
+- **Card progress**, **Reviews this week** and **Due next 7 days** (the last two once there's something to chart)
 - **Trends** — as in Fitness: your last 90 days against your year (or the time since you started), each with an arrow and its year figure in words — **reviews a day**, **recall** (of cards already in review, the share you remembered) and **study days a week**. Word cards only, and only real counts: nothing shows until there are 120 days of history, and recall waits for 30 reviews in each stretch. Down is grey, as in Fitness
 - **Kana** — how many of your chosen kana you've started, how many are ready, and a button straight to it
 - **Puzzles** and **Games** — solved / played, your day streak, the last three (each with its result), and **See stats**. A puzzle revealed in full doesn't count

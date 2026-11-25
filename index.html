@@ -79,12 +79,15 @@
   </div>
   <!-- The account button opens this menu everywhere. On a phone it also
        stands in for the Help / Customize / theme glyphs, so those rows
-       (data-phone-only) show only there. -->
+       (data-phone-only) show only there -- and, on Practice, for its
+       Settings (data-practice-only), so every tab's masthead is the one
+       account button. -->
   <div class="account-menu" id="accountMenu" role="menu" aria-label="Account and settings" hidden>
     <div class="account-menu-who"><b id="accountMenuName">Guest</b><span id="accountMenuStatus">This device only · not backed up</span></div>
-    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="account">Account<span aria-hidden="true">›</span></button>
-    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="customize" data-phone-only>Customize tables<span aria-hidden="true">›</span></button>
-    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="help" data-phone-only>Help<span aria-hidden="true">›</span></button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="account">Account</button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="practice-settings" data-phone-only data-practice-only>Practice settings</button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="customize" data-phone-only>Customize tables</button>
+    <button type="button" class="account-menu-item" role="menuitem" data-menu-go="help" data-phone-only>Help</button>
     <a class="account-menu-item" role="menuitem" data-menu-go="support" href="https://ko-fi.com/raume" target="_blank" rel="noopener">Support raume<span aria-hidden="true">↗</span></a>
     <div class="account-menu-sep" role="separator" data-phone-only></div>
     <div class="account-menu-label" id="accountMenuAppearance" data-phone-only>Appearance</div>
@@ -122,6 +125,7 @@
       <div class="options-scrim" id="optionsScrim" hidden></div>
       <div class="options-sheet" id="optionsSheet" role="dialog" aria-label="Options" hidden>
         <div class="options-grab"></div>
+        <div class="options-sheet-head"><h2 class="options-sheet-title">Options</h2><button type="button" class="options-done" id="optionsDone">Done</button></div>
         <div class="opt-group">
           <h3 class="opt-head">Show</h3>
           <div class="opt-list">
@@ -152,7 +156,7 @@
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Hide row</span><span class="opt-legend-sub">Show all brings it back</span></span></div>
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Grammar</span><span class="opt-legend-sub">Verb group, adjective type, particles</span></span></div>
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Add to flashcards</span><span class="opt-legend-sub">On search results</span></span></div>
-            <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="14" cy="9" r="1.45"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Table menu</span><span class="opt-legend-sub">Icon, add to flashcards, hide table</span></span></div>
+            <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="14" cy="9" r="1.45"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Table menu</span><span class="opt-legend-sub">On an open table: icon, add to flashcards, hide, print</span></span></div>
           </div>
         </div>
         <div class="opt-group">
@@ -218,7 +222,7 @@
         <li><span class="help-term">Show polite</span><span class="help-desc">Verb tables switch to the 〜ます form.</span></li>
         <li><span class="help-term">Highlight progress</span><span class="help-desc">Turns the green of known words and the amber of tricky ones on or off. Options › Row colours names each.</span></li>
         <li><span class="help-term">Expand all</span><span class="help-desc">Opens every table in the section.</span></li>
-        <li><span class="help-term">Print</span><span class="help-desc">One table (its ⋯ menu), the section, or everything, as A4.</span></li>
+        <li><span class="help-term">Print</span><span class="help-desc">One table (open it, then its ⋯ menu), the section, or everything, as A4.</span></li>
       </ul>
     </details>
     <details class="help-group">
@@ -230,7 +234,7 @@
         <li><span class="help-term">Irregular words</span><span class="help-desc">Their text is red.</span></li>
         <li><span class="help-term">What an icon is</span><span class="help-desc">Point at it, or touch and hold it, for its name.</span></li>
         <li><span class="help-term">Hide a row</span><span class="help-desc">The eye icon. <strong>Show all</strong> brings rows back.</span></li>
-        <li><span class="help-term">Hide a table</span><span class="help-desc">A table’s ⋯ menu › Hide table. Customize › Show brings it back.</span></li>
+        <li><span class="help-term">Hide a table</span><span class="help-desc">Open the table, then its ⋯ menu › Hide table. Customize › Show brings it back.</span></li>
         <li><span class="help-term">Undo</span><span class="help-desc">After hiding, pausing or deleting a word, Undo at the bottom takes it back.</span></li>
         <li><span class="help-term">Notes</span><span class="help-desc">Your class notes as HTML files, private to your account — the Notes tab. A note’s ⋯ › Mark as tags it Sakura, WSJJ or Mine; in a lesson note, ⋯ › Add words to Practice adds its words. Search all notes over the list, or one note at its top; tap a list's name to open it. Edit in a note's bar changes its text or deletes a row; Done saves it.</span></li>
         <li><span class="help-term">Customize</span><span class="help-desc">Rename, recolour and reorder tables — the sliders icon at the top (on a phone, the account button's menu).</span></li>

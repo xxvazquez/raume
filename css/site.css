@@ -92,6 +92,14 @@
   --section-soft: var(--sec-vocabulary-soft);
   --section-strong: var(--sec-vocabulary-strong);
   --section-ink: var(--ink);
+  /* The tint: what iOS paints everything you can act on in -- action rows,
+     plain buttons, checkmarks, a switch that's on, the row speaker. One per
+     section, a more saturated sibling of its tone: the muted -strong tones
+     sit too close to ink to read as "tap me", and the mid tones fall under
+     AA as text. Each clears 4.5:1 on the card and the grouped ground. */
+  --tint-vocabulary: #2c6a90; --tint-grammar: #8c3d73; --tint-kanji: #86601c;
+  --tint-notes: #2f7a5e; --tint-flashcards: #6650a6;
+  --tint: var(--tint-vocabulary);
 
   /* Row highlight. Vocab table rows wash in the live section tone (see
      .vocab tbody tr:hover); every other tappable row -- Settings, Help,
@@ -318,6 +326,9 @@
   --section: var(--sec-vocabulary);
   --section-soft: var(--sec-vocabulary-soft);
   --section-strong: var(--sec-vocabulary-strong);
+  --tint-vocabulary: #7db5da; --tint-grammar: #d690c0; --tint-kanji: #d8b06c;
+  --tint-notes: #80c6aa; --tint-flashcards: #b4a4ea;
+  --tint: var(--tint-vocabulary);
 
   --irregular-ink: #ec8379;
 
@@ -363,15 +374,19 @@
 
 /* Which section's tone is live. */
 body[data-active-section="grammar"] {
+  --tint: var(--tint-grammar);
   --section: var(--sec-grammar); --section-soft: var(--sec-grammar-soft); --section-strong: var(--sec-grammar-strong);
 }
 body[data-active-section="kanji"] {
+  --tint: var(--tint-kanji);
   --section: var(--sec-kanji); --section-soft: var(--sec-kanji-soft); --section-strong: var(--sec-kanji-strong);
 }
 body[data-active-page="notes"] {
+  --tint: var(--tint-notes);
   --section: var(--sec-notes); --section-soft: var(--sec-notes-soft); --section-strong: var(--sec-notes-strong);
 }
 body[data-active-page="flashcards"] {
+  --tint: var(--tint-flashcards);
   --section: var(--sec-flashcards); --section-soft: var(--sec-flashcards-soft); --section-strong: var(--sec-flashcards-strong);
 }
 /* Page titles carry the section identity as a barely-tinted ink -- resolved
@@ -885,16 +900,17 @@ body {
   .search-box { position: static; }
 }
 
-/* A switch is "on" in the deep section tone in light, and the mid tone in dark
-   (the deep one is a pale tint there, which would wash out the white thumb). */
-body { --switch-on: var(--section-strong); }
-:root[data-theme="dark"] body { --switch-on: var(--section); }
+/* A switch that's on fills with the section's tint -- the muted tones it
+   used read as a disabled grey track. */
+body { --switch-on: var(--tint); }
 /* Segmented control (iOS 26): a grey capsule track holding the segments,
    the selected one raised on a white thumb -- single-select only (Manage's .fc-manage-filters;
    the Flashcards tabs and the Appearance picker share the look). Multi-select
    on/off sets are switches or checkmark menu items, never this. */
 .fc-manage-filters {
-  display: inline-flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr; /* UIKit: every segment the same width */
   align-items: stretch;
   gap: 2px;
   padding: 2px;
@@ -961,6 +977,10 @@ body { --switch-on: var(--section-strong); }
   box-shadow: var(--shadow-menu);
 }
 .options-grab { display: none; }
+/* A popover has no title; the phone's bottom sheet does -- iOS's sheet nav
+   bar, the title centred and Done trailing in the tint, on the sheet's own
+   glass (an opaque pinned band read as a second, lighter surface). */
+.options-sheet-head { display: none; }
 .vocab-toolbar.options-open, .vocab-toolbar.tindex-open, .vocab-toolbar.recents-open { z-index: 70; }
 /* iOS list header: 13px sentence-case secondary text, not tracked caps. */
 .opt-head { margin: 0; padding: 12px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
@@ -984,7 +1004,7 @@ body { --switch-on: var(--section-strong); }
   background-size: calc(100% - 16px) 1px;
 }
 .opt-row:hover { background-color: var(--row-hover); }
-.opt-action { color: var(--section-strong); padding-right: 16px; }
+.opt-action { color: var(--tint); padding-right: 16px; }
 /* What the row icons mean -- a phone has no hover tooltip, so the one sheet
    of reading settings also spells out the small glyphs down each row.
    Read-only rows, an iOS subtitle cell: the glyph in its own column, the
@@ -1057,6 +1077,15 @@ body { --switch-on: var(--section-strong); }
     padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .options-grab { display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 2px; }
+  .options-sheet-head {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    padding: 0 0 2px;
+  }
+  .options-sheet-title { grid-column: 2; margin: 0; font: 600 calc(17px * var(--dt))/1.3 var(--font-ui); color: var(--ink); }
+  .options-done {
+    grid-column: 3; justify-self: end; appearance: none; border: 0; background: none; cursor: pointer;
+    min-height: 44px; padding: 0 2px; color: var(--tint); font: 600 calc(17px * var(--dt))/1 var(--font-ui);
+  }
 }
 .search-count { color: var(--faint); font-size: var(--fs-micro); }
 .search-count:empty { display: none; }
@@ -1315,6 +1344,18 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section:not(.collapsed) .vocab th:last-child,
 #vocabulary .table-section:not(.collapsed) .vocab td:last-child { padding-right: 12px; }
 #vocabulary .table-section:not(.collapsed) .vocab.vocab-sentences td { padding-left: 16px; padding-right: 16px; }
+/* Row hairlines inset to the text's leading edge, as the list rows above
+   them are -- an iOS list never mixes inset and edge-to-edge separators. */
+#vocabulary .table-section:not(.collapsed) .vocab td:first-child,
+#vocabulary .table-section:not(.collapsed) .vocab.vocab-sentences tr {
+  border-image: linear-gradient(to right, transparent 16px, var(--row-line) 16px) 1;
+}
+/* A closed row is one tap target: the tile, its name and the chevron. The
+   table's ⋯ (with Print in it) appears on its title row once it's open --
+   the actions belong to the table you're looking at, not to every row of
+   the list. */
+#vocabulary .table-section.collapsed > .section-head .section-menu,
+#vocabulary .table-section.collapsed > .section-head .section-menu ~ .print-icon-btn { display: none; }
 
 /* Icon tile (iOS Settings style): a small rounded square with a white glyph,
    filled in a soft, muted hue. Each table's hue is a key (data-tile, set in
@@ -1600,12 +1641,15 @@ body.icon-picker-open { overflow: hidden; }
 .notes-row-tx { display: flex; flex-direction: column; min-width: 0; }
 .notes-row-title { font: 400 15px/1.3 var(--font-ui); color: var(--ink); overflow-wrap: anywhere; }
 .notes-row-sub { margin-top: 1px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
+/* iOS's empty-state view (ContentUnavailableView): straight on the ground,
+   no card -- a large grey glyph, a title, one grey line, the action. */
 .notes-empty {
-  margin-top: 14px; padding: 28px 24px; background: var(--paper); border-radius: var(--radius-card);
+  margin-top: 56px; padding: 0 24px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-.notes-empty .help-tile { width: 44px; height: 44px; border-radius: 11px; }
-.notes-empty-title { margin: 12px 0 4px; font: 600 16px/1.3 var(--font-ui); color: var(--ink); }
+.notes-empty .help-tile { width: 56px; height: 56px; background: none; color: var(--faint); }
+.notes-empty .help-tile svg { width: 48px; height: 48px; stroke-width: .9; }
+.notes-empty-title { margin: 10px 0 4px; font: 600 calc(20px * var(--dt))/1.3 var(--font-ui); color: var(--ink); }
 .notes-empty-sub { margin: 0 0 16px; max-width: 34em; color: var(--muted); font-size: var(--fs-small); line-height: 1.45; text-wrap: pretty; }
 .notes-empty .fc-btn { min-height: 44px; padding: 0 22px; }
 /* Under the title, one grey line: where the note is from (its mark) and
@@ -2249,7 +2293,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 }
 .tpick-tile .si { display: block; width: 100%; height: 100%; }
 .tpick-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
-.tpick-check { flex: 0 0 auto; display: flex; color: var(--accent-strong); }
+.tpick-check { flex: 0 0 auto; display: flex; color: var(--tint); }
 .tpick-empty { margin: 48px 16px; text-align: center; color: var(--muted); font-size: var(--fs-small); }
 body.tpick-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .tpick-sheet { animation: none; } }
@@ -2489,16 +2533,10 @@ body.tpick-open { overflow: hidden; }
 .set-card .set-row.fc-direction-check { border-radius: 0; padding: 0 16px; border-top: 0; font-size: 15px; }
 .set-card .set-row.fc-direction-check:hover { background: var(--row-hover); }
 .set-value { display: inline-flex; align-items: baseline; gap: 4px; color: var(--muted); }
-.set-unit-tight { margin-left: -4px; } /* "90%", not "90 %" */
-.set-num {
-  width: 5.5em; padding: 0; border: 0; border-radius: 0; background: transparent;
-  color: var(--muted); font: 400 15px/1.3 var(--font-ui); text-align: right;
-  -moz-appearance: textfield; appearance: textfield;
-}
-.set-num::-webkit-outer-spin-button, .set-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.set-num:focus { outline: 0; color: var(--section-strong); }
-.set-row:has(.set-num:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
-.set-unit { font-size: 15px; }
+/* A number setting: a pop-up row (value + ⌃⌄), the select laid over it. */
+.set-pick { position: relative; cursor: pointer; }
+.set-pick:hover { background: var(--row-hover); }
+.set-pick:has(.set-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
 .set-switch {
   appearance: none; flex: 0 0 auto; width: 42px; height: 26px; margin: 0; border: 0; border-radius: 999px;
   background: var(--switch-off); cursor: pointer; position: relative; transition: background .15s ease;
@@ -2511,7 +2549,7 @@ body.tpick-open { overflow: hidden; }
 .set-switch:checked::after { transform: translateX(16px); }
 .set-action {
   appearance: none; border: 0; background: transparent; text-align: left;
-  color: var(--section-strong); justify-content: flex-start;
+  color: var(--tint); justify-content: flex-start;
 }
 .set-action:hover { background: var(--row-hover); }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
@@ -2639,7 +2677,7 @@ body.tpick-open { overflow: hidden; }
 .section-menu-list .col-menu-item:hover,
 .section-menu-list .notes-check-item:hover,
 .section-menu-list .notes-mark-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.section-menu-list .menu-item-check { flex: 0 0 14px; display: flex; color: var(--accent-strong); }
+.section-menu-list .menu-item-check { flex: 0 0 14px; display: flex; color: var(--tint); }
 .section-menu-list .menu-item-check svg { display: block; }
 .section-menu-list .col-menu-item[aria-checked="false"] .menu-item-check,
 .section-menu-list .notes-check-item[aria-checked="false"] .menu-item-check,
@@ -2659,10 +2697,10 @@ body.tpick-open { overflow: hidden; }
 .section-menu-list .notes-mark-item + :not(.notes-mark-item) { border-top: 6px solid var(--group-ground); }
 .section-menu-list .col-menu-item + :not(.col-menu-item),
 .section-menu-list .notes-check-item:not([hidden]) + :not(.notes-check-item) { border-top: 6px solid var(--group-ground); }
-@media (max-width: 700px) {
-  .controls .section-menu ~ .print-icon-btn { display: none; }
-  .section-menu-list .print-menu-item { display: flex; }
-}
+/* Print sits in the ⋯ menu at every width: a third trailing glyph beside
+   ⋯ and the chevron was a row of icons, not an iOS row. */
+.controls .section-menu ~ .print-icon-btn { display: none; }
+.section-menu-list .print-menu-item { display: flex; }
 
 .rows-hidden-status {
   display: flex;
@@ -2750,6 +2788,13 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
    view-mode filter only recolours. */
 .vocab th:nth-child(1), .vocab td:nth-child(1) { width: 46%; }
 .vocab th:nth-child(2), .vocab td:nth-child(2) { width: 54%; }
+/* A phone's column is too narrow at 46% for an 8-kana loanword
+   (クアラル / ンプール broke mid-word); the English wraps far more
+   gracefully, so the Japanese takes the larger share there. */
+@media (max-width: 640px) {
+  .vocab th:nth-child(1), .vocab td:nth-child(1) { width: 53%; }
+  .vocab th:nth-child(2), .vocab td:nth-child(2) { width: 47%; }
+}
 
 [lang="ja"] { font-family: var(--font-jp); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
@@ -2924,9 +2969,9 @@ body.show-polite .verb-form-polite { display: block; }
    (RaumeStudy.shared.speech, js/shared.js). Hidden until that module confirms
    the browser actually has a Japanese voice installed -- showing it
    unconditionally would be a control that silently does nothing, or speaks
-   in the wrong voice, on a device with no ja voice. In table rows it's
-   ghosted like the row-action icons (quiet in a dense list, full strength on
-   hover/focus); on the review card, where it's the only word on screen, it
+   in the wrong voice, on a device with no ja voice. It's the row's main
+   action, so it's in the tint (a touch softer under a pointer until the row
+   is hovered); on the review card, where it's the only word on screen, it
    sits at a steadier resting opacity instead. */
 .jp-speak-btn { display: none; }
 body.ja-voice-ready .jp-speak-btn {
@@ -2937,22 +2982,22 @@ body.ja-voice-ready .jp-speak-btn {
   border: 0;
   background: transparent;
   padding: 2px;
-  color: var(--faint);
-  opacity: .3;
+  color: var(--tint);
+  opacity: .7;
   cursor: pointer;
   transition: opacity .12s ease;
 }
 .vocab tbody tr:hover .jp-speak-btn,
 .vocab tbody tr:focus-within .jp-speak-btn,
 .jp-speak-btn:focus-visible { opacity: 1; }
-.jp-speak-btn:hover { color: var(--accent-dark); }
+.jp-speak-btn:hover { opacity: 1; }
 /* Out of the line, so the word itself is what's centred on the card -- the
    speaker hangs just after it instead of pushing it left. */
 .fc-review-card .jp-speak-btn { opacity: .55; position: absolute; font-size: inherit; margin-top: calc(.7em - 8.5px); }
 /* The glyph stays small beside the word; the tap area doesn't (44pt). */
 .fc-review-card .jp-speak-btn::after { content: ""; position: absolute; inset: -13px; }
 @media (hover: none) {
-  body.ja-voice-ready .jp-speak-btn { opacity: .5; }
+  body.ja-voice-ready .jp-speak-btn { opacity: 1; }
 }
 
 /* Furigana: always visible, never behind hover/click/a setting. A clear
@@ -3859,6 +3904,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    pushed screen: a "‹ Flashcards" back button above its own title. */
 .fc-titlebar { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .fc-titlebar-actions { display: flex; gap: 18px; flex: 0 0 auto; }
+/* On a phone the masthead is one account button on every tab, Practice
+   included: Settings and Help are in its menu there. */
+@media (max-width: 640px) { .fc-titlebar-actions { display: none; } }
 .fc-titlebar-btn, .fc-back {
   appearance: none; border: 0; background: none; padding: 0; cursor: pointer;
   color: var(--section-strong); font: 400 var(--fs-nav)/1.4 var(--font-ui);
@@ -4018,7 +4066,7 @@ body.selftest-mode .vocab .row-info-btn { visibility: hidden; }
   transition: opacity .12s ease;
 }
 .fc-toggle-btn,
-.row-hide-btn { color: var(--faint) !important; opacity: .3; }
+.row-hide-btn { color: var(--faint) !important; opacity: .45; }
 .vocab tbody tr:hover .fc-toggle-btn,
 .vocab tbody tr:focus-within .fc-toggle-btn,
 .fc-toggle-btn:focus-visible,
@@ -4040,7 +4088,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .row-hide-btn:focus-visible { opacity: 1; }
 @media (hover: none) {
   .fc-toggle-btn,
-  .row-hide-btn { opacity: .5; }               /* ghosted -- present, not loud */
+  .row-hide-btn { opacity: .8; }               /* secondary -- grey, not tinted, but plainly there */
   .fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
 }
 
@@ -4049,9 +4097,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* The Flashcards sub-tabs are the shared segmented control (see .fc-manage-filters):
    a grey track, the selected tab raised on a thumb. Full width on a phone,
    sized to its content on a wide window. */
-.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
+.fc-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
 .fc-tab {
-  flex: 1 1 auto;
   appearance: none; border: 0; background: transparent;
   padding: 7px 8px; border-radius: 999px; text-align: center; white-space: nowrap;
   color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
@@ -4060,8 +4107,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-tab:hover { color: var(--ink); }
 .fc-tab.active { background: var(--seg-thumb); box-shadow: var(--seg-thumb-shadow); color: var(--seg-thumb-ink); font-weight: 600; }
 @media (min-width: 700px) {
-  .fc-tabs { display: inline-flex; }
-  .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
+  .fc-tabs { display: inline-grid; }
+  .fc-tab { padding: 7px 16px; }
 }
 .fc-tabpanel[hidden] { display: none; }
 
@@ -4676,7 +4723,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-stat-glyph { flex: none; margin-top: calc((var(--fs-micro) * 1.4 - 12px) / 2); color: var(--faint); }
 .fc-stat-glyph[data-tile] { color: var(--tile); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
-.fc-stat-tile-pending .fc-stat-value { font-size: var(--fs-small); font-weight: 400; color: var(--muted); line-height: 1.35; }
+.fc-stat-tile-pending .fc-stat-value { color: var(--muted); font-weight: 400; white-space: nowrap; } /* "No data", on the numbers' own line */
 
 /* Dashboard visualizations -- colors reused from the existing palette. The
    two compact charts share the top row; the mistakes list, which grows,
@@ -4793,9 +4840,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    the one filled button; per-row actions (.fc-btn-vocabaction) drop to plain
    text so a long list isn't a wall of capsules. */
 .fc-btn {
-  /* The section tone, like the filled primary beside it -- one tint per
+  /* The section's tint, like the filled primary beside it -- one tint per
      screen, never a lavender button next to a brown one. */
-  appearance: none; border: 0; background: var(--paper); color: var(--section-strong); box-shadow: var(--control-lift);
+  appearance: none; border: 0; background: var(--paper); color: var(--tint); box-shadow: var(--control-lift);
   font: 500 var(--fs-small)/1 var(--font-ui);
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
@@ -4803,15 +4850,15 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-btn:hover { background: var(--row-hover); }
 .fc-btn:active { opacity: .7; }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
-/* The primary action -- a filled button in the deep section tone
-   (--section-strong, so white text clears AA). No shadow: it outranks the
-   tinted buttons around it by fill alone. */
+/* The primary action -- a filled button in the tint (each clears AA under
+   white text in light, under the dark ground's ink in dark). No shadow: it
+   outranks the tinted buttons around it by fill alone. */
 .fc-btn-primary {
-  background: var(--section-strong); color: var(--paper);
+  background: var(--tint); color: var(--paper);
   font-weight: 500; box-shadow: none;
 }
 .fc-btn-primary:hover {
-  background: color-mix(in srgb, var(--section-strong) 86%, var(--ink));
+  background: color-mix(in srgb, var(--tint) 86%, var(--ink));
   color: var(--paper);
 }
 .fc-note { color: var(--muted); font-size: var(--fs-small); }
@@ -4831,18 +4878,18 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   cursor: pointer; list-style: none;
   display: flex; align-items: baseline; gap: 12px;
   background: transparent; width: auto;
-  margin: 0 0 8px; padding: 0 0 0 16px;
+  margin: 0 0 8px; padding: 0 16px;
 }
 .fc-manage-group-title::-webkit-details-marker { display: none; }
 .fc-manage-group-title .cat-name { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-/* name · count · caret read as one cluster on the left, not name on one edge
-   and count+caret flung to the other. */
+/* Name and count read as one cluster on the left; the fold chevron trails
+   at the far edge, as on the Vocabulary list's category headers. */
 .fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: var(--fs-micro); font-weight: 400; }
 .fc-manage-group-title:hover .cat-name { color: var(--ink); }
 /* The iOS collapsible-section chevron: points right when folded, down when
    open (a filled triangle is a desktop tree control, not iOS). */
 .fc-manage-group-title::after {
-  content: ""; display: inline-block; width: 6px; height: 6px; flex: 0 0 auto; align-self: center; margin-left: 2px;
+  content: ""; display: inline-block; width: 6px; height: 6px; flex: 0 0 auto; align-self: center; margin-left: auto;
   border-right: 1.5px solid var(--faint); border-bottom: 1.5px solid var(--faint);
   transform: translateX(-1px) rotate(-45deg);
   transition: transform .15s ease;
@@ -4863,8 +4910,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table:not(.fc-manage-table + .fc-manage-table) { border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card); }
 .fc-manage-table:not(:has(+ .fc-manage-table)) { border-bottom-left-radius: var(--radius-card); border-bottom-right-radius: var(--radius-card); margin-bottom: 12px; }
 .fc-manage-table:last-child { margin-bottom: 0; }
-.fc-manage-table + .fc-manage-table::before { content: ""; position: absolute; top: 0; left: 82px; right: 0; border-top: 1px solid var(--row-line); }
-/* Deliberate columns: [chevron] [ name + progress ] [ Add table · Pause table ].
+.fc-manage-table + .fc-manage-table::before { content: ""; position: absolute; top: 0; left: 54px; right: 0; border-top: 1px solid var(--row-line); }
+/* Category-wide "Add all": the card's last row, an action row in the tint. */
+.fc-manage-table + .fc-manage-cat-row::before { left: 16px; }
+.fc-manage-cat-add {
+  appearance: none; border: 0; background: transparent; width: 100%; min-height: 44px;
+  padding: 0 16px; text-align: left; color: var(--tint); font: 400 15px/1.3 var(--font-ui); cursor: pointer;
+}
+.fc-manage-cat-add:hover { background: var(--row-hover); }
+.fc-manage-cat-add:active { background: var(--row-press); }
+/* Deliberate columns: [ name + progress ] [ Add · Pause ] [chevron].
    A grid, not flex -- the middle column is the only one that flexes (and its
    text ellipsises), so the action buttons keep their own column and never
    wrap onto a second line on desktop. On a phone the row restacks: name on
@@ -4872,11 +4927,11 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table-head {
   cursor: pointer;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "toggle label actions";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "label actions toggle";
   align-items: center;
-  column-gap: 12px;
-  padding: 8px 12px 8px 14px;
+  column-gap: 8px;
+  padding: 8px 10px 8px 14px;
 }
 .fc-manage-table-toggle {
   grid-area: toggle;
@@ -4915,11 +4970,17 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table-dormant { color: var(--faint); font-style: italic; }
 .fc-manage-table-paused .fc-manage-table-title { color: var(--muted); }
 .fc-manage-table-actions { grid-area: actions; display: flex; gap: 6px; white-space: nowrap; }
-/* Add / Pause / Resume / Restore all read as the same ordinary bordered
-   .fc-btn -- a table row shouldn't look tappable in one state and inert in
+/* Add / Pause / Resume / Restore all read as the same plain button -- a
+   table row shouldn't look tappable in one state and inert in
    another just because "Add" happens to be the common case down a long,
    mostly-untouched list. */
 .fc-btn-tableaction { gap: 6px; }
+/* On a white card they're plain tint text (iOS's plain button), not white
+   capsules outlined on white. */
+.fc-manage-table-actions .fc-btn, .fc-manage-row .fc-actions .fc-btn {
+  background: transparent; box-shadow: none; color: var(--tint); font-weight: 400; font-size: 15px;
+}
+.fc-manage-table-actions .fc-btn:hover, .fc-manage-row .fc-actions .fc-btn:hover { background: var(--row-hover); }
 .fc-btn-ic { display: none; }
 .fc-btn-ic svg { display: block; }
 /* The actions live in their own grid column and never wrap; on a narrow row
@@ -4936,9 +4997,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   .fc-manage-table-actions .fc-btn-tx { display: none; }
   .fc-manage-table-actions .fc-btn-tx-short { display: inline; }
 }
-/* Category-wide "Add all", sitting just under the category summary. */
-.fc-manage-cat-actions { margin: 4px 0 14px; }
-.fc-manage-cat-actions .fc-btn { font-size: var(--fs-micro); }
 .fc-manage-list { border-top: 1px solid var(--row-line); }
 /* One flat line per word: status | kanji romaji english | action. Plain kanji
    (no ruby -- see views.js) keeps every row the same height, so the status
@@ -5489,7 +5547,7 @@ mark.fc-diff-co {
   margin-left: auto;
   flex: 0 0 auto;
   width: 5px; height: 10px;
-  border: solid var(--section);
+  border: solid var(--tint);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
   opacity: 0;
@@ -5632,15 +5690,11 @@ mark.fc-diff-co {
 @media (max-width: 619.98px) { .fc-stats-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 620px) { .fc-stats-grid-3 .fc-stat-tile { grid-column: span 4; } }
 
-/* The N5 journey (dashboard.js journeyHtml) takes the stats card: "Level 4"
-   with "14 words to Level 5" trailing, the one sage bar, then Kana / Kanji /
-   Words as three equal columns -- tabular value, "/total" muted, the label
-   under it; each a way into its place -- and the three stat tiles under a
-   hairline. */
-.fc-journey-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.fc-journey-level { font-size: 20px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-.fc-journey-next { color: var(--muted); font-size: var(--fs-small); }
-.fc-journey-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+/* The N5 journey (dashboard.js journeyHtml) takes the stats card: Kana /
+   Kanji / Words as three equal columns -- tabular value, "/total" muted, the
+   label under it; each a way into its place -- and the three stat tiles
+   under a hairline. */
+.fc-journey-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 16px; }
 .fc-journey-col {
   appearance: none; border: 0; background: none; padding: 0; margin: 0; cursor: pointer; text-align: left;
   display: flex; flex-direction: column; gap: 3px; min-width: 0; font: inherit; color: inherit; border-radius: 8px;
@@ -6056,6 +6110,22 @@ mark.fc-diff-co {
     border-bottom: 0;
   }
 }
+/* iPad portrait (641-899px): the sections as the same white floating
+   capsule as the desktop bar, centred on its own row under the masthead --
+   iPadOS's top tab bar -- not a left-aligned row of text links. The nav is
+   the capsule; a spread shadow, clipped to the row, paints the ground
+   either side so rows scrolling under it don't show beside it. */
+@media (min-width: 641px) and (max-width: 899px) {
+  :root { --nav-h: 54px; }
+  .site-nav {
+    width: max-content; max-width: calc(100% - 32px); margin: 6px auto 8px; top: 6px;
+    padding: 4px; gap: 2px; border-radius: 999px;
+    background: var(--paper);
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    box-shadow: var(--control-lift), 0 0 0 100vmax var(--group-ground);
+    clip-path: inset(-6px -100vmax -8px -100vmax);
+  }
+}
 /* Desktop: one glass top bar, like an iPadOS 26 / macOS window -- the
    wordmark leading, the four sections as a white floating capsule in the
    middle, the utility glyphs trailing -- pinned while you scroll, so the
@@ -6129,7 +6199,7 @@ mark.fc-diff-co {
 .fc-gs-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 .fc-gs-mode-tx { flex: 1 1 auto; min-width: 0; }
 .fc-gs-mode-name { display: block; color: var(--ink); }
-.fc-gs-check { flex: none; color: var(--section-strong); visibility: hidden; }
+.fc-gs-check { flex: none; color: var(--tint); visibility: hidden; }
 .fc-gs-radio:checked ~ .fc-gs-check { visibility: visible; }
 .fc-gs-mode:hover, .fc-gs-pick:hover { background: var(--row-hover); }
 /* Keyboard focus on a row is the row lit in the section tone, as iOS
@@ -6333,6 +6403,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .account-menu[hidden] { display: none; }
 /* The account glyph sits last in the trailing cluster, where an Apple app
    keeps its profile button, so the menu drops straight under it. */
+body:not([data-active-page="flashcards"]) .account-menu [data-practice-only] { display: none; }
 @media (min-width: 641px) {
   .account-menu [data-phone-only] { display: none; }
   .masthead-right #accountToggle { order: 1; }

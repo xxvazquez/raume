@@ -164,6 +164,15 @@ clear AA on `--paper`. `--section` is switched by `body[data-active-*]`:
 The five hues sit well over 20° apart (the smoke test enforces it), light and
 dark, so moving between sections reads as a change of place.
 
+**The tint** (`--tint`, switched with the section): what iOS paints
+everything you can act on in — filled and secondary buttons, plain action
+rows (Options › Expand all / Print, Settings › Back up, Library's Add and
+Add all), checkmarks, a switch that's on, and the table rows' speaker. One
+per section, a more saturated sibling of its tone (`--tint-vocabulary`
+`#2C6A90`, grammar `#8C3D73`, kanji `#86601C`, notes `#2F7A5E`, flashcards
+`#6650A6`; lighter in dark): the muted `-strong` tones sat too close to ink
+to read as "tap me". Each clears 4.5:1 on the card and the grouped ground.
+
 ### Kanji grid and sheet
 
 A Kanji table is a row like any other table's -- same tile, title, ⋯, print
@@ -246,9 +255,9 @@ and Help.
   (`--group-ground`) behind the page and white `--radius-card` cards sitting
   directly on it — no borders, no coloured
   bars, no rules under headings, no box inside a box. A run of collapsed tables
-  is ONE card of list cells (inset hairline between them, the per-table ⋯ menu /
-  print kept on the cell as bare glyphs and the disclosure chevron trailing
-  after them at the row's very end, as iOS places it; the
+  is ONE card of list cells (inset hairline between them, the disclosure
+  chevron alone at the row's trailing end, as iOS places it — the table's ⋯
+  menu, Print inside it, appears on its title row once it's open; the
   hairline is inset to start under the title, and cells only group with
   neighbours that are on screen); every table has a 28px **icon tile** — an 8px-radius
   square with a white glyph, filled in a soft, muted hue **per content category**
@@ -384,7 +393,8 @@ and Help.
   exact size and position (14px title, same padding), its chevron turns, and
   the table unfolds flat inside the same card beneath it — nothing above moves,
   only what's below is pushed down. The row after an open table gets a
-  full-width hairline. (Previously an open table broke out into its own card
+  full-width hairline; the table's own row hairlines are inset 16px, like
+  every other list separator. (Previously an open table broke out into its own card
   with a 20px title and a 16–24px gap above, so every tap made the page jump.)
   While a table is open its title row pins under the search bar as you scroll
   through it (sticky within its own table), so you always know where you are
@@ -429,13 +439,12 @@ and Help.
     band setting the group off from Print).
   - **Switch** (the Options sheet's `.opt-switch` rows — Japanese / Furigana /
     English, Cover answers, Show polite — plus Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
-    track filling with the section tone (`--switch-on` — the deep tone in light, the
-    mid tone in dark, where the deep one is a pale tint that would wash out the
-    thumb). The Options switches are `<button aria-pressed>` rows (pressed = on; a
+    track filling with the section's tint (`--switch-on` = `--tint`; the muted
+    section tones read as a disabled grey track). The Options switches are `<button aria-pressed>` rows (pressed = on; a
     column switch is on while the column shows); the track and thumb are
     `::before` / `::after`.
-  - **Buttons** (all capsules): *filled* (`.fc-btn-primary`, deep section tone,
-    no shadow), *white* secondary (`.fc-btn`, accent text on `--control-lift`,
+  - **Buttons** (all capsules): *filled* (`.fc-btn-primary`, the tint, no
+    shadow; one per screen), *white* secondary (`.fc-btn`, tint text on `--control-lift`,
     no border — never a grey tint), *tinted* (per-word Pause / Restore,
     `.fc-btn-vocabaction`: section-tone text on the soft `--section-soft` wash,
     App Store "Get" style, so it reads as a button inside a white card; Add stays
@@ -472,8 +481,9 @@ and Help.
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
     (Show / Study), white `--radius-card` cards of 44px rows with inset hairlines, switches
     at the trailing edge, plain tint-text action rows, and the badge legends as
-    footnote text. A 320px popover under the button on a wide screen; on a phone a
-    bottom sheet with a grab bar and scrim (same shape as the table index) that
+    footnote text. A 320px popover under the button on a wide screen (no title,
+    as an iOS popover); on a phone a bottom sheet with a grab bar, iOS's sheet
+    nav bar (**Options** centred, **Done** trailing in the tint) and scrim (same shape as the table index) that
     lifts the toolbar above the tab bar while open (`.options-open`). The sticky
     bar is one row — the search capsule, then one shared glass capsule
     (`.bar-capsule`, iOS 26's grouped bar buttons) holding **Tables** and
@@ -561,8 +571,9 @@ and Help.
   the five tabs (Vocabulary, Grammar, Kanji, Notes, Practice) as a white floating capsule (`--control-lift`) laid over
   its centre (both share the frame's first grid row, so the markup is the
   phone's), the utility glyphs trailing; the sticky search bar stops under it
-  (`--nav-h: 64px`). **641–899px** the tabs keep their own row under the
-  masthead, a sticky glass band (`--nav-h: 45px`). The phone keeps its bottom
+  (`--nav-h: 64px`). **641–899px** (iPad portrait) the tabs are the same white
+  floating capsule, centred on their own row under the masthead — iPadOS's
+  top tab bar — pinned 6px from the top on a ground band (`--nav-h: 54px`). The phone keeps its bottom
   tab bar. The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
   targets: no box, no outline. On a tablet (`hover: none`) each glyph gets a 10px
@@ -573,7 +584,10 @@ and Help.
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
   menu of words: who you are + sync state, Account (reads "Sign in" for a guest
-  and opens the sign-in screen) / Customize tables / Help,
+  and opens the sign-in screen) / Practice settings (on Practice only — its
+  title bar keeps no Settings / Help buttons on a phone) / Customize tables /
+  Help (Practice's own Help while on Practice) — plain rows, no › chevrons
+  (an iOS menu marks only submenus),
   and Appearance as a System / Light / Dark segmented control that applies at
   once, then — signed in — a separated **Sign out** row in the coral
   `--wrong-strong`, iOS's destructive position at the bottom. Wider windows
@@ -830,7 +844,9 @@ and Help.
   Sakura / WSJJ / Mine (each with its glyph in its hue) / No mark, then
   Cancel — before the file picker. Once any note is marked, the app's
   segmented control (All · Sakura · WSJJ · Mine) sits over the list and
-  filters it. Like Practice, its list title is the phone's large title
+  filters it. Signed out (or with no notes yet) it's iOS's empty-state view
+  straight on the ground: a large thin grey document glyph, a 20px title,
+  one grey line and the filled tint button — no card. Like Practice, its list title is the phone's large title
   and is visually hidden on a wider window (the top bar names it). A note opens as a pushed screen: "‹ Notes", the note's name as
   the large title — itself the Rename control, a faint pencil after it, as a
   document's title is on iOS — then one row — the lesson date left, **Quiz** (a white
@@ -921,9 +937,11 @@ and Help.
   top corners) with the one float shadow; the current table in the index is a
   soft fill, not a bar; the picker's group labels are sentence-case
   `--fs-small`.
-- **Flashcards header**: the four-segment control and Settings / Help share
-  the title bar. On a phone: the large "Flashcards" title with Settings / Help,
-  the segments full width under it. Wider: the title is visually hidden (the
+- **Flashcards header**: the five-segment control and Settings / Help share
+  the title bar. On a phone: the large "Practice" title with the account
+  button alone (Settings and Help are in its menu, as on every other tab),
+  the segments full width under it, every segment the same width (UIKit's
+  rule, here and in Library's filter). Wider: the title is visually hidden (the
   top bar names the page, as on the reference pages), segments leading and
   Settings / Help trailing on one row.
 - **Flashcards is one centred 900px column** past phone width — title bar,
@@ -931,10 +949,16 @@ and Help.
   `#flashcardsPage`, so the inline-flex tabs line up too). Customize (720px)
   and Help (680px) centre on their own widths the same way, so no page hugs
   the left edge of a wide window. **Library** fills
-  that column — its rows are content-driven, not a proportional grid. A
-  category's tables are one inset-grouped card (rows back to back, an inset
-  hairline from the title, corners on the first and last row only), as on
-  the reference pages — not a stack of separate cards. Its word rows show the plain kanji, not the furigana ruby
+  that column — its rows are content-driven, not a proportional grid. Its
+  filter (All vocabulary / My flashcards / Archived) runs full width with
+  equal segments. A category's header is the reference list's: name and
+  count leading, the fold chevron trailing. Its tables are one inset-grouped
+  card (rows back to back, an inset hairline from the title, corners on the
+  first and last row only), as on the reference pages — not a stack of
+  separate cards. A table row is tile, name over "N / M", then Add / Pause as
+  plain tint text and the disclosure chevron trailing; **Add all N remaining
+  tables** is the card's last row, a tint action row — never a button
+  floating on the ground. Its word rows show the plain kanji, not the furigana ruby
   the reference tables use: Library is a deck-management checklist, and ruby made
   every row a different height so the status glyphs and action buttons never
   lined up. The reading stays one column over (romaji, hidden on a phone).
@@ -991,9 +1015,11 @@ be scannable at a glance:
   Retention, in one even row; each label one line), Awards, a Highlights row when
   there's news, and then, under a quiet "Details" list header (13px muted,
   `.fc-dash-head`), one `.fc-viz-card` each for
-  Card progress, Reviews this week, Due next 7 days, Kana (the Kanji card's
-  layout: "25 of 112 started" with "35 to study now" under it, a filled Study kana
-  — white Open Kana when nothing is due — and the sage bar), Puzzles and Games (full
+  Card progress, Reviews this week and Due next 7 days (each only once it
+  has something to chart — an empty chart is no news), Kana (the Kanji card's
+  layout: "25 of 112 started" with "35 to study now" under it, a white Study kana
+  — Open Kana when nothing is due; Study now stays the screen's one filled
+  button — and the sage bar), Puzzles and Games (full
   width, always there, one card each: two stat cells that hold for every game —
   solved / played and the day streak (each game's own measure is in its
   Stats) — Games' week as the Reviews-this-week bars, then the last three as
@@ -1035,12 +1061,13 @@ be scannable at a glance:
   under it only when there's news: "Best 21 days · 9 to beat it", or "Your
   longest streak yet". A run that ended before yesterday shows 0, not the
   number it reached; the strip wraps under the number on a phone;
-- **The journey** (`.fc-journey`, the stats card): "Level 4" at 20px
-  semibold with "14 words to Level 5" trailing in grey, the sage bar to the
-  next level, then three equal columns — Kana started, Kanji known, Words
-  mastered — each a tabular figure with "/total" in `--faint` and an 11.5px
-  grey label, the whole column a way in (Kana tab / Kanji section /
-  Library); a hairline, then the three stat tiles. No level names.
+- **The journey** (`.fc-journey`, the stats card): three equal columns —
+  Kana started, Kanji known, Words mastered — each a tabular figure with
+  "/total" in `--faint` and an 11.5px grey label, the whole column a way in
+  (Kana tab / Kanji section / Library); a hairline, then the three stat
+  tiles (Retention reads "No data" in grey until FSRS can forecast). No
+  levels: a "Level N" made up from words mastered was invented points, and
+  the Words column and word awards already count the real thing.
 - **Awards** (`.fc-dash-awards`), Fitness's medals: a 44px round face in the
   award's `--tile` hue with a white glyph (a character for kana / kanji);
   locked, a 40px track-grey face with a `--faint` glyph inside a thin 2.5px

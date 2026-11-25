@@ -832,6 +832,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (collapsed) {
         const text = h1.textContent.trim();
         if (bar.textContent !== text) bar.textContent = text;
+      } else if (!h1 || bar.textContent !== h1.textContent.trim()) {
+        // Another screen took over (a tab switch): drop the old name rather
+        // than let it fade out over the new screen's large title.
+        bar.textContent = '';
       }
       document.body.classList.toggle('title-collapsed', collapsed);
     }
@@ -1822,6 +1826,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (rows[0]) rows[0].focus({ preventScroll: true });
       });
       document.getElementById('optionsScrim').addEventListener('click', closeOptionsSheet);
+      document.getElementById('optionsDone').addEventListener('click', closeOptionsSheet);
       optionsSheet.addEventListener('keydown', function (event) {
         const rows = optionRows();
         const i = rows.indexOf(document.activeElement);
@@ -1886,7 +1891,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // The account menu (index.html #accountMenu): who you are and the sync
     // state (filled in by js/flashcards/bootstrap.js), Account, Support and
     // Sign out -- plus, on a phone, Customize tables / Help (the pages the
-    // wider masthead's glyphs open) and Appearance as a System / Light /
+    // wider masthead's glyphs open), Practice settings while on Practice
+    // (its title bar keeps no buttons there), and Appearance as a System / Light /
     // Dark switch that applies at once and leaves the menu open. Closes on
     // an outside tap or Escape.
     const accountMenu = document.getElementById('accountMenu');
@@ -1895,6 +1901,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       accountMenu.hidden = !open;
       if (accountToggle) accountToggle.setAttribute('aria-expanded', String(open));
       if (open) { const first = accountMenu.querySelector('.account-menu-item'); if (first) first.focus({ preventScroll: true }); }
+    }
+    // Practice's Settings / Help, from the menu: on another pushed screen
+    // (Help open, Settings asked for) its title bar has no buttons, so go
+    // Back first.
+    function openPracticeScreen(tab) {
+      const sel = '#flashcardsPage .fc-titlebar-btn[data-tab="' + tab + '"]';
+      if (!document.querySelector(sel) && document.querySelector('#flashcardsPage .fc-titlebar-pushed h1')
+        && document.querySelector('#flashcardsPage .fc-titlebar-pushed h1').textContent.toLowerCase() === tab) return;
+      const back = document.getElementById('fcBack');
+      if (!document.querySelector(sel) && back) back.click();
+      const btn = document.querySelector(sel);
+      if (btn) btn.click();
     }
     vocab.toggleAccountMenu = function () { setAccountMenu(!!accountMenu && accountMenu.hidden); };
     if (accountMenu) {
@@ -1907,14 +1925,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         setAccountMenu(false);
         if (go.dataset.menuGo === 'account') openAccount();
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
+        else if (go.dataset.menuGo === 'practice-settings') openPracticeScreen('settings');
         else if (go.dataset.menuGo === 'help') {
           // Help for the screen you're on: on Practice, the Flashcards Help
           // (already open: stay there); anywhere else, the reference Help.
-          if (document.body.dataset.activePage === 'flashcards') {
-            const fcHelp = document.querySelector('#flashcardsPage .fc-titlebar-btn[data-tab="help"]');
-            if (fcHelp) fcHelp.click();
-            return;
-          }
+          if (document.body.dataset.activePage === 'flashcards') { openPracticeScreen('help'); return; }
           const h = document.getElementById('helpToggle'); if (h) h.click();
         }
         else if (go.dataset.menuGo === 'signout') { const fc = window.RaumeStudy.flashcards; if (fc && fc.signOut) fc.signOut(); }

@@ -111,10 +111,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     stopDashboardPoll();
     if (session) { renderReview(panel); return; }
     if (stats.total === 0) { renderEmptyDashboard(panel); return; }
-    // Before FSRS has enough reviews to forecast, spell it out -- a lone "—"
-    // in a stat tile reads as a broken value.
+    // Before FSRS has enough reviews to forecast, say so in Health's words --
+    // a lone "—" reads as a broken value, and a sentence wrapped and broke the
+    // tiles' shared baseline.
     var retentionPending = stats.estimatedRetention == null;
-    var retentionText = retentionPending ? "After a few reviews" : Math.round(stats.estimatedRetention * 100) + "%";
+    var retentionText = retentionPending ? "No data" : Math.round(stats.estimatedRetention * 100) + "%";
     var settings = getCache().settings;
     // A couple of points under target is normal noise, not a real dip -- only
     // flag it once it's meaningfully below what Settings asks FSRS to aim for,
@@ -151,6 +152,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // "your stats" (the 4 tiles) and "your progress" (the charts) -- each
     // item keeping its own colour/accent but losing its individual box.
     var rings = todayRings(now, stats);
+    var forecast = dueForecast(now);
     var jn = noteJourney(now, stats);
     var tilesHtml = '<div class="fc-stats-grid fc-stats-grid-3 fc-journey-stats">' +
       statTile(stats.total, "Total cards") +
@@ -170,7 +172,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<button type="button" class="fc-btn fc-btn-primary fc-now-btn" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
       "</div>" +
       streakStripHtml(now, rings) +
-      // The journey: level, Kana / Kanji / Words and the stat tiles; the
+      // The journey: Kana / Kanji / Words and the stat tiles; the
       // awards; a Highlights row when there's news -- then everything else
       // under a quiet "Details" header.
       journeyHtml(jn.journey, now, tilesHtml) +
@@ -180,17 +182,19 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-dash-progress">' +
       '<div class="fc-viz-grid">' +
       '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Card progress") + stateBreakdownChart(stats) + "</div>" +
-      '<div class="fc-viz-card">' + vizTitle("Reviews this week") + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>" +
-      '<div class="fc-viz-card">' + vizTitle("Due next 7 days") + dueForecastHtml(dueForecast(now)) + "</div>" +
+      // A chart with nothing in it is a card of "no news": it waits until
+      // there's a review this week, or a card scheduled, to show.
+      (weeklyActivity && !weeklyActivity.some(function (d) { return d.count; }) ? ""
+        : '<div class="fc-viz-card">' + vizTitle("Reviews this week") + (weeklyActivity ? weeklyActivityChart(weeklyActivity) : '<p class="fc-note">Loading…</p>') + "</div>") +
+      (forecast.total || forecast.later ? '<div class="fc-viz-card">' + vizTitle("Due next 7 days") + dueForecastHtml(forecast) + "</div>" : "") +
       trendsHtml(now) +
       kanaCardHtml(now) +
       puzzlesCardHtml(now) +
       gamesCardHtml(now) +
       kanjiCardHtml() +
-      (foldReview
-        ? '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Words to review") + '<p class="fc-note">Nothing to review yet — words you miss collect here, and repeat misses become a table to drill and print.</p></div>'
-        // Nothing missed today: no card at all -- an empty card saying so is
-        // a row of space for no news.
+      // Nothing missed yet, or today: no card at all -- an empty card saying
+      // so is a row of space for no news.
+      (foldReview ? ""
         : reviewInsights && !reviewInsights.recentMistakes.length ? ""
         : '<div class="fc-viz-card fc-viz-wide">' + vizTitle("Missed today") + missedTodayHtml() + "</div>") +
       leechesHtml() +
@@ -480,13 +484,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
 
   // --- Dashboard: the N5 journey, awards and highlights -------------------
-  // A level that only grows -- one per 25 words *ever* mastered, kept in
-  // getCache().journey so forgetting a word never takes a level back -- then
-  // where you stand in Kana, Kanji and Words; the awards to collect (each
+  // Where you stand in Kana, Kanji and Words; the awards to collect (each
   // celebrated once: its id is noted the day it's earned); and one
   // Highlights row only when there's real news. All derived from what the
-  // app already keeps, except that journey record.
-  var LEVEL_WORDS = 25;
+  // app already keeps, except the journey record (getCache().journey: every
+  // word ever mastered, so forgetting one never takes a word award back).
   // The N5 kanji (the vocab-kanji tables) and how many are marked Known.
   function kanjiCounts() {
     var kk = window.RaumeStudy.knownKanji;
@@ -624,10 +626,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<button type="button" class="fc-pz-link" id="fcAwardsAll">Show all</button></div>' +
       '<ul class="fc-awards-grid">' + dashAwards(j, vals).map(function (a) { return awardHtml(a, j, vals); }).join("") + "</ul></div>";
   }
-  // Level + its bar, then Kana / Kanji / Words -- each a way into its place
-  // -- then the three stat tiles under a hairline.
+  // Kana / Kanji / Words -- each a way into its place -- then the three
+  // stat tiles under a hairline. Real counts only: the "Level N" that used
+  // to head it was points made up from words mastered, which the Words
+  // column (and the word awards) already count.
   function journeyHtml(j, now, tilesHtml) {
-    var ever = Object.keys(j.mastered).length, level = Math.floor(ever / LEVEL_WORDS) + 1, into = ever % LEVEL_WORDS;
     var kana = fc.kana && fc.kana.summary ? fc.kana.summary(now) : null, kj = kanjiCounts();
     var inDeck = {};
     studyableCards().forEach(function (c) { inDeck[c.vocabId] = true; });
@@ -642,11 +645,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     else if (kana) cols.push(["kana", "Kana started", kana.started, kana.total]);
     if (kj) cols.push(["kanji", "Kanji known", kj.known, kj.total]);
     cols.push(["manage", "Words mastered", Object.keys(masteredWords()).length, Object.keys(inDeck).length]);
-    var left = LEVEL_WORDS - into;
     return '<div class="fc-dash-stats fc-journey">' +
-      '<div class="fc-journey-head"><span class="fc-journey-level">Level ' + level + "</span>" +
-      '<span class="fc-journey-next">' + left + (left === 1 ? " word" : " words") + " to Level " + (level + 1) + "</span></div>" +
-      progressBarHtml(into, LEVEL_WORDS, into + " of " + LEVEL_WORDS + " words mastered toward Level " + (level + 1)) +
       '<div class="fc-journey-cols">' + cols.map(function (c) {
         return '<button type="button" class="fc-journey-col" data-dash-go="' + c[0] + '"><span class="fc-journey-val">' + c[2] +
           '<span class="fc-journey-of">/' + c[3] + '</span></span><span class="fc-journey-lbl">' + c[1] + "</span></button>";
@@ -1216,7 +1215,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     return '<div class="fc-viz-card fc-viz-wide fc-dash-kana">' + vizTitle("Kana") +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + k.started + "</b> of " + k.total + " started" +
       (k.toStudy ? '<span class="fc-kj-sub">' + k.toStudy + " to study now</span>" : "") + "</span>" +
-      '<button type="button" class="fc-btn' + (k.toStudy ? " fc-btn-primary" : "") + '" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
+      // Secondary even with kana to study: Study now is the screen's one
+      // filled button.
+      '<button type="button" class="fc-btn" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
       progressBarHtml(k.started, k.total, k.started + " of " + k.total + " kana cards started") + "</div>";
   }
   // The Puzzles / Games / Kana / Kanji cards' buttons: to that tab, or the

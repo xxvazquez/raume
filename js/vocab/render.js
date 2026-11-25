@@ -806,7 +806,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var CATEGORY_TILE = {
     'Food & Ingredients': 'green', 'Kitchen & Dining': 'orange', 'Numbers & Counting': 'blue',
     'Time & Calendar': 'indigo', 'Grammar': 'purple', 'Around Town': 'teal',
-    'People & Daily Life': 'clay', 'N5 Kanji': 'slate'
+    'People & Daily Life': 'clay', 'N5 Kanji': 'amber'
   };
   function tableTile(id, category) {
     var tc = window.RaumeStudy.tableCustom, ic = window.RaumeStudy.icons;

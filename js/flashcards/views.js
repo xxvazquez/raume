@@ -120,7 +120,6 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Cards to study</span><span class="help-desc">What Study now would start with: due reviews plus today’s new cards.</span></li>' +
       '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, or just one table. Study now follows it until you switch back; the rings still count everything.</span></li>' +
       '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review. The dots are this week: full when studied, half for today until Review closes.</span></li>' +
-      '<li><span class="help-term">Level</span><span class="help-desc">One level per 25 words mastered — every card of a word remembered for three weeks. Forgetting one never takes a level back.</span></li>' +
       '<li><span class="help-term">Awards</span><span class="help-desc">Medals for streaks, reviews, words, kana, kanji, puzzles and games. Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
       '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news: more reviews than last week, or a new best Match pace.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
@@ -264,7 +263,9 @@ window.RaumeStudy.flashcards.views = (function () {
         html += '<details open class="fc-manage-group"><summary class="fc-manage-group-title">' + window.RaumeStudy.vocab.categoryHeaderHtml(cat, totalInCategory) + "</summary>";
         // Bulk add for the whole category -- the "no way to add more than one
         // table at once" gap. Only worth showing when more than one table
-        // still has words left to add.
+        // still has words left to add. It's the card's last row, an iOS
+        // action row in the tint, not a button floating on the ground.
+        var catAddRow = "";
         if (manageFilter === "all") {
           var partialTables = tableIds.filter(function (k) {
             if (isTablePaused(k)) return false; // resume it before bulk-adding
@@ -272,8 +273,8 @@ window.RaumeStudy.flashcards.views = (function () {
             return t.ids.filter(function (id) { return vocabState(id) === "active"; }).length < t.ids.length;
           });
           if (partialTables.length > 1) {
-            html += '<div class="fc-manage-cat-actions">' +
-              '<button type="button" class="fc-btn" data-cat-action="add-cat" data-cat="' + esc(cat) + '" title="Adds every word from every table in this category (skips rows you’ve hidden on the vocabulary page)">Add all ' + partialTables.length + ' remaining tables</button></div>';
+            catAddRow = '<div class="fc-manage-table fc-manage-cat-row">' +
+              '<button type="button" class="fc-manage-cat-add" data-cat-action="add-cat" data-cat="' + esc(cat) + '" title="Adds every word from every table in this category (skips rows you’ve hidden on the vocabulary page)">Add all ' + partialTables.length + ' remaining tables</button></div>';
           }
         }
         tableIds.forEach(function (tableId) {
@@ -303,6 +304,8 @@ window.RaumeStudy.flashcards.views = (function () {
           html += '<div class="fc-manage-table' + (expanded ? "" : " fc-manage-table-collapsed") + (tablePaused ? " fc-manage-table-paused" : "") + '"' +
             (tileKey ? ' data-tile="' + tileKey + '"' : "") + '>' +
             '<div class="fc-manage-table-head">' +
+            // The disclosure chevron trails the row (after the actions), as
+            // on the reference pages and everywhere else in iOS.
             '<button type="button" class="fc-manage-table-toggle" data-table-id="' + tableId + '" aria-expanded="' + expanded + '" aria-label="' + (expanded ? "Collapse" : "Expand") + " " + esc(displayTitle) + '">' + CHEVRON_ICON + "</button>" +
             // Title over its count, iOS list-row style: the name gets the whole
             // width (and may wrap) instead of being cut off beside "0 / 19".
@@ -349,7 +352,7 @@ window.RaumeStudy.flashcards.views = (function () {
           });
           html += "</div></div>";
         });
-        html += "</details>";
+        html += catAddRow + "</details>";
       });
     }
     panel.innerHTML = html;
@@ -546,8 +549,7 @@ window.RaumeStudy.flashcards.views = (function () {
   // Settings follows iOS Settings: a grey group header, a white card of 44px
   // rows (label left, value or control right), and a short grey footnote
   // under the card -- instead of a paragraph under every field. Changes save
-  // as you make them (a number when you leave its field, a switch or tick at
-  // once); there's no Save button, same as iOS.
+  // as you make them; there's no Save button, same as iOS.
   // iOS Settings marks each row with a tile: a white glyph on its own hue
   // (the table rows' --tile palette), the row's hairline inset to its text.
   var SET_TILES = {
@@ -561,10 +563,35 @@ window.RaumeStudy.flashcards.views = (function () {
     var t = SET_TILES[key];
     return t ? '<span class="set-tile" data-tile="' + t[0] + '"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + t[1] + "</svg></span>" : "";
   }
-  function setNum(id, label, value, min, max, unit, tile) {
-    return '<label class="set-row' + (tile ? " set-row-tiled" : "") + '"><span class="set-label">' + setTile(tile) + esc(label) + '</span><span class="set-value">' +
-      '<input type="number" class="set-num" id="' + id + '" min="' + min + '" max="' + max + '" value="' + value + '" inputmode="numeric">' +
-      (unit ? '<span class="set-unit' + (unit === "%" ? " set-unit-tight" : "") + '">' + unit + "</span>" : "") + "</span></label>";
+  // A number is a pop-up row, as iOS Settings has it: the value and ⌃⌄,
+  // a native select laid invisibly over the row opening the system picker.
+  // A typed field gave no sign it could be changed at all.
+  var UPDOWN = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
+  var PICK_STEPS = {
+    retention: [70, 75, 80, 85, 88, 90, 92, 95, 97, 99],
+    interval: [30, 90, 180, 365, 730, 1825, 3650, 36500],
+    perDay: [0, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200]
+  };
+  function pickLabel(kind, v) {
+    v = Number(v);
+    if (kind === "retention") return v + "%";
+    if (kind !== "interval") return String(v);
+    if (v >= 36500) return "No limit";
+    if (v % 365 === 0) return v / 365 + (v === 365 ? " year" : " years");
+    if (v === 30) return "1 month";
+    if (v % 30 === 0 || v === 180 || v === 90) return Math.round(v / 30) + " months";
+    return v + " days";
+  }
+  function setPick(id, label, value, kind) {
+    var steps = PICK_STEPS[kind].slice();
+    // A value set before these steps existed (or synced from elsewhere)
+    // stays choosable rather than snapping to its neighbour.
+    if (steps.indexOf(Number(value)) < 0) steps = steps.concat(Number(value)).sort(function (a, b) { return a - b; });
+    return '<label class="set-row set-row-tiled set-pick"><span class="set-label">' + setTile(kind) + esc(label) + '</span>' +
+      '<span class="fc-xw-menu-val"><span class="set-pick-val">' + esc(pickLabel(kind, value)) + "</span>" + UPDOWN + "</span>" +
+      '<select class="fc-xw-pick-select set-pick-select" id="' + id + '" data-kind="' + kind + '" aria-label="' + esc(label) + '">' +
+      steps.map(function (v) { return '<option value="' + v + '"' + (v === Number(value) ? " selected" : "") + ">" + esc(pickLabel(kind, v)) + "</option>"; }).join("") +
+      "</select></label>";
   }
   function setSwitch(id, label, on, tile) {
     return '<label class="set-row' + (tile ? " set-row-tiled" : "") + '"><span class="set-label">' + setTile(tile) + esc(label) + '</span>' +
@@ -598,15 +625,15 @@ window.RaumeStudy.flashcards.views = (function () {
       }).join(""), "Study now only draws from the ticked directions. Turning one off keeps its cards and progress.") +
       '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div>' +
       setGroup("Word cards",
-        setNum("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), 70, 99, "%", "retention") +
-        setNum("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, 30, 36500, "days", "interval") +
-        setNum("fcNewPerDay", "New cards per day", s.queue_new_cards_per_day, 0, 200, "", "perDay") +
+        setPick("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), "retention") +
+        setPick("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, "interval") +
+        setPick("fcNewPerDay", "New cards per day", s.queue_new_cards_per_day, "perDay") +
         setSwitch("fcFuzz", "Fuzz intervals", s.fsrs_enable_fuzz, "fuzz"),
-        "FSRS-6 brings a card back when your recall is expected to fall to this level — 90% is its default. 36,500 days means no cap. Fuzz spreads out cards added on the same day.") +
+        "FSRS-6 brings a card back when your recall is expected to fall to this level — 90% is its default. Maximum interval caps how far ahead a card can go. Fuzz spreads out cards added on the same day.") +
       setGroup("Kana cards",
-        setNum("fcKanaRetention", "Desired retention", Math.round(k.fsrs_request_retention * 100), 70, 99, "%", "retention") +
-        setNum("fcKanaMaxInterval", "Maximum interval", k.fsrs_maximum_interval, 30, 36500, "days", "interval") +
-        setNum("fcKanaNewPerDay", "New kana per day", k.new_per_day, 0, 200, "", "perDay") +
+        setPick("fcKanaRetention", "Desired retention", Math.round(k.fsrs_request_retention * 100), "retention") +
+        setPick("fcKanaMaxInterval", "Maximum interval", k.fsrs_maximum_interval, "interval") +
+        setPick("fcKanaNewPerDay", "New kana per day", k.new_per_day, "perDay") +
         setSwitch("fcKanaFuzz", "Fuzz intervals", k.fsrs_enable_fuzz, "fuzz"),
         "Its own schedule, separate from word cards.") +
       appBadgeGroupHtml() +
@@ -661,14 +688,6 @@ window.RaumeStudy.flashcards.views = (function () {
           fsrs_enable_fuzz: document.getElementById("fcKanaFuzz").checked,
           new_per_day: Number(document.getElementById("fcKanaNewPerDay").value)
         });
-        var kSaved = getKanaFsrs();
-        // Reflect any clamping (retention typed as 150 -> 99) back into the fields.
-        document.getElementById("fcRetention").value = Math.round(retention * 100);
-        document.getElementById("fcMaxInterval").value = maxInterval;
-        document.getElementById("fcNewPerDay").value = newPerDay;
-        document.getElementById("fcKanaRetention").value = Math.round(kSaved.fsrs_request_retention * 100);
-        document.getElementById("fcKanaMaxInterval").value = kSaved.fsrs_maximum_interval;
-        document.getElementById("fcKanaNewPerDay").value = kSaved.new_per_day;
         var note = document.getElementById("fcSettingsSaved");
         if (note) note.textContent = "Saved";
       } catch (e) {
@@ -690,10 +709,10 @@ window.RaumeStudy.flashcards.views = (function () {
         });
         return;
       }
+      if (target.classList.contains("set-pick-select")) {
+        target.closest(".set-pick").querySelector(".set-pick-val").textContent = pickLabel(target.dataset.kind, target.value);
+      }
       saving = saving.then(function () { return saveAll(target); });
-    });
-    panel.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && e.target.classList && e.target.classList.contains("set-num")) e.target.blur();
     });
   }
   // --- Back up & restore (guest mode) ---
