@@ -66,6 +66,25 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function splitAlternatives(s) {
     return String(s || "").split(" / ").map(function (x) { return x.trim(); }).filter(Boolean);
   }
+  // A list of meanings ("job, work", "he; boyfriend") reads as a list, so
+  // any one of them is a right answer, like a " / " alternative. Only a
+  // comma or semicolon followed by a space and outside brackets splits --
+  // "1,000" and "(a, b)" stay whole -- and never in a sentence, where
+  // "Yes, please" is one answer.
+  function splitMeaningList(s) {
+    var parts = [], depth = 0, from = 0;
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (ch === "(" || ch === "（") depth++;
+      else if ((ch === ")" || ch === "）") && depth) depth--;
+      else if (!depth && (ch === "," || ch === ";") && /\s/.test(s.charAt(i + 1))) {
+        parts.push(s.slice(from, i)); from = i + 1;
+      }
+    }
+    parts.push(s.slice(from));
+    parts = parts.map(function (x) { return x.trim(); }).filter(Boolean);
+    return parts.length > 1 ? parts : [];
+  }
 
   function jpPlainOf(segments) {
     return segments.map(function (seg) { return seg.kanji ? seg.kanji : (seg.text || seg.p || ""); }).join("");
@@ -282,9 +301,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
         // though typing it along with the answer still counts.
         entry.englishNote = row.enNote || "";
         entry.englishFull = row.english + (row.enNote ? " (" + row.enNote + ")" : "");
+        var sentence = table.tableClass === "vocab-sentences" || /[?!]|\.(\s|$)/.test(row.english);
         entry.englishAnswers = splitAlternatives(row.english).reduce(function (all, a) {
           var list = englishAnswerVariants(a);
           if (row.enNote) list.push(normalizeAnswer(a + " " + row.enNote, false));
+          if (!sentence) splitMeaningList(a).forEach(function (part) { list = list.concat(englishAnswerVariants(part)); });
           return all.concat(list);
         }, []);
         index[row.id] = entry;

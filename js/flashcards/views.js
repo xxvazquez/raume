@@ -103,7 +103,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
       '<li><span class="help-term">Another word</span><span class="help-desc">Another word that also fits the English (kantan for “easy” when the card wants yasashii) isn’t marked wrong — try again.</span></li>' +
       '<li><span class="help-term">Notes</span><span class="help-desc">The grey line under a meaning (“before a noun”) is a hint — type just the meaning.</span></li>' +
-      '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man.</span></li>' +
+      '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man. The same for a list like job, work.</span></li>' +
       '<li><span class="help-term">Same sound</span><span class="help-desc">Romaji like atsui can be several words — any of their meanings counts.</span></li>' +
       '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
       '<li><span class="help-term">Kanji cards</span><span class="help-desc">A kanji asks only its meaning and one reading — yama or san both count.</span></li>' +

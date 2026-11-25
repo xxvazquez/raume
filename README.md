@@ -327,6 +327,9 @@ their cards then.
 - Several right answers typed together count — `grandfather, old man`,
   `yon / shi` — and a word with two readings (四: *yon / shi*) accepts either
   one alone.
+- A meaning written as a list (*job, work* or *he; boyfriend*) takes any one
+  of them alone. Commas inside brackets or a number (*1,000*) and in
+  sentences stay part of the answer.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
   for `ryōri shimasu`.
 - The right answer in the wrong language — the romaji on a card that asks for

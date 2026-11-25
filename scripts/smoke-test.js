@@ -3149,6 +3149,15 @@ async function main() {
     return vi.checkAnswer(idx.v0635, "jp-en", "1 oclock") && !vi.checkAnswer(idx.v0635, "jp-en", "2 oclock")
       && !!deepFry && vi.checkAnswer(deepFry, "jp-en", "deep fry") && !!stirFry && vi.checkAnswer(stirFry, "jp-en", "stirfry");
   })());
+  check("any one meaning of a comma list counts (long, thin items), but a number's comma and a sentence's don't split", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    const idx = vi.getVocabIndex();
+    const thousand = Object.values(idx).find(e => e.englishDisplay === "1,000");
+    return vi.checkAnswer(idx.v0003, "jp-en", "long") && vi.checkAnswer(idx.v0003, "jp-en", "thin items")
+      && vi.checkAnswer(idx.v0003, "jp-en", "long, thin items")
+      && !!thousand && !vi.checkAnswer(thousand, "jp-en", "1") && vi.checkAnswer(thousand, "jp-en", "1,000")
+      && !vi.checkAnswer(idx.v1029, "jp-en", "washington") && vi.checkAnswer(idx.v1029, "jp-en", "Washington DC");
+  })());
   check("ん typed nn before a vowel or y counts (honnya, kinnyoubi), and the apostrophe-free spelling still does", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
