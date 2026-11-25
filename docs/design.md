@@ -1131,13 +1131,13 @@ The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
 watermelon") and the Across / Down cards beside it, so the whole puzzle is in
 view without scrolling; narrower, the clue bar sits above a full-width grid
-and the lists below. Wide, the lists share their row with a **notes pad**
-(`.fc-xw-notes`): a "Notes" list header over a plain white `--radius-card`
-textarea a fixed 320px tall (a pad stretched down a 20-row list was one
-blank slab), no border, no Save, section-tone caret — the
-free space beside a short word list rather than an over-wide one (a word
-search's list is held to 300px); where it wraps under the lists it spans
-their full width, edges aligned. It belongs to the puzzle (blank on New
+and the lists below. Wide, a **notes pad** (`.fc-xw-notes`) sits under the grid, the two
+sharing one column (`.fc-xw-main`) beside the lists: a "Notes" list header
+over a plain white `--radius-card` textarea that fills whatever height the
+grid leaves free beside the lists (160px at least), so neither column ends
+in a blank stretch of ground; no border, no Save, section-tone caret. An
+arroword, which has no lists, puts it under the clue bar instead, as tall as
+the grid; a stacked puzzle gives it a modest 200px under the lists. It belongs to the puzzle (blank on New
 puzzle) and isn't on a phone or in print. The clue bar is there from the start (a muted "Tap a square or a clue to
 start" until one is picked), so the first tap never pushes the grid down; moving square to
 square focuses without the browser's scroll, and the page moves only to bring a hidden square

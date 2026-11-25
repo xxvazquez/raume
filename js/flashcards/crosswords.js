@@ -2714,7 +2714,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return rows.join("");
   }
 
-  // A scratch pad beside the clues on a wide window -- readings, guesses,
+  // A scratch pad under the grid on a wide window -- readings, guesses,
   // kana while solving. Kept for the puzzle it was written on (across tab
   // switches), blank again with the next one; a phone has no room for it.
   function notesHtml() {
@@ -3586,12 +3586,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * GRID_CELL) + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
-      (wordsearch
-        ? '<div class="fc-xw-gridwrap">' + wordSearchGridHtml(p, romajiMode) + "</div>"
-        : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start</p>' +
-          '<div class="fc-xw-gridwrap"><div class="fc-xw-grid">' +
-          gridHtml(p, arroword, romajiMode) + "</div></div>") +
-      '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : arroword ? "" : clueListHtml(p)) + notesHtml() + "</div>" +
+      (wordsearch ? "" : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start</p>') +
+      // The grid with the notes pad under it, so on a wide window the pad
+      // fills the space below the grid beside the (longer) lists.
+      '<div class="fc-xw-main"><div class="fc-xw-gridwrap">' +
+      (wordsearch ? wordSearchGridHtml(p, romajiMode)
+        : '<div class="fc-xw-grid">' + gridHtml(p, arroword, romajiMode) + "</div>") +
+      "</div>" + notesHtml() + "</div>" +
+      (arroword ? "" : '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : clueListHtml(p)) + "</div>") +
       "</div>";
 
     fitPuzzle();

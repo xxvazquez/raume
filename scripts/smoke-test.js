@@ -4318,8 +4318,8 @@ async function main() {
       && document.querySelector("#fcPanelCrosswords .fc-xw-print-title").textContent === "Word search"
       && document.querySelectorAll("#fcPanelCrosswords [style]").length === 0;
   })());
-  check("a notes pad sits beside the word list, keeps its text across a re-render of the same puzzle, and starts blank with a new one", (() => {
-    const pad = document.querySelector("#fcPanelCrosswords .fc-xw-side > .fc-xw-notes #fcXwNotes");
+  check("a notes pad sits under the word search grid, keeps its text across a re-render of the same puzzle, and starts blank with a new one", (() => {
+    const pad = document.querySelector("#fcPanelCrosswords .fc-xw-main > .fc-xw-notes #fcXwNotes");
     if (!pad || pad.tagName !== "TEXTAREA") return false;
     pad.value = "みず = water";
     pad.dispatchEvent(new window.Event("input"));

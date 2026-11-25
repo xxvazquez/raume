@@ -4176,6 +4176,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-clues {
   flex: 1 1 300px; min-width: 0; max-width: 620px;
   display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start;
+  /* Never stretched to a taller neighbour: each card stays its own height. */
+  align-content: start;
 }
 .fc-xw-cluehead { margin: 0 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
@@ -6232,52 +6234,64 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .fc-xw-scrim { display: none; }
 .fc-xw-actions + .fc-xw-footnote { margin-top: -6px; }
 
-/* The puzzle: one DOM order (clue bar, grid, clue lists) laid out by grid
-   areas -- stacked on a phone (clue bar above the grid, lists below), the
-   grid leading with the clue bar and lists beside it on a wide window, so
-   the whole puzzle is in view without scrolling. */
+/* The puzzle: one DOM order (clue bar, grid + notes, clue lists) laid out
+   by grid areas -- stacked on a phone (clue bar above the grid, lists
+   below), the grid leading with the clue bar and lists beside it on a wide
+   window, so the whole puzzle is in view without scrolling. The grid and
+   its notes pad share .fc-xw-main: a column of its own beside the lists on
+   a wide window, dissolved into the stack (display: contents) otherwise. */
 .fc-xw-puzzle {
   display: grid; grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "current" "grid" "clues"; gap: 14px; align-items: start;
+  grid-template-areas: "current" "grid" "clues" "notes"; gap: 14px; align-items: start;
 }
 .fc-xw-puzzle > .fc-xw-current { grid-area: current; margin: 0; }
-.fc-xw-puzzle > .fc-xw-gridwrap { grid-area: grid; }
-/* Beside the grid: the clue (or word) list, then a notes pad filling the
-   rest of the row, as tall as the list -- a word list stretched across a
-   wide window was a lot of empty white. A fixed height, top-aligned with
-   the list's card: a pad stretched down a 20-row list was one tall blank
-   slab. Uncapped in width, so a pad that wraps under the lists (the 900px
-   column leaves no room beside them) lines up with their edges. */
-.fc-xw-puzzle > .fc-xw-side { grid-area: clues; display: flex; flex-wrap: wrap; gap: 16px 24px; min-width: 0; }
-.fc-xw-notes { flex: 1 1 200px; align-self: flex-start; display: flex; flex-direction: column; }
+.fc-xw-main { display: contents; }
+.fc-xw-main > .fc-xw-gridwrap { grid-area: grid; }
+.fc-xw-puzzle > .fc-xw-side { grid-area: clues; min-width: 0; }
+/* A word search has no clue bar, an arroword no lists. */
+.fc-xw-puzzle-ws { grid-template-areas: "grid" "clues" "notes"; }
+.fc-xw-puzzle-arroword { grid-template-areas: "current" "grid" "notes"; }
+/* Notes: a "Notes" list header over a plain white card. Stacked, a modest
+   fixed height; beside the lists it fills whatever the grid leaves free
+   below it, so neither column ends in a blank stretch of ground. */
+.fc-xw-notes { grid-area: notes; display: flex; flex-direction: column; min-width: 0; }
 .fc-xw-notes-pad {
-  box-sizing: border-box; width: 100%; height: 320px; margin: 0; padding: 12px 16px;
+  box-sizing: border-box; width: 100%; height: 200px; margin: 0; padding: 12px 16px;
   border: 0; border-radius: var(--radius-card); background: var(--paper); color: var(--ink);
   font: 400 var(--fs-nav)/1.5 var(--font-ui); resize: none; caret-color: var(--section);
 }
 .fc-xw-notes-pad::placeholder { color: var(--faint); }
 .fc-xw-notes-pad:focus { outline: 0; }
 @media (max-width: 759px) {
-  .fc-xw-notes, .fc-xw-puzzle-arroword > .fc-xw-side { display: none; }
+  .fc-xw-notes { display: none; }
 }
 @media (min-width: 760px) {
-  /* A word list of short words needs no more than this. */
-  .fc-xw-side > .fc-ws-list { flex: 0 1 300px; }
   /* The grid's column never grows past what's left beside the clues
      (minmax(0, …)), so the page itself never scrolls sideways; a grid too
      wide for that gets .fc-xw-puzzle-stack from fitPuzzle() instead. */
   .fc-xw-puzzle:not(.fc-xw-puzzle-stack) {
     grid-template-columns: minmax(0, max-content) minmax(260px, 1fr);
     grid-template-rows: auto 1fr;
-    grid-template-areas: "grid current" "grid clues";
+    grid-template-areas: "main current" "main clues";
     gap: 14px 24px;
   }
-  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) > .fc-xw-gridwrap .fc-xw-grid { margin: 0; }
-  /* A word search has no clue bar: grid and lists share one row, the
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) > .fc-xw-main {
+    grid-area: main; align-self: stretch; min-width: 0;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) .fc-xw-notes { flex: 1 1 auto; }
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) .fc-xw-notes-pad { flex: 1 1 auto; height: auto; min-height: 160px; }
+  .fc-xw-puzzle:not(.fc-xw-puzzle-stack) .fc-xw-gridwrap .fc-xw-grid { margin: 0; }
+  /* A word search has no clue bar: grid and list share one row, the
      grid's card dropped by a list header's height so its top lines up
      with the list's card beside it. */
-  .fc-xw-puzzle-ws:not(.fc-xw-puzzle-stack) { grid-template-rows: auto; grid-template-areas: "grid clues"; }
-  .fc-xw-puzzle-ws:not(.fc-xw-puzzle-stack) > .fc-xw-gridwrap { padding-top: calc(var(--fs-small) * 1.3 + 6px); }
+  .fc-xw-puzzle-ws:not(.fc-xw-puzzle-stack) { grid-template-rows: auto; grid-template-areas: "main clues"; }
+  .fc-xw-puzzle-ws:not(.fc-xw-puzzle-stack) .fc-xw-gridwrap { padding-top: calc(var(--fs-small) * 1.3 + 6px); }
+  /* An arroword has no lists: its notes take the lists' place, under the
+     clue bar and as tall as the grid. */
+  .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) { grid-template-areas: "grid current" "grid notes"; }
+  .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) > .fc-xw-main { display: contents; }
+  .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) .fc-xw-notes { align-self: stretch; }
   /* The grid's column sizes to its cells' intrinsic width, which ignores
      their 40px flex basis -- give them the width outright (they still shrink
      if a very wide grid needs it). */

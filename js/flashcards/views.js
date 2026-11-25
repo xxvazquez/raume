@@ -146,7 +146,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type — on a keyboard, romaji turns into kana. A right square turns green. Tap a crossing square again to switch direction.</span></li>' +
       '<li><span class="help-term">Hint</span><span class="help-desc">Fills the square you’re on (else the next one not yet right) — or, in a word search, shows one word.</span></li>' +
       '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals the puzzle, clears or saves a PDF.</span></li>' +
-      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad beside the clues for readings or guesses. Blank again with each new puzzle.</span></li>' +
+      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad under the grid for readings or guesses. Blank again with each new puzzle.</span></li>' +
       '<li><span class="help-term">Word search</span><span class="help-desc">Find the Japanese for each clue: drag across it, or tap its first and last letter. Any direction, backwards too.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Games</h3>' +
