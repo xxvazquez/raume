@@ -4843,6 +4843,8 @@ async function main() {
   };
   const wcSubmit = () => wcEl(".fc-wc-form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
   const wcMsg = () => wcEl(".fc-wc-msg").textContent;
+  // A word as written, without its furigana.
+  const wcWritten = el => { const c = el.cloneNode(true); c.querySelectorAll("rt").forEach(r => r.remove()); return c.textContent; };
   check("Word chain: the first word in the trail, \"Starts with\" its last kana, a field to type in, Hint, and Skip in ⋯ -- nothing to tap instead", (() => {
     const p = xw.state.puzzle;
     const menu = [...document.querySelectorAll("#fcPanelGames .fc-xw-menu-item")].map(b => b.textContent).join("|");
@@ -4899,11 +4901,12 @@ async function main() {
   // (Not one with ん before a vowel -- toRomaji writes きんえん as "kinen".)
   const wcNext = wcDict.byHead[wcStart.tail].find(o => o.key !== wcStart.key && o.written !== o.answer && !/[んン][あいうえおやゆよアイウエオヤユヨ]/.test(o.answer)
     && wcCarries(o, { [wcStart.key]: true }));
-  check("a good word typed in romaji joins the trail as it's written (kanji and all), its English under the field", (() => {
+  check("a good word typed in romaji joins the trail as it's written (kanji with furigana), its English under the field", (() => {
     wcType(window.RaumeStudy.kanaRomaji.toRomaji(wcNext.answer).replace(/[āīūēō]/g, v => ({ ā: "a-", ī: "i-", ū: "u-", ē: "e-", ō: "o-" })[v]));
     wcSubmit();
     const chips = document.querySelectorAll("#fcPanelGames .fc-wc-chip");
-    return chips.length === 2 && chips[1].querySelector(".fc-wc-chip-w").textContent === wcNext.written
+    return chips.length === 2 && wcWritten(chips[1].querySelector(".fc-wc-chip-w")) === wcNext.written
+      && !!chips[1].querySelector("ruby rt.furigana")
       && wcEl(".fc-wc-en").textContent === wcNext.written + " · " + wcNext.clue && wcMsg() === "" && wcEl(".fc-wc-kana").textContent === wcNext.tail
       && document.getElementById("fcLsCount").textContent === "2 / 3" && wcEl(".fc-wc-field").value === "";
   })());
@@ -4930,14 +4933,15 @@ async function main() {
   })());
   await (async () => {
     const need = wcEl(".fc-wc-kana").textContent;
-    const trailText = [...document.querySelectorAll("#fcPanelGames .fc-wc-chip-w")].map(c => c.textContent);
+    const trailText = [...document.querySelectorAll("#fcPanelGames .fc-wc-chip-w")].map(wcWritten);
     const good = wcDict.byHead[need].find(o => o.tail !== "ん" && !trailText.includes(o.written));
     wcType(good.answer);
     wcSubmit();
     for (let waited = 0; waited < 3000 && !wcEl(".fc-mt-done"); waited += 25) await new Promise(r => setTimeout(r, 25));
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("wordchain").pop();
-    check("the typed game ends after its links: the one clean link scored, the hinted and skipped ones missed, help logged, its own setup",
-      !!wcEl(".fc-mt-done") && wcEl(".fc-mt-done-time").textContent === "1 / 3" && wcEl(".fc-wc-chain").textContent.split(" → ").length === 4
+    check("the typed game ends after its links: the one clean link scored, the hinted and skipped ones missed (marked in the chain list), help logged, its own setup",
+      !!wcEl(".fc-mt-done") && wcEl(".fc-mt-done-time").textContent === "1 / 3" && document.querySelectorAll("#fcPanelGames .fc-wc-chain li").length === 4
+      && [...document.querySelectorAll("#fcPanelGames .fc-wc-chain-missed")].map(li => li.querySelector(".fc-wc-chain-tag").textContent).join() === "Missed,Missed"
       && !!last && last.right === 1 && last.n === 3 && last.help === 1 && last.missed.length === 2 && /\|kana\|type\|3$/.test(last.setup));
   })();
   xwSource("flashcards");

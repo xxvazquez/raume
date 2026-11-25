@@ -647,7 +647,7 @@ with reduced motion on, it's all a plain change of state.
 - しりとり: each word starts with the kana the one before it ends on, and
   you **type** it — nothing to pick from, so you have to recall a word.
   The chain so far runs along the top (each word as it's written, its
-  reading under kanji, its English, the kana it links on underlined); under it, "Starts
+  kanji with furigana, its English, the kana it links on underlined); under it, "Starts
   with や" in large kana, with the last word and its English.
 - Type in romaji and it turns into kana as you go, like a Japanese
   keyboard: `ya` → や, `shi` / `si` → し, a doubled consonant → っ
@@ -672,7 +672,9 @@ with reduced motion on, it's all a plain change of state.
   it again and it shows the word itself (its kana under kanji) to type in —
   still one hint. ⋯ › *Skip this link* plays one for you. *Words* is the number of links; a link
   counts as right only with no miss, hint or skip. At the end: the score,
-  the whole chain on one line (each word with its English), and the links you missed. Hints show in its
+  the whole chain as a list, one row per link in order (the word with its
+  furigana and romaji, the kana it links on underlined, its English); a
+  missed link's row is tinted amber and says "Missed". Hints show in its
   Stats.
 
 </details>

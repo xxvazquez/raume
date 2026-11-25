@@ -4435,7 +4435,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ss-bucket.fc-ss-was { box-shadow: 0 0 0 2px var(--right); color: var(--right-strong); }
 /* Word chain's finish card sets the whole chain as one wrapping line. */
 .fc-wc-en { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
-.fc-wc-chain { margin: 4px 0 12px; color: var(--ink); font-size: var(--fs-nav); line-height: 1.6; text-align: center; }
+.fc-wc-chain-head { align-self: stretch; margin: 10px 10px 4px; color: var(--muted); font-size: var(--fs-small); }
+.fc-wc-chain { align-self: stretch; margin: 0 0 16px; padding: 0; list-style: none; }
+.fc-wc-chain li { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 10px; border-top: 1px solid var(--row-line); }
+.fc-wc-chain-missed { background: var(--tricky-bg); }
+.fc-wc-chain-n { flex: none; min-width: 1.4em; color: var(--faint); font-size: var(--fs-small); font-variant-numeric: tabular-nums; text-align: right; }
+.fc-wc-chain-word { display: flex; flex-direction: column; min-width: 0; }
+.fc-wc-chain-jp { font-size: 17px; line-height: 1.3; color: var(--ink); }
+.fc-wc-chain-ro { color: var(--muted); font-size: var(--fs-small); }
+.fc-wc-chain-en { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; color: var(--muted); font-size: var(--fs-small); text-align: right; }
+.fc-wc-chain-tag { color: var(--tricky-ink); font-size: var(--fs-micro); }
 /* Word chain: the chain so far as a row of white chips (written
    form, its reading small under kanji; the kana the chain runs on
    underlined in the section tint), scrolling sideways, the newest sliding
@@ -4455,10 +4464,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   padding: 6px 12px; border-radius: 14px; background: var(--paper); box-shadow: var(--control-lift);
 }
 .fc-wc-chip-w { font-size: 17px; line-height: 1.25; color: var(--ink); }
-.fc-wc-chip-r { font-size: 11px; color: var(--muted); }
 .fc-wc-chip-en { font-size: 11px; line-height: 1.3; color: var(--muted); white-space: nowrap; }
-.fc-wc-chain-en { color: var(--muted); font-size: var(--fs-small); }
-.fc-wc-chip u { text-decoration: underline 2px var(--section); text-underline-offset: 3px; }
+:is(.fc-wc-chip, .fc-wc-chain) u { text-decoration: underline 2px var(--section); text-underline-offset: 3px; }
+:is(.fc-wc-chip, .fc-wc-chain) rt u { text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
 .fc-wc-chip-new { animation: fc-wc-in .3s cubic-bezier(.2, .8, .2, 1); }
 @keyframes fc-wc-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 .fc-wc-need { position: relative; }
@@ -4476,6 +4484,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   flex: 1 1 auto; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent;
   font: 400 15px/1 var(--font-ui); color: var(--ink); outline: none;
 }
+/* あ | ア: which kana romaji turns into -- a small segmented control in the
+   field, the selected segment on the section-tone wash. */
+.fc-wc-script { flex: none; display: flex; padding: 2px; border-radius: 18px; background: var(--seg-track); box-shadow: var(--control-lift); }
+.fc-wc-kana-btn {
+  appearance: none; border: 0; padding: 0; position: relative; width: 34px; height: 32px; border-radius: 16px;
+  background: transparent; color: var(--muted); font: 400 15px/1 var(--font-ui); cursor: pointer;
+}
+.fc-wc-kana-btn::after { content: ""; position: absolute; inset: -6px -2px; } /* 44pt hit area */
+.fc-wc-kana-btn[aria-pressed="true"] { background: var(--section-soft); color: var(--section-strong); font-weight: 600; }
+.fc-wc-kana-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; }
 .fc-wc-go {
   appearance: none; border: 0; padding: 0; flex: none; display: flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; border-radius: 50%; background: var(--section); color: #fff; cursor: pointer;
@@ -4514,16 +4532,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-choice:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong),
 .fc-oo-word:disabled:not(.fc-mt-right):not(.fc-ls-chosen-wrong),
 .fc-ss-bucket:disabled:not(.fc-mt-right):not(.fc-mt-wrong):not(.fc-ss-was) { opacity: .45; }
-/* あ | ア: which kana romaji turns into -- a small segmented control in the
-   field, the selected segment on the section-tone wash. */
-.fc-wc-script { flex: none; display: flex; padding: 2px; border-radius: 18px; background: var(--seg-track); box-shadow: var(--control-lift); }
-.fc-wc-kana-btn {
-  appearance: none; border: 0; padding: 0; position: relative; width: 34px; height: 32px; border-radius: 16px;
-  background: transparent; color: var(--muted); font: 400 15px/1 var(--font-ui); cursor: pointer;
-}
-.fc-wc-kana-btn::after { content: ""; position: absolute; inset: -6px -2px; } /* 44pt hit area */
-.fc-wc-kana-btn[aria-pressed="true"] { background: var(--section-soft); color: var(--section-strong); font-weight: 600; }
-.fc-wc-kana-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; }
 .fc-oo-en:not([hidden]) { animation: fc-fb-rise .3s .1s ease-out both; }
 .fc-oo-reveal:not([hidden]), .fc-ls-word:not([hidden]), .fc-kt-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
 /* The question counter's number rolls up into place. */

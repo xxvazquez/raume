@@ -1193,17 +1193,21 @@ Stats hue is clay.
 **Word chain** keeps Listening's toolbar ("3 / 10", ⏸) plus a white Hint
 capsule before ⏸, and *Skip this link* first in ⋯. Typed, never tapped:
 the chain so far is a sideways-scrolling row of white chips
-(`--control-lift`, 14px corners) — the written form at 17px, its reading at
-11px grey under kanji, the kana it links on underlined 2px in the section
-tint — the newest sliding in from the right. Under it Speed sort's card:
+(`--control-lift`, 14px corners) — the written form at 17px, kanji with
+their furigana, the kana it links on underlined 2px in the section
+tint (in the furigana when that's where it is) — the newest sliding in from the right. Under it Speed sort's card:
 a quiet "Starts with", the kana at 44px in `--section-strong`, the last
 word and its English as one grey line, and a bare ⓘ in its corner opening
 the rules as a glass note. Then the field: a 44px white capsule like the
 search field (15px text, a section ring on focus) with a 36px filled ↑
 circle inside its trailing end; romaji turns into kana in it as you type.
 One line under it (kept tall enough not to jump) says what went wrong in
-coral, with Speed sort's shake on the field, or shows a hint. The finish card sets the whole chain as one centred, wrapping line
-("りんご → ごま → まど …"). Its Stats hue is slate.
+coral, with Speed sort's shake on the field, or shows a hint. The finish card lists the whole chain
+under a "Your chain" list header, one hairline 44px row per link in order:
+a faint number, the word (17px, kanji with furigana, the link kana
+underlined as in the trail) over its romaji, the English trailing; a
+missed link's row wears the Tricky wash and says "Missed" under its
+English. No second list of missed words. Its Stats hue is slate.
 
 **Odd one out** keeps Listening's toolbar: a quiet "Which one doesn’t
 belong?" over a 2 × 2 of Match's white tiles, each word centred at 20px;

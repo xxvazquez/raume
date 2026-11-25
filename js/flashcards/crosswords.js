@@ -2020,16 +2020,38 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     pool.forEach(function (w) { poolIds[w.id] = true; });
     return { start: starts[0], links: Math.min(limit, Math.max(CHAIN_MIN, pool.length)), poolIds: poolIds, placements: [] };
   }
-  // One chip of the trail: the word as written and, under it when that's
-  // kanji, its reading -- the kana the chain runs on underlined (its first
-  // where it carries on from the word before, the one it ends on).
+  // A chain word as it's written, kanji with their furigana, the kana the
+  // chain runs on underlined: its first (where it carries on from the word
+  // before) and the one it ends on -- in the reading when that's furigana.
+  function chainWordHtml(w, first) {
+    var entry = vocabIndex()[w.id] || {};
+    var box = document.createElement("span");
+    box.innerHTML = w.written !== w.answer && entry.jpInlineHtml ? entry.jpInlineHtml : esc(w.written);
+    var kana = [];
+    (function walk(el) {
+      Array.prototype.forEach.call(el.childNodes, function (n) {
+        if (n.nodeType === 3) Array.from(n.data).forEach(function (c, i) { if (/[ぁ-ゖァ-ヺー]/.test(c)) kana.push({ node: n, at: i, c: c }); });
+        else if (n.nodeType === 1 && n.tagName !== "RB") walk(n);
+      });
+    })(box);
+    var ends = kana.filter(function (k) { return k.c !== "ー"; });
+    var marks = [];
+    if (!first && ends.length) marks.push(ends[0]);
+    if (ends.length && ends[ends.length - 1] !== marks[0]) marks.push(ends[ends.length - 1]);
+    // Later one first, so the earlier one's offset still holds.
+    marks.reverse().forEach(function (k) {
+      var mid = k.node.splitText(k.at);
+      mid.splitText(1);
+      var u = document.createElement("u");
+      mid.parentNode.replaceChild(u, mid);
+      u.appendChild(mid);
+    });
+    return box.innerHTML.replace(/^〜/, "");
+  }
+  // One chip of the trail: the word (see chainWordHtml) over its English.
   function chainChipHtml(w, first, isNew) {
-    var chars = Array.from(w.answer), end = Array.from(w.answer.replace(/ー+$/, "")).length - 1;
-    var marked = chars.map(function (c, i) { return (i === 0 && !first) || i === end ? "<u>" + esc(c) + "</u>" : esc(c); }).join("");
-    var kanji = w.written !== w.answer;
     return '<span class="fc-wc-chip' + (isNew ? " fc-wc-chip-new" : "") + '">' +
-      '<span class="fc-wc-chip-w" lang="ja">' + (kanji ? esc(w.written) : marked) + "</span>" +
-      (kanji ? '<span class="fc-wc-chip-r" lang="ja">' + marked + "</span>" : "") +
+      '<span class="fc-wc-chip-w" lang="ja">' + chainWordHtml(w, first) + "</span>" +
       '<span class="fc-wc-chip-en">' + esc(w.clue) + "</span></span>";
   }
   var SEND_ICON = '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14.5v-11M4.5 8 9 3.5 13.5 8"/></svg>';
@@ -2190,13 +2212,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (pop && !pop.hidden) { pop.hidden = true; boardEl.querySelector(".fc-wc-info").setAttribute("aria-expanded", "false"); }
     });
     function setup() { return setupKey(total, "kana|type"); }
+    // The finished chain, an inset list in order: each link's word (with
+    // its furigana, the link kana underlined) and romaji, its English
+    // trailing; a missed link wears the Tricky wash and says so.
     function chainLineHtml() {
-      return '<p class="fc-wc-chain">' + trail.map(function (w) { return '<span lang="ja">' + esc(w.written) + '</span> <span class="fc-wc-chain-en">' + esc(w.clue) + "</span>"; }).join(" → ") + "</p>";
-    }
-    function missedHtml() {
-      return missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
-        return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
-      }).join("") + "</ul>" : "";
+      return '<p class="fc-wc-chain-head">Your chain</p><ol class="fc-wc-chain">' + trail.map(function (w, i) {
+        var miss = missed.indexOf(w) >= 0, entry = vocabIndex()[w.id] || {};
+        return "<li" + (miss ? ' class="fc-wc-chain-missed"' : "") + '><span class="fc-wc-chain-n">' + (i + 1) + "</span>" +
+          '<span class="fc-wc-chain-word"><span class="fc-wc-chain-jp" lang="ja">' + chainWordHtml(w, i === 0) + "</span>" +
+          '<span class="fc-wc-chain-ro">' + esc(String(entry.romajiDisplay || "").split(" / ")[0]) + "</span></span>" +
+          '<span class="fc-wc-chain-en">' + esc(w.clue) + (miss ? '<span class="fc-wc-chain-tag">Missed</span>' : "") + "</span></li>";
+      }).join("") + "</ol>";
     }
     function finish() {
       done = true;
@@ -2207,9 +2233,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + at + "</p>" +
-        accuracyStatsHtml("wordchain", score, at, run) + chainLineHtml() +
-        '<p class="fc-mt-done-meta">' + (missed.length ? "Links you missed:" : "Every link right") + "</p>" +
-        missedHtml() + doneActionsHtml("fcWcAgain") + "</div>";
+        accuracyStatsHtml("wordchain", score, at, run) + chainLineHtml() + doneActionsHtml("fcWcAgain") + "</div>";
       bindDoneActions("fcWcAgain");
     }
     function pause() {
