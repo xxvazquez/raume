@@ -156,7 +156,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Pace medal</span><span class="help-desc">The ring on Match’s end card: gold under 2s a pair, silver under 3s, bronze under 4s.</span></li>' +
       '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
       '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order. A few tiles are look-alikes; a missed word comes back at the end.</span></li>' +
-      '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words come from one table: tap the one that doesn’t belong.</span></li>' +
+      '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words come from one table: tap the one that doesn’t belong. Needs two or more themed tables.</span></li>' +
       '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock. Each answer shows the English, clock stopped; Next or Enter goes on. Sort by, on the setup screen, picks which.</span></li>' +
       '<li><span class="help-term">Word chain</span><span class="help-desc">Type a word that starts with the kana the last one ends on — romaji turns into kana as you type; あ | ア picks hiragana or katakana. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules.</span></li>' +
       '<li><span class="help-term">In a row</span><span class="help-desc">The five dots beside the counter fill with each right answer in a row; a miss empties them.</span></li>' +

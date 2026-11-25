@@ -615,9 +615,10 @@ with reduced motion on, it's all a plain change of state.
   pick), and one line naming the tables: "*imoto* is Family — the rest are
   Drinks". Right moves on by itself; wrong waits for **Next**.
 - A word that sits in two tables, or shares its English with another
-  table's word, never plays — every set has one right answer. It needs
-  words from at least two tables, three or more from one of them; with one
-  table it says so.
+  table's word, never plays — every set has one right answer. It needs two
+  or more themed tables, three or more words from one of them: the setup
+  screen says so and keeps Start off with a single table (a mixed class
+  list included — its table says nothing about what each word is).
 - The score is sets right; the end card lists the odd ones you missed. ⏸
   and End game work as in Listening.
 

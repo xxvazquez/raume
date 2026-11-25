@@ -2582,8 +2582,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function setupHtml() {
     var games = state.kind === "games";
-    var short = state.poolCount < MIN_WORDS;
+    // Odd one out is "which word is from another table", so a single
+    // table -- or one mixed class list -- can't make a set: say so here,
+    // before Start, rather than after it.
+    var noOdd = state.mode === "oddone" && !!state.puzzle && !!state.puzzle.questions && !state.puzzle.questions.length;
+    var short = state.poolCount < MIN_WORDS || noOdd;
     var why = state.source === "table" && !state.tables.length ? "Choose a table to play with."
+      : noOdd ? "Odd one out needs two or more themed tables: three words come from one, the odd word from another. " +
+        "Tick another table under Words from."
       : "This needs at least " + MIN_WORDS + " usable words" + (state.poolCount ? " — these have " + state.poolCount : "") +
         ". Tick more tables under Words from" + (state.source === "table" ? "" : ", or add words to your flashcards") + ".";
     // [key, label, shown value, options] per row under Words from.

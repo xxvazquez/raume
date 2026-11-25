@@ -4744,8 +4744,11 @@ async function main() {
       && !!last && last.right === n - 1 && last.missed.join() === String(ooFirst.words[ooFirst.odd].id);
   })());
   xwSource([ooTables[0]]);
-  check("from a single table it says what a set needs instead of a game", /at least two tables/.test(document.querySelector("#fcPanelGames .fc-xw-footnote").textContent)
-    && !document.querySelector("#fcPanelGames .fc-oo-word"));
+  check("from a single table the setup screen says it needs two or more themed tables, and Start stays off", (() => {
+    const why = document.querySelector("#fcPanelGames .fc-gs-why");
+    return !!why && /two or more themed tables/.test(why.textContent) && document.getElementById("fcGsStart").disabled
+      && !document.querySelector("#fcPanelGames .fc-oo-word");
+  })());
   xwSource("flashcards");
   xwPick("mode", "listening");
 
