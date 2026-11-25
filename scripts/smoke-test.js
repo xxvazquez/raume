@@ -3873,8 +3873,9 @@ async function main() {
     && xw.foldRomajiForGrid("~hon") === "hon" && xw.foldRomajiForGrid("O-namae wa?") === "onamaewa"
     && xw.foldRomajiForGrid("budō", "ぶどう") === "budou" && xw.foldRomajiForGrid("kōhī", "コーヒー") === "koohii"
     && xw.foldRomajiForGrid("ōkii", "おおきい") === "ookii" && xw.foldRomajiForGrid("wa", "は") === "wa");
+  // Sentence tables (Everyday Sentences is the largest) give no grid words.
   check("given a whole pool and a size, the builder swaps in words that cross until it reaches that size -- not a pre-picked handful that mostly doesn't", (() => {
-    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    const biggest = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-sentences").sort((a, b) => b.rows.length - a.rows.length)[0];
     const pool = xw.tableWordPool([biggest.id]).filter(w => w.romaji).map(w => ({ id: w.id, clue: w.clue, answer: w.romaji }));
     if (pool.length < 30) return false; // the largest table should comfortably clear this
     return [0, 1, 2].every(() => xw.buildGrid(pool, false, 12).placements.length === 12);
@@ -3887,7 +3888,7 @@ async function main() {
     && !xw.isGiveaway("こうちゃ", "kocha", "black tea") && !xw.isGiveaway("みず", "mizu", "water")
     && !xw.isGiveaway("ナイフ", "naifu", "fork"));
   check("the word pool only ever offers pure kana, 2-10 characters, deduplicated by reading", (() => {
-    const biggest = window.RaumeStudy.data.vocabularyTables.slice().sort((a, b) => b.rows.length - a.rows.length)[0];
+    const biggest = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-sentences").sort((a, b) => b.rows.length - a.rows.length)[0];
     const pool = xw.tableWordPool([biggest.id]);
     const seen = new Set();
     return pool.length > 0 && pool.every(w => {
@@ -3903,7 +3904,7 @@ async function main() {
     Object.keys(cards).forEach(k => { delete cards[k]; });
     // The longest table of plain words -- verbs have no single written form,
     // so a Match in the written script can't use them.
-    const biggest = window.RaumeStudy.data.vocabularyTables.filter(t => t.rows.every(r => r.type === "word")).sort((a, b) => b.rows.length - a.rows.length)[0];
+    const biggest = window.RaumeStudy.data.vocabularyTables.filter(t => t.tableClass !== "vocab-sentences" && t.rows.every(r => r.type === "word")).sort((a, b) => b.rows.length - a.rows.length)[0];
     const ids = xw.tableWordPool([biggest.id]).slice(0, 20).map(w => w.id);
     ids.forEach((id, i) => {
       cards[id + ":jp-en"] = { id: id + ":jp-en", vocabId: id, direction: "jp-en", active: true,
