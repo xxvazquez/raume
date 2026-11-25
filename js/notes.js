@@ -672,6 +672,19 @@ window.RaumeStudy.notes = (function () {
       lead.remove();
       text.innerHTML = text.innerHTML.replace(/^\s+/, "");
     }
+    // Word-sized examples (せんしゅう · senshū · last week) sit side by side
+    // in columns rather than a tall stack; sentences keep a line each.
+    var exs = text ? Array.prototype.slice.call(text.querySelectorAll(":scope > .rn-ex")) : [];
+    var short = exs.length > 1 && exs.every(function (ex) {
+      var jp = ex.querySelector(".rn-ex-jp"), en = ex.querySelector(".rn-ex-en"), ro = ex.querySelector(".rn-ex-ro");
+      return jp && jp.textContent.trim().length <= 12 && (!en || en.textContent.trim().length <= 22) && (!ro || ro.textContent.trim().length <= 22);
+    });
+    if (short) {
+      var grid = document.createElement("div");
+      grid.className = "rn-exs";
+      text.insertBefore(grid, exs[0]);
+      exs.forEach(function (ex) { grid.appendChild(ex); });
+    }
     tip.classList.add("rn-tip-row");
     return lrow(label, kind, [tip]);
   }
@@ -784,6 +797,7 @@ window.RaumeStudy.notes = (function () {
     c.querySelectorAll(".rn-pair").forEach(function (p) { p.replaceWith(document.createTextNode(p.textContent)); });
     c.querySelectorAll("[contenteditable], [data-eid]").forEach(function (n) { n.removeAttribute("contenteditable"); n.removeAttribute("data-eid"); });
     c.querySelectorAll(".rn-del, .jp-speak-btn").forEach(function (n) { n.remove(); });
+    c.querySelectorAll(".rn-exs").forEach(function (g) { g.replaceWith.apply(g, Array.prototype.slice.call(g.childNodes)); });
     return c.innerHTML.replace(/<br\s*\/?>/gi, " ").replace(/\u00a0/g, " ");
   }
   function finishEdit(save) {

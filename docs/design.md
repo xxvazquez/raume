@@ -860,7 +860,9 @@ and Help.
   chevron over a hairline, closed until tapped; the lesson's ideas
   (patterns, rules, tips) always show. A tip is its short rule, then each
   example on its own lines, and a pattern the same: the Japanese, its
-  romaji, its English — three rows, as everywhere in raume (a pattern's
+  romaji, its English — three rows, as everywhere in raume; a tip whose
+  examples are all word-sized sets them side by side in columns (`.rn-exs`,
+  7.5rem minimum: two on a phone, more when wider), sentences stay stacked (a pattern's
   older "romaji · English" line is split on the way in). Word lists read
   like a reference table (hairline rows, the picture leading, a pair's ↔
   faint, the English trailing or from halfway across on a wide window; one

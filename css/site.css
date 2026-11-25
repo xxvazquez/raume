@@ -1667,6 +1667,10 @@ body.icon-picker-open { overflow: hidden; }
 .rn-ex-jp { display: block; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; word-break: keep-all; }
 .rn-ex-ro { display: block; font-size: var(--fs-romaji); font-style: italic; color: var(--romaji, var(--muted)); line-height: 1.3; }
 .rn-ex-en { display: block; font-size: var(--fs-english); color: var(--ink-2); line-height: 1.35; }
+/* Word-sized examples (notes.js tipRow) flow into columns: two on a
+   phone, more on a wider window. */
+.rn-exs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 7.5rem), 1fr)); gap: 8px 16px; margin-top: 8px; }
+.rn-exs > .rn-ex { margin-top: 0; min-width: 0; }
 /* A right / wrong example in a note's text is its own line under the
    explanation, at the Japanese size -- never run on inside the sentence. */
 .rn-lrow-c .rn-ok, .rn-lrow-c .rn-x { display: block; width: fit-content; margin-top: 2px; font-family: var(--font-jp); font-size: calc(16px * var(--dt)); line-height: 1.5; white-space: normal; word-break: keep-all; }

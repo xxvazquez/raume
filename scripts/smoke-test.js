@@ -2341,6 +2341,22 @@ async function main() {
       if (rn3) rn3.remove();
       return ok;
     })());
+    check("a tip's word-sized examples sit in columns (.rn-exs); a tip with a sentence keeps a line per example", (() => {
+      const spot4 = document.createElement("p");
+      host.appendChild(spot4);
+      const ex = (jp, ro, en) => '<div class="rn-ex"><span class="rn-ex-jp">' + jp + '</span><span class="rn-ex-ro">' + ro + '</span><span class="rn-ex-en">' + en + '</span></div>';
+      nh.showLessonHtml('<html><head><meta name="raume-note" content="1"></head><body><article class="rn"><section class="rn-sec" data-tile="clay">' +
+        '<h2 class="rn-sec-head"><span class="rn-sec-num" aria-hidden="true">1</span><span>Time</span><span class="rn-sub">Grammar</span></h2>' +
+        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">⏱</span><div>No particle.' + ex("せんしゅう", "senshū", "last week") + ex("きのう", "kinō", "yesterday") + ex("きょう", "kyō", "today") + '</div></div>' +
+        '<div class="rn-tip"><span class="rn-dot" aria-hidden="true">+</span><div>Long.' + ex("きのう", "kinō", "yesterday") + ex("わたしは きのう ほんを よみました", "watashi wa kinō hon o yomimashita", "I read a book yesterday") + '</div></div>' +
+        '</section></article></body></html>', spot4);
+      const rn4 = host.querySelectorAll(".rn")[1];
+      const rows = rn4 ? rn4.querySelectorAll(".rn-sec-body > .rn-lrow") : [];
+      const ok = rows.length === 2 && !!rows[0].querySelector(".rn-exs") && rows[0].querySelectorAll(".rn-exs > .rn-ex").length === 3
+        && !rows[1].querySelector(".rn-exs") && rows[1].querySelectorAll(".rn-ex").length === 2;
+      if (rn4) rn4.remove();
+      return ok;
+    })());
     check("a drawn note numbers what can be edited or deleted (data-eid), so Done can save each change back to the same element", (() => {
       const jp = rn && rn.querySelector(".rn-jp"), en = rn && rn.querySelector(".rn-en"), st = rn && rn.querySelector(".rn-st");
       return !!jp && /^\d+$/.test(jp.dataset.eid || "") && /^\d+$/.test(en.dataset.eid || "") && /^\d+$/.test(st.dataset.eid || "")
