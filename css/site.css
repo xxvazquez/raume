@@ -4346,7 +4346,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-play:active { transform: scale(.94); }
 .fc-ls-play:focus-visible { outline: 2px solid var(--section); outline-offset: 3px; }
 .fc-ls-hint { margin: 0; color: var(--muted); font-size: var(--fs-small); }
-.fc-ls-hint[hidden], .fc-ls-word[hidden], .fc-ls-next[hidden] { display: none; }
+.fc-ls-hint[hidden], .fc-ls-word[hidden], .fc-ls-next[hidden], .fc-kt-reveal[hidden] { display: none; }
 .fc-ls-word { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0; }
 .fc-ls-written { font-size: 28px; line-height: 1.2; color: var(--ink); }
 .fc-ls-sub { color: var(--muted); font-size: var(--fs-small); }

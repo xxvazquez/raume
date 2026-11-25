@@ -4676,6 +4676,17 @@ async function main() {
     document.querySelector("#fcPanelGames .fc-ls-next").click();
     return ok && ktQ() !== ktFirst.word.clue;
   })());
+  const ktShown = ktCur();
+  check("Show answer: the spelling shows, the tiles lock, Next takes its place -- and the word counts as missed", (() => {
+    const reveal = document.querySelector("#fcPanelGames .fc-kt-reveal");
+    if (!reveal || reveal.hidden || reveal.classList.contains("fc-btn-primary")) return false;
+    reveal.click();
+    const ok = reveal.hidden && !document.querySelector("#fcPanelGames .fc-kt-answer").hidden
+      && !document.querySelector("#fcPanelGames .fc-ls-next").hidden
+      && [...document.querySelectorAll("#fcPanelGames .fc-kt-tile")].every(t => t.disabled);
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok && ktQ() !== ktShown.word.clue;
+  })());
   await fastGamePauses(window, async () => { for (let k = 0; k < 60 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
     ktCur().chars.forEach(ktTap);
     for (let waited = 0; waited < 3000; waited += 25) {
@@ -4683,13 +4694,13 @@ async function main() {
       await new Promise(r => setTimeout(r, 25));
     }
   } });
-  check("a right spelling moves on by itself; the end scores first-time words, lists the one to spell again, and logs a kanatiles game", (() => {
+  check("a right spelling moves on by itself; the end scores first-time words, lists the ones to spell again, and logs a kanatiles game", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const n = xw.state.puzzle.questions.length;
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("kanatiles").pop();
-    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n
-      && done.textContent.includes(ktFirst.word.clue) && !!last && last.right === n - 1 && last.n === n
-      && last.missed.join() === String(ktFirst.word.id) && last.setup === "flashcards|hiragana|" + n;
+    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 2) + " / " + n
+      && done.textContent.includes(ktFirst.word.clue) && done.textContent.includes(ktShown.word.clue) && !!last && last.right === n - 2 && last.n === n
+      && last.missed.join() === [ktFirst.word.id, ktShown.word.id].join() && last.setup === "flashcards|hiragana|" + n;
   })());
   xwPick("mode", "listening");
 

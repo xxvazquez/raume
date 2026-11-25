@@ -1365,7 +1365,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // dakuten pair). Tap tiles in order; tap a placed one to take it back.
   // The last slot filled checks it: right moves on by itself; wrong shakes,
   // shows the spelling, waits for Next and brings the word back once at the
-  // end of the round. Small ゃゅょっ and ー are tiles of their own. Only
+  // end of the round. Show answer (stuck, or never met the word) counts as
+  // a miss the same way, so you see it now and spell it again later. Small ゃゅょっ and ー are tiles of their own. Only
   // words really written in the script (as the grids' Hiragana/Katakana).
   // Practice only -- never an FSRS review.
   // -----------------------------------------------------------------------
@@ -1431,7 +1432,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-kt-bank" data-cols="' + Math.ceil(cur.tiles.length / Math.ceil(cur.tiles.length / 5)) + '">' + cur.tiles.map(function (c, i) {
           return '<button type="button" class="fc-kt-tile" data-t="' + i + '" lang="ja">' + esc(c) + "</button>";
         }).join("") + "</div>" +
-        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+        // Show answer and Next share the row: one gives way to the other,
+        // so nothing under the bank moves.
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-kt-reveal">Show answer</button>' +
+        '<button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
     }
     function drawSlots() {
       var cur = q();
@@ -1450,8 +1454,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var right = spelled === cur.word.answer, thisGame = game;
       locked = true;
       var slots = boardEl.querySelector(".fc-kt-slots");
-      streak.hit(right);
       if (right) {
+        streak.hit(true);
         slots.classList.add("fc-kt-right");
         if (!retried[cur.word.id]) score++;
         setTimeout(function () {
@@ -1462,6 +1466,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         return;
       }
       slots.classList.add("fc-kt-wrong");
+      reveal();
+    }
+    // A miss, typed or asked for: the word comes back once at the end, its
+    // spelling shows, and Next waits.
+    function reveal() {
+      var cur = q();
+      locked = true;
+      streak.hit(false);
       if (!retried[cur.word.id]) {
         missed.push(cur.word);
         retried[cur.word.id] = true;
@@ -1471,6 +1483,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       ans.innerHTML = spokenWordHtml(cur.word);
       ans.hidden = false;
       boardEl.querySelectorAll(".fc-kt-tile").forEach(function (t) { t.disabled = true; });
+      boardEl.querySelector(".fc-kt-reveal").hidden = true;
       var nextBtn = boardEl.querySelector(".fc-ls-next");
       nextBtn.hidden = false;
       nextBtn.focus();
@@ -1487,6 +1500,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (e.target.closest(".fc-ls-next")) { next(); return; }
       if (e.target.closest(".fc-kt-say")) { speakWord(q().word); return; }
       if (locked) return;
+      if (e.target.closest(".fc-kt-reveal")) { reveal(); return; }
       var tile = e.target.closest(".fc-kt-tile");
       if (tile && !tile.disabled) {
         placed.push(+tile.dataset.t);
@@ -3102,7 +3116,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type, and あ | ア picks hiragana or katakana. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
-      : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
+      : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes. Stuck? Show answer, and the word comes back at the end."
       : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
       : mt ? "Tap a word, then its meaning — either side first. A wrong pair adds a second."
       : ws ? "Drag across a word, or tap its first and last letter. Words run in every direction — backwards and diagonally too."

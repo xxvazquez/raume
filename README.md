@@ -597,7 +597,8 @@ with reduced motion on, it's all a plain change of state.
 - Tap tiles in order; tap a placed tile to take it (and those after it)
   back. Filling the last slot checks it: right moves on by itself; wrong
   shows the spelling, waits for **Next**, and the word comes back once at
-  the end of the game.
+  the end of the game. Stuck? **Show answer** (under the bank) does the
+  same: the spelling shows, and the word counts as missed and comes back.
 - *Script* is *Hiragana* or *Katakana* only — words really written that way.
   The score counts words right first time; the end card lists the ones to
   spell again. ⏸ and End game work as in Listening.
