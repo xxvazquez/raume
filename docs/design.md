@@ -167,7 +167,9 @@ dark, so moving between sections reads as a change of place.
 **The tint** (`--tint`, switched with the section): what iOS paints
 everything you can act on in — filled and secondary buttons, plain action
 rows (Options › Expand all / Print, Settings › Back up, Library's Add and
-Add all), checkmarks, a switch that's on, and the table rows' speaker. One
+Add all), every text bar button (Tables, Options, ‹ Practice, Settings /
+Help, Done, Show all), checkmarks, a switch that's on, and the table rows'
+speaker. One
 per section, a more saturated sibling of its tone (`--tint-vocabulary`
 `#2C6A90`, grammar `#8C3D73`, kanji `#86601C`, notes `#2F7A5E`, flashcards
 `#6650A6`; lighter in dark): the muted `-strong` tones sat too close to ink

@@ -620,7 +620,7 @@ body {
   padding: 0 8px;
   background: none;
   border: 0;
-  color: var(--section-strong);
+  color: var(--tint);
   /* line-height 1.4, not 1: the label sets overflow:hidden for its ellipsis,
      so a tight line box would clip the descenders on g / p / y. */
   font: 400 var(--fs-nav)/1.4 var(--font-ui);
@@ -870,7 +870,7 @@ body {
 .recents-title { margin: 0; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .recents-clear {
   min-height: 44px; padding: 0 12px; border: 0; background: transparent;
-  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--section-strong); cursor: pointer;
+  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint); cursor: pointer;
 }
 .recents-list { margin: 0; padding: 0; list-style: none; }
 .recents-row { position: relative; display: flex; align-items: center; }
@@ -951,7 +951,7 @@ body { --switch-on: var(--tint); }
   display: inline-flex; align-items: center; gap: 6px;
   height: 36px; padding: 0 8px;
   border: 0; background: transparent;
-  color: var(--section-strong);
+  color: var(--tint);
   font: 400 var(--fs-nav)/1 var(--font-ui);
   cursor: pointer;
 }
@@ -1552,7 +1552,7 @@ svg.si { stroke-width: 1.6; }
   padding: 10px 12px; border-top: 1px solid var(--line);
 }
 .icon-picker-upload {
-  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--accent-dark);
+  font: 500 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   cursor: pointer;
 }
 .icon-picker-upload:hover { text-decoration: underline; }
@@ -1608,7 +1608,7 @@ body.icon-picker-open { overflow: hidden; }
 .notes-quiz[aria-pressed="true"] { min-height: 30px; margin: 7px 2px; background: var(--tab-select); color: var(--section-strong); font-weight: 600; }
 .notes-tool {
   appearance: none; border: 0; background: none; cursor: pointer; width: 44px; height: 44px;
-  display: inline-flex; align-items: center; justify-content: center; color: var(--section-strong);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--tint);
 }
 .notes-tool:hover { opacity: .7; }
 .notes-tool:active { opacity: .5; }
@@ -1969,7 +1969,7 @@ body.icon-picker-open { overflow: hidden; }
 .ios-confirm-field:focus { outline: 2px solid var(--section); outline-offset: 0; }
 .ios-confirm-go {
   appearance: none; border: 0; width: 100%; min-height: 56px; cursor: pointer; background: transparent;
-  font: 600 17px/1.2 var(--font-ui); color: var(--accent-strong);
+  font: 600 17px/1.2 var(--font-ui); color: var(--tint);
 }
 .ios-confirm-go:active { background: var(--row-press-overlay); }
 .ios-confirm-go:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
@@ -2143,7 +2143,7 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 .cz-row-reset, .cz-row-vis {
   flex: 0 0 auto; appearance: none; border: 0;
   border-radius: var(--radius-button); background: transparent;
-  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
+  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   padding: 8px 10px; cursor: pointer;
 }
 .cz-row-reset:hover:not([disabled]), .cz-row-vis:hover { background: var(--accent-soft); }
@@ -2253,7 +2253,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
 .tpick-cancel {
   justify-self: start; appearance: none; border: 0; background: transparent; cursor: pointer;
   min-height: 44px; padding: 0 10px; border-radius: 999px;
-  color: var(--accent-strong); font: 400 var(--fs-body)/1 var(--font-ui);
+  color: var(--tint); font: 400 var(--fs-body)/1 var(--font-ui);
 }
 .tpick-cancel:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
 .tpick-title { margin: 0; font: 600 var(--fs-body)/1.2 var(--font-ui); color: var(--ink); }
@@ -2317,12 +2317,12 @@ body.tpick-open { overflow: hidden; }
 .cv-btn {
   flex: 0 0 auto; appearance: none; border: 0;
   border-radius: var(--radius-button); background: var(--accent-soft);
-  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
+  font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   min-height: 32px; padding: 8px 14px; cursor: pointer;
 }
 .cv-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
 .cv-file-btn {
-  position: relative; flex: 0 0 auto; font: 400 var(--fs-small)/1 var(--font-ui); color: var(--accent-strong);
+  position: relative; flex: 0 0 auto; font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   border: 0; border-radius: var(--radius-button); padding: 8px 12px; cursor: pointer;
 }
 .cv-file-btn:hover { background: var(--accent-soft); }
@@ -2715,7 +2715,7 @@ body.tpick-open { overflow: hidden; }
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--accent-strong);
+  color: var(--tint);
   font: inherit;
   font-weight: 500;
   padding: 0;
@@ -3378,7 +3378,7 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .ks-replay, .ks-write {
   appearance: none; padding: 6px 14px; border: 0; border-radius: 999px;
   background: var(--paper); box-shadow: var(--control-lift);
-  color: var(--section-strong); font: 500 14px/1.2 var(--font-ui); cursor: pointer;
+  color: var(--tint); font: 500 14px/1.2 var(--font-ui); cursor: pointer;
 }
 /* Write it (js/vocab/kanji-write.js): the sheet as a pushed view -- ‹ Back,
    the title, ✕ -- then one card holding the square pad (KanjiVG's 109 grid,
@@ -3389,7 +3389,7 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .kw-back {
   justify-self: start; appearance: none; border: 0; background: none; padding: 6px 0; cursor: pointer;
   display: inline-flex; align-items: center; gap: 2px;
-  color: var(--section-strong); font: 400 15px/1.2 var(--font-ui);
+  color: var(--tint); font: 400 15px/1.2 var(--font-ui);
 }
 .kw-title { margin: 0; font: 600 17px/1.25 var(--font-ui); color: var(--ink); }
 .kw-top .ks-close { justify-self: end; }
@@ -3832,6 +3832,9 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   #vocabulary .table-section:not(.collapsed) .vocab,
   .vocab { margin: 0 !important; width: 100% !important; border: 0 !important; border-radius: 0 !important; overflow: visible; }
   .vocab th, .vocab td { border: 0 !important; border-bottom: .5pt solid #dcdcdc !important; }
+  /* The screen's inset row lines are a border-image; it would paint over
+     these rules (and blank the first column's left edge). */
+  .vocab td, .vocab.vocab-sentences tr { border-image: none !important; }
   .vocab :is(th, td):not(:first-child) { border-left: .5pt solid #dcdcdc !important; }
   .vocab th { border-top: .75pt solid #bdbdbd !important; }
   .vocab :is(th, td):first-child { border-left: .75pt solid #bdbdbd !important; }
@@ -3909,7 +3912,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
 @media (max-width: 640px) { .fc-titlebar-actions { display: none; } }
 .fc-titlebar-btn, .fc-back {
   appearance: none; border: 0; background: none; padding: 0; cursor: pointer;
-  color: var(--section-strong); font: 400 var(--fs-nav)/1.4 var(--font-ui);
+  color: var(--tint); font: 400 var(--fs-nav)/1.4 var(--font-ui);
   min-height: 32px;
 }
 .fc-back { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 2px -5px; }
@@ -4446,7 +4449,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-kt-clue { margin: 0; color: var(--ink); font-size: 20px; line-height: 1.3; text-align: center; }
 .fc-kt-say {
   appearance: none; border: 0; padding: 0; position: relative; display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; margin-top: -6px; border-radius: 50%; background: transparent; color: var(--section-strong); cursor: pointer;
+  width: 32px; height: 32px; margin-top: -6px; border-radius: 50%; background: transparent; color: var(--tint); cursor: pointer;
 }
 .fc-kt-say::after { content: ""; position: absolute; inset: -6px; }
 .fc-kt-say svg { width: 20px; height: 20px; }
@@ -4669,7 +4672,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ls-say {
   appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
-  background: var(--group-ground); color: var(--section-strong); cursor: pointer;
+  background: var(--group-ground); color: var(--tint); cursor: pointer;
 }
 .fc-ws-done .fc-ws-clue { color: var(--muted); }
 /* Help and Settings are prose, not a data surface -- hold them to a readable
@@ -4723,7 +4726,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-stat-glyph { flex: none; margin-top: calc((var(--fs-micro) * 1.4 - 12px) / 2); color: var(--faint); }
 .fc-stat-glyph[data-tile] { color: var(--tile); }
 /* "Not enough reviews yet" etc. -- a real sentence, not a headline number. */
-.fc-stat-tile-pending .fc-stat-value { color: var(--muted); font-weight: 400; white-space: nowrap; } /* "No data", on the numbers' own line */
+.fc-stat-tile-pending .fc-stat-value { color: var(--muted); font-weight: 400; } /* "No data", on the numbers' own line */
 
 /* Dashboard visualizations -- colors reused from the existing palette. The
    two compact charts share the top row; the mistakes list, which grows,
@@ -4759,7 +4762,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-pz-empty .fc-pz-actions { margin-top: 0; }
 .fc-pz-link {
   appearance: none; border: 0; background: none; padding: 8px 2px; cursor: pointer;
-  color: var(--section-strong); font: 400 var(--fs-nav)/1 var(--font-ui); white-space: nowrap;
+  color: var(--tint); font: 400 var(--fs-nav)/1 var(--font-ui); white-space: nowrap;
 }
 .fc-pz-link:hover { opacity: .7; }
 .fc-pz-sub { margin: 14px 0 8px; color: var(--muted); font-size: var(--fs-small); font-weight: 400; }
@@ -4867,6 +4870,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Manage: reuses the overview list-row pattern. The filter is the shared
    segmented control (see above), one segment raised at a time. */
 .fc-manage-filters { margin-bottom: 14px; }
+/* Full width on a phone; past it, sized to its widest segment (still all
+   equal) rather than stretched across the 900px column. */
+@media (min-width: 641px) { .fc-manage-filters { display: inline-grid; } }
 /* Category group -- a quiet label on the ground above its cards, like the
    reference pages' .cat-heading: name in the section tone, count beside it, a
    small disclosure caret at the end. No rule under it. */
@@ -4977,10 +4983,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-btn-tableaction { gap: 6px; }
 /* On a white card they're plain tint text (iOS's plain button), not white
    capsules outlined on white. */
-.fc-manage-table-actions .fc-btn, .fc-manage-row .fc-actions .fc-btn {
+.fc-manage-table-actions .fc-btn {
   background: transparent; box-shadow: none; color: var(--tint); font-weight: 400; font-size: 15px;
 }
-.fc-manage-table-actions .fc-btn:hover, .fc-manage-row .fc-actions .fc-btn:hover { background: var(--row-hover); }
+.fc-manage-table-actions .fc-btn:hover { background: var(--row-hover); }
 .fc-btn-ic { display: none; }
 .fc-btn-ic svg { display: block; }
 /* The actions live in their own grid column and never wrap; on a narrow row
@@ -5104,7 +5110,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    hit area (the padding, cancelled by a negative margin so the row stays slim). */
 .fc-session-exit {
   appearance: none; border: 0; background: transparent; font: inherit; cursor: pointer;
-  color: var(--accent-strong); padding: 13px 14px 13px 0; margin: -13px 0;
+  color: var(--tint); padding: 13px 14px 13px 0; margin: -13px 0;
 }
 .fc-session-exit:hover { opacity: .7; }
 /* Thin session progress bar (a real <progress>, so it's announced too). */
@@ -5406,7 +5412,7 @@ mark.fc-diff-co {
 .fc-auth-forgot {
   display: block; appearance: none; border: 0; background: transparent;
   margin: -6px 0 14px; padding: 0;
-  color: var(--accent-dark); font: 500 var(--fs-small)/1 var(--font-ui); cursor: pointer;
+  color: var(--tint); font: 500 var(--fs-small)/1 var(--font-ui); cursor: pointer;
 }
 .fc-auth-forgot:hover { text-decoration: underline; }
 .fc-auth-error { color: var(--danger); font-size: var(--fs-small); margin-bottom: 10px; }
@@ -6278,7 +6284,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .fc-xw-sheet-title { margin: 0; font: 600 var(--fs-body)/1.3 var(--font-ui); color: var(--ink); }
 .fc-xw-sheet-done {
   appearance: none; border: 0; background: none; padding: 6px 2px; cursor: pointer;
-  color: var(--accent-strong); font: 600 var(--fs-nav)/1 var(--font-ui);
+  color: var(--tint); font: 600 var(--fs-nav)/1 var(--font-ui);
 }
 /* Words from: the title row and search stay put; only the list scrolls. */
 #fcXwSheet { display: flex; flex-direction: column; overflow: hidden; }
@@ -6403,7 +6409,10 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .account-menu[hidden] { display: none; }
 /* The account glyph sits last in the trailing cluster, where an Apple app
    keeps its profile button, so the menu drops straight under it. */
-body:not([data-active-page="flashcards"]) .account-menu [data-practice-only] { display: none; }
+/* Practice settings: only on Practice, and only once it has a title bar to
+   open Settings from (not on the sign-in choice before guest / account). */
+body:not([data-active-page="flashcards"]) .account-menu [data-practice-only],
+body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] { display: none; }
 @media (min-width: 641px) {
   .account-menu [data-phone-only] { display: none; }
   .masthead-right #accountToggle { order: 1; }
@@ -6744,7 +6753,6 @@ body.title-collapsed:not(:has(#vocabPage:not([hidden]))) .compact-title {
   .page-vocab .vocab-toolbar::before, body .masthead::before, body.title-collapsed .compact-title { -webkit-mask-image: none !important; mask-image: none !important; }
   body::after { display: none; }
   .row-menu-scrim { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(12, 14, 20, .4); }
-  @media (min-width: 641px) and (max-width: 899px) { .site-nav { background: var(--group-ground); } }
 }
 /* Increase Contrast: the same quiet palette, one firm step stronger --
    hairlines and row rules darker, secondary and tertiary text (labels,

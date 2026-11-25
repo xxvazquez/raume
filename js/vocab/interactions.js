@@ -1907,12 +1907,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Back first.
     function openPracticeScreen(tab) {
       const sel = '#flashcardsPage .fc-titlebar-btn[data-tab="' + tab + '"]';
-      if (!document.querySelector(sel) && document.querySelector('#flashcardsPage .fc-titlebar-pushed h1')
-        && document.querySelector('#flashcardsPage .fc-titlebar-pushed h1').textContent.toLowerCase() === tab) return;
+      const pushedTitle = document.querySelector('#flashcardsPage .fc-titlebar-pushed h1');
+      if (pushedTitle && pushedTitle.textContent.toLowerCase() === tab) return true;
       const back = document.getElementById('fcBack');
       if (!document.querySelector(sel) && back) back.click();
       const btn = document.querySelector(sel);
       if (btn) btn.click();
+      return !!btn;
     }
     vocab.toggleAccountMenu = function () { setAccountMenu(!!accountMenu && accountMenu.hidden); };
     if (accountMenu) {
@@ -1929,7 +1930,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         else if (go.dataset.menuGo === 'help') {
           // Help for the screen you're on: on Practice, the Flashcards Help
           // (already open: stay there); anywhere else, the reference Help.
-          if (document.body.dataset.activePage === 'flashcards') { openPracticeScreen('help'); return; }
+          // (Before Practice has a title bar -- the sign-in choice -- the
+          // reference Help instead of a tap that does nothing.)
+          if (document.body.dataset.activePage === 'flashcards' && openPracticeScreen('help')) return;
           const h = document.getElementById('helpToggle'); if (h) h.click();
         }
         else if (go.dataset.menuGo === 'signout') { const fc = window.RaumeStudy.flashcards; if (fc && fc.signOut) fc.signOut(); }
