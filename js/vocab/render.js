@@ -118,8 +118,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         var pr = seg.r || PARTICLE_ROMAJI[seg.p] || '';
         return '<span class="particle"' + (pr ? ' data-r="' + esc(pr) + '"' : '') + '>' + esc(seg.p) + '</span>';
       }
+      // kg: one reading shared by several kanji (弁護士 over べんごし) --
+      // css/site.css spreads it across the whole run on a review card.
       return seg.kanji
-        ? '<ruby><rb class="jpmain">' + esc(seg.kanji) + '</rb><rt class="furigana">' + esc(seg.reading) + '</rt></ruby>'
+        ? '<ruby' + (seg.kanji.length > 1 ? ' class="kg"' : '') + '><rb class="jpmain">' + esc(seg.kanji) + '</rb><rt class="furigana">' + esc(seg.reading) + '</rt></ruby>'
         : plain(seg.text);
     }).join('');
   }

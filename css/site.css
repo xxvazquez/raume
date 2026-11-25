@@ -5005,6 +5005,10 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-progress::-moz-progress-bar { background: var(--bar-fill); border-radius: 999px; }
 .fc-prompt { font-size: 19px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
 .fc-prompt .jpword ruby, .fc-stage-meaning .jpword ruby { ruby-position: over; ruby-align: start; }
+/* One reading over several kanji (render.js `kg`) spreads across them all,
+   as print sets group ruby -- べんごし over the whole of 弁護士, not
+   bunched at its left edge with 士 bare. */
+.fc-prompt .jpword ruby.kg, .fc-stage-meaning .jpword ruby.kg { ruby-align: space-around; }
 /* The Japanese word's reading, shown only once checked and only on
    Japanese -> English cards -- the other Japanese-prompt direction
    (Japanese -> Romaji) already tests the reading itself, so restating it
