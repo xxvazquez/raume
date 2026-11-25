@@ -4483,6 +4483,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-wc-shake { animation: fc-fb-shake .34s ease-out; }
 .fc-wc-msg { min-height: 1.45em; margin: 10px 0 0; color: var(--muted); font-size: var(--fs-nav); line-height: 1.45; text-align: center; }
 .fc-wc-msg-bad { color: var(--wrong-strong); }
+.fc-wc-msg-hint { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .fc-ls-play { transition: none; } }
 /* Answer feel (crosswords.js answerFeel), shared by the pick-one games: a
    tile squeezes a little under a finger; once answered, the right tile's

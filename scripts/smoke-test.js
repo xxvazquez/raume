@@ -4893,9 +4893,11 @@ async function main() {
       && wcEl(".fc-wc-en").textContent === wcNext.written + " · " + wcNext.clue && wcMsg() === "" && wcEl(".fc-wc-kana").textContent === wcNext.tail
       && document.getElementById("fcLsCount").textContent === "2 / 3" && wcEl(".fc-wc-field").value === "";
   })());
-  check("Hint shows the English of a word that would work", (() => {
+  check("Hint shows the English of a word that would work, and tapped again the word itself", (() => {
     document.getElementById("fcXwHint").click();
-    return /^Hint: .+/.test(wcMsg());
+    const first = /^Hint: .+ · Hint again shows the word$/.test(wcMsg());
+    document.getElementById("fcXwHint").click();
+    return first && /^Word: .+ · .+ — type it to go on$/.test(wcMsg());
   })());
   check("⋯ › Skip this link moves on with a word that works", (() => {
     document.getElementById("fcXwSkip").click();

@@ -665,8 +665,9 @@ with reduced motion on, it's all a plain change of state.
 - A miss gets one line under the field and a shake: "Needs to start with
   や", "Not one of your words", "Already in the chain", "本 ends on ん — the
   chain can't go on", or that no word starts where it ends.
-- **Hint** (beside ⏸) shows the English of one word that would work; ⋯ ›
-  *Skip this link* plays one for you. *Words* is the number of links; a link
+- **Hint** (beside ⏸) shows the English of one word that would work; tap
+  it again and it shows the word itself (its kana under kanji) to type in —
+  still one hint. ⋯ › *Skip this link* plays one for you. *Words* is the number of links; a link
   counts as right only with no miss, hint or skip. At the end: the score,
   the whole chain on one line (each word with its English), and the links you missed. Hints show in its
   Stats.

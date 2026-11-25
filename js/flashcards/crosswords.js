@@ -2131,6 +2131,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var mine = ok.filter(function (w) { return p.poolIds[w.id]; });
       return shuffle(mine.length ? mine : ok)[0] || null;
     }
+    // Hint in two steps, on the same button: first the English of a word
+    // that would work, then (tapped again) the word itself to type in.
+    // One help either way -- the link is already a miss.
     function hint() {
       if (locked || done || pausedAt !== null) return;
       if (!hinted) {
@@ -2139,8 +2142,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         help++;
         linkMissed = true;
         streak.hit(false);
+        say('<span class="fc-wc-msg-hint">Hint: ' + esc(hinted.clue) + '</span> <span class="fc-wc-msg-more">· Hint again shows the word</span>');
+      } else {
+        say('<span class="fc-wc-msg-hint">Word: <span lang="ja">' + esc(hinted.written) + "</span>" +
+          (hinted.written !== hinted.answer ? ' <span lang="ja">(' + esc(hinted.answer) + ")</span>" : "") +
+          " · " + esc(hinted.clue) + '</span> <span class="fc-wc-msg-more">— type it to go on</span>');
       }
-      say("Hint: " + esc(hinted.clue));
       field.focus();
     }
     function skip() {
@@ -3039,7 +3046,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function howToText() {
     var ws = state.mode === "wordsearch", ls = state.mode === "listening", mt = state.mode === "match";
-    return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type. Any word in the vocabulary counts. Hint shows one that would work; ⓘ has the rules."
+    return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes."
