@@ -42,6 +42,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     // words typed without the mark. Kept for the expected-answer *display*
     // (that reads the raw field), stripped only here for the comparison.
     v = v.replace(/[?!.,;:…。、！？「」『』（）()]/g, "").replace(/\s+/g, " ").trim();
+    // The ~ in an English meaning marks where the word goes ("that ~",
+    // "~ language") -- a placeholder to read, never to type.
+    if (!romaji) v = v.replace(/[~〜～]/g, " ").replace(/\s+/g, " ").trim();
     if (romaji) {
       // Apostrophes, hyphens and word breaks are spelling conventions, not
       // the reading: kin'en / kinen, shabu-shabu / shabu shabu all count.

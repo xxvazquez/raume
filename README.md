@@ -329,7 +329,8 @@ their cards then.
   one alone.
 - A meaning written as a list (*job, work* or *he; boyfriend*) takes any one
   of them alone. Commas inside brackets or a number (*1,000*) and in
-  sentences stay part of the answer.
+  sentences stay part of the answer. A meaning's `~` placeholder is never
+  typed: *that ~* takes `that`.
 - A noun + suru verb also takes its optional を — `ryouri o shimasu` counts
   for `ryōri shimasu`.
 - The right answer in the wrong language — the romaji on a card that asks for

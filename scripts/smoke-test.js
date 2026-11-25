@@ -3149,6 +3149,11 @@ async function main() {
     return vi.checkAnswer(idx.v0635, "jp-en", "1 oclock") && !vi.checkAnswer(idx.v0635, "jp-en", "2 oclock")
       && !!deepFry && vi.checkAnswer(deepFry, "jp-en", "deep fry") && !!stirFry && vi.checkAnswer(stirFry, "jp-en", "stirfry");
   })());
+  check("an English meaning's ~ placeholder is never typed (that ~ = that, ~ language = language)", (() => {
+    const vi = window.RaumeStudy.flashcards.vocabIndex;
+    return vi.normalizeAnswer("that ~", false) === "that" && vi.normalizeAnswer("〜 language", false) === "language"
+      && vi.normalizeAnswer("that ~ (over there)", false) === "that over there";
+  })());
   check("any one meaning of a comma list counts (long, thin items), but a number's comma and a sentence's don't split", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const idx = vi.getVocabIndex();
