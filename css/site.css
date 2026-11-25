@@ -2695,7 +2695,9 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout:
    divider before the next one.) */
 body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):not(.page-hidden))) .vocab tbody tr:not(:has(~ tr:not(.search-hidden))) td { border-bottom: 0; }
 /* Hover: a very subtle wash of the live section tone -- no edge, no fill. */
-.vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 8%, var(--paper)); }
+/* 14%, not less: a fainter wash is the grey of the ground around the card,
+   so the hovered row seemed to drop out of it. */
+.vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 14%, var(--paper)); }
 
 /* Two columns. Japanese gets 46%, not a sliver -- it carries the speaker
    button alongside the word (see .jp-line), and the
