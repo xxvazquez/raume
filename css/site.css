@@ -6197,7 +6197,10 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 /* Words from: the title row and search stay put; only the list scrolls. */
 #fcXwSheet { display: flex; flex-direction: column; overflow: hidden; }
 #fcXwSheet[hidden] { display: none; }
-.fc-xw-sheet .fc-xw-table-picker { flex: 1 1 auto; min-height: 0; max-height: min(50vh, 420px); margin: 0; }
+/* Four tables in view (a category caption + four 35.5px rows) and half
+   of the next, so the cut-off row says the list scrolls -- a short iOS
+   popover, not one that covers half the screen. */
+.fc-xw-sheet .fc-xw-table-picker { flex: 1 1 auto; min-height: 0; max-height: 178px; margin: 0; }
 .fc-xw-table-cat[hidden], .fc-xw-table-check[hidden] { display: none; }
 .fc-xw-table-none { margin: 14px 6px; color: var(--muted); font-size: var(--fs-small); }
 .fc-xw-search {
@@ -6273,7 +6276,6 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .fc-gs-words .fc-xw-sheet { top: auto; left: 0; }
   .fc-xw-sheet-head.fc-gs-menu-head { display: flex; }
   .fc-xw-sheet.fc-gs-menu { padding: 14px 10px calc(16px + env(safe-area-inset-bottom)); }
-  .fc-xw-sheet .fc-xw-table-picker { max-height: none; }
 }
 @media print {
   body.print-only .fc-xw-current { display: none !important; }

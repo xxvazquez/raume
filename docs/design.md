@@ -1123,7 +1123,9 @@ clears the tables, unticking the last table goes back to Flashcards — in a
 glass popover under the setup screen's Words from row
 (`.fc-xw-sheet`, the Options pattern) — a bottom sheet over a scrim on a
 phone — staying open while you tick, closing on Done, an outside tap or
-Escape. No pills over the content: an earlier row of four setting pills
+Escape. The title and search stay put; the list scrolls inside, about
+four tables tall with half the next peeking, so the popover never covers
+half the screen. No pills over the content: an earlier row of four setting pills
 plus a row of actions read as a settings screen stacked on the game.
 The puzzle is one grid-areas layout:
 ≥760px the grid leads (40px squares) with the white clue bar ("1 Down ·
