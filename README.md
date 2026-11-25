@@ -349,8 +349,9 @@ their cards then.
 
 - Japanese → English shows the English answer right under the word once
   checked — a miss shows the right meaning first, then what you typed. A word's
-  furigana already gives its reading, so no second kana line is added; only a
-  bare kanji card (山) shows its reading under it.
+  furigana already gives its kana reading, so the context line underneath adds
+  its Romaji instead; a bare kanji card (山) has no furigana of its own, so it
+  shows its kana reading there instead of Romaji.
 - Romaji and English prompts reveal the Japanese under the answer once
   checked, with its furigana — Japanese never appears without it.
 

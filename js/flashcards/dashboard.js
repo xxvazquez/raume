@@ -1666,7 +1666,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // showing the same word twice on screen at once.
       '<span class="fc-verdict-badge fc-verdict-badge-' + verdictKind + '">' + verdictIcon + "</span>" +
       '<div class="fc-stage">' + stageHtml +
-        (dir === "jp-en" || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + sameSoundHtml + "</div>" +
+        ((dir === "jp-en" && entry.kanji) || String(context.value).toLowerCase() === String(expected).toLowerCase() ? "" : '<div class="fc-stage-meaning"><span class="fc-answer-label">' + esc(context.label) + '</span>' + (context.html ? '<span lang="ja">' + context.html + "</span>" : esc(context.value)) + "</div>") + sameSoundHtml + "</div>" +
       // After a wrong (or blank) answer the honest ratings are Again / Hard,
       // so Good / Easy sit at reduced opacity -- still one click away (typos
       // happen), just not the default read.

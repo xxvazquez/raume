@@ -3123,13 +3123,20 @@ async function main() {
     return document.querySelectorAll(".fc-review-card .fc-prompt-small").length === 0
       && document.querySelectorAll(".fc-review-card .fc-prompt").length === 1;
   })());
-  check("the reveal shows one field of context (meaning/reading), not just the answer -- for Japanese -> English the English answer itself, with no second kana line under a word whose furigana already reads it; the meaning line under the answer for the other three directions", (() => {
+  check("the reveal shows one field of context (meaning/reading), not just the answer -- for Japanese -> English an ordinary word gets a Romaji line (its furigana already reads the kana), a bare kanji-table entry gets the kana reading instead (no furigana of its own) and never both; the meaning line under the answer for the other three directions", (() => {
     const direction = (document.querySelector(".fc-review-progress") || {}).textContent || "";
     if (direction.indexOf("Japanese → English") === 0) {
       const readingEl = document.querySelector(".fc-prompt-reading");
       const prompt = document.querySelector(".fc-review-card .fc-prompt");
       const answer = document.querySelector(".fc-stage-expected, .fc-stage-compare .fc-answer-right");
-      return !!readingEl && (readingEl.hidden || !prompt.querySelector("ruby")) && !!answer && answer.textContent.trim().length > 0;
+      const meaningEl = document.querySelector(".fc-stage-meaning");
+      if (!readingEl || !answer || !answer.textContent.trim().length) return false;
+      // A bare kanji-table entry: the kana reading shows under the word instead
+      // (no furigana of its own to read it), so no extra Romaji line.
+      if (!readingEl.hidden && prompt.querySelector("ruby")) return !meaningEl;
+      // An ordinary word: furigana already reads it above, so the context line
+      // here is the one new thing -- Romaji.
+      return !!meaningEl && /Romaji/.test(meaningEl.textContent) && meaningEl.textContent.trim().length > "Romaji".length;
     }
     const meaningEl = document.querySelector(".fc-stage-meaning");
     // A Japanese meaning line keeps its furigana, like Japanese everywhere else.
