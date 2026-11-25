@@ -93,8 +93,14 @@
   --section-strong: var(--sec-vocabulary-strong);
   --section-ink: var(--ink);
 
-  /* Row hover is a faint wash of the live section tone (see the rule on
-     .vocab tbody tr:hover) -- no fixed grey token. */
+  /* Row highlight. Vocab table rows wash in the live section tone (see
+     .vocab tbody tr:hover); every other tappable row -- Settings, Help,
+     game setup, Notes, menus -- uses these, iOS's grey cell highlight:
+     --row-hover / --row-press on solid cards, the -overlay pair on glass. */
+  --row-hover: color-mix(in srgb, var(--ink) 7%, var(--paper));
+  --row-press: color-mix(in srgb, var(--ink) 12%, var(--paper));
+  --row-hover-overlay: color-mix(in srgb, var(--ink) 8%, transparent);
+  --row-press-overlay: color-mix(in srgb, var(--ink) 13%, transparent);
 
   /* Irregular rows: their text in red, no wash -- the row's background is
      left free for your progress (known green / tricky amber), so both read
@@ -963,7 +969,7 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
   background-position: 16px 0;
   background-size: calc(100% - 16px) 1px;
 }
-.opt-row:hover { background-color: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.opt-row:hover { background-color: var(--row-hover); }
 .opt-action { color: var(--section-strong); padding-right: 16px; }
 /* What the row icons mean -- a phone has no hover tooltip, so the one sheet
    of reading settings also spells out the small glyphs down each row.
@@ -1573,8 +1579,8 @@ body.icon-picker-open { overflow: hidden; }
   content: ""; position: absolute; right: 18px; top: 50%; width: 7px; height: 7px; margin-top: -4px;
   border-right: 1.6px solid var(--faint); border-bottom: 1.6px solid var(--faint); transform: rotate(-45deg);
 }
-.notes-row:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
-.notes-row:active { background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
+.notes-row:hover { background: var(--row-hover); }
+.notes-row:active { background: var(--row-press); }
 .notes-row:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; border-radius: var(--radius-card); }
 .notes-row .set-tile svg { display: block; }
 .notes-row-tx { display: flex; flex-direction: column; min-width: 0; }
@@ -1907,7 +1913,7 @@ body.icon-picker-open { overflow: hidden; }
   appearance: none; border: 0; width: 100%; min-height: 56px; cursor: pointer; background: transparent;
   font: 600 17px/1.2 var(--font-ui); color: var(--accent-strong);
 }
-.ios-confirm-go:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ios-confirm-go:active { background: var(--row-press-overlay); }
 .ios-confirm-go:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
 /* + Add's "where are they from?" sheet (notes.js addSheet): one choice per
    row, the mark's glyph in its hue before the name, hairlines between. */
@@ -2220,7 +2226,7 @@ details.cv-card + details.cv-card { border-top-left-radius: 0; border-top-right-
   background: transparent; color: var(--ink); text-align: left;
   font: 400 14px/1.3 var(--font-ui);
 }
-.tpick-row:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tpick-row:active { background: var(--row-press-overlay); }
 .tpick-row:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; }
 .tpick-tile {
   flex: 0 0 auto; display: flex; width: 28px; height: 28px; padding: 5.5px; box-sizing: border-box;
@@ -2379,7 +2385,7 @@ body.tpick-open { overflow: hidden; }
   position: relative; background: var(--paper); border-radius: var(--radius-card); text-decoration: none;
 }
 .help-support::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
-.help-support:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.help-support:hover { background: var(--row-hover); }
 /* A footnote is an iOS section footer: ragged-right like all of iOS (never
    justified -- a narrow column opens gaps between the words), with the rag
    evened out where the browser can. */
@@ -2396,7 +2402,7 @@ body.tpick-open { overflow: hidden; }
   background: linear-gradient(var(--row-line), var(--row-line)) no-repeat 16px 0 / calc(100% - 16px) 1px;
 }
 .help-legal-row::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
-.help-legal-row:hover { background-color: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.help-legal-row:hover { background-color: var(--row-hover); }
 .help-legal-val { margin-left: auto; color: var(--muted); text-align: right; }
 .page-help .help-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 .help-group summary {
@@ -2419,7 +2425,7 @@ body.tpick-open { overflow: hidden; }
   transform: rotate(-45deg); transition: transform .15s ease;
 }
 .help-group[open] summary::after { transform: rotate(45deg); }
-.help-group summary:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.help-group summary:hover { background: var(--row-hover); }
 .page-help h3 { margin: 0; padding: 0; font-size: 15px; font-weight: 400; color: var(--ink); }
 .help-sub { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-small); }
 /* Inside a topic, and on the Flashcards Help screen: scannable two-line
@@ -2467,7 +2473,7 @@ body.tpick-open { overflow: hidden; }
 .set-row-tiled .set-label { display: inline-flex; align-items: center; }
 .set-card > .set-row-tiled + .set-row-tiled::before { left: 58px; }
 .set-card .set-row.fc-direction-check { border-radius: 0; padding: 0 16px; border-top: 0; font-size: 15px; }
-.set-card .set-row.fc-direction-check:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.set-card .set-row.fc-direction-check:hover { background: var(--row-hover); }
 .set-value { display: inline-flex; align-items: baseline; gap: 4px; color: var(--muted); }
 .set-unit-tight { margin-left: -4px; } /* "90%", not "90 %" */
 .set-num {
@@ -2493,7 +2499,7 @@ body.tpick-open { overflow: hidden; }
   appearance: none; border: 0; background: transparent; text-align: left;
   color: var(--section-strong); justify-content: flex-start;
 }
-.set-action:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.set-action:hover { background: var(--row-hover); }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .set-foot[hidden] { display: none; }
 .set-head { display: flex; align-items: center; gap: 2px; }
@@ -3222,7 +3228,7 @@ body.ja-voice-ready .kanji-sheet .ks-top .jp-speak-btn {
    the kana, its romaji beside it, the speaker trailing. The whole row plays,
    with the Settings rows' neutral press fill. */
 .ks-reading { cursor: pointer; transition: background .12s ease; }
-.ks-reading:active { background-color: color-mix(in srgb, var(--ink) 7%, var(--paper)); }
+.ks-reading:active { background-color: var(--row-press); }
 .ks-reading-main { display: flex; flex-direction: column; min-width: 0; }
 .ks-reading-kind { font-size: var(--fs-small); line-height: 1.3; color: var(--muted); }
 .ks-reading-val { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
@@ -4161,7 +4167,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-xw-cluerows li { position: relative; display: flex; gap: 8px; padding: 9px 16px; font-size: var(--fs-nav); line-height: 1.35; color: var(--ink); cursor: pointer; }
 .fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 44px; right: 0; border-top: 1px solid var(--row-line); }
-.fc-xw-cluerows li:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.fc-xw-cluerows li:hover { background: var(--row-hover); }
 .fc-xw-cluerows li.fc-xw-clue-active { background: var(--accent-soft); }
 .fc-xw-cluerows li b { flex: none; width: 20px; text-align: right; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 /* Word search: a white card of plain letters, no cell lines -- a lined grid
@@ -4745,7 +4751,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
 }
-.fc-btn:hover { background: color-mix(in srgb, var(--ink) 4%, var(--paper)); }
+.fc-btn:hover { background: var(--row-hover); }
 .fc-btn:active { opacity: .7; }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
 /* The primary action -- a filled button in the deep section tone
@@ -5137,7 +5143,7 @@ mark.fc-diff-co {
   text-align: center; cursor: pointer; background: transparent;
   transition: background .12s ease, opacity .12s ease;
 }
-.fc-rating-btn:hover:not([disabled]) { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.fc-rating-btn:hover:not([disabled]) { background: var(--row-hover-overlay); }
 .fc-rating-btn:active { opacity: .6; }
 .fc-rating-btn .fc-rating-name { display: block; font: 500 15px/1.2 var(--font-ui); color: inherit; }
 .fc-rating-btn .fc-rating-interval { display: block; font-size: 12px; color: var(--muted); opacity: .75; font-weight: 400; }
@@ -5418,10 +5424,10 @@ mark.fc-diff-co {
 /* Hover / press: the Settings rows' neutral fill, never a tinted block. */
 .fc-kana-group:hover,
 .fc-direction-check:hover {
-  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
+  background: var(--row-hover);
 }
 .fc-kana-group:active,
-.fc-direction-check:active { background: color-mix(in srgb, var(--ink) 7%, var(--paper)); }
+.fc-direction-check:active { background: var(--row-press); }
 .fc-kana-group input[type="checkbox"],
 .fc-direction-check input[type="checkbox"] {
   position: absolute;
@@ -6072,14 +6078,14 @@ mark.fc-diff-co {
 .fc-gs-mode-name { display: block; color: var(--ink); }
 .fc-gs-check { flex: none; color: var(--section-strong); visibility: hidden; }
 .fc-gs-radio:checked ~ .fc-gs-check { visibility: visible; }
-.fc-gs-mode:hover, .fc-gs-pick:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.fc-gs-mode:hover, .fc-gs-pick:hover { background: var(--row-hover); }
 /* Keyboard focus on a row is the row lit in the section tone, as iOS
    highlights a focused cell -- an inset ring was cut by the card's
    corners and broken by the hairline. */
 .fc-gs-mode:has(.fc-gs-radio:focus-visible), .fc-gs-pick:focus-visible,
 .fc-gs-stats:focus-visible { background: var(--section-soft); outline: 0; }
 .fc-gs-pick, .fc-gs-stats { appearance: none; border: 0; background: transparent; text-align: left; }
-.fc-gs-pick[aria-expanded="true"] { background: color-mix(in srgb, var(--ink) 5%, var(--paper)); }
+.fc-gs-pick[aria-expanded="true"] { background: var(--row-hover); }
 .fc-gs-stats { color: var(--ink); justify-content: space-between; }
 .fc-gs-words { position: relative; }
 /* Every row's menu drops from under its own row's trailing edge: row N
@@ -6097,7 +6103,7 @@ mark.fc-diff-co {
   width: 100%; min-height: 44px; padding: 0 12px; border-radius: 14px; cursor: pointer; text-align: left;
   color: var(--ink); font: 400 15px/1.3 var(--font-ui);
 }
-.fc-gs-opt:hover, .fc-gs-opt:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
+.fc-gs-opt:hover, .fc-gs-opt:focus-visible { background: var(--row-hover-overlay); outline: 0; }
 .fc-gs-opt[aria-checked="true"] .fc-gs-check { visibility: visible; }
 .fc-gs-why { margin-top: 8px; }
 .fc-gs-go { display: flex; justify-content: center; margin: 24px 0; }
@@ -6290,7 +6296,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .account-menu-item span { color: var(--faint); }
 .account-menu-item[hidden], .account-menu-sep[hidden] { display: none; }
 .account-menu-signout { color: var(--wrong-strong); }
-.account-menu-item:hover, .account-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
+.account-menu-item:hover, .account-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
 .account-menu-sep { height: 1px; margin: 4px 8px; background: var(--row-line); }
 .account-menu-label { padding: 6px 12px 4px; color: var(--muted); font-size: var(--fs-small); }
 .account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); box-shadow: var(--control-lift); }
@@ -6333,7 +6339,11 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .fc-st-scale { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--faint); font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
 .fc-st-change { margin: 8px 0 0; color: var(--right-strong); font-size: var(--fs-small); }
 .fc-st-bests .set-row { appearance: none; border: 0; background: transparent; text-align: left; }
-.fc-st-bests .set-row:hover { background: color-mix(in srgb, var(--ink) 3%, var(--paper)); }
+.fc-st-bests .set-row:hover { background: var(--row-hover); }
+/* A finger has no hover: every tappable list row darkens while pressed. */
+.fc-gs-mode:active, .fc-gs-pick:active, .set-action:active, .opt-row:active,
+.help-support:active, .help-legal-row:active, .help-group summary:active,
+.fc-xw-cluerows li:active, .fc-st-bests .set-row:active { background: var(--row-press); }
 .fc-st-bests .set-row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
 .fc-st-bests .set-row:first-child::before { display: none; }
 .fc-st-best .set-label { display: flex; flex-direction: column; gap: 1px; padding: 8px 0; min-width: 0; }
@@ -6380,7 +6390,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 }
 .ios-confirm-destroy { color: var(--wrong-strong); }
 .ios-confirm-cancel { border-radius: var(--radius-menu); background: var(--paper); color: var(--accent-strong); font-weight: 600; }
-.ios-confirm-destroy:active, .ios-confirm-cancel:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ios-confirm-destroy:active, .ios-confirm-cancel:active { background: var(--row-press-overlay); }
 .ios-confirm-destroy:focus-visible, .ios-confirm-cancel:focus-visible { outline: 2px solid var(--section); outline-offset: -4px; }
 @keyframes ios-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ios-confirm-sheet { animation: none; } }
@@ -6499,8 +6509,8 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   font: 400 var(--fs-body)/1.2 var(--font-ui); color: var(--ink);
 }
 .row-menu-item + .row-menu-item { border-top: .5px solid var(--row-line); }
-.row-menu-item:hover, .row-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: 0; }
-.row-menu-item:active { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.row-menu-item:hover, .row-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+.row-menu-item:active { background: var(--row-press-overlay); }
 @keyframes row-menu-in { from { opacity: 0; scale: .94; } }
 @media (prefers-reduced-motion: reduce) { .row-menu-stack { animation: none; } }
 /* A hold on a row opens the menu, not the system's callout or a text

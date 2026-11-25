@@ -488,8 +488,10 @@ and Help.
   - **Checkmark rows** (kana groups, study directions): the row is the tap
     target and a tick appears at the trailing edge. They sit in the Settings card
     model — the card has no side padding and clips its rows, so a row's hover /
-    press fill (neutral `--ink` 3% / 7%, never a section tint) runs edge to edge
-    and rounds with the card; 44px rows, hairlines inset 16px from the leading edge.
+    press fill (`--row-hover` / `--row-press`, neutral `--ink` 7% / 12% --
+    iOS's grey cell highlight, never a section tint; every tappable list row
+    and menu item shares the pair, the menus their `-overlay` twins) runs edge
+    to edge and rounds with the card; 44px rows, hairlines inset 16px from the leading edge.
 - **iOS 26 materials** (the "iOS 26 materials" block at the end of
   `css/site.css`): the sticky search bar, the Options / Tables sheets, popovers
   and ⋯ menus are translucent glass — `backdrop-filter` blur with the
