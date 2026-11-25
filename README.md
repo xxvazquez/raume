@@ -254,7 +254,7 @@ flashcards**, or single words from **Library** or a search result.
 ### Reviewing
 
 ```
-card  →  type answer, Enter or ↑  →  verdict + answer (audio plays)  →  rate 1–4  →  next
+card  →  type answer (or leave it blank to see it), Enter or ↑  →  verdict + answer (audio plays)  →  rate 1–4  →  next
 ```
 
 - Every rating saves at once, so **End session** never loses progress.
