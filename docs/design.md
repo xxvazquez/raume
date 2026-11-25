@@ -358,8 +358,8 @@ and Help.
   "Tricky". Known wins. Options › Study ›
   **Highlight progress** turns both washes off together (`body.no-progress-hl`).
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
-  Patterns, or a custom table of your own sentences): stacked rows, not two columns —
-  the Japanese full width at 18px / line-height 1.9 (at 16 a reading like わたし
+  Patterns, or a table of your own that is mostly sentences): stacked rows, not two columns —
+  the Japanese full width at 17px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   in the meaning colour (`--ink-2`; secondary grey read too faint), alone on its
   line — a pattern example's grammar (`row.pattern`) waits behind the row's ⓘ,
@@ -884,7 +884,7 @@ and Help.
   Japanese item is Japanese with furigana (particles bold blue,
   `.particle`, as everywhere in raume) and the reference tables' speaker
   button, then English, in the tables' own type — `--font-jp` at `--fs-jp`
-  (16px on a phone), `--fs-english` (12.5px on a phone); as in the
+  (16px; 15px on a phone), `--fs-english` (12.5px on a phone); as in the
   tables, tapping the Japanese opens its romaji (italic, `--romaji`) as a
   caption under it, one at a time. Colour is only the section's tile hue
   (highlights, slots, dots); the lesson kit's pink becomes clay. Quiz and

@@ -233,18 +233,16 @@ window.RaumeStudy.customVocab = (function () {
   // A table of your own has no way to say up front "this is going to be
   // whole sentences, not headwords" (unlike the built-in Phrases table,
   // which is simply authored with tableClass: "vocab-sentences"). Guess it
-  // instead from what actually ended up in it -- a real sentence runs well
-  // past the longest built-in headword (9 kana/kanji, e.g. トイレットペーパー)
-  // and/or carries 。/、, neither of which any built-in word ever does. Wrong
-  // in either direction is harmless: a word table that happens to guess
-  // "sentence" just gets a little extra row height and a 50/50 split instead
-  // of 46/54, not broken -- what actually breaks (the furigana overlapping
-  // a wrapped second line, see the render.js/site.css sentence CSS) is a true
-  // sentence rendered as a headword, which this exists to avoid.
+  // instead from what actually ended up in it -- a real sentence runs past
+  // the longest built-in headwords (よろしくおねがいします is 11) and/or
+  // carries 。/、, which no built-in word ever does. The whole table goes
+  // stacked only when most of its rows are sentences: a word table with a
+  // few greetings or phrases in it stays a word table, laid out exactly like
+  // the built-in ones (Greetings holds よろしくおねがいします as a word row).
   var SENTENCE_PUNCTUATION = /[。、]/;
   function looksLikeSentence(jp) {
     var text = (jp || []).map(function (s) { return s.kanji || s.text || ""; }).join("");
-    return text.length > 10 || SENTENCE_PUNCTUATION.test(text);
+    return text.length > 11 || SENTENCE_PUNCTUATION.test(text);
   }
 
   // Merge every custom table + row into RaumeStudy.data.vocabularyTables in
@@ -286,7 +284,8 @@ window.RaumeStudy.customVocab = (function () {
     });
     Object.keys(customById).forEach(function (id) {
       var t = customById[id];
-      if (t.rows.some(function (r) { return looksLikeSentence(r.jp); })) t.tableClass = "vocab-sentences";
+      var n = t.rows.filter(function (r) { return looksLikeSentence(r.jp); }).length;
+      if (n * 2 > t.rows.length) t.tableClass = "vocab-sentences";
     });
   }
 

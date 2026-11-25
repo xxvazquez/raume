@@ -90,7 +90,7 @@ Grammatical **particles are blue and bold** everywhere.
 | --- | --- |
 | **Columns** | **Japanese** (with furigana) and **English**. Tap a word to show its **romaji** underneath; romaji is always searchable. Context for a meaning ("before a noun", "polite") follows the English in grey on the same line, dropping under it only when it doesn't fit. |
 | **Furigana** | Always shown, 11px minimum. Each reading starts where its kanji start; consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and a long reading runs on over the following kana instead of pushing a gap into the word (料理する). |
-| **Sentence tables** | (A table of your own sentences) Japanese on its own line, English under it, romaji on tap. |
+| **Sentence tables** | (A table of your own that is mostly sentences) Japanese on its own line, English under it, romaji on tap. A table of mostly words, with a few phrases in it, is laid out like every other table. |
 | **Katakana** | Hover or tap any katakana to see its romaji above it. |
 | **Pronunciation** | The speaker icon plays a native-voice clip. Custom words use the browser's speech engine. |
 | **Sorting** | The English column sorts A–Z / Z–A. Japanese has no single natural order, so it doesn't sort. Tables open A–Z, except those taught as a sequence — counting (ひとつ, ふたつ…), days and years (おととい → きのう → きょう), time of day, こ・そ・あ・ど, particles, question words, family and greetings — which open in that order. |
