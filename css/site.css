@@ -2787,6 +2787,9 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
   /* 17px, not 16: at 16 a reading like わたし is wider than 私は, so the
      no-touching-readings rule pushed gaps into sentences (私 は, 私 の). */
   white-space: normal; overflow-wrap: anywhere; font-size: 17px;
+  /* Break between phrases only (render.js phraseSegments puts a <wbr> at
+     each), never inside a word -- anywhere only when a phrase can't fit. */
+  word-break: keep-all;
   /* Tighter than the old 2 -- the furigana overhangs (below) instead of
      needing a whole extra line of air. */
   line-height: 1.9;

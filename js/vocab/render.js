@@ -140,6 +140,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var groups = [];
     segments.forEach(function (seg) {
       var last = groups[groups.length - 1];
+      if (seg.wbr) { groups.push(seg); return; }
       if (seg.kanji && last && last.kanji) { last.kanji += seg.kanji; last.reading += seg.reading; }
       else groups.push(seg.kanji ? { kanji: seg.kanji, reading: seg.reading } : seg);
     });
@@ -152,6 +153,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return 'x';
     }
     return groups.map(function (seg, i) {
+      if (seg.wbr) return '<wbr>';
       if (!seg.kanji) return jpSegments([seg], true);
       var cls = 'rb rt-' + Math.min(RT_MAX, seg.reading.length) + ' kb-' + Math.min(KB_MAX, seg.kanji.length) + ' rm-' + roomAfter(i);
       return '<ruby class="' + cls + '"><rb class="jpmain">' + esc(seg.kanji) +
@@ -283,10 +285,43 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (!meta) return '';
     return '<span class="visually-hidden">(' + meta.label + ')</span>';
   }
+  // A sentence wraps between phrases, never inside one (おねがいし / ます):
+  // the cell is keep-all (css/site.css), and a { wbr } marker goes where a
+  // line may break -- between the row's tiles, each particle kept with the
+  // word before it; a sentence without tiles breaks after a particle or 、.
+  function phraseSegments(row) {
+    var segs = row.jp, cuts = {}, at = 0, starts = {};
+    segs.forEach(function (seg) { if (seg.p) starts[at] = true; at += String(seg.text || seg.p || seg.kanji || '').length; });
+    if (row.tiles) {
+      at = 0;
+      row.tiles.forEach(function (tile, i) { if (i && !starts[at]) cuts[at] = true; at += tile.length; });
+    } else {
+      at = 0;
+      segs.forEach(function (seg, i) {
+        var str = String(seg.text || seg.p || seg.kanji || '');
+        if (seg.text) for (var k = 0; k < str.length - 1; k++) if (str[k] === '、') cuts[at + k + 1] = true;
+        at += str.length;
+        if ((seg.p || /、$/.test(str)) && segs[i + 1] && !segs[i + 1].p) cuts[at] = true;
+      });
+    }
+    var out = [];
+    at = 0;
+    segs.forEach(function (seg) {
+      var str = String(seg.text || seg.p || seg.kanji || ''), from = 0;
+      if (at && cuts[at]) out.push({ wbr: true });
+      if (seg.text) {
+        for (var k = 1; k < str.length; k++) if (cuts[at + k]) { out.push({ text: str.slice(from, k) }, { wbr: true }); from = k; }
+        out.push(from ? { text: str.slice(from) } : seg);
+      } else out.push(seg);
+      at += str.length;
+    });
+    return out;
+  }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
-    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpGroupedSegments(row.jp) + '</span>';
+    var segs = row.tiles || row.pattern ? phraseSegments(row) : row.jp;
+    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpGroupedSegments(segs) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
@@ -427,6 +462,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     return null;
   }
+  vocab.rawRow = rawRow;
   // Words in the other tables written with this kanji -- how an N5 kanji
   // actually sticks: through words the reader already knows. Shortest first
   // (the plainest words), every one of them, the sheet's example left out.
@@ -612,6 +648,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return row.type === 'verb-pair' ? verbPairRow(row) : row.type === 'kanji' ? kanjiRow(row) : wordRow(row);
     }).join('\n    ');
   }
+  // One row's <tr>, for repainting a row in place after its word is edited.
+  vocab.rowHtml = function (row) { return rowsHtmlFor([row]); };
   // Column-visibility items for a table's ⋯ menu -- the same set as the
   // reference Options sheet's switches (index.html). An iOS segmented control is
   // single-select, so these multi-select toggles are checkmark menu items
@@ -959,6 +997,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function mergeCustomVocab() {
     var cv = window.RaumeStudy.customVocab;
     if (cv && cv.applyToDataset) cv.applyToDataset();
+    // ...and the reader's edits to built-in words (js/vocab/word-edits.js).
+    var we = window.RaumeStudy.wordEdits;
+    if (we && we.applyToDataset) we.applyToDataset();
   }
   function tagOriginalIndex() {
     document.querySelectorAll('.vocab tbody').forEach(function (tbody) {

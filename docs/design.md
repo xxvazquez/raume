@@ -358,7 +358,7 @@ and Help.
   "Tricky". Known wins. Options › Study ›
   **Highlight progress** turns both washes off together (`body.no-progress-hl`).
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
-  Patterns, or a table of your own that is mostly sentences): stacked rows, not two columns —
+  Patterns, Everyday Sentences, or a table of your own that is mostly sentences): stacked rows, not two columns —
   the Japanese full width at 17px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   in the meaning colour (`--ink-2`; secondary grey read too faint), alone on its
@@ -366,6 +366,9 @@ and Help.
   never as grey text beside the English — romaji on tap between them, speaker
   and hide glyphs at the trailing edge of each line; no column headers (authored order, nothing to sort).
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
+  A line breaks only between phrases, never inside a word (おねがいし / ます):
+  `word-break: keep-all` plus a `<wbr>` between the row's tiles, each particle
+  kept with the word before it (rows without tiles: after a particle or 、).
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never
   extends left of them. Consecutive kanji share one reading; the reading floats
