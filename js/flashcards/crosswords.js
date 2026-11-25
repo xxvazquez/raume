@@ -2226,16 +2226,24 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (pop && !pop.hidden) { pop.hidden = true; boardEl.querySelector(".fc-wc-info").setAttribute("aria-expanded", "false"); }
     });
     function setup() { return setupKey(total, "kana|type"); }
-    // The finished chain, an inset list in order: each link's word (with
-    // its furigana, the link kana underlined) and romaji, its English
-    // trailing; a missed link wears the Tricky wash and says so.
+    // The finished chain, under the result card: an iOS inset-grouped
+    // list, one row per word in order -- a tile saying how the link went
+    // (start / right / missed: glyph and colour), the word with its furigana
+    // over its romaji, the English trailing.
+    var WC_TILE = {
+      start: ["slate", "First word", '<path d="M5 15V3.5M5 4h8.5l-2 3 2 3H5"/>'],
+      right: ["green", "Right", '<path d="m4 9.5 3.2 3.2L14 5.5"/>'],
+      missed: ["amber", "Missed", '<path d="M9 4v6.5"/><path d="M9 14h.01"/>']
+    };
     function chainLineHtml() {
-      return '<p class="fc-wc-chain-head">Your chain</p><ol class="fc-wc-chain">' + trail.map(function (w, i) {
-        var miss = missed.indexOf(w) >= 0, entry = vocabIndex()[w.id] || {};
-        return "<li" + (miss ? ' class="fc-wc-chain-missed"' : "") + '><span class="fc-wc-chain-n">' + (i + 1) + "</span>" +
+      return '<h3 class="help-head fc-wc-chain-head">Your chain</h3><ol class="fc-wc-chain">' + trail.map(function (w, i) {
+        var how = i === 0 ? "start" : missed.indexOf(w) >= 0 ? "missed" : "right", t = WC_TILE[how], entry = vocabIndex()[w.id] || {};
+        return '<li class="fc-wc-chain-' + how + '"><span class="set-tile fc-wc-chain-tile" data-tile="' + t[0] + '">' +
+          '<svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + t[2] + "</svg>" +
+          '<span class="visually-hidden fc-wc-chain-tag">' + t[1] + "</span></span>" +
           '<span class="fc-wc-chain-word"><span class="fc-wc-chain-jp" lang="ja">' + chainWordHtml(w, i === 0) + "</span>" +
           '<span class="fc-wc-chain-ro">' + esc(String(entry.romajiDisplay || "").split(" / ")[0]) + "</span></span>" +
-          '<span class="fc-wc-chain-en">' + esc(w.clue) + (miss ? '<span class="fc-wc-chain-tag">Missed</span>' : "") + "</span></li>";
+          '<span class="fc-wc-chain-en">' + esc(w.clue) + "</span></li>";
       }).join("") + "</ol>";
     }
     function finish() {
@@ -2247,7 +2255,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       countEl.classList.add("fc-ws-count-done");
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + at + "</p>" +
-        accuracyStatsHtml("wordchain", score, at, run) + chainLineHtml() + doneActionsHtml("fcWcAgain") + "</div>";
+        accuracyStatsHtml("wordchain", score, at, run) + doneActionsHtml("fcWcAgain") + "</div>" + chainLineHtml();
       bindDoneActions("fcWcAgain");
     }
     function pause() {

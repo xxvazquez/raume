@@ -4437,16 +4437,16 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-ss-bucket.fc-ss-was { box-shadow: 0 0 0 2px var(--right); color: var(--right-strong); }
 /* Word chain's finish card sets the whole chain as one wrapping line. */
 .fc-wc-en { margin: 0; color: var(--muted); font-size: var(--fs-small); text-align: center; }
-.fc-wc-chain-head { align-self: stretch; margin: 10px 10px 4px; color: var(--muted); font-size: var(--fs-small); }
-.fc-wc-chain { align-self: stretch; margin: 0 0 16px; padding: 0; list-style: none; }
-.fc-wc-chain li { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 10px; border-top: 1px solid var(--row-line); }
-.fc-wc-chain-missed { background: var(--tricky-bg); }
-.fc-wc-chain-n { flex: none; min-width: 1.4em; color: var(--faint); font-size: var(--fs-small); font-variant-numeric: tabular-nums; text-align: right; }
-.fc-wc-chain-word { display: flex; flex-direction: column; min-width: 0; }
+/* The finished chain: a white inset-grouped card under the result card,
+   Settings' tiled rows -- hairlines inset to the text, not the tile. */
+.fc-wc-chain { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
+.fc-wc-chain li { position: relative; display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; box-sizing: border-box; }
+.fc-wc-chain li + li::before { content: ""; position: absolute; top: 0; left: 58px; right: 0; border-top: 1px solid var(--row-line); }
+.fc-wc-chain-tile.set-tile { margin-right: 0; }
+.fc-wc-chain-word { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .fc-wc-chain-jp { font-size: 17px; line-height: 1.3; color: var(--ink); }
 .fc-wc-chain-ro { color: var(--muted); font-size: var(--fs-small); }
-.fc-wc-chain-en { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; color: var(--muted); font-size: var(--fs-small); text-align: right; }
-.fc-wc-chain-tag { color: var(--tricky-ink); font-size: var(--fs-micro); }
+.fc-wc-chain-en { margin-left: auto; color: var(--muted); font-size: 15px; text-align: right; }
 /* Word chain: the chain so far as a row of white chips (written
    form, its reading small under kanji; the kana the chain runs on
    underlined in the section tint), scrolling sideways, the newest sliding
@@ -4467,8 +4467,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 .fc-wc-chip-w { font-size: 17px; line-height: 1.25; color: var(--ink); }
 .fc-wc-chip-en { font-size: 11px; line-height: 1.3; color: var(--muted); white-space: nowrap; }
-:is(.fc-wc-chip, .fc-wc-chain) u { text-decoration: underline 2px var(--section); text-underline-offset: 3px; }
-:is(.fc-wc-chip, .fc-wc-chain) rt u { text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+/* The kana a word links on: the section tint, in the word or its furigana. */
+:is(.fc-wc-chip, .fc-wc-chain) u { text-decoration: none; color: var(--section-strong); font-weight: 600; }
 .fc-wc-chip-new { animation: fc-wc-in .3s cubic-bezier(.2, .8, .2, 1); }
 @keyframes fc-wc-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 .fc-wc-need { position: relative; }
