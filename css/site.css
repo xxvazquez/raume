@@ -161,13 +161,20 @@
   --field-fill: #eef0f3;
   --field-line: var(--line-strong);
   --card-line: #dbdfe6;
-  /* Controls library (iOS 26): a segmented control is a solid white capsule
-     (--control-lift) whose selected segment takes the soft section-tone
-     wash -- the desktop nav capsule's look, no grey track; a switch is a
-     grey track that fills with
-     the section tone (--switch-on, set on body below -- the section tones are
-     only defined there). */
-  --seg-track: var(--paper);
+  /* Controls library (iOS 26): a segmented control is UIKit's -- a grey
+     capsule track (no border, no lift) with the selected segment raised on
+     a white thumb, its label in ink, semibold. Neutral, not the section
+     tone: the pale section wash it used to be blended into white and grey
+     alike. A switch is a grey track that fills with the section tone
+     (--switch-on, set on body below -- the section tones are only defined
+     there). --tab-select is the selected tab's neutral pill (the phone tab
+     bar, the desktop nav capsule, a toolbar toggle that's on), its label
+     in the section tone. */
+  --seg-track: rgba(118, 118, 128, .12);
+  --seg-thumb: var(--paper);
+  --seg-thumb-ink: var(--ink);
+  --seg-thumb-shadow: 0 0 0 .5px rgba(0, 0, 0, .04), 0 3px 8px rgba(0, 0, 0, .12), 0 3px 1px rgba(0, 0, 0, .04);
+  --tab-select: color-mix(in srgb, var(--ink) 11%, transparent);
   /* One progress bar everywhere (Today, a session, Kana, Kanji): 6px, a
      faint ink track, the sage "done" fill. */
   --bar-h: 6px;
@@ -270,6 +277,12 @@
    <html data-theme> before first paint.
    ------------------------------------------------------------------- */
 :root[data-theme="dark"] {
+  /* Segmented control + tab selection, UIKit's dark values: a lighter grey
+     track and a grey (not white) thumb a step above it. */
+  --seg-track: rgba(118, 118, 128, .24);
+  --seg-thumb: color-mix(in srgb, #fff 28%, var(--paper));
+  --seg-thumb-shadow: 0 3px 8px rgba(0, 0, 0, .28), 0 3px 1px rgba(0, 0, 0, .08);
+  --tab-select: color-mix(in srgb, var(--ink) 14%, transparent);
   --ink: #eef1f5;
   --ink-2: #dbe1e8;
   --muted: #9ba7b4;
@@ -551,8 +564,9 @@ body {
   border-radius: 999px;
 }
 /* Each item carries its own section tone on hover / when active -- the
-   selected one is a soft capsule in that tone with deeper text, the one place
-   the section colour is spent on the chrome. */
+   selected one on the neutral --tab-select pill (iOS 26's tab selection)
+   with its label in the deep section tone, the one place the section colour
+   is spent on the chrome. */
 .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
 .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
 .site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); }
@@ -561,7 +575,7 @@ body {
 .site-nav-link.active {
   color: var(--section-strong);
   font-weight: 500;
-  background: var(--section-soft);
+  background: var(--tab-select);
 }
 
 /* --- Page shell ------------------------------------------------- */
@@ -671,12 +685,11 @@ body {
 }
 /* A name wraps rather than truncates -- "Signs, Doors & Pla…" told you nothing. */
 .tindex-tname { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
-.tindex-menu a:hover { background: var(--section-soft); color: var(--section-strong); }
-.tindex-menu a:hover .tindex-count { color: var(--section-strong); }
-/* The table you're viewing now -- a section-colour left edge + tinted ground,
-   subtle but instantly locatable in the directory. */
+.tindex-menu a:hover { background: var(--row-hover-overlay); }
+/* The table you're viewing now -- the neutral selection pill with its name
+   in the section tone, instantly locatable in the directory. */
 .tindex-menu a.current {
-  background: var(--section-soft);
+  background: var(--tab-select);
   color: var(--section-strong);
   font-weight: 500;
 }
@@ -874,11 +887,10 @@ body {
 
 /* A switch is "on" in the deep section tone in light, and the mid tone in dark
    (the deep one is a pale tint there, which would wash out the white thumb). */
-/* The selected segment: set on body, where the section tone is defined. */
-body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --seg-thumb-ink: var(--section-strong); }
+body { --switch-on: var(--section-strong); }
 :root[data-theme="dark"] body { --switch-on: var(--section); }
-/* Segmented control (iOS 26): a white capsule holding the segments, the
-   selected one on a soft section-tone wash -- single-select only (Manage's .fc-manage-filters;
+/* Segmented control (iOS 26): a grey capsule track holding the segments,
+   the selected one raised on a white thumb -- single-select only (Manage's .fc-manage-filters;
    the Flashcards tabs and the Appearance picker share the look). Multi-select
    on/off sets are switches or checkmark menu items, never this. */
 .fc-manage-filters {
@@ -887,7 +899,6 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
   gap: 2px;
   padding: 2px;
   background: var(--seg-track);
-  box-shadow: var(--control-lift);
   border-radius: 999px;
 }
 .fc-manage-filters button {
@@ -903,8 +914,9 @@ body { --switch-on: var(--section-strong); --seg-thumb: var(--section-soft); --s
 }
 .fc-manage-filters button.active {
   background: var(--seg-thumb);
+  box-shadow: var(--seg-thumb-shadow);
   color: var(--seg-thumb-ink);
-  font-weight: 500;
+  font-weight: 600;
 }
 .fc-manage-filters button:hover { color: var(--ink); }
 /* --- Options sheet (search bar's trailing button) ----------------------
@@ -1552,7 +1564,7 @@ body.icon-picker-open { overflow: hidden; }
 .notes-nav .fc-back { margin-bottom: 0; }
 .notes-tools { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; margin: 0 -10px 0 auto; }
 .notes-quiz { min-height: 44px; padding: 0 10px; border-radius: 999px; }
-.notes-quiz[aria-pressed="true"] { min-height: 30px; margin: 7px 2px; background: var(--section-soft); font-weight: 600; }
+.notes-quiz[aria-pressed="true"] { min-height: 30px; margin: 7px 2px; background: var(--tab-select); color: var(--section-strong); font-weight: 600; }
 .notes-tool {
   appearance: none; border: 0; background: none; cursor: pointer; width: 44px; height: 44px;
   display: inline-flex; align-items: center; justify-content: center; color: var(--section-strong);
@@ -4037,7 +4049,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* The Flashcards sub-tabs are the shared segmented control (see .fc-manage-filters):
    a grey track, the selected tab raised on a thumb. Full width on a phone,
    sized to its content on a wide window. */
-.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); box-shadow: var(--control-lift); border-radius: 999px; }
+.fc-tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 16px; background: var(--seg-track); border-radius: 999px; }
 .fc-tab {
   flex: 1 1 auto;
   appearance: none; border: 0; background: transparent;
@@ -4046,7 +4058,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   cursor: pointer;
 }
 .fc-tab:hover { color: var(--ink); }
-.fc-tab.active { background: var(--seg-thumb); color: var(--seg-thumb-ink); font-weight: 500; }
+.fc-tab.active { background: var(--seg-thumb); box-shadow: var(--seg-thumb-shadow); color: var(--seg-thumb-ink); font-weight: 600; }
 @media (min-width: 700px) {
   .fc-tabs { display: inline-flex; }
   .fc-tab { flex: 0 0 auto; padding: 7px 16px; }
@@ -4487,14 +4499,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   font: 400 15px/1 var(--font-ui); color: var(--ink); outline: none;
 }
 /* あ | ア: which kana romaji turns into -- a small segmented control in the
-   field, the selected segment on the section-tone wash. */
-.fc-wc-script { flex: none; display: flex; padding: 2px; border-radius: 18px; background: var(--seg-track); box-shadow: var(--control-lift); }
+   field, the selected segment raised on the thumb. */
+.fc-wc-script { flex: none; display: flex; padding: 2px; border-radius: 18px; background: var(--seg-track); }
 .fc-wc-kana-btn {
   appearance: none; border: 0; padding: 0; position: relative; width: 34px; height: 32px; border-radius: 16px;
   background: transparent; color: var(--muted); font: 400 15px/1 var(--font-ui); cursor: pointer;
 }
 .fc-wc-kana-btn::after { content: ""; position: absolute; inset: -6px -2px; } /* 44pt hit area */
-.fc-wc-kana-btn[aria-pressed="true"] { background: var(--section-soft); color: var(--section-strong); font-weight: 600; }
+.fc-wc-kana-btn[aria-pressed="true"] { background: var(--seg-thumb); box-shadow: var(--seg-thumb-shadow); color: var(--seg-thumb-ink); font-weight: 600; }
 .fc-wc-kana-btn:focus-visible { outline: 2px solid var(--section); outline-offset: 1px; }
 .fc-wc-go {
   appearance: none; border: 0; padding: 0; flex: none; display: flex; align-items: center; justify-content: center;
@@ -5989,7 +6001,7 @@ mark.fc-diff-co {
     -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
   }
-  .site-nav-link.active { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--section-strong); }
+  .site-nav-link.active { background: var(--tab-select); color: var(--section-strong); }
 }
 @media print {
   .options-sheet, .tindex-menu, .section-menu-list, .search-recents, .page-vocab .vocab-toolbar::before {
@@ -6320,12 +6332,12 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .account-menu-item:hover, .account-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
 .account-menu-sep { height: 1px; margin: 4px 8px; background: var(--row-line); }
 .account-menu-label { padding: 6px 12px 4px; color: var(--muted); font-size: var(--fs-small); }
-.account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); box-shadow: var(--control-lift); }
+.account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); }
 .account-menu-seg button {
   flex: 1; appearance: none; border: 0; background: transparent; cursor: pointer;
   padding: 7px 0; border-radius: 999px; color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
 }
-.account-menu-seg button[aria-pressed="true"] { background: var(--seg-thumb); color: var(--seg-thumb-ink); font-weight: 500; }
+.account-menu-seg button[aria-pressed="true"] { background: var(--seg-thumb); box-shadow: var(--seg-thumb-shadow); color: var(--seg-thumb-ink); font-weight: 600; }
 
 /* --- Stats (Puzzles / Games) -------------------------------------------
    A pushed screen in the Settings model: a segmented control for the

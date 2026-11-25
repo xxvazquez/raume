@@ -330,8 +330,8 @@ and Help.
   The search field is a 36px solid white capsule with a 0.5px hairline and a
   very soft lift (`--control-lift`), styled exactly like the Tables | Options
   capsule beside it — never grey, never translucent glass (glass read grey
-  over the grey ground). Segmented controls: a faint track (`--seg-track`,
-  ink 6%) with the selected segment raised in white on the same lift. Its text is 13.5px everywhere, just under the 14px
+  over the grey ground). Segmented controls: UIKit's grey track (`--seg-track`)
+  with the selected segment raised on a white thumb (`--seg-thumb-shadow`). Its text is 13.5px everywhere, just under the 14px
   rows it searches; the placeholder ends in "…" when the field is narrow. Focusing the empty field drops a **Recent** list under it (`.search-recents`):
   a glass menu exactly the field's width (the whole bar's on a phone, where the
   field is narrow), a 13px grey "Recent" header with a plain tinted **Clear**,
@@ -413,14 +413,16 @@ and Help.
   beside the hide eye opens a popover (`.role-pop-list`) with a line per note,
   each led by its own tinted glyph. The English keeps the row's full width.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
-  `--seg-thumb`, `--seg-thumb-ink`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
+  `--seg-thumb`, `--seg-thumb-ink`, `--seg-thumb-shadow`, `--tab-select`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.fc-manage-filters`, the Flashcards tabs, the
-    Appearance picker): a solid white capsule (`--seg-track` = paper, the
-    `--control-lift` hairline) with 2px padding, the selected segment on the soft
-    section-tone wash (`--seg-thumb` = `--section-soft`, label `--seg-thumb-ink` =
-    `--section-strong`, weight 500) — the desktop nav capsule's active item, so
-    every pill in the app reads the same. No grey track (iOS 26; Laura,
-    2026-09-27). Single-select only — never several segments raised at once. A
+    Appearance picker, Word chain's あ | ア): UIKit's own — a grey capsule track
+    (`--seg-track`, rgba(118,118,128) at 12% light / 24% dark, no border or
+    lift) with 2px padding, the selected segment raised on a thumb
+    (`--seg-thumb`: white in light, a grey a step above the track in dark;
+    `--seg-thumb-shadow`), its label in ink (`--seg-thumb-ink`), weight 600.
+    Neutral, not the section tone: the pale section wash it used to be
+    (2026-09-27) blended into the white and grey around it (Laura,
+    2026-11-25). Single-select only — never several segments raised at once. A
     multi-select on/off set is switches (the reference Options sheet's Japanese /
     Furigana / English) or checkmark items in a ⋯ menu (the dashboard's Words to
     review: `.col-menu-item`, `role="menuitemcheckbox"`, tick leading, a ground
@@ -591,10 +593,12 @@ and Help.
   as the tinted one (`--accent-strong`), the way a selected bar item does on iOS;
   the sync dot stays, sitting on the account glyph's corner (green when signed in,
   amber when offline or something's queued, the glyph tinting to match). The
-  nav is still top tabs, but the selected one is a **capsule** — `--section-soft`
-  fill, `--section-strong` text, weight 500 — instead of a tinted block over a
-  3px underline; the rest are plain secondary text. The capsule is the one place
-  a section tone is spent on the chrome. That is the layout from 641px up.
+  nav is still top tabs, but the selected one is a **capsule** — the neutral
+  `--tab-select` pill (ink 11% light / 14% dark, iOS 26's tab selection, shared
+  with the phone tab bar), `--section-strong` text, weight 500 — instead of a
+  tinted block over a 3px underline; the rest are plain secondary text. Its
+  label is the one place a section tone is spent on the chrome. The table
+  index marks the table you're in the same way. That is the layout from 641px up.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS 26 tab bar**: a
   floating Liquid Glass capsule (`position: fixed`), 12px in from the sides (five tabs need the width; labels 10px) and
   just above the home indicator (`--tabbar-gap`: the bottom safe-area inset less
@@ -603,7 +607,7 @@ and Help.
   soft shadow — so content scrolling under it shows through; the blur sits on
   the bar itself, which has no `position: fixed` children. Five equal tabs, an
   icon over a 10.5px label (iOS's ~10pt), unselected in `--muted`, the selected
-  one in its section tone on a rounded neutral highlight (`--ink` 8%,
+  one in its section tone on a rounded neutral highlight (`--tab-select`, ink 11%,
   concentric inside the capsule), same weight. (Laura, 2026-10-08 — replacing
   the traditional square, full-width bar.) Nothing is added or removed (same
   five links, same taps); the icons are CSS masks on `.site-nav-link::before`
@@ -871,8 +875,8 @@ and Help.
   12% larger, the part that changes on a soft chip of the section's hue —
   the hue that marks it in the examples.
   Japanese breaks at its spaces, never inside a word. The bar is
-  Notes': "‹ Notes" leading; Quiz (a plain tinted word, on a soft
-  `--section-soft` capsule while on), a 44pt search glyph and ⋯ trailing
+  Notes': "‹ Notes" leading; Quiz (a plain tinted word, on the neutral
+  `--tab-select` pill while on), a 44pt search glyph and ⋯ trailing
   (clear of the phone's account button). Under the title one grey line
   holds the mark and, when the title isn't it, the date. **Edit** (a
   plain tinted word before Quiz, lesson notes only) is iOS's edit mode: the
