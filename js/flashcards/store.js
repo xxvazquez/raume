@@ -361,6 +361,23 @@ window.RaumeStudy.flashcards.store = (function () {
     saveCache();
     return list;
   }
+  // Study from: the one table Study now draws on, or null for every
+  // flashcard. A per-device choice like the theme -- what you drill on the
+  // way to class needn't follow you to the desk -- kept beside, not in, the
+  // card cache, so it never syncs and never touches a card.
+  // Held in memory too, so the pick still works for the visit where
+  // storage is blocked.
+  var STUDY_FROM_KEY = "raume-flashcards-study-from", studyFromMem = null;
+  function studyFrom() {
+    try { return localStorage.getItem(STUDY_FROM_KEY) || null; } catch (e) { return studyFromMem; }
+  }
+  function setStudyFrom(tableId) {
+    studyFromMem = tableId == null || tableId === "" ? null : String(tableId);
+    try {
+      if (studyFromMem == null) localStorage.removeItem(STUDY_FROM_KEY);
+      else localStorage.setItem(STUDY_FROM_KEY, studyFromMem);
+    } catch (e) {}
+  }
   // Only a *different* user (or none) starts from empty. The same account
   // coming back -- every page load restores its session -- keeps its
   // cached cards and offline outbox, so the dashboard isn't "No flashcards
@@ -521,6 +538,7 @@ window.RaumeStudy.flashcards.store = (function () {
     cleanJourney: cleanJourney, mergeJourney: mergeJourney,
     loadCache: loadCache, saveCache: saveCache, onSave: onSave, noteReviewDay: noteReviewDay, getCache: getCache, resetCacheForUser: resetCacheForUser,
     isTablePaused: isTablePaused, pausedTables: pausedTables, setTablePausedLocal: setTablePausedLocal,
+    studyFrom: studyFrom, setStudyFrom: setStudyFrom,
     loadKanaCache: loadKanaCache, saveKanaCache: saveKanaCache, getKanaCache: getKanaCache,
     resetKanaCacheForUser: resetKanaCacheForUser,
     defaultKanaFsrs: defaultKanaFsrs, sanitizeKanaFsrs: sanitizeKanaFsrs,

@@ -386,6 +386,7 @@ From the top:
 | Card | Shows |
 | --- | --- |
 | **Today's rings** | Apple Fitness-style: **Review** (cards due today that you've done), **Learn** (new cards met, of your daily number) and **Play** (one finished puzzle or game; more laps the ring), beside how many cards **Study now** holds |
+| **Study from** | Between the rings and Study now, once your flashcards span two tables: **All flashcards** or any one table (a class's list before the lesson). Study now and its count follow it; the rings, stats and Library still count everything. Remembered on this device until you switch back; nothing is paused or changed |
 | **Streak** | Days in a row, this week as seven dots (studied / missed / today half-filled until Review closes) and your best to beat |
 | **Level** | One per 25 words ever mastered (forgetting a word never takes one back), with Kana started (of all 208 basic hiragana and katakana, whichever groups you drill), Kanji known, Words mastered, total cards, reviews and retention (FSRS's forecast, behind its ⓘ; under your target it turns coral with a ↓ arrow, and the ⓘ says so) |
 | **Awards** | Medals for streaks, reviews, words mastered, all the hiragana / katakana, kanji known, puzzles and games, a Match under 2s a pair, a perfect Listening game. The newest six earned and the nearest to go; **Show all** for every one, tap one for what it's for and when you earned it |

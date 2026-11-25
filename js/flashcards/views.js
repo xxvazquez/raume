@@ -118,6 +118,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Rings</span><span class="help-desc">Today’s three goals. Review: the cards due today you’ve done. Learn: new cards, up to your daily number. Play: one game or puzzle.</span></li>' +
       '<li><span class="help-term">Cards to study</span><span class="help-desc">What Study now would start with: due reviews plus today’s new cards.</span></li>' +
+      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, or just one table. Study now follows it until you switch back; the rings still count everything.</span></li>' +
       '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review. The dots are this week: full when studied, half for today until Review closes.</span></li>' +
       '<li><span class="help-term">Level</span><span class="help-desc">One level per 25 words mastered — every card of a word remembered for three weeks. Forgetting one never takes a level back.</span></li>' +
       '<li><span class="help-term">Awards</span><span class="help-desc">Medals for streaks, reviews, words, kana, kanji, puzzles and games. Grey ones show how far along you are; tap one for what it’s for.</span></li>' +

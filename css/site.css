@@ -5530,6 +5530,11 @@ mark.fc-diff-co {
    80ms apart outer to inner); reduced motion and every later render draw
    them at rest. */
 .fc-rings-row { display: flex; align-items: center; gap: 20px; margin-bottom: 14px; }
+/* Study from: a Settings pop-up row between the rings and Study now,
+   hairlined off both, flush with the card's own padding. */
+.fc-study-from { padding: 0; margin: -4px 0 10px; border-top: 1px solid var(--row-line); border-bottom: 1px solid var(--row-line); }
+.fc-study-from .fc-xw-menu-val { max-width: 60%; }
+.fc-study-from:has(.fc-xw-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
 .fc-rings { flex: none; display: block; overflow: visible; }
 .fc-ring circle { fill: none; stroke-width: 12; }
 .fc-ring-track { stroke: color-mix(in srgb, var(--tile) 18%, var(--paper)); }

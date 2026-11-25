@@ -122,6 +122,28 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       return !!entry && !store.isTablePaused(entry.tableId);
     });
   }
+  // Study from (Dashboard): the tables with cards in study, and the cards
+  // Study now draws on -- one table's, or every one's. A choice whose table
+  // has nothing left in study (deleted, paused, every word archived) reads
+  // as every flashcard, so Study now never goes quiet over a stale pick.
+  // Only what a session holds follows it; the rings, stats and Library
+  // still count everything you've studied.
+  function studyTables() {
+    var index = vidx.getVocabIndex(), has = {};
+    studyableCards().forEach(function (card) { has[String(index[card.vocabId].tableId)] = true; });
+    return (window.RaumeStudy.data.vocabularyTables || []).filter(function (t) { return has[String(t.id)]; })
+      .map(function (t) { return { id: String(t.id), title: t.title, category: t.category || "" }; });
+  }
+  function studyScope() {
+    var id = store.studyFrom();
+    return id && studyTables().some(function (t) { return t.id === id; }) ? id : null;
+  }
+  function scopedCards() {
+    var cards = studyableCards(), id = studyScope();
+    if (!id) return cards;
+    var index = vidx.getVocabIndex();
+    return cards.filter(function (card) { return String(index[card.vocabId].tableId) === id; });
+  }
   // Leeches: words you keep forgetting. A card "lapses" each time a card you'd
   // already learned is rated Again, so a high count means the word isn't
   // sticking however often it's shown. Per word (pausing is per word), by its
@@ -183,7 +205,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   var LEARN_AHEAD_MS = 20 * 60 * 1000;
   function readyToStudy(now) {
     var t = (now || new Date()).getTime();
-    return studyableCards().filter(function (card) {
+    return scopedCards().filter(function (card) {
       if (card.state === 0) return false;
       var due = new Date(card.due).getTime();
       if (card.state === 1 || card.state === 3) return due <= t + LEARN_AHEAD_MS;
@@ -263,11 +285,12 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   }
   // How many new cards could be introduced right now (see introducible) --
   // what the Dashboard counts, so its numbers match what Study now holds.
-  function introducibleCount() { return introducible(studyableCards()).length; }
+  // `all` counts past Study from (the Learn ring is the whole day's).
+  function introducibleCount(all) { return introducible(all ? studyableCards() : scopedCards()).length; }
   function buildQueue(now) {
     var c = getCache();
     var allowance = Math.max(0, c.settings.queue_new_cards_per_day - todayNewCount(now));
-    var fresh = shuffle(introducible(studyableCards()))
+    var fresh = shuffle(introducible(scopedCards()))
       .slice(0, allowance);
     return spaceByVocab(shuffle(readyToStudy(now).concat(fresh)))
       .map(function (card) { return card.id; });
@@ -305,6 +328,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     retrievabilityOf: retrievabilityOf, formatInterval: formatInterval,
     fsrsRowFields: fsrsRowFields,
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
+    studyTables: studyTables, studyScope: studyScope, scopedCards: scopedCards,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
     readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay,

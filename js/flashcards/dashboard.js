@@ -165,6 +165,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // and the button that starts it, on one row.
       '<div class="fc-dash-now fc-dash-rings">' +
       '<div class="fc-rings-row">' + ringsSvgHtml(rings, 120, ringsAnimateToday(now)) + ringsLegendHtml(rings) + "</div>" +
+      studyFromHtml() +
       '<div class="fc-now-row">' + ringsLineHtml(now, rings, ready.length + newInSession) +
       '<button type="button" class="fc-btn fc-btn-primary fc-now-btn" id="fcStudyNow"' + (canStudy ? "" : " disabled") + ">Study now</button></div>" +
       "</div>" +
@@ -198,6 +199,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       (foldReview ? "" : '<div id="fcWordsToReview"></div>');
     var btn = document.getElementById("fcStudyNow");
     if (btn) btn.addEventListener("click", startSession);
+    var from = document.getElementById("fcStudyFrom");
+    if (from) from.addEventListener("change", function () {
+      store.setStudyFrom(from.value || null);
+      rerender();
+    });
     bindDashGo(panel);
     var info = panel.querySelector(".fc-stat-info"), note = document.getElementById("fcRetentionNote");
     if (info && note) info.addEventListener("click", function () {
@@ -322,7 +328,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       return c.state !== 0 && !seen[c.id] && !fresh[c.id] && new Date(c.due) <= endToday;
     }).length;
     var perDay = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
-    var learnGoal = Math.min(perDay, day.count + sched.introducibleCount());
+    var learnGoal = Math.min(perDay, day.count + sched.introducibleCount(true));
     var runs = fc.puzzleRuns ? fc.puzzleRuns.all() : [];
     var today = localDateStr(now);
     var played = runs.filter(function (r) { return !r.reset && !r.ended && r.at && localDateStr(new Date(r.at)) === today; }).length;
@@ -381,6 +387,32 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     } catch (e) { return false; }
     return !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
+  // Study from: a pop-up row (the value and ⌃⌄ over the native picker) for
+  // drilling one table -- a class's list before the lesson -- then back to
+  // everything. Tables grouped by category, named as Customize names them.
+  // Only there when your flashcards span two tables or more.
+  var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
+  function studyFromHtml() {
+    var tables = sched.studyTables();
+    if (tables.length < 2) return "";
+    var tc = window.RaumeStudy.tableCustom;
+    var nameOf = function (t) { return (tc && tc.nameOf(t.id)) || t.title; };
+    var current = sched.studyScope(), shown = "All flashcards", groups = {}, order = [];
+    tables.forEach(function (t) {
+      if (t.id === current) shown = nameOf(t);
+      if (!groups[t.category]) { groups[t.category] = []; order.push(t.category); }
+      groups[t.category].push(t);
+    });
+    return '<label class="set-row fc-study-from"><span class="set-label">Study from</span>' +
+      '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" +
+      '<select class="fc-xw-pick-select" id="fcStudyFrom" aria-label="Study from">' +
+      '<option value=""' + (current ? "" : " selected") + ">All flashcards</option>" +
+      order.map(function (cat) {
+        return '<optgroup label="' + esc(cat || "Other") + '">' + groups[cat].map(function (t) {
+          return '<option value="' + esc(t.id) + '"' + (t.id === current ? " selected" : "") + ">" + esc(nameOf(t)) + "</option>";
+        }).join("") + "</optgroup>";
+      }).join("") + "</select></label>";
+  }
   // The line beside Study now: what a session holds now, else when the
   // next review is, else that every ring is closed.
   function ringsLineHtml(now, rings, readyNow) {
@@ -388,7 +420,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (readyNow > 0) text = readyNow + (readyNow === 1 ? " card" : " cards") + " to study";
     else if (ringsClosed(rings)) text = "All rings closed";
     else {
-      var next = studyableCards().filter(function (c) { return c.state !== 0; })
+      var next = sched.scopedCards().filter(function (c) { return c.state !== 0; })
         .map(function (c) { return new Date(c.due).getTime(); })
         .filter(function (t) { return t > now.getTime(); }).sort(function (a, b) { return a - b; })[0];
       var endToday = new Date(now); endToday.setHours(23, 59, 59, 999);

@@ -2999,6 +2999,36 @@ async function main() {
     })());
   }
 
+  console.log("Flashcards: Study from");
+  {
+    const fcNs = window.RaumeStudy.flashcards;
+    await fcNs.dataOps.addVocabs(["v0001", "v0708"]); // Counters + Counting Things: two tables at least
+    fcNs.render();
+    await flush();
+    const tables = fcNs.scheduling.studyTables();
+    const pick = () => document.getElementById("fcStudyFrom");
+    check("Study from is a pop-up row over Study now, reading All flashcards, one option per table with cards", tables.length >= 2
+      && !!pick() && pick().closest(".fc-dash-now .fc-study-from") && pick().value === ""
+      && /All flashcards/.test(pick().closest(".fc-study-from").textContent)
+      && pick().querySelectorAll("option").length === tables.length + 1);
+    const one = tables.find(t => t.id === "0");
+    pick().value = one.id;
+    pick().dispatchEvent(new window.Event("change", { bubbles: true }));
+    await flush();
+    const index = fcNs.vocabIndex.getVocabIndex(), cards = fcNs.store.getCache().cards;
+    const queue = fcNs.scheduling.buildQueue(new Date());
+    check("picking a table keeps the choice and builds Study now from that table alone", fcNs.store.studyFrom() === "0"
+      && pick().value === "0" && /Counters/.test(pick().closest(".fc-study-from").textContent)
+      && queue.length > 0 && queue.every(id => String(index[cards[id].vocabId].tableId) === "0"));
+    check("...while the Learn ring still counts every table", fcNs.scheduling.introducibleCount(true) > fcNs.scheduling.introducibleCount());
+    fcNs.store.setStudyFrom("no-such-table");
+    check("a pick whose table has nothing in study reads as every flashcard", fcNs.scheduling.studyScope() === null);
+    pick().value = "";
+    pick().dispatchEvent(new window.Event("change", { bubbles: true }));
+    await flush();
+    check("All flashcards clears it", fcNs.store.studyFrom() === null && pick().value === "");
+  }
+
   console.log("Flashcards: review session bookends");
   // A new word only offers its Japanese -> English card at first, so make
   // sure the session holds more than one card to advance through.
@@ -5198,7 +5228,7 @@ async function main() {
     if (document.getElementById("fcBack")) document.getElementById("fcBack").click(); // last screen left open was Help
     document.querySelector('.fc-tab[data-tab="dashboard"]').click();
     const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
-    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "12");
+    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "20"); // 12 + the two Study from words (4 cards each)
   }
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
 

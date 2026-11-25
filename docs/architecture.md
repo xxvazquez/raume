@@ -169,6 +169,13 @@ flowchart LR
   revert — a word paused individually before the table pause is still paused
   individually after. Sign-in unions the two lists (a device's pauses aren't
   dropped).
+- **Study from** (Dashboard) narrows Study now to one table without touching
+  any card: a table id in `raume-flashcards-study-from` (per device, never
+  synced; `store.studyFrom` / `setStudyFrom`, with an in-memory fallback).
+  `scopedCards()` (scheduling.js) filters `studyableCards()` to that table and
+  feeds `readyToStudy`, `buildQueue` and `introducibleCount`; the rings,
+  stats and Library still read everything. `studyScope()` treats a table with
+  nothing left in study as no pick, so a stale id reads as All flashcards.
 
 ### Class notes
 
