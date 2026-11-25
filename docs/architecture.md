@@ -461,14 +461,12 @@ js/
   notes.js              the Notes page: the reader's class notes (Supabase + IndexedDB),
                         lesson notes drawn natively, any other HTML in the sealed frame
 notes-frame.html        the sealed page a non-lesson note is shown in (its own CSP, no scripts)
-data/sentences.js       200 N5 example sentences (polite and casual) for the planned
-                        Sentences game: each split into tiles, N5 kanji only, with
-                        romaji, English and the grammar it shows; not loaded yet --
-                        wire it in (script tag, sw.js, sw-test, validate) with the game
 data/vocabulary.js      the vocabulary as plain data; every row has a permanent id
                         (adjective rows carry adj:"i" / adj:"na" for the type pill;
                         verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
                         kanji rows -- type:"kanji", the N5 Kanji tables -- see below)
+                        (Everyday Sentences rows carry tiles: the sentence split into
+                        the pieces the planned Sentences game puts in order)
 data/kanji-strokes.js   kanji stroke order from KanjiVG (CC BY-SA 3.0, see NOTICE): the N5 kanji,
                         then (paths only) every other kanji the vocabulary uses
 data/kana-strokes.js    every kana's stroke order (and ー), same source + licence

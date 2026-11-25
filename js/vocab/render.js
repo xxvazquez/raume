@@ -740,7 +740,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     38: 'calculator', 39: 'cake', 40: 'wallet',
     41: 'hash', 42: 'calendar', 43: 'users', 44: 'compass', 45: 'mountain', 46: 'zap', 47: 'sparkles',
     48: 'shopping-bag', 49: 'bus', 50: 'signpost', 51: 'home', 52: 'utensils', 53: 'smile',
-    54: 'box', 55: 'dice', 56: 'paw', 57: 'hand', 58: 'globe', 59: 'message', 60: 'landmark', 61: 'arrow-right'
+    54: 'box', 55: 'dice', 56: 'paw', 57: 'hand', 58: 'globe', 59: 'message', 60: 'landmark', 62: 'quote'
   };
   // The icon a table shows: the reader's pick, else the shipped default, else --
   // for a table of their own -- one suggested from its name (see icons.suggest),

@@ -1353,7 +1353,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         section.classList.remove('page-hidden');
         section.classList.toggle('search-hidden', sectionRows === 0);
         if (sectionRows > 0) { totalTables++; totalRows += sectionRows; expandSection(section); }
-        sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex });
+        // A sentence table (Sentence Patterns, Everyday Sentences) follows the
+        // word tables: "beer" finds the word first, then sentences using it.
+        sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex, sentences: !!section.querySelector('table.vocab-sentences') });
       });
       if (!q && preSearch) {
         document.body.classList.toggle('expand-all-mode', preSearch.expandAll);
@@ -1370,7 +1372,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // The best match overall should be first on the page; ties keep table order.
       const children = [...vocabHost.children];
       if (q) {
-        sectionOrder.sort((a, b) => a.rank - b.rank || a.originalIndex - b.originalIndex);
+        sectionOrder.sort((a, b) => (a.sentences - b.sentences) || a.rank - b.rank || a.originalIndex - b.originalIndex);
         placeInOrder(vocabHost, sectionOrder.map(s => s.section), children.filter(el => el.classList.contains('table-section')));
       } else {
         placeInOrder(vocabHost, vocabOrder, children);
