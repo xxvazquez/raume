@@ -1327,7 +1327,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     if (!card || !entry || !input || store.isWriteDirection(card.direction)) return; // writing checks itself
     session.write = null;
     session.userAnswer = input.value;
-    // A Verb → its forms card checks as a romaji card for this review's form.
+    // A Verb → conjugated form card checks as a romaji card for this review's form.
     var view = vidx.cardView(entry, card), dir = view.direction;
     entry = view.entry;
     session.correct = checkAnswer(entry, dir, input.value);
@@ -1548,7 +1548,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var cur = session && currentReviewCard();
     if (!shell || !cur) return false;
     var card = cur.card, entry = cur.entry;
-    // A Verb → its forms card is shown and checked as a romaji card for the
+    // A Verb → conjugated form card is shown and checked as a romaji card for the
     // form this review asks (vocab-index.js cardView); its label stays its own.
     var view = vidx.cardView(entry, card), dir = view.direction;
     entry = view.entry;

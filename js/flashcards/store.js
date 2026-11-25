@@ -14,9 +14,9 @@ window.RaumeStudy.flashcards.store = (function () {
   // en-wr / en-wk: English -> the word handwritten on a pad
   // (js/flashcards/write-card.js), in kana or as it's written with its
   // kanji -- each off until switched on in Settings.
-  // jp-vf: a verb -> one of its forms in romaji (ません, ました, ませんでした,
-  // the て-form, a different one each review) -- verbs only, also off until
-  // switched on.
+  // jp-vf: a verb -> one of its conjugated forms in romaji (ません, ました,
+  // ませんでした, the て-form, a different one each review) -- verbs only,
+  // also off until switched on.
   var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr", "en-wk", "jp-vf"];
   function isWriteDirection(d) { return d === "en-wr" || d === "en-wk"; }
   // Off until switched on, and sent up apart from the rest: an account whose
@@ -29,7 +29,7 @@ window.RaumeStudy.flashcards.store = (function () {
     "en-ro": "English → Romaji",
     "en-wr": "English → Japanese (kana)",
     "en-wk": "English → Japanese (kanji)",
-    "jp-vf": "Verb → its forms"
+    "jp-vf": "Verb → conjugated form"
   };
   var RATING_NAMES = ["Again", "Hard", "Good", "Easy"];
   // localStorage keys. Old "sakura-*" names (the app's former name) are moved

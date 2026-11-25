@@ -238,7 +238,7 @@ flashcards**, or single words from **Library** or a search result.
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
 - Each word becomes up to six cards: **JP → EN · JP → Romaji · Romaji → EN ·
   EN → Romaji**, plus two handwritten ones, **EN → Japanese (kana)** and
-  **EN → Japanese (kanji)** — and a verb gets one more, **Verb → its forms**:
+  **EN → Japanese (kanji)** — and a verb gets one more, **Verb → conjugated form**:
   the verb asks for one of its forms (〜ません, 〜ました, 〜ませんでした or the
   て-form, a different one each time it comes up), typed in romaji; the reveal
   shows the form with its furigana and plays it. You never type Japanese.

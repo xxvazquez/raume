@@ -274,7 +274,7 @@ window.RaumeStudy.customVocab = (function () {
       }
       if (!target) return; // stale target table -- drop quietly
       // A verb becomes a verb pair like the built-in ones (both forms in the
-      // table, its group, the Verb -> its forms cards); it keeps jp / romaji
+      // table, its group, the Verb -> conjugated form cards); it keeps jp / romaji
       // for the lists that show one line per word.
       target.rows.push(r.verb
         ? { id: r.id, type: "verb-pair", forms: [{ jp: r.jp, romaji: r.romaji }, { jp: r.verb.jp, romaji: r.verb.romaji }],

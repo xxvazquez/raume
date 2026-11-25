@@ -123,7 +123,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "en-wk" ? entry.writeKanjiChars : direction === "en-wr" ? entry.writeChars : null;
   }
 
-  // A verb's forms for the Verb → its forms cards (jp-vf), each as the review
+  // A verb's forms for the Verb → conjugated form cards (jp-vf), each as the review
   // card needs it: written with furigana, its kana reading (what plays), and
   // its romaji. All come from the polite form -- swap the ます, or turn the
   // stem into the て-form by the verb's group -- so the kanji keep their
@@ -182,7 +182,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       return { label: VF_LABELS[i], html: jpHtmlFn(p[0]), plain: jpPlainOf(p[0]), reading: p[1], romaji: p[2] };
     });
   }
-  // What a Verb → its forms card shows and accepts this review: the verb's
+  // What a Verb → conjugated form card shows and accepts this review: the verb's
   // dictionary form asking for one form -- a different one each time it
   // comes up (its review count picks it) -- checked as a romaji card. Any
   // other card is itself.

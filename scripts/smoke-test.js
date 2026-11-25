@@ -2057,7 +2057,7 @@ async function main() {
     const made = cvNs.addRow(String(verbsTable.id), pairs[0]);
     const row = verbsTable.rows.find(r => r.id === made.id);
     const vi = window.RaumeStudy.flashcards.vocabIndex, entry = vi.getVocabIndex()[made.id];
-    check("...it joins the table as a verb pair with Verb → its forms, and takes the meaning with or without its to",
+    check("...it joins the table as a verb pair with Verb → conjugated form, and takes the meaning with or without its to",
       !!row && row.type === "verb-pair" && row.forms[1].romaji === "kaerimasu" && !!entry
       && vi.directionsForEntry(entry).indexOf("jp-vf") !== -1
       && vi.checkAnswer(entry, "jp-en", "go home") && vi.checkAnswer(entry, "jp-en", "to go home"));
@@ -5339,10 +5339,10 @@ async function main() {
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");
   check("the Numbers table now carries real romaji (not kana), so the row is romaji-usable", !!numberEntry && numberEntry.romajiUsable === true);
   check("...so the four typed directions are offered for it", JSON.stringify(fc.directionsForEntry(numberEntry).filter(d => !/^en-w/.test(d))) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
-  check("a verb offers Verb → its forms (jp-vf); a noun doesn't", fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu")).indexOf("jp-vf") !== -1
+  check("a verb offers Verb → conjugated form (jp-vf); a noun doesn't", fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu")).indexOf("jp-vf") !== -1
     && fc.directionsForEntry(beerEntry).indexOf("jp-vf") === -1
-    && window.RaumeStudy.flashcards.store.DIRECTION_LABEL["jp-vf"] === "Verb → its forms");
-  check("a Verb → its forms card asks a different form each review and checks it as romaji (行く: past negative, then the て-form 行って)", (() => {
+    && window.RaumeStudy.flashcards.store.DIRECTION_LABEL["jp-vf"] === "Verb → conjugated form");
+  check("a Verb → conjugated form card asks a different form each review and checks it as romaji (行く: past negative, then the て-form 行って)", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const iku = Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu");
     const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 3 });

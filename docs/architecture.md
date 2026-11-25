@@ -137,7 +137,7 @@ flowchart LR
   flashcard progress. Deleting a custom row/table is a real delete (no learning
   history on the content itself to keep).
 - Each vocab entry maps to up to six independently scheduled cards (jp-en,
-  jp-ro, ro-en, en-ro, en-wr, en-wk), plus **jp-vf** (Verb → its forms) for a
+  jp-ro, ro-en, en-ro, en-wr, en-wk), plus **jp-vf** (Verb → conjugated form) for a
   verb, never Japanese-to-type. A jp-vf card is one card per verb: each review
   asks the form `card.reps % 4` picks (〜ません / 〜ました / 〜ませんでした /
   て-form), shown and checked as a jp-ro card by `vocab-index.js` `cardView`
