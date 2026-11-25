@@ -310,10 +310,11 @@ def tiles(items, n=4, az=False):
 # -- and no word lists: its words go to that class's vocabulary table.
 # words() takes them without drawing anything, and render(source=...) writes
 # them to <date>.<source>.csv in raume's Import a list format
-# (japanese(furigana),romaji,english). Sakura's table is the reader's own, so
-# it gets every word of the lesson, even ones raume already has; WSJJ's is a
-# reference table, so it gets only the words raume doesn't have yet. Either
-# way a word already sent by an earlier note of the same class is left out.
+# (japanese(furigana),romaji,english), to import into the reader's own table
+# for that class. Sakura's gets every word of the lesson, even ones raume
+# already has; WSJJ's gets only the words raume's tables don't have yet.
+# Either way a word already sent by an earlier note of the same class is
+# left out.
 SOURCES = ("sakura", "wsjj")
 _words = []
 _tiles_used = []
