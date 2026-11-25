@@ -6107,7 +6107,7 @@ mark.fc-diff-co {
    trailing only what you use mid-play: Hint, Check (or the count / clock)
    and ⋯ -- New puzzle on a phone, How to play, Reveal / Clear / Save as
    PDF, Stats. */
-.fc-gs { max-width: 560px; margin-inline: auto; } /* centred in the 900px column on iPad, as the boards it starts */
+.fc-gs { max-width: 560px; } /* leading-aligned under the segment bar, as Dashboard, Kana and Library */
 .fc-gs .help-head:first-child { margin-top: 0; }
 .fc-gs-mode { min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
 .fc-gs-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
