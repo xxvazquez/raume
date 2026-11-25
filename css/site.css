@@ -1193,6 +1193,27 @@ body.selftest-mode .selftest-hint { display: block; }
    secondary grey, inset to line up with the row content -- the header labels
    the group, the rows are what you read. */
 .page-vocab .cat-heading { font-size: calc(12px * var(--dt)); font-weight: 500; letter-spacing: 0; color: var(--muted); }
+/* The header is one button that folds its group away, chevron at the
+   trailing edge in line with the rows' own (down = open, right = folded).
+   Its padding grows the hit area to 44px; the matching negative margin
+   keeps the header's place, so the list doesn't move. Folding is screen
+   only -- a search looks through every group, and print is unaffected. */
+.cat-fold {
+  appearance: none; display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box;
+  margin: -14px 0; padding: 14px 16px 14px 0; border: 0; background: none;
+  font: inherit; color: inherit; letter-spacing: inherit; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-fold:focus-visible { outline: 2px solid var(--section); outline-offset: -6px; border-radius: 10px; }
+.cat-heading-name { min-width: 0; }
+.cat-fold-icon {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 16px; height: 16px; margin-left: auto; color: var(--faint);
+}
+.cat-fold-icon svg { transition: transform .15s ease; }
+.cat-heading.cat-folded .cat-fold-icon svg { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .cat-fold-icon svg { transition: none; } }
+@media screen { body:not(.is-searching) #vocabulary .table-section.cat-folded { display: none; } }
 .page-vocab .vocab-toolbar { border-bottom: 0; background: var(--group-ground); }
 
 /* Decorative empty-icon "+" placeholder reads as an add button; drop it. */

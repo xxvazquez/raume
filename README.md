@@ -53,7 +53,7 @@ python3 -m http.server
 
 | Section        | What's in it |
 | -------------- | ------------ |
-| **Vocabulary** | The landing page — words, grouped by topic: Around Town (places, shops, transport, directions, countries, capital cities), Food & Ingredients, Kitchen & Dining (with eating out), Numbers & Counting, People & Daily Life (family, people, body & health, weather & seasons, home, everyday things, free time, animals, greetings & expressions), Time & Calendar |
+| **Vocabulary** | The landing page — words, grouped by topic: Around Town (places, shops, transport, directions, countries, capital cities), Food & Ingredients, Kitchen & Dining (with eating out), Numbers & Counting, People & Daily Life (family, people, body & health, weather & seasons, home, everyday things, free time, animals, greetings & expressions), Time & Calendar. Tap a topic's header to fold its tables away (the chevron turns); it stays folded until you open it again, a search still looks inside, and jumping to one of its tables opens it |
 | **Grammar**    | How words change and join, as a Japanese class splits it from vocabulary: Adjectives (い / な), Verbs (plain and polite forms), Particles, Question Words, This / That / Over There (こそあど), Sentence Patterns — whole example sentences with their English; the ⓘ on each names the pattern it shows (どんな, 〜くない / 〜じゃない, あります / います, の + position + に) |
 | **Kanji**      | The 102 N5 kanji in seven themes (numbers & money, days & time, people & body, places & directions, nature & things, verbs, adjectives) — see [Kanji](#kanji) |
 | **Notes**      | Your own class notes, private to your account — see [Class notes](#class-notes) |

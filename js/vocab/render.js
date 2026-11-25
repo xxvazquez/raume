@@ -920,7 +920,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // Assemble #vocabulary: every table, grouped section -> category -> table
   // (categories and tables alphabetical). The Vocabulary section carries a
-  // quiet category sub-heading before each of its groups; Grammar and Kanji
+  // quiet, foldable category sub-heading before each of its groups; Grammar and Kanji
   // are a single category, so they get none. Headings and sections all start
   // page-hidden; routing (interactions.js -> showSection) reveals one section
   // at a time.
@@ -931,8 +931,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     SECTION_ORDER.forEach(function (sec) {
       groupByCategory(bySection[sec], sec).forEach(function (g) {
         if (sec === 'vocabulary') {
+          // The header folds its whole group away (interactions.js
+          // applyCategoryFolds) -- the chevron at its trailing edge, as in
+          // an iOS sidebar section.
           html += '<h2 class="cat-heading page-hidden" data-section="' + sec + '" data-category="' + esc(g.name) + '">' +
-            esc(g.name) + '<span class="cat-heading-count" aria-label="' + g.tables.length + ' tables">' + g.tables.length + '</span></h2>';
+            '<button type="button" class="cat-fold" aria-expanded="true">' +
+            '<span class="cat-heading-name">' + esc(g.name) + '</span>' +
+            '<span class="cat-heading-count" aria-label="' + g.tables.length + ' tables">' + g.tables.length + '</span>' +
+            '<span class="cat-fold-icon">' + CHEVRON_ICON + '</span></button></h2>';
         }
         g.tables.forEach(function (t) { html += renderTable(t) + '\n'; });
       });

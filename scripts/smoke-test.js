@@ -1087,6 +1087,17 @@ async function main() {
   const catHeads = [...document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]')];
   check("a sub-heading per Vocabulary category (Around Town / Food & Ingredients / Kitchen & Dining / Numbers & Counting / People & Daily Life / Time & Calendar)", catHeads.length === 6);
   check("sub-headings are visible on the Vocabulary page", catHeads.every(h => !h.classList.contains("page-hidden")));
+  check("a category header folds its group of tables away and the fold is remembered, then unfolds again", (() => {
+    const h = catHeads[0], cat = h.dataset.category, btn = h.querySelector(".cat-fold");
+    const tables = [...document.querySelectorAll("#vocabulary .table-section")].filter(s => s.dataset.category === cat);
+    btn.click();
+    const folded = h.classList.contains("cat-folded") && btn.getAttribute("aria-expanded") === "false"
+      && tables.length > 0 && tables.every(s => s.classList.contains("cat-folded"))
+      && (!storageUsable || JSON.parse(readLocalStorage("raume-folded-categories") || "[]").includes(cat));
+    btn.click();
+    return folded && !h.classList.contains("cat-folded") && btn.getAttribute("aria-expanded") === "true"
+      && tables.every(s => !s.classList.contains("cat-folded")) && (!storageUsable || readLocalStorage("raume-folded-categories") === null);
+  })());
   check("the reading column and its category rules share one width cap", (() => {
     const mw = el => window.getComputedStyle(el).maxWidth;
     const table = mw(document.querySelector("#vocabulary .table-section"));

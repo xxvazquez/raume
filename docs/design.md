@@ -339,7 +339,11 @@ and Help.
   phone keyboard. The glyph comes from a default per shipped table, or — for a table of your own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one.
-  The category name is a quiet label above its card. Scoped to `#vocabulary` /
+  The category name is a quiet label above its card, and a button: tapping
+  it folds the card away (its 12px chevron at the trailing edge, in line
+  with the rows' own — down open, right folded; a 44px hit area that
+  doesn't move the header). The fold is remembered; search and print
+  ignore it. Scoped to `#vocabulary` /
   `.page-vocab` (Flashcards' *Words to review* already sits in a card) and
   flattened for print. In dark the ground is *darker* than the card
   (`--page-bg` under `--paper`), as on iOS.

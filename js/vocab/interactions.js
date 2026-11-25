@@ -260,6 +260,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       h.classList.remove('search-hidden');
       h.classList.toggle('page-hidden', h.dataset.section !== name);
     });
+    applyCategoryFolds();
     markActiveNav(name);
     updatePoliteVisibility();
     if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
@@ -268,12 +269,55 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   vocab.showSection = showSection;
 
+  // Folded Vocabulary categories: a header's chevron hides its whole group
+  // of tables, and the choice stays across visits (this device only, like
+  // Show polite). The tables keep their own open/closed state underneath;
+  // a search looks through folded groups too (CSS keys the fold off
+  // body:not(.is-searching)).
+  // Held in memory and saved best-effort, so folding still works where
+  // storage is refused.
+  const FOLD_KEY = 'raume-folded-categories';
+  let foldedList = (function () {
+    try { const v = JSON.parse(localStorage.getItem(FOLD_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  })();
+  function applyCategoryFolds() {
+    const folded = new Set(foldedList);
+    document.querySelectorAll('#vocabulary .cat-heading[data-section="vocabulary"]').forEach(function (h) {
+      const on = folded.has(h.dataset.category);
+      h.classList.toggle('cat-folded', on);
+      const b = h.querySelector('.cat-fold');
+      if (b) b.setAttribute('aria-expanded', String(!on));
+    });
+    document.querySelectorAll('#vocabulary .table-section').forEach(function (s) {
+      s.classList.toggle('cat-folded', s.dataset.section === 'vocabulary' && folded.has(s.dataset.category));
+    });
+  }
+  function setCategoryFolded(name, on) {
+    foldedList = foldedList.filter(function (c) { return c !== name; });
+    if (on) foldedList.push(name);
+    try {
+      if (foldedList.length) localStorage.setItem(FOLD_KEY, JSON.stringify(foldedList));
+      else localStorage.removeItem(FOLD_KEY);
+    } catch (e) {}
+    applyCategoryFolds();
+  }
+  vocab.applyCategoryFolds = applyCategoryFolds;
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('#vocabulary .cat-fold');
+    if (!b) return;
+    const h = b.closest('.cat-heading');
+    setCategoryFolded(h.dataset.category, !h.classList.contains('cat-folded'));
+    if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
+  });
+
   // Jump straight to a table: switch section if needed, open it (collapsing
-  // its category siblings), scroll it into view.
+  // its category siblings), scroll it into view. A table in a folded
+  // category unfolds that category -- you asked to see it.
   function goToTable(id, opts) {
     opts = opts || {};
     const section = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');
     if (!section) return;
+    if (section.classList.contains('cat-folded')) setCategoryFolded(section.dataset.category, false);
     if (document.body.dataset.activeSection !== section.dataset.section) showSection(section.dataset.section, { fromRoute: true });
     expandSection(section);
     collapseSiblingSections(section);
