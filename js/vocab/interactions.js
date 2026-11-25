@@ -1372,7 +1372,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // The best match overall should be first on the page; ties keep table order.
       const children = [...vocabHost.children];
       if (q) {
-        sectionOrder.sort((a, b) => (a.sentences - b.sentences) || a.rank - b.rank || a.originalIndex - b.originalIndex);
+        // Tables with no match go last, behind every result: left between
+        // two results (a word table and a sentence table), they split one
+        // grouped card into two rounded ones sitting flush.
+        const unmatched = s => s.rank === Infinity ? 1 : 0;
+        sectionOrder.sort((a, b) => (unmatched(a) - unmatched(b)) || (a.sentences - b.sentences) || a.rank - b.rank || a.originalIndex - b.originalIndex);
         placeInOrder(vocabHost, sectionOrder.map(s => s.section), children.filter(el => el.classList.contains('table-section')));
       } else {
         placeInOrder(vocabHost, vocabOrder, children);
