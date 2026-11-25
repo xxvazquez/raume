@@ -181,7 +181,9 @@
   --radius-card: 20px;
   --radius-menu: 22px;
   --radius-sheet: 30px;
-  --row-line: var(--line);
+  /* List-row separators: iOS's opaque separator weight -- the softer
+     --line read as barely there between rows. */
+  --row-line: #d0d5dc;
   --band: var(--paper);
   --row-alt: #eef0f3;
   --classic-band: var(--paper);
