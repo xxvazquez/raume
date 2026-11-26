@@ -273,7 +273,7 @@ async function main() {
     const yama = rows.find(r => r.querySelector(".kanji-char").textContent === "山");
     const miru = rows.find(r => r.querySelector(".kanji-char").textContent === "見");
     return kanjiSecs.length === 7 && kanjiSecs.every(s => s.dataset.section === "kanji") && rows.length === 102
-      && kanjiSecs.map(s => s.querySelector(".section-title-text").textContent).join(",") === "Numbers & Money,Days & Time,People & Body,Places & Directions,Nature & Things,Verbs,Adjectives"
+      && kanjiSecs.map(s => s.querySelector(".section-title-text").textContent).join(",") === "Numbers & Money,Days & Time,People & Body,Places & Directions,Nature & Things,Verb Kanji,Adjective Kanji"
       && kanjiSecs[0].querySelector("tbody tr .kanji-char").textContent === "一"
       && rows.every(r => r.classList.contains("kanji-tile") && r.tabIndex === 0 && !r.cells[0].querySelector("ruby") && r.cells[0].querySelector(".kanji-readings.furigana"))
       && yama.querySelector(".kanji-on").textContent === "サン" && yama.querySelector(".kanji-kun").textContent === "やま"

@@ -1481,7 +1481,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   },
   {
     id: 46,
-    title: "Verbs",
+    title: "Verb Kanji",
     category: "N5 Kanji",
     tableClass: "vocab-kanji",
     rows: [
@@ -1505,7 +1505,7 @@ window.RaumeStudy.data = { vocabularyTables: [
   },
   {
     id: 47,
-    title: "Adjectives",
+    title: "Adjective Kanji",
     category: "N5 Kanji",
     tableClass: "vocab-kanji",
     rows: [
