@@ -1177,14 +1177,19 @@ in a blank stretch of ground; no border, no Save, section-tone caret. An
 arroword, which has no lists there, puts it under the clue bar instead, as
 tall as the grid; a stacked puzzle gives it a modest 200px under the lists. It belongs to the puzzle (blank on New
 puzzle) and isn't on a phone or in print. **Arroword squares** are 56px on screen where
-there's room, the clue text in them up to 11px (iOS's smallest size) and the
-letters 21px, both scaled with the square (`cqw`, the square a size
-container) as a narrower window shrinks it; long words hyphenate. A square
-squeezed under 40px — a phone — can't hold readable text, so it shows its
+there's room, the clue text in them 11px (iOS's smallest size), at most
+three lines, and the letters 20px. A long clue shows a shorter form in its
+square — bracketed (optional) words dropped, then just its first meanings
+("thin, mild" for "thin, mild, light in flavor") — and the whole clue in the
+clue bar, the list and print. Where the squares would shrink under 50px (a
+phone, a narrow window) the text can't stay readable, so `fitPuzzle()` makes
+the puzzle compact (`.fc-xw-puzzle-compact`): each clue square shows its
 arrow alone (14px), and the clues are listed under the grid instead
-(`.fc-xw-clues-arroword`, phone only): Across and Down cards in reading
-order, each row led by its arrow where a crossword has its number; a tap
-selects that word, as a clue square does. The clue bar is there from the start (a muted "Tap a square or a clue to
+(`.fc-xw-clues-arroword`): Across and Down cards in reading order, each row
+led by its arrow where a crossword has its number; a tap selects that word,
+as a clue square does. A clue square keeps no side padding (its text does):
+a shrinking row scales each square by its width less its padding, so a
+padded one came out wider and the columns stopped lining up. The clue bar is there from the start (a muted "Tap a square or a clue to
 start" until one is picked), so the first tap never pushes the grid down; moving square to
 square focuses without the browser's scroll, and the page moves only to bring a hidden square
 (and its clue bar) back into view — the

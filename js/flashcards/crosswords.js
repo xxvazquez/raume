@@ -2369,10 +2369,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // grid across the whole width) rather than pushing the page sideways.
   // Sizes match .fc-xw-cell / .fc-ws-cell and the 260px + 24px clue column.
   var GRID_CELL = 40, ARROW_CELL = 56, WS_CELL = 44, WS_CELL_DENSE = 38, SIDE_COLUMN = 284;
+  // An arroword whose squares would shrink under ARROW_MIN can't hold 11px
+  // clue text: it goes compact -- arrows alone in the squares, the clues
+  // listed under the grid.
+  var ARROW_MIN = 50;
   function fitPuzzle() {
     var el = document.querySelector(".fc-xw-puzzle[data-natural]");
     if (!el || !el.clientWidth) return;
     el.classList.toggle("fc-xw-puzzle-stack", Number(el.dataset.natural) + SIDE_COLUMN > el.clientWidth);
+    if (el.dataset.cols) el.classList.toggle("fc-xw-puzzle-compact", el.clientWidth < Number(el.dataset.cols) * ARROW_MIN);
   }
   window.addEventListener("resize", fitPuzzle);
   function scriptOpts() {
@@ -2704,7 +2709,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         } else if (p.clueCells[k]) {
           var cc = p.clueCells[k];
           cells.push('<div class="fc-xw-cell fc-xw-cell-clue fc-xw-clue-' + cc.dir + '" data-start="' + cc.start + '" data-dir="' + cc.dir + '" role="button" tabindex="0">' +
-            arrowIcon(cc.dir) + '<span class="fc-xw-cluetext">' + esc(cc.clue) + "</span></div>");
+            arrowIcon(cc.dir) + clueTextHtml(cc.clue) + "</div>");
         } else {
           cells.push('<div class="fc-xw-cell fc-xw-cell-blank" aria-hidden="true"></div>');
         }
@@ -2712,6 +2717,28 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       rows.push('<div class="fc-xw-row">' + cells.join("") + "</div>");
     }
     return rows.join("");
+  }
+
+  // An on-screen square holds about three short lines: a longer clue drops
+  // its bracketed words (optional ones -- "skin" for "skin (chicken skin on
+  // a yakitori menu; also peel)"), then keeps its first meanings ("thin,
+  // mild" for "thin, mild, light in flavor"); anything still too long ends
+  // in an ellipsis. The whole clue is in print, the clue bar and the phone's
+  // list.
+  var SQUARE_CLUE = 22;
+  function squareClue(clue) {
+    if (clue.length <= SQUARE_CLUE) return clue;
+    var bare = clue.replace(/\s*\([^)]*\)/g, "").trim() || clue;
+    if (bare.length <= SQUARE_CLUE) return bare;
+    var parts = bare.split(", "), out = parts[0];
+    for (var i = 1; i < parts.length && (out + ", " + parts[i]).length <= SQUARE_CLUE; i++) out += ", " + parts[i];
+    return out;
+  }
+  function clueTextHtml(clue) {
+    var short = squareClue(clue);
+    if (short === clue) return '<span class="fc-xw-cluetext">' + esc(clue) + "</span>";
+    return '<span class="fc-xw-cluetext fc-xw-cluetext-full">' + esc(clue) + "</span>" +
+      '<span class="fc-xw-cluetext fc-xw-cluetext-short">' + esc(short) + "</span>";
   }
 
   // A scratch pad under the grid on a wide window -- readings, guesses,
@@ -3592,7 +3619,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       toolbarHtml() +
       (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
       '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + (wordsearch ? " fc-xw-puzzle-ws" : "") +
-      '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * (arroword ? ARROW_CELL : GRID_CELL)) + '">' +
+      '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * (arroword ? ARROW_CELL : GRID_CELL)) + '"' + (arroword ? ' data-cols="' + p.cols + '"' : "") + ">" +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch ? "" : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start</p>') +
