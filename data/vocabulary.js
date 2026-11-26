@@ -1193,6 +1193,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1539","jlpt":1,"type":"word","jp":[{"text":"カーペット"}],"romaji":"kāpetto","english":"carpet"},
     {"id":"v1545","jlpt":3,"type":"word","jp":[{"text":"かじ"}],"romaji":"kaji","english":"housework"},
     {"id":"v1597","type":"word","jp":[{"text":"リビング"}],"romaji":"ribingu","english":"living room"},
+    {"id":"v1637","type":"word","jp":[{"text":"キッチン"}],"romaji":"kitchin","english":"kitchen"},
     ]
   },
   {
@@ -1226,6 +1227,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1458","jlpt":5,"type":"word","jp":[{"text":"きって"}],"romaji":"kitte","english":"stamp"},
     {"id":"v1492","jlpt":5,"type":"word","jp":[{"text":"ニュース"}],"romaji":"nyūsu","english":"news"},
     {"id":"v1513","type":"word","jp":[{"text":"メール"}],"romaji":"mēru","english":"e-mail"},
+    {"id":"v1638","type":"word","jp":[{"text":"ネット"}],"romaji":"netto","english":"internet"},
     {"id":"v1522","jlpt":5,"type":"word","jp":[{"text":"はがき"}],"romaji":"hagaki","english":"postcard"},
     {"id":"v1523","type":"word","jp":[{"text":"シーディー"}],"romaji":"shīdī","english":"CD"},
     {"id":"v1529","jlpt":4,"type":"word","jp":[{"text":"スーツケース"}],"romaji":"sūtsukēsu","english":"suitcase"},
@@ -1600,6 +1602,8 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1385","jlpt":4,"type":"word","jp":[{"text":"すうがく"}],"romaji":"sūgaku","english":"maths, mathematics"},
     {"id":"v1388","jlpt":5,"type":"word","jp":[{"kanji":"何年生","reading":"なんねんせい"}],"romaji":"nannensei","english":"what year","enNote":"of school"},
     {"id":"v1407","jlpt":5,"type":"word","jp":[{"text":"ことば"}],"romaji":"kotoba","english":"word, language"},
+    {"id":"v1639","jlpt":5,"type":"word","jp":[{"text":"ひらがな"}],"romaji":"hiragana","english":"hiragana"},
+    {"id":"v1640","jlpt":5,"type":"word","jp":[{"text":"カタカナ"}],"romaji":"katakana","english":"katakana"},
     {"id":"v1417","jlpt":5,"type":"word","jp":[{"text":"きょうしつ"}],"romaji":"kyōshitsu","english":"classroom"},
     {"id":"v1418","jlpt":5,"type":"word","jp":[{"text":"ページ"}],"romaji":"pēji","english":"page"},
     {"id":"v1419","jlpt":1,"type":"word","jp":[{"text":"ペア"}],"romaji":"pea","english":"pair"},
