@@ -1312,7 +1312,14 @@ Japanese at 19px with 10px furigana, particles blue), a used piece dimmed in
 place; placed pieces keep full strength once the round locks, so a wrong
 order stays readable. The answer — "The sentence" in grey after a miss, the
 sentence at 19px, its romaji, ▶ — rises in under the line. Its Stats hue is
-blue (puzzles' blue never shares the Game stats screen).
+blue (puzzles' blue never shares the Game stats screen). Its **Particles**
+exercise sets the sentence at 22px with each particle a **circle** to fill —
+how a Japanese worksheet marks one (Laura, 2026-11-26), never [ ＿ ] — a kana
+wide: an outline while empty (the next one a thicker tint ring), your choice
+inside in particle blue once filled; marked, it fills sage or coral, a wrong
+one struck through with the right particle bold and small under it. Six
+choices under the card are the bank's capsules, particle blue, always in
+one order (は が を に で へ と も の から まで より か).
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

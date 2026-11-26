@@ -4782,7 +4782,7 @@ async function main() {
     return rows.length >= 200 && cut;
   })());
   xwPick("mode", "sentences");
-  check("Sentences' setup: Register and Sentence count, no Words from or Script; Register narrows the pool to polite or casual", (() => {
+  check("Sentences' setup: Exercise, Register and Sentence count, no Words from or Script; Register narrows the pool to polite or casual", (() => {
     xwSetup();
     const panel = document.querySelector("#fcPanelGames");
     const rows = [...panel.querySelectorAll(".fc-gs-pick")].map(b => b.dataset.pick || b.id).join("|");
@@ -4791,7 +4791,7 @@ async function main() {
     const regs = {};
     ["polite", "casual", "both"].forEach(r => { xw.state.register = r; regs[r] = xw.sentencePool(); });
     xw.state.register = "both";
-    return rows === "register|size" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
+    return rows === "exercise|register|size" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
       && regs.polite.every(s => byId(s.id).enNote !== "casual") && regs.casual.every(s => byId(s.id).enNote === "casual")
       && regs.both.length === regs.polite.length + regs.casual.length && regs.both.every(s => s.tiles.length >= 3);
   })());
@@ -4847,6 +4847,60 @@ async function main() {
     return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n && list.includes(sbFirst.word.clue)
       && !!last && last.right === n - 1 && last.n === n && last.missed.join() === sbFirst.word.id && last.setup === "sentences|both|" + n;
   })());
+  console.log("Flashcards: Sentences › Particles");
+  check("Particles blanks the grammar particles and a question's closing か, never よ / ね / な", (() => {
+    const pb = jp => xw.particleBlanks(jp).map(i => jp[i].p).join("");
+    return pb([{ text: "わたし" }, { p: "は" }, { text: "学生です" }, { p: "か" }, { text: "。" }]) === "はか"
+      && pb([{ text: "いい" }, { p: "ね" }, { text: "。" }]) === "" && pb([{ text: "これ" }, { p: "か" }, { text: "それ" }]) === ""
+      && pb([{ text: "パン" }, { p: "を" }, { text: "食べる" }, { p: "よ" }]) === "を";
+  })());
+  xwPick("exercise", "particles");
+  check("the Exercise row picks Particles: only sentences with a blank play, each offering six particles in one fixed order, its own among them", (() => {
+    const order = ["は", "が", "を", "に", "で", "へ", "と", "も", "の", "から", "まで", "より", "か"];
+    const qs = xw.state.puzzle.questions;
+    return xw.state.exercise === "particles" && qs.length > 0 && qs.every(q => q.word.blanks.length > 0
+      && q.choices.length >= 6 && q.word.blanks.every(i => q.choices.includes(q.word.jp[i].p))
+      && q.choices.every((c, i) => !i || order.indexOf(q.choices[i - 1]) < order.indexOf(c)));
+  })());
+  xwStart();
+  const spCur = () => xw.state.puzzle.questions.find(q => q.word.clue === document.querySelector("#fcPanelGames .fc-sb-clue").textContent);
+  const spPick = p => [...document.querySelectorAll("#fcPanelGames .fc-sp-choice")].find(b => b.dataset.p === p).click();
+  check("a Particles question: the English, the sentence with a circle per blank (the first outlined as next), and the six choices", (() => {
+    const q = spCur();
+    const blanks = document.querySelectorAll("#fcPanelGames .fc-sp-blank");
+    return !!q && blanks.length === q.word.blanks.length && blanks[0].classList.contains("fc-sp-next")
+      && document.querySelectorAll("#fcPanelGames .fc-sp-choice").length === q.choices.length
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const spFirst = spCur();
+  check("a wrong particle: its circle washes coral with the right one under it, the sentence shows whole, Next waits; it comes back at the end", (() => {
+    const q = spFirst, right = q.word.blanks.map(i => q.word.jp[i].p);
+    const wrong = q.choices.find(c => c !== right[0]);
+    spPick(wrong);
+    if (right.length > 1) {
+      document.querySelector('#fcPanelGames .fc-sp-blank[data-b="0"]').click(); // clears it again
+      if (document.querySelector('#fcPanelGames .fc-sp-blank[data-b="0"]').textContent) return false;
+      spPick(wrong);
+    }
+    right.slice(1).forEach(spPick);
+    const first = document.querySelector('#fcPanelGames .fc-sp-blank[data-b="0"]');
+    const ok = first.classList.contains("fc-sp-wrong") && first.querySelector(".fc-sp-fix").textContent === right[0]
+      && !document.querySelector("#fcPanelGames .fc-sb-answer").hidden && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok;
+  })());
+  for (let k = 0; k < 80 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    const q = spCur();
+    q.word.blanks.forEach(i => spPick(q.word.jp[i].p));
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+  }
+  check("...and the Particles game logs with its own setup, so its bests never mix with Build's", (() => {
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
+    return !!document.querySelector("#fcPanelGames .fc-mt-done") && !!last && last.right === n - 1
+      && last.setup === "sentences|both|" + n + "|particles" && last.missed.join() === spFirst.word.id;
+  })());
+  xwPick("exercise", "build");
   xwPick("mode", "listening");
 
   console.log("Flashcards: Odd one out");

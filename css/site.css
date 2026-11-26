@@ -4658,8 +4658,37 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-missed .fc-sb-whole { font-size: 17px; }
 .fc-sb-missed .fc-ls-missed-en { margin-left: 0; text-align: left; }
 .fc-sb-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
+/* Particles: the sentence at 22px with each particle a circle -- how a
+   Japanese worksheet marks one to fill in -- a kana wide, an outline while
+   empty (the next one in the tint, thicker), your choice inside once
+   filled; marked, it fills sage or coral, a wrong one with the right
+   particle small under it. The six choices are the bank's capsules. */
+.fc-sp-line { margin: 0; text-align: center; font: 400 22px/2.1 var(--font-jp); color: var(--ink); }
+.fc-sp-line rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
+.fc-sp-blank {
+  appearance: none; position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.45em; height: 1.45em; margin: 0 .12em; padding: 0 .2em; box-sizing: border-box; vertical-align: middle;
+  border: 1.5px solid var(--line-strong); border-radius: .725em; background: var(--paper);
+  font: inherit; line-height: 1; color: var(--particle); font-weight: 700; cursor: pointer;
+}
+.fc-sp-blank.fc-sp-next { border: 2px solid var(--tint); }
+.fc-sp-blank.fc-sp-filled { border-color: color-mix(in srgb, var(--particle) 45%, transparent); }
+.fc-sp-blank::after { content: ""; position: absolute; inset: -6px; }
+.fc-sp-blank:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+.fc-sp-blank.fc-sp-right { border-color: transparent; background: color-mix(in srgb, var(--right) 20%, var(--paper)); color: var(--right-strong); }
+.fc-sp-blank.fc-sp-wrong { border-color: transparent; background: color-mix(in srgb, var(--wrong) 18%, var(--paper)); color: var(--wrong-strong); text-decoration: line-through; }
+.fc-sp-blank:disabled { cursor: default; }
+.fc-sp-fix {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px;
+  font-size: 14px; font-weight: 700; line-height: 1; color: var(--right-strong); text-decoration: none;
+}
+/* Each circle says right or wrong itself: no wash on the whole line. */
+.fc-sp-line.fc-sb-right, .fc-sp-line.fc-sb-wrong { background: none; }
+.fc-sp-line.fc-sb-wrong { animation: fc-ws-miss .3s ease; }
+.fc-sp-choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 360px; margin: 14px auto 0; }
+.fc-sp-choice { min-width: 52px; font-size: 21px; font-weight: 700; color: var(--particle); }
 @media (prefers-reduced-motion: reduce) {
-  .fc-sb-wrong, .fc-sb-answer:not([hidden]) { animation: none; }
+  .fc-sb-wrong, .fc-sp-line.fc-sb-wrong, .fc-sb-answer:not([hidden]) { animation: none; }
   .fc-sb-tile { transition: none; }
 }
 /* Odd one out: a quiet question over a 2 × 2 of Match's white tiles, the

@@ -462,10 +462,15 @@ confetti; reduced motion is honoured.
 <details>
 <summary><b>Sentences</b></summary>
 
-- See the English, tap the Japanese pieces into order. The pieces carry
-  their furigana; particles are blue. Tap a placed piece to send it back.
-- Plays the Everyday Sentences table (sentences of three pieces or more).
-  **Register** picks *Polite*, *Casual* or both; no *Words from*.
+- **Exercise** picks how you practise the Everyday Sentences table:
+  - *Build*: see the English, tap the Japanese pieces into order. The pieces
+    carry their furigana; particles are blue. Tap a placed piece to send it
+    back. Sentences of three pieces or more.
+  - *Particles*: the sentence with each particle a circle to fill, from six
+    particle buttons. The circles fill left to right; tap one to clear it.
+    Only grammar particles and a question's closing か are blanks — never
+    よ / ね / な, which are tone, not rules.
+- **Register** picks *Polite*, *Casual* or both; no *Words from*.
 - Each answer shows the whole sentence with its romaji and ▶. A miss (or
   **Show answer**) comes back at the end; missed sentences join Tricky words.
 

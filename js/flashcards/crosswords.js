@@ -1598,9 +1598,34 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // look. A miss (or Show answer) brings it back once at the end of the
   // round, as Kana tiles does. A sentence of one or two pieces is left out
   // (no order to find). Practice only -- never an FSRS review.
+  // The Particles exercise asks the same sentences another way: the
+  // Japanese with each particle a blank, and six particle buttons (its own
+  // and common wrong ones, always in one order) -- the blanks fill left to
+  // right, a filled one taps clear, and the last one filled marks each
+  // blank. Only the particles a rule decides are blanks: case particles and
+  // a question's closing か, never よ / ね / な / けど (tone, not grammar).
   // -----------------------------------------------------------------------
   var REGISTER_OPTS = [["both", "Polite and casual"], ["polite", "Polite"], ["casual", "Casual"]];
+  var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"]];
   var SENTENCE_MIN_TILES = 3;
+  // The buttons' fixed order, and the ones a wrong choice is drawn from.
+  var PARTICLE_ORDER = ["は", "が", "を", "に", "で", "へ", "と", "も", "の", "から", "まで", "より", "か"];
+  var PARTICLE_COMMON = ["は", "が", "を", "に", "で", "と", "の", "も"];
+  var PARTICLE_CHOICES = 6;
+  // Which of a row's jp segments are blanks: a particle in PARTICLE_ORDER,
+  // か only where it closes the sentence (nothing but punctuation after it).
+  function particleBlanks(jp) {
+    var out = [];
+    jp.forEach(function (s, i) {
+      if (!s.p || PARTICLE_ORDER.indexOf(s.p) === -1) return;
+      if (s.p === "か") {
+        var rest = jp.slice(i + 1).map(function (x) { return x.kanji || x.text || x.p || ""; }).join("");
+        if (!/^[。？！?!\s]*$/.test(rest)) return;
+      }
+      out.push(i);
+    });
+    return out;
+  }
   // A tile's own segments: the row's jp cut where its tiles are (no kanji
   // run ever straddles a cut), so each piece keeps its reading and particle.
   function tileSegments(row) {
@@ -1630,7 +1655,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var out = [];
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
       t.rows.forEach(function (row) {
-        if (!Array.isArray(row.tiles) || row.tiles.length < SENTENCE_MIN_TILES) return;
+        if (!Array.isArray(row.tiles)) return;
+        var blanks = particleBlanks(row.jp);
+        if (state.exercise === "particles" ? !blanks.length : row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
@@ -1638,7 +1665,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (!segs) return;
         var V = window.RaumeStudy.vocab;
         out.push({
-          id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""),
+          id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""), blanks: blanks,
           romaji: row.romaji, jp: row.jp, speak: V.jpReadingOf(row.jp), tableId: t.id, weight: tricky[row.id] ? 2 : 1
         });
       });
@@ -1650,6 +1677,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return {
       placements: picked,
       questions: picked.map(function (s) {
+        if (state.exercise === "particles") {
+          var want = [];
+          s.blanks.forEach(function (i) { if (want.indexOf(s.jp[i].p) === -1) want.push(s.jp[i].p); });
+          var choices = want.concat(shuffle(PARTICLE_COMMON.filter(function (x) { return want.indexOf(x) === -1; })))
+            .slice(0, Math.max(PARTICLE_CHOICES, want.length));
+          choices.sort(function (a, b) { return PARTICLE_ORDER.indexOf(a) - PARTICLE_ORDER.indexOf(b); });
+          return { word: s, choices: choices };
+        }
         var order = s.tiles.map(function (t, i) { return i; });
         // Never dealt already in order (the same text counts as in order).
         for (var tries = 0; tries < 8; tries++) {
@@ -1671,17 +1706,67 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var queue, at, score, missed, retried, placed, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
     var total = p.questions.length;
     var V = window.RaumeStudy.vocab;
+    var particles = state.exercise === "particles", exercise = state.exercise;
+    // Particles: `filled` holds each blank's choice (null while empty).
+    var filled;
     function count() { setCount(countEl, Math.min(at + 1, total), total); }
     function q() { return queue[0]; }
     function tileHtml(cur, i, cls) {
       return '<button type="button" class="fc-sb-tile' + (cls || "") + '" data-t="' + i + '" lang="ja">' +
         '<span class="jpword">' + V.jpSegmentsHtml(cur.word.segs[i]) + "</span></button>";
     }
+    // The sentence with its blanks: each a circle, as a Japanese worksheet
+    // marks a particle to fill in, holding your choice; the one to fill next
+    // is outlined in the tint. Once marked, a wrong one shows the right
+    // particle under it.
+    function blankLineHtml(cur, marked) {
+      var next = filled.indexOf(null);
+      return cur.word.jp.map(function (s, i) {
+        var b = cur.word.blanks.indexOf(i);
+        if (b === -1) return V.jpSegmentsHtml([s]);
+        var got = filled[b], cls = "fc-sp-blank" + (got ? " fc-sp-filled" : "");
+        if (marked) cls += got === s.p ? " fc-sp-right" : " fc-sp-wrong";
+        else if (b === next) cls += " fc-sp-next";
+        return '<button type="button" class="' + cls + '" data-b="' + b + '" aria-label="' +
+          (got ? "Blank " + (b + 1) + ": " + got : "Blank " + (b + 1) + ", empty") + '"' + (marked ? " disabled" : "") + ">" +
+          '<span class="fc-sp-got">' + esc(got || "") + "</span>" +
+          (marked && got !== s.p ? '<span class="fc-sp-fix">' + esc(s.p) + "</span>" : "") + "</button>";
+      }).join("");
+    }
+    function drawBlanks(marked) {
+      boardEl.querySelector(".fc-sp-line").innerHTML = blankLineHtml(q(), marked);
+    }
+    function renderParticles(cur) {
+      filled = cur.word.blanks.map(function () { return null; });
+      boardEl.innerHTML =
+        '<div class="fc-ls-card fc-sb-card">' +
+        '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
+        '<p class="fc-sp-line jpword" lang="ja" aria-label="The sentence, with its particles blank">' + blankLineHtml(cur, false) + "</p>" +
+        '<p class="fc-sb-answer" aria-live="polite" hidden></p></div>' +
+        '<div class="fc-sp-choices" role="group" aria-label="Particles">' + cur.choices.map(function (c) {
+          return '<button type="button" class="fc-sb-tile fc-sp-choice" data-p="' + esc(c) + '" lang="ja">' + esc(c) + "</button>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-kt-reveal fc-sb-reveal">Show answer</button>' +
+        '<button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function checkParticles() {
+      var cur = q();
+      var right = cur.word.blanks.every(function (i, b) { return filled[b] === cur.word.jp[i].p; });
+      drawBlanks(true);
+      if (right) {
+        streak.hit(true);
+        if (!retried[cur.word.id]) score++;
+        showWhole(true);
+        return;
+      }
+      miss();
+    }
     function render() {
       var cur = q();
       count();
       placed = [];
       locked = false;
+      if (particles) { renderParticles(cur); return; }
       boardEl.innerHTML =
         '<div class="fc-ls-card fc-sb-card">' +
         '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
@@ -1708,6 +1793,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
       ans.hidden = false;
       boardEl.querySelectorAll(".fc-sb-tile").forEach(function (t) { t.disabled = true; });
+      if (particles) boardEl.querySelector(".fc-sp-line").classList.add(right ? "fc-sb-right" : "fc-sb-wrong");
       boardEl.querySelector(".fc-sb-reveal").hidden = true;
       var nextBtn = boardEl.querySelector(".fc-ls-next");
       nextBtn.hidden = false;
@@ -1749,7 +1835,19 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (e.target.closest(".fc-ls-next")) { next(); return; }
       if (e.target.closest(".fc-sb-say")) { speakWord(q().word); return; }
       if (locked) return;
-      if (e.target.closest(".fc-sb-reveal")) { miss(); return; }
+      if (e.target.closest(".fc-sb-reveal")) { if (particles) drawBlanks(true); miss(); return; }
+      if (particles) {
+        var blank = e.target.closest(".fc-sp-blank");
+        if (blank) { filled[+blank.dataset.b] = null; drawBlanks(false); return; }
+        var choice = e.target.closest(".fc-sp-choice");
+        var at0 = filled.indexOf(null);
+        if (choice && at0 !== -1) {
+          filled[at0] = choice.dataset.p;
+          drawBlanks(false);
+          if (filled.indexOf(null) === -1) checkParticles();
+        }
+        return;
+      }
       var back = e.target.closest(".fc-sb-placed");
       if (back) { placed.splice(+back.dataset.at, 1); drawLine(); return; }
       var tile = e.target.closest(".fc-sb-bank .fc-sb-tile");
@@ -1759,7 +1857,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (placed.length === q().word.tiles.length) check();
       }
     });
-    function setup() { return "sentences|" + state.register + "|" + total; }
+    function setup() { return "sentences|" + state.register + "|" + total + (exercise === "particles" ? "|particles" : ""); }
     function finish() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -1772,7 +1870,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         accuracyStatsHtml("sentences", score, total, run) +
         (missed.length ? "" : '<p class="fc-mt-done-meta">Every sentence right first time</p>') +
         doneActionsHtml("fcSbAgain") + "</div>" +
-        missedListHtml("Sentences to build again", missed.map(function (s) {
+        missedListHtml(particles ? "Sentences to try again" : "Sentences to build again", missed.map(function (s) {
           return '<li class="fc-sb-missed">' + sentenceHtml(s) + '<span class="fc-ls-missed-en">' + esc(s.clue) + "</span></li>";
         }));
       bindDoneActions("fcSbAgain");
@@ -2565,7 +2663,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // choices are remembered on this device for next time (SETUP_KEY); the
   // puzzle itself still isn't.
   var SETUP_KEY = "raume-games-setup";
-  var SETUP_FIELDS = ["mode", "source", "tables", "script", "size", "sortBy", "register"];
+  var SETUP_FIELDS = ["mode", "source", "tables", "script", "size", "sortBy", "register", "exercise"];
   function loadSetup(kind) {
     try { return (JSON.parse(localStorage.getItem(SETUP_KEY)) || {})[kind] || {}; } catch (e) { return {}; }
   }
@@ -2580,7 +2678,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
   function freshState(kind) {
     var st = { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
-      script: "romaji", size: 15, sortBy: "tables", register: "both", puzzle: null, poolCount: 0, notes: "", started: false };
+      script: "romaji", size: 15, sortBy: "tables", register: "both", exercise: "build", puzzle: null, poolCount: 0, notes: "", started: false };
     var saved = loadSetup(kind);
     var modes = MODE_OPTS.map(function (o) { return o[0]; });
     if (modes.indexOf(saved.mode) !== -1 && (PUZZLE_MODES.indexOf(saved.mode) !== -1) === (kind === "puzzles")) st.mode = saved.mode;
@@ -2589,6 +2687,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (typeof saved.size === "number" && saved.size > 0) st.size = saved.size;
     if (typeof saved.sortBy === "string") st.sortBy = saved.sortBy;
     if (REGISTER_OPTS.some(function (o) { return o[0] === saved.register; })) st.register = saved.register;
+    if (EXERCISE_OPTS.some(function (o) { return o[0] === saved.exercise; })) st.exercise = saved.exercise;
     return st;
   }
   // Filled in at the end of this file: MODE_OPTS and SCRIPT_OPTS come later.
@@ -2880,6 +2979,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (sentences) {
       short = state.poolCount < MIN_WORDS;
       why = "There aren’t enough " + (state.register === "both" ? "" : optionLabel(REGISTER_OPTS, state.register).toLowerCase() + " ") + "sentences to play — pick another Register.";
+      picks.push(["exercise", "Exercise", optionLabel(EXERCISE_OPTS, state.exercise), EXERCISE_OPTS]);
       picks.push(["register", "Register", optionLabel(REGISTER_OPTS, state.register), REGISTER_OPTS]);
     }
     else if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
@@ -3424,6 +3524,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type, and あ | ア picks hiragana or katakana. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
+      : state.mode === "sentences" && state.exercise === "particles" ? "Read the English, then fill each circle with its particle — they fill left to right; tap a filled one to clear it. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" ? "Read the English, then tap the Japanese pieces in order to say it. Tap a placed piece to take it back. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes. Stuck? Show answer, and the word comes back at the end."
       : ls ? "Tap ▶ to hear a word, then pick its meaning. After you answer, you’ll see how it’s written."
@@ -4010,7 +4111,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, particleBlanks: particleBlanks, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states
