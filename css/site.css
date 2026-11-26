@@ -3560,8 +3560,14 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
   font: inherit; color: var(--tint); cursor: pointer;
 }
 .we-restore:active { background-color: var(--row-press); }
+/* A phone: the form is a full-height sheet from the top, as iOS's own edit
+   forms are -- a bottom sheet ends up under the keyboard, every field hidden
+   while you type. */
 @media (max-width: 640px) {
-  .word-edit-sheet { width: auto; }
+  .kanji-sheet.word-edit-sheet {
+    width: auto; top: calc(env(safe-area-inset-top, 0px) + 10px);
+    max-height: none;
+  }
 }
 
 /* Particles ({ p: … } segments) -- blue and bold everywhere they appear: the

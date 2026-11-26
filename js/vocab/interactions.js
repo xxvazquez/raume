@@ -759,7 +759,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<label class="ks-row we-row"><span class="ks-label">' + label + '</span>' +
       '<input type="text" class="we-input" name="' + name + '" value="' + esc(value || '') + '"' +
       (opts.ja ? ' lang="ja"' : '') + (opts.placeholder ? ' placeholder="' + esc(opts.placeholder) + '"' : '') +
-      ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>';
+      ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done"></label>';
   }
   function wordEditHtml(row) {
     const verb = row.type === 'verb-pair';
