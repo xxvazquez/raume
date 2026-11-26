@@ -5654,6 +5654,10 @@ mark.fc-diff-co {
 } }
 .fc-kana-group:active,
 .fc-direction-check:active { background: var(--row-press); }
+/* The hidden checkbox sits in its own row: with no positioned row it was
+   placed against the Words from sheet, so focusing a ticked table far down
+   the list scrolled the sheet's contents out of sight and the page with it. */
+.fc-kana-group, .fc-direction-check { position: relative; }
 .fc-kana-group input[type="checkbox"],
 .fc-direction-check input[type="checkbox"] {
   position: absolute;
@@ -5692,10 +5696,6 @@ mark.fc-diff-co {
    Flashcards additions: Help tab, Manage status dots, and the Dashboard's
    Today / Next review / Missed today / Words to Review sections. All
    reuse the existing card, list and palette language.
-/* The hidden checkbox sits in its own row: with no positioned row it was
-   placed against the Words from sheet, so focusing a ticked table far down
-   the list scrolled the sheet's contents out of sight and the page with it. */
-.fc-kana-group, .fc-direction-check { position: relative; }
    --------------------------------------------------------------------- */
 
 /* Manage status indicator -- one glyph per row, computed from live card state. */
@@ -6357,6 +6357,14 @@ mark.fc-diff-co {
 .fc-gs-words .fc-gs-menu-at-1 { top: 96px; }
 .fc-gs-words .fc-gs-menu-at-2 { top: 140px; }
 .fc-gs-words .fc-gs-menu-at-3 { top: 184px; }
+/* Too little room under the row: the menu opens over it instead
+   (placeMenu), its bottom 8px above row N's top. */
+@media (min-width: 641px) {
+  .fc-gs-words .fc-gs-menu-up { top: auto; bottom: calc(100% + 8px); }
+  .fc-gs-words .fc-gs-menu-at-1.fc-gs-menu-up { bottom: calc(100% - 36px); }
+  .fc-gs-words .fc-gs-menu-at-2.fc-gs-menu-up { bottom: calc(100% - 80px); }
+  .fc-gs-words .fc-gs-menu-at-3.fc-gs-menu-up { bottom: calc(100% - 124px); }
+}
 /* A single-choice menu: checkmark rows, no title (an iOS menu has none) --
    the title shows only on a phone's sheet. */
 .fc-xw-sheet.fc-gs-menu { width: auto; min-width: 220px; padding: 6px; }
@@ -6398,14 +6406,6 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 /* New puzzle is its own button on a wide window, the menu's first item on
    a phone. */
 .section-menu-list .fc-xw-menu-new { display: none; }
-/* Too little room under the row: the menu opens over it instead
-   (placeMenu), its bottom 8px above row N's top. */
-@media (min-width: 641px) {
-  .fc-gs-words .fc-gs-menu-up { top: auto; bottom: calc(100% + 8px); }
-  .fc-gs-words .fc-gs-menu-at-1.fc-gs-menu-up { bottom: calc(100% - 36px); }
-  .fc-gs-words .fc-gs-menu-at-2.fc-gs-menu-up { bottom: calc(100% - 80px); }
-  .fc-gs-words .fc-gs-menu-at-3.fc-gs-menu-up { bottom: calc(100% - 124px); }
-}
 /* "Several tables…": the checklist as a glass popover under the toolbar
    (the reference pages' Options pattern); on a phone, a bottom sheet. */
 .fc-xw-sheet {
