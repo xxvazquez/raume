@@ -245,9 +245,9 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 51 table sections", sections.length === 51);
+  check("renders 58 table sections", sections.length === 58);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 1143 vocabulary rows", totalRows === 1143);
+  check("renders 1476 vocabulary rows", totalRows === 1476);
   check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
     const forms = id => JSON.parse(document.querySelector('tr[data-vocab-id="' + id + '"] .verb-forms-note')?.dataset.forms || "[]").map(f => f[0]);
     const iku = forms("v0141"), oyogu = forms("v0155"), kuru = forms("v0135"), taberu = forms("v0139");
@@ -444,10 +444,11 @@ async function main() {
     const input = document.getElementById("tableSearch");
     input.value = "adjective";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    const hits = document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)').length;
+    // Only rows whose meaning is "adjective" (けいようし) may match.
+    const hits = [...document.querySelectorAll('#vocabulary tbody tr:not(.search-hidden)')];
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    return hits === 0;
+    return hits.length === 1 && /adjective/.test(hits[0].querySelector(".meaning-text").textContent);
   })());
   check("a sentence row reads Japanese + English only; its pattern waits behind the row's ⓘ -- and Sentence Patterns' sentences now live in Everyday Sentences", (() => {
     const tr = document.querySelector('.table-section[data-table="62"] tbody tr[data-vocab-id="v1084"]');
@@ -524,7 +525,7 @@ async function main() {
     const kirei = rows.find(r => r.cells[0].textContent.includes("きれい"));
     const ii = rows.find(r => r.cells[0].querySelector(".jpword").textContent.replace(/\s/g, "") === "いい");
     return badgeOk && document.querySelectorAll(".vocab .adj-note").length === 0
-      && irr.length === 6 && irr.every(r => r.cells[1].querySelector(".adj-badge-irr").tagName === "BUTTON" && /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
+      && irr.length === 8 && irr.every(r => r.cells[1].querySelector(".adj-badge-irr").tagName === "BUTTON" && /—/.test(r.cells[1].querySelector(".adj-badge-irr").dataset.role))
       && kirei.classList.contains("irregular-row") === false && kirei.cells[0].classList.contains("adj-na")
       && !!ii && ii.cells[0].classList.contains("adj-i") && !!ii.cells[1].querySelector(".adj-badge-irr")
       && plain.every(r => r.cells[1].querySelector(".adj-badge").tagName === "SPAN" && r.cells[1].querySelector(".adj-badge").dataset.role === undefined);
@@ -548,7 +549,7 @@ async function main() {
     const godanIchidan = rows.filter(r => !r.cells[1].querySelector(".verb-badge-irregular"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
-    return badgeOk && rows.length === 83 && document.querySelectorAll(".vocab .adj-note").length === 0
+    return badgeOk && rows.length === 91 && document.querySelectorAll(".vocab .adj-note").length === 0
       && irr.length === 6 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")
@@ -1847,7 +1848,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 51 tables", czRows.length === 51);
+  check("it lists every one of the 58 tables", czRows.length === 58);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {
