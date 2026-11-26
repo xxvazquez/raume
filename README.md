@@ -66,7 +66,7 @@ the grammar it shows.
 | | |
 | --- | --- |
 | **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. Clearing the search puts back the tables you had open. |
-| **JLPT level** | Type **n5** … **n1** as a word of its own for that level's words: **n4** lists them all, **n4 eat** only those matching *eat*. |
+| **JLPT level** | Type **n5** … **n1** as a word of its own for that level's words: **n4** lists them all, **n4 eat** only those matching *eat*. **n0** finds the words not on the JLPT lists. |
 | **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), a verb's *to* is never needed, and any one meaning typed whole is an exact match (*see* finds *to see, to watch* first). Only visible columns are searched, plus romaji. |
 | **+ on a result** | Adds the word to flashcards; it turns into Practice's cards icon (tap again to pause). |
 | **Recent searches** | Tap the empty field for your last eight — tap one to rerun it, **×** removes one, **Clear** all. Only searches you used (Return or a tap on a result) that found something are kept, on this device. |
@@ -88,7 +88,7 @@ the grammar it shows.
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
 | **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |
-| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times, country names with their 〜人 and 〜語) counts as N5. A sentence takes the level of its grammar or of its hardest word, whichever is harder (〜てる, 〜にします, 〜ことがすき are N4). City and sight names, and foods the lists leave out, have none. Your own words — class tables included — take the level of the same word in raume's tables. |
+| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times, country names with their 〜人 and 〜語) counts as N5. A sentence takes the level of its grammar or of its hardest word, whichever is harder (〜てる, 〜にします, 〜ことがすき are N4). City and sight names, and foods the lists leave out, say plainly that they're **not on the JLPT lists** — topic words, as textbooks treat them, never given a guessed level. Your own words — class tables included — take the level of the same word in raume's tables. |
 
 The ⓘ lists:
 
@@ -122,7 +122,7 @@ dot on it means something is off its default.
 | Option | Does |
 | --- | --- |
 | **Japanese / Furigana / English** | Hide a column (never both text columns). |
-| **JLPT level** | **All levels**, or tick one level or several (N5 + N4) to show only their words. Tables and topics without any of them step aside, and search keeps to them too. |
+| **JLPT level** | **All levels**, or tick one level or several (N5 + N4) to show only their words — **Not on the lists** among them. Tables and topics without any of them step aside, and search keeps to them too. |
 | **Cover answers** | Blanks the English (and the kanji readings); tap a row to reveal it. |
 | **Show polite** | Switches verbs to 〜ます. Only while the Verbs table is open. |
 | **Highlight progress** | The Known green and Tricky amber washes, on or off together. |
@@ -320,7 +320,7 @@ kept. **Undo** takes a pause back.
 | Card | Shows |
 | --- | --- |
 | **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of your daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
-| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…) or one table. Study now follows it; everything else still counts all cards |
+| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…), **Words not on the JLPT lists**, or one table. Study now follows it; everything else still counts all cards |
 | **Streak** | Days in a row, this week as seven dots, and your best |
 | **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under your target) |
 | **Awards** | The newest six and the nearest to go; **Show all** for the rest |
@@ -330,7 +330,8 @@ Under **Details**: card progress, reviews this week, due next 7 days,
 **Trends** (last 90 days against your year — reviews a day, recall, study
 days a week — after 120 days of history), Kana, Puzzles and Games (results,
 streak, the last three, **See stats**), Kanji, **JLPT levels** (each
-level's words in the reference and how many are Known, once one is),
+level's words in the reference — and the words not on the lists — and how
+many are Known, once one is),
 **Missed today**, **Leeches**
 (forgotten 8+ times; *Pause* or *Keep*) and **Words to review**.
 
@@ -354,7 +355,7 @@ Choices are remembered on this device.
 | Setting | Choices |
 | --- | --- |
 | **Words from** | *Flashcards* (leaning toward words you're still learning) or any number of tables, in or out of flashcards |
-| **JLPT level** | *All*, or tick one level or several (N5 + N4) to play only their words. Puzzles and every game, Sentences included (its sentences' levels) |
+| **JLPT level** | *All*, or tick one level or several (N5 + N4, or *Not on the lists*) to play only their words. Puzzles and every game, Sentences included (its sentences' levels) |
 | **Script** | *Romaji* (long vowels spelled out: *koohii*), *Japanese* (as written — Match and Word search only), *Hiragana* or *Katakana*. A word is never forced into a script it isn't written in |
 | **Word count** | 10–40; Match and Listening up to 100 or *All* |
 

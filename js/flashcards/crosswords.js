@@ -214,7 +214,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (!state.levels.length) return pool;
     var index = vocabIndex(), want = {};
     state.levels.forEach(function (v) { want[v] = true; });
-    return pool.filter(function (w) { return index[w.id] && want[String(index[w.id].jlpt)]; });
+    return pool.filter(function (w) { return index[w.id] && want[String(index[w.id].jlpt || 0)]; });
   }
   // The N5 Kanji tables hold single characters, not words to play with.
   function vocabTables() {
@@ -1783,7 +1783,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
           : state.exercise === "build" && row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
         // JLPT level: a sentence's is its grammar's or its hardest word's.
-        if (!only && state.levels.length && state.levels.indexOf(String(row.jlpt || "")) === -1) return;
+        if (!only && state.levels.length && state.levels.indexOf(String(row.jlpt || 0)) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
         // Only Build and Verb form deal the pieces.
@@ -2922,16 +2922,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // puzzle itself still isn't.
   var SETUP_KEY = "raume-games-setup";
   var SETUP_FIELDS = ["mode", "source", "tables", "levels", "script", "size", "sortBy", "register", "exercise"];
-  var LEVEL_OPTS = [["", "All"], ["5", "N5"], ["4", "N4"], ["3", "N3"], ["2", "N2"], ["1", "N1"]];
+  var LEVEL_OPTS = [["", "All"], ["5", "N5"], ["4", "N4"], ["3", "N3"], ["2", "N2"], ["1", "N1"], ["0", "Not on the lists"]];
   // The ticked levels, easiest first; every level ticked is the same as All.
   function cleanLevels(list) {
     var on = {};
-    (Array.isArray(list) ? list : []).forEach(function (v) { if (/^[1-5]$/.test(String(v))) on[String(v)] = true; });
-    var out = ["5", "4", "3", "2", "1"].filter(function (v) { return on[v]; });
-    return out.length === 5 ? [] : out;
+    (Array.isArray(list) ? list : []).forEach(function (v) { if (/^[0-5]$/.test(String(v))) on[String(v)] = true; });
+    var out = ["5", "4", "3", "2", "1", "0"].filter(function (v) { return on[v]; });
+    return out.length === 6 ? [] : out;
   }
   function levelsLabel() {
-    return state.levels.length ? state.levels.map(function (v) { return "N" + v; }).join(" + ") : "All";
+    return state.levels.length ? state.levels.map(function (v) { return v === "0" ? "Not on the lists" : "N" + v; }).join(" + ") : "All";
   }
   function loadSetup(kind) {
     try { return (JSON.parse(localStorage.getItem(SETUP_KEY)) || {})[kind] || {}; } catch (e) { return {}; }

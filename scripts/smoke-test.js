@@ -699,6 +699,28 @@ async function main() {
     btn.click();
     return lines.length === 2 && /こと/.test(lines[0]) && lines[1] === "JLPT N4";
   })());
+  check("a word the JLPT lists leave out says so in its ⓘ, and n0 or Options › Not on the lists finds those words", (() => {
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v0034"]');
+    const btn = row && row.querySelector(".row-info-btn");
+    if (!btn || row.dataset.jlpt !== "0") return false;
+    btn.click();
+    const said = (document.querySelector(".role-pop-list") || {}).textContent === "Not on the JLPT lists";
+    btn.click();
+    const search = document.getElementById("tableSearch");
+    const shown = () => [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
+    search.value = "n0";
+    search.dispatchEvent(new window.Event("input"));
+    const hits = shown();
+    const token = hits.length > 20 && hits.every(r => r.dataset.jlpt === "0") && hits.includes(row);
+    search.value = "";
+    search.dispatchEvent(new window.Event("input"));
+    const box = document.getElementById("levelChecks");
+    box.querySelector('.opt-check[data-level="0"]').click();
+    const filtered = document.body.dataset.jlptFilter === "0" && !row.classList.contains("level-out")
+      && !!document.querySelector('#vocabulary tr[data-jlpt="5"].level-out');
+    box.querySelector('.opt-check[data-level=""]').click();
+    return said && token && filtered && !document.body.dataset.jlptFilter;
+  })());
   check("typing n3 in search lists that level's words, alone or with more text", (() => {
     const search = document.getElementById("tableSearch");
     const shown = () => [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
@@ -714,7 +736,7 @@ async function main() {
     search.dispatchEvent(new window.Event("input"));
     return allOk && someOk;
   })());
-  check("rows with nothing to explain get no ⓘ", (() => {
+  check("kanji tiles, with nothing to explain, get no ⓘ", (() => {
     const plain = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => !r.querySelector(".row-badges"));
     return !!plain && !plain.querySelector(".row-info-btn");
   })());

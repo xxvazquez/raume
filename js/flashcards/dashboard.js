@@ -400,12 +400,16 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // JLPT levels are choices too (their words from every table), grouped
   // first, above the tables: each level alone, then the easiest ones
   // together -- N5 + N4, N5 + N4 + N3 -- the way you climb them.
+  // Not on the JLPT lists (0) is a choice of its own, never part of a climb.
   function levelSets(levels) {
-    var sets = levels.map(function (n) { return [n]; });
-    for (var k = 2; k <= levels.length; k++) sets.push(levels.slice(0, k));
+    var sets = levels.map(function (n) { return [n]; }), real = levels.filter(function (n) { return n; });
+    for (var k = 2; k <= real.length; k++) sets.push(real.slice(0, k));
     return sets;
   }
-  function levelsName(set) { return set.map(function (n) { return "N" + n; }).join(" + ") + " words"; }
+  function levelsName(set) {
+    if (set.length === 1 && set[0] === 0) return "Words not on the JLPT lists";
+    return set.map(function (n) { return "N" + n; }).join(" + ") + " words";
+  }
   function studyFromHtml() {
     var tables = sched.studyTables(), levels = sched.studyLevels ? sched.studyLevels() : [];
     if (tables.length < 2 && levels.length < 2) return "";
@@ -1232,23 +1236,24 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
       if (t.tableClass === "vocab-kanji") return;   // the Kanji card counts those
       t.rows.forEach(function (r) {
-        var n = Number(r.jlpt);
-        if (!r.id || !(n >= 1 && n <= 5)) return;
+        var n = Number(r.jlpt) || 0;   // 0: not on the JLPT lists
+        if (!r.id || !(n >= 0 && n <= 5)) return;
         var c = by[n] || (by[n] = { level: n, known: 0, total: 0 });
         c.total++;
         if (isKnown(r.id)) c.known++;
       });
     });
-    return [5, 4, 3, 2, 1].filter(function (n) { return by[n]; }).map(function (n) { return by[n]; });
+    return [5, 4, 3, 2, 1, 0].filter(function (n) { return by[n]; }).map(function (n) { return by[n]; });
   }
   function jlptCardHtml() {
     var levels = jlptCounts();
     if (!levels || !levels.some(function (c) { return c.known; })) return "";
     return '<div class="fc-viz-card fc-viz-wide fc-jlpt-card">' + vizTitle("JLPT levels") +
       levels.map(function (c) {
-        return '<div class="fc-jlpt-level"><div class="fc-kj-row"><span class="fc-jlpt-name">N' + c.level + "</span>" +
+        var name = c.level ? "N" + c.level : "Not on the lists";
+        return '<div class="fc-jlpt-level"><div class="fc-kj-row"><span class="fc-jlpt-name">' + name + "</span>" +
           '<span class="fc-kj-count"><b>' + c.known + "</b> of " + c.total + " known</span></div>" +
-          progressBarHtml(c.known, c.total, "N" + c.level + ": " + c.known + " of " + c.total + " words known") + "</div>";
+          progressBarHtml(c.known, c.total, name + ": " + c.known + " of " + c.total + " words known") + "</div>";
       }).join("") + "</div>";
   }
   // --- Dashboard: Kana ---

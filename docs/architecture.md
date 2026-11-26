@@ -637,7 +637,11 @@ the Tanos / Waller lists (via the open `yomitan-jlpt-vocab` data, matched by
 writing, then by reading + meaning), with an N5 class's basics those lists
 file higher or leave out — greetings, counters, numbers, dates, times,
 country names and their X人 / X語 — set to 5 by hand; every N5 kanji row is
-5. City and sight names, and foods outside the lists, carry none. Each
+5. City and sight names, and foods outside the lists, carry no `jlpt`: they
+render as level 0 (`data-jlpt="0"`, "Not on the JLPT lists" in the ⓘ), a
+value every level filter takes like any other — Options, the `n0` token,
+Study from's `jlpt:0`, the games' `levels`, the Dashboard card. Never a
+guessed level. Each
 Everyday Sentences row has a level too: the harder of its grammar point's
 (N4 for casual contractions 〜てる, 〜にします, 〜ことがすき, noun + で as a
 cause, けど, の？ questions, 〜つ目…; N5 otherwise), its `mainVerb`'s and

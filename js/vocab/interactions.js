@@ -1479,11 +1479,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function runSearch() {
       // An iPhone keyboard types a curly apostrophe (o’clock); the tables use '.
       const q = input.value.trim().replace(/[‘’ʼ`´]/g, "'").toLocaleLowerCase();
-      // "n4" in the query, as a word of its own, is a level token: results
+      // "n4" in the query, as a word of its own, is a level token ("n0":
+      // words not on the JLPT lists): results
       // are that JLPT level's rows -- every one of them on its own ("n5"),
       // or the ones matching the rest ("n5 eat"). mq is the rest, the text
       // actually matched; q still decides whether a search is running.
-      const tok = q.match(/(?:^|\s)n([1-5])(?=\s|$)/);
+      const tok = q.match(/(?:^|\s)n([0-5])(?=\s|$)/);
       const lvTok = tok ? tok[1] : '';
       const mq = lvTok ? q.replace(tok[0], ' ').trim() : q;
       // Options › Level narrows results the same way; a typed token wins.
@@ -2361,12 +2362,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
     }
     vocab.markLevelEmpty = markLevelEmpty;
-    // Every level ticked is the same as All levels.
+    // Every level ticked, Not on the lists too, is the same as All levels.
     function applyLevelFilter(list) {
       const on = {};
-      (list || []).forEach(function (v) { if (/^[1-5]$/.test(String(v))) on[String(v)] = true; });
-      let lv = ['5', '4', '3', '2', '1'].filter(function (v) { return on[v]; });
-      if (lv.length === 5) lv = [];
+      (list || []).forEach(function (v) { if (/^[0-5]$/.test(String(v))) on[String(v)] = true; });
+      let lv = ['5', '4', '3', '2', '1', '0'].filter(function (v) { return on[v]; });
+      if (lv.length === 6) lv = [];
       if (lv.length) document.body.dataset.jlptFilter = lv.join(','); else delete document.body.dataset.jlptFilter;
       if (levelChecks) levelChecks.querySelectorAll('.opt-check').forEach(function (b) {
         const v = b.dataset.level;
@@ -2519,7 +2520,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         if (b.dataset.level) {
           line.className = 'role-pop-line role-pop-level';
           line.lang = 'en';
-          line.textContent = 'JLPT N' + b.dataset.level;
+          line.textContent = b.dataset.level === '0' ? 'Not on the JLPT lists' : 'JLPT N' + b.dataset.level;
           pop.appendChild(line);
           return;
         }

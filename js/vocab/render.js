@@ -441,23 +441,23 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // row.jlpt -- the word's JLPT level (5 = N5 ... 1 = N1), from the widely
   // used Tanos / Waller lists, with an N5 class's own basics (greetings,
-  // counters, numbers, dates) counted as N5. Not every row has one:
-  // sentences, place names and dishes the lists leave out stay unlevelled.
-  // On the row it's data for the Level filter and the search's "n4"; to the
-  // eye it's the last line of the row's ⓘ -- every levelled row has one,
-  // like the ⓘ on every row of an iOS list ("details of this item").
+  // counters, numbers, dates) counted as N5. A word the lists leave out
+  // (most foods, city names) is 0 -- "not on the JLPT lists", said as
+  // plainly as a level, never left blank or guessed. On the row it's data
+  // for the Level filter and the search's "n4" / "n0"; to the eye it's the
+  // last line of the row's ⓘ -- so every row has one, like the ⓘ on every
+  // row of an iOS list ("details of this item").
   function jlptLevel(row) {
     var n = Number(row && row.jlpt);
     return n >= 1 && n <= 5 ? n : 0;
   }
   vocab.jlptLevel = jlptLevel;
   function jlptAttr(row) {
-    var n = jlptLevel(row);
-    return n ? ' data-jlpt="' + n + '"' : '';
+    return ' data-jlpt="' + jlptLevel(row) + '"';
   }
   function levelNote(row) {
     var n = jlptLevel(row);
-    return n ? '<span class="level-note" data-level="' + n + '"><span class="visually-hidden">(JLPT N' + n + ')</span></span>' : '';
+    return '<span class="level-note" data-level="' + n + '"><span class="visually-hidden">(' + (n ? 'JLPT N' + n : 'not on the JLPT lists') + ')</span></span>';
   }
   // row.pattern -- the grammar a sentence row shows ("な-adjective
   // + な + noun"). An explanation, so it waits behind the row's ⓘ with the

@@ -117,7 +117,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Rings</span><span class="help-desc">Review: today’s due cards done. Learn: new cards, of your daily number. Play: one game or puzzle.</span></li>' +
       '<li><span class="help-term">Study now</span><span class="help-desc">Starts today’s due reviews and new cards; the number is how many.</span></li>' +
-      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, one JLPT level’s words or several together (N5 + N4), or one table. Study now follows it; the rings still count everything.</span></li>' +
+      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, one JLPT level’s words or several together (N5 + N4), the words not on the JLPT lists, or one table. Study now follows it; the rings still count everything.</span></li>' +
       '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review; the dots are this week.</span></li>' +
       '<li><span class="help-term">Awards</span><span class="help-desc">Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
       '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news, like a new best Match pace.</span></li>' +
@@ -138,7 +138,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Setup</span><span class="help-desc">Pick the puzzle, where the words come from, their JLPT level, the script and how many, then Start. ‹ goes back.</span></li>' +
       '<li><span class="help-term">Words from</span><span class="help-desc">Your flashcards (leaning toward words you’re still learning), or as many tables as you like.</span></li>' +
-      '<li><span class="help-term">JLPT level</span><span class="help-desc">All, or tick one level or several (N5 + N4) to play only their words.</span></li>' +
+      '<li><span class="help-term">JLPT level</span><span class="help-desc">All, or tick one level or several (N5 + N4, or Not on the lists) to play only their words.</span></li>' +
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type; tap a crossing square again to switch direction. Right squares turn green.</span></li>' +
       '<li><span class="help-term">Hint</span><span class="help-desc">Fills the square you’re on, or the next wrong one. In a word search, shows a word.</span></li>' +
       '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong.</span></li>' +

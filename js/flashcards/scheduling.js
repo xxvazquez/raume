@@ -138,12 +138,12 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // ("jlpt:5,4"): the levels your cards in study have, easiest first.
   function studyLevels() {
     var index = vidx.getVocabIndex(), has = {};
-    studyableCards().forEach(function (card) { var n = index[card.vocabId].jlpt; if (n) has[n] = true; });
-    return [5, 4, 3, 2, 1].filter(function (n) { return has[n]; });
+    studyableCards().forEach(function (card) { has[index[card.vocabId].jlpt || 0] = true; });
+    return [5, 4, 3, 2, 1, 0].filter(function (n) { return has[n]; });   // 0: not on the JLPT lists
   }
   // "jlpt:5,4" -> [5, 4]; null for a table id.
   function scopeLevels(id) {
-    var m = /^jlpt:([1-5](?:,[1-5])*)$/.exec(id || "");
+    var m = /^jlpt:([0-5](?:,[0-5])*)$/.exec(id || "");
     return m ? m[1].split(",").map(Number) : null;
   }
   function studyScope() {
