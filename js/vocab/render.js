@@ -87,6 +87,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // And js/flashcards/crosswords.js's Sentences, so a sentence there wraps
   // between phrases as it does in the tables.
   vocab.phraseSegments = phraseSegments;
+  vocab.phraseWrap = phraseWrap;
   // A kana-only reading, for feeding the Web Speech API -- reconstructed from
   // each segment's reading where there is one (a kanji segment), or its own
   // text otherwise (already kana/katakana). Kept separate from jpPlainOf
@@ -337,11 +338,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     });
     return out;
   }
+  // Each phrase of a { wbr }-marked sentence held whole in a no-wrap span:
+  // a <wbr> alone still lets a line break beside a kanji's furigana
+  // (と言 / います), since a ruby is a break point of its own.
+  function phraseWrap(html) {
+    return html.indexOf('<wbr>') === -1 ? html
+      : '<span class="jp-phrase">' + html.split('<wbr>').join('</span><wbr><span class="jp-phrase">') + '</span>';
+  }
   function jpCell(row, romaji) {
     // Particles carry their own { p: … } segment now (jpSegments emits the
     // .particle span), so a standalone-particle row needs no special case.
     var segs = row.tiles || row.pattern ? phraseSegments(row) : row.jp;
-    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + jpGroupedSegments(segs) + '</span>';
+    var inner = '<span class="jpword"' + romajiAttr(romaji) + '>' + phraseWrap(jpGroupedSegments(segs)) + '</span>';
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).

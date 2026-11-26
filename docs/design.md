@@ -382,7 +382,9 @@ and Help.
   Kinsoku via `line-break: strict` plus `text-wrap: pretty` against a lone か。.
   A line breaks only between phrases, never inside a word (おねがいし / ます):
   `word-break: keep-all` plus a `<wbr>` between the row's tiles, each particle
-  kept with the word before it (rows without tiles: after a particle or 、).
+  kept with the word before it (rows without tiles: after a particle or 、),
+  and each phrase held whole in a no-wrap `.jp-phrase` — a ruby is a break
+  point of its own, so `<wbr>` alone still split と言 / います.
 - **Furigana in every reference table** (word, verb and sentence rows) is
   start-aligned — a reading begins exactly where its kanji begin and never
   extends left of them. Consecutive kanji share one reading; the reading floats

@@ -2891,7 +2891,7 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
      no-touching-readings rule pushed gaps into sentences (私 は, 私 の). */
   white-space: normal; overflow-wrap: anywhere; font-size: 17px;
   /* Break between phrases only (render.js phraseSegments puts a <wbr> at
-     each), never inside a word -- anywhere only when a phrase can't fit. */
+     each, phraseWrap holds each whole), never inside a word. */
   word-break: keep-all;
   /* Tighter than the old 2 -- the furigana overhangs (below) instead of
      needing a whole extra line of air. */
@@ -2901,6 +2901,9 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
   line-break: strict;
   text-wrap: pretty;
 }
+/* A sentence's phrase (render.js phraseWrap), here and in the Sentences
+   game: never broken inside. */
+.jp-phrase { white-space: nowrap; }
 .vocab.vocab-sentences td:nth-child(2),
 .vocab.vocab-sentences tbody tr:has(ruby) td:nth-child(2) {
   padding: 0 14px 14px 14px; color: var(--ink-2); font-size: var(--fs-nav); line-height: 1.4;
@@ -4668,11 +4671,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-answer-head { font-size: var(--fs-small); color: var(--muted); }
 .fc-sb-whole { font: 400 19px/1.6 var(--font-jp); color: var(--ink); }
 /* As the sentence tables: a line breaks only between phrases (crosswords.js
-   phraseWrap() holds each whole, <wbr> between), never inside a word, and
+   phraseWrap() holds each whole in a .jp-phrase, <wbr> between), never inside a word, and
    。、」 never start one. Centred, a wrapped sentence splits into even
    lines, never a lone い？ under the rest. */
 .fc-sb-whole, .fc-sp-line { word-break: keep-all; overflow-wrap: anywhere; }
-.fc-sb-phrase { white-space: nowrap; }
 .fc-sb-whole, .fc-sp-line, .fc-sb-clue { line-break: strict; text-wrap: balance; }
 .fc-sb-romaji { color: var(--muted); font-size: 14px; }
 .fc-sb-say { margin-top: 0; }

@@ -1816,12 +1816,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // never inside a word (食 / べに), as the sentence tables do. A sentence
   // the reader edited no longer matches its pieces and wraps as it can.
   function phrased(s) { return s.segs ? window.RaumeStudy.vocab.phraseSegments({ jp: s.jp, tiles: s.tiles }) : s.jp; }
-  // Each phrase then held whole in a no-wrap span: a <wbr> alone still lets
-  // a line break beside a kanji's furigana (土よう / 日).
-  function phraseWrap(html) {
-    return html.indexOf("<wbr>") === -1 ? html
-      : '<span class="fc-sb-phrase">' + html.split("<wbr>").join('</span><wbr><span class="fc-sb-phrase">') + "</span>";
-  }
+  // Each phrase then held whole (render.js), so no break slips in beside
+  // a kanji's furigana either (土よう / 日).
+  function phraseWrap(html) { return window.RaumeStudy.vocab.phraseWrap(html); }
   function sentenceHtml(s) {
     var V = window.RaumeStudy.vocab;
     return '<span class="fc-sb-whole jpword" lang="ja">' + phraseWrap(V.jpSegmentsHtml(phrased(s))) + "</span>" +
