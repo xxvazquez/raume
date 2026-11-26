@@ -5415,6 +5415,10 @@ mark.fc-diff-co {
 .fc-kana-fieldset {
   display: block; border: 0; background: transparent;
   padding: 0; min-width: 180px; margin: 0;
+  /* The lists share the row's full width (Hiragana | Katakana as two equal
+     halves) -- sized to their rows, they filled the left half of a wide
+     window and left the right half blank under the full-width card. */
+  flex: 1 1 260px;
 }
 .fc-kana-fieldset legend {
   float: left; width: 100%; padding: 0 0 6px 16px; margin: 0;

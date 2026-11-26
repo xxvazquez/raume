@@ -521,6 +521,8 @@ and Help.
     finger is down (`:active`), as an iOS cell does — except table rows,
     which scroll under the finger. No grey tap-flash box anywhere
     (`-webkit-tap-highlight-color: transparent` on `html`).
+  - The Kana tab's Hiragana and Katakana lists share the row's full width
+    as two equal halves, never two narrow cards beside a blank half.
 - **iOS 26 materials** (the "iOS 26 materials" block at the end of
   `css/site.css`): the sticky search bar, the Options / Tables sheets, popovers
   and ⋯ menus are translucent glass — `backdrop-filter` blur with the
