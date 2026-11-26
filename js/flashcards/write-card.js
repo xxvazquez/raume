@@ -50,7 +50,7 @@ window.RaumeStudy.flashcards.writeCard = (function () {
   function padHtml() {
     var strokes = strokesOf(st.chars[st.ci]), done = "";
     for (var i = 0; i < st.si; i++) done += '<path class="kw-stroke ' + soClass(i) + '" d="' + esc(strokes[i]) + '"/>';
-    return '<div class="kw-pad-wrap fcw-pad-wrap"><svg class="kw-pad fcw-pad" viewBox="0 0 109 109" role="img" aria-label="Writing pad, character ' +
+    return '<div class="kw-pad-wrap fcw-pad-wrap"><svg class="kw-pad fcw-pad" viewBox="0 0 109 109" role="img" data-no-tip aria-label="Writing pad, character ' +
       (st.ci + 1) + " of " + st.chars.length + '">' +
       '<g class="kw-grid"><path d="M54.5 4v101M4 54.5h101"/></g>' +
       '<g class="kw-done">' + done + "</g>" +

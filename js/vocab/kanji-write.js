@@ -157,7 +157,7 @@ window.RaumeStudy.kanjiWrite = (function () {
       '<button type="button" class="ks-close" aria-label="Close">' + CLOSE_ICON + "</button></div>" +
       '<div class="ks-card kw-card">' +
       '<div class="kw-pad-wrap"><svg class="kw-pad' + (st.outline ? " kw-outline" : "") + (finished ? " kw-finished" : "") +
-      '" viewBox="0 0 109 109" role="img" aria-label="Writing pad for ' + esc(st.ch) + '">' +
+      '" viewBox="0 0 109 109" role="img" data-no-tip aria-label="Writing pad for ' + esc(st.ch) + '">' +
       '<g class="kw-grid"><path d="M54.5 4v101M4 54.5h101"/></g>' +
       '<g class="kw-guide">' + guide + "</g>" +
       '<g class="kw-done">' + done + "</g>" +

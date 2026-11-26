@@ -379,7 +379,9 @@ window.RaumeStudy.shared = (function () {
   // Placed through one constructed sheet, never a style attribute.
   var TIP_TARGETS = 'button, a[href], [role="button"], [role="tab"], [role="menuitem"], [role="img"][aria-label], [data-tip]';
   function iconLabel(el) {
-    if (!el || el.disabled) return "";
+    // A surface you draw on (the writing pads) is no glyph: a finger
+    // resting to start a stroke mustn't pop its name over the writing.
+    if (!el || el.disabled || el.hasAttribute("data-no-tip")) return "";
     var text = el.innerText != null ? el.innerText : el.textContent;
     if (String(text || "").trim()) return "";
     if (el.hasAttribute("title")) {
