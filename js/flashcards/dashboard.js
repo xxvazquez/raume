@@ -192,6 +192,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       puzzlesCardHtml(now) +
       gamesCardHtml(now) +
       kanjiCardHtml() +
+      jlptCardHtml() +
       // Nothing missed yet, or today: no card at all -- an empty card saying
       // so is a row of space for no news.
       (foldReview ? ""
@@ -396,12 +397,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // everything. Tables grouped by category, named as Customize names them.
   // Only there when your flashcards span two tables or more.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
+  // A JLPT level is a choice too (its words from every table), grouped
+  // first, above the tables.
   function studyFromHtml() {
-    var tables = sched.studyTables();
-    if (tables.length < 2) return "";
+    var tables = sched.studyTables(), levels = sched.studyLevels ? sched.studyLevels() : [];
+    if (tables.length < 2 && levels.length < 2) return "";
     var tc = window.RaumeStudy.tableCustom;
     var nameOf = function (t) { return (tc && tc.nameOf(t.id)) || t.title; };
-    var current = sched.studyScope(), shown = "All flashcards", groups = {}, order = [];
+    var current = sched.studyScope(), groups = {}, order = [];
+    var shown = /^jlpt:/.test(current || "") ? "N" + current.slice(5) + " words" : "All flashcards";
     tables.forEach(function (t) {
       if (t.id === current) shown = nameOf(t);
       if (!groups[t.category]) { groups[t.category] = []; order.push(t.category); }
@@ -411,11 +415,14 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" +
       '<select class="fc-xw-pick-select" id="fcStudyFrom" aria-label="Study from">' +
       '<option value=""' + (current ? "" : " selected") + ">All flashcards</option>" +
-      order.map(function (cat) {
+      (levels.length < 2 ? "" : '<optgroup label="JLPT level">' + levels.map(function (n) {
+        return '<option value="jlpt:' + n + '"' + (current === "jlpt:" + n ? " selected" : "") + ">N" + n + " words</option>";
+      }).join("") + "</optgroup>") +
+      (tables.length < 2 ? "" : order.map(function (cat) {
         return '<optgroup label="' + esc(cat || "Other") + '">' + groups[cat].map(function (t) {
           return '<option value="' + esc(t.id) + '"' + (t.id === current ? " selected" : "") + ">" + esc(nameOf(t)) + "</option>";
         }).join("") + "</optgroup>";
-      }).join("") + "</select></label>";
+      }).join("")) + "</select></label>";
   }
   // The line beside Study now: what a session holds now, else when the
   // next review is, else that every ring is closed.
@@ -1203,6 +1210,37 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + known + "</b> of " + total + " known</span>" +
       '<button type="button" class="fc-btn" data-dash-go="kanji">' + (known ? "Open Kanji" : "Mark kanji you know") + "</button></div>" +
       progressBarHtml(known, total, known + " of " + total + " kanji known") + "</div>";
+  }
+  // --- Dashboard: JLPT levels ---
+  // Each level's words in the reference and how many of them are Known --
+  // the same Known as the green row wash (marked by you, or every card of
+  // the word remembered three weeks or more). A level the reference has no
+  // words for doesn't show; the card waits for a first known word.
+  function jlptCounts() {
+    var v = window.RaumeStudy.vocab;
+    if (!v || !v.knownWordTest) return null;
+    var isKnown = v.knownWordTest(), by = {};
+    (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
+      if (t.tableClass === "vocab-kanji") return;   // the Kanji card counts those
+      t.rows.forEach(function (r) {
+        var n = Number(r.jlpt);
+        if (!r.id || !(n >= 1 && n <= 5)) return;
+        var c = by[n] || (by[n] = { level: n, known: 0, total: 0 });
+        c.total++;
+        if (isKnown(r.id)) c.known++;
+      });
+    });
+    return [5, 4, 3, 2, 1].filter(function (n) { return by[n]; }).map(function (n) { return by[n]; });
+  }
+  function jlptCardHtml() {
+    var levels = jlptCounts();
+    if (!levels || !levels.some(function (c) { return c.known; })) return "";
+    return '<div class="fc-viz-card fc-viz-wide fc-jlpt-card">' + vizTitle("JLPT levels") +
+      levels.map(function (c) {
+        return '<div class="fc-jlpt-level"><div class="fc-kj-row"><span class="fc-jlpt-name">N' + c.level + "</span>" +
+          '<span class="fc-kj-count"><b>' + c.known + "</b> of " + c.total + " known</span></div>" +
+          progressBarHtml(c.known, c.total, "N" + c.level + ": " + c.known + " of " + c.total + " words known") + "</div>";
+      }).join("") + "</div>";
   }
   // --- Dashboard: Kana ---
   // The Kana trainer's chosen groups: how many cards started (a sage bar,

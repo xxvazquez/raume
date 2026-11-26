@@ -49,6 +49,12 @@ Bundled third-party components (not covered by LICENSE.md or LICENSE-CONTENT.md)
   and those two files alone are distributed under CC BY-SA 3.0
   (http://creativecommons.org/licenses/by-sa/3.0/).
 
+  JLPT levels (the "jlpt" field in data/vocabulary.js) are based on
+  Jonathan Waller's JLPT Resources (http://www.tanos.co.uk/jlpt/), used under
+  Creative Commons Attribution (CC BY), via the yomitan-jlpt-vocab edition of
+  those lists (https://github.com/stephenmk/yomitan-jlpt-vocab); raume
+  adjusts some levels, as described in docs/architecture.md.
+
   audio/*.mp3                Generated with VOICEVOX
                              (https://voicevox.hiroshiba.jp/),
                              voice VOICEVOX:四国めたん

@@ -66,6 +66,7 @@ the grammar it shows.
 | | |
 | --- | --- |
 | **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. Clearing the search puts back the tables you had open. |
+| **JLPT level** | Type **n5** … **n1** as a word of its own for that level's words: **n4** lists them all, **n4 eat** only those matching *eat*. |
 | **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), a verb's *to* is never needed, and any one meaning typed whole is an exact match (*see* finds *to see, to watch* first). Only visible columns are searched, plus romaji. |
 | **+ on a result** | Adds the word to flashcards; it turns into Practice's cards icon (tap again to pause). |
 | **Recent searches** | Tap the empty field for your last eight — tap one to rerun it, **×** removes one, **Clear** all. Only searches you used (Return or a tap on a result) that found something are kept, on this device. |
@@ -86,7 +87,8 @@ the grammar it shows.
 | **Speaker** | Plays a recorded native-voice clip; your own words use the device's voice. |
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
-| **ⓘ on a row** | The row's grammar in one popover — hidden while the English is covered, so it can't give the answer away. |
+| **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |
+| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times) counts as N5. Sentences, place names and dishes the lists leave out have none. |
 
 The ⓘ lists:
 
@@ -120,6 +122,7 @@ dot on it means something is off its default.
 | Option | Does |
 | --- | --- |
 | **Japanese / Furigana / English** | Hide a column (never both text columns). |
+| **JLPT level** | **All**, or one level's words only. Tables and topics without any of them step aside, and search keeps to that level too. |
 | **Cover answers** | Blanks the English (and the kanji readings); tap a row to reveal it. |
 | **Show polite** | Switches verbs to 〜ます. Only while the Verbs table is open. |
 | **Highlight progress** | The Known green and Tricky amber washes, on or off together. |
@@ -317,7 +320,7 @@ kept. **Undo** takes a pause back.
 | Card | Shows |
 | --- | --- |
 | **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of your daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
-| **Study from** | Once your cards span two tables: **All flashcards** or one table. Study now follows it; everything else still counts all cards |
+| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one level's words (**N5 words**…) or one table. Study now follows it; everything else still counts all cards |
 | **Streak** | Days in a row, this week as seven dots, and your best |
 | **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under your target) |
 | **Awards** | The newest six and the nearest to go; **Show all** for the rest |
@@ -326,7 +329,9 @@ kept. **Undo** takes a pause back.
 Under **Details**: card progress, reviews this week, due next 7 days,
 **Trends** (last 90 days against your year — reviews a day, recall, study
 days a week — after 120 days of history), Kana, Puzzles and Games (results,
-streak, the last three, **See stats**), Kanji, **Missed today**, **Leeches**
+streak, the last three, **See stats**), Kanji, **JLPT levels** (each
+level's words in the reference and how many are Known, once one is),
+**Missed today**, **Leeches**
 (forgotten 8+ times; *Pause* or *Keep*) and **Words to review**.
 
 ### Kana trainer

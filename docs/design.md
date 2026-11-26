@@ -428,6 +428,10 @@ and Help.
   hidden) as data and for screen readers, and one **ⓘ** (`.row-info-btn`)
   beside the hide eye opens a popover (`.role-pop-list`) with a line per note,
   each led by its own tinted glyph. The English keeps the row's full width.
+  The word's JLPT level closes the list as a grey "JLPT N4" line, so every
+  levelled row has an ⓘ — iOS's "details of this item" on every list row,
+  not a level badge painted on each one. The level is a filter (Options ›
+  JLPT level, the search's `n4`), never a colour.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--seg-thumb-ink`, `--seg-thumb-shadow`, `--tab-select`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.fc-manage-filters`, the Flashcards tabs, the

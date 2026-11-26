@@ -172,7 +172,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const cl = document.body.classList;
     const pt = document.getElementById('politeToggle');
     const changed = cl.contains('hide-japanese') || cl.contains('hide-furigana') || cl.contains('hide-english')
-      || cl.contains('selftest-mode') || cl.contains('no-progress-hl') || (cl.contains('show-polite') && !!pt && !pt.hidden);
+      || cl.contains('selftest-mode') || cl.contains('no-progress-hl') || (cl.contains('show-polite') && !!pt && !pt.hidden)
+      || !!document.body.dataset.jlptFilter;
     dot.hidden = !changed;
     const btn = document.getElementById('optionsBtn');
     if (btn) btn.setAttribute('aria-label', changed ? 'Options (some changed)' : 'Options');
@@ -417,6 +418,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return !!(mastered || masteredVocab(activeFlashcards()))[id];
   }
   vocab.isWordKnown = function (id) { return wordKnown(id); };
+  // For counting many words at once (Dashboard › JLPT levels): the cards
+  // are read once, not once per word.
+  vocab.knownWordTest = function () {
+    const mastered = masteredVocab(activeFlashcards());
+    return function (id) { return wordKnown(id, mastered); };
+  };
   function refreshKnownRows() {
     const cards = activeFlashcards();
     const mastered = masteredVocab(cards), tricky = trickyVocab(cards);
@@ -1472,6 +1479,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function runSearch() {
       // An iPhone keyboard types a curly apostrophe (o’clock); the tables use '.
       const q = input.value.trim().replace(/[‘’ʼ`´]/g, "'").toLocaleLowerCase();
+      // "n4" in the query, as a word of its own, is a level token: results
+      // are that JLPT level's rows -- every one of them on its own ("n5"),
+      // or the ones matching the rest ("n5 eat"). mq is the rest, the text
+      // actually matched; q still decides whether a search is running.
+      const tok = q.match(/(?:^|\s)n([1-5])(?=\s|$)/);
+      const lvTok = tok ? tok[1] : '';
+      const mq = lvTok ? q.replace(tok[0], ' ').trim() : q;
+      // Options › Level narrows results the same way; a typed token wins.
+      const lv = lvTok || document.body.dataset.jlptFilter || '';
       box.classList.toggle('has-value', Boolean(q));
       // Shows each row's add-to-flashcards toggle (css/site.css) only while
       // searching; its plus/check state is refreshed as the search starts,
@@ -1493,22 +1509,22 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       let totalRows = 0, totalTables = 0;
       const sectionOrder = [];
       const kr = window.RaumeStudy.kanaRomaji;
-      const latin = /^[a-z0-9 '\-āīūēōâîûêô~]+$/.test(q);
+      const latin = /^[a-z0-9 '\-āīūēōâîûêô~]+$/.test(mq);
       const qx = {
-        expanded: expandMacronsForSearch(q),
+        expanded: expandMacronsForSearch(mq),
         // Folded romaji, from three letters on (one or two letters folded
         // would match far too much).
-        folded: latin && q.replace(/[\s'-]/g, '').length >= 3 ? kr.foldRomaji(q) : '',
+        folded: latin && mq.replace(/[\s'-]/g, '').length >= 3 ? kr.foldRomaji(mq) : '',
         // Folding changed more than case, breaks and macrons (see rankRow).
-        foldedWhole: latin && kr.foldRomaji(q) !== q.replace(/[\s'-]/g, '')
+        foldedWhole: latin && kr.foldRomaji(mq) !== mq.replace(/[\s'-]/g, '')
           .replace(/[āâ]/g, 'a').replace(/[īî]/g, 'i').replace(/[ūû]/g, 'u').replace(/[ēê]/g, 'e').replace(/[ōô]/g, 'o'),
-        kana: /[\u3040-\u30ff]/.test(q) ? toHiragana(q) : ''
+        kana: /[\u3040-\u30ff]/.test(mq) ? toHiragana(mq) : ''
       };
       // A single Latin letter only matches words that start with it: "t"
       // appearing anywhere matches most of the page, which is noise to read
       // and hundreds of rows to lay out on a phone. One kana or kanji (水)
       // still matches anywhere -- it's a real search on its own.
-      const prefixOnly = q.length === 1 && /[a-z0-9]/.test(q);
+      const prefixOnly = mq.length === 1 && /[a-z0-9]/.test(mq);
       const hide = { japanese: isHidden('japanese'), furigana: isHidden('furigana'), english: isHidden('english') };
 
       highlighted.forEach(clearHighlights);
@@ -1550,12 +1566,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const ranked = [];
         [...tbody.rows].sort(byOriginalIndex).forEach(row => {
           const info = infoFor(row);
-          const hit = userHidden ? { rank: null } : rankRow(info, q, qx, prefixOnly, hide);
+          const hit = userHidden || (lv && row.dataset.jlpt !== lv) ? { rank: null }
+            : mq ? rankRow(info, mq, qx, prefixOnly, hide) : { rank: 0 };
           const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
           r.row.classList.toggle('search-hidden', !r.match);
           if (r.match) {
             ranked.push({ row: r.row, rank: r.rank, index: Number(r.row.dataset.originalIndex) });
-            highlightRow(r.row, r.info, r.hit, q);
+            if (mq) highlightRow(r.row, r.info, r.hit, mq);
             sectionRows++;
             if (sectionBest === null || r.rank < sectionBest) sectionBest = r.rank;
           }
@@ -1595,6 +1612,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         placeInOrder(vocabHost, vocabOrder, children);
       }
     }
+    vocab.refreshSearch = function () { if (input.value.trim()) runSearch(); };
     vocab.clearSearchQuery = function () {
       if (input.value) { input.value = ''; runSearch(); }
     };
@@ -2300,6 +2318,58 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     updatePoliteVisibility();
 
+    // Options › JLPT level: All, or one level's rows only. The rows hide by
+    // CSS (body[data-jlpt-filter]); here a table left with none of that
+    // level's rows goes too, and a Vocabulary category header with none of
+    // its tables left, its count following what's still shown. Kept on this
+    // device like the other Options.
+    const LEVEL_KEY = 'raume-jlpt-filter';
+    const levelSelect = document.getElementById('levelSelect');
+    const levelVal = document.getElementById('levelPickVal');
+    function markLevelEmpty() {
+      const lv = document.body.dataset.jlptFilter || '';
+      const host = document.getElementById('vocabulary');
+      if (!host) return;
+      const shownByCat = {};
+      host.querySelectorAll('.table-section').forEach(function (sec) {
+        const empty = !!lv && !sec.querySelector('tbody tr[data-jlpt="' + lv + '"]');
+        sec.classList.toggle('level-empty', empty);
+        if (sec.dataset.section !== 'vocabulary') return;
+        const cat = sec.dataset.category || '';
+        shownByCat[cat] = (shownByCat[cat] || 0) + (empty || sec.classList.contains('user-hidden') ? 0 : 1);
+      });
+      host.querySelectorAll('.cat-heading[data-section="vocabulary"]').forEach(function (h) {
+        const n = shownByCat[h.dataset.category] || 0;
+        h.classList.toggle('level-empty', !!lv && n === 0);
+        const count = h.querySelector('.cat-heading-count');
+        if (count && !h.classList.contains('user-hidden')) { count.textContent = n; count.setAttribute('aria-label', n + ' tables'); }
+      });
+      // The Tables directory leaves them out too: a jump to nothing.
+      const emptyIds = {};
+      host.querySelectorAll('.table-section.level-empty').forEach(function (sec) { emptyIds[sec.dataset.table] = true; });
+      document.querySelectorAll('#tableIndex a[data-target]').forEach(function (a) { a.classList.toggle('level-empty', !!emptyIds[a.dataset.target]); });
+      document.querySelectorAll('#tableIndex .tindex-cat-group').forEach(function (g) {
+        g.classList.toggle('level-empty', !g.querySelector('a[data-target]:not(.level-empty)'));
+      });
+    }
+    vocab.markLevelEmpty = markLevelEmpty;
+    function applyLevelFilter(v) {
+      v = /^[1-5]$/.test(String(v)) ? String(v) : '';
+      if (v) document.body.dataset.jlptFilter = v; else delete document.body.dataset.jlptFilter;
+      if (levelSelect) levelSelect.value = v;
+      if (levelVal) levelVal.textContent = v ? 'N' + v : 'All';
+      try { if (v) localStorage.setItem(LEVEL_KEY, v); else localStorage.removeItem(LEVEL_KEY); } catch (e) {}
+      markLevelEmpty();
+      updateOptionsDot();
+      if (vocab.refreshSearch) vocab.refreshSearch();
+    }
+    if (levelSelect) {
+      let startLevel = '';
+      try { startLevel = localStorage.getItem(LEVEL_KEY) || ''; } catch (e) {}
+      applyLevelFilter(startLevel);
+      levelSelect.addEventListener('change', function () { applyLevelFilter(levelSelect.value); });
+    }
+
     // Highlight progress: the known-green / tricky-amber row washes, on by
     // default. Off hides both at once (body.no-progress-hl) for a clean
     // table; rows keep their classes, so switching back on is instant.
@@ -2412,12 +2482,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // The row's ⓘ: every grammar note on that row in one popover -- a line
     // per badge (verb group, adjective type, each particle), each led by the
     // badge's own tinted glyph. A plain い/な badge has no note of its own, so
-    // its line just names the type.
+    // its line just names the type. The word's JLPT level closes the list.
     function openInfoPop(btn) {
       closePop();
       if (popBlocked()) return;
       const row = btn.closest('tr');
-      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge], .row-badges [data-pattern], .row-badges [data-forms]')] : [];
+      const badges = row ? [...row.querySelectorAll('.row-badges [data-badge], .row-badges [data-pattern], .row-badges [data-forms], .row-badges [data-level]')] : [];
       if (!badges.length) return;
       pop = document.createElement('div');
       pop.className = 'role-pop role-pop-list';
@@ -2427,6 +2497,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const line = document.createElement('div');
         line.className = 'role-pop-line';
         if (b.dataset.pattern) { line.textContent = b.dataset.pattern; pop.appendChild(line); return; } // a sentence's pattern: words only
+        if (b.dataset.level) {
+          line.className = 'role-pop-line role-pop-level';
+          line.lang = 'en';
+          line.textContent = 'JLPT N' + b.dataset.level;
+          pop.appendChild(line);
+          return;
+        }
         if (b.dataset.forms) {
           // A verb's forms (render.js verbForms): a quiet header, then one
           // line each -- the form, then what it is.

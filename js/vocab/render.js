@@ -394,7 +394,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (js/vocab/interactions.js openInfoPop). The English keeps the width.
   var INFO_ICON = '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg>';
   function rowInfoButton() {
-    return '<button type="button" class="row-info-btn" aria-label="Grammar notes" aria-expanded="false">' + INFO_ICON + '</button>';
+    return '<button type="button" class="row-info-btn" aria-label="Details" aria-expanded="false">' + INFO_ICON + '</button>';
   }
   function rowActions(vocabId, hasInfo) {
     return '<span class="row-actions">' + flashcardToggle(vocabId) + (hasInfo ? rowInfoButton() : '') + rowHideButton() + '</span>';
@@ -436,8 +436,28 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // this -- both render as Japanese (with a romaji reveal next to the speaker
   // button) + English, two columns, no separate Romaji column.
   function wordRow(row) {
-    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
-    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row) + patternBadge(row), row.enNote) + '</tr>';
+    var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + (row.irregular ? ' class="irregular-row">' : '>');
+    return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row) + patternBadge(row) + levelNote(row), row.enNote) + '</tr>';
+  }
+  // row.jlpt -- the word's JLPT level (5 = N5 ... 1 = N1), from the widely
+  // used Tanos / Waller lists, with an N5 class's own basics (greetings,
+  // counters, numbers, dates) counted as N5. Not every row has one:
+  // sentences, place names and dishes the lists leave out stay unlevelled.
+  // On the row it's data for the Level filter and the search's "n4"; to the
+  // eye it's the last line of the row's ⓘ -- every levelled row has one,
+  // like the ⓘ on every row of an iOS list ("details of this item").
+  function jlptLevel(row) {
+    var n = Number(row && row.jlpt);
+    return n >= 1 && n <= 5 ? n : 0;
+  }
+  vocab.jlptLevel = jlptLevel;
+  function jlptAttr(row) {
+    var n = jlptLevel(row);
+    return n ? ' data-jlpt="' + n + '"' : '';
+  }
+  function levelNote(row) {
+    var n = jlptLevel(row);
+    return n ? '<span class="level-note" data-level="' + n + '"><span class="visually-hidden">(JLPT N' + n + ')</span></span>' : '';
   }
   // row.pattern -- the grammar a sentence row shows ("な-adjective
   // + な + noun"). An explanation, so it waits behind the row's ⓘ with the
@@ -451,7 +471,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
     var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
-    return '<tr data-vocab-id="' + esc(row.id || '') + '"><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row) + verbFormsNote(row), row.enNote) + '</tr>';
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + '><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row) + verbFormsNote(row) + levelNote(row), row.enNote) + '</tr>';
   }
   // A kanji row (the Kanji section): drawn as a tile in a grid -- the
   // character large, its meaning small under it (css/site.css .vocab-kanji).
@@ -471,7 +491,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var on = (row.on || []).map(kanjiReadingHtml).join(sep), kun = (row.kun || []).map(kanjiReadingHtml).join(sep);
     var readings = (on ? '<span class="kanji-on">' + on + '</span>' : '') + (kun ? '<span class="kanji-kun">' + kun + '</span>' : '');
     var known = window.RaumeStudy.knownKanji && window.RaumeStudy.knownKanji.isKnown(row.id);
-    return '<tr data-vocab-id="' + esc(row.id || '') + '" class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
+    return '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + ' class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
       '<td class="jp" lang="ja"><div class="kanji-stack"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
       '<span class="kanji-readings furigana">' + readings + '</span></div></td>' +
       meaningCell(row.english, row.id, '', '') + '</tr>';
@@ -1126,6 +1146,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // keeps its current-table mark).
       if (indexHtml !== lastIndexHtml) { indexHost.innerHTML = indexHtml; lastIndexHtml = indexHtml; }
     }
+    if (vocab.markLevelEmpty) vocab.markLevelEmpty();   // Options › JLPT level
   }
   var lastIndexHtml = null;
   vocab.reflowLayout = reflowLayout;

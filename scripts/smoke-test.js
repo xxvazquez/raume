@@ -630,7 +630,7 @@ async function main() {
     const lines = pop ? pop.querySelectorAll(".role-pop-line").length : 0;
     const expanded = btn.getAttribute("aria-expanded") === "true";
     btn.click();
-    return !!btn && !!hiddenRule && lines === row.querySelectorAll(".row-badges [data-badge]").length && expanded
+    return !!btn && !!hiddenRule && lines === row.querySelectorAll(".row-badges [data-badge], .row-badges [data-level]").length && expanded
       && !document.querySelector(".role-pop-list");
   })());
   check("a regular adjective's usage note (多い) keeps the plain badge and shows as its line in the ⓘ popover", (() => {
@@ -650,6 +650,53 @@ async function main() {
     const badge = row && row.querySelector(".verb-badge");
     return !!badge && badge.hasAttribute("data-usage") && !badge.classList.contains("verb-badge-irr")
       && /テニスをする/.test(badge.dataset.role) && /u-verb/.test(badge.dataset.role);
+  })());
+  check("a levelled word with no grammar still gets an ⓘ, naming its JLPT level", (() => {
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v1069"]');
+    const btn = row && row.querySelector(".row-info-btn");
+    if (!btn || row.dataset.jlpt !== "5") return false;
+    btn.click();
+    const pop = document.querySelector(".role-pop-list");
+    const shown = !!pop && pop.querySelector(".role-pop-level") && pop.textContent.trim() === "JLPT N5";
+    btn.click();
+    return shown && btn.getAttribute("aria-label") === "Details";
+  })());
+  check("Options › JLPT level shows one level: tables without it go, the dot lights, and search keeps to it", (() => {
+    const sel = document.getElementById("levelSelect");
+    if (!sel) return false;
+    sel.value = "4";
+    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    const secs = [...document.querySelectorAll("#vocabulary .table-section")];
+    const on = document.body.dataset.jlptFilter === "4" && secs.some(s => s.classList.contains("level-empty"))
+      && secs.every(s => s.classList.contains("level-empty") === !s.querySelector('tbody tr[data-jlpt="4"]'))
+      && !document.getElementById("optionsDot").hidden && document.getElementById("levelPickVal").textContent === "N4"
+      && !![...document.querySelectorAll("#vocabulary .table-section")].find(s => !s.classList.contains("level-empty"));
+    const search = document.getElementById("tableSearch");
+    search.value = "to";
+    search.dispatchEvent(new window.Event("input"));
+    const hits = [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
+    const kept = hits.length > 0 && hits.every(r => r.dataset.jlpt === "4");
+    search.value = "";
+    search.dispatchEvent(new window.Event("input"));
+    sel.value = "";
+    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
+    const off = !document.body.dataset.jlptFilter && !document.querySelector("#vocabulary .level-empty") && document.getElementById("optionsDot").hidden;
+    return on && kept && off;
+  })());
+  check("typing n3 in search lists that level's words, alone or with more text", (() => {
+    const search = document.getElementById("tableSearch");
+    const shown = () => [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
+    search.value = "n3";
+    search.dispatchEvent(new window.Event("input"));
+    const all = shown();
+    const allOk = all.length > 3 && all.every(r => r.dataset.jlpt === "3");
+    search.value = "n5 cat";
+    search.dispatchEvent(new window.Event("input"));
+    const some = shown();
+    const someOk = some.length > 0 && some.every(r => r.dataset.jlpt === "5") && some.some(r => r.dataset.vocabId === "v1070");
+    search.value = "";
+    search.dispatchEvent(new window.Event("input"));
+    return allOk && someOk;
   })());
   check("rows with nothing to explain get no ⓘ", (() => {
     const plain = [...document.querySelectorAll("#vocabulary .vocab tbody tr")].find(r => !r.querySelector(".row-badges"));
@@ -2482,7 +2529,7 @@ async function main() {
   // add/remove); it's back only as a search-result affordance, hidden at rest.
   const rowToggle = firstRowFc.querySelector(".fc-toggle-btn");
   check("each row has an add toggle keyed to its vocab id, in the row-action cluster before the hide button", !!rowToggle && rowToggle.dataset.vocabId === firstRowFc.dataset.vocabId
-    && [...firstRowFc.querySelector(".row-actions").children].map(c => c.className.split(" ")[0]).join(",") === "fc-toggle-btn,row-hide-btn");
+    && /^fc-toggle-btn,(row-info-btn,)?row-hide-btn$/.test([...firstRowFc.querySelector(".row-actions").children].map(c => c.className.split(" ")[0]).join(",")));
   check("...hidden while nothing is being searched", window.getComputedStyle(rowToggle).display === "none");
   const searchBox = document.getElementById("tableSearch");
   searchBox.value = "cooking oil";
@@ -3102,6 +3149,23 @@ async function main() {
     pick().dispatchEvent(new window.Event("change", { bubbles: true }));
     await flush();
     check("All flashcards clears it", fcNs.store.studyFrom() === null && pick().value === "");
+    await fcNs.dataOps.addVocabs(["v1406"]); // すごい, an N4 word beside the N5 counters
+    fcNs.render();
+    await flush();
+    const n4 = pick() && pick().querySelector('option[value="jlpt:4"]');
+    check("Study from offers each JLPT level your cards span", !!n4 && !!pick().querySelector('option[value="jlpt:5"]')
+      && n4.parentElement.getAttribute("label") === "JLPT level");
+    pick().value = "jlpt:4";
+    pick().dispatchEvent(new window.Event("change", { bubbles: true }));
+    await flush();
+    const lvQueue = fcNs.scheduling.buildQueue(new Date());
+    const lvIndex = fcNs.vocabIndex.getVocabIndex(), lvCards = fcNs.store.getCache().cards;
+    check("...and picking N4 builds Study now from N4 words alone", fcNs.scheduling.studyScope() === "jlpt:4"
+      && /N4 words/.test(pick().closest(".fc-study-from").textContent)
+      && lvQueue.length > 0 && lvQueue.every(id => lvIndex[lvCards[id].vocabId].jlpt === 4));
+    pick().value = "";
+    pick().dispatchEvent(new window.Event("change", { bubbles: true }));
+    await flush();
   }
 
   console.log("Flashcards: review session bookends");
@@ -5621,7 +5685,7 @@ async function main() {
     if (document.getElementById("fcBack")) document.getElementById("fcBack").click(); // last screen left open was Help
     document.querySelector('.fc-tab[data-tab="dashboard"]').click();
     const totalTileAgain = document.querySelector(".fc-stat-tile:nth-child(1) .fc-stat-value").textContent;
-    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "20"); // 12 + the two Study from words (4 cards each)
+    check("...the in-memory fallback keeps the session's guest data reachable regardless", totalTileAgain === "24"); // 12 + the three Study from words (4 cards each)
   }
   document.querySelector('#siteNav .site-nav-link[data-section="vocabulary"]').click();
 

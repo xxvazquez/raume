@@ -249,7 +249,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (table) {
       table.rows.forEach(function (row) {
         if (!row.id) return;
-        var entry = { vocabId: row.id, category: table.category || "", tableTitle: table.title, tableId: table.id };
+        var entry = { vocabId: row.id, category: table.category || "", tableTitle: table.title, tableId: table.id, jlpt: Number(row.jlpt) || 0 };
         var jpHtmlFn = window.RaumeStudy.vocab.jpSegmentsHtml || function () { return ""; };
         var jpReadingFn = window.RaumeStudy.vocab.jpReadingOf || function () { return ""; };
         var speakBtnFn = window.RaumeStudy.vocab.speakButtonHtml || function () { return ""; };

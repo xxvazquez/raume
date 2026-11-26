@@ -132,6 +132,7 @@
             <button type="button" class="opt-row opt-switch active" data-col="japanese" aria-pressed="true">Japanese</button>
             <button type="button" class="opt-row opt-switch active" data-col="furigana" aria-pressed="true">Furigana</button>
             <button type="button" class="opt-row opt-switch active" data-col="english" aria-pressed="true">English</button>
+            <label class="opt-row opt-pick"><span class="opt-pick-label">JLPT level</span><span class="fc-xw-menu-val"><span id="levelPickVal">All</span><svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg></span><select class="fc-xw-pick-select" id="levelSelect" aria-label="JLPT level"><option value="">All</option><option value="5">N5</option><option value="4">N4</option><option value="3">N3</option><option value="2">N2</option><option value="1">N1</option></select></label>
           </div>
         </div>
         <div class="opt-group">
@@ -154,7 +155,7 @@
           <div class="opt-list">
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Play aloud</span><span class="opt-legend-sub">Hear the word in Japanese</span></span></div>
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Hide row</span><span class="opt-legend-sub">Show all brings it back</span></span></div>
-            <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Grammar</span><span class="opt-legend-sub">Verb group, adjective type, particles</span></span></div>
+            <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Details</span><span class="opt-legend-sub">Verb group, adjective type, particles, JLPT level</span></span></div>
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Add to flashcards</span><span class="opt-legend-sub">On search results</span></span></div>
             <div class="opt-row opt-legend"><svg viewBox="0 0 18 18" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.45"/><circle cx="9" cy="9" r="1.45"/><circle cx="14" cy="9" r="1.45"/></svg><span class="opt-legend-tx"><span class="opt-legend-name">Table menu</span><span class="opt-legend-sub">On an open table: icon, add to flashcards, hide, print</span></span></div>
           </div>
@@ -191,6 +192,7 @@
       <summary><span class="help-tile" data-tile="blue" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M12.2 12.2 16 16"/></svg></span><span class="help-sum"><h3>Finding words</h3><span class="help-sub">Search, tables, sort</span></span></summary>
       <ul class="help-rows">
         <li><span class="help-term">Search</span><span class="help-desc">Japanese, kana, romaji or English, every section at once. Press <kbd>/</kbd> to jump in.</span></li>
+        <li><span class="help-term">n5 … n1</span><span class="help-desc">Typed in search: that JLPT level’s words. Add a word to narrow it — n4 eat.</span></li>
         <li><span class="help-term">Recent searches</span><span class="help-desc">Tap the empty field for your last few; × removes one, Clear removes all.</span></li>
         <li><span class="help-term">+ on a result</span><span class="help-desc">Adds the word to your flashcards; it turns into Practice's cards icon. Tap that again to pause it.</span></li>
         <li><span class="help-term">Tables</span><span class="help-desc">Lists every table in the section — tap one to go there.</span></li>
@@ -207,7 +209,7 @@
         <li><span class="help-term">Grey note</span><span class="help-desc">Context after a meaning, like “before a noun” — never part of the answer.</span></li>
         <li><span class="help-term">Speaker</span><span class="help-desc">Plays the word aloud.</span></li>
         <li><span class="help-term">Particles</span><span class="help-desc">Blue and bold, like <span class="particle">は</span> — tap one for how it’s read (は is “wa”).</span></li>
-        <li><span class="help-term">ⓘ on a row</span><span class="help-desc">Its grammar: い / な, verb group, the particles it takes, a verb’s forms.</span></li>
+        <li><span class="help-term">ⓘ on a row</span><span class="help-desc">Its grammar — い / な, verb group, the particles it takes, a verb’s forms — and its JLPT level.</span></li>
         <li><span class="help-term">Kanji</span><span class="help-desc">Tap one for its readings, strokes, radical, the words that use it and Add to flashcards.</span></li>
         <li><span class="help-term">Stroke order</span><span class="help-desc">The kanji draws itself in its sheet; Replay draws it again.</span></li>
         <li><span class="help-term">Write it</span><span class="help-desc">Under the drawing: write the kanji stroke by stroke on a pad.</span></li>
@@ -215,9 +217,10 @@
       </ul>
     </details>
     <details class="help-group">
-      <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, cover, polite, highlight, print</span></span></summary>
+      <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, level, cover, polite, highlight, print</span></span></summary>
       <ul class="help-rows">
         <li><span class="help-term">Japanese · Furigana · English</span><span class="help-desc">Switch any of them off. A dot on Options means something is changed.</span></li>
+        <li><span class="help-term">JLPT level</span><span class="help-desc">Show one level’s words only, N5 to N1; search keeps to it too.</span></li>
         <li><span class="help-term">Cover answers</span><span class="help-desc">Blanks the English — tap a row to check yourself.</span></li>
         <li><span class="help-term">Show polite</span><span class="help-desc">Verb tables switch to the 〜ます form.</span></li>
         <li><span class="help-term">Highlight progress</span><span class="help-desc">The green of known words and amber of tricky ones, on or off.</span></li>

@@ -134,14 +134,25 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     return (window.RaumeStudy.data.vocabularyTables || []).filter(function (t) { return has[String(t.id)]; })
       .map(function (t) { return { id: String(t.id), title: t.title, category: t.category || "" }; });
   }
+  // Or one JLPT level's words, across every table ("jlpt:4"): the levels
+  // your cards in study have, easiest first.
+  function studyLevels() {
+    var index = vidx.getVocabIndex(), has = {};
+    studyableCards().forEach(function (card) { var n = index[card.vocabId].jlpt; if (n) has[n] = true; });
+    return [5, 4, 3, 2, 1].filter(function (n) { return has[n]; });
+  }
   function studyScope() {
     var id = store.studyFrom();
-    return id && studyTables().some(function (t) { return t.id === id; }) ? id : null;
+    if (!id) return null;
+    var m = /^jlpt:([1-5])$/.exec(id);
+    if (m) return studyLevels().indexOf(Number(m[1])) !== -1 ? id : null;
+    return studyTables().some(function (t) { return t.id === id; }) ? id : null;
   }
   function scopedCards() {
     var cards = studyableCards(), id = studyScope();
     if (!id) return cards;
-    var index = vidx.getVocabIndex();
+    var index = vidx.getVocabIndex(), m = /^jlpt:([1-5])$/.exec(id);
+    if (m) return cards.filter(function (card) { return index[card.vocabId].jlpt === Number(m[1]); });
     return cards.filter(function (card) { return String(index[card.vocabId].tableId) === id; });
   }
   // Leeches: words you keep forgetting. A card "lapses" each time a card you'd
@@ -328,7 +339,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     retrievabilityOf: retrievabilityOf, formatInterval: formatInterval,
     fsrsRowFields: fsrsRowFields,
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
-    studyTables: studyTables, studyScope: studyScope, scopedCards: scopedCards,
+    studyTables: studyTables, studyLevels: studyLevels, studyScope: studyScope, scopedCards: scopedCards,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
     readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay,

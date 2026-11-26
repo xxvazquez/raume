@@ -192,6 +192,9 @@ flowchart LR
   feeds `readyToStudy`, `buildQueue` and `introducibleCount`; the rings,
   stats and Library still read everything. `studyScope()` treats a table with
   nothing left in study as no pick, so a stale id reads as All flashcards.
+  It can also hold `jlpt:5` … `jlpt:1` — one JLPT level's words across every
+  table (`studyLevels()` lists the levels your cards span; the vocab index
+  carries each entry's `jlpt`).
 
 ### Class notes
 
@@ -627,6 +630,17 @@ row): an `adj: "i"` reading must end in い; a `な`-adjective whose reading end
 shipping a wrong badge. An optional `usageNote` (多い, 古い, 遊ぶ) is a usage trap on a
 regular adjective or verb — on a word it needs an `adj`; it keeps the plain
 badge and shows in the ⓘ popover.
+
+An optional `jlpt` (5 = N5 … 1 = N1) is the word's JLPT level, assigned from
+the Tanos / Waller lists (via the open `yomitan-jlpt-vocab` data, matched by
+writing, then by reading + meaning), with an N5 class's basics those lists
+file higher or leave out — greetings, counters, numbers, dates, times, X人 /
+X語 — set to 5 by hand; every N5 kanji row is 5. Sentences, proper nouns
+and dishes outside the lists carry none. Rows render it as `data-jlpt` (the
+Options › JLPT level filter: `body[data-jlpt-filter]` in CSS, `.level-empty`
+on tables / headings / directory links left with none; the search's `n4`
+token) and a `.level-note` the ⓘ reads. The filter is per device
+(`raume-jlpt-filter`).
 
 `english` holds only what a learner types; context for it goes in an optional
 `enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note follows
