@@ -174,7 +174,7 @@ site). Needs an account.
 
 **Writing a lesson note.** A lesson file builds its sections from the kit's
 components and calls `render()` with the lesson's date, which names the note
-("Sat, Nov 21st 2026"): `python3 private-notes/2026-11-21.py`. The kit checks
+("Sat 21 Nov 2026"): `python3 private-notes/2026-11-21.py`. The kit checks
 furigana and romaji and lists each word once. A class note (Sakura or WSJJ)
 has no word lists — the kit writes the lesson's words to a `.csv` beside it
 for **Import a list**: every word into your Sakura table, only words raume

@@ -316,15 +316,29 @@ window.RaumeStudy.notes = (function () {
   function isKitOriginal(doc) {
     return !doc.querySelector("article.rn") && !!doc.querySelector("main.page .st .jp") && !!doc.querySelector(".tb-group [data-pref]");
   }
-  // 2026-11-21 -> "Sat, Nov 21st 2026" (scripts/note_kit.py lesson_name).
+  // 2026-11-21 -> "Sat 21 Nov 2026" (scripts/note_kit.py lesson_name):
+  // the name a lesson note is saved under.
+  var WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function lessonName(iso) {
+    var d = dateOf(iso);
+    return d ? WD[d.getDay()] + " " + d.getDate() + " " + MO[d.getMonth()] + " " + d.getFullYear() : "Lesson";
+  }
+  // Notes saved before 2026-11-26 were named "Sat, Nov 21st 2026".
+  function oldLessonName(iso) {
     var d = dateOf(iso);
     if (!d) return "Lesson";
     var n = d.getDate(), m = n % 100;
     var suffix = m >= 11 && m <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[n % 10] || "th";
-    var wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
-    var mo = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()];
-    return wd + ", " + mo + " " + n + suffix + " " + d.getFullYear();
+    return WD[d.getDay()] + ", " + MO[d.getMonth()] + " " + n + suffix + " " + d.getFullYear();
+  }
+  // A note still called by its date, under either name.
+  function isLessonTitle(note) { return note.title === lessonName(note.note_date) || note.title === oldLessonName(note.note_date); }
+  // What a note is shown as: one called by its date shows the date as the
+  // device writes it, as iOS does ("Sat 21 Nov 2026", or "Sat, Nov 21, 2026"
+  // on a US iPhone) -- never "21st". A name of your own shows as it is.
+  function titleOf(note) {
+    var d = isLessonTitle(note) && dateOf(note.note_date);
+    return d ? d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : note.title;
   }
   function fromKit(doc) {
     var main = doc.querySelector("main.page");
@@ -940,7 +954,7 @@ window.RaumeStudy.notes = (function () {
       var rows = (notes || []).slice().sort(byDate).map(function (n) {
         var rec = byId[n.id], idx = rec && rec.html != null ? noteIndex(rec) : { units: [], topic: "" };
         var found = idx.units.filter(test);
-        var named = test({ textContent: n.title + " " + idx.topic, querySelectorAll: function () { return []; } });
+        var named = test({ textContent: titleOf(n) + " " + n.title + " " + idx.topic, querySelectorAll: function () { return []; } });
         return found.length || named ? { n: n, found: found, topic: idx.topic } : null;
       }).filter(Boolean);
       res.hidden = false;
@@ -949,7 +963,7 @@ window.RaumeStudy.notes = (function () {
           '<ul class="notes-card">' + rows.map(function (r) {
             var sub = r.found.length ? snippet(r.found[0]) + (r.found.length > 1 ? " — and " + (r.found.length - 1) + " more" : "") : (r.topic || shortDate(r.n.note_date));
             return '<li><button type="button" class="notes-row" data-note="' + esc(r.n.id) + '" data-find="1">' + noteTile(r.n) +
-              '<span class="notes-row-tx"><span class="notes-row-title">' + esc(r.n.title) + "</span>" +
+              '<span class="notes-row-tx"><span class="notes-row-title">' + esc(titleOf(r.n)) + "</span>" +
               '<span class="notes-row-sub" lang="ja">' + esc(sub) + "</span></span></button></li>";
           }).join("") + "</ul>"
         : '<p class="notes-filter-empty">No notes have “' + esc(q.trim()) + "”.</p>";
@@ -1325,9 +1339,9 @@ window.RaumeStudy.notes = (function () {
       // where you were reading it.
       var h1 = openId === note.id && hostEl && hostEl.querySelector(".notes-title-tx");
       if (!h1) { rerender(); return; }
-      h1.textContent = note.title;
+      h1.textContent = titleOf(note);
       var tb = hostEl.querySelector("#notesTitle");
-      if (tb) tb.setAttribute("aria-label", "Rename “" + note.title + "”");
+      if (tb) tb.setAttribute("aria-label", "Rename “" + titleOf(note) + "”");
       var when = hostEl.querySelector(".notes-reader-date");
       if (when) when.innerHTML = readerMetaHtml(note);
       hostEl.querySelectorAll("[data-note-mark]").forEach(function (b) {
@@ -1340,8 +1354,8 @@ window.RaumeStudy.notes = (function () {
   }
   function rename(note) {
     fieldSheet({
-      title: "Rename note", label: "Name", value: note.title, confirm: "Rename",
-      onConfirm: function (v) { if (v !== note.title) patch(note, { title: v.slice(0, 200) }); }
+      title: "Rename note", label: "Name", value: titleOf(note), confirm: "Rename",
+      onConfirm: function (v) { if (v !== titleOf(note)) patch(note, { title: v.slice(0, 200) }); }
     });
   }
   function redate(note) {
@@ -1381,7 +1395,7 @@ window.RaumeStudy.notes = (function () {
   }
   function remove(note) {
     shared.confirmSheet({
-      title: "Delete “" + note.title + "”?",
+      title: "Delete “" + titleOf(note) + "”?",
       message: "It’s removed from your account on every device. This can’t be undone.",
       confirm: "Delete Note",
       onConfirm: function () {
@@ -1492,11 +1506,11 @@ window.RaumeStudy.notes = (function () {
         '<ul class="notes-card" aria-label="' + esc(label) + '">' + byMonth[k].map(function (n) {
           return '<li><button type="button" class="notes-row" data-note="' + esc(n.id) + '">' +
             noteTile(n) +
-            '<span class="notes-row-tx"><span class="notes-row-title">' + esc(n.title) +
+            '<span class="notes-row-tx"><span class="notes-row-title">' + esc(titleOf(n)) +
             (markOf(n) ? '<span class="visually-hidden">, ' + esc(markOf(n).label) + "</span>" : "") + "</span>" +
             // A note named by its date doesn't repeat it: its topic fills
             // this line (showTopics) once this device holds a copy.
-            '<span class="notes-row-sub">' + esc(n.title === lessonName(n.note_date) ? "Lesson notes" : shortDate(n.note_date)) + "</span></span></button></li>";
+            '<span class="notes-row-sub">' + esc(isLessonTitle(n) ? "Lesson notes" : shortDate(n.note_date)) + "</span></span></button></li>";
         }).join("") + "</ul>";
     }).join("") + "</div>";
   }
@@ -1518,7 +1532,7 @@ window.RaumeStudy.notes = (function () {
     deviceList(u.id).then(function (have) {
       have.forEach(function (rec) {
         var note = findNote(rec.id);
-        if (!note || rec.html == null || note.title !== lessonName(note.note_date)) return;
+        if (!note || rec.html == null || !isLessonTitle(note)) return;
         var topic = topicOf(rec.html);
         var row = host.querySelector('.notes-row[data-note="' + rec.id + '"] .notes-row-sub');
         if (topic && row) row.textContent = topic;
@@ -1526,7 +1540,7 @@ window.RaumeStudy.notes = (function () {
     });
   }
   // The date under the title -- unless the title already is it.
-  function readerDate(note) { return note.title === lessonName(note.note_date) ? "" : longDate(note.note_date); }
+  function readerDate(note) { return isLessonTitle(note) ? "" : longDate(note.note_date); }
   // The line under the title: the note's mark (its glyph + name), then the
   // date unless the title already is it.
   function readerMetaHtml(note) {
@@ -1578,8 +1592,8 @@ window.RaumeStudy.notes = (function () {
       "</div></div></div></div>" +
       // The title is the rename control, as a document's title is on iOS;
       // where it's from (its mark) and its date sit in one grey line under it.
-      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(note.title) + '”">' +
-      '<span class="notes-title-tx">' + esc(note.title) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
+      '<div class="fc-titlebar fc-titlebar-pushed notes-titlebar"><h1><button type="button" class="notes-title" id="notesTitle" aria-label="Rename “' + esc(titleOf(note)) + '”">' +
+      '<span class="notes-title-tx">' + esc(titleOf(note)) + "</span>" + MENU_ICONS.rename.replace("<svg ", '<svg class="notes-title-pen" aria-hidden="true" ') + "</button></h1></div>" +
       '<p class="notes-reader-date">' + readerMetaHtml(note) + "</p>" +
       flashHtml() +
       // Search this note: dropped in under the bar by its glyph, Done puts it away.
@@ -1588,7 +1602,7 @@ window.RaumeStudy.notes = (function () {
       '<button type="button" class="clear-search" data-clear="notesFind" aria-label="Clear search">×</button></label>' +
       '<button type="button" class="fc-titlebar-btn notes-find-done" id="notesFindDone">Done</button></div>' +
       '<p class="notes-filter-empty" id="notesFindNone" hidden>Nothing in this note matches.</p>' +
-      '<p class="notes-loading" role="status" id="notesReaderStatus" data-title="' + esc(note.title) + '">Opening…</p>';
+      '<p class="notes-loading" role="status" id="notesReaderStatus" data-title="' + esc(titleOf(note)) + '">Opening…</p>';
   }
   function showInReader(note) {
     var want = note.id;

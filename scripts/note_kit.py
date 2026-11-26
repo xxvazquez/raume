@@ -487,16 +487,15 @@ PICT = {
 
 # ── page ────────────────────────────────────────────────────
 def lesson_name(date):
-    """2026-11-21 -> "Sat, Nov 21st 2026": what a lesson note is called."""
+    """2026-11-21 -> "Sat 21 Nov 2026": what a lesson note is called (the
+    app shows it as the device writes dates, never "21st")."""
     d = datetime.date.fromisoformat(date)
-    n = d.day
-    suffix = "th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
-    return f"{d:%a}, {d:%b} {n}{suffix} {d.year}"
+    return f"{d:%a} {d.day} {d:%b} {d.year}"
 
 
 def render(out_html, date, title, desc, sections, eyebrow=None, source=None):
     """date: the lesson's date, YYYY-MM-DD -- the Notes list is ordered by it.
-    The note is named by its date ("Sat, Nov 21st 2026", or `eyebrow` if
+    The note is named by its date ("Sat 21 Nov 2026", or `eyebrow` if
     given): that is its title in raume and its row in the list; `title` is
     the lesson's topic, the heading over the description. sections: from
     section(), in any order -- they're put in OUTLINE order and numbered.

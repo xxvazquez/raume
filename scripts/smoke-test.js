@@ -2324,7 +2324,7 @@ async function main() {
       '<div class="card list qa"><div class="r"><div class="lead em">🚉</div><div class="st"><div class="jp">えき</div><div class="ro">eki</div><div class="en">station</div></div></div></div></section>' +
       '</main><script>x()</script></body></html>';
     check("an original lesson-kit page is recognised and named by its date, never a lesson number", nh.isKitOriginal(parser0(kitOriginal))
-      && nh.describeFile(kitOriginal, "Japanese-Lesson-9.html", new Date(2026, 10, 12).getTime()).title === "Thu, Nov 12th 2026");
+      && nh.describeFile(kitOriginal, "Japanese-Lesson-9.html", new Date(2026, 10, 12).getTime()).title === "Thu 12 Nov 2026");
     check("...and turned into a lesson note: rn classes, the section's hue (pink as clay), its head rebuilt, no toolbar, script or how-to line", (() => {
       const d = nh.fromKit(kitOriginal);
       const sec = d.querySelector("article.rn section.rn-sec");

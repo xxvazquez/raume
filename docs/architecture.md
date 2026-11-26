@@ -224,7 +224,7 @@ and deleting need a connection and say so when they fail.
   buttons) is converted on open (`fromKit`): its classes mapped to `rn-*`,
   each `c-<colour>` section to `data-tile` (pink → clay), the section heads
   rebuilt, the toolbar, styles, script and how-to line dropped — then drawn
-  as a lesson note. On upload it's named by its date, like the kit's notes ("Sat, Nov 21st 2026").
+  as a lesson note. On upload it's named by its date, like the kit's notes ("Sat 21 Nov 2026", shown as the device writes dates).
 - **Any other HTML** — never enters the page. It's copied into
   `notes-frame.html` inside `<iframe sandbox="allow-same-origin allow-popups
   allow-popups-to-escape-sandbox">`: no `allow-scripts`, so nothing in it can
@@ -251,7 +251,7 @@ and deleting need a connection and say so when they fail.
   `data/vocabulary.js`) — those words are written in kana. It also stops
   on a word listed in two word lists (`tiles`): a class note lists each
   word once, so it reviews at a glance. A lesson note is
-  named by its date — "Sat, Nov 21st 2026" (`lesson_name`) — in its
+  named by its date — "Sat 21 Nov 2026" (`lesson_name`; notes saved earlier as "Sat, Nov 21st 2026" count too, and the app shows either as the device writes dates) — in its
   `<title>` and eyebrow; `title` is the lesson's topic, shown over the
   description. Lesson files are personal content: they live in
   `private-notes/` (gitignored) or outside the repo, never in Git.
