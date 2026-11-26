@@ -266,6 +266,15 @@ which pages with `.order("id").range()` until a short page comes back. A plain
 but never loaded, so Add looked like it did nothing. Any new list query must
 use the helper too.
 
+### A login the database isn't ready for
+
+Right after signing in, PostgREST can refuse the new login with 401
+`PGRST303` "JWT issued at future": Supabase's sign-in server clock runs a
+second or two ahead of the database's. The account then opened empty until
+something loaded it again. The client is created with its own `fetch`
+(`data-ops.js` `skewTolerantFetch`), which waits a second and sends a request
+refused that way again, up to four times — every query, Notes included.
+
 ### Guest backup
 
 `js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) is guest-only —

@@ -32,8 +32,29 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   function getClient() {
     if (supabaseClient || !configured()) return supabaseClient;
     var cfg = window.RaumeStudy.config;
-    supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+    supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey, { global: { fetch: skewTolerantFetch } });
     return supabaseClient;
+  }
+  // Right after signing in, the database can refuse the brand-new login
+  // ("JWT issued at future", PGRST303): Supabase's sign-in server clock runs
+  // a second or two ahead of the database's. Every request then failed, and
+  // the account opened empty until something happened to load it again.
+  // Asked again a moment later the same login is accepted, so each request
+  // turned away that way waits and tries again, a few times.
+  var SKEW_RETRIES = 4, SKEW_WAIT_MS = 1000;
+  function skewTolerantFetch(input, init) {
+    var send = function () { return window.fetch(input, init); };
+    function attempt(left) {
+      return send().then(function (res) {
+        if (res.status !== 401 || !left) return res;
+        return res.clone().json().then(function (body) {
+          if (!body || body.code !== "PGRST303") return res;
+          return new Promise(function (go) { setTimeout(go, SKEW_WAIT_MS); }).then(function () { return attempt(left - 1); });
+        }, function () { return res; });
+      });
+    }
+    // A Request object's body can only be read once: send it as it is.
+    return typeof input === "string" || (input && input.href) ? attempt(SKEW_RETRIES) : send();
   }
 
   // `passwordRecovery` is set when the user lands here via a "reset your
