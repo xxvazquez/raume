@@ -1604,9 +1604,59 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // right, a filled one taps clear, and the last one filled marks each
   // blank. Only the particles a rule decides are blanks: case particles and
   // a question's closing か, never よ / ね / な / けど (tone, not grammar).
+  // The Verb form exercise blanks the sentence's main verb (row.mainVerb,
+  // marked by hand in data/vocabulary.js) and offers four forms of that same
+  // verb as a 2 × 2 grid -- present and past down, affirmative and negative
+  // across, always in that place: ます / ません / ました / ませんでした, or the
+  // plain る / ない / た / なかった, or たい / たくない / たかった / たくなかった
+  // -- whichever set the sentence's own form is in. Every choice is real
+  // Japanese; only the English (tense, "not", "want") tells them apart.
   // -----------------------------------------------------------------------
   var REGISTER_OPTS = [["both", "Polite and casual"], ["polite", "Polite"], ["casual", "Casual"]];
-  var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"]];
+  var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"], ["verbform", "Verb form"]];
+  var VERB_GRID_LABELS = ["present", "present negative", "past", "past negative"];
+  var CLOSING_PUNCT = /[。、！？!?…]+$/;
+  function segReading(segs) { return segs.map(function (s) { return s.reading || s.text || s.p || s.kanji || ""; }).join(""); }
+  // The sentence's verb tiles as one run of segments, its closing
+  // punctuation split off (it stays in the sentence, after the blank).
+  function verbSegments(s) {
+    var mv = s.mainVerb, segs = [].concat.apply([], s.segs.slice(mv.tile, mv.tile + (mv.span || 1)));
+    var last = segs[segs.length - 1], punct = "";
+    if (last && last.text && CLOSING_PUNCT.test(last.text)) {
+      punct = last.text.match(CLOSING_PUNCT)[0];
+      var rest = last.text.slice(0, -punct.length);
+      segs = segs.slice(0, -1).concat(rest ? [{ text: rest }] : []);
+    }
+    return { segs: segs, punct: punct };
+  }
+  // The four forms in the sentence's set, each written the way the sentence
+  // writes its verb: its kanji where it has them (来 taking こ in 来ない), the
+  // rest in kana. null when the sentence's form is in none of the sets.
+  function verbGrid(s) {
+    var verb = window.RaumeStudy.vocab.rawRow(s.mainVerb.id), entry = vocabIndex()[s.mainVerb.id];
+    if (!verb || !entry || !entry.plainForms) return null;
+    var stem = segReading(verb.forms[1].jp).replace(/ます$/, ""), dict = segReading(verb.forms[0].jp);
+    var plain = entry.plainForms.map(function (f) { return f.reading; });
+    var sets = [
+      [stem + "ます", stem + "ません", stem + "ました", stem + "ませんでした"],
+      [dict, plain[0], plain[1], plain[2]],
+      [stem + "たい", stem + "たくない", stem + "たかった", stem + "たくなかった"]
+    ];
+    var own = verbSegments(s), said = segReading(own.segs);
+    var set = sets.filter(function (x) { return x.indexOf(said) !== -1; })[0];
+    if (!set) return null;
+    var lastKanji = -1;
+    own.segs.forEach(function (g, i) { if (g.kanji) lastKanji = i; });
+    var lead = own.segs.slice(0, lastKanji + 1), leadReading = segReading(lead);
+    function written(reading) {
+      if (!lead.length) return [{ text: reading }];
+      if (reading.indexOf(leadReading) === 0) return lead.concat(reading.length > leadReading.length ? [{ text: reading.slice(leadReading.length) }] : []);
+      // One kanji whose own reading moves with the form: 来(き)ます, 来(こ)ない.
+      if (lead.length === 1 && lead[0].reading.length === 1) return [{ kanji: lead[0].kanji, reading: reading.charAt(0) }, { text: reading.slice(1) }];
+      return [{ text: reading }];
+    }
+    return { choices: set.map(written), answer: set.indexOf(said), punct: own.punct };
+  }
   var SENTENCE_MIN_TILES = 3;
   // The buttons' fixed order, and the ones a wrong choice is drawn from.
   var PARTICLE_ORDER = ["は", "が", "を", "に", "で", "へ", "と", "も", "の", "から", "まで", "より", "か"];
@@ -1657,7 +1707,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       t.rows.forEach(function (row) {
         if (!Array.isArray(row.tiles)) return;
         var blanks = particleBlanks(row.jp);
-        if (state.exercise === "particles" ? !blanks.length : row.tiles.length < SENTENCE_MIN_TILES) return;
+        if (state.exercise === "particles" ? !blanks.length : state.exercise === "verbform" ? !row.mainVerb : row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
@@ -1665,11 +1715,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (!segs) return;
         var V = window.RaumeStudy.vocab;
         out.push({
-          id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""), blanks: blanks,
+          id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""), blanks: blanks, mainVerb: row.mainVerb || null,
           romaji: row.romaji, jp: row.jp, speak: V.jpReadingOf(row.jp), tableId: t.id, weight: tricky[row.id] ? 2 : 1
         });
       });
     });
+    if (state.exercise === "verbform") out = out.filter(function (s) { return (s.grid = verbGrid(s)); });
     return out;
   }
   function buildSentences(pool, limit) {
@@ -1677,6 +1728,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return {
       placements: picked,
       questions: picked.map(function (s) {
+        if (state.exercise === "verbform") return { word: s, grid: s.grid };
         if (state.exercise === "particles") {
           var want = [];
           s.blanks.forEach(function (i) { if (want.indexOf(s.jp[i].p) === -1) want.push(s.jp[i].p); });
@@ -1706,7 +1758,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var queue, at, score, missed, retried, placed, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
     var total = p.questions.length;
     var V = window.RaumeStudy.vocab;
-    var particles = state.exercise === "particles", exercise = state.exercise;
+    var particles = state.exercise === "particles", verbform = state.exercise === "verbform", exercise = state.exercise;
     // Particles: `filled` holds each blank's choice (null while empty).
     var filled;
     function count() { setCount(countEl, Math.min(at + 1, total), total); }
@@ -1761,12 +1813,55 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }
       miss();
     }
+    // Verb form: the sentence with its verb a wide blank (filled with the
+    // right form once answered), and the 2 × 2 grid of forms under the card.
+    function verbLineHtml(cur, filledWith) {
+      var mv = cur.word.mainVerb, span = mv.span || 1;
+      return cur.word.segs.map(function (segs, i) {
+        if (i < mv.tile || i >= mv.tile + span) return V.jpSegmentsHtml(segs);
+        if (i > mv.tile) return "";
+        return '<span class="fc-sp-blank fc-vf-blank' + (filledWith ? " fc-sp-right" : " fc-sp-next") + '" aria-label="' + (filledWith ? "The verb" : "Blank: the verb") + '">' +
+          (filledWith ? V.jpSegmentsHtml(filledWith) : "") + "</span>" + esc(cur.grid.punct);
+      }).join("");
+    }
+    function renderVerbForm(cur) {
+      boardEl.innerHTML =
+        '<div class="fc-ls-card fc-sb-card">' +
+        '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
+        '<p class="fc-sp-line jpword" lang="ja" aria-label="The sentence, with its verb blank">' + verbLineHtml(cur, null) + "</p>" +
+        '<p class="fc-sb-answer" aria-live="polite" hidden></p></div>' +
+        '<div class="fc-ls-choices fc-vf-grid" role="group" aria-label="Forms of the verb">' + cur.grid.choices.map(function (segs, i) {
+          return '<button type="button" class="fc-mt-tile fc-ls-choice fc-vf-choice" data-i="' + i + '" lang="ja" aria-label="' +
+            esc(segs.map(function (g) { return g.kanji || g.text; }).join("") + ", " + VERB_GRID_LABELS[i]) + '">' +
+            '<span class="jpword">' + V.jpSegmentsHtml(segs) + "</span></button>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-kt-reveal fc-sb-reveal">Show answer</button>' +
+        '<button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function answerVerbForm(btn) {
+      var cur = q(), right = btn ? +btn.dataset.i === cur.grid.answer : false, rightBtn = null;
+      boardEl.querySelectorAll(".fc-vf-choice").forEach(function (b) {
+        b.disabled = true;
+        if (+b.dataset.i === cur.grid.answer) { b.classList.add("fc-mt-right"); rightBtn = b; }
+      });
+      if (btn && !right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      answerFeel(rightBtn, btn);
+      boardEl.querySelector(".fc-sp-line").innerHTML = verbLineHtml(cur, cur.grid.choices[cur.grid.answer]);
+      if (right) {
+        streak.hit(true);
+        if (!retried[cur.word.id]) score++;
+        showWhole(true);
+        return;
+      }
+      miss();
+    }
     function render() {
       var cur = q();
       count();
       placed = [];
       locked = false;
       if (particles) { renderParticles(cur); return; }
+      if (verbform) { renderVerbForm(cur); return; }
       boardEl.innerHTML =
         '<div class="fc-ls-card fc-sb-card">' +
         '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
@@ -1789,11 +1884,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var cur = q();
       locked = true;
       var ans = boardEl.querySelector(".fc-sb-answer");
-      ans.innerHTML = (right ? "" : '<span class="fc-sb-answer-head">The sentence</span>') + sentenceHtml(cur.word) +
+      // Verb form's line already reads as the whole sentence once its blank
+      // fills: under it only the romaji and ▶, not the Japanese again.
+      ans.innerHTML = (verbform ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
+        : (right ? "" : '<span class="fc-sb-answer-head">The sentence</span>') + sentenceHtml(cur.word)) +
         (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
       ans.hidden = false;
       boardEl.querySelectorAll(".fc-sb-tile").forEach(function (t) { t.disabled = true; });
-      if (particles) boardEl.querySelector(".fc-sp-line").classList.add(right ? "fc-sb-right" : "fc-sb-wrong");
+      boardEl.querySelectorAll(".fc-vf-choice").forEach(function (b) { b.disabled = true; });
+      if (particles || verbform) boardEl.querySelector(".fc-sp-line").classList.add(right ? "fc-sb-right" : "fc-sb-wrong");
       boardEl.querySelector(".fc-sb-reveal").hidden = true;
       var nextBtn = boardEl.querySelector(".fc-ls-next");
       nextBtn.hidden = false;
@@ -1835,7 +1934,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (e.target.closest(".fc-ls-next")) { next(); return; }
       if (e.target.closest(".fc-sb-say")) { speakWord(q().word); return; }
       if (locked) return;
-      if (e.target.closest(".fc-sb-reveal")) { if (particles) drawBlanks(true); miss(); return; }
+      if (e.target.closest(".fc-sb-reveal")) {
+        if (verbform) { answerVerbForm(null); return; }
+        if (particles) drawBlanks(true);
+        miss();
+        return;
+      }
+      if (verbform) {
+        var form = e.target.closest(".fc-vf-choice");
+        if (form && !form.disabled) answerVerbForm(form);
+        return;
+      }
       if (particles) {
         var blank = e.target.closest(".fc-sp-blank");
         if (blank) { filled[+blank.dataset.b] = null; drawBlanks(false); return; }
@@ -1857,7 +1966,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (placed.length === q().word.tiles.length) check();
       }
     });
-    function setup() { return "sentences|" + state.register + "|" + total + (exercise === "particles" ? "|particles" : ""); }
+    function setup() { return "sentences|" + state.register + "|" + total + (exercise === "build" ? "" : "|" + exercise); }
     function finish() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -1870,7 +1979,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         accuracyStatsHtml("sentences", score, total, run) +
         (missed.length ? "" : '<p class="fc-mt-done-meta">Every sentence right first time</p>') +
         doneActionsHtml("fcSbAgain") + "</div>" +
-        missedListHtml(particles ? "Sentences to try again" : "Sentences to build again", missed.map(function (s) {
+        missedListHtml(particles || verbform ? "Sentences to try again" : "Sentences to build again", missed.map(function (s) {
           return '<li class="fc-sb-missed">' + sentenceHtml(s) + '<span class="fc-ls-missed-en">' + esc(s.clue) + "</span></li>";
         }));
       bindDoneActions("fcSbAgain");
@@ -3524,6 +3633,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type, and あ | ア picks hiragana or katakana. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
+      : state.mode === "sentences" && state.exercise === "verbform" ? "Read the English, then pick the form of the verb it needs. The four forms always sit in the same places: present on top, past below, the negative on the right. Keys 1–4 pick too. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" && state.exercise === "particles" ? "Read the English, then fill each circle with its particle — they fill left to right; tap a filled one to clear it. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" ? "Read the English, then tap the Japanese pieces in order to say it. Tap a placed piece to take it back. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "kanatiles" ? "Tap the kana in order to spell the word. Tap a placed one to take it back — a few tiles are look-alikes. Stuck? Show answer, and the word comes back at the end."
@@ -4111,7 +4221,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, particleBlanks: particleBlanks, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, particleBlanks: particleBlanks, verbGrid: verbGrid, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

@@ -470,6 +470,12 @@ confetti; reduced motion is honoured.
     particle buttons. The circles fill left to right; tap one to clear it.
     Only grammar particles and a question's closing か are blanks — never
     よ / ね / な, which are tone, not rules.
+  - *Verb form*: the sentence's verb is a blank; pick its form from four of
+    the same verb, always in the same places — present on top, past below,
+    the negative on the right (ます / ません / ました / ませんでした, the
+    plain る / ない / た / なかった, or たい / たくない / たかった /
+    たくなかった). Only the English tells them apart. 67 sentences, each
+    with its verb marked by hand.
 - **Register** picks *Polite*, *Casual* or both; no *Words from*.
 - Each answer shows the whole sentence with its romaji and ▶. A miss (or
   **Show answer**) comes back at the end; missed sentences join Tricky words.

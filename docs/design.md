@@ -1319,7 +1319,13 @@ wide: an outline while empty (the next one a thicker tint ring), your choice
 inside in particle blue once filled; marked, it fills sage or coral, a wrong
 one struck through with the right particle bold and small under it. Six
 choices under the card are the bank's capsules, particle blue, always in
-one order (は が を に で へ と も の から まで より か).
+one order (は が を に で へ と も の から まで より か). **Verb form** draws the
+verb's blank as that circle made long — a capsule a few kana wide — and
+offers the four forms as Listening's 2 × 2 choices at 19px with furigana,
+**always in the same places**: present on top, past below, the negative on
+the right — the grid itself teaches the pattern. Answered, Listening's ✓ / ✕
+marks the choices and the blank fills sage with the right form, so the line
+reads as the finished sentence; under it only the romaji and ▶.
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

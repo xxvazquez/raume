@@ -313,7 +313,7 @@ puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
 match / listening / kanatiles / oddone / speedsort / wordchain / sentences / crossword / arroword / wordsearch; `setup` is
 `source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana|type` for Word chain;
-Sentences is `sentences|both·polite·casual|count` (`|particles` added for the Particles exercise), `missed` its sentence ids,
+Sentences is `sentences|both·polite·casual|count` (`|particles` or `|verbform` added for those exercises), `missed` its sentence ids,
 typed since 2026-10 — older `kana` runs were the pick-from-four version); a Word chain run also keeps
 `help` (hints) when it used any;
 `ended` marks a Match / Listening game stopped early (only its finished
@@ -624,6 +624,19 @@ the English in grey on the same line in the tables, under an English prompt or a
 Flashcards, and in parentheses in lists and puzzle clues — it's never part of a
 right answer. Parentheses left in `english` are optional words inside the answer
 itself ("one pair (of shoes)"); answer-checking accepts it with or without them.
+
+A sentence row (Everyday Sentences) adds what the Sentences game plays:
+`pattern` (its grammar, behind the ⓘ), `tiles` (the sentence cut into the
+pieces Build deals — joined, exactly its Japanese; no kanji run is ever cut)
+and, for 67 of them, `mainVerb` (`{ tile, id, span? }` — the piece holding the
+sentence's main verb, `span` pieces long, and the verb-pair row it is a form
+of; Verb form blanks it). `mainVerb` is marked by hand, only where the
+English alone settles the form: never a mid-sentence て-form, a
+〜ています / 〜てください helper, an invitation (〜ませんか, casual 〜ない？) or
+an idiom whose tense differs from the English (つかれた "I'm tired").
+`validate` checks the tile range, that `id` is a verb and that the piece uses
+only that verb's kanji; the games smoke test checks every marked piece is one
+of the verb's own forms.
 
 A `kanji` row (the N5 Kanji tables, `tableClass: "vocab-kanji"`, the Kanji
 section) holds one character: `jp` is that kanji with the reading the speaker

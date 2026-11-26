@@ -4786,12 +4786,13 @@ async function main() {
     xwSetup();
     const panel = document.querySelector("#fcPanelGames");
     const rows = [...panel.querySelectorAll(".fc-gs-pick")].map(b => b.dataset.pick || b.id).join("|");
+    const exercises = [...panel.querySelectorAll('.fc-gs-opt[data-pick="exercise"]')].map(o => o.textContent).join("|");
     const label = panel.querySelector('.fc-gs-pick[data-pick="size"] .set-label').textContent;
     const byId = id => window.RaumeStudy.vocab.rawRow(id);
     const regs = {};
     ["polite", "casual", "both"].forEach(r => { xw.state.register = r; regs[r] = xw.sentencePool(); });
     xw.state.register = "both";
-    return rows === "exercise|register|size" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
+    return rows === "exercise|register|size" && exercises === "Build|Particles|Verb form" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
       && regs.polite.every(s => byId(s.id).enNote !== "casual") && regs.casual.every(s => byId(s.id).enNote === "casual")
       && regs.both.length === regs.polite.length + regs.casual.length && regs.both.every(s => s.tiles.length >= 3);
   })());
@@ -4899,6 +4900,47 @@ async function main() {
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
     return !!document.querySelector("#fcPanelGames .fc-mt-done") && !!last && last.right === n - 1
       && last.setup === "sentences|both|" + n + "|particles" && last.missed.join() === spFirst.word.id;
+  })());
+  console.log("Flashcards: Sentences › Verb form");
+  xwPick("exercise", "verbform");
+  check("every sentence that marks its main verb plays in Verb form: its own form sits in a 2 × 2 of that verb's set, written as the sentence writes it", (() => {
+    const marked = window.RaumeStudy.data.vocabularyTables.flatMap(t => t.rows).filter(r => r.mainVerb).length;
+    const pool = xw.sentencePool();
+    const w = segs => segs.map(g => g.kanji ? g.kanji + "(" + g.reading + ")" : g.text).join("");
+    const kuru = pool.find(x => x.id === "v1298"), iku = pool.find(x => x.id === "v1216"), tai = pool.find(x => x.id === "v1247");
+    return pool.length === marked && pool.every(x => x.grid.choices.length === 4 && new Set(x.grid.choices.map(w)).size === 4)
+      && w(kuru.grid.choices[0]) === "来(く)る" && w(kuru.grid.choices[1]) === "来(こ)ない" && kuru.grid.answer === 1
+      && iku.grid.answer === 3 && w(iku.grid.choices[3]) === "行(い)きませんでした"
+      && w(tai.grid.choices[0]) === "行(い)きたい" && w(tai.grid.choices[1]) === "行(い)きたくない";
+  })());
+  xwStart();
+  const vfCur = () => xw.state.puzzle.questions.find(q => q.word.clue === document.querySelector("#fcPanelGames .fc-sb-clue").textContent);
+  const vfFirst = vfCur();
+  check("a Verb form question: the sentence with its verb a blank, and the four forms as Listening's 2 × 2 choices", (() => {
+    return !!vfFirst && document.querySelectorAll("#fcPanelGames .fc-vf-blank").length === 1
+      && document.querySelectorAll("#fcPanelGames .fc-ls-choices .fc-vf-choice").length === 4
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  check("a wrong form: ✕ on yours, ✓ on the right one, which fills the blank; the romaji and Next follow", (() => {
+    const wrong = (vfFirst.grid.answer + 1) % 4;
+    document.querySelector('#fcPanelGames .fc-vf-choice[data-i="' + wrong + '"]').click();
+    const ok = document.querySelector('#fcPanelGames .fc-vf-choice[data-i="' + wrong + '"]').classList.contains("fc-ls-chosen-wrong")
+      && document.querySelector('#fcPanelGames .fc-vf-choice[data-i="' + vfFirst.grid.answer + '"]').classList.contains("fc-mt-right")
+      && document.querySelector("#fcPanelGames .fc-vf-blank").classList.contains("fc-sp-right")
+      && document.querySelector("#fcPanelGames .fc-sb-answer").textContent.includes(vfFirst.word.romaji)
+      && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok;
+  })());
+  for (let k = 0; k < 80 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    document.querySelector('#fcPanelGames .fc-vf-choice[data-i="' + vfCur().grid.answer + '"]').click();
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+  }
+  check("...and a Verb form game logs under its own setup", (() => {
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
+    return !!document.querySelector("#fcPanelGames .fc-mt-done") && last.setup === "sentences|both|" + n + "|verbform"
+      && last.right === n - 1 && last.missed.join() === vfFirst.word.id;
   })());
   xwPick("exercise", "build");
   xwPick("mode", "listening");

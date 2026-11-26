@@ -4682,6 +4682,17 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px;
   font-size: 14px; font-weight: 700; line-height: 1; color: var(--right-strong); text-decoration: none;
 }
+/* Verb form: the verb's blank is the particle circle drawn long -- a
+   capsule a few kana wide -- that takes the right form, furigana and all,
+   once answered. The four forms are Listening's 2 × 2 choices, the
+   Japanese at 19px: present on top, past below, negative on the right,
+   the same places every time. */
+.fc-vf-blank { min-width: 4.5em; cursor: default; }
+.fc-vf-blank.fc-sp-right { height: auto; min-height: 1.45em; padding: .15em .45em; border-radius: .725em; font-weight: 400; color: var(--right-strong); }
+.fc-vf-blank rt { color: var(--furigana); }
+.fc-vf-grid { max-width: 420px; margin-inline: auto; }
+.fc-vf-choice { text-align: center; font: 400 19px/1.5 var(--font-jp); padding-block: 8px; }
+.fc-vf-choice rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
 /* Each circle says right or wrong itself: no wash on the whole line. */
 .fc-sp-line.fc-sb-right, .fc-sp-line.fc-sb-wrong { background: none; }
 .fc-sp-line.fc-sb-wrong { animation: fc-ws-miss .3s ease; }

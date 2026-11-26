@@ -217,3 +217,29 @@ for (const table of tableList) {
   }
 }
 console.log("Particle validation passed: " + tableList.reduce((n, t) => n + t.rows.filter(r => r.particles && r.particles.length).length, 0) + " words take particles.");
+
+// A sentence's mainVerb (the Sentences game's Verb form exercise): the
+// tile (and, with span, the tiles after it) holding the sentence's main
+// verb, and the verb-pair row it is a form of, whose kanji the tile may
+// only use. (That the tile is one of the verb's forms -- the game's own
+// conjugation -- is checked by the games smoke test.)
+{
+  const verbs = new Map();
+  tableList.forEach(t => t.rows.forEach(r => { if (r.type === "verb-pair") verbs.set(r.id, r); }));
+  let marked = 0;
+  tableList.forEach(t => t.rows.forEach(row => {
+    if (!row.mainVerb) return;
+    const label = row.id + " in " + t.title, mv = row.mainVerb, span = mv.span || 1;
+    if (!Array.isArray(row.tiles) || !Number.isInteger(mv.tile) || mv.tile < 0 || mv.tile + span > row.tiles.length) {
+      console.error("Main verb validation failed: tile out of range (" + label + ")."); process.exit(1);
+    }
+    const verb = verbs.get(mv.id);
+    if (!verb || !verb.verbClass) { console.error("Main verb validation failed: " + mv.id + " is not a verb (" + label + ")."); process.exit(1); }
+    const text = row.tiles.slice(mv.tile, mv.tile + span).join("");
+    const kanji = [...text].filter(c => /[一-鿿]/.test(c));
+    const verbKanji = verb.forms.flatMap(f => f.jp).filter(s => s.kanji).map(s => s.kanji).join("");
+    if (!kanji.every(c => verbKanji.includes(c))) { console.error("Main verb validation failed: kanji not in " + mv.id + " (" + label + ")."); process.exit(1); }
+    marked++;
+  }));
+  console.log("Main verb validation passed: " + marked + " sentences mark their verb.");
+}
