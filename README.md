@@ -88,7 +88,7 @@ the grammar it shows.
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
 | **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |
-| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times) counts as N5. Sentences, place names and dishes the lists leave out have none. Your own words — class tables included — take the level of the same word in raume's tables. |
+| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times, country names with their 〜人 and 〜語) counts as N5. Sentences, city and sight names, and foods the lists leave out have none. Your own words — class tables included — take the level of the same word in raume's tables. |
 
 The ⓘ lists:
 

@@ -635,9 +635,13 @@ badge and shows in the ⓘ popover.
 An optional `jlpt` (5 = N5 … 1 = N1) is the word's JLPT level, assigned from
 the Tanos / Waller lists (via the open `yomitan-jlpt-vocab` data, matched by
 writing, then by reading + meaning), with an N5 class's basics those lists
-file higher or leave out — greetings, counters, numbers, dates, times, X人 /
-X語 — set to 5 by hand; every N5 kanji row is 5. Sentences, proper nouns
-and dishes outside the lists carry none. Rows render it as `data-jlpt` (the
+file higher or leave out — greetings, counters, numbers, dates, times,
+country names and their X人 / X語 — set to 5 by hand; every N5 kanji row is
+5. Sentences, city and sight names, and foods outside the lists carry none.
+Audited 2026-11-26: a word written like a different word in the lists
+(十分 "10 minutes" vs "enough", おや "parent" vs "oh!", レバー "liver" vs
+"lever") takes its own meaning's level, or none; a set of words at one
+stage of study shares one level (小学生 / 中学生 / 高校生 N4). Rows render it as `data-jlpt` (the
 Options › JLPT level filter: `body[data-jlpt-filter]` in CSS, `.level-empty`
 on tables / headings / directory links left with none; the search's `n4`
 token) and a `.level-note` the ⓘ reads. Options › JLPT level is a
