@@ -1174,9 +1174,17 @@ sharing one column (`.fc-xw-main`) beside the lists: a "Notes" list header
 over a plain white `--radius-card` textarea that fills whatever height the
 grid leaves free beside the lists (160px at least), so neither column ends
 in a blank stretch of ground; no border, no Save, section-tone caret. An
-arroword, which has no lists, puts it under the clue bar instead, as tall as
-the grid; a stacked puzzle gives it a modest 200px under the lists. It belongs to the puzzle (blank on New
-puzzle) and isn't on a phone or in print. The clue bar is there from the start (a muted "Tap a square or a clue to
+arroword, which has no lists there, puts it under the clue bar instead, as
+tall as the grid; a stacked puzzle gives it a modest 200px under the lists. It belongs to the puzzle (blank on New
+puzzle) and isn't on a phone or in print. **Arroword squares** are 56px on screen where
+there's room, the clue text in them up to 11px (iOS's smallest size) and the
+letters 21px, both scaled with the square (`cqw`, the square a size
+container) as a narrower window shrinks it; long words hyphenate. A square
+squeezed under 40px — a phone — can't hold readable text, so it shows its
+arrow alone (14px), and the clues are listed under the grid instead
+(`.fc-xw-clues-arroword`, phone only): Across and Down cards in reading
+order, each row led by its arrow where a crossword has its number; a tap
+selects that word, as a clue square does. The clue bar is there from the start (a muted "Tap a square or a clue to
 start" until one is picked), so the first tap never pushes the grid down; moving square to
 square focuses without the browser's scroll, and the page moves only to bring a hidden square
 (and its clue bar) back into view — the

@@ -458,7 +458,9 @@ scrolls sideways.
 <details>
 <summary><b>Solving a crossword / arroword</b></summary>
 
-- Tap a square or a clue and type. Typing follows the word's direction; tap a
+- Tap a square or a clue and type. On a phone an arroword's squares are too
+  small for their clue text, so they show the arrow alone and the clues are
+  listed under the grid (Across / Down, in reading order). Typing follows the word's direction; tap a
   crossing square again to switch. The bar above the grid shows the clue
   you're on (a quiet prompt until you pick a square, so the grid never
   shifts; the ⓘ beside Check has the how-to). A filled square takes a new

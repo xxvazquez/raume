@@ -2368,7 +2368,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // fits there at full cell size. Otherwise the puzzle stacks (clues below,
   // grid across the whole width) rather than pushing the page sideways.
   // Sizes match .fc-xw-cell / .fc-ws-cell and the 260px + 24px clue column.
-  var GRID_CELL = 40, WS_CELL = 44, WS_CELL_DENSE = 38, SIDE_COLUMN = 284;
+  var GRID_CELL = 40, ARROW_CELL = 56, WS_CELL = 44, WS_CELL_DENSE = 38, SIDE_COLUMN = 284;
   function fitPuzzle() {
     var el = document.querySelector(".fc-xw-puzzle[data-natural]");
     if (!el || !el.clientWidth) return;
@@ -2722,16 +2722,25 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<textarea id="fcXwNotes" class="fc-xw-notes-pad" placeholder="Readings, guesses, kana…" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>';
   }
 
-  function clueListHtml(p) {
-    var across = p.placements.filter(function (pl) { return pl.dir === "across"; }).sort(function (a, b) { return a.number - b.number; });
-    var down = p.placements.filter(function (pl) { return pl.dir === "down"; }).sort(function (a, b) { return a.number - b.number; });
+  // An arroword's clues live in their squares; this list is for a phone,
+  // whose squares are too small to hold readable text (they show the arrow
+  // alone) -- its words in reading order, each led by its arrow, not a number.
+  function clueListHtml(p, arroword) {
+    var order = arroword
+      ? function (a, b) { return a.row - b.row || a.col - b.col; }
+      : function (a, b) { return a.number - b.number; };
+    var across = p.placements.filter(function (pl) { return pl.dir === "across"; }).sort(order);
+    var down = p.placements.filter(function (pl) { return pl.dir === "down"; }).sort(order);
     function group(title, items) {
       if (!items.length) return "";
       return '<div class="fc-xw-cluegroup"><h4 class="fc-xw-cluehead">' + title + "</h4><ol class=\"fc-xw-cluerows\">" +
-        items.map(function (pl) { return '<li value="' + pl.number + '" data-start="' + pl.row + "," + pl.col + '" data-dir="' + pl.dir + '" role="button" tabindex="0"><b>' + pl.number + "</b> " + esc(pl.clue) + "</li>"; }).join("") +
+        items.map(function (pl) {
+          return "<li" + (arroword ? "" : ' value="' + pl.number + '"') + ' data-start="' + pl.row + "," + pl.col + '" data-dir="' + pl.dir + '" role="button" tabindex="0"><b>' +
+            (arroword ? arrowIcon(pl.dir) : pl.number) + "</b> " + esc(pl.clue) + "</li>";
+        }).join("") +
         "</ol></div>";
     }
-    return '<div class="fc-xw-clues">' + group("Across", across) + group("Down", down) + "</div>";
+    return '<div class="fc-xw-clues' + (arroword ? " fc-xw-clues-arroword" : "") + '">' + group("Across", across) + group("Down", down) + "</div>";
   }
 
   // -----------------------------------------------------------------------
@@ -3583,7 +3592,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       toolbarHtml() +
       (footnote ? '<p class="fc-xw-footnote">' + esc(footnote) + "</p>" : "") +
       '<div class="fc-xw-puzzle print-target' + (arroword ? " fc-xw-puzzle-arroword" : "") + (wordsearch ? " fc-xw-puzzle-ws" : "") +
-      '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * GRID_CELL) + '">' +
+      '" data-natural="' + (wordsearch ? p.cols * (p.cols > 10 ? WS_CELL_DENSE : WS_CELL) + 24 : p.cols * (arroword ? ARROW_CELL : GRID_CELL)) + '">' +
       '<header class="fc-xw-print-head"><h2 class="fc-xw-print-title">' + esc(printTitle) + "</h2>" +
       '<p class="fc-xw-print-meta">' + esc(printMeta) + "</p></header>" +
       (wordsearch ? "" : '<p class="fc-xw-current fc-xw-current-idle" aria-live="polite">Tap a square or a clue to start</p>') +
@@ -3593,7 +3602,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       (wordsearch ? wordSearchGridHtml(p, romajiMode)
         : '<div class="fc-xw-grid">' + gridHtml(p, arroword, romajiMode) + "</div>") +
       "</div>" + notesHtml() + "</div>" +
-      (arroword ? "" : '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : clueListHtml(p)) + "</div>") +
+      '<div class="fc-xw-side">' + (wordsearch ? wordSearchListHtml(p) : clueListHtml(p, arroword)) + "</div>" +
       "</div>";
 
     fitPuzzle();

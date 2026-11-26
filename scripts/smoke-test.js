@@ -4153,7 +4153,12 @@ async function main() {
   document.getElementById("fcXwReset").click();
 
   xwPick("mode", "arroword");
-  check("switching to Arroword drops the separate clue list for clue cells inside the grid", !document.querySelector("#fcPanelCrosswords .fc-xw-clues") && !!document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue"));
+  check("switching to Arroword puts the clues in squares inside the grid, with an arrow-led list (for a phone) in reading order, no numbers", (() => {
+    const rows = [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-clues-arroword li")];
+    const p = window.RaumeStudy.flashcards.crosswords.__testHooks.state.puzzle;
+    return !!document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue") && rows.length === p.placements.length
+      && rows.every(li => li.querySelector("b .fc-xw-arrow-svg") && !li.hasAttribute("value") && li.dataset.start);
+  })());
   check("a fresh Arroword puzzle's cells are empty again -- switching style starts a new grid", [...document.querySelectorAll("#fcPanelCrosswords .fc-xw-cell-input")].every(i => i.value === ""));
   check("an arroword clue cell is keyboard-reachable and knows which cell its word starts at", (() => {
     const cc = document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue");

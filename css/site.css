@@ -4274,6 +4274,28 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 .fc-xw-arrow-svg { color: var(--faint); flex: none; pointer-events: none; }
+/* Arroword: each clue lives in its square, so on screen the squares are
+   56px where there's room -- clue text up to 11px (iOS's smallest) and
+   letters 21px, both scaled with the square (cqw) as a narrower window
+   shrinks it. A square squeezed under 40px (a phone) can't hold readable
+   text: it shows its arrow alone, larger, and the clues are listed under
+   the grid instead (.fc-xw-clues-arroword), each row led by its arrow.
+   Print keeps its own 9mm squares with the text in them. */
+@media screen {
+  .fc-xw-puzzle.fc-xw-puzzle-arroword .fc-xw-cell { flex-basis: 56px; width: 56px; container-type: inline-size; }
+  .fc-xw-puzzle-arroword .fc-xw-cell-clue { padding: 2px 3px; gap: 2px; }
+  .fc-xw-puzzle-arroword .fc-xw-cluetext {
+    font-size: clamp(6.5px, 23cqw, 11px); line-height: 1.1;
+    -webkit-hyphens: auto; hyphens: auto; overflow-wrap: break-word;
+  }
+  .fc-xw-puzzle-arroword .fc-xw-cell-input { font-size: clamp(14px, 38cqw, 21px); }
+  .fc-xw-clues-arroword li b { display: flex; align-items: center; justify-content: flex-end; height: 1.35em; }
+  .fc-xw-clues-arroword .fc-xw-arrow-svg { width: 12px; height: 12px; color: var(--muted); }
+  @container (max-width: 39px) {
+    .fc-xw-cluetext { display: none; }
+    .fc-xw-arrow-svg { width: 14px; height: 14px; color: var(--muted); }
+  }
+}
 /* Clue list: iOS inset-grouped -- a 13px secondary header over a white
    card of hairline rows; the clue you're on is tinted. Across and Down sit
    side by side when there's room (a 40-word puzzle is two short lists, not
@@ -5995,6 +6017,7 @@ mark.fc-diff-co {
   body.print-only .fc-xw-puzzle { display: block; }
   body.print-only .fc-xw-side { display: block; }
   body.print-only .fc-xw-notes { display: none !important; }
+  body.print-only .fc-xw-puzzle-arroword > .fc-xw-side { display: none !important; }
   body.print-only .fc-xw-gridwrap { padding: 0; margin: 0 0 9mm; }
   body.print-only .fc-xw-grid { margin: 0 auto; }
   /* Squares are sized as if empty (contain: size): a clue's text runs
@@ -6410,9 +6433,10 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
 .fc-xw-main { display: contents; }
 .fc-xw-main > .fc-xw-gridwrap { grid-area: grid; }
 .fc-xw-puzzle > .fc-xw-side { grid-area: clues; min-width: 0; }
-/* A word search has no clue bar, an arroword no lists. */
+/* A word search has no clue bar. An arroword lists its clues only on a
+   phone, whose squares show the arrow alone; wider, they're in the squares. */
 .fc-xw-puzzle-ws { grid-template-areas: "grid" "clues" "notes"; }
-.fc-xw-puzzle-arroword { grid-template-areas: "current" "grid" "notes"; }
+.fc-xw-puzzle-arroword { grid-template-areas: "current" "grid" "clues" "notes"; }
 /* Notes: a "Notes" list header over a plain white card. Stacked, a modest
    fixed height; beside the lists it fills whatever the grid leaves free
    below it, so neither column ends in a blank stretch of ground. */
@@ -6451,6 +6475,7 @@ button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-of
   .fc-xw-puzzle-ws:not(.fc-xw-puzzle-stack) .fc-xw-gridwrap { padding-top: calc(var(--fs-small) * 1.3 + 6px); }
   /* An arroword has no lists: its notes take the lists' place, under the
      clue bar and as tall as the grid. */
+  .fc-xw-puzzle-arroword > .fc-xw-side { display: none; }
   .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) { grid-template-areas: "grid current" "grid notes"; }
   .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) > .fc-xw-main { display: contents; }
   .fc-xw-puzzle-arroword:not(.fc-xw-puzzle-stack) .fc-xw-notes { align-self: stretch; }
