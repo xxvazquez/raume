@@ -585,7 +585,9 @@ and Help.
   (`--nav-h: 64px`). **641–899px** (iPad portrait) the tabs are the same white
   floating capsule, centred on their own row under the masthead — iPadOS's
   top tab bar — pinned 6px from the top on a ground band (`--nav-h: 54px`). The phone keeps its bottom
-  tab bar. The four masthead controls — account, help,
+  tab bar. On a window under 500px tall (an iPhone on its side) the top bar
+  and tabs scroll away instead of pinning — pinned, they and the search bar
+  took a third of the height; the search bar still pins, at the very top. The four masthead controls — account, help,
   customize, theme — are **bare 20px glyphs** in secondary grey inside 40px tap
   targets: no box, no outline. On a tablet (`hover: none`) each glyph gets a 10px
   caption under it — Account / Help / Customize / the current theme — since a

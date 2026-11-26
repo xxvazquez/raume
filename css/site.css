@@ -6278,6 +6278,14 @@ mark.fc-diff-co {
   }
   .app-frame > .app { grid-column: 1; }
 }
+/* An iPhone on its side (a window under 500px tall): the top bar and tabs
+   scroll away with the page instead of pinning -- pinned, they and the
+   search bar took a third of the height. The search bar still pins, at the
+   very top. */
+@media (min-width: 641px) and (max-height: 500px) {
+  :root { --nav-h: 1px; }
+  .masthead, .site-nav { position: relative; top: auto; }
+}
 @media print {
   .app-frame { display: block; }
 }
