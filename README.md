@@ -52,13 +52,13 @@ python3 -m http.server
 
 | Section        | What's in it |
 | -------------- | ------------ |
-| **Vocabulary** | The landing page: words grouped by topic — Around Town, Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life, Time & Calendar. People & Daily Life ends with **Everyday Sentences**: 200 N5 sentences, polite and casual (casual ones marked in grey) |
-| **Grammar**    | How words change and join: Adjectives (い / な), Verbs (plain and polite), Particles, Question Words, This / That / Over There (こそあど) and Sentence Patterns |
+| **Vocabulary** | The landing page: words grouped by topic — Around Town, Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life, Time & Calendar. People & Daily Life ends with **Everyday Sentences**: 211 N5 sentences, polite and casual (casual ones marked in grey) |
+| **Grammar**    | How words change and join: Adjectives (い / な), Verbs (plain and polite), Particles, Question Words and This / That / Over There (こそあど) |
 | **Kanji**      | The 102 N5 kanji in seven themes — see [Kanji](#kanji) |
 | **Notes**      | Your own class notes — see [Class notes](#class-notes) |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
-In sentence tables (Everyday Sentences, Sentence Patterns) each row's ⓘ names
+In sentence tables (Everyday Sentences) each row's ⓘ names
 the grammar it shows.
 
 ### Finding words
@@ -474,7 +474,7 @@ confetti; reduced motion is honoured.
     the same verb, always in the same places — present on top, past below,
     the negative on the right (ます / ません / ました / ませんでした, the
     plain る / ない / た / なかった, or たい / たくない / たかった /
-    たくなかった). Only the English tells them apart. 67 sentences, each
+    たくなかった). Only the English tells them apart. 71 sentences, each
     with its verb marked by hand.
   - *Meaning*: read the Japanese (▶ plays it) and pick its English from
     three. The wrong two are the sentences that look most like it — the

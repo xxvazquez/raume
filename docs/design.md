@@ -371,8 +371,8 @@ and Help.
   (`--tricky-bg`: `--fc-hard` at 20% on paper, 24% in dark), announced as
   "Tricky". Known wins. Options › Study ›
   **Highlight progress** turns both washes off together (`body.no-progress-hl`).
-- **Sentence tables** (`tableClass: "vocab-sentences"` — Grammar › Sentence
-  Patterns, Everyday Sentences, or a table of your own that is mostly sentences): stacked rows, not two columns —
+- **Sentence tables** (`tableClass: "vocab-sentences"` — Everyday
+  Sentences, or a table of your own that is mostly sentences): stacked rows, not two columns —
   the Japanese full width at 17px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   in the meaning colour (`--ink-2`; secondary grey read too faint), alone on its

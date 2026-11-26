@@ -245,7 +245,7 @@ async function main() {
 
   console.log("Rendering");
   const sections = document.querySelectorAll(".table-section");
-  check("renders 52 table sections", sections.length === 52);
+  check("renders 51 table sections", sections.length === 51);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 1143 vocabulary rows", totalRows === 1143);
   check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
@@ -449,9 +449,9 @@ async function main() {
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
     return hits === 0;
   })());
-  check("a Sentence Patterns row reads Japanese + English only; its pattern waits behind the row's ⓘ", (() => {
-    const sec = [...document.querySelectorAll(".table-section")].find(s => s.querySelector(".section-title-text").textContent === "Sentence Patterns");
-    const tr = sec && sec.querySelector("tbody tr");
+  check("a sentence row reads Japanese + English only; its pattern waits behind the row's ⓘ -- and Sentence Patterns' sentences now live in Everyday Sentences", (() => {
+    const tr = document.querySelector('.table-section[data-table="62"] tbody tr[data-vocab-id="v1084"]');
+    if ([...document.querySelectorAll(".section-title-text")].some(t => t.textContent === "Sentence Patterns")) return false;
     return !!tr && !tr.querySelector(".meaning-note") && !!tr.querySelector(".row-badges [data-pattern]") && !!tr.querySelector(".row-info-btn");
   })());
   check("every Japanese cell is marked lang=\"ja\"", [...document.querySelectorAll("td.jp")].every(td => td.getAttribute("lang") === "ja"));
@@ -1847,7 +1847,7 @@ async function main() {
   check("its own title is a real <h1>, this screen's entry point for a screen reader", document.querySelector(".cz-intro h1").textContent.startsWith("Customize tables"));
   check("no nav link is active on the Customize page", !document.querySelector('#siteNav .site-nav-link.active'));
   const czRows = document.querySelectorAll("#customizePage .cz-row");
-  check("it lists every one of the 52 tables", czRows.length === 52);
+  check("it lists every one of the 51 tables", czRows.length === 51);
   check("each row has a name field, a reset control and a Hide button", [...czRows].every(r => r.querySelector(".cz-row-name") && r.querySelector(".cz-row-reset[data-reset-for]") && r.querySelector(".cz-row-vis")));
   check("each row's icon button reuses the shared picker hook", [...czRows].every(r => r.querySelector('.section-icon-btn[data-icon-for]')));
   check("the name field is a bounded cluster with the reset button, not stretched the full row width", (() => {

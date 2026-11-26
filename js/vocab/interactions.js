@@ -1563,7 +1563,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         section.classList.remove('page-hidden');
         section.classList.toggle('search-hidden', sectionRows === 0);
         if (sectionRows > 0) { totalTables++; totalRows += sectionRows; expandSection(section); }
-        // A sentence table (Sentence Patterns, Everyday Sentences) follows the
+        // A sentence table (Everyday Sentences, or one of your own) follows the
         // word tables: "beer" finds the word first, then sentences using it.
         sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex, sentences: !!section.querySelector('table.vocab-sentences') });
       });

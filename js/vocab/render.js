@@ -427,7 +427,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var openTag = '<tr data-vocab-id="' + esc(row.id || '') + '"' + (row.irregular ? ' class="irregular-row">' : '>');
     return openTag + jpCell(row, row.romaji) + meaningCell(row.english, row.id, adjBadge(row) + particleChips(row) + patternBadge(row), row.enNote) + '</tr>';
   }
-  // row.pattern -- the grammar a Sentence Patterns example shows ("な-adjective
+  // row.pattern -- the grammar a sentence row shows ("な-adjective
   // + な + noun"). An explanation, so it waits behind the row's ⓘ with the
   // other grammar notes instead of crowding the English under the sentence.
   function patternBadge(row) {

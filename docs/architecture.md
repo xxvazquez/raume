@@ -487,7 +487,7 @@ data/vocabulary.js      the vocabulary as plain data; every row has a permanent 
                         verb-pair rows carry verbClass:"godan" / "ichidan" / "irregular";
                         kanji rows -- type:"kanji", the N5 Kanji tables -- see below)
                         (Everyday Sentences rows carry tiles: the sentence split into
-                        the pieces the planned Sentences game puts in order)
+                        the pieces the Sentences game puts in order)
 data/kanji-strokes.js   kanji stroke order from KanjiVG (CC BY-SA 3.0, see NOTICE): the N5 kanji,
                         then (paths only) every other kanji the vocabulary uses
 data/kana-strokes.js    every kana's stroke order (and ー), same source + licence
@@ -625,10 +625,12 @@ Flashcards, and in parentheses in lists and puzzle clues — it's never part of 
 right answer. Parentheses left in `english` are optional words inside the answer
 itself ("one pair (of shoes)"); answer-checking accepts it with or without them.
 
-A sentence row (Everyday Sentences) adds what the Sentences game plays:
+A sentence row (Everyday Sentences) adds what the Sentences game plays
+(Grammar's Sentence Patterns table was folded into it on 2026-11-26, ids
+kept, so any flashcards on its 11 sentences keep their history):
 `pattern` (its grammar, behind the ⓘ), `tiles` (the sentence cut into the
 pieces Build deals — joined, exactly its Japanese; no kanji run is ever cut)
-and, for 67 of them, `mainVerb` (`{ tile, id, span? }` — the piece holding the
+and, for 71 of them, `mainVerb` (`{ tile, id, span? }` — the piece holding the
 sentence's main verb, `span` pieces long, and the verb-pair row it is a form
 of; Verb form blanks it). `mainVerb` is marked by hand, only where the
 English alone settles the form: never a mid-sentence て-form, a

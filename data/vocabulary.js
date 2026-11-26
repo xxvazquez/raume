@@ -846,25 +846,6 @@ window.RaumeStudy.data = { vocabularyTables: [
     ]
   },
   {
-    id: 59,
-    title: "Sentence Patterns",
-    category: "Grammar",
-    tableClass: "vocab-sentences",
-    rows: [
-    {"id":"v1083","type":"word","jp":[{"text":"ポーランド"},{"p":"は"},{"text":"どんな"},{"kanji":"国","reading":"くに"},{"text":"ですか。"}],"romaji":"Pōrando wa donna kuni desu ka.","english":"What kind of country is Poland?","pattern":"どんな + noun ですか: asking what kind of"},
-    {"id":"v1084","type":"word","jp":[{"text":"ふじさん"},{"p":"は"},{"kanji":"高","reading":"たか"},{"text":"い"},{"kanji":"山","reading":"やま"},{"text":"です。"}],"romaji":"Fujisan wa takai yama desu.","english":"Mt. Fuji is a tall mountain.","pattern":"い-adjective + noun: the adjective goes straight before it"},
-    {"id":"v1085","type":"word","jp":[{"text":"ここ"},{"p":"は"},{"text":"しずかなまちです。"}],"romaji":"Koko wa shizuka na machi desu.","english":"This is a quiet town.","pattern":"な-adjective + な + noun"},
-    {"id":"v1086","type":"word","jp":[{"text":"このいえ"},{"p":"は"},{"kanji":"新","reading":"あたら"},{"text":"しくないです。"}],"romaji":"Kono ie wa atarashiku nai desu.","english":"This house isn't new.","pattern":"い-adjective, not: drop い, add くない · formal: 新しくありません"},
-    {"id":"v1088","type":"word","jp":[{"text":"このへや"},{"p":"は"},{"text":"きれいじゃないです。"}],"romaji":"Kono heya wa kirei ja nai desu.","english":"This room isn't clean.","pattern":"な-adjective, not: add じゃない · formal: きれいじゃありません"},
-    {"id":"v1090","type":"word","jp":[{"text":"このえいが"},{"p":"は"},{"text":"よくないです。"}],"romaji":"Kono eiga wa yoku nai desu.","english":"This movie isn't good.","pattern":"いい, not: よくない (from よい) · formal: よくありません"},
-    {"id":"v1091","type":"word","jp":[{"text":"きっさてん"},{"p":"は"},{"text":"どこ"},{"p":"に"},{"text":"ありますか。"}],"romaji":"Kissaten wa doko ni arimasu ka.","english":"Where is the café?","pattern":"X は どこに ありますか: asking where something is"},
-    {"id":"v1092","type":"word","jp":[{"kanji":"駅","reading":"えき"},{"p":"は"},{"text":"ホテル"},{"p":"の"},{"text":"となり"},{"p":"に"},{"text":"あります。"}],"romaji":"Eki wa hoteru no tonari ni arimasu.","english":"The station is next to the hotel.","pattern":"where something is: X は place の position に あります"},
-    {"id":"v1093","type":"word","jp":[{"text":"ねこ"},{"p":"は"},{"text":"つくえ"},{"p":"の"},{"kanji":"下","reading":"した"},{"p":"に"},{"text":"います。"}],"romaji":"Neko wa tsukue no shita ni imasu.","english":"The cat is under the desk.","pattern":"います for people and animals, あります for things"},
-    {"id":"v1094","type":"word","jp":[{"text":"いえ"},{"p":"に"},{"text":"テレビ"},{"p":"が"},{"kanji":"二","reading":"ふた"},{"text":"つあります。"}],"romaji":"Ie ni terebi ga futatsu arimasu.","english":"There are two TVs in my house.","pattern":"what is there: place に X が あります"},
-    {"id":"v1095","type":"word","jp":[{"text":"わたし"},{"p":"の"},{"kanji":"友","reading":"とも"},{"text":"だち"},{"p":"は"},{"text":"おもしろい"},{"kanji":"人","reading":"ひと"},{"text":"たちです。"}],"romaji":"Watashi no tomodachi wa omoshiroi hitotachi desu.","english":"My friends are funny people.","pattern":"〜たち: more than one person (人たち, わたしたち)"},
-    ]
-  },
-  {
     id: 34,
     title: "Family",
     ordered: true,
@@ -1359,6 +1340,17 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1300","type":"word","jp":[{"kanji":"今","reading":"いま"},{"text":"、"},{"kanji":"駅","reading":"えき"},{"p":"に"},{"text":"ついた"},{"p":"よ"},{"text":"。"}],"romaji":"Ima, eki ni tsuita yo.","english":"I've just got to the station.","enNote":"casual","pattern":"に つく: arrive at","tiles":["今、","駅","に","ついた","よ。"]},
     {"id":"v1301","type":"word","jp":[{"text":"もしもし、"},{"kanji":"中山","reading":"なかやま"},{"text":"です。"},{"kanji":"今","reading":"いま"},{"text":"、だいじょうぶです"},{"p":"か"},{"text":"。"}],"romaji":"Moshimoshi, Nakayama desu. Ima, daijōbu desu ka.","english":"Hello, it's Nakayama. Is now a good time?","pattern":"on the phone: is now OK?","tiles":["もしもし、","中山","です。","今、","だいじょうぶ","です","か。"]},
     {"id":"v1302","type":"word","jp":[{"text":"あれ、"},{"kanji":"何","reading":"なに"},{"text":"？"}],"romaji":"Are, nani?","english":"What's that?","enNote":"casual","pattern":"あれ: that thing over there","tiles":["あれ、","何？"]},
+    {"id":"v1083","type":"word","jp":[{"text":"ポーランド"},{"p":"は"},{"text":"どんな"},{"kanji":"国","reading":"くに"},{"text":"ですか。"}],"romaji":"Pōrando wa donna kuni desu ka.","english":"What kind of country is Poland?","pattern":"どんな + noun ですか: asking what kind of","tiles":["ポーランド","は","どんな","国","です","か。"]},
+    {"id":"v1084","type":"word","jp":[{"text":"ふじさん"},{"p":"は"},{"kanji":"高","reading":"たか"},{"text":"い"},{"kanji":"山","reading":"やま"},{"text":"です。"}],"romaji":"Fujisan wa takai yama desu.","english":"Mt. Fuji is a tall mountain.","pattern":"い-adjective + noun: the adjective goes straight before it","tiles":["ふじさん","は","高い","山","です。"]},
+    {"id":"v1085","type":"word","jp":[{"text":"ここ"},{"p":"は"},{"text":"しずかなまちです。"}],"romaji":"Koko wa shizuka na machi desu.","english":"This is a quiet town.","pattern":"な-adjective + な + noun","tiles":["ここ","は","しずかな","まち","です。"]},
+    {"id":"v1086","type":"word","jp":[{"text":"このいえ"},{"p":"は"},{"kanji":"新","reading":"あたら"},{"text":"しくないです。"}],"romaji":"Kono ie wa atarashiku nai desu.","english":"This house isn't new.","pattern":"い-adjective, not: drop い, add くない · formal: 新しくありません","tiles":["この","いえ","は","新しくない","です。"]},
+    {"id":"v1088","type":"word","jp":[{"text":"このへや"},{"p":"は"},{"text":"きれいじゃないです。"}],"romaji":"Kono heya wa kirei ja nai desu.","english":"This room isn't clean.","pattern":"な-adjective, not: add じゃない · formal: きれいじゃありません","tiles":["この","へや","は","きれい","じゃない","です。"]},
+    {"id":"v1090","type":"word","jp":[{"text":"このえいが"},{"p":"は"},{"text":"よくないです。"}],"romaji":"Kono eiga wa yoku nai desu.","english":"This movie isn't good.","pattern":"いい, not: よくない (from よい) · formal: よくありません","tiles":["この","えいが","は","よくない","です。"]},
+    {"id":"v1091","type":"word","jp":[{"text":"きっさてん"},{"p":"は"},{"text":"どこ"},{"p":"に"},{"text":"ありますか。"}],"romaji":"Kissaten wa doko ni arimasu ka.","english":"Where is the café?","pattern":"X は どこに ありますか: asking where something is","tiles":["きっさてん","は","どこ","に","あります","か。"],"mainVerb":{"tile":4,"id":"v0734"}},
+    {"id":"v1092","type":"word","jp":[{"kanji":"駅","reading":"えき"},{"p":"は"},{"text":"ホテル"},{"p":"の"},{"text":"となり"},{"p":"に"},{"text":"あります。"}],"romaji":"Eki wa hoteru no tonari ni arimasu.","english":"The station is next to the hotel.","pattern":"where something is: X は place の position に あります","tiles":["駅","は","ホテル","の","となり","に","あります。"],"mainVerb":{"tile":6,"id":"v0734"}},
+    {"id":"v1093","type":"word","jp":[{"text":"ねこ"},{"p":"は"},{"text":"つくえ"},{"p":"の"},{"kanji":"下","reading":"した"},{"p":"に"},{"text":"います。"}],"romaji":"Neko wa tsukue no shita ni imasu.","english":"The cat is under the desk.","pattern":"います for people and animals, あります for things","tiles":["ねこ","は","つくえ","の","下","に","います。"],"mainVerb":{"tile":6,"id":"v0735"}},
+    {"id":"v1094","type":"word","jp":[{"text":"いえ"},{"p":"に"},{"text":"テレビ"},{"p":"が"},{"kanji":"二","reading":"ふた"},{"text":"つあります。"}],"romaji":"Ie ni terebi ga futatsu arimasu.","english":"There are two TVs in my house.","pattern":"what is there: place に X が あります","tiles":["いえ","に","テレビ","が","二つ","あります。"],"mainVerb":{"tile":5,"id":"v0734"}},
+    {"id":"v1095","type":"word","jp":[{"text":"わたし"},{"p":"の"},{"kanji":"友","reading":"とも"},{"text":"だち"},{"p":"は"},{"text":"おもしろい"},{"kanji":"人","reading":"ひと"},{"text":"たちです。"}],"romaji":"Watashi no tomodachi wa omoshiroi hitotachi desu.","english":"My friends are funny people.","pattern":"〜たち: more than one person (人たち, わたしたち)","tiles":["わたし","の","友だち","は","おもしろい","人たち","です。"]},
     ]
   },
   {
