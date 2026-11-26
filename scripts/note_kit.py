@@ -342,11 +342,16 @@ def _known_words():
         if not line.startswith('{"id"'):
             continue
         row = json.loads(line)
-        if row.get("type") != "word":
+        # A verb is a verb-pair: its dictionary and ます forms both count.
+        if row.get("type") == "word":
+            spellings = [row.get("jp") or []]
+        elif row.get("type") == "verb-pair":
+            spellings = [f.get("jp") or [] for f in row.get("forms") or []]
+        else:
             continue
-        segs = row.get("jp") or []
-        spelt.add("".join(f"{s['kanji']}({s['reading']})" if "kanji" in s else s.get("text", "") for s in segs))
-        read.add("".join(s.get("reading") or s.get("text", "") for s in segs))
+        for segs in spellings:
+            spelt.add("".join(f"{s['kanji']}({s['reading']})" if "kanji" in s else s.get("text", "") for s in segs))
+            read.add("".join(s.get("reading") or s.get("text", "") for s in segs))
     return spelt, read
 
 
@@ -368,12 +373,13 @@ def _write_words(out_html, date, source):
     print(f"{len(rows)} of {len(_words)} words -> {out.name}")
 
 
-def tip(mark, text, ex=None):
+def tip(mark, text, ex=None, check=True):
     """A tip: `text` is the rule, short; `ex` its examples, one per line --
     (jp, romaji, english) tuples (checked like any Japanese line; romaji or
     english may be "") or ready markup such as ok() / wrong(). Keep the
     Japanese out of `text` and in `ex`, so a tip reads rule first, then a
-    line per example, never one run-on sentence."""
+    line per example, never one run-on sentence. check=False leaves the
+    examples out of render()'s Japanese check (digits: 7じ = shichiji)."""
     lines = ""
     for e in ex or []:
         if isinstance(e, str):
@@ -383,7 +389,7 @@ def tip(mark, text, ex=None):
         jp = jp_markup(jp)
         # "ひと → ひとたち" / "hito → hitotachi": each side checked on its own.
         jps, ros = jp.split("→"), ro.split("→") if ro else []
-        for i, part in enumerate(jps):
+        for i, part in enumerate(jps if check else []):
             _check(part.strip(), ros[i].strip() if len(ros) == len(jps) else "")
         lines += (f'<div class="rn-ex"><span class="rn-ex-jp" lang="ja">{jp}</span>'
                   + (f'<span class="rn-ex-ro">{_text(ro)}</span>' if ro else "")

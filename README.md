@@ -178,7 +178,7 @@ components and calls `render()` with the lesson's date, which names the note
 furigana and romaji and lists each word once. A class note (Sakura or WSJJ)
 has no word lists — the kit writes the lesson's words to a `.csv` beside it
 for **Import a list**: every word into your Sakura table, only words raume
-lacks into your WSJJ table. Lesson files stay in gitignored `private-notes/`.
+lacks (verbs in either form count) into your WSJJ table. Lesson files stay in gitignored `private-notes/`.
 
 ### Around the app
 
