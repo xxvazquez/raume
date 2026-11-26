@@ -1782,6 +1782,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (state.exercise === "particles" ? !blanks.length : state.exercise === "verbform" ? !row.mainVerb
           : state.exercise === "build" && row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
+        // JLPT level: a sentence's is its grammar's or its hardest word's.
+        if (!only && state.levels.length && state.levels.indexOf(String(row.jlpt || "")) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
         // Only Build and Verb form deal the pieces.
@@ -3250,9 +3252,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var picks = [], sentences = state.mode === "sentences";
     if (sentences) {
       short = state.poolCount < MIN_WORDS;
-      why = "There aren’t enough " + (state.register === "both" ? "" : optionLabel(REGISTER_OPTS, state.register).toLowerCase() + " ") + "sentences to play — pick another Register.";
+      why = "There aren’t enough " + (state.register === "both" ? "" : optionLabel(REGISTER_OPTS, state.register).toLowerCase() + " ") + (state.levels.length ? levelsLabel() + " " : "") + "sentences to play — pick another Register" + (state.levels.length ? " or JLPT level" : "") + ".";
       picks.push(["exercise", "Exercise", optionLabel(EXERCISE_OPTS, state.exercise), EXERCISE_OPTS]);
       picks.push(["register", "Register", optionLabel(REGISTER_OPTS, state.register), REGISTER_OPTS]);
+      if (state.source !== "tricky") picks.push(["levels", "JLPT level", levelsLabel(), LEVEL_OPTS]);
     }
     else {
       // JLPT level: right under Words from, the other half of "which words".

@@ -690,6 +690,15 @@ async function main() {
       && document.getElementById("optionsDot").hidden;
     return startAll && one && two && kept && off;
   })());
+  check("a sentence carries the level of its grammar: 〜ことがすき reads JLPT N4 in its ⓘ, under its pattern", (() => {
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v1229"]');
+    const btn = row && row.querySelector(".row-info-btn");
+    if (!btn || row.dataset.jlpt !== "4") return false;
+    btn.click();
+    const lines = [...document.querySelectorAll(".role-pop-list .role-pop-line")].map(l => l.textContent);
+    btn.click();
+    return lines.length === 2 && /こと/.test(lines[0]) && lines[1] === "JLPT N4";
+  })());
   check("typing n3 in search lists that level's words, alone or with more text", (() => {
     const search = document.getElementById("tableSearch");
     const shown = () => [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
@@ -4173,6 +4182,16 @@ async function main() {
     document.querySelector('#fcGsMenu-size .fc-gs-opt[data-value="' + before + '"]').click();
     return same && opened && esc && picked && xw.state.size === before;
   })());
+  check("the Sentences game keeps to the JLPT levels ticked", (() => {
+    const st = xw.state, keep = { levels: st.levels, exercise: st.exercise, register: st.register, source: st.source };
+    Object.assign(st, { levels: [], exercise: "meaning", register: "both", source: "flashcards" });
+    const all = xw.sentencePool();
+    st.levels = ["4"];
+    const n4 = xw.sentencePool();
+    const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
+    Object.assign(st, keep);
+    return all.length > n4.length && n4.length > 0 && n4.every(x => idx[x.id].jlpt === 4);
+  })());
   check("JLPT level ticks one level or several -- the menu stays open between ticks -- and All puts every word back", (() => {
     const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
     const menu = () => document.getElementById("fcGsMenu-levels");
@@ -4898,7 +4917,7 @@ async function main() {
     return rows.length >= 200 && cut;
   })());
   xwPick("mode", "sentences");
-  check("Sentences' setup: Exercise, Register and Sentence count, no Words from or Script; Register narrows the pool to polite or casual", (() => {
+  check("Sentences' setup: Exercise, Register, JLPT level and Sentence count, no Words from or Script; Register narrows the pool to polite or casual", (() => {
     xwSetup();
     const panel = document.querySelector("#fcPanelGames");
     const rows = [...panel.querySelectorAll(".fc-gs-pick")].map(b => b.dataset.pick || b.id).join("|");
@@ -4908,7 +4927,7 @@ async function main() {
     const regs = {};
     ["polite", "casual", "both"].forEach(r => { xw.state.register = r; regs[r] = xw.sentencePool(); });
     xw.state.register = "both";
-    return rows === "exercise|register|size" && exercises === "Build|Particles|Verb form|Meaning" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
+    return rows === "exercise|register|levels|size" && exercises === "Build|Particles|Verb form|Meaning" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
       && regs.polite.every(s => byId(s.id).enNote !== "casual") && regs.casual.every(s => byId(s.id).enNote === "casual")
       && regs.both.length === regs.polite.length + regs.casual.length && regs.both.every(s => s.tiles.length >= 3);
   })());

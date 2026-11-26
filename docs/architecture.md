@@ -637,7 +637,13 @@ the Tanos / Waller lists (via the open `yomitan-jlpt-vocab` data, matched by
 writing, then by reading + meaning), with an N5 class's basics those lists
 file higher or leave out — greetings, counters, numbers, dates, times,
 country names and their X人 / X語 — set to 5 by hand; every N5 kanji row is
-5. Sentences, city and sight names, and foods outside the lists carry none.
+5. City and sight names, and foods outside the lists, carry none. Each
+Everyday Sentences row has a level too: the harder of its grammar point's
+(N4 for casual contractions 〜てる, 〜にします, 〜ことがすき, noun + で as a
+cause, けど, の？ questions, 〜つ目…; N5 otherwise), its `mainVerb`'s and
+that of any levelled word written in it (kanji / katakana words, or kana
+words of four letters or more; きょうし is skipped, since it sits inside
+べんきょうし…). The Sentences game filters by it.
 Audited 2026-11-26: a word written like a different word in the lists
 (十分 "10 minutes" vs "enough", おや "parent" vs "oh!", レバー "liver" vs
 "lever") takes its own meaning's level, or none; a set of words at one
