@@ -1223,6 +1223,12 @@ async function main() {
     return check1(".kr:hover::after", ".kr.kr-on::after")
       && check1(".particle[data-r]:hover::after", ".particle[data-r].particle-on::after");
   })());
+  check("every :hover rule sits behind a (hover: …) media query -- iOS leaves a tapped element stuck in :hover, so an ungated one keeps a tapped row or tab highlighted", (() => {
+    const gated = r => { for (let p = r.parentRule; p; p = p.parentRule) if (p.media && /hover/.test(p.media.mediaText)) return true; return false; };
+    const loose = allCssRules.filter(r => r.selectorText && /:hover/.test(r.selectorText) && !gated(r)).map(r => r.selectorText);
+    if (loose.length) console.log("    ungated :hover:", loose.slice(0, 5).join(" | "));
+    return loose.length === 0;
+  })());
   check("clicking the Japanese word reveals its romaji (touch path) and toggles the pinned state", (() => {
     const jpword = saltRow.querySelector('td.jp .jpword[data-romaji]');
     jpword.click();
@@ -4163,6 +4169,25 @@ async function main() {
   check("an arroword clue cell is keyboard-reachable and knows which cell its word starts at", (() => {
     const cc = document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue");
     return cc.getAttribute("tabindex") === "0" && /^\d+,\d+$/.test(cc.dataset.start);
+  })());
+  check("an arroword too narrow for 11px clue text goes compact (arrows alone, the list shown), and a long clue keeps a shorter form for its square", (() => {
+    const pz = document.querySelector("#fcPanelCrosswords .fc-xw-puzzle-arroword");
+    const cols = Number(pz.dataset.cols);
+    Object.defineProperty(pz, "clientWidth", { configurable: true, get: () => cols * 30 });
+    window.dispatchEvent(new window.Event("resize"));
+    const compact = pz.classList.contains("fc-xw-puzzle-compact");
+    Object.defineProperty(pz, "clientWidth", { configurable: true, get: () => cols * 56 + 400 });
+    window.dispatchEvent(new window.Event("resize"));
+    const roomy = !pz.classList.contains("fc-xw-puzzle-compact");
+    delete pz.clientWidth;
+    const rules = allCssRules.map(r => r.selectorText || "");
+    const css = rules.includes(".fc-xw-puzzle-compact .fc-xw-cluetext") && rules.includes(".fc-xw-puzzle-arroword:not(.fc-xw-puzzle-compact) > .fc-xw-side")
+      && rules.includes(".fc-xw-puzzle-arroword .fc-xw-cluetext-full");
+    const short = [...pz.querySelectorAll(".fc-xw-cluetext-short")].every(s => {
+      const full = s.previousElementSibling;
+      return full && full.classList.contains("fc-xw-cluetext-full") && s.textContent.length < full.textContent.length;
+    });
+    return cols > 0 && compact && roomy && css && short;
   })());
   check("tapping a clue focuses that word's first cell", (() => {
     const cc = document.querySelector("#fcPanelCrosswords .fc-xw-cell-clue");
