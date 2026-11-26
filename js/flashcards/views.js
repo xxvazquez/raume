@@ -111,7 +111,7 @@ window.RaumeStudy.flashcards.views = (function () {
       (window.RaumeStudy.flashcards.appBadge && window.RaumeStudy.flashcards.appBadge.supported
         ? '<li><span class="help-term">Badge</span><span class="help-desc">Settings › App icon puts the number of cards to study on raume’s icon.</span></li>' : '') +
       '<li><span class="help-term">Writing</span><span class="help-desc">Off until you turn it on: write the word stroke by stroke, in kana (みず) or with its kanji (水).</span></li>' +
-      '<li><span class="help-term">Verb forms</span><span class="help-desc">Off until you turn it on: type a verb’s 〜ません, 〜ました, 〜ませんでした or て-form in romaji.</span></li>' +
+      '<li><span class="help-term">Verb forms</span><span class="help-desc">Off until you turn it on: type one of a verb’s polite or plain forms (〜ません, 〜ない, 〜た…) or its て-form in romaji.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +

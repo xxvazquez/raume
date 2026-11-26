@@ -248,11 +248,13 @@ async function main() {
   check("renders 52 table sections", sections.length === 52);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
   check("renders 1143 vocabulary rows", totalRows === 1143);
-  check("a verb's ⓘ data lists its polite forms and て-form, worked out by group (行って, 泳いで, 来(き)て)", (() => {
+  check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
     const forms = id => JSON.parse(document.querySelector('tr[data-vocab-id="' + id + '"] .verb-forms-note')?.dataset.forms || "[]").map(f => f[0]);
     const iku = forms("v0141"), oyogu = forms("v0155"), kuru = forms("v0135"), taberu = forms("v0139");
-    return iku.join() === "行きません,行きました,行きませんでした,行って" && oyogu[3] === "泳いで"
-      && kuru[3] === "来(き)て" && kuru[0] === "来(き)ません" && taberu[3] === "食べて";
+    const aru = forms(window.RaumeStudy.data.vocabularyTables.flatMap(t => t.rows).find(r => r.type === "verb-pair" && r.forms[0].romaji === "aru").id);
+    return iku.join() === "行きません,行きました,行きませんでした,行かない,行った,行かなかった,行って" && oyogu[6] === "泳いで" && oyogu[4] === "泳いだ"
+      && kuru[6] === "来(き)て" && kuru[0] === "来(き)ません" && kuru[3] === "来(こ)ない" && kuru[4] === "来(き)た"
+      && taberu.slice(3).join() === "食べない,食べた,食べなかった,食べて" && aru.slice(3, 6).join() === "ない,あった,なかった";
   })());
   check("a sequence table keeps its teaching order, not A-Z by English (one, two ... ten; おととい before きのう)", (() => {
     const english = title => {
@@ -5462,11 +5464,15 @@ async function main() {
   check("a verb offers Verb → conjugated form (jp-vf); a noun doesn't", fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu")).indexOf("jp-vf") !== -1
     && fc.directionsForEntry(beerEntry).indexOf("jp-vf") === -1
     && window.RaumeStudy.flashcards.store.DIRECTION_LABEL["jp-vf"] === "Verb → conjugated form");
-  check("a Verb → conjugated form card asks a different form each review and checks it as romaji (行く: past negative, then the て-form 行って)", (() => {
+  check("a Verb → conjugated form card asks a different form each review and checks it as romaji (行く: past negative, plain past 行った, then the て-form 行って)", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const iku = Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu");
-    const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 3 });
-    const kuru = vi.cardView(Object.values(vocabIndex).find(e => e.romajiDisplay === "kuru / kimasu"), { direction: "jp-vf", reps: 3 });
+    const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 6 });
+    const plainPast = vi.cardView(iku, { direction: "jp-vf", reps: 4 });
+    const kuruEntry = Object.values(vocabIndex).find(e => e.romajiDisplay === "kuru / kimasu");
+    const kuru = vi.cardView(kuruEntry, { direction: "jp-vf", reps: 6 }), konai = vi.cardView(kuruEntry, { direction: "jp-vf", reps: 3 });
+    if (!(/plain past/.test(plainPast.entry.askLabel) && fc.checkAnswer(plainPast.entry, "jp-ro", "itta") && plainPast.entry.jpPlain === "行った"
+      && konai.entry.jpReading === "こない" && fc.checkAnswer(konai.entry, "jp-ro", "konai"))) return false;
     return pastNeg.direction === "jp-ro" && /past negative/.test(pastNeg.entry.askLabel)
       && fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasen deshita") && fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasendeshita")
       && !fc.checkAnswer(pastNeg.entry, "jp-ro", "ikimasen")

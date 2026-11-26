@@ -255,8 +255,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // verb's group -- a ru-verb or irregular verb adds て to the stem, a u-verb
   // changes by its last sound (い・ち・り -> って, み・び・に -> んで,
   // き -> いて, ぎ -> いで, し -> して), and 行く is the one exception (行って).
+  // The plain (casual) set follows from the same stem: ない adds to a
+  // ru-verb's stem, a u-verb's last sound moves to the あ row (書き -> 書か,
+  // and い -> わ: 買い -> 買わ), する verbs give しない and 来る gives 来(こ)ない;
+  // ある is the one u-verb exception (ない). The plain past is the て-form
+  // with た / だ (行った, 泳いだ), and なかった is ない's past.
   // Shown in the row's ⓘ, one per line.
   var TE_GODAN = { 'い': 'って', 'ち': 'って', 'り': 'って', 'み': 'んで', 'び': 'んで', 'に': 'んで', 'き': 'いて', 'ぎ': 'いで', 'し': 'して' };
+  var A_ROW = { 'い': 'わ', 'き': 'か', 'ぎ': 'が', 'し': 'さ', 'ち': 'た', 'に': 'な', 'び': 'ば', 'み': 'ま', 'り': 'ら' };
   function verbForms(row) {
     var polite = row.forms && row.forms[1];
     if (!polite || !row.verbClass) return null;
@@ -274,7 +280,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     else if (/行き$/.test(stem)) te = stem.slice(0, -1) + 'って';
     else if (TE_GODAN[stem.slice(-1)]) te = stem.slice(0, -1) + TE_GODAN[stem.slice(-1)];
     else return null;
-    return [[stem + 'ません', 'negative'], [stem + 'ました', 'past'], [stem + 'ませんでした', 'past negative'], [te, 'て-form']];
+    var nai;
+    if (row.verbClass === 'ichidan' || (row.verbClass === 'irregular' && /し$/.test(stem))) nai = stem + 'ない';
+    else if (row.verbClass === 'irregular') nai = stem.replace(/来\(き\)$/, '来(こ)').replace(/き$/, 'こ') + 'ない';
+    else if (jpPlain(row.forms[0].jp) === 'ある') nai = 'ない';
+    else if (A_ROW[stem.slice(-1)]) nai = stem.slice(0, -1) + A_ROW[stem.slice(-1)] + 'ない';
+    else return null;
+    return [[stem + 'ません', 'polite negative'], [stem + 'ました', 'polite past'], [stem + 'ませんでした', 'polite past negative'],
+      [nai, 'plain negative'], [te.replace(/て$/, 'た').replace(/で$/, 'だ'), 'plain past'], [nai.slice(0, -1) + 'かった', 'plain past negative'],
+      [te, 'て-form']];
   }
   vocab.verbForms = verbForms;
   function verbFormsNote(row) {

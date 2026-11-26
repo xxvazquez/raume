@@ -150,10 +150,10 @@ flowchart LR
 - Each vocab entry maps to up to six independently scheduled cards (jp-en,
   jp-ro, ro-en, en-ro, en-wr, en-wk), plus **jp-vf** (Verb → conjugated form) for a
   verb, never Japanese-to-type. A jp-vf card is one card per verb: each review
-  asks the form `card.reps % 4` picks (〜ません / 〜ました / 〜ませんでした /
-  て-form), shown and checked as a jp-ro card by `vocab-index.js` `cardView`
+  asks the form `card.reps % 7` picks (polite 〜ません / 〜ました / 〜ませんでした,
+  plain 〜ない / 〜た / 〜なかった, て-form), shown and checked as a jp-ro card by `vocab-index.js` `cardView`
   (a derived entry whose romaji answers, reading and written form are that
-  form's; `entry.verbForms` holds all four, worked out from the polite form).
+  form's; `entry.verbForms` holds all seven, worked out from the polite form).
   Off by default like the writing ones (`store.isOptInDirection`); its column
   is `enabled_jp_vf` and its cards need the widened direction check in
   `supabase/schema.sql`. Rows whose romaji is still kana

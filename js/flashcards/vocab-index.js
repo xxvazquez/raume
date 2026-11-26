@@ -129,7 +129,16 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // stem into the て-form by the verb's group -- so the kanji keep their
   // reading as written (来ます -> 来(き)て). The same rules as the forms in a
   // verb's ⓘ (js/vocab/render.js verbForms).
-  var VF_LABELS = ["negative", "past", "past negative", "て-form"];
+  // The plain set too: ない by group (書か-ない, 買わ-ない, 来(こ)ない, ある ->
+  // ない), the plain past from the て-form (行った), なかった from ない.
+  var VF_LABELS = ["polite negative", "polite past", "polite past negative", "plain negative", "plain past", "plain past negative", "て-form"];
+  var A_KANA = { "い": "わ", "き": "か", "ぎ": "が", "し": "さ", "ち": "た", "に": "な", "び": "ば", "み": "ま", "り": "ら" };
+  function aRomaji(stem) {
+    if (/shi$/.test(stem)) return stem.slice(0, -3) + "sa";
+    if (/chi$/.test(stem)) return stem.slice(0, -3) + "ta";
+    if (/[aiueoāīūēō]i$/.test(stem)) return stem.slice(0, -1) + "wa";
+    return /i$/.test(stem) ? stem.slice(0, -1) + "a" : null;
+  }
   var TE_KANA = { "い": "って", "ち": "って", "り": "って", "み": "んで", "び": "んで", "に": "んで", "き": "いて", "ぎ": "いで", "し": "して" };
   function teRomaji(stem, iku) {
     if (iku) return stem.slice(0, -2) + "tte";
@@ -172,10 +181,34 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var teTail = !godan ? "て" : iku ? "って" : TE_KANA[stemKana.slice(-1)];
     var teJp = written(teTail, godan);
     if (!teJp) return null;
+    var naiJp, naiKana, naiRo;
+    if (row.verbClass === "ichidan" || (row.verbClass === "irregular" && /し$/.test(stemKana))) {
+      naiJp = written("ない"); naiKana = stemKana + "ない"; naiRo = stemRo + "nai";
+    } else if (row.verbClass === "irregular") {
+      // 来る: its き becomes こ, in the reading over 来 or the kana itself.
+      var end = stemJp[stemJp.length - 1];
+      if (!end || !/き$/.test(end.kanji ? end.reading : end.text) || !/ki$/.test(stemRo)) return null;
+      var ko = end.kanji ? { kanji: end.kanji, reading: end.reading.slice(0, -1) + "こ" } : { text: end.text.slice(0, -1) + "こ" };
+      naiJp = stemJp.slice(0, -1).concat([ko, { text: "ない" }]);
+      naiKana = stemKana.slice(0, -1) + "こない"; naiRo = stemRo.slice(0, -2) + "konai";
+    } else if (jpReadingFn(row.forms[0].jp) === "ある") {
+      naiJp = [{ text: "ない" }]; naiKana = "ない"; naiRo = "nai";
+    } else {
+      var a = A_KANA[stemKana.slice(-1)], aRo = aRomaji(stemRo);
+      if (!a || !aRo) return null;
+      naiJp = written(a + "ない", true); naiKana = stemKana.slice(0, -1) + a + "ない"; naiRo = aRo + "nai";
+    }
+    if (!naiJp) return null;
+    var past = function (s) { return s.replace(/て$/, "た").replace(/で$/, "だ"); };
+    var taJp = teJp.slice(0, -1).concat([{ text: past(teJp[teJp.length - 1].text) }]);
+    var nakattaJp = naiJp.slice(0, -1).concat([{ text: naiJp[naiJp.length - 1].text.replace(/い$/, "かった") }]);
     var parts = [
       [written("ません"), stemKana + "ません", stemRo + "masen"],
       [written("ました"), stemKana + "ました", stemRo + "mashita"],
       [written("ませんでした"), stemKana + "ませんでした", stemRo + "masen deshita"],
+      [naiJp, naiKana, naiRo],
+      [taJp, past(teKana), teRo.replace(/te$/, "ta").replace(/de$/, "da")],
+      [nakattaJp, naiKana.replace(/い$/, "かった"), naiRo.replace(/nai$/, "nakatta")],
       [teJp, teKana, teRo]
     ];
     return parts.map(function (p, i) {

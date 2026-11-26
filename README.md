@@ -95,7 +95,7 @@ The ⓘ lists:
 | **い** / **な** | Adjective type | It breaks the pattern: a な-adjective ending in い (きれい), or irregular いい |
 | **五段** / **一段** / **変格** | u-verb, ru-verb, irregular verb | The group is easy to mistake (切る, 帰る), or the verb is 来る |
 | **を** **に** **が** … | The particles a word takes, e.g. 聞く: を *what you listen to*, に *who you ask* | — |
-| **Forms** | A verb's 〜ません, 〜ました, 〜ませんでした and て-form (行って, 来(き)て) | — |
+| **Forms** | A verb's polite 〜ません, 〜ました, 〜ませんでした, its plain 〜ない, 〜た, 〜なかった (書かない, 行った, 来(こ)ない, ある → ない) and its て-form (行って, 来(き)て) | — |
 
 Usage traps get a plain line of their own (多い doesn't go right before a
 noun; 遊ぶ isn't for sports). Mimetic words (*mochimochi*) are 擬態語, not
@@ -213,9 +213,9 @@ to flashcards**, or single words from **Library** or a search result.
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
 - Up to six cards per word: **JP → EN · JP → Romaji · Romaji → EN ·
   EN → Romaji**, and two handwritten, **EN → Japanese (kana)** and
-  **EN → Japanese (kanji)**. A verb can add **Verb → form**: one of 〜ません,
-  〜ました, 〜ませんでした or the て-form, a different one each time, typed in
-  romaji. You never type Japanese.
+  **EN → Japanese (kanji)**. A verb can add **Verb → form**: one of its
+  polite 〜ません, 〜ました, 〜ませんでした, plain 〜ない, 〜た, 〜なかった or the
+  て-form, a different one each time, typed in romaji. You never type Japanese.
 - **Study directions** in Settings picks which you get; the handwritten two
   and verb forms are off until you turn them on.
 - A session mixes everything due (plus learning steps due within 20 minutes)
