@@ -4151,6 +4151,13 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
 @media (hover: none) { .row-info-btn:active { opacity: 1; color: var(--section-strong); } }
 .row-info-btn::after { content: ""; position: absolute; inset: -8px; }
 .row-info-btn { position: relative; }
+/* A row's icons (+, ⓘ, the eye) sit 10px apart and their touch areas meet
+   halfway, never overlapping: the eye's used to reach over the right of
+   the ⓘ, so a tap on the ⓘ hid the row. Each keeps the full 44pt height;
+   the last keeps its reach past the row's edge. */
+.row-actions > .row-info-btn, .row-actions > .row-hide-btn { margin-left: 10px; }
+.row-actions > :is(.fc-toggle-btn, .row-info-btn, .row-hide-btn)::after { left: -5px; right: -5px; }
+.row-actions > :is(.fc-toggle-btn, .row-info-btn, .row-hide-btn):last-child::after { right: min(-5px, calc(50% - 22px)); }
 /* Nothing to explain while the English is hidden or covered (a particle's
    role would give the answer away), so the ⓘ fades with the row icons. */
 body.hide-english .vocab .row-info-btn,
