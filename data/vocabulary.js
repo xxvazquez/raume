@@ -177,7 +177,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0082","type":"word","jp":[{"kanji":"親子丼","reading":"おやこどん"}],"romaji":"oyakodon","english":"chicken-and-egg rice bowl"},
     {"id":"v0083","type":"word","jp":[{"kanji":"焼","reading":"や"},{"text":"きそば"}],"romaji":"yakisoba","english":"fried noodles"},
     {"id":"v0084","type":"word","jp":[{"kanji":"焼","reading":"や"},{"text":"き"},{"kanji":"鳥","reading":"とり"}],"romaji":"yakitori","english":"grilled chicken skewers"},
-    {"id":"v0085","type":"word","jp":[{"kanji":"鍋","reading":"なべ"}],"romaji":"nabe","english":"hot pot"},
+    {"id":"v0085","type":"word","jp":[{"kanji":"鍋","reading":"なべ"},{"kanji":"料理","reading":"りょうり"}],"romaji":"naberyōri","english":"hot pot"},
     {"id":"v0086","type":"word","jp":[{"kanji":"唐揚","reading":"からあ"},{"text":"げ"}],"romaji":"karaage","english":"Japanese fried chicken"},
     {"id":"v0087","type":"word","jp":[{"kanji":"焼肉","reading":"やきにく"}],"romaji":"yakiniku","english":"Japanese grilled meat"},
     {"id":"v0088","type":"word","jp":[{"text":"たこ"},{"kanji":"焼","reading":"や"},{"text":"き"}],"romaji":"takoyaki","english":"octopus-filled savory balls"},
