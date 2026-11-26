@@ -122,7 +122,7 @@ dot on it means something is off its default.
 | Option | Does |
 | --- | --- |
 | **Japanese / Furigana / English** | Hide a column (never both text columns). |
-| **JLPT level** | **All**, or one level's words only. Tables and topics without any of them step aside, and search keeps to that level too. |
+| **JLPT level** | **All levels**, or tick one level or several (N5 + N4) to show only their words. Tables and topics without any of them step aside, and search keeps to them too. |
 | **Cover answers** | Blanks the English (and the kanji readings); tap a row to reveal it. |
 | **Show polite** | Switches verbs to 〜ます. Only while the Verbs table is open. |
 | **Highlight progress** | The Known green and Tricky amber washes, on or off together. |
@@ -320,7 +320,7 @@ kept. **Undo** takes a pause back.
 | Card | Shows |
 | --- | --- |
 | **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of your daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
-| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one level's words (**N5 words**…) or one table. Study now follows it; everything else still counts all cards |
+| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…) or one table. Study now follows it; everything else still counts all cards |
 | **Streak** | Days in a row, this week as seven dots, and your best |
 | **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under your target) |
 | **Awards** | The newest six and the nearest to go; **Show all** for the rest |

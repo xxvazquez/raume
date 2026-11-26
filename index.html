@@ -132,7 +132,17 @@
             <button type="button" class="opt-row opt-switch active" data-col="japanese" aria-pressed="true">Japanese</button>
             <button type="button" class="opt-row opt-switch active" data-col="furigana" aria-pressed="true">Furigana</button>
             <button type="button" class="opt-row opt-switch active" data-col="english" aria-pressed="true">English</button>
-            <label class="opt-row opt-pick"><span class="opt-pick-label">JLPT level</span><span class="fc-xw-menu-val"><span id="levelPickVal">All</span><svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg></span><select class="fc-xw-pick-select" id="levelSelect" aria-label="JLPT level"><option value="">All</option><option value="5">N5</option><option value="4">N4</option><option value="3">N3</option><option value="2">N2</option><option value="1">N1</option></select></label>
+          </div>
+        </div>
+        <div class="opt-group">
+          <h3 class="opt-head">JLPT level</h3>
+          <div class="opt-list" id="levelChecks" role="group" aria-label="JLPT level">
+            <button type="button" class="opt-row opt-check" data-level="" aria-pressed="true">All levels<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
+            <button type="button" class="opt-row opt-check" data-level="5" aria-pressed="false">N5<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
+            <button type="button" class="opt-row opt-check" data-level="4" aria-pressed="false">N4<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
+            <button type="button" class="opt-row opt-check" data-level="3" aria-pressed="false">N3<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
+            <button type="button" class="opt-row opt-check" data-level="2" aria-pressed="false">N2<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
+            <button type="button" class="opt-row opt-check" data-level="1" aria-pressed="false">N1<svg class="opt-check-ic" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg></button>
           </div>
         </div>
         <div class="opt-group">
@@ -220,7 +230,7 @@
       <summary><span class="help-tile" data-tile="indigo" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h6.2M12.8 5H16M2 13h6.2M12.8 13H16M2 9h1.8M8.2 9H16"/><circle cx="10.5" cy="5" r="2.3"/><circle cx="10.5" cy="13" r="2.3"/><circle cx="6" cy="9" r="2.3"/></svg></span><span class="help-sum"><h3>Options</h3><span class="help-sub">Show, level, cover, polite, highlight, print</span></span></summary>
       <ul class="help-rows">
         <li><span class="help-term">Japanese · Furigana · English</span><span class="help-desc">Switch any of them off. A dot on Options means something is changed.</span></li>
-        <li><span class="help-term">JLPT level</span><span class="help-desc">Show one level’s words only, N5 to N1; search keeps to it too.</span></li>
+        <li><span class="help-term">JLPT level</span><span class="help-desc">Tick one level or several (N5 + N4) to show only their words; search keeps to them too. All levels shows everything.</span></li>
         <li><span class="help-term">Cover answers</span><span class="help-desc">Blanks the English — tap a row to check yourself.</span></li>
         <li><span class="help-term">Show polite</span><span class="help-desc">Verb tables switch to the 〜ます form.</span></li>
         <li><span class="help-term">Highlight progress</span><span class="help-desc">The green of known words and amber of tricky ones, on or off.</span></li>

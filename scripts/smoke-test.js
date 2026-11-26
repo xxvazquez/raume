@@ -661,27 +661,34 @@ async function main() {
     btn.click();
     return shown && btn.getAttribute("aria-label") === "Details";
   })());
-  check("Options › JLPT level shows one level: tables without it go, the dot lights, and search keeps to it", (() => {
-    const sel = document.getElementById("levelSelect");
-    if (!sel) return false;
-    sel.value = "4";
-    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
-    const secs = [...document.querySelectorAll("#vocabulary .table-section")];
-    const on = document.body.dataset.jlptFilter === "4" && secs.some(s => s.classList.contains("level-empty"))
-      && secs.every(s => s.classList.contains("level-empty") === !s.querySelector('tbody tr[data-jlpt="4"]'))
-      && !document.getElementById("optionsDot").hidden && document.getElementById("levelPickVal").textContent === "N4"
-      && !![...document.querySelectorAll("#vocabulary .table-section")].find(s => !s.classList.contains("level-empty"));
+  check("Options › JLPT level ticks one level or several: only their rows show, empty tables go, the dot lights, and search keeps to them", (() => {
+    const box = document.getElementById("levelChecks");
+    if (!box) return false;
+    const tick = v => box.querySelector('.opt-check[data-level="' + v + '"]').click();
+    const pressed = () => [...box.querySelectorAll('.opt-check[aria-pressed="true"]')].map(b => b.dataset.level).join(",");
+    const secs = () => [...document.querySelectorAll("#vocabulary .table-section")];
+    const fits = (r, set) => set.indexOf(r.dataset.jlpt) !== -1;
+    const startAll = pressed() === "";
+    tick("4");
+    const one = document.body.dataset.jlptFilter === "4" && pressed() === "4"
+      && secs().every(s => s.classList.contains("level-empty") === !s.querySelector('tbody tr[data-jlpt="4"]'))
+      && [...document.querySelectorAll("#vocabulary tbody tr")].every(r => r.classList.contains("level-out") === !fits(r, ["4"]))
+      && !document.getElementById("optionsDot").hidden;
+    tick("3");
+    const two = document.body.dataset.jlptFilter === "4,3" && pressed() === "4,3"
+      && [...document.querySelectorAll("#vocabulary tbody tr")].every(r => r.classList.contains("level-out") === !fits(r, ["4", "3"]))
+      && secs().every(s => s.classList.contains("level-empty") === !s.querySelector('tbody tr[data-jlpt="4"], tbody tr[data-jlpt="3"]'));
     const search = document.getElementById("tableSearch");
     search.value = "to";
     search.dispatchEvent(new window.Event("input"));
     const hits = [...document.querySelectorAll("#vocabulary tbody tr:not(.search-hidden)")].filter(r => !r.closest(".table-section.search-hidden"));
-    const kept = hits.length > 0 && hits.every(r => r.dataset.jlpt === "4");
+    const kept = hits.length > 0 && hits.every(r => fits(r, ["4", "3"])) && hits.some(r => r.dataset.jlpt === "4");
     search.value = "";
     search.dispatchEvent(new window.Event("input"));
-    sel.value = "";
-    sel.dispatchEvent(new window.Event("change", { bubbles: true }));
-    const off = !document.body.dataset.jlptFilter && !document.querySelector("#vocabulary .level-empty") && document.getElementById("optionsDot").hidden;
-    return on && kept && off;
+    tick("");
+    const off = !document.body.dataset.jlptFilter && pressed() === "" && !document.querySelector("#vocabulary .level-empty, #vocabulary .level-out")
+      && document.getElementById("optionsDot").hidden;
+    return startAll && one && two && kept && off;
   })());
   check("typing n3 in search lists that level's words, alone or with more text", (() => {
     const search = document.getElementById("tableSearch");
@@ -3173,6 +3180,15 @@ async function main() {
     check("...and picking N4 builds Study now from N4 words alone", fcNs.scheduling.studyScope() === "jlpt:4"
       && /N4 words/.test(pick().closest(".fc-study-from").textContent)
       && lvQueue.length > 0 && lvQueue.every(id => lvIndex[lvCards[id].vocabId].jlpt === 4));
+    const both = pick().querySelector('option[value="jlpt:5,4"]');
+    pick().value = "jlpt:5,4";
+    pick().dispatchEvent(new window.Event("change", { bubbles: true }));
+    await flush();
+    const bothQueue = fcNs.scheduling.buildQueue(new Date());
+    check("...and N5 + N4 together builds it from both levels", !!both && fcNs.scheduling.studyScope() === "jlpt:5,4"
+      && /N5 \+ N4 words/.test(pick().closest(".fc-study-from").textContent)
+      && bothQueue.some(id => lvIndex[lvCards[id].vocabId].jlpt === 4) && bothQueue.some(id => lvIndex[lvCards[id].vocabId].jlpt === 5)
+      && bothQueue.every(id => [5, 4].indexOf(lvIndex[lvCards[id].vocabId].jlpt) !== -1));
     pick().value = "";
     pick().dispatchEvent(new window.Event("change", { bubbles: true }));
     await flush();

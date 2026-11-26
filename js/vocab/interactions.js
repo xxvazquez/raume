@@ -1487,7 +1487,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const lvTok = tok ? tok[1] : '';
       const mq = lvTok ? q.replace(tok[0], ' ').trim() : q;
       // Options › Level narrows results the same way; a typed token wins.
-      const lv = lvTok || document.body.dataset.jlptFilter || '';
+      const lvSet = lvTok ? [lvTok] : (document.body.dataset.jlptFilter || '').split(',').filter(Boolean);
       box.classList.toggle('has-value', Boolean(q));
       // Shows each row's add-to-flashcards toggle (css/site.css) only while
       // searching; its plus/check state is refreshed as the search starts,
@@ -1566,7 +1566,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const ranked = [];
         [...tbody.rows].sort(byOriginalIndex).forEach(row => {
           const info = infoFor(row);
-          const hit = userHidden || (lv && row.dataset.jlpt !== lv) ? { rank: null }
+          const hit = userHidden || (lvSet.length && lvSet.indexOf(row.dataset.jlpt) === -1) ? { rank: null }
             : mq ? rankRow(info, mq, qx, prefixOnly, hide) : { rank: 0 };
           const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
           r.row.classList.toggle('search-hidden', !r.match);
@@ -2318,21 +2318,29 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     }
     updatePoliteVisibility();
 
-    // Options › JLPT level: All, or one level's rows only. The rows hide by
-    // CSS (body[data-jlpt-filter]); here a table left with none of that
-    // level's rows goes too, and a Vocabulary category header with none of
-    // its tables left, its count following what's still shown. Kept on this
-    // device like the other Options.
+    // Options › JLPT level: All levels, or any levels ticked (N5 + N4) --
+    // only their rows show. Rows outside them get .level-out (hidden by CSS
+    // while no search runs); a table left with none goes too, and a
+    // Vocabulary category header with none of its tables left, its count
+    // following what's still shown. Kept on this device like the other
+    // Options, as "5,4".
     const LEVEL_KEY = 'raume-jlpt-filter';
-    const levelSelect = document.getElementById('levelSelect');
-    const levelVal = document.getElementById('levelPickVal');
+    const levelChecks = document.getElementById('levelChecks');
+    function levelSet() { return (document.body.dataset.jlptFilter || '').split(',').filter(Boolean); }
     function markLevelEmpty() {
-      const lv = document.body.dataset.jlptFilter || '';
+      const lv = levelSet(), on = {};
+      lv.forEach(function (v) { on[v] = true; });
       const host = document.getElementById('vocabulary');
       if (!host) return;
       const shownByCat = {};
       host.querySelectorAll('.table-section').forEach(function (sec) {
-        const empty = !!lv && !sec.querySelector('tbody tr[data-jlpt="' + lv + '"]');
+        let any = false;
+        sec.querySelectorAll('tbody tr').forEach(function (tr) {
+          const keep = !lv.length || !!on[tr.dataset.jlpt];
+          tr.classList.toggle('level-out', !keep);
+          if (keep) any = true;
+        });
+        const empty = !!lv.length && !any;
         sec.classList.toggle('level-empty', empty);
         if (sec.dataset.section !== 'vocabulary') return;
         const cat = sec.dataset.category || '';
@@ -2340,7 +2348,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
       host.querySelectorAll('.cat-heading[data-section="vocabulary"]').forEach(function (h) {
         const n = shownByCat[h.dataset.category] || 0;
-        h.classList.toggle('level-empty', !!lv && n === 0);
+        h.classList.toggle('level-empty', !!lv.length && n === 0);
         const count = h.querySelector('.cat-heading-count');
         if (count && !h.classList.contains('user-hidden')) { count.textContent = n; count.setAttribute('aria-label', n + ' tables'); }
       });
@@ -2353,21 +2361,32 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
     }
     vocab.markLevelEmpty = markLevelEmpty;
-    function applyLevelFilter(v) {
-      v = /^[1-5]$/.test(String(v)) ? String(v) : '';
-      if (v) document.body.dataset.jlptFilter = v; else delete document.body.dataset.jlptFilter;
-      if (levelSelect) levelSelect.value = v;
-      if (levelVal) levelVal.textContent = v ? 'N' + v : 'All';
-      try { if (v) localStorage.setItem(LEVEL_KEY, v); else localStorage.removeItem(LEVEL_KEY); } catch (e) {}
+    // Every level ticked is the same as All levels.
+    function applyLevelFilter(list) {
+      const on = {};
+      (list || []).forEach(function (v) { if (/^[1-5]$/.test(String(v))) on[String(v)] = true; });
+      let lv = ['5', '4', '3', '2', '1'].filter(function (v) { return on[v]; });
+      if (lv.length === 5) lv = [];
+      if (lv.length) document.body.dataset.jlptFilter = lv.join(','); else delete document.body.dataset.jlptFilter;
+      if (levelChecks) levelChecks.querySelectorAll('.opt-check').forEach(function (b) {
+        const v = b.dataset.level;
+        b.setAttribute('aria-pressed', String(v ? lv.indexOf(v) !== -1 : !lv.length));
+      });
+      try { if (lv.length) localStorage.setItem(LEVEL_KEY, lv.join(',')); else localStorage.removeItem(LEVEL_KEY); } catch (e) {}
       markLevelEmpty();
       updateOptionsDot();
       if (vocab.refreshSearch) vocab.refreshSearch();
     }
-    if (levelSelect) {
-      let startLevel = '';
-      try { startLevel = localStorage.getItem(LEVEL_KEY) || ''; } catch (e) {}
-      applyLevelFilter(startLevel);
-      levelSelect.addEventListener('change', function () { applyLevelFilter(levelSelect.value); });
+    if (levelChecks) {
+      let start = [];
+      try { start = (localStorage.getItem(LEVEL_KEY) || '').split(','); } catch (e) {}
+      applyLevelFilter(start);
+      levelChecks.addEventListener('click', function (event) {
+        const b = event.target.closest('.opt-check');
+        if (!b) return;
+        const v = b.dataset.level, lv = levelSet();
+        applyLevelFilter(!v ? [] : lv.indexOf(v) !== -1 ? lv.filter(function (x) { return x !== v; }) : lv.concat(v));
+      });
     }
 
     // Highlight progress: the known-green / tricky-amber row washes, on by

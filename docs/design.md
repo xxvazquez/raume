@@ -431,7 +431,9 @@ and Help.
   The word's JLPT level closes the list as a grey "JLPT N4" line, so every
   levelled row has an ⓘ — iOS's "details of this item" on every list row,
   not a level badge painted on each one. The level is a filter (Options ›
-  JLPT level, the search's `n4`), never a colour.
+  JLPT level, the search's `n4`), never a colour. Several levels can be
+  picked at once, so Options › JLPT level is a list of checkmark rows (All
+  levels, N5 … N1, `.opt-check`), iOS's multi-select, not a pop-up row.
 - **Controls library** — one set of components everywhere, tokens `--seg-track`,
   `--seg-thumb`, `--seg-thumb-ink`, `--seg-thumb-shadow`, `--tab-select`, `--switch-off`, `--switch-thumb`, `--switch-on`, `--radius-button`:
   - **Segmented control** (`.fc-manage-filters`, the Flashcards tabs, the

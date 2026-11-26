@@ -117,7 +117,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Rings</span><span class="help-desc">Review: today’s due cards done. Learn: new cards, of your daily number. Play: one game or puzzle.</span></li>' +
       '<li><span class="help-term">Study now</span><span class="help-desc">Starts today’s due reviews and new cards; the number is how many.</span></li>' +
-      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, one JLPT level’s words, or one table. Study now follows it; the rings still count everything.</span></li>' +
+      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, one JLPT level’s words or several together (N5 + N4), or one table. Study now follows it; the rings still count everything.</span></li>' +
       '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review; the dots are this week.</span></li>' +
       '<li><span class="help-term">Awards</span><span class="help-desc">Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
       '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news, like a new best Match pace.</span></li>' +

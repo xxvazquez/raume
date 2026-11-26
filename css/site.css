@@ -1073,19 +1073,17 @@ body { --switch-on: var(--tint); }
 .opt-switch.active::before { background: var(--switch-on); }
 .opt-switch.active::after { right: 18px; }
 .opt-switch { padding-right: 72px; } /* the label clears the 42px switch */
-/* A pop-up row (JLPT level): label left, value + ⌃⌄ right, the native
-   select laid over the whole row (.fc-xw-pick-select). */
-.opt-pick { justify-content: space-between; gap: 12px; padding-right: 16px; }
-.opt-pick:has(.fc-xw-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
-/* Options › JLPT level: only that level's rows, and no table or category
-   header left with nothing in it (js/vocab/interactions.js). A search
-   narrows by the same level itself, so the rule stands down for it. */
+/* A multi-select list (JLPT level): iOS checkmark rows, the tinted check
+   trailing on each one ticked. */
+.opt-check { justify-content: space-between; padding-right: 16px; }
+.opt-check-ic { flex: none; color: var(--tint); visibility: hidden; }
+.opt-check[aria-pressed="true"] .opt-check-ic { visibility: visible; }
+/* Options › JLPT level: only the ticked levels' rows (.level-out on the
+   rest), and no table or category header left with nothing in it
+   (js/vocab/interactions.js). A search narrows by the same levels itself,
+   so the row rule stands down for it. */
 .level-empty { display: none !important; }
-body[data-jlpt-filter="5"]:not(.is-searching) #vocabulary .vocab tbody tr:not([data-jlpt="5"]),
-body[data-jlpt-filter="4"]:not(.is-searching) #vocabulary .vocab tbody tr:not([data-jlpt="4"]),
-body[data-jlpt-filter="3"]:not(.is-searching) #vocabulary .vocab tbody tr:not([data-jlpt="3"]),
-body[data-jlpt-filter="2"]:not(.is-searching) #vocabulary .vocab tbody tr:not([data-jlpt="2"]),
-body[data-jlpt-filter="1"]:not(.is-searching) #vocabulary .vocab tbody tr:not([data-jlpt="1"]) { display: none; }
+body[data-jlpt-filter]:not(.is-searching) #vocabulary .vocab tbody tr.level-out { display: none; }
 @media (prefers-reduced-motion: reduce) { .opt-switch::before, .opt-switch::after { transition: none; } }
 .expand-bar.search-hidden { display: none; }
 /* Footnote under the list: what the badges mean, only for a table that has them. */

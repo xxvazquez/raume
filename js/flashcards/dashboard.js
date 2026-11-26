@@ -397,15 +397,23 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // everything. Tables grouped by category, named as Customize names them.
   // Only there when your flashcards span two tables or more.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
-  // A JLPT level is a choice too (its words from every table), grouped
-  // first, above the tables.
+  // JLPT levels are choices too (their words from every table), grouped
+  // first, above the tables: each level alone, then the easiest ones
+  // together -- N5 + N4, N5 + N4 + N3 -- the way you climb them.
+  function levelSets(levels) {
+    var sets = levels.map(function (n) { return [n]; });
+    for (var k = 2; k <= levels.length; k++) sets.push(levels.slice(0, k));
+    return sets;
+  }
+  function levelsName(set) { return set.map(function (n) { return "N" + n; }).join(" + ") + " words"; }
   function studyFromHtml() {
     var tables = sched.studyTables(), levels = sched.studyLevels ? sched.studyLevels() : [];
     if (tables.length < 2 && levels.length < 2) return "";
     var tc = window.RaumeStudy.tableCustom;
     var nameOf = function (t) { return (tc && tc.nameOf(t.id)) || t.title; };
     var current = sched.studyScope(), groups = {}, order = [];
-    var shown = /^jlpt:/.test(current || "") ? "N" + current.slice(5) + " words" : "All flashcards";
+    var lvScope = sched.scopeLevels ? sched.scopeLevels(current) : null;
+    var shown = lvScope ? levelsName(lvScope) : "All flashcards";
     tables.forEach(function (t) {
       if (t.id === current) shown = nameOf(t);
       if (!groups[t.category]) { groups[t.category] = []; order.push(t.category); }
@@ -415,9 +423,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<span class="fc-xw-menu-val">' + esc(shown) + UPDOWN_ICON + "</span>" +
       '<select class="fc-xw-pick-select" id="fcStudyFrom" aria-label="Study from">' +
       '<option value=""' + (current ? "" : " selected") + ">All flashcards</option>" +
-      (levels.length < 2 ? "" : '<optgroup label="JLPT level">' + levels.map(function (n) {
-        return '<option value="jlpt:' + n + '"' + (current === "jlpt:" + n ? " selected" : "") + ">N" + n + " words</option>";
-      }).join("") + "</optgroup>") +
+      (levels.length < 2 ? "" : '<optgroup label="JLPT level">' + levelSets(levels).map(function (set) {
+          var v = "jlpt:" + set.join(",");
+          return '<option value="' + v + '"' + (current === v ? " selected" : "") + ">" + levelsName(set) + "</option>";
+        }).join("") + "</optgroup>") +
       (tables.length < 2 ? "" : order.map(function (cat) {
         return '<optgroup label="' + esc(cat || "Other") + '">' + groups[cat].map(function (t) {
           return '<option value="' + esc(t.id) + '"' + (t.id === current ? " selected" : "") + ">" + esc(nameOf(t)) + "</option>";

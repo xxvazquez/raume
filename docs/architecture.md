@@ -192,9 +192,10 @@ flowchart LR
   feeds `readyToStudy`, `buildQueue` and `introducibleCount`; the rings,
   stats and Library still read everything. `studyScope()` treats a table with
   nothing left in study as no pick, so a stale id reads as All flashcards.
-  It can also hold `jlpt:5` … `jlpt:1` — one JLPT level's words across every
-  table (`studyLevels()` lists the levels your cards span; the vocab index
-  carries each entry's `jlpt`).
+  It can also hold JLPT levels — `jlpt:4`, or several as `jlpt:5,4` — their
+  words across every table (`scopeLevels()` parses it, `studyLevels()` lists
+  the levels your cards span; the Dashboard offers each level and the
+  easiest ones together; the vocab index carries each entry's `jlpt`).
 
 ### Class notes
 
@@ -639,8 +640,9 @@ X語 — set to 5 by hand; every N5 kanji row is 5. Sentences, proper nouns
 and dishes outside the lists carry none. Rows render it as `data-jlpt` (the
 Options › JLPT level filter: `body[data-jlpt-filter]` in CSS, `.level-empty`
 on tables / headings / directory links left with none; the search's `n4`
-token) and a `.level-note` the ⓘ reads. The filter is per device
-(`raume-jlpt-filter`). A custom row has no level of its own: at merge time
+token) and a `.level-note` the ⓘ reads. Options › JLPT level is a
+checklist: `body[data-jlpt-filter="5,4"]`, rows outside it `.level-out`; per
+device (`raume-jlpt-filter`, "5,4"). A custom row has no level of its own: at merge time
 (`custom-vocab.js` `builtInLevels`) it takes the level of the built-in word
 written the same, else of the one read the same when that reading has a
 single level. Puzzles / Games setup carries a `levels` list — none (All)
