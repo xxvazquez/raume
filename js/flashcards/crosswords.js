@@ -1878,7 +1878,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-ls-card fc-sb-card">' +
         '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
         '<p class="fc-sp-line jpword" lang="ja" aria-label="The sentence, with its particles blank">' + blankLineHtml(cur, false) + "</p>" +
-        '<p class="fc-sb-answer" aria-live="polite" hidden></p></div>' +
+        answerSlotHtml(cur) + "</div>" +
         '<div class="fc-sp-choices" role="group" aria-label="Particles">' + cur.choices.map(function (c) {
           return '<button type="button" class="fc-sb-tile fc-sp-choice" data-p="' + esc(c) + '" lang="ja">' + esc(c) + "</button>";
         }).join("") + "</div>" +
@@ -1917,7 +1917,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-ls-card fc-sb-card">' +
         '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
         '<p class="fc-sp-line jpword" lang="ja" aria-label="The sentence, with its verb blank">' + verbLineHtml(cur, null) + "</p>" +
-        '<p class="fc-sb-answer" aria-live="polite" hidden></p></div>' +
+        answerSlotHtml(cur) + "</div>" +
         '<div class="fc-ls-choices fc-vf-grid" role="group" aria-label="Forms of the verb">' + cur.grid.choices.map(function (segs, i) {
           return '<button type="button" class="fc-mt-tile fc-ls-choice fc-vf-choice" data-i="' + i + '" lang="ja" aria-label="' +
             esc(segs.map(function (g) { return g.kanji || g.text; }).join("") + ", " + VERB_GRID_LABELS[i]) + '">' +
@@ -1950,7 +1950,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         // The romaji's line is held open under the Japanese, so ▶ never
         // moves when it fills.
         '<p class="fc-sb-whole fc-mn-jp jpword" lang="ja">' + phraseWrap(V.jpSegmentsHtml(phrased(cur.word))) + "</p>" +
-        '<p class="fc-sb-answer" aria-live="polite" hidden></p>' +
+        answerSlotHtml(cur) +
         (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "") + "</div>" +
         '<div class="fc-ls-choices fc-mn-choices" role="group" aria-label="What it means">' + cur.meaning.choices.map(function (en, i) {
           return '<button type="button" class="fc-mt-tile fc-ls-choice fc-mn-choice" data-i="' + i + '">' + esc(en) + "</button>";
@@ -1986,7 +1986,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-ls-card fc-sb-card">' +
         '<p class="fc-sb-clue">' + esc(cur.word.clue) + "</p>" +
         '<div class="fc-sb-line" aria-label="Your sentence"><span class="fc-sb-line-empty">Tap the pieces in order</span></div>' +
-        '<p class="fc-sb-answer" aria-live="polite" hidden></p></div>' +
+        answerSlotHtml(cur) + "</div>" +
         '<div class="fc-sb-bank">' + cur.order.map(function (i) { return tileHtml(cur, i); }).join("") + "</div>" +
         '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-kt-reveal fc-sb-reveal">Show answer</button>' +
         '<button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
@@ -2000,6 +2000,17 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         tile.disabled = placed.indexOf(+tile.dataset.t) !== -1;
       });
     }
+    // The romaji and ▶ under the sentence (Meaning's card has had its ▶
+    // from the start).
+    function romajiSayHtml(cur) {
+      return '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>" +
+        (canSpeak() && !meaning ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
+    }
+    // Their room is held, unseen, from the start (css/site.css), so the
+    // choices under the card never drop when you answer.
+    function answerSlotHtml(cur) {
+      return '<p class="fc-sb-answer" aria-live="polite" hidden>' + romajiSayHtml(cur).replace("<button ", '<button tabindex="-1" ') + "</p>";
+    }
     function showWhole(right) {
       var cur = q();
       locked = true;
@@ -2008,10 +2019,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // right answer, Verb form's filled blank, Meaning's card -- only the
       // romaji and ▶ follow, never the Japanese again. A wrong Build or
       // Particles answer shows the sentence as it should be.
-      ans.innerHTML = (right || verbform || meaning ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
-        : '<span class="fc-sb-answer-head">The sentence</span>' + sentenceHtml(cur.word)) +
-        // Meaning's card has had its ▶ from the start.
-        (canSpeak() && !meaning ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
+      ans.innerHTML = (right || verbform || meaning ? "" : '<span class="fc-sb-answer-head">The sentence</span>' + sentenceHtml(cur.word)) + romajiSayHtml(cur);
       ans.hidden = false;
       boardEl.querySelectorAll(".fc-sb-tile").forEach(function (t) { t.disabled = true; });
       boardEl.querySelectorAll(".fc-vf-choice, .fc-mn-choice").forEach(function (b) { b.disabled = true; });

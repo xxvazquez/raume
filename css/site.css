@@ -4667,7 +4667,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-placed:disabled { opacity: 1; cursor: default; }
 .fc-sb-right .fc-sb-placed { color: var(--right-strong); }
 .fc-sb-answer { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; text-align: center; }
-.fc-sb-answer[hidden] { display: none; }
+/* Unanswered, the romaji and ▶ are there but unseen: their room is held,
+   so nothing under the card moves when they show. */
+.fc-sb-answer[hidden] { display: flex; visibility: hidden; }
 .fc-sb-answer-head { font-size: var(--fs-small); color: var(--muted); }
 .fc-sb-whole { font: 400 19px/1.6 var(--font-jp); color: var(--ink); }
 /* As the sentence tables: a line breaks only between phrases (crosswords.js
@@ -4722,12 +4724,11 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 @media (max-width: 380px) { .fc-ls-choices .fc-vf-choice { font-size: 15px; padding-inline: 12px; } }
 .fc-vf-choice rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
 /* Meaning: the Japanese leads the card at 22px, its romaji's line held
-   open under it (filled once answered, so ▶ below never moves); the three English choices are Listening's
+   open under it (as every exercise's, so ▶ below never moves); the three English choices are Listening's
    tiles stacked full width -- sentences are too long for its 2 × 2. */
 .fc-mn-jp { margin: 0; font-size: 22px; line-height: 1.7; text-align: center; }
 .fc-mn-card { gap: 6px; }
-.fc-mn-card .fc-sb-answer { min-height: 1.4em; }
-.fc-mn-card .fc-sb-answer[hidden] { display: flex; visibility: hidden; }
+
 .fc-mn-choices { grid-template-columns: minmax(0, 1fr); max-width: 520px; margin-inline: auto; }
 .fc-mn-choice { text-align: left; font-size: 15px; line-height: 1.35; padding: 12px 40px 12px 16px; }
 /* Each circle says right or wrong itself: no wash on the whole line. */
