@@ -514,6 +514,13 @@ and Help.
     iOS's grey cell highlight, never a section tint; every tappable list row
     and menu item shares the pair, the menus their `-overlay` twins) runs edge
     to edge and rounds with the card; 44px rows, hairlines inset 16px from the leading edge.
+  - **Touch has no hover.** Every `:hover` rule sits behind
+    `@media (hover: hover)` (a mouse or an iPad trackpad): iOS Safari leaves a
+    tapped element stuck in `:hover` until the next tap, so a tapped row or
+    tab stayed highlighted. On touch the same highlight shows only while the
+    finger is down (`:active`), as an iOS cell does — except table rows,
+    which scroll under the finger. No grey tap-flash box anywhere
+    (`-webkit-tap-highlight-color: transparent` on `html`).
 - **iOS 26 materials** (the "iOS 26 materials" block at the end of
   `css/site.css`): the sticky search bar, the Options / Tables sheets, popovers
   and ⋯ menus are translucent glass — `backdrop-filter` blur with the

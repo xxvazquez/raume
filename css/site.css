@@ -410,6 +410,13 @@ body { --section-ink: color-mix(in srgb, var(--ink) 84%, var(--section)); }
 }
 
 html { background: var(--page-bg); }
+/* Touch is iOS's: no grey flash box on a tap -- a control shows its own
+   press instead. Every :hover rule sits behind @media (hover: hover) (a
+   mouse or trackpad), because iOS Safari leaves a tapped element stuck in
+   :hover until the next tap; on touch the same highlight shows while the
+   finger is down (:active), as an iOS cell does. Table rows get no press
+   wash -- they scroll under the finger. */
+html { -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
   padding: 0;
@@ -504,8 +511,11 @@ body {
   cursor: pointer;
 }
 .theme-toggle svg, .masthead-gear svg { width: 20px; height: 20px; }
-.theme-toggle:hover, .masthead-gear:hover { color: var(--ink); }
-.masthead-gear.active, .masthead-gear.active:hover { color: var(--accent-strong); }
+@media (hover: hover) { .theme-toggle:hover, .masthead-gear:hover { color: var(--ink); } }
+@media (hover: none) { .theme-toggle:active, .masthead-gear:active { color: var(--ink); } }
+.masthead-gear.active { color: var(--accent-strong); }
+@media (hover: hover) { .masthead-gear.active:hover { color: var(--accent-strong); } }
+@media (hover: none) { .masthead-gear.active:active { color: var(--accent-strong); } }
 /* Guest = the same grey glyph as the others. Signed in adds a small solid dot
    (the app's one positive-state colour, also used for "Synced" in
    Flashcards) -- presence/absence of the dot is the actual at-a-glance
@@ -513,7 +523,9 @@ body {
    looking closely); the glyph also tints to match, reinforcing it for
    anyone who does look closely. */
 .masthead-account { position: relative; }
-.masthead-account-signed-in, .masthead-account-signed-in:hover { color: var(--right-strong); }
+.masthead-account-signed-in { color: var(--right-strong); }
+@media (hover: hover) { .masthead-account-signed-in:hover { color: var(--right-strong); } }
+@media (hover: none) { .masthead-account-signed-in:active { color: var(--right-strong); } }
 .masthead-account-dot {
   display: none; position: absolute; top: 7px; right: 7px;
   width: 9px; height: 9px; border-radius: 50%;
@@ -523,7 +535,9 @@ body {
 /* Offline, or something still queued (a table rename, a custom word) --
    same amber the Flashcards sync chip uses for "not synced yet", so the two
    read as the same signal wherever a reader happens to see it. */
-.masthead-account-pending, .masthead-account-pending:hover { color: var(--warn-strong); }
+.masthead-account-pending { color: var(--warn-strong); }
+@media (hover: hover) { .masthead-account-pending:hover { color: var(--warn-strong); } }
+@media (hover: none) { .masthead-account-pending:active { color: var(--warn-strong); } }
 .masthead-account-pending .masthead-account-dot { display: block; background: var(--warn-strong); }
 /* Show the icon for the mode the button is CURRENTLY in (system / light /
    dark); clicking cycles to the next. Default (no/other choice) = system. */
@@ -582,11 +596,16 @@ body {
    selected one on the neutral --tab-select pill (iOS 26's tab selection)
    with its label in the deep section tone, the one place the section colour
    is spent on the chrome. */
-.site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); }
-.site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); }
-.site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); }
-.site-nav-link[data-page="notes"]:hover { color: var(--sec-notes); }
-.site-nav-link[data-page="flashcards"]:hover { color: var(--sec-flashcards); }
+@media (hover: hover) { .site-nav-link[data-section="vocabulary"]:hover { color: var(--sec-vocabulary); } }
+@media (hover: none) { .site-nav-link[data-section="vocabulary"]:active { color: var(--sec-vocabulary); } }
+@media (hover: hover) { .site-nav-link[data-section="grammar"]:hover { color: var(--sec-grammar); } }
+@media (hover: none) { .site-nav-link[data-section="grammar"]:active { color: var(--sec-grammar); } }
+@media (hover: hover) { .site-nav-link[data-section="kanji"]:hover { color: var(--sec-kanji); } }
+@media (hover: none) { .site-nav-link[data-section="kanji"]:active { color: var(--sec-kanji); } }
+@media (hover: hover) { .site-nav-link[data-page="notes"]:hover { color: var(--sec-notes); } }
+@media (hover: none) { .site-nav-link[data-page="notes"]:active { color: var(--sec-notes); } }
+@media (hover: hover) { .site-nav-link[data-page="flashcards"]:hover { color: var(--sec-flashcards); } }
+@media (hover: none) { .site-nav-link[data-page="flashcards"]:active { color: var(--sec-flashcards); } }
 .site-nav-link.active {
   color: var(--section-strong);
   font-weight: 500;
@@ -628,7 +647,7 @@ body {
 }
 .tindex-trigger-icon { flex: 0 0 auto; }
 .tindex-trigger-short { display: none; }
-.tindex-trigger:hover { opacity: .7; }
+@media (hover: hover) { .tindex-trigger:hover { opacity: .7; } }
 .tindex-trigger:active { opacity: .5; }
 .tindex-trigger-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tindex-trigger svg:last-child { flex: 0 0 auto; color: var(--section); transition: transform .15s ease; }
@@ -700,7 +719,8 @@ body {
 }
 /* A name wraps rather than truncates -- "Signs, Doors & Pla…" told you nothing. */
 .tindex-tname { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
-.tindex-menu a:hover { background: var(--row-hover-overlay); }
+@media (hover: hover) { .tindex-menu a:hover { background: var(--row-hover-overlay); } }
+@media (hover: none) { .tindex-menu a:active { background: var(--row-hover-overlay); } }
 /* The table you're viewing now -- the neutral selection pill with its name
    in the section tone, instantly locatable in the directory. */
 .tindex-menu a.current {
@@ -934,7 +954,8 @@ body { --switch-on: var(--tint); }
   color: var(--seg-thumb-ink);
   font-weight: 600;
 }
-.fc-manage-filters button:hover { color: var(--ink); }
+@media (hover: hover) { .fc-manage-filters button:hover { color: var(--ink); } }
+@media (hover: none) { .fc-manage-filters button:active { color: var(--ink); } }
 /* --- Options sheet (search bar's trailing button) ----------------------
    The sticky bar is just the search field and one Options button; everything
    else -- the column switches, Cover answers, Show polite, Expand all, Print
@@ -955,7 +976,7 @@ body { --switch-on: var(--tint); }
   font: 400 var(--fs-nav)/1 var(--font-ui);
   cursor: pointer;
 }
-.options-btn:hover { opacity: .7; }
+@media (hover: hover) { .options-btn:hover { opacity: .7; } }
 .options-btn:active { opacity: .5; }
 .options-btn svg { flex: 0 0 auto; }
 /* Something is off its default (a column hidden, answers covered, polite on):
@@ -1003,7 +1024,7 @@ body { --switch-on: var(--tint); }
   background-position: 16px 0;
   background-size: calc(100% - 16px) 1px;
 }
-.opt-row:hover { background-color: var(--row-hover); }
+@media (hover: hover) { .opt-row:hover { background-color: var(--row-hover); } }
 .opt-action { color: var(--tint); padding-right: 16px; }
 /* What the row icons mean -- a phone has no hover tooltip, so the one sheet
    of reading settings also spells out the small glyphs down each row.
@@ -1012,7 +1033,8 @@ body { --switch-on: var(--tint); }
    at the words, as under any iOS row with an icon. */
 .opt-legend { gap: 12px; padding-top: 7px; padding-bottom: 7px; padding-right: 16px; cursor: default; }
 .opt-legend + .opt-legend { background-position: 44px 0; background-size: calc(100% - 44px) 1px; }
-.opt-legend:hover { background-color: transparent; }
+@media (hover: hover) { .opt-legend:hover { background-color: transparent; } }
+@media (hover: none) { .opt-legend:active { background-color: transparent; } }
 .opt-legend svg { flex: none; color: var(--muted); }
 /* Row colours legend: a small rounded swatch of each row wash (the same
    tokens the rows use) with a rim in its own hue -- the wash alone is too
@@ -1414,8 +1436,8 @@ body.selftest-mode .selftest-hint { display: block; }
   transition: color .12s ease;
 }
 .section-toggle-icon svg { transition: transform .15s ease; }
-.section-toggle:hover .section-toggle-icon,
-.section-toggle:hover .section-title-text { color: var(--section-strong); }
+@media (hover: hover) { .section-toggle:hover .section-toggle-icon, .section-toggle:hover .section-title-text { color: var(--section-strong); } }
+@media (hover: none) { .section-toggle:active .section-toggle-icon, .section-toggle:active .section-title-text { color: var(--section-strong); } }
 .table-section.collapsed .section-toggle-icon svg { transform: rotate(-90deg); }
 .section-title-text {
   min-width: 0;
@@ -1450,15 +1472,17 @@ svg.si { stroke-width: 1.6; }
   transition: color .12s ease, opacity .12s ease;
 }
 .section-icon { display: block; width: 100%; height: 100%; }
-.section-icon-btn:hover { color: var(--section-strong); }
+@media (hover: hover) { .section-icon-btn:hover { color: var(--section-strong); } }
+@media (hover: none) { .section-icon-btn:active { color: var(--section-strong); } }
 /* The empty slot is a quiet "+" -- barely there at rest. (Not a dashed
    square: that read as an unchecked checkbox, especially stacked down the
    Customize page.) Still reveals a touch more on hover/focus where it sits
    inside an actual button (the Customize row); the header instance below
    is decorative now, not a control, so it has no hover state to reveal. */
 .section-icon-empty { color: var(--line-strong); }
-.section-icon-btn:hover .section-icon-empty,
 .section-icon-btn:focus-visible .section-icon-empty { color: var(--faint); }
+@media (hover: hover) { .section-icon-btn:hover .section-icon-empty { color: var(--faint); } }
+@media (hover: none) { .section-icon-btn:active .section-icon-empty { color: var(--faint); } }
 /* The header glyph (see render.js sectionMarkup) sits directly in
    .section-head now, not wrapped in a button -- changing it lives in the
    table's "Table options" menu instead, so this is decoration only and
@@ -1509,7 +1533,8 @@ svg.si { stroke-width: 1.6; }
   flex: 0 0 auto; appearance: none; border: 0; background: transparent;
   color: var(--faint); cursor: pointer; padding: 4px; border-radius: 6px;
 }
-.icon-picker-close:hover { color: var(--ink); }
+@media (hover: hover) { .icon-picker-close:hover { color: var(--ink); } }
+@media (hover: none) { .icon-picker-close:active { color: var(--ink); } }
 /* Tile colour row: an "Auto" pill then one dot per hue; applies at once. */
 .icon-picker-colors { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--row-line); }
 .icon-picker-colors[hidden] { display: none; }
@@ -1545,7 +1570,8 @@ svg.si { stroke-width: 1.6; }
 /* Same scale as the icon shows at in a section header, so the picker preview
    isn't heavier than the rest of the page. */
 .icon-cell .si { width: 15px; height: 15px; }
-.icon-cell:hover { background: var(--surface); border-color: var(--line-strong); }
+@media (hover: hover) { .icon-cell:hover { background: var(--surface); border-color: var(--line-strong); } }
+@media (hover: none) { .icon-cell:active { background: var(--surface); border-color: var(--line-strong); } }
 .icon-cell.selected { border-color: var(--section); background: var(--section-soft); color: var(--section-strong); }
 .icon-picker-foot {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -1555,12 +1581,14 @@ svg.si { stroke-width: 1.6; }
   font: 500 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   cursor: pointer;
 }
-.icon-picker-upload:hover { text-decoration: underline; }
+@media (hover: hover) { .icon-picker-upload:hover { text-decoration: underline; } }
+@media (hover: none) { .icon-picker-upload:active { text-decoration: underline; } }
 .icon-picker-remove {
   appearance: none; border: 0; background: transparent;
   font: 400 var(--fs-small)/1 var(--font-ui); color: var(--faint); cursor: pointer;
 }
-.icon-picker-remove:hover { color: var(--wrong); }
+@media (hover: hover) { .icon-picker-remove:hover { color: var(--wrong); } }
+@media (hover: none) { .icon-picker-remove:active { color: var(--wrong); } }
 .icon-picker-remove[hidden] { display: none; }
 body.icon-picker-open { overflow: hidden; }
 @media (max-width: 560px) {
@@ -1593,7 +1621,9 @@ body.icon-picker-open { overflow: hidden; }
   font: inherit; color: inherit; letter-spacing: inherit; text-align: left;
 }
 .notes-title-pen { display: inline-block; width: .62em; height: .62em; margin-left: .3em; vertical-align: .05em; color: var(--faint); }
-.notes-title:hover .notes-title-pen, .notes-title:focus-visible .notes-title-pen { color: var(--section-strong); }
+.notes-title:focus-visible .notes-title-pen { color: var(--section-strong); }
+@media (hover: hover) { .notes-title:hover .notes-title-pen { color: var(--section-strong); } }
+@media (hover: none) { .notes-title:active .notes-title-pen { color: var(--section-strong); } }
 .notes-title:focus-visible { outline: 2px solid var(--section); outline-offset: 3px; border-radius: 6px; }
 .notes-add { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; margin-left: auto; }
 .notes-add svg { display: block; }
@@ -1610,7 +1640,7 @@ body.icon-picker-open { overflow: hidden; }
   appearance: none; border: 0; background: none; cursor: pointer; width: 44px; height: 44px;
   display: inline-flex; align-items: center; justify-content: center; color: var(--tint);
 }
-.notes-tool:hover { opacity: .7; }
+@media (hover: hover) { .notes-tool:hover { opacity: .7; } }
 .notes-tool:active { opacity: .5; }
 .notes-quiz[hidden], .notes-tool[hidden], .notes-check-item[hidden] { display: none; }
 .notes-menu .section-menu-btn { color: var(--section-strong); }
@@ -1634,7 +1664,7 @@ body.icon-picker-open { overflow: hidden; }
   content: ""; position: absolute; right: 18px; top: 50%; width: 7px; height: 7px; margin-top: -4px;
   border-right: 1.6px solid var(--faint); border-bottom: 1.6px solid var(--faint); transform: rotate(-45deg);
 }
-.notes-row:hover { background: var(--row-hover); }
+@media (hover: hover) { .notes-row:hover { background: var(--row-hover); } }
 .notes-row:active { background: var(--row-press); }
 .notes-row:focus-visible { outline: 2px solid var(--section); outline-offset: -2px; border-radius: var(--radius-card); }
 .notes-row .set-tile svg { display: block; }
@@ -1673,7 +1703,8 @@ body.icon-picker-open { overflow: hidden; }
 .notes-reader-mark { display: inline-flex; align-items: center; gap: 5px; }
 .notes-reader-mark svg { width: 15px; height: 15px; color: var(--tile); }
 .notes-menu-danger, .section-menu-list .notes-menu-danger .menu-item-ic { color: var(--wrong-strong); }
-.section-menu-list .notes-menu-danger:hover, .section-menu-list .notes-menu-danger:hover .menu-item-ic { color: var(--wrong-strong); }
+@media (hover: hover) { .section-menu-list .notes-menu-danger:hover, .section-menu-list .notes-menu-danger:hover .menu-item-ic { color: var(--wrong-strong); } }
+@media (hover: none) { .section-menu-list .notes-menu-danger:active, .section-menu-list .notes-menu-danger:active .menu-item-ic { color: var(--wrong-strong); } }
 .note-frame {
   display: block; width: 100%; height: 60vh; margin-top: 6px; border: 0;
   border-radius: var(--radius-card); background: #fff; color-scheme: light;
@@ -1997,7 +2028,8 @@ body.icon-picker-open { overflow: hidden; }
   border: 0; border-radius: 50%;
   background: transparent; color: var(--muted); cursor: pointer;
 }
-.info-btn:hover { color: var(--ink); }
+@media (hover: hover) { .info-btn:hover { color: var(--ink); } }
+@media (hover: none) { .info-btn:active { color: var(--ink); } }
 .info-btn[aria-expanded="true"] { color: var(--accent-strong); }
 .info-panel { margin: 0 0 16px; padding: 0 2px; }
 .info-panel[hidden] { display: none; }
@@ -2090,7 +2122,8 @@ details[open] > .disclosure-caret::after { transform: rotate(45deg); }
   width: 28px; height: 28px; margin-left: auto; display: flex; align-items: center; justify-content: center;
   color: var(--faint); cursor: grab; touch-action: none;
 }
-.cz-drag-handle:hover { color: var(--ink); }
+@media (hover: hover) { .cz-drag-handle:hover { color: var(--ink); } }
+@media (hover: none) { .cz-drag-handle:active { color: var(--ink); } }
 /* A real control now (arrow keys move it): a visible focus ring, and a 44pt
    hit area around the small glyph. */
 .cz-drag-handle { position: relative; border-radius: 8px; }
@@ -2135,7 +2168,8 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
   background: transparent; color: var(--ink);
   font: 400 var(--fs-nav)/1.2 var(--font-ui); padding: 6px;
 }
-.cz-row-name:hover { background: color-mix(in srgb, var(--field-fill) 60%, transparent); }
+@media (hover: hover) { .cz-row-name:hover { background: color-mix(in srgb, var(--field-fill) 60%, transparent); } }
+@media (hover: none) { .cz-row-name:active { background: color-mix(in srgb, var(--field-fill) 60%, transparent); } }
 /* The ring sits inside the field -- outside, it ran into the icon tile. */
 .cz-row-name:focus { background: var(--field-fill); outline: 2px solid var(--section); outline-offset: -2px; }
 .cz-row-name::placeholder { color: var(--ink); opacity: 1; }
@@ -2146,7 +2180,8 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
   font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   padding: 8px 10px; cursor: pointer;
 }
-.cz-row-reset:hover:not([disabled]), .cz-row-vis:hover { background: var(--accent-soft); }
+@media (hover: hover) { .cz-row-reset:hover:not([disabled]), .cz-row-vis:hover { background: var(--accent-soft); } }
+@media (hover: none) { .cz-row-reset:active:not([disabled]), .cz-row-vis:active { background: var(--accent-soft); } }
 /* Nothing to reset: no button at all, rather than a greyed-out one taking
    width from the name field on a phone. */
 .cz-row-reset[disabled] { display: none; }
@@ -2187,7 +2222,8 @@ details.cv-card:not([open]) { padding-top: 12px; padding-bottom: 12px; }
 /* The three action cards (Add a word / New table / Import a list) are
    <details>, collapsed by default except Add a word -- occasional actions
    stay out of the way, the common one doesn't need an extra click. */
-.cv-card-summary:hover { color: var(--accent-strong); }
+@media (hover: hover) { .cv-card-summary:hover { color: var(--accent-strong); } }
+@media (hover: none) { .cv-card-summary:active { color: var(--accent-strong); } }
 details.cv-card:not([open]) .cv-card-summary { margin-bottom: 0; }
 /* Add a word / New table / Import a list are one inset-grouped card of
    disclosure rows: back to back, a hairline between, corners on the ends. */
@@ -2320,12 +2356,14 @@ body.tpick-open { overflow: hidden; }
   font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   min-height: 32px; padding: 8px 14px; cursor: pointer;
 }
-.cv-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); }
+@media (hover: hover) { .cv-btn:hover { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); } }
+@media (hover: none) { .cv-btn:active { background: color-mix(in srgb, var(--accent) 22%, var(--paper)); } }
 .cv-file-btn {
   position: relative; flex: 0 0 auto; font: 400 var(--fs-small)/1 var(--font-ui); color: var(--tint);
   border: 0; border-radius: var(--radius-button); padding: 8px 12px; cursor: pointer;
 }
-.cv-file-btn:hover { background: var(--accent-soft); }
+@media (hover: hover) { .cv-file-btn:hover { background: var(--accent-soft); } }
+@media (hover: none) { .cv-file-btn:active { background: var(--accent-soft); } }
 .cv-file-btn input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .cv-add-msg { font-size: var(--fs-small); }
 .cv-add-msg-ok { color: var(--right-strong); }
@@ -2373,14 +2411,16 @@ body.tpick-open { overflow: hidden; }
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--row-line);
 }
-.cv-owned-head:hover .cv-owned-title { color: var(--ink); }
+@media (hover: hover) { .cv-owned-head:hover .cv-owned-title { color: var(--ink); } }
+@media (hover: none) { .cv-owned-head:active .cv-owned-title { color: var(--ink); } }
 .cv-owned-title { flex: 1 1 auto; min-width: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
 .cv-owned-count { flex: 0 0 auto; font-size: var(--fs-micro); color: var(--faint); }
 .cv-del-table {
   flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
   font: 400 var(--fs-micro)/1 var(--font-ui); color: var(--muted); padding: 2px 4px;
 }
-.cv-del-table:hover { color: var(--wrong-strong); }
+@media (hover: hover) { .cv-del-table:hover { color: var(--wrong-strong); } }
+@media (hover: none) { .cv-del-table:active { color: var(--wrong-strong); } }
 .cv-owned-list { list-style: none; margin: 0; padding: 0; }
 /* Your own table's Category, first thing inside it when opened. */
 .cv-table-cat { margin: 8px 0 6px; }
@@ -2410,8 +2450,10 @@ body.tpick-open { overflow: hidden; }
   flex: 0 0 auto; appearance: none; border: 0; background: none; cursor: pointer;
   color: var(--faint); padding: 7px; line-height: 0; border-radius: 8px;
 }
-.cv-edit-row:hover { color: var(--ink); }
-.cv-del-row:hover { color: var(--wrong-strong); }
+@media (hover: hover) { .cv-edit-row:hover { color: var(--ink); } }
+@media (hover: none) { .cv-edit-row:active { color: var(--ink); } }
+@media (hover: hover) { .cv-del-row:hover { color: var(--wrong-strong); } }
+@media (hover: none) { .cv-del-row:active { color: var(--wrong-strong); } }
 .cv-owned-row-edit { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .cv-edit-input {
   flex: 1 1 260px; border: 0; border-radius: 8px;
@@ -2423,7 +2465,8 @@ body.tpick-open { overflow: hidden; }
   appearance: none; border: 0; background: none; cursor: pointer;
   font: 400 var(--fs-small)/1 var(--font-ui); color: var(--muted); padding: 5px 4px;
 }
-.cv-edit-cancel:hover { color: var(--ink); }
+@media (hover: hover) { .cv-edit-cancel:hover { color: var(--ink); } }
+@media (hover: none) { .cv-edit-cancel:active { color: var(--ink); } }
 .cv-edit-error { flex: 1 1 100%; margin-top: 4px; }
 
 /* --- Help page (#help) ------------------------------------------- */
@@ -2443,7 +2486,7 @@ body.tpick-open { overflow: hidden; }
   position: relative; background: var(--paper); border-radius: var(--radius-card); text-decoration: none;
 }
 .help-support::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
-.help-support:hover { background: var(--row-hover); }
+@media (hover: hover) { .help-support:hover { background: var(--row-hover); } }
 /* A footnote is an iOS section footer: ragged-right like all of iOS (never
    justified -- a narrow column opens gaps between the words), with the rag
    evened out where the browser can. */
@@ -2460,7 +2503,7 @@ body.tpick-open { overflow: hidden; }
   background: linear-gradient(var(--row-line), var(--row-line)) no-repeat 16px 0 / calc(100% - 16px) 1px;
 }
 .help-legal-row::after { content: "↗"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; }
-.help-legal-row:hover { background-color: var(--row-hover); }
+@media (hover: hover) { .help-legal-row:hover { background-color: var(--row-hover); } }
 .help-legal-val { margin-left: auto; color: var(--muted); text-align: right; }
 .page-help .help-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 .help-group summary {
@@ -2483,7 +2526,7 @@ body.tpick-open { overflow: hidden; }
   transform: rotate(-45deg); transition: transform .15s ease;
 }
 .help-group[open] summary::after { transform: rotate(45deg); }
-.help-group summary:hover { background: var(--row-hover); }
+@media (hover: hover) { .help-group summary:hover { background: var(--row-hover); } }
 .page-help h3 { margin: 0; padding: 0; font-size: 15px; font-weight: 400; color: var(--ink); }
 .help-sub { display: block; margin-top: 2px; color: var(--muted); font-size: var(--fs-small); }
 /* Inside a topic, and on the Flashcards Help screen: scannable two-line
@@ -2531,11 +2574,13 @@ body.tpick-open { overflow: hidden; }
 .set-row-tiled .set-label { display: inline-flex; align-items: center; }
 .set-card > .set-row-tiled + .set-row-tiled::before { left: 58px; }
 .set-card .set-row.fc-direction-check { border-radius: 0; padding: 0 16px; border-top: 0; font-size: 15px; }
-.set-card .set-row.fc-direction-check:hover { background: var(--row-hover); }
+@media (hover: hover) { .set-card .set-row.fc-direction-check:hover { background: var(--row-hover); } }
+@media (hover: none) { .set-card .set-row.fc-direction-check:active { background: var(--row-hover); } }
 .set-value { display: inline-flex; align-items: baseline; gap: 4px; color: var(--muted); }
 /* A number setting: a pop-up row (value + ⌃⌄), the select laid over it. */
 .set-pick { position: relative; cursor: pointer; }
-.set-pick:hover { background: var(--row-hover); }
+@media (hover: hover) { .set-pick:hover { background: var(--row-hover); } }
+@media (hover: none) { .set-pick:active { background: var(--row-hover); } }
 .set-pick:has(.set-pick-select:focus-visible) { box-shadow: inset 0 0 0 2px var(--section); }
 .set-switch {
   appearance: none; flex: 0 0 auto; width: 42px; height: 26px; margin: 0; border: 0; border-radius: 999px;
@@ -2551,7 +2596,7 @@ body.tpick-open { overflow: hidden; }
   appearance: none; border: 0; background: transparent; text-align: left;
   color: var(--tint); justify-content: flex-start;
 }
-.set-action:hover { background: var(--row-hover); }
+@media (hover: hover) { .set-action:hover { background: var(--row-hover); } }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .set-foot[hidden] { display: none; }
 .set-head { display: flex; align-items: center; gap: 2px; }
@@ -2591,8 +2636,8 @@ body.tpick-open { overflow: hidden; }
   cursor: pointer;
   flex: 0 0 auto;
 }
-.print-one:hover,
-.section-menu-btn:hover { color: var(--ink); }
+@media (hover: hover) { .print-one:hover, .section-menu-btn:hover { color: var(--ink); } }
+@media (hover: none) { .print-one:active, .section-menu-btn:active { color: var(--ink); } }
 .section-menu-btn[aria-expanded="true"] {
   color: var(--accent-strong);
   background: var(--accent-soft);
@@ -2648,18 +2693,10 @@ body.tpick-open { overflow: hidden; }
 .section-menu-list > * + * { border-top: 1px solid var(--row-line); }
 .section-menu-list .menu-item-ic { flex: 0 0 auto; display: flex; color: var(--muted); }
 .section-menu-list .menu-item-ic svg { display: block; }
-.section-menu-list .section-icon-btn:hover,
-.section-menu-list .fc-add-table-btn:hover,
-.section-menu-list .print-menu-item:hover,
-.section-menu-list .print-scope:hover,
-.section-menu-list .fc-xw-menu-item:hover,
-.section-menu-list .notes-menu-item:hover,
-.section-menu-list .hide-table-btn:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.section-menu-list .section-icon-btn:hover .menu-item-ic,
-.section-menu-list .fc-add-table-btn:hover .menu-item-ic,
-.section-menu-list .print-menu-item:hover .menu-item-ic,
-.section-menu-list .fc-xw-menu-item:hover .menu-item-ic,
-.section-menu-list .hide-table-btn:hover .menu-item-ic { color: var(--accent-strong); }
+@media (hover: hover) { .section-menu-list .section-icon-btn:hover, .section-menu-list .fc-add-table-btn:hover, .section-menu-list .print-menu-item:hover, .section-menu-list .print-scope:hover, .section-menu-list .fc-xw-menu-item:hover, .section-menu-list .notes-menu-item:hover, .section-menu-list .hide-table-btn:hover { background: var(--accent-soft); color: var(--accent-strong); } }
+@media (hover: none) { .section-menu-list .section-icon-btn:active, .section-menu-list .fc-add-table-btn:active, .section-menu-list .print-menu-item:active, .section-menu-list .print-scope:active, .section-menu-list .fc-xw-menu-item:active, .section-menu-list .notes-menu-item:active, .section-menu-list .hide-table-btn:active { background: var(--accent-soft); color: var(--accent-strong); } }
+@media (hover: hover) { .section-menu-list .section-icon-btn:hover .menu-item-ic, .section-menu-list .fc-add-table-btn:hover .menu-item-ic, .section-menu-list .print-menu-item:hover .menu-item-ic, .section-menu-list .fc-xw-menu-item:hover .menu-item-ic, .section-menu-list .hide-table-btn:hover .menu-item-ic { color: var(--accent-strong); } }
+@media (hover: none) { .section-menu-list .section-icon-btn:active .menu-item-ic, .section-menu-list .fc-add-table-btn:active .menu-item-ic, .section-menu-list .print-menu-item:active .menu-item-ic, .section-menu-list .fc-xw-menu-item:active .menu-item-ic, .section-menu-list .hide-table-btn:active .menu-item-ic { color: var(--accent-strong); } }
 .section-menu-list .fc-add-table-btn[disabled] { opacity: .5; cursor: default; }
 .section-menu-list .print-menu-item { display: none; }
 /* Column checkmarks (Words to review's ⋯ menu): an iOS menu's multi-select
@@ -2674,9 +2711,8 @@ body.tpick-open { overflow: hidden; }
   padding: 12px 14px 12px 10px; border-radius: 0; color: var(--ink);
   font: 400 var(--fs-subhead)/1.3 var(--font-ui); cursor: pointer; white-space: nowrap;
 }
-.section-menu-list .col-menu-item:hover,
-.section-menu-list .notes-check-item:hover,
-.section-menu-list .notes-mark-item:hover { background: var(--accent-soft); color: var(--accent-strong); }
+@media (hover: hover) { .section-menu-list .col-menu-item:hover, .section-menu-list .notes-check-item:hover, .section-menu-list .notes-mark-item:hover { background: var(--accent-soft); color: var(--accent-strong); } }
+@media (hover: none) { .section-menu-list .col-menu-item:active, .section-menu-list .notes-check-item:active, .section-menu-list .notes-mark-item:active { background: var(--accent-soft); color: var(--accent-strong); } }
 .section-menu-list .menu-item-check { flex: 0 0 14px; display: flex; color: var(--tint); }
 .section-menu-list .menu-item-check svg { display: block; }
 .section-menu-list .col-menu-item[aria-checked="false"] .menu-item-check,
@@ -2721,11 +2757,13 @@ body.tpick-open { overflow: hidden; }
   padding: 0;
   cursor: pointer;
 }
-.show-all-rows:hover { text-decoration: underline; }
+@media (hover: hover) { .show-all-rows:hover { text-decoration: underline; } }
+@media (hover: none) { .show-all-rows:active { text-decoration: underline; } }
 
 /* .row-hide-btn's own layout/visibility lives with the other two row-action
    icons below -- it's always one of the three now, not a separate mode. */
-.row-hide-btn:hover { color: var(--section-strong) !important; }
+@media (hover: hover) { .row-hide-btn:hover { color: var(--section-strong) !important; } }
+@media (hover: none) { .row-hide-btn:active { color: var(--section-strong) !important; } }
 .vocab tbody tr.row-hidden { display: none; }
 .table-section.collapsed .vocab { display: none; }
 
@@ -2776,7 +2814,7 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
 /* Hover: a very subtle wash of the live section tone -- no edge, no fill. */
 /* 14%, not less: a fainter wash is the grey of the ground around the card,
    so the hovered row seemed to drop out of it. */
-.vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 14%, var(--paper)); }
+@media (hover: hover) { .vocab tbody tr:hover td { background: color-mix(in srgb, var(--section) 14%, var(--paper)); } }
 
 /* Two columns. Japanese gets 46%, not a sliver -- it carries the speaker
    button alongside the word (see .jp-line), and the
@@ -2987,10 +3025,10 @@ body.ja-voice-ready .jp-speak-btn {
   cursor: pointer;
   transition: opacity .12s ease;
 }
-.vocab tbody tr:hover .jp-speak-btn,
-.vocab tbody tr:focus-within .jp-speak-btn,
-.jp-speak-btn:focus-visible { opacity: 1; }
-.jp-speak-btn:hover { opacity: 1; }
+.vocab tbody tr:focus-within .jp-speak-btn, .jp-speak-btn:focus-visible { opacity: 1; }
+@media (hover: hover) { .vocab tbody tr:hover .jp-speak-btn { opacity: 1; } }
+@media (hover: hover) { .jp-speak-btn:hover { opacity: 1; } }
+@media (hover: none) { .jp-speak-btn:active { opacity: 1; } }
 /* Out of the line, so the word itself is what's centred on the card -- the
    speaker hangs just after it instead of pushing it left. */
 .fc-review-card .jp-speak-btn { opacity: .55; position: absolute; font-size: inherit; margin-top: calc(.7em - 8.5px); }
@@ -3062,8 +3100,8 @@ body.ja-voice-ready .jp-speak-btn {
   pointer-events: none;
   transition: opacity .12s ease;
 }
-.kr:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
-.kr:hover::before { opacity: 1; }
+@media (hover: hover) { .kr:hover::after { opacity: 1; transform: translateX(-50%) scale(1); } }
+@media (hover: hover) { .kr:hover::before { opacity: 1; } }
 @media (hover: none) {
   .kr:hover::after { opacity: 0; transform: translateX(-50%) scale(.85); }
   .kr:hover::before { opacity: 0; }
@@ -3163,7 +3201,7 @@ body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile {
   cursor: pointer; transition: background .12s ease, transform .12s ease;
 }
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.row-hidden { display: none; }
-body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:hover { background: color-mix(in srgb, var(--section) 12%, var(--group-ground)); }
+@media (hover: hover) { body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:hover { background: color-mix(in srgb, var(--section) 12%, var(--group-ground)); } }
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:active { transform: scale(.97); }
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 /* !important: the word tables' per-column insets (a left inset on the
@@ -3197,7 +3235,7 @@ body:not(.is-searching) .vocab.vocab-kanji .meaning-text mark.search-hit { color
    and a small check in the state colour on its soft wash -- so what's left
    to learn is what stays grey. */
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known { position: relative; background: var(--right-soft); }
-body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known:hover { background: color-mix(in srgb, var(--right) 18%, var(--right-soft)); }
+@media (hover: hover) { body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known:hover { background: color-mix(in srgb, var(--right) 18%, var(--right-soft)); } }
 body:not(.is-searching) .vocab.vocab-kanji tr.kanji-known .kanji-char, body:not(.is-searching) .vocab.vocab-kanji tr.kanji-known .meaning-text { color: var(--right-strong); }
 body:not(.is-searching) .vocab.vocab-kanji tbody tr.kanji-tile.kanji-known::after {
   content: ""; position: absolute; top: 7px; right: 7px; width: 14px; height: 14px; border-radius: 50%;
@@ -3246,7 +3284,8 @@ body.ja-voice-ready .kanji-sheet .ks-top .jp-speak-btn {
   background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--muted);
   cursor: pointer;
 }
-.ks-close:hover { color: var(--ink); }
+@media (hover: hover) { .ks-close:hover { color: var(--ink); } }
+@media (hover: none) { .ks-close:active { color: var(--ink); } }
 .ks-group-head { margin: 0; padding: 14px 16px 6px; font: 400 var(--fs-small)/1.3 var(--font-ui); color: var(--muted); }
 .ks-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 /* Two cards back to back (no group header between) keep the grouped-list gap. */
@@ -3516,7 +3555,7 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
   pointer-events: none;
   transition: opacity .1s ease;
 }
-.particle[data-r]:hover::after { opacity: 1; }
+@media (hover: hover) { .particle[data-r]:hover::after { opacity: 1; } }
 @media (hover: none) { .particle[data-r]:hover::after { opacity: 0; } }
 /* Declared after the hover-none suppression -- see .kr-on above for why. */
 .particle[data-r].particle-on::after { opacity: 1; }
@@ -3581,8 +3620,9 @@ rt mark.search-hit { padding: 0; border-radius: 1px; }
   line-height: 1;
   cursor: pointer;
 }
-.sort-button:hover,
 .sort-button.active { color: var(--section-strong); }
+@media (hover: hover) { .sort-button:hover { color: var(--section-strong); } }
+@media (hover: none) { .sort-button:active { color: var(--section-strong); } }
 /* One chevron pair; the half matching the current direction goes full
    strength, the other stays a ghost (both ghosted on an unsorted column),
    like the sort indicator in iOS Files. */
@@ -3916,7 +3956,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   min-height: 32px;
 }
 .fc-back { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 2px -5px; }
-.fc-titlebar-btn:hover, .fc-back:hover { opacity: .7; }
+@media (hover: hover) { .fc-titlebar-btn:hover, .fc-back:hover { opacity: .7; } }
 .fc-titlebar-btn:active, .fc-back:active { opacity: .5; }
 .page-flashcards h1 {
   margin: 0 0 4px;
@@ -3985,7 +4025,9 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
    (the one deliberate use of bold -- see .particle), so a chip reads as
    "particle" wherever it appears. */
 .particle-chip { color: var(--particle); background: color-mix(in srgb, var(--particle) 12%, var(--paper)); font-weight: 700; }
-.particle-chip:hover, .particle-chip[aria-expanded="true"] { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); }
+.particle-chip[aria-expanded="true"] { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); }
+@media (hover: hover) { .particle-chip:hover { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); } }
+@media (hover: none) { .particle-chip:active { background: color-mix(in srgb, var(--particle) 24%, var(--paper)); } }
 /* iOS-style popover: a small rounded surface with the one menu shadow and an
    arrow pointing at its chip (--arrow-x is set by the script). */
 .role-pop {
@@ -4014,8 +4056,12 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
 .role-pop .adj-badge::before, .role-pop .verb-badge::before, .role-pop .particle-chip::before { content: none; }
 .adj-badge-i { color: var(--adj-i-ink); background: color-mix(in srgb, var(--adj-i-ink) 14%, var(--paper)); }
 .adj-badge-na { color: var(--adj-na-ink); background: color-mix(in srgb, var(--adj-na-ink) 14%, var(--paper)); }
-.adj-badge-i:hover, .adj-badge-i[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); }
-.adj-badge-na:hover, .adj-badge-na[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-na-ink) 24%, var(--paper)); }
+.adj-badge-i[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); }
+@media (hover: hover) { .adj-badge-i:hover { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); } }
+@media (hover: none) { .adj-badge-i:active { background: color-mix(in srgb, var(--adj-i-ink) 24%, var(--paper)); } }
+.adj-badge-na[aria-expanded="true"] { background: color-mix(in srgb, var(--adj-na-ink) 24%, var(--paper)); }
+@media (hover: hover) { .adj-badge-na:hover { background: color-mix(in srgb, var(--adj-na-ink) 24%, var(--paper)); } }
+@media (hover: none) { .adj-badge-na:active { background: color-mix(in srgb, var(--adj-na-ink) 24%, var(--paper)); } }
 /* 五段/一段/変格 verb-group badge, the same treatment as the adjective badge
    above: filled for the plain case, outlined (.verb-badge-irr) for the
    handful of verbs worth a second look -- 切る/帰る (godan despite looking
@@ -4024,14 +4070,21 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
 .verb-badge-godan { color: var(--verb-godan-ink); background: color-mix(in srgb, var(--verb-godan-ink) 14%, var(--paper)); }
 .verb-badge-ichidan { color: var(--verb-ichidan-ink); background: color-mix(in srgb, var(--verb-ichidan-ink) 14%, var(--paper)); }
 .verb-badge-irregular { color: var(--irregular-ink); background: color-mix(in srgb, var(--irregular-ink) 14%, var(--paper)); }
-.verb-badge-godan:hover, .verb-badge-godan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-godan-ink) 24%, var(--paper)); }
-.verb-badge-ichidan:hover, .verb-badge-ichidan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-ichidan-ink) 24%, var(--paper)); }
-.verb-badge-irregular:hover, .verb-badge-irregular[aria-expanded="true"] { background: color-mix(in srgb, var(--irregular-ink) 24%, var(--paper)); }
+.verb-badge-godan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-godan-ink) 24%, var(--paper)); }
+@media (hover: hover) { .verb-badge-godan:hover { background: color-mix(in srgb, var(--verb-godan-ink) 24%, var(--paper)); } }
+@media (hover: none) { .verb-badge-godan:active { background: color-mix(in srgb, var(--verb-godan-ink) 24%, var(--paper)); } }
+.verb-badge-ichidan[aria-expanded="true"] { background: color-mix(in srgb, var(--verb-ichidan-ink) 24%, var(--paper)); }
+@media (hover: hover) { .verb-badge-ichidan:hover { background: color-mix(in srgb, var(--verb-ichidan-ink) 24%, var(--paper)); } }
+@media (hover: none) { .verb-badge-ichidan:active { background: color-mix(in srgb, var(--verb-ichidan-ink) 24%, var(--paper)); } }
+.verb-badge-irregular[aria-expanded="true"] { background: color-mix(in srgb, var(--irregular-ink) 24%, var(--paper)); }
+@media (hover: hover) { .verb-badge-irregular:hover { background: color-mix(in srgb, var(--irregular-ink) 24%, var(--paper)); } }
+@media (hover: none) { .verb-badge-irregular:active { background: color-mix(in srgb, var(--irregular-ink) 24%, var(--paper)); } }
 /* Outlined (irregular) badges have no fill to darken on hover -- wash in a
    little of their own ink instead, over the two colour rules above. */
 .adj-badge-irr, .verb-badge-irr { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
-.adj-badge-irr:hover, .adj-badge-irr[aria-expanded="true"],
-.verb-badge-irr:hover, .verb-badge-irr[aria-expanded="true"] { background: color-mix(in srgb, currentColor 14%, transparent); }
+.adj-badge-irr[aria-expanded="true"], .verb-badge-irr[aria-expanded="true"] { background: color-mix(in srgb, currentColor 14%, transparent); }
+@media (hover: hover) { .adj-badge-irr:hover, .verb-badge-irr:hover { background: color-mix(in srgb, currentColor 14%, transparent); } }
+@media (hover: none) { .adj-badge-irr:active, .verb-badge-irr:active { background: color-mix(in srgb, currentColor 14%, transparent); } }
 
 /* Visually hidden but still announced by assistive tech -- colour alone is
    never the only signal (used for the adjective-type note above). */
@@ -4049,7 +4102,9 @@ button.adj-badge::before, .verb-badge::before, .particle-chip::before { content:
   appearance: none; border: 0; background: transparent; cursor: pointer;
   color: var(--muted); opacity: .75; transition: opacity .12s ease, color .12s ease;
 }
-.row-info-btn:hover, .row-info-btn[aria-expanded="true"] { opacity: 1; color: var(--section-strong); }
+.row-info-btn[aria-expanded="true"] { opacity: 1; color: var(--section-strong); }
+@media (hover: hover) { .row-info-btn:hover { opacity: 1; color: var(--section-strong); } }
+@media (hover: none) { .row-info-btn:active { opacity: 1; color: var(--section-strong); } }
 .row-info-btn::after { content: ""; position: absolute; inset: -8px; }
 .row-info-btn { position: relative; }
 /* Nothing to explain while the English is hidden or covered (a particle's
@@ -4070,25 +4125,23 @@ body.selftest-mode .vocab .row-info-btn { visibility: hidden; }
 }
 .fc-toggle-btn,
 .row-hide-btn { color: var(--faint) !important; opacity: .45; }
-.vocab tbody tr:hover .fc-toggle-btn,
-.vocab tbody tr:focus-within .fc-toggle-btn,
-.fc-toggle-btn:focus-visible,
-.fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
+.vocab tbody tr:focus-within .fc-toggle-btn, .fc-toggle-btn:focus-visible, .fc-toggle-btn[aria-pressed="true"] { opacity: 1; }
+@media (hover: hover) { .vocab tbody tr:hover .fc-toggle-btn { opacity: 1; } }
 /* Only while searching (body.is-searching) -- see js/vocab/render.js. */
 .vocab .fc-toggle-btn { display: none; }
 body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-toggle-btn .fc-ic-added,
 .fc-toggle-btn[aria-pressed="true"] .fc-ic-add { display: none; }
 .fc-toggle-btn[aria-pressed="true"] .fc-ic-added { display: block; }
-.fc-toggle-btn:hover { color: var(--accent-dark) !important; }
+@media (hover: hover) { .fc-toggle-btn:hover { color: var(--accent-dark) !important; } }
+@media (hover: none) { .fc-toggle-btn:active { color: var(--accent-dark) !important; } }
 /* Already in your flashcards: the Practice tab's cards glyph in Practice's
    own tone -- green is the known-word mark, so this stays clear of it.
    Quiet enough not to speckle the table, clear enough to pick out the rows
    you've added. */
 .fc-toggle-btn[aria-pressed="true"] { color: var(--sec-flashcards) !important; }
-.vocab tbody tr:hover .row-hide-btn,
-.vocab tbody tr:focus-within .row-hide-btn,
-.row-hide-btn:focus-visible { opacity: 1; }
+.vocab tbody tr:focus-within .row-hide-btn, .row-hide-btn:focus-visible { opacity: 1; }
+@media (hover: hover) { .vocab tbody tr:hover .row-hide-btn { opacity: 1; } }
 @media (hover: none) {
   .fc-toggle-btn,
   .row-hide-btn { opacity: .8; }               /* secondary -- grey, not tinted, but plainly there */
@@ -4107,7 +4160,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   color: var(--muted); font: 400 var(--fs-small)/1.2 var(--font-ui);
   cursor: pointer;
 }
-.fc-tab:hover { color: var(--ink); }
+@media (hover: hover) { .fc-tab:hover { color: var(--ink); } }
+@media (hover: none) { .fc-tab:active { color: var(--ink); } }
 .fc-tab.active { background: var(--seg-thumb); box-shadow: var(--seg-thumb-shadow); color: var(--seg-thumb-ink); font-weight: 600; }
 @media (min-width: 700px) {
   .fc-tabs { display: inline-grid; }
@@ -4212,7 +4266,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   background: color-mix(in srgb, var(--ink) 5%, var(--paper)); flex-direction: column; gap: 1px;
   padding: 1px 2px; text-align: center; overflow: hidden; cursor: pointer;
 }
-.fc-xw-cell-clue:hover, .fc-xw-cell-clue:focus-visible { background: var(--accent-soft); }
+.fc-xw-cell-clue:focus-visible { background: var(--accent-soft); }
+@media (hover: hover) { .fc-xw-cell-clue:hover { background: var(--accent-soft); } }
+@media (hover: none) { .fc-xw-cell-clue:active { background: var(--accent-soft); } }
 .fc-xw-cluetext {
   font: 400 6.5px/1.1 var(--font-ui); color: var(--muted);
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
@@ -4233,7 +4289,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-cluerows { margin: 0; padding: 0; list-style: none; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-xw-cluerows li { position: relative; display: flex; gap: 8px; padding: 9px 16px; font-size: var(--fs-nav); line-height: 1.35; color: var(--ink); cursor: pointer; }
 .fc-xw-cluerows li + li::before { content: ""; position: absolute; top: 0; left: 44px; right: 0; border-top: 1px solid var(--row-line); }
-.fc-xw-cluerows li:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-xw-cluerows li:hover { background: var(--row-hover); } }
 .fc-xw-cluerows li.fc-xw-clue-active { background: var(--accent-soft); }
 .fc-xw-cluerows li b { flex: none; width: 20px; text-align: right; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 /* Word search: a white card of plain letters, no cell lines -- a lined grid
@@ -4280,7 +4336,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    always there, so nothing shifts when it appears. */
 .fc-ws-list .fc-xw-cluerows li { cursor: default; align-items: center; gap: 12px; min-height: 44px; box-sizing: border-box; padding: 10px 16px; }
 .fc-ws-list .fc-xw-cluerows li + li::before { left: 16px; }
-.fc-ws-list .fc-xw-cluerows li:hover { background: none; }
+@media (hover: hover) { .fc-ws-list .fc-xw-cluerows li:hover { background: none; } }
+@media (hover: none) { .fc-ws-list .fc-xw-cluerows li:active { background: none; } }
 .fc-ws-clue { flex: 1 1 auto; min-width: 0; }
 .fc-ws-answer { flex: none; max-width: 55%; text-align: right; color: var(--muted); }
 .fc-ws-tick { flex: none; width: 16px; display: flex; align-items: center; justify-content: flex-end; color: transparent; }
@@ -4346,7 +4403,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   background: transparent; color: var(--muted); cursor: pointer;
 }
 .fc-mt-pause-btn::after { content: ""; position: absolute; inset: -6px; }
-.fc-mt-pause-btn:hover { color: var(--ink); }
+@media (hover: hover) { .fc-mt-pause-btn:hover { color: var(--ink); } }
+@media (hover: none) { .fc-mt-pause-btn:active { color: var(--ink); } }
 .fc-mt-pause-btn[hidden] { display: none; }
 .fc-mt-pause-btn:disabled { opacity: .35; cursor: default; }
 .fc-mt-paused > :not(.fc-mt-pause) { display: none; }
@@ -4556,7 +4614,9 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
   background: transparent; color: var(--muted); cursor: pointer;
 }
-.fc-wc-info:hover, .fc-wc-info[aria-expanded="true"] { color: var(--section-strong); }
+.fc-wc-info[aria-expanded="true"] { color: var(--section-strong); }
+@media (hover: hover) { .fc-wc-info:hover { color: var(--section-strong); } }
+@media (hover: none) { .fc-wc-info:active { color: var(--section-strong); } }
 .fc-xw-tip-pop.fc-wc-rules { top: 44px; right: 8px; text-align: left; }
 .fc-wc-form { display: flex; align-items: center; gap: 8px; height: 44px; margin-top: 14px; padding: 0 4px 0 16px; border-radius: 22px; background: var(--paper); box-shadow: var(--control-lift); }
 .fc-wc-form:focus-within { box-shadow: var(--control-lift), 0 0 0 2px var(--section); }
@@ -4764,7 +4824,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   appearance: none; border: 0; background: none; padding: 8px 2px; cursor: pointer;
   color: var(--tint); font: 400 var(--fs-nav)/1 var(--font-ui); white-space: nowrap;
 }
-.fc-pz-link:hover { opacity: .7; }
+@media (hover: hover) { .fc-pz-link:hover { opacity: .7; } }
+@media (hover: none) { .fc-pz-link:active { opacity: .7; } }
 .fc-pz-sub { margin: 14px 0 8px; color: var(--muted); font-size: var(--fs-small); font-weight: 400; }
 .fc-pz-list { list-style: none; margin: 0; padding: 0; }
 .fc-pz-row {
@@ -4850,7 +4911,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   display: inline-flex; align-items: center; justify-content: center;
   min-height: 32px; padding: 7px 14px; border-radius: var(--radius-button); cursor: pointer; white-space: nowrap;
 }
-.fc-btn:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-btn:hover { background: var(--row-hover); } }
 .fc-btn:active { opacity: .7; }
 .fc-btn[disabled] { opacity: .5; cursor: not-allowed; }
 /* The primary action -- a filled button in the tint (each clears AA under
@@ -4860,10 +4921,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   background: var(--tint); color: var(--paper);
   font-weight: 500; box-shadow: none;
 }
-.fc-btn-primary:hover {
+@media (hover: hover) { .fc-btn-primary:hover {
   background: color-mix(in srgb, var(--tint) 86%, var(--ink));
   color: var(--paper);
-}
+} }
+@media (hover: none) { .fc-btn-primary:active {
+  background: color-mix(in srgb, var(--tint) 86%, var(--ink));
+  color: var(--paper);
+} }
 .fc-note { color: var(--muted); font-size: var(--fs-small); }
 .fc-legend-term { color: var(--accent-dark); }
 
@@ -4891,7 +4956,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Name and count read as one cluster on the left; the fold chevron trails
    at the far edge, as on the Vocabulary list's category headers. */
 .fc-manage-group-title .cat-count { align-self: center; color: var(--faint); font-size: var(--fs-micro); font-weight: 400; }
-.fc-manage-group-title:hover .cat-name { color: var(--ink); }
+@media (hover: hover) { .fc-manage-group-title:hover .cat-name { color: var(--ink); } }
+@media (hover: none) { .fc-manage-group-title:active .cat-name { color: var(--ink); } }
 /* The iOS collapsible-section chevron: points right when folded, down when
    open (a filled triangle is a desktop tree control, not iOS). */
 .fc-manage-group-title::after {
@@ -4923,7 +4989,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   appearance: none; border: 0; background: transparent; width: 100%; min-height: 44px;
   padding: 0 16px; text-align: left; color: var(--tint); font: 400 15px/1.3 var(--font-ui); cursor: pointer;
 }
-.fc-manage-cat-add:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-manage-cat-add:hover { background: var(--row-hover); } }
 .fc-manage-cat-add:active { background: var(--row-press); }
 /* Deliberate columns: [ name + progress ] [ Add · Pause ] [chevron].
    A grid, not flex -- the middle column is the only one that flexes (and its
@@ -4945,7 +5011,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   display: flex; align-items: center; justify-content: center;
   color: var(--faint); cursor: pointer;
 }
-.fc-manage-table-toggle:hover { color: var(--section-strong); }
+@media (hover: hover) { .fc-manage-table-toggle:hover { color: var(--section-strong); } }
+@media (hover: none) { .fc-manage-table-toggle:active { color: var(--section-strong); } }
 .fc-manage-table-toggle svg { transition: transform .15s ease; }
 .fc-manage-table:not(.fc-manage-table-collapsed) .fc-manage-table-toggle svg { transform: rotate(0deg); }
 .fc-manage-table.fc-manage-table-collapsed .fc-manage-table-toggle svg { transform: rotate(-90deg); }
@@ -4986,7 +5053,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-table-actions .fc-btn {
   background: transparent; box-shadow: none; color: var(--tint); font-weight: 400; font-size: 15px;
 }
-.fc-manage-table-actions .fc-btn:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-manage-table-actions .fc-btn:hover { background: var(--row-hover); } }
+@media (hover: none) { .fc-manage-table-actions .fc-btn:active { background: var(--row-hover); } }
 .fc-btn-ic { display: none; }
 .fc-btn-ic svg { display: block; }
 /* The actions live in their own grid column and never wrap; on a narrow row
@@ -5037,12 +5105,18 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    common case down a long, mostly-untouched list -- exactly like "Add
    table") and takes the tinted fill on hover / focus. */
 .fc-btn-vocabaction { gap: 6px; background: var(--section-soft); box-shadow: none; }
-.fc-btn-vocabaction:hover { background: color-mix(in srgb, var(--section) 22%, var(--paper)); }
+@media (hover: hover) { .fc-btn-vocabaction:hover { background: color-mix(in srgb, var(--section) 22%, var(--paper)); } }
+@media (hover: none) { .fc-btn-vocabaction:active { background: color-mix(in srgb, var(--section) 22%, var(--paper)); } }
 .fc-btn-vocabaction[data-action="add"] { background: transparent; color: var(--faint); }
-.fc-btn-vocabaction[data-action="add"]:hover,
 .fc-btn-vocabaction[data-action="add"]:focus-visible {
   background: var(--section-soft); color: var(--section-strong);
 }
+@media (hover: hover) { .fc-btn-vocabaction[data-action="add"]:hover {
+  background: var(--section-soft); color: var(--section-strong);
+} }
+@media (hover: none) { .fc-btn-vocabaction[data-action="add"]:active {
+  background: var(--section-soft); color: var(--section-strong);
+} }
 /* Phone: drop the separate romaji column so each row stays one tight line --
    kanji + English + the action, which keeps its one-word label (Add / Pause
    / Restore) rather than shrinking to an unexplained icon. */
@@ -5112,7 +5186,8 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
   appearance: none; border: 0; background: transparent; font: inherit; cursor: pointer;
   color: var(--tint); padding: 13px 14px 13px 0; margin: -13px 0;
 }
-.fc-session-exit:hover { opacity: .7; }
+@media (hover: hover) { .fc-session-exit:hover { opacity: .7; } }
+@media (hover: none) { .fc-session-exit:active { opacity: .7; } }
 /* Thin session progress bar (a real <progress>, so it's announced too). */
 .fc-progress {
   appearance: none; -webkit-appearance: none; align-self: stretch; width: 100%; height: var(--bar-h);
@@ -5256,7 +5331,8 @@ mark.fc-diff-co {
   text-align: center; cursor: pointer; background: transparent;
   transition: background .12s ease, opacity .12s ease;
 }
-.fc-rating-btn:hover:not([disabled]) { background: var(--row-hover-overlay); }
+@media (hover: hover) { .fc-rating-btn:hover:not([disabled]) { background: var(--row-hover-overlay); } }
+@media (hover: none) { .fc-rating-btn:active:not([disabled]) { background: var(--row-hover-overlay); } }
 .fc-rating-btn:active { opacity: .6; }
 .fc-rating-btn .fc-rating-name { display: block; font: 500 15px/1.2 var(--font-ui); color: inherit; }
 .fc-rating-btn .fc-rating-interval { display: block; font-size: 12px; color: var(--muted); opacity: .75; font-weight: 400; }
@@ -5414,7 +5490,8 @@ mark.fc-diff-co {
   margin: -6px 0 14px; padding: 0;
   color: var(--tint); font: 500 var(--fs-small)/1 var(--font-ui); cursor: pointer;
 }
-.fc-auth-forgot:hover { text-decoration: underline; }
+@media (hover: hover) { .fc-auth-forgot:hover { text-decoration: underline; } }
+@media (hover: none) { .fc-auth-forgot:active { text-decoration: underline; } }
 .fc-auth-error { color: var(--danger); font-size: var(--fs-small); margin-bottom: 10px; }
 .fc-auth-switch { margin-top: 12px; font-size: var(--fs-small); color: var(--muted); }
 .fc-auth-switch button { appearance: none; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-weight: 500; padding: 0; cursor: pointer; }
@@ -5439,7 +5516,8 @@ mark.fc-diff-co {
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
   padding: 5px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap;
 }
-.fc-sync-now:hover { background: color-mix(in srgb, currentColor 24%, transparent); }
+@media (hover: hover) { .fc-sync-now:hover { background: color-mix(in srgb, currentColor 24%, transparent); } }
+@media (hover: none) { .fc-sync-now:active { background: color-mix(in srgb, currentColor 24%, transparent); } }
 .fc-sync-details-toggle {
   appearance: none; border: 0; background: transparent;
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
@@ -5535,10 +5613,9 @@ mark.fc-diff-co {
 }
 .fc-kana-group { font-size: 15px; } /* an iOS list row, not a caption */
 /* Hover / press: the Settings rows' neutral fill, never a tinted block. */
-.fc-kana-group:hover,
-.fc-direction-check:hover {
+@media (hover: hover) { .fc-kana-group:hover, .fc-direction-check:hover {
   background: var(--row-hover);
-}
+} }
 .fc-kana-group:active,
 .fc-direction-check:active { background: var(--row-press); }
 .fc-kana-group input[type="checkbox"],
@@ -5784,7 +5861,9 @@ mark.fc-diff-co {
   text-align: left; cursor: pointer; color: var(--ink);
 }
 .fc-missed-list li:first-child .fc-missed-row { border-top: 0; }
-.fc-missed-row:hover, .fc-missed-row:focus-visible { background: var(--surface); }
+.fc-missed-row:focus-visible { background: var(--surface); }
+@media (hover: hover) { .fc-missed-row:hover { background: var(--surface); } }
+@media (hover: none) { .fc-missed-row:active { background: var(--surface); } }
 /* Japanese pair -- the anchor: full size, one line, plain/polite split by a
    quiet slash. */
 .fc-missed-jp {
@@ -6207,7 +6286,7 @@ mark.fc-diff-co {
 .fc-gs-mode-name { display: block; color: var(--ink); }
 .fc-gs-check { flex: none; color: var(--tint); visibility: hidden; }
 .fc-gs-radio:checked ~ .fc-gs-check { visibility: visible; }
-.fc-gs-mode:hover, .fc-gs-pick:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-gs-mode:hover, .fc-gs-pick:hover { background: var(--row-hover); } }
 /* Keyboard focus on a row is the row lit in the section tone, as iOS
    highlights a focused cell -- an inset ring was cut by the card's
    corners and broken by the hairline. */
@@ -6232,7 +6311,9 @@ mark.fc-diff-co {
   width: 100%; min-height: 44px; padding: 0 12px; border-radius: 14px; cursor: pointer; text-align: left;
   color: var(--ink); font: 400 15px/1.3 var(--font-ui);
 }
-.fc-gs-opt:hover, .fc-gs-opt:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+.fc-gs-opt:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+@media (hover: hover) { .fc-gs-opt:hover { background: var(--row-hover-overlay); outline: 0; } }
+@media (hover: none) { .fc-gs-opt:active { background: var(--row-hover-overlay); outline: 0; } }
 .fc-gs-opt[aria-checked="true"] .fc-gs-check { visibility: visible; }
 .fc-gs-why { margin-top: 8px; }
 .fc-gs-go { display: flex; justify-content: center; margin: 24px 0; }
@@ -6246,7 +6327,8 @@ mark.fc-diff-co {
   color: var(--ink); font: 500 17px/1.2 var(--font-ui); cursor: pointer;
 }
 button.fc-xw-title { appearance: none; border: 0; background: none; padding: 0; gap: 2px; }
-button.fc-xw-title:hover { opacity: .7; }
+@media (hover: hover) { button.fc-xw-title:hover { opacity: .7; } }
+@media (hover: none) { button.fc-xw-title:active { opacity: .7; } }
 button.fc-xw-title:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; border-radius: 8px; }
 .fc-xw-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fc-xw-title-chev { flex: none; color: var(--section-strong); }
@@ -6457,7 +6539,9 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
 .account-menu-item span { color: var(--faint); }
 .account-menu-item[hidden], .account-menu-sep[hidden] { display: none; }
 .account-menu-signout { color: var(--wrong-strong); }
-.account-menu-item:hover, .account-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+.account-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+@media (hover: hover) { .account-menu-item:hover { background: var(--row-hover-overlay); outline: 0; } }
+@media (hover: none) { .account-menu-item:active { background: var(--row-hover-overlay); outline: 0; } }
 .account-menu-sep { height: 1px; margin: 4px 8px; background: var(--row-line); }
 .account-menu-label { padding: 6px 12px 4px; color: var(--muted); font-size: var(--fs-small); }
 .account-menu-seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 999px; background: var(--seg-track); }
@@ -6500,7 +6584,7 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
 .fc-st-scale { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--faint); font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
 .fc-st-change { margin: 8px 0 0; color: var(--right-strong); font-size: var(--fs-small); }
 .fc-st-bests .set-row { appearance: none; border: 0; background: transparent; text-align: left; }
-.fc-st-bests .set-row:hover { background: var(--row-hover); }
+@media (hover: hover) { .fc-st-bests .set-row:hover { background: var(--row-hover); } }
 /* A finger has no hover: every tappable list row darkens while pressed. */
 .fc-gs-mode:active, .fc-gs-pick:active, .set-action:active, .opt-row:active,
 .help-support:active, .help-legal-row:active, .help-group summary:active,
@@ -6670,7 +6754,8 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
   font: 400 var(--fs-body)/1.2 var(--font-ui); color: var(--ink);
 }
 .row-menu-item + .row-menu-item { border-top: .5px solid var(--row-line); }
-.row-menu-item:hover, .row-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+.row-menu-item:focus-visible { background: var(--row-hover-overlay); outline: 0; }
+@media (hover: hover) { .row-menu-item:hover { background: var(--row-hover-overlay); outline: 0; } }
 .row-menu-item:active { background: var(--row-press-overlay); }
 @keyframes row-menu-in { from { opacity: 0; scale: .94; } }
 @media (prefers-reduced-motion: reduce) { .row-menu-stack { animation: none; } }
