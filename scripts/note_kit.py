@@ -311,10 +311,10 @@ def tiles(items, n=4, az=False):
 # words() takes them without drawing anything, and render(source=...) writes
 # them to <date>.<source>.csv in raume's Import a list format
 # (japanese(furigana),romaji,english), to import into the reader's own table
-# for that class. Sakura's gets every word of the lesson, even ones raume
-# already has; WSJJ's gets only the words raume's tables don't have yet.
-# Either way a word already sent by an earlier note of the same class is
-# left out.
+# for that class. A class table gets every word of the lesson, even ones
+# raume's own tables already have -- it is the list of what that class
+# taught. A word already sent by an earlier note of the same class is left
+# out.
 SOURCES = ("sakura", "wsjj")
 _words = []
 _tiles_used = []
@@ -332,40 +332,15 @@ def words(items):
         _words.append((jp.replace("（", "(").replace("）", ")"), ro.lower(), en.replace(" · ", ", ")))
 
 
-def _known_words():
-    """raume's own words, as 漢字(かんじ) spellings and as kana readings."""
-    import json
-    spelt, read = set(), set()
-    src = (pathlib.Path(__file__).resolve().parents[1] / "data" / "vocabulary.js").read_text(encoding="utf-8")
-    for line in src.splitlines():
-        line = line.strip().rstrip(",")
-        if not line.startswith('{"id"'):
-            continue
-        row = json.loads(line)
-        # A verb is a verb-pair: its dictionary and ます forms both count.
-        if row.get("type") == "word":
-            spellings = [row.get("jp") or []]
-        elif row.get("type") == "verb-pair":
-            spellings = [f.get("jp") or [] for f in row.get("forms") or []]
-        else:
-            continue
-        for segs in spellings:
-            spelt.add("".join(f"{s['kanji']}({s['reading']})" if "kanji" in s else s.get("text", "") for s in segs))
-            read.add("".join(s.get("reading") or s.get("text", "") for s in segs))
-    return spelt, read
-
-
 def _write_words(out_html, date, source):
     out_dir = pathlib.Path(out_html).parent
     sent = set()
     for f in out_dir.glob(f"*.{source}.csv"):
         if f.name.split(".")[0] < date:
             sent.update(line.split(",")[0] for line in f.read_text(encoding="utf-8").splitlines()[1:])
-    spelt, read = _known_words() if source == "wsjj" else (set(), set())
     rows = []
     for jp, ro, en in _words:
-        kana = _FURIGANA_RE.sub(lambda m: m.group(2), jp)
-        if jp in sent or jp in spelt or (source == "wsjj" and kana in read):
+        if jp in sent:
             continue
         rows.append(f"{jp},{ro},{en}")
     out = out_dir / f"{pathlib.Path(out_html).stem}.{source}.csv"

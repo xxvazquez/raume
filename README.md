@@ -177,8 +177,9 @@ components and calls `render()` with the lesson's date, which names the note
 ("Sat 21 Nov 2026"): `python3 private-notes/2026-11-21.py`. The kit checks
 furigana and romaji and lists each word once. A class note (Sakura or WSJJ)
 has no word lists — the kit writes the lesson's words to a `.csv` beside it
-for **Import a list**: every word into your Sakura table, only words raume
-lacks (verbs in either form count) into your WSJJ table. Lesson files stay in gitignored `private-notes/`.
+for **Import a list** into that class's table (Sakura or WSJJ): every word
+of the lesson, even ones raume's own tables have, so the table is the list
+of what that class taught. Lesson files stay in gitignored `private-notes/`.
 
 ### Around the app
 
