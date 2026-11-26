@@ -4157,19 +4157,25 @@ async function main() {
     document.querySelector('#fcGsMenu-size .fc-gs-opt[data-value="' + before + '"]').click();
     return same && opened && esc && picked && xw.state.size === before;
   })());
-  check("JLPT level narrows a puzzle's words to that level, and All puts them all back", (() => {
+  check("JLPT level ticks one level or several -- the menu stays open between ticks -- and All puts every word back", (() => {
     const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
-    const pickLevel = v => {
-      document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="level"]').click();
-      document.querySelector('#fcGsMenu-level .fc-gs-opt[data-value="' + v + '"]').click();
-    };
+    const menu = () => document.getElementById("fcGsMenu-levels");
+    const tick = v => menu().querySelector('.fc-gs-opt[data-value="' + v + '"]').click();
     const all = xw.wordPool().length;
-    pickLevel("5");
+    document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="levels"]').click();
+    tick("5");
     const n5 = xw.wordPool();
-    const narrowed = xw.state.level === "5" && n5.length > 0 && n5.length <= all && n5.every(w => idx[w.id].jlpt === 5)
-      && document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="level"] .fc-xw-menu-val').textContent.indexOf("N5") === 0;
-    pickLevel("");
-    return narrowed && xw.state.level === "" && xw.wordPool().length === all;
+    const one = xw.state.levels.join() === "5" && n5.length > 0 && n5.every(w => idx[w.id].jlpt === 5) && !menu().hidden;
+    tick("4");
+    const both = xw.wordPool();
+    const two = xw.state.levels.join() === "5,4" && both.length > n5.length && both.every(w => idx[w.id].jlpt === 5 || idx[w.id].jlpt === 4)
+      && !menu().hidden && menu().querySelectorAll('[role="menuitemcheckbox"][aria-checked="true"]').length === 2
+      && document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="levels"] .fc-xw-menu-val').textContent.indexOf("N5 + N4") === 0;
+    tick("");
+    const cleared = !xw.state.levels.length && xw.wordPool().length === all
+      && menu().querySelector('.fc-gs-opt[data-value=""]').getAttribute("aria-checked") === "true";
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    return one && two && cleared && menu().hidden;
   })());
   xwStart();
   check("the Puzzles tab renders a puzzle once there are enough flashcard words -- never fewer than 6 of them",

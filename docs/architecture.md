@@ -643,8 +643,10 @@ token) and a `.level-note` the ⓘ reads. The filter is per device
 (`raume-jlpt-filter`). A custom row has no level of its own: at merge time
 (`custom-vocab.js` `builtInLevels`) it takes the level of the built-in word
 written the same, else of the one read the same when that reading has a
-single level. Puzzles / Games setup carries a `level` field (`wordPool()`
-filters by the vocab index's `jlpt`; Tricky words ignores it).
+single level. Puzzles / Games setup carries a `levels` list — none (All)
+or any of "5"…"1" (`wordPool()` filters by the vocab index's `jlpt`; Tricky
+words ignores it; a setup saved with the older single `level` is read as a
+one-item list).
 
 `english` holds only what a learner types; context for it goes in an optional
 `enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note follows

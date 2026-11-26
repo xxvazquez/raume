@@ -354,7 +354,7 @@ Choices are remembered on this device.
 | Setting | Choices |
 | --- | --- |
 | **Words from** | *Flashcards* (leaning toward words you're still learning) or any number of tables, in or out of flashcards |
-| **JLPT level** | *All*, or only one level's words from those (N5 … N1). Puzzles and every word game; not Sentences |
+| **JLPT level** | *All*, or tick one level or several (N5 + N4) to play only their words. Puzzles and every word game; not Sentences |
 | **Script** | *Romaji* (long vowels spelled out: *koohii*), *Japanese* (as written — Match and Word search only), *Hiragana* or *Katakana*. A word is never forced into a script it isn't written in |
 | **Word count** | 10–40; Match and Listening up to 100 or *All* |
 

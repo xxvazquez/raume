@@ -138,7 +138,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Setup</span><span class="help-desc">Pick the puzzle, where the words come from, their JLPT level, the script and how many, then Start. ‹ goes back.</span></li>' +
       '<li><span class="help-term">Words from</span><span class="help-desc">Your flashcards (leaning toward words you’re still learning), or as many tables as you like.</span></li>' +
-      '<li><span class="help-term">JLPT level</span><span class="help-desc">All, or one level’s words from those, N5 to N1.</span></li>' +
+      '<li><span class="help-term">JLPT level</span><span class="help-desc">All, or tick one level or several (N5 + N4) to play only their words.</span></li>' +
       '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type; tap a crossing square again to switch direction. Right squares turn green.</span></li>' +
       '<li><span class="help-term">Hint</span><span class="help-desc">Fills the square you’re on, or the next wrong one. In a word search, shows a word.</span></li>' +
       '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong.</span></li>' +

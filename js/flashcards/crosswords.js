@@ -205,15 +205,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var index = vocabIndex();
     return poolFromEntries((ids || []).map(function (id) { return index[id]; }).filter(Boolean));
   }
-  // JLPT level narrows either source to that level's words (the vocab
-  // index's jlpt); Stats' Tricky words is a fixed list and plays whole.
+  // JLPT level narrows either source to the levels ticked (the vocab
+  // index's jlpt) -- one or several, N5 + N4 say; none ticked is All.
+  // Stats' Tricky words is a fixed list and plays whole.
   function wordPool() {
     if (state.source === "tricky") return idsWordPool(state.trickyIds);
     var pool = state.source === "table" ? tableWordPool(state.tables) : flashcardsWordPool();
-    var lv = Number(state.level);
-    if (!lv) return pool;
-    var index = vocabIndex();
-    return pool.filter(function (w) { return index[w.id] && index[w.id].jlpt === lv; });
+    if (!state.levels.length) return pool;
+    var index = vocabIndex(), want = {};
+    state.levels.forEach(function (v) { want[v] = true; });
+    return pool.filter(function (w) { return index[w.id] && want[String(index[w.id].jlpt)]; });
   }
   // The N5 Kanji tables hold single characters, not words to play with.
   function vocabTables() {
@@ -2918,8 +2919,18 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // choices are remembered on this device for next time (SETUP_KEY); the
   // puzzle itself still isn't.
   var SETUP_KEY = "raume-games-setup";
-  var SETUP_FIELDS = ["mode", "source", "tables", "level", "script", "size", "sortBy", "register", "exercise"];
+  var SETUP_FIELDS = ["mode", "source", "tables", "levels", "script", "size", "sortBy", "register", "exercise"];
   var LEVEL_OPTS = [["", "All"], ["5", "N5"], ["4", "N4"], ["3", "N3"], ["2", "N2"], ["1", "N1"]];
+  // The ticked levels, easiest first; every level ticked is the same as All.
+  function cleanLevels(list) {
+    var on = {};
+    (Array.isArray(list) ? list : []).forEach(function (v) { if (/^[1-5]$/.test(String(v))) on[String(v)] = true; });
+    var out = ["5", "4", "3", "2", "1"].filter(function (v) { return on[v]; });
+    return out.length === 5 ? [] : out;
+  }
+  function levelsLabel() {
+    return state.levels.length ? state.levels.map(function (v) { return "N" + v; }).join(" + ") : "All";
+  }
   function loadSetup(kind) {
     try { return (JSON.parse(localStorage.getItem(SETUP_KEY)) || {})[kind] || {}; } catch (e) { return {}; }
   }
@@ -2933,13 +2944,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     } catch (e) { /* private mode: just not remembered */ }
   }
   function freshState(kind) {
-    var st = { kind: kind, source: "flashcards", tables: [], level: "", tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
+    var st = { kind: kind, source: "flashcards", tables: [], levels: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
       script: "romaji", size: 15, sortBy: "tables", register: "both", exercise: "build", puzzle: null, poolCount: 0, notes: "", started: false };
     var saved = loadSetup(kind);
     var modes = MODE_OPTS.map(function (o) { return o[0]; });
     if (modes.indexOf(saved.mode) !== -1 && (PUZZLE_MODES.indexOf(saved.mode) !== -1) === (kind === "puzzles")) st.mode = saved.mode;
     if (saved.source === "table" && Array.isArray(saved.tables) && saved.tables.length) { st.source = "table"; st.tables = saved.tables.map(String); }
-    if (LEVEL_OPTS.some(function (o) { return o[0] === saved.level; })) st.level = saved.level;
+    st.levels = cleanLevels(Array.isArray(saved.levels) ? saved.levels : saved.level ? [saved.level] : []);
     if (SCRIPT_OPTS.some(function (o) { return o[0] === saved.script; })) st.script = saved.script;
     if (typeof saved.size === "number" && saved.size > 0) st.size = saved.size;
     if (typeof saved.sortBy === "string") st.sortBy = saved.sortBy;
@@ -3214,8 +3225,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return '<div class="fc-xw-sheet fc-gs-menu fc-gs-menu-at-' + at + '" id="fcGsMenu-' + name + '" role="menu" aria-label="' + esc(label) + '" hidden>' +
       '<div class="fc-xw-sheet-head fc-gs-menu-head"><h4 class="fc-xw-sheet-title">' + esc(label) + "</h4></div>" +
       options.map(function (o) {
-        var val = Array.isArray(o) ? o[0] : String(o), on = String(current) === val;
-        return '<button type="button" class="fc-gs-opt" role="menuitemradio" aria-checked="' + on + '" data-pick="' + name + '" data-value="' + esc(val) + '">' +
+        var val = Array.isArray(o) ? o[0] : String(o);
+        // JLPT level ticks several: each level its own checkbox, All the
+        // empty list.
+        var multi = Array.isArray(current);
+        var on = multi ? (val ? current.indexOf(val) !== -1 : !current.length) : String(current) === val;
+        return '<button type="button" class="fc-gs-opt" role="' + (multi ? "menuitemcheckbox" : "menuitemradio") + '" aria-checked="' + on + '" data-pick="' + name + '" data-value="' + esc(val) + '">' +
           '<span class="fc-gs-opt-tx">' + esc(Array.isArray(o) ? o[1] : String(o)) + "</span>" + CHECK_ICON + "</button>";
       }).join("") + "</div>";
   }
@@ -3241,10 +3256,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     }
     else {
       // JLPT level: right under Words from, the other half of "which words".
-      if (state.source !== "tricky") picks.push(["level", "JLPT level", optionLabel(LEVEL_OPTS, state.level), LEVEL_OPTS]);
-      if (state.level && state.source !== "tricky" && state.poolCount < MIN_WORDS && !noOdd) {
-        why = "There aren’t enough N" + state.level + " words here" + (state.poolCount ? " — these have " + state.poolCount : "") +
-          ". Pick All or another JLPT level, or tick more tables under Words from.";
+      if (state.source !== "tricky") picks.push(["levels", "JLPT level", levelsLabel(), LEVEL_OPTS]);
+      if (state.levels.length && state.source !== "tricky" && state.poolCount < MIN_WORDS && !noOdd) {
+        why = "There aren’t enough " + levelsLabel() + " words here" + (state.poolCount ? " — these have " + state.poolCount : "") +
+          ". Tick another JLPT level or All, or more tables under Words from.";
       }
       if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
     }
@@ -4043,6 +4058,22 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     panel.querySelectorAll(".fc-gs-opt").forEach(function (opt) {
       opt.addEventListener("click", function () {
         var key = opt.dataset.pick;
+        if (key === "levels") {
+          // A tick toggles that level and the menu stays open for the next
+          // one, as an iOS multi-select menu does; All clears them.
+          var v = opt.dataset.value, has = state.levels.indexOf(v) !== -1;
+          state.levels = cleanLevels(!v ? [] : has ? state.levels.filter(function (x) { return x !== v; }) : state.levels.concat(v));
+          openPick = null;
+          saveSetup();
+          generate();
+          rerender();
+          if (currentPanel) {
+            openPickMenu(currentPanel, "levels");
+            var same = currentPanel.querySelector('#fcGsMenu-levels .fc-gs-opt[data-value="' + v + '"]');
+            if (same) same.focus({ preventScroll: true });
+          }
+          return;
+        }
         openPick = null;
         state[key] = key === "size" ? parseInt(opt.dataset.value, 10) : opt.dataset.value;
         saveSetup();
