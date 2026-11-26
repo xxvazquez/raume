@@ -82,7 +82,7 @@ the grammar it shows.
 | **Columns** | **Japanese** (with furigana) and **English**. Tap a word for its **romaji**. Context for a meaning ("before a noun") follows the English in grey. |
 | **Furigana** | Always shown. Consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and each reading starts where its kanji start. |
 | **Katakana** | Hover or tap any katakana to see its romaji. |
-| **Particles** | Blue and bold everywhere; tap one to see what it marks. |
+| **Particles** | Blue and bold everywhere; tap one for how it’s read (は is “wa”). |
 | **Speaker** | Plays a recorded native-voice clip; your own words use the device's voice. |
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
