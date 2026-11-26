@@ -66,7 +66,7 @@ the grammar it shows.
 | | |
 | --- | --- |
 | **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. Clearing the search puts back the tables you had open. |
-| **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), and a verb's *to* is never needed. Only visible columns are searched, plus romaji. |
+| **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), a verb's *to* is never needed, and any one meaning typed whole is an exact match (*see* finds *to see, to watch* first). Only visible columns are searched, plus romaji. |
 | **+ on a result** | Adds the word to flashcards; it turns into Practice's cards icon (tap again to pause). |
 | **Recent searches** | Tap the empty field for your last eight — tap one to rerun it, **×** removes one, **Clear** all. Only searches you used (Return or a tap on a result) that found something are kept, on this device. |
 | **Tables** | The list button in the pinned search bar: every table in the section, with entry counts, the one you're in marked. |

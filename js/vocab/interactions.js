@@ -1188,6 +1188,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     function rankWords(t, q, prefixOnly) {
       if (!t) return null;
       if (t === q) return 0;
+      // Any one of its meanings typed whole is exact too: "see" is
+      // "to see, to watch" itself, above sētā, which only starts with it.
+      if (t.split(/,\s*/).some(m => m === q || (!/^to\b/.test(q) && m === 'to ' + q))) return 0;
       if (t.startsWith(q)) return 1;
       // A verb's "to" isn't the word: "see" finds "to see" first.
       if (!/^to\b/.test(q) && /^to /.test(t)) {
