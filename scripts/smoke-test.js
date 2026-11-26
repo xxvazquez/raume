@@ -1224,7 +1224,16 @@ async function main() {
       && check1(".particle[data-r]:hover::after", ".particle[data-r].particle-on::after");
   })());
   check("every :hover rule sits behind a (hover: …) media query -- iOS leaves a tapped element stuck in :hover, so an ungated one keeps a tapped row or tab highlighted", (() => {
-    const gated = r => { for (let p = r.parentRule; p; p = p.parentRule) if (p.media && /hover/.test(p.media.mediaText)) return true; return false; };
+    // Gated = inside (hover: hover), or a (hover: none)-only query (an
+    // override for touch); a list like "(hover: none), (max-width: 640px)"
+    // also matches a narrow mouse window, so it doesn't count.
+    const gated = r => {
+      for (let p = r.parentRule; p; p = p.parentRule) {
+        const m = p.media && p.media.mediaText;
+        if (m && (/\(hover:\s*hover\)/.test(m) || (/\(hover:\s*none\)/.test(m) && !m.includes(",")))) return true;
+      }
+      return false;
+    };
     const loose = allCssRules.filter(r => r.selectorText && /:hover/.test(r.selectorText) && !gated(r)).map(r => r.selectorText);
     if (loose.length) console.log("    ungated :hover:", loose.slice(0, 5).join(" | "));
     return loose.length === 0;
