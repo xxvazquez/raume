@@ -474,9 +474,11 @@ and Help.
     a search field. No native `<select>` — its menu looked different on every
     platform and beside Words from's sheet; keyboard focus lights the row in
     the section tone, never an inset ring the card's corners would cut),
-    then a filled 50px **Start** capsule, centred, and a Stats row. On a
-    wide window (iPad) the 560px setup starts at the segment bar's leading
-    edge, like every other Practice screen; the 640px game boards centre in
+    then a filled 50px **Start** capsule, centred, and a Stats row. From
+    760px wide (iPad) the setup is two equal columns under the segment bar,
+    like the Kana tab — the puzzle / game list on the left; Words, Start and
+    Stats on the right — so the whole setup is in view and no half of the
+    screen sits empty; narrower, one 560px column. The 640px game boards centre in
     Practice's 900px column under the full-width toolbar. Never a
     row of pills over the content (Laura, 2026-09-28).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):

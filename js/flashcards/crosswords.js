@@ -2638,14 +2638,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
     picks.push(["size", "Word count", sizeLabel(), sizeOpts()]);
     if (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length) picks.push(["sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), state.sortAvail]);
-    return '<div class="fc-gs">' +
+    // Two columns on a wide window (the style; then Words, Start and
+    // Stats), one stacked column on a phone.
+    return '<div class="fc-gs"><div class="fc-gs-col">' +
       '<h3 class="help-head set-head">' + (games ? "Game" : "Puzzle") + "</h3>" +
       '<div class="help-card set-card fc-gs-modes" role="radiogroup" aria-label="' + (games ? "Game" : "Puzzle") + '">' +
       modeOpts().map(function (o) {
         return '<label class="set-row fc-gs-mode"><input type="radio" class="fc-gs-radio" name="fcGsMode" value="' + o[0] + '"' + (o[0] === state.mode ? " checked" : "") + ">" +
           '<span class="fc-gs-mode-tx"><span class="fc-gs-mode-name">' + esc(o[1]) + '</span><span class="help-desc">' + esc(MODE_BLURBS[o[0]]) + "</span></span>" + CHECK_ICON + "</label>";
-      }).join("") + "</div>" +
-      '<h3 class="help-head set-head">Words</h3>' +
+      }).join("") + "</div></div>" +
+      '<div class="fc-gs-col"><h3 class="help-head set-head">Words</h3>' +
       '<div class="fc-gs-words"><div class="help-card set-card">' +
       '<button type="button" class="set-row fc-gs-pick fc-gs-src" id="fcXwSource" aria-haspopup="dialog" aria-expanded="' + !!state.tablesOpen + '" aria-controls="fcXwSheet">' +
       '<span class="set-label">Words from</span><span class="fc-xw-menu-val">' + esc(sourceLabel()) + UPDOWN_ICON + "</span></button>" +
@@ -2656,7 +2658,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       '<div class="fc-gs-go"><button type="button" class="fc-btn fc-btn-primary fc-gs-start" id="fcGsStart"' + (short ? " disabled" : "") + ">Start</button></div>" +
       '<div class="help-card set-card fc-gs-more"><button type="button" class="set-row set-action fc-gs-stats" id="fcGsStats">' +
       '<span class="set-label">Stats</span>' + ROW_CHEVRON + "</button></div>" +
-      "</div>";
+      "</div></div>";
   }
   function renderSetup(panel) {
     if (!state.puzzle) generate();

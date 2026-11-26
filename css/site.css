@@ -6325,7 +6325,16 @@ mark.fc-diff-co {
    and ⋯ -- New puzzle on a phone, How to play, Reveal / Clear / Save as
    PDF, Stats. */
 .fc-gs { max-width: 560px; } /* leading-aligned under the segment bar, as Dashboard, Kana and Library */
-.fc-gs .help-head:first-child { margin-top: 0; }
+.fc-gs-col:first-child > .help-head:first-child { margin-top: 0; }
+/* Stacked, Words keeps a group's full gap above it. */
+.fc-gs-col + .fc-gs-col > .help-head:first-child { margin-top: 22px; }
+/* A wide window: the puzzle / game list in the left half, Words, Start and
+   Stats in the right -- the Kana tab's two equal halves, the whole setup
+   in view. One 560px column left the right half of an iPad empty. */
+@media (min-width: 760px) {
+  .fc-gs { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .fc-gs-col + .fc-gs-col > .help-head:first-child { margin-top: 0; }
+}
 .fc-gs-mode { min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
 .fc-gs-radio { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 .fc-gs-mode-tx { flex: 1 1 auto; min-width: 0; }
