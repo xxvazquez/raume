@@ -4291,7 +4291,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   .fc-xw-puzzle.fc-xw-puzzle-arroword .fc-xw-cell { flex-basis: 56px; width: 56px; }
   .fc-xw-puzzle-arroword .fc-xw-cell-clue { padding: 2px 0; gap: 2px; }
   .fc-xw-puzzle-arroword .fc-xw-cluetext {
-    padding: 0 2px; font-size: 11px; line-height: 1.1; -webkit-line-clamp: 3;
+    padding: 0 1px; font-size: 11px; line-height: 1.1; -webkit-line-clamp: 3;
     -webkit-hyphens: auto; hyphens: auto; overflow-wrap: break-word;
   }
   .fc-xw-puzzle-arroword .fc-xw-cell-input { font-size: 20px; }
