@@ -1763,14 +1763,20 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
       t.rows.forEach(function (row) {
         if (!Array.isArray(row.tiles)) return;
+        // A sentence whose Japanese the reader edited (js/vocab/word-edits.js)
+        // no longer matches its pieces: it sits out of Build and Verb form,
+        // which deal them, and still plays where only the sentence counts.
+        var intact = row.tiles.join("") === row.jp.map(function (g) { return g.kanji || g.text || g.p || ""; }).join("");
+        if (!intact && (state.exercise === "build" || state.exercise === "verbform")) return;
         var blanks = particleBlanks(row.jp);
         if (state.exercise === "particles" ? !blanks.length : state.exercise === "verbform" ? !row.mainVerb
           : state.exercise === "build" && row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
-        var segs = tileSegments(row);
-        if (!segs) return;
+        // Only Build and Verb form deal the pieces.
+        var segs = intact ? tileSegments(row) : null;
+        if (!segs && (state.exercise === "build" || state.exercise === "verbform")) return;
         var V = window.RaumeStudy.vocab;
         out.push({
           id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""), blanks: blanks, mainVerb: row.mainVerb || null,
@@ -1975,10 +1981,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var cur = q();
       locked = true;
       var ans = boardEl.querySelector(".fc-sb-answer");
-      // Verb form's line already reads as the whole sentence once its blank
-      // fills: under it only the romaji and ▶, not the Japanese again.
-      ans.innerHTML = (verbform || meaning ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
-        : (right ? "" : '<span class="fc-sb-answer-head">The sentence</span>') + sentenceHtml(cur.word)) +
+      // Whenever the line above already reads as the whole sentence -- a
+      // right answer, Verb form's filled blank, Meaning's card -- only the
+      // romaji and ▶ follow, never the Japanese again. A wrong Build or
+      // Particles answer shows the sentence as it should be.
+      ans.innerHTML = (right || verbform || meaning ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
+        : '<span class="fc-sb-answer-head">The sentence</span>' + sentenceHtml(cur.word)) +
         // Meaning's card has had its ▶ from the start.
         (canSpeak() && !meaning ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
       ans.hidden = false;

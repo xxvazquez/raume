@@ -4829,10 +4829,12 @@ async function main() {
     document.querySelector("#fcPanelGames .fc-ls-next").click();
     return ok && sbQ() !== sbFirst.word.clue;
   })());
-  check("the right order washes the line sage and shows the sentence too, with Next", (() => {
-    sbCur().word.tiles.forEach((t, i) => sbTap(i));
+  check("the right order washes the line sage; under it only the romaji (the line is the sentence), with Next", (() => {
+    const w = sbCur().word;
+    w.tiles.forEach((t, i) => sbTap(i));
+    const ans = document.querySelector("#fcPanelGames .fc-sb-answer");
     const ok = document.querySelector("#fcPanelGames .fc-sb-line").classList.contains("fc-sb-right")
-      && !document.querySelector("#fcPanelGames .fc-sb-answer").hidden;
+      && !ans.hidden && ans.textContent.includes(w.romaji) && !ans.querySelector(".fc-sb-whole");
     document.querySelector("#fcPanelGames .fc-ls-next").click();
     return ok;
   })());
@@ -4952,6 +4954,16 @@ async function main() {
       return m.choices.length === 3 && new Set(m.choices).size === 3 && m.choices[m.answer] === r.english
         && m.choices.every(en => (byEn[en].enNote === "casual") === (r.enNote === "casual"));
     });
+  })());
+  check("a sentence whose Japanese was edited sits out of Build and Verb form (its pieces no longer match) but still plays in Particles and Meaning", (() => {
+    const st = xw.state, was = st.exercise, row = window.RaumeStudy.vocab.rawRow("v1126"), jp = row.jp;
+    const has = ex => { st.exercise = ex; return xw.sentencePool().some(x => x.id === row.id); };
+    row.jp = [{ text: "パン" }, { p: "は" }, { kanji: "食", reading: "た" }, { text: "べません。" }]; // as an edit leaves it
+    const res = [has("build"), has("verbform"), has("particles"), has("meaning")];
+    row.jp = jp;
+    const back = has("build") && has("verbform");
+    st.exercise = was;
+    return !res[0] && !res[1] && res[2] && res[3] && back;
   })());
   xwPick("exercise", "meaning");
   xwStart();

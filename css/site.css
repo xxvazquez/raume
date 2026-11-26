@@ -3552,6 +3552,10 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .we-input[lang="ja"] { font-family: var(--font-jp); }
 .we-input::placeholder { color: var(--muted); opacity: .55; }
 .we-row:focus-within { background-color: color-mix(in srgb, var(--section) 7%, var(--paper)); }
+/* The site-wide :focus-visible ring would box the field (Safari draws it on
+   a tapped text field): an iOS form shows focus by its caret and the row's
+   tint above, nothing round the field. */
+.we-input:focus, .we-input:focus-visible { outline: none; }
 .we-error { margin: 12px 16px 0; font-size: var(--fs-small); line-height: 1.35; color: var(--wrong-strong); }
 .we-error[hidden] { display: none; }
 .we-form > .ks-card:last-child { margin-top: 20px; }
@@ -4704,7 +4708,8 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    open under it (filled once answered, so ▶ below never moves); the three English choices are Listening's
    tiles stacked full width -- sentences are too long for its 2 × 2. */
 .fc-mn-jp { margin: 0; font-size: 22px; line-height: 1.7; text-align: center; }
-.fc-mn-card .fc-sb-answer { min-height: 1.4em; margin-top: -6px; }
+.fc-mn-card { gap: 6px; }
+.fc-mn-card .fc-sb-answer { min-height: 1.4em; }
 .fc-mn-card .fc-sb-answer[hidden] { display: flex; visibility: hidden; }
 .fc-mn-choices { grid-template-columns: minmax(0, 1fr); max-width: 520px; margin-inline: auto; }
 .fc-mn-choice { text-align: left; font-size: 15px; line-height: 1.35; padding: 12px 40px 12px 16px; }

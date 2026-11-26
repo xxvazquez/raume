@@ -1313,7 +1313,8 @@ tiles' white capsules sized to their words (44px tall, 12px corners, the
 Japanese at 19px with 10px furigana, particles blue), a used piece dimmed in
 place; placed pieces keep full strength once the round locks, so a wrong
 order stays readable. The answer — "The sentence" in grey after a miss, the
-sentence at 19px, its romaji, ▶ — rises in under the line. Its Stats hue is
+sentence at 19px, its romaji, ▶ — rises in under the line; a right answer
+shows only the romaji and ▶, since the line already reads as the sentence. Its Stats hue is
 blue (puzzles' blue never shares the Game stats screen). Its **Particles**
 exercise sets the sentence at 22px with each particle a **circle** to fill —
 how a Japanese worksheet marks one (Laura, 2026-11-26), never [ ＿ ] — a kana

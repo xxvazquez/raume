@@ -481,8 +481,10 @@ confetti; reduced motion is honoured.
     same words or pattern, a question among questions — never one that
     means the same. The romaji shows once you answer.
 - **Register** picks *Polite*, *Casual* or both; no *Words from*.
-- Each answer shows the whole sentence with its romaji and ▶. A miss (or
-  **Show answer**) comes back at the end; missed sentences join Tricky words.
+- Each answer shows the romaji and ▶ (and, after a miss, the sentence as it
+  should be). A miss (or **Show answer**) comes back at the end; missed
+  sentences join Tricky words. A sentence whose Japanese you edited sits out
+  of Build and Verb form, whose pieces no longer match it.
 
 </details>
 
