@@ -3607,6 +3607,10 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 @media (hover: none) { .particle[data-r]:hover::after { opacity: 0; } }
 /* Declared after the hover-none suppression -- see .kr-on above for why. */
 .particle[data-r].particle-on::after { opacity: 1; }
+/* Inside a button (a game's よ。 tile) the reading never shows: the tap
+   or hover is the button's, and the reading would give the answer away. */
+button .particle[data-r]::after, button .kr::after { display: none; }
+button .particle[data-r], button .kr { cursor: inherit; }
 
 .irregular-row td { color: var(--irregular-ink) !important; }
 .irregular-row .furigana { color: var(--irregular-ink) !important; }
@@ -4663,6 +4667,13 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-answer[hidden] { display: none; }
 .fc-sb-answer-head { font-size: var(--fs-small); color: var(--muted); }
 .fc-sb-whole { font: 400 19px/1.6 var(--font-jp); color: var(--ink); }
+/* As the sentence tables: a line breaks only between phrases (crosswords.js
+   phraseWrap() holds each whole, <wbr> between), never inside a word, and
+   。、」 never start one. Centred, a wrapped sentence splits into even
+   lines, never a lone い？ under the rest. */
+.fc-sb-whole, .fc-sp-line { word-break: keep-all; overflow-wrap: anywhere; }
+.fc-sb-phrase { white-space: nowrap; }
+.fc-sb-whole, .fc-sp-line, .fc-sb-clue { line-break: strict; text-wrap: balance; }
 .fc-sb-romaji { color: var(--muted); font-size: 14px; }
 .fc-sb-say { margin-top: 0; }
 .fc-ls-missed li.fc-sb-missed { flex-direction: column; align-items: flex-start; gap: 2px; }

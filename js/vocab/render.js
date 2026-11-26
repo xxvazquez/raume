@@ -84,6 +84,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // Exposed so js/flashcards/vocab-index.js can render the exact same furigana markup
   // for a vocab entry's Japanese prompt instead of duplicating this logic.
   vocab.jpSegmentsHtml = jpSegments;
+  // And js/flashcards/crosswords.js's Sentences, so a sentence there wraps
+  // between phrases as it does in the tables.
+  vocab.phraseSegments = phraseSegments;
   // A kana-only reading, for feeding the Web Speech API -- reconstructed from
   // each segment's reading where there is one (a kanji segment), or its own
   // text otherwise (already kana/katakana). Kept separate from jpPlainOf
@@ -114,6 +117,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       ? function (t) { return window.RaumeStudy.kanaRomaji.decorate(t); }
       : esc;
     return segments.map(function (seg) {
+      if (seg.wbr) return '<wbr>';
       if (seg.p) {
         var pr = seg.r || PARTICLE_ROMAJI[seg.p] || '';
         return '<span class="particle"' + (pr ? ' data-r="' + esc(pr) + '"' : '') + '>' + esc(seg.p) + '</span>';

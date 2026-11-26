@@ -1329,7 +1329,10 @@ offers the four forms as Listening's 2 × 2 choices at 19px with furigana,
 the right — the grid itself teaches the pattern, so it stays 2 × 2 on the
 narrowest iPhone too (the forms drop to 15px there; Listening's own grid
 stacks). A closing 。 never starts a line: it holds on to the blank before
-it, the verb's capsule or a particle's circle. Answered, Listening's ✓ / ✕
+it, the verb's capsule or a particle's circle. Every sentence in the game
+wraps as the sentence tables do — only between its pieces, never inside a
+word (食 / べに), into even centred lines (no lone い？ under the rest) — and
+a particle's romaji never shows inside a tile: tapping it is the tile's. Answered, Listening's ✓ / ✕
 marks the choices and the blank fills sage with the right form, so the line
 reads as the finished sentence; under it only the romaji and ▶. **Meaning**
 puts the Japanese first in the card at 22px, its romaji's line held open

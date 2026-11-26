@@ -1812,9 +1812,19 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       })
     };
   }
+  // The sentence with a <wbr> between its pieces: it wraps between phrases,
+  // never inside a word (食 / べに), as the sentence tables do. A sentence
+  // the reader edited no longer matches its pieces and wraps as it can.
+  function phrased(s) { return s.segs ? window.RaumeStudy.vocab.phraseSegments({ jp: s.jp, tiles: s.tiles }) : s.jp; }
+  // Each phrase then held whole in a no-wrap span: a <wbr> alone still lets
+  // a line break beside a kanji's furigana (土よう / 日).
+  function phraseWrap(html) {
+    return html.indexOf("<wbr>") === -1 ? html
+      : '<span class="fc-sb-phrase">' + html.split("<wbr>").join('</span><wbr><span class="fc-sb-phrase">') + "</span>";
+  }
   function sentenceHtml(s) {
     var V = window.RaumeStudy.vocab;
-    return '<span class="fc-sb-whole jpword" lang="ja">' + V.jpSegmentsHtml(s.jp) + "</span>" +
+    return '<span class="fc-sb-whole jpword" lang="ja">' + phraseWrap(V.jpSegmentsHtml(phrased(s))) + "</span>" +
       '<span class="fc-sb-romaji">' + esc(s.romaji) + "</span>";
   }
   function wireSentences(boardEl, countEl, p) {
@@ -1839,8 +1849,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     function blankLineHtml(cur, marked) {
       var next = filled.indexOf(null), held = "";
       var LEADING_PUNCT = /^[。、！？!?…」]+/;
-      return cur.word.jp.map(function (s, i) {
-        var b = cur.word.blanks.indexOf(i);
+      // A particle is never split, so it is still the row's own segment.
+      var segs = phrased(cur.word);
+      return phraseWrap(segs.map(function (s, k) {
+        if (s.wbr) return "<wbr>";
+        var i = cur.word.jp.indexOf(s), b = i === -1 ? -1 : cur.word.blanks.indexOf(i);
         if (b === -1) {
           // Punctuation the blank before it already took.
           if (held && s.text) { var rest = s.text.slice(held.length); held = ""; return rest ? V.jpSegmentsHtml([{ text: rest }]) : ""; }
@@ -1850,14 +1863,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         if (marked) cls += got === s.p ? " fc-sp-right" : " fc-sp-wrong";
         else if (b === next) cls += " fc-sp-next";
         // A 。 after the circle holds on to it: a line never starts with it.
-        var after = cur.word.jp[i + 1], punct = after && after.text && cur.word.blanks.indexOf(i + 1) === -1 ? (after.text.match(LEADING_PUNCT) || [""])[0] : "";
+        var after = segs[k + 1], punct = after && after.text ? (after.text.match(LEADING_PUNCT) || [""])[0] : "";
         held = punct;
         var btn = '<button type="button" class="' + cls + '" data-b="' + b + '" aria-label="' +
           (got ? "Blank " + (b + 1) + ": " + got : "Blank " + (b + 1) + ", empty") + '"' + (marked ? " disabled" : "") + ">" +
           '<span class="fc-sp-got">' + esc(got || "") + "</span>" +
           (marked && got !== s.p ? '<span class="fc-sp-fix">' + esc(s.p) + "</span>" : "") + "</button>";
         return punct ? '<span class="fc-sp-tail">' + btn + esc(punct) + "</span>" : btn;
-      }).join("");
+      }).join(""));
     }
     function drawBlanks(marked) {
       boardEl.querySelector(".fc-sp-line").innerHTML = blankLineHtml(q(), marked);
@@ -1891,13 +1904,16 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // right form once answered), and the 2 × 2 grid of forms under the card.
     function verbLineHtml(cur, filledWith) {
       var mv = cur.word.mainVerb, span = mv.span || 1;
-      return cur.word.segs.map(function (segs, i) {
-        if (i < mv.tile || i >= mv.tile + span) return V.jpSegmentsHtml(segs);
+      return phraseWrap(cur.word.segs.map(function (segs, i) {
+        // A line may break between pieces, never before one opening on a
+        // particle (it stays with the word before it).
+        var wbr = i && !(segs[0] && segs[0].p) ? "<wbr>" : "";
+        if (i < mv.tile || i >= mv.tile + span) return wbr + V.jpSegmentsHtml(segs);
         if (i > mv.tile) return "";
         // The closing 。 holds on to the verb: a line never starts with it.
-        return '<span class="fc-sp-tail"><span class="fc-sp-blank fc-vf-blank' + (filledWith ? " fc-sp-right" : " fc-sp-next") + '" aria-label="' + (filledWith ? "The verb" : "Blank: the verb") + '">' +
+        return wbr + '<span class="fc-sp-tail"><span class="fc-sp-blank fc-vf-blank' + (filledWith ? " fc-sp-right" : " fc-sp-next") + '" aria-label="' + (filledWith ? "The verb" : "Blank: the verb") + '">' +
           (filledWith ? V.jpSegmentsHtml(filledWith) : "") + "</span>" + esc(cur.grid.punct) + "</span>";
-      }).join("");
+      }).join(""));
     }
     function renderVerbForm(cur) {
       boardEl.innerHTML =
@@ -1936,7 +1952,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<div class="fc-ls-card fc-sb-card fc-mn-card" data-sentence="' + esc(cur.word.id) + '">' +
         // The romaji's line is held open under the Japanese, so ▶ never
         // moves when it fills.
-        '<p class="fc-sb-whole fc-mn-jp jpword" lang="ja">' + V.jpSegmentsHtml(cur.word.jp) + "</p>" +
+        '<p class="fc-sb-whole fc-mn-jp jpword" lang="ja">' + phraseWrap(V.jpSegmentsHtml(phrased(cur.word))) + "</p>" +
         '<p class="fc-sb-answer" aria-live="polite" hidden></p>' +
         (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "") + "</div>" +
         '<div class="fc-ls-choices fc-mn-choices" role="group" aria-label="What it means">' + cur.meaning.choices.map(function (en, i) {

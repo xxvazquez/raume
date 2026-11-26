@@ -2175,9 +2175,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     document.addEventListener('click', function (event) {
       const t = event.target;
       if (!t || !t.closest) return;
-      pin('kr', 'kr-on', t.closest('.kr'));
+      // A tap on a button is that button's action (a game's よ。 tile), never
+      // a reading lookup -- it only clears what was pinned.
+      const inButton = !!t.closest('button');
+      pin('kr', 'kr-on', inButton ? null : t.closest('.kr'));
       // Same touch-pin behaviour for a particle's reading (は -> "wa").
-      pin('particle', 'particle-on', t.closest('.particle[data-r]'));
+      pin('particle', 'particle-on', inButton ? null : t.closest('.particle[data-r]'));
       // Whole-word/sentence romaji reveal: click/tap the Japanese text to
       // open its romaji, click/tap elsewhere to close it -- no hover trigger
       // here (unlike .kr/.particle above), so this is the only way it opens.
