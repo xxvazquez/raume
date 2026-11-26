@@ -172,7 +172,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         "ro-en": settingsRow.enabled_ro_en !== false, "en-ro": settingsRow.enabled_en_ro !== false,
         // The written ones start off -- only an explicit on counts.
         "en-wr": settingsRow.enabled_en_wr === true, "en-wk": settingsRow.enabled_en_wk === true,
-        "jp-vf": settingsRow.enabled_jp_vf === true
+        "jp-vf": settingsRow.enabled_jp_vf === true, "jp-vn": settingsRow.enabled_jp_vn === true
       }
     };
     // Paused tables: union the account's list with whatever this device had
@@ -398,7 +398,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     }).catch(function (e) { console.warn("Flashcards: settings sync failed", e); });
     return settingsChain;
   }
-  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro", "en-wr": "enabled_en_wr", "en-wk": "enabled_en_wk", "jp-vf": "enabled_jp_vf" };
+  var DIRECTION_COLUMN = { "jp-en": "enabled_jp_en", "jp-ro": "enabled_jp_ro", "ro-en": "enabled_ro_en", "en-ro": "enabled_en_ro", "en-wr": "enabled_en_wr", "en-wk": "enabled_en_wk", "jp-vf": "enabled_jp_vf", "jp-vn": "enabled_jp_vn" };
   // Lay queued changes over the account's row just read into the cache.
   function applyPendingSettings(c) {
     var p = c.pendingSettings || {};
@@ -532,7 +532,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   // fetch): a word that already has one, studied or archived, is left alone.
   async function ensureWritingCards() {
     var c = getCache();
-    var dirs = ["en-wr", "en-wk", "jp-vf"].filter(function (d) { return c.settings.enabled_directions[d] === true; });
+    var dirs = ["en-wr", "en-wk", "jp-vf", "jp-vn"].filter(function (d) { return c.settings.enabled_directions[d] === true; });
     if (!dirs.length) return;
     var index = getVocabIndex(), has = {}, inStudy = {};
     Object.keys(c.cards).forEach(function (id) {
@@ -543,7 +543,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     var missing = [];
     Object.keys(inStudy).forEach(function (v) {
       dirs.forEach(function (d) {
-        if (!has[v + "|" + d] && index[v] && (d === "jp-vf" ? !!index[v].verbForms : vidx.writeCharsFor(index[v], d))) missing.push({ vocabId: v, direction: d });
+        if (!has[v + "|" + d] && index[v] && (store.isVerbFormDirection(d) ? !!vidx.formsFor(index[v], d) : vidx.writeCharsFor(index[v], d))) missing.push({ vocabId: v, direction: d });
       });
     });
     if (!missing.length) return;
@@ -623,7 +623,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
         enabled_jp_en: enabledMap["jp-en"], enabled_jp_ro: enabledMap["jp-ro"],
         enabled_ro_en: enabledMap["ro-en"], enabled_en_ro: enabledMap["en-ro"],
         enabled_en_wr: enabledMap["en-wr"] === true, enabled_en_wk: enabledMap["en-wk"] === true,
-        enabled_jp_vf: enabledMap["jp-vf"] === true
+        enabled_jp_vf: enabledMap["jp-vf"] === true, enabled_jp_vn: enabledMap["jp-vn"] === true
       });
     }
     await ensureWritingCards();

@@ -148,14 +148,17 @@ flowchart LR
   flashcard progress. Deleting a custom row/table is a real delete (no learning
   history on the content itself to keep).
 - Each vocab entry maps to up to six independently scheduled cards (jp-en,
-  jp-ro, ro-en, en-ro, en-wr, en-wk), plus **jp-vf** (Verb → conjugated form) for a
-  verb, never Japanese-to-type. A jp-vf card is one card per verb: each review
-  asks the form `card.reps % 7` picks (polite 〜ません / 〜ました / 〜ませんでした,
-  plain 〜ない / 〜た / 〜なかった, て-form), shown and checked as a jp-ro card by `vocab-index.js` `cardView`
-  (a derived entry whose romaji answers, reading and written form are that
-  form's; `entry.verbForms` holds all seven, worked out from the polite form).
-  Off by default like the writing ones (`store.isOptInDirection`); its column
-  is `enabled_jp_vf` and its cards need the widened direction check in
+  jp-ro, ro-en, en-ro, en-wr, en-wk), plus two for a verb: **jp-vf** (Verb →
+  polite form) and **jp-vn** (Verb → plain form), never Japanese-to-type. Each
+  is one card per verb, and each review asks the form `card.reps` picks from
+  its set -- jp-vf from `entry.verbForms` (〜ません / 〜ました / 〜ませんでした /
+  て-form), jp-vn from `entry.plainForms` (〜ない / 〜た / 〜なかった), both
+  worked out from the polite form -- shown and checked as a jp-ro card by
+  `vocab-index.js` `cardView` (a derived entry whose romaji answers, reading
+  and written form are that form's). Two cards so the plain set keeps its own
+  schedule. Off by default like the writing ones (`store.isOptInDirection`);
+  their columns are `enabled_jp_vf` / `enabled_jp_vn` and their cards need the
+  widened direction check in
   `supabase/schema.sql`. Rows whose romaji is still kana
   get jp-en only. **en-wr** / **en-wk** (English → Japanese (kana) / (kanji))
   ask for the word handwritten on a pad (`js/flashcards/write-card.js`), judged

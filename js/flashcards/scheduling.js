@@ -118,7 +118,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       // A written card whose word can no longer be written that way (its
       // reading changed) has nothing to ask either.
       if (entry && store.isWriteDirection(card.direction) && !vidx.writeCharsFor(entry, card.direction)) return false;
-      if (entry && card.direction === "jp-vf" && !entry.verbForms) return false;
+      if (entry && store.isVerbFormDirection(card.direction) && !vidx.formsFor(entry, card.direction)) return false;
       return !!entry && !store.isTablePaused(entry.tableId);
     });
   }

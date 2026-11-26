@@ -213,9 +213,10 @@ to flashcards**, or single words from **Library** or a search result.
   [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs).
 - Up to six cards per word: **JP → EN · JP → Romaji · Romaji → EN ·
   EN → Romaji**, and two handwritten, **EN → Japanese (kana)** and
-  **EN → Japanese (kanji)**. A verb can add **Verb → form**: one of its
-  polite 〜ません, 〜ました, 〜ませんでした, plain 〜ない, 〜た, 〜なかった or the
-  て-form, a different one each time, typed in romaji. You never type Japanese.
+  **EN → Japanese (kanji)**. A verb can add two more, each asking a
+  different form every time, typed in romaji: **Verb → polite form** (〜ません,
+  〜ました, 〜ませんでした, the て-form) and **Verb → plain form** (〜ない, 〜た,
+  〜なかった). You never type Japanese.
 - **Study directions** in Settings picks which you get; the handwritten two
   and verb forms are off until you turn them on.
 - A session mixes everything due (plus learning steps due within 20 minutes)

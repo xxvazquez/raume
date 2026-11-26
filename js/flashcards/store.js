@@ -14,14 +14,17 @@ window.RaumeStudy.flashcards.store = (function () {
   // en-wr / en-wk: English -> the word handwritten on a pad
   // (js/flashcards/write-card.js), in kana or as it's written with its
   // kanji -- each off until switched on in Settings.
-  // jp-vf: a verb -> one of its conjugated forms in romaji (ません, ました,
-  // ませんでした, the て-form, a different one each review) -- verbs only,
-  // also off until switched on.
-  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr", "en-wk", "jp-vf"];
+  // jp-vf / jp-vn: a verb -> one of its forms in romaji, a different one each
+  // review -- jp-vf its polite set and て-form (ません, ました, ませんでした,
+  // 行って), jp-vn its plain set (ない, た, なかった). Two cards, not one, so
+  // the newer plain forms keep their own schedule. Verbs only, off until
+  // switched on.
+  var DIRECTIONS = ["jp-en", "jp-ro", "ro-en", "en-ro", "en-wr", "en-wk", "jp-vf", "jp-vn"];
   function isWriteDirection(d) { return d === "en-wr" || d === "en-wk"; }
   // Off until switched on, and sent up apart from the rest: an account whose
   // database predates one refuses its cards, which mustn't stop a word.
-  function isOptInDirection(d) { return isWriteDirection(d) || d === "jp-vf"; }
+  function isOptInDirection(d) { return isWriteDirection(d) || isVerbFormDirection(d); }
+  function isVerbFormDirection(d) { return d === "jp-vf" || d === "jp-vn"; }
   var DIRECTION_LABEL = {
     "jp-en": "Japanese → English",
     "jp-ro": "Japanese → Romaji",
@@ -29,7 +32,8 @@ window.RaumeStudy.flashcards.store = (function () {
     "en-ro": "English → Romaji",
     "en-wr": "English → Japanese (kana)",
     "en-wk": "English → Japanese (kanji)",
-    "jp-vf": "Verb → conjugated form"
+    "jp-vf": "Verb → polite form",
+    "jp-vn": "Verb → plain form"
   };
   var RATING_NAMES = ["Again", "Hard", "Good", "Easy"];
   // localStorage keys. Old "sakura-*" names (the app's former name) are moved
@@ -193,7 +197,7 @@ window.RaumeStudy.flashcards.store = (function () {
       // leaves its cards out of the queue/stats, never deletes or resets
       // them. The typed four are on by default, same as before this setting
       // existed; the two written ones are off (slow without a pen).
-      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true, "en-wr": false, "en-wk": false, "jp-vf": false }
+      enabled_directions: { "jp-en": true, "jp-ro": true, "ro-en": true, "en-ro": true, "en-wr": false, "en-wk": false, "jp-vf": false, "jp-vn": false }
     };
   }
   function emptyCache(userId) {
@@ -528,7 +532,7 @@ window.RaumeStudy.flashcards.store = (function () {
   }
 
   return {
-    DIRECTIONS: DIRECTIONS, DIRECTION_LABEL: DIRECTION_LABEL, isWriteDirection: isWriteDirection, isOptInDirection: isOptInDirection, RATING_NAMES: RATING_NAMES,
+    DIRECTIONS: DIRECTIONS, DIRECTION_LABEL: DIRECTION_LABEL, isWriteDirection: isWriteDirection, isOptInDirection: isOptInDirection, isVerbFormDirection: isVerbFormDirection, RATING_NAMES: RATING_NAMES,
     CACHE_SCHEMA_VERSION: CACHE_SCHEMA_VERSION,
     getStoredMode: getStoredMode, setStoredMode: setStoredMode,
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,

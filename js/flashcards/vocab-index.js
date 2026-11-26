@@ -123,7 +123,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "en-wk" ? entry.writeKanjiChars : direction === "en-wr" ? entry.writeChars : null;
   }
 
-  // A verb's forms for the Verb → conjugated form cards (jp-vf), each as the review
+  // A verb's forms for the Verb → form cards (jp-vf / jp-vn), each as the review
   // card needs it: written with furigana, its kana reading (what plays), and
   // its romaji. All come from the polite form -- swap the ます, or turn the
   // stem into the て-form by the verb's group -- so the kanji keep their
@@ -215,13 +215,20 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
       return { label: VF_LABELS[i], html: jpHtmlFn(p[0]), plain: jpPlainOf(p[0]), reading: p[1], romaji: p[2] };
     });
   }
-  // What a Verb → conjugated form card shows and accepts this review: the verb's
+  // A verb's seven forms split between its two cards: jp-vf asks the polite
+  // set and the て-form, jp-vn the plain set.
+  function formsFor(entry, direction) {
+    if (!entry) return null;
+    return direction === "jp-vf" ? entry.verbForms : direction === "jp-vn" ? entry.plainForms : null;
+  }
+  // What a Verb → form card shows and accepts this review: the verb's
   // dictionary form asking for one form -- a different one each time it
   // comes up (its review count picks it) -- checked as a romaji card. Any
   // other card is itself.
   function cardView(entry, card) {
-    if (!card || card.direction !== "jp-vf" || !entry || !entry.verbForms) return { entry: entry, direction: card ? card.direction : "" };
-    var f = entry.verbForms[(card.reps || 0) % entry.verbForms.length];
+    var forms = card && formsFor(entry, card.direction);
+    if (!forms) return { entry: entry, direction: card ? card.direction : "" };
+    var f = forms[(card.reps || 0) % forms.length];
     var view = Object.create(entry);
     var plainForm = String(entry.jpPromptHtml).split('<span class="fc-jp-slash">')[0];
     view.jpPromptHtml = plainForm + '<span class="fc-prompt-note fc-vf-ask" lang="en">→ ' + f.label + "</span>";
@@ -308,7 +315,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           entry.romajiAnswerDisplays = entry.romajiUsable
             ? row.forms.map(function (f) { return f.romaji; })
             : [];
-          entry.verbForms = entry.romajiUsable ? verbFormsOf(row, jpHtmlFn, jpReadingFn) : null;
+          var allForms = entry.romajiUsable ? verbFormsOf(row, jpHtmlFn, jpReadingFn) : null;
+          entry.verbForms = allForms ? allForms.slice(0, 3).concat(allForms.slice(6)) : null;
+          entry.plainForms = allForms ? allForms.slice(3, 6) : null;
         } else {
           // A kanji row's prompt is the bare character: furigana over it
           // would hand a jp-ro card its answer.
@@ -389,7 +398,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     if (entry.kanji) return entry.romajiUsable ? ["jp-en", "jp-ro"] : ["jp-en"];
     if (!entry.romajiUsable) return ["jp-en"];
     return DIRECTIONS.filter(function (d) {
-      if (d === "jp-vf") return !!entry.verbForms;
+      if (d === "jp-vf" || d === "jp-vn") return !!formsFor(entry, d);
       return !isWriteDirection(d) || !!writeCharsFor(entry, d);
     });
   }
@@ -617,7 +626,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
 
   return {
-    getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
+    formsFor: formsFor, getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
     otherLanguageHint: otherLanguageHint, otherWordHint: otherWordHint, homophonesOf: homophonesOf, cardView: cardView,

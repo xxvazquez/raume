@@ -2102,9 +2102,9 @@ async function main() {
     const made = cvNs.addRow(String(verbsTable.id), pairs[0]);
     const row = verbsTable.rows.find(r => r.id === made.id);
     const vi = window.RaumeStudy.flashcards.vocabIndex, entry = vi.getVocabIndex()[made.id];
-    check("...it joins the table as a verb pair with Verb → conjugated form, and takes the meaning with or without its to",
+    check("...it joins the table as a verb pair with both Verb → form cards, and takes the meaning with or without its to",
       !!row && row.type === "verb-pair" && row.forms[1].romaji === "kaerimasu" && !!entry
-      && vi.directionsForEntry(entry).indexOf("jp-vf") !== -1
+      && vi.directionsForEntry(entry).indexOf("jp-vf") !== -1 && vi.directionsForEntry(entry).indexOf("jp-vn") !== -1
       && vi.checkAnswer(entry, "jp-en", "go home") && vi.checkAnswer(entry, "jp-en", "to go home"));
     cvNs.deleteRow(made.id);
   }
@@ -3421,7 +3421,7 @@ async function main() {
       && Object.values(idx).filter(e => !e.kanji && /[一-鿏々]/.test(e.jpPlain)).every(e => [...e.jpPlain].every(ch => !/[一-鿏々]/.test(ch) || !!window.RaumeStudy.data.kanjiStrokes[ch])));
     await fcx.dataOps.addVocabs(["v0015"]);
     Object.keys(c.cards).forEach(id => { if (c.cards[id].direction === "en-wr" && c.cards[id].vocabId === "v0015") delete c.cards[id]; });
-    check("writing and verb forms are off by default", saved.settings.enabled_directions["en-wr"] === false && saved.settings.enabled_directions["jp-vf"] === false);
+    check("writing and verb forms are off by default", saved.settings.enabled_directions["en-wr"] === false && saved.settings.enabled_directions["jp-vf"] === false && saved.settings.enabled_directions["jp-vn"] === false);
     await fcx.dataOps.saveDirectionSettings({ "jp-en": false, "jp-ro": false, "ro-en": false, "en-ro": false, "en-wr": true, "en-wk": false });
     const wr = Object.values(c.cards).filter(x => x.vocabId === "v0015" && x.direction === "en-wr");
     check("switching it on gives words already in study their writing card, once", wr.length === 1 && wr[0].active);
@@ -5270,8 +5270,8 @@ async function main() {
       && document.querySelectorAll("#fcPanelSettings .set-info").length >= 3 && shown && foot.hidden;
   })());
   const dirChecks = [...document.querySelectorAll(".fc-dir-checkbox")];
-  check("all 7 directions are offered as a setting", dirChecks.length === 7);
-  check("the four typed ones are on by default, the two written ones and verb forms off", dirChecks.every(cb => cb.checked === !/^en-w|^jp-vf$/.test(cb.dataset.direction)));
+  check("all 8 directions are offered as a setting", dirChecks.length === 8);
+  check("the four typed ones are on by default, the two written ones and verb forms off", dirChecks.every(cb => cb.checked === !/^en-w|^jp-v[fn]$/.test(cb.dataset.direction)));
   const fcChange = el => el.dispatchEvent(new window.Event("change", { bubbles: true }));
   check("there's no Save button -- changes save as you make them, as in iOS Settings", !document.getElementById("fcSaveSettings"));
   for (const cb of dirChecks.filter(x => x.checked)) { cb.checked = false; fcChange(cb); await flush(); }
@@ -5461,16 +5461,22 @@ async function main() {
   const numberEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "0");
   check("the Numbers table now carries real romaji (not kana), so the row is romaji-usable", !!numberEntry && numberEntry.romajiUsable === true);
   check("...so the four typed directions are offered for it", JSON.stringify(fc.directionsForEntry(numberEntry).filter(d => !/^en-w/.test(d))) === JSON.stringify(["jp-en", "jp-ro", "ro-en", "en-ro"]));
-  check("a verb offers Verb → conjugated form (jp-vf); a noun doesn't", fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu")).indexOf("jp-vf") !== -1
-    && fc.directionsForEntry(beerEntry).indexOf("jp-vf") === -1
-    && window.RaumeStudy.flashcards.store.DIRECTION_LABEL["jp-vf"] === "Verb → conjugated form");
-  check("a Verb → conjugated form card asks a different form each review and checks it as romaji (行く: past negative, plain past 行った, then the て-form 行って)", (() => {
+  check("a verb offers Verb → polite form (jp-vf) and Verb → plain form (jp-vn); a noun neither", (() => {
+    const dirs = fc.directionsForEntry(Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu"));
+    const labels = window.RaumeStudy.flashcards.store.DIRECTION_LABEL;
+    return dirs.indexOf("jp-vf") !== -1 && dirs.indexOf("jp-vn") !== -1
+      && fc.directionsForEntry(beerEntry).indexOf("jp-vf") === -1 && fc.directionsForEntry(beerEntry).indexOf("jp-vn") === -1
+      && labels["jp-vf"] === "Verb → polite form" && labels["jp-vn"] === "Verb → plain form";
+  })());
+  check("each Verb → form card asks a different form of its own set each review, checked as romaji (行く: polite past negative, then 行って; plain: 行かない, 行った)", (() => {
     const vi = window.RaumeStudy.flashcards.vocabIndex;
     const iku = Object.values(vocabIndex).find(e => e.romajiDisplay === "iku / ikimasu");
-    const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 6 });
-    const plainPast = vi.cardView(iku, { direction: "jp-vf", reps: 4 });
+    const pastNeg = vi.cardView(iku, { direction: "jp-vf", reps: 2 }), te = vi.cardView(iku, { direction: "jp-vf", reps: 3 });
+    const plainPast = vi.cardView(iku, { direction: "jp-vn", reps: 1 });
+    if (iku.verbForms.map(f => f.plain).join() !== "行きません,行きました,行きませんでした,行って"
+      || iku.plainForms.map(f => f.plain).join() !== "行かない,行った,行かなかった") return false;
     const kuruEntry = Object.values(vocabIndex).find(e => e.romajiDisplay === "kuru / kimasu");
-    const kuru = vi.cardView(kuruEntry, { direction: "jp-vf", reps: 6 }), konai = vi.cardView(kuruEntry, { direction: "jp-vf", reps: 3 });
+    const kuru = vi.cardView(kuruEntry, { direction: "jp-vf", reps: 3 }), konai = vi.cardView(kuruEntry, { direction: "jp-vn", reps: 0 });
     if (!(/plain past/.test(plainPast.entry.askLabel) && fc.checkAnswer(plainPast.entry, "jp-ro", "itta") && plainPast.entry.jpPlain === "行った"
       && konai.entry.jpReading === "こない" && fc.checkAnswer(konai.entry, "jp-ro", "konai"))) return false;
     return pastNeg.direction === "jp-ro" && /past negative/.test(pastNeg.entry.askLabel)

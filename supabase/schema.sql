@@ -106,9 +106,12 @@ alter table public.flashcard_settings add column if not exists enabled_en_wk boo
 -- jp-vf: a verb -> one of its forms (ません, ました, ませんでした, the
 -- て-form), typed in romaji; also off until switched on.
 alter table public.flashcard_settings add column if not exists enabled_jp_vf boolean not null default false;
+-- jp-vn: a verb -> one of its plain forms (ない, た, なかった); its own card
+-- so the plain set keeps its own schedule. Off until switched on.
+alter table public.flashcard_settings add column if not exists enabled_jp_vn boolean not null default false;
 alter table public.flashcards drop constraint if exists flashcards_direction_check;
 alter table public.flashcards add constraint flashcards_direction_check
-  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk', 'jp-vf'));
+  check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk', 'jp-vf', 'jp-vn'));
 
 -- Per-table personalisation for the vocabulary page (the icon you pick for a
 -- table header, keyed by the table's permanent id). Not a flashcards concept
