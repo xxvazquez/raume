@@ -79,13 +79,13 @@ window.RaumeStudy.flashcards.views = (function () {
     panel.innerHTML =
       '<h3 class="help-head">Adding &amp; pausing</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Add</span><span class="help-desc">A single word, or a whole table from Library or a search result.</span></li>' +
-      '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps every bit of progress. Paused words collect under Archived.</span></li>' +
-      '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back exactly as it was.</span></li>' +
-      '<li><span class="help-term">Undo</span><span class="help-desc">Right after a pause, Undo at the bottom of the screen takes it back.</span></li>' +
-      '<li><span class="help-term">Swipe a word</span><span class="help-desc">On a phone, swipe a Library word left for its Pause, Add or Restore.</span></li>' +
+      '<li><span class="help-term">Add</span><span class="help-desc">A whole table from Library, or single words from Library or a search result.</span></li>' +
+      '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps all progress. Paused words collect under Archived.</span></li>' +
+      '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back as it was.</span></li>' +
+      '<li><span class="help-term">Undo</span><span class="help-desc">Right after a pause, Undo at the bottom takes it back.</span></li>' +
+      '<li><span class="help-term">Swipe a word</span><span class="help-desc">On a phone, swipe a Library word left to Pause, Add or Restore it.</span></li>' +
       '<li><span class="help-term">Nothing is deleted</span><span class="help-desc">Scheduling and review history are kept for good.</span></li>' +
-      '<li><span class="help-term">Your own words</span><span class="help-desc">Add them under Customize › Your vocabulary, then study them like any other.</span></li>' +
+      '<li><span class="help-term">Your own words</span><span class="help-desc">Add them on Customize, then study them like any other.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Library icons</h3>' +
       '<ul class="help-rows help-card fc-help-status">' +
@@ -96,40 +96,37 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Reviewing</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term"><kbd>Enter</kbd> or <kbd>Space</kbd></span><span class="help-desc">Check your answer — leave it blank and press Enter to see the answer without typing.</span></li>' +
-      '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — once the answer shows.</span></li>' +
-      '<li><span class="help-term">Checking</span><span class="help-desc">Type the answer, then press Return or tap ↑ to check it; rate it Again, Hard, Good or Easy — 1–4 on a keyboard.</span></li>' +
+      '<li><span class="help-term">Checking</span><span class="help-desc">Type the answer, then Return or ↑. Leave it blank to just see the answer.</span></li>' +
+      '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — tap one or press its number.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
+      '<li><span class="help-term">Several meanings</span><span class="help-desc">Any one counts, or several together: grandfather, old man.</span></li>' +
+      '<li><span class="help-term">Grey note</span><span class="help-desc">A hint like “before a noun” — type just the meaning.</span></li>' +
       '<li><span class="help-term">Wrong language</span><span class="help-desc">Romaji on an English card (or the reverse) isn’t marked wrong — type the other one.</span></li>' +
-      '<li><span class="help-term">Another word</span><span class="help-desc">Another word that also fits the English (kantan for “easy” when the card wants yasashii) isn’t marked wrong — try again.</span></li>' +
-      '<li><span class="help-term">Notes</span><span class="help-desc">The grey line under a meaning (“before a noun”) is a hint — type just the meaning.</span></li>' +
-      '<li><span class="help-term">Two answers</span><span class="help-desc">Either one counts, or both together: grandfather, old man. The same for a list like job, work.</span></li>' +
+      '<li><span class="help-term">Another word</span><span class="help-desc">A different word for the same English (kantan for “easy”) isn’t marked wrong — try again.</span></li>' +
       '<li><span class="help-term">Same sound</span><span class="help-desc">Romaji like atsui can be several words — any of their meanings counts.</span></li>' +
-      '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker icon plays it again.</span></li>' +
-      '<li><span class="help-term">Kanji cards</span><span class="help-desc">A kanji asks only its meaning and one reading — yama or san both count.</span></li>' +
+      '<li><span class="help-term">Audio</span><span class="help-desc">Plays when the answer shows; the speaker plays it again.</span></li>' +
+      '<li><span class="help-term">Kanji cards</span><span class="help-desc">Its meaning, and any one reading — yama or san.</span></li>' +
       '<li><span class="help-term">New words</span><span class="help-desc">Each starts Japanese → English; its other directions follow once you’ve seen it.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns each direction on or off — progress is kept.</span></li>' +
       (window.RaumeStudy.flashcards.appBadge && window.RaumeStudy.flashcards.appBadge.supported
         ? '<li><span class="help-term">Badge</span><span class="help-desc">Settings › App icon puts the number of cards to study on raume’s icon.</span></li>' : '') +
-      '<li><span class="help-term">Writing</span><span class="help-desc">English → Japanese, off until you turn it on: write the word on the pad stroke by stroke — in kana (みず), or with its kanji (水). Show answer if you’re stuck.</span></li>' +
-      '<li><span class="help-term">Verb forms</span><span class="help-desc">Off until you turn it on: a verb asks for one of its forms — ません, ました, ませんでした or the て-form, a different one each time. Type it in romaji.</span></li>' +
+      '<li><span class="help-term">Writing</span><span class="help-desc">Off until you turn it on: write the word stroke by stroke, in kana (みず) or with its kanji (水).</span></li>' +
+      '<li><span class="help-term">Verb forms</span><span class="help-desc">Off until you turn it on: type a verb’s 〜ません, 〜ました, 〜ませんでした or て-form in romaji.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Dashboard</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Rings</span><span class="help-desc">Today’s three goals. Review: the cards due today you’ve done. Learn: new cards, up to your daily number. Play: one game or puzzle.</span></li>' +
-      '<li><span class="help-term">Cards to study</span><span class="help-desc">What Study now would start with: due reviews plus today’s new cards.</span></li>' +
-      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, or just one table. Study now follows it until you switch back; the rings still count everything.</span></li>' +
-      '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review. The dots are this week: full when studied, half for today until Review closes.</span></li>' +
-      '<li><span class="help-term">Awards</span><span class="help-desc">Medals for streaks, reviews, words, kana, kanji, puzzles and games. Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
-      '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news: more reviews than last week, or a new best Match pace.</span></li>' +
-      '<li><span class="help-term">Due next 7 days</span><span class="help-desc">How many cards come due each day; overdue counts as today.</span></li>' +
-      '<li><span class="help-term">Trends</span><span class="help-desc">Your last 90 days against your year: reviews, recall, study days. After 120 days of study.</span></li>' +
-      '<li><span class="help-term">Kana</span><span class="help-desc">Kana cards started, and how many to study now.</span></li>' +
-      '<li><span class="help-term">Puzzles</span><span class="help-desc">Every game you finish or puzzle you solve: accuracy, best pace, games this week and the latest few.</span></li>' +
-      '<li><span class="help-term">Kanji</span><span class="help-desc">How many kanji you’ve marked as known.</span></li>' +
+      '<li><span class="help-term">Rings</span><span class="help-desc">Review: today’s due cards done. Learn: new cards, of your daily number. Play: one game or puzzle.</span></li>' +
+      '<li><span class="help-term">Study now</span><span class="help-desc">Starts today’s due reviews and new cards; the number is how many.</span></li>' +
+      '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, or one table. Study now follows it; the rings still count everything.</span></li>' +
+      '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review; the dots are this week.</span></li>' +
+      '<li><span class="help-term">Awards</span><span class="help-desc">Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
+      '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news, like a new best Match pace.</span></li>' +
+      '<li><span class="help-term">Due next 7 days</span><span class="help-desc">Cards coming due each day; overdue counts as today.</span></li>' +
+      '<li><span class="help-term">Trends</span><span class="help-desc">Your last 90 days against your year, after 120 days of study.</span></li>' +
+      '<li><span class="help-term">Puzzles · Games</span><span class="help-desc">Solved or played, your streak, the latest three and See stats.</span></li>' +
       '<li><span class="help-term">Missed today</span><span class="help-desc">Words you missed, most-missed first — tap one to practise it.</span></li>' +
       '<li><span class="help-term">Leeches</span><span class="help-desc">Words forgotten 8+ times after learning. Pause, or Keep studying.</span></li>' +
-      '<li><span class="help-term">Words to review</span><span class="help-desc">Words you often miss, as a table you can sort and print; ⋯ hides a column.</span></li>' +
+      '<li><span class="help-term">Words to review</span><span class="help-desc">Words you often miss, as a table to sort and print; ⋯ hides a column.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Kana</h3>' +
       '<ul class="help-rows help-card">' +
@@ -139,32 +136,32 @@ window.RaumeStudy.flashcards.views = (function () {
       '</ul>' +
       '<h3 class="help-head">Puzzles</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Setup</span><span class="help-desc">Pick the puzzle or game, where the words come from, the script and how many, then Start. ‹ in play goes back to it.</span></li>' +
-      '<li><span class="help-term">⋯ menu</span><span class="help-desc">New puzzle (same settings, fresh words), How to play, Reveal, Clear, Save as PDF, Stats.</span></li>' +
-      '<li><span class="help-term">Words from</span><span class="help-desc">Your flashcards (leaning toward words you’re still learning), or tick as many tables as you like. At least 6 words; no clues that give the answer away.</span></li>' +
-      '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type — on a keyboard, romaji turns into kana. A right square turns green. Tap a crossing square again to switch direction.</span></li>' +
-      '<li><span class="help-term">Hint</span><span class="help-desc">Fills the square you’re on (else the next one not yet right) — or, in a word search, shows one word.</span></li>' +
-      '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong. ⋯ reveals the puzzle, clears or saves a PDF.</span></li>' +
-      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a pad under the grid for readings or guesses. Blank again with each new puzzle.</span></li>' +
-      '<li><span class="help-term">Word search</span><span class="help-desc">Find the Japanese for each clue: drag across it, or tap its first and last letter. Any direction, backwards too.</span></li>' +
+      '<li><span class="help-term">Setup</span><span class="help-desc">Pick the puzzle, where the words come from, the script and how many, then Start. ‹ goes back.</span></li>' +
+      '<li><span class="help-term">Words from</span><span class="help-desc">Your flashcards (leaning toward words you’re still learning), or as many tables as you like.</span></li>' +
+      '<li><span class="help-term">Solving</span><span class="help-desc">Tap a square or clue and type; tap a crossing square again to switch direction. Right squares turn green.</span></li>' +
+      '<li><span class="help-term">Hint</span><span class="help-desc">Fills the square you’re on, or the next wrong one. In a word search, shows a word.</span></li>' +
+      '<li><span class="help-term">Check</span><span class="help-desc">Marks filled squares right or wrong.</span></li>' +
+      '<li><span class="help-term">⋯ menu</span><span class="help-desc">New puzzle, How to play, Reveal, Clear, Save as PDF, Stats.</span></li>' +
+      '<li><span class="help-term">Notes</span><span class="help-desc">On a wide window, a scratch pad beside the grid.</span></li>' +
+      '<li><span class="help-term">Word search</span><span class="help-desc">Drag across a word, or tap its first and last letter. Any direction, backwards too.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Games</h3>' +
       '<ul class="help-rows help-card">' +
-      '<li><span class="help-term">Game</span><span class="help-desc">Tap its name to switch game: Match, Listening, Kana tiles, Odd one out, Speed sort or Word chain; ⋯ has New game and the same settings as Puzzles.</span></li>' +
-      '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second. ⏸ pauses; there’s a break between rounds.</span></li>' +
-      '<li><span class="help-term">Pace medal</span><span class="help-desc">The ring on Match’s end card: gold under 2s a pair, silver under 3s, bronze under 4s.</span></li>' +
-      '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning. You see how it’s written after you answer.</span></li>' +
-      '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order. A few tiles are look-alikes; stuck, Show answer shows it. A missed word comes back at the end.</span></li>' +
-      '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words come from one table: tap the one that doesn’t belong. Needs two or more themed tables.</span></li>' +
-      '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock. Each answer shows the English, clock stopped; Next or Enter goes on. Sort by, on the setup screen, picks which.</span></li>' +
-      '<li><span class="help-term">Word chain</span><span class="help-desc">Type a word that starts with the kana the last one ends on — romaji turns into kana as you type; あ | ア picks hiragana or katakana. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules.</span></li>' +
-      '<li><span class="help-term">In a row</span><span class="help-desc">The five dots beside the counter fill with each right answer in a row; a miss empties them.</span></li>' +
-      '<li><span class="help-term">Stats</span><span class="help-desc">On the setup screen or ⋯, for puzzles too: your bests, a trend, and the words you miss most — Practise these plays just them.</span></li>' +
+      '<li><span class="help-term">Setup</span><span class="help-desc">Pick the game and its words, as for Puzzles, then Start. ⏸ pauses; ⋯ has New game and Restart.</span></li>' +
+      '<li><span class="help-term">Match</span><span class="help-desc">Tap a word, then its meaning, against the clock. A wrong pair adds a second.</span></li>' +
+      '<li><span class="help-term">Pace medal</span><span class="help-desc">Match’s end card: gold under 2s a pair, silver under 3s, bronze under 4s.</span></li>' +
+      '<li><span class="help-term">Listening</span><span class="help-desc">Tap ▶ to hear a word, then pick its meaning.</span></li>' +
+      '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order; some tiles are look-alikes.</span></li>' +
+      '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words share a table: tap the one that doesn’t. Needs two or more themed tables.</span></li>' +
+      '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock.</span></li>' +
+      '<li><span class="help-term">Word chain</span><span class="help-desc">Type a word starting with the kana the last one ends on; romaji turns into kana. ⓘ has the rules.</span></li>' +
+      '<li><span class="help-term">In a row</span><span class="help-desc">The five dots by the counter fill with each right answer in a row; a miss empties them.</span></li>' +
+      '<li><span class="help-term">Stats</span><span class="help-desc">On the setup screen or ⋯, for puzzles too: bests, a trend, and your tricky words — Practise these plays just them.</span></li>' +
       '</ul>' +
       '<h3 class="help-head">Syncing</h3>' +
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Signed in</span><span class="help-desc">Saved on this device first, then synced to your account.</span></li>' +
-      '<li><span class="help-term">Offline</span><span class="help-desc">Everything keeps working. Changes wait here and sync on their own when you’re back.</span></li>' +
+      '<li><span class="help-term">Offline</span><span class="help-desc">Everything keeps working; changes sync on their own when you’re back.</span></li>' +
       '<li><span class="help-term">Status</span><span class="help-desc"><em>Syncing…</em>, <em>Offline</em>, or <em>couldn’t sync</em> with Sync now to retry.</span></li>' +
       '<li><span class="help-term">What’s pending?</span><span class="help-desc">Lists exactly what hasn’t reached your account yet.</span></li>' +
       '<li><span class="help-term">Signing out</span><span class="help-desc">Anything not yet synced stays on this device and syncs the next time you sign in here.</span></li>' +
