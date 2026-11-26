@@ -48,6 +48,11 @@ window.RaumeStudy.flashcards.backup = (function () {
     var all = kk ? kk.getAll() : {};
     return Object.keys(all).length ? all : null;
   }
+  function wordEdits() {
+    var we = window.RaumeStudy.wordEdits;
+    var all = we ? we.getAll() : {};
+    return Object.keys(all).length ? all : null;
+  }
   function puzzleRuns() {
     var pr = window.RaumeStudy.flashcards.puzzleRuns;
     var all = pr ? pr.all() : [];
@@ -72,6 +77,7 @@ window.RaumeStudy.flashcards.backup = (function () {
         tableCustom: Object.keys(tableCustom).length ? tableCustom : null,
         customVocab: readCustomVocab(),
         knownKanji: knownKanji(),
+        wordEdits: wordEdits(),
         puzzleRuns: puzzleRuns()
       }
     };
@@ -155,14 +161,17 @@ window.RaumeStudy.flashcards.backup = (function () {
       var clean = cv.sanitize(d.customVocab);
       if (clean.tables.length || clean.rows.length) customVocab = clean;
     }
-    // Backups from before these two existed don't mention them -- leave the
+    // Backups from before these existed don't mention them -- leave the
     // device's own untouched then (undefined) rather than clearing them.
     var kk = window.RaumeStudy.knownKanji, pr = window.RaumeStudy.flashcards.puzzleRuns;
     var known = !("knownKanji" in d) ? undefined : kk ? kk.sanitize(d.knownKanji) : null;
     if (known && !Object.keys(known).length) known = null;
+    var we = window.RaumeStudy.wordEdits;
+    var edits = !("wordEdits" in d) ? undefined : we ? we.sanitize(d.wordEdits) : null;
+    if (edits && !Object.keys(edits).length) edits = null;
     var runs = !("puzzleRuns" in d) ? undefined : pr ? pr.sanitize(d.puzzleRuns) : null;
     if (runs && !runs.length) runs = null;
-    var backup = { flashcards: flashcards, kana: kana, tableCustom: tableCustom, customVocab: customVocab, knownKanji: known, puzzleRuns: runs };
+    var backup = { flashcards: flashcards, kana: kana, tableCustom: tableCustom, customVocab: customVocab, knownKanji: known, wordEdits: edits, puzzleRuns: runs };
     return { ok: true, backup: backup, summary: summarize(backup, raw.exportedAt) };
   }
 
@@ -178,6 +187,7 @@ window.RaumeStudy.flashcards.backup = (function () {
       customWords: b.customVocab ? b.customVocab.rows.length : 0,
       customisedTables: b.tableCustom ? Object.keys(b.tableCustom).length : 0,
       knownKanji: b.knownKanji ? Object.keys(b.knownKanji).filter(function (id) { return b.knownKanji[id].k; }).length : 0,
+      editedWords: b.wordEdits ? Object.keys(b.wordEdits).filter(function (id) { return !b.wordEdits[id].x; }).length : 0,
       puzzleGames: b.puzzleRuns ? b.puzzleRuns.length : 0
     };
   }
@@ -195,6 +205,7 @@ window.RaumeStudy.flashcards.backup = (function () {
       [cv.GUEST_KEY, b.customVocab]
     ];
     if (b.knownKanji !== undefined && window.RaumeStudy.knownKanji) plan.push([window.RaumeStudy.knownKanji.STORAGE_KEY, b.knownKanji]);
+    if (b.wordEdits !== undefined && window.RaumeStudy.wordEdits) plan.push([window.RaumeStudy.wordEdits.STORAGE_KEY, b.wordEdits]);
     if (b.puzzleRuns !== undefined && window.RaumeStudy.flashcards.puzzleRuns) plan.push([window.RaumeStudy.flashcards.puzzleRuns.STORAGE_KEY, b.puzzleRuns]);
     var before = [];
     try {

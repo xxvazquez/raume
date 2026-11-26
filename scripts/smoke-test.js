@@ -1728,6 +1728,33 @@ async function main() {
     firstRow.querySelector(".row-hide-btn").click();
     return ok && back && firstRow.classList.contains("row-hidden");
   })());
+  check("Edit in the hold menu changes a built-in word in place (meanings comma-separated, the note grey in the row and the preview); Restore original puts it back" + (storageUsable ? "" : " -- here, with no storage, a refused save changes nothing"), (() => {
+    const row = [...drinksSectionManage.querySelectorAll("tbody tr[data-vocab-id]")].find(tr => !tr.classList.contains("row-hidden"));
+    const id = row.dataset.vocabId, before = window.RaumeStudy.vocab.rawRow(id).english;
+    const menuFor = () => { drinksSectionManage.querySelector('tr[data-vocab-id="' + id + '"] td:nth-child(2)').dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true })); };
+    menuFor();
+    document.querySelector('.row-menu-item[data-act="edit"]').click();
+    const sheet = document.getElementById("kanjiSheet"), form = sheet.querySelector(".we-form");
+    if (sheet.hidden || !form || sheet.querySelector(".we-restore")) return false;
+    sheet.querySelector('.we-input[name="en"]').value = "edited meaning; second";
+    sheet.querySelector('.we-input[name="note"]').value = "a note";
+    form.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+    const tr = drinksSectionManage.querySelector('tr[data-vocab-id="' + id + '"]');
+    // No storage in this harness: the save is refused, the form stays open
+    // saying so, and the word is left exactly as it was.
+    if (!storageUsable) return !sheet.hidden && !sheet.querySelector(".we-error").hidden
+      && tr.querySelector(".meaning-text").textContent.trim() === before && !window.RaumeStudy.wordEdits.isEdited(id)
+      && (sheet.querySelector(".we-cancel").click(), sheet.hidden);
+    const edited = sheet.hidden && tr.querySelector(".meaning-text").firstChild.textContent.trim() === "edited meaning, second"
+      && tr.querySelector(".meaning-note").textContent === "a note" && window.RaumeStudy.wordEdits.isEdited(id);
+    menuFor();
+    const peekNote = document.querySelector(".row-menu-preview .meaning-note");
+    document.querySelector('.row-menu-item[data-act="edit"]').click();
+    sheet.querySelector(".we-restore").click();
+    const back = drinksSectionManage.querySelector('tr[data-vocab-id="' + id + '"] .meaning-text').textContent.trim() === before
+      && !window.RaumeStudy.wordEdits.isEdited(id) && sheet.hidden;
+    return edited && !!peekNote && back && document.querySelectorAll("[style]").length === 0;
+  })());
   const status = drinksSectionManage.querySelector(".rows-hidden-status");
   check("the status line appears and reports the count", status.hidden === false && status.querySelector(".rows-hidden-count").textContent === "1 row hidden");
   status.querySelector(".show-all-rows").click();

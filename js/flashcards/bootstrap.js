@@ -37,7 +37,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   var clearPasswordRecovery = dataOps.clearPasswordRecovery;
   var initAuth = dataOps.initAuth, onAuthChange = dataOps.onAuthChange;
   var fetchAllFromServer = dataOps.fetchAllFromServer, syncOutbox = dataOps.syncOutbox;
-  var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty, syncSettings = dataOps.syncSettings;
+  var syncCvOutbox = dataOps.syncCvOutbox, syncTableCustomIfDirty = dataOps.syncTableCustomIfDirty, syncWordEditsIfDirty = dataOps.syncWordEditsIfDirty, syncSettings = dataOps.syncSettings;
   var syncNow = dataOps.syncNow, withTimeout = dataOps.withTimeout;
   var onSyncStateChange = dataOps.onSyncStateChange, getSyncState = dataOps.getSyncState;
   var getPendingItems = dataOps.pendingItems;
@@ -269,7 +269,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       initialSyncInFlight = true;
       lastInitialSyncAttempt = Date.now();
       withTimeout(fetchAllFromServer(), "initial sync")
-        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncSettings(); render(); })
+        .then(function () { initialSyncDone = true; invalidateInsights(); syncOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncWordEditsIfDirty(); syncSettings(); render(); })
         .catch(function (e) { console.error("Flashcards: could not load from Supabase", e); render(); })
         .finally(function () { initialSyncInFlight = false; });
     }
@@ -397,6 +397,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
       if (k.some(function (x) { return /^(fsrs_|queue_|enabled_)/.test(x); })) parts.push("Study settings");
       return parts.join(", ") || "Settings";
     }
+    if (item.kind === "words") return "Your word edits";
     return "Table icon/name changes";
   }
 
@@ -610,6 +611,12 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   if (window.RaumeStudy.knownKanji) {
     window.RaumeStudy.knownKanji.setRemotePush(function (obj) {
       if (authState.session) dataOps.saveKnownKanjiRemote(obj);
+    });
+  }
+  // Edits to built-in words: pushed while signed in, retried if a push fails.
+  if (window.RaumeStudy.wordEdits) {
+    window.RaumeStudy.wordEdits.setRemotePush(function () {
+      if (authState.session) dataOps.saveWordEditsRemoteQueued();
     });
   }
   if (window.RaumeStudy.flashcards.puzzleRuns) {

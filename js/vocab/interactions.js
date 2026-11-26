@@ -339,6 +339,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // on a phone. Built fresh from the data each time (render.js
   // kanjiSheetHtml); the ✕, the scrim, Escape or leaving the page close it.
   let kanjiOpener = null;
+  let wordEditId = null; // the word open in the edit sheet (Edit a word, below)
   function openKanjiSheet(tile) {
     const sheet = document.getElementById('kanjiSheet'), scrim = document.getElementById('kanjiScrim');
     const html = sheet && vocab.kanjiSheetHtml(tile.dataset.vocabId);
@@ -358,6 +359,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     sheet.hidden = true;
     if (scrim) scrim.hidden = true;
     sheet.innerHTML = '';
+    sheet.classList.remove('word-edit-sheet');
+    wordEditId = null;
     if (window.RaumeStudy.kanjiWrite) window.RaumeStudy.kanjiWrite.close();
     closeKanjiPop();
     if (kanjiOpener && kanjiOpener.isConnected && !kanjiOpener.closest('[hidden]')) kanjiOpener.focus({ preventScroll: true });
@@ -595,6 +598,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const showEn = !body.contains('hide-english') && !(body.contains('selftest-mode') && !tr.classList.contains('revealed'));
     const jpHtml = jpWord ? jpWord.cloneNode(true) : null;
     if (jpHtml) jpHtml.querySelectorAll('mark').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+    // The meaning with its note, the note grey as in the row.
+    const enHtml = enCell ? enCell.cloneNode(true) : null;
+    if (enHtml) enHtml.querySelectorAll('mark').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
     const added = fcBtn && fcBtn.classList.contains('fc-added');
     const items = [];
     if (speak && body.contains('ja-voice-ready')) items.push(['play', 'Play', '<path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/>']);
@@ -602,6 +608,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (fcBtn) items.push(['fc', added ? 'Pause in flashcards' : 'Add to flashcards', added ? '<path d="M7 4.5v9M11 4.5v9"/>' : '<path d="M9 4v10M4 9h10"/>']);
     const known = wordKnown(tr.dataset.vocabId);
     items.push(['known', known ? 'Mark as not known' : 'Mark as known', known ? '<path d="M4 9.5l3.2 3L14 5.5"/><path d="M3 15 15 3"/>' : '<path d="M4 9.5l3.2 3L14 5.5"/>']);
+    if (editableRow(tr)) items.push(['edit', 'Edit', '<path d="M11.5 3.5l3 3L6 15H3v-3l8.5-8.5Z"/><path d="M10 5l3 3"/>']);
     if (hideBtn) items.push(['hide', 'Hide row', '<path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/>']);
     const el = document.createElement('div');
     el.className = 'row-menu';
@@ -610,7 +617,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         '<div class="row-menu-preview">' +
           (showJp && jpHtml ? '<div class="row-menu-jp" lang="ja"></div>' : '') +
           (romaji ? '<div class="row-menu-ro">' + esc(romaji) + '</div>' : '') +
-          (showEn && enCell ? '<div class="row-menu-en">' + esc(enCell.textContent.trim()) + '</div>' : '') +
+          (showEn && enHtml ? '<div class="row-menu-en">' + enHtml.innerHTML.trim() + '</div>' : '') +
         '</div>' +
         '<div class="row-menu-list" role="menu">' + items.map(it =>
           '<button type="button" class="row-menu-item" role="menuitem" data-act="' + it[0] + '">' + esc(it[1]) +
@@ -640,6 +647,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (act === 'play') speak.click();
       else if (act === 'fc') fcBtn.click();
       else if (act === 'hide') hideBtn.click();
+      else if (act === 'edit') openWordEdit(tr);
       else if (act === 'known' && window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.setKnown(tr.dataset.vocabId, !wordKnown(tr.dataset.vocabId));
       else if (act === 'copy') {
         const c = jpWord.cloneNode(true);
@@ -686,6 +694,204 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       openRowMenu(tr);
     });
   })();
+
+  /* Edit a word -- the hold menu's Edit. The word opens in the sheet the
+     kanji use (#kanjiSheet) as an iOS form: Cancel / the title / Save along
+     the top, then the Japanese with each kanji's reading in ( ) after it
+     (as when you add a word), its romaji, the English and its note. A
+     built-in word's change is kept by js/vocab/word-edits.js, which puts
+     it over the dataset for every page (Restore original takes it back
+     off); a word of your own is changed at its source,
+     js/vocab/custom-vocab.js. Only a change that is really stored closes
+     the sheet -- otherwise it stays open and says why. */
+  const wordEdits = window.RaumeStudy.wordEdits;
+  function editableRow(tr) {
+    const row = tr && vocab.rawRow && vocab.rawRow(tr.dataset.vocabId);
+    if (!row || (row.type !== 'word' && row.type !== 'verb-pair')) return null;
+    return row.__custom ? (window.RaumeStudy.customVocab ? row : null) : (wordEdits ? row : null);
+  }
+  function segText(jp) {
+    return (jp || []).map(s => s.kanji ? s.kanji + '(' + s.reading + ')' : (s.text || s.p || '')).join('');
+  }
+  function segPlain(jp) { return (jp || []).map(s => s.kanji || s.text || s.p || '').join(''); }
+  // A typed edit comes back as plain text and kanji; the word's particles
+  // (blue, bold) are found again where they were -- the same particle with
+  // the same character beside it, the nearest to its old place -- so fixing
+  // one word in a sentence doesn't strip the sentence's grammar colour.
+  function keepParticles(before, after) {
+    const oldPlain = segPlain(before), newPlain = segPlain(after);
+    const marks = [];
+    let at = 0;
+    before.forEach(s => {
+      const len = (s.kanji || s.text || s.p || '').length;
+      if (s.p) {
+        const prev = oldPlain.charAt(at - 1), next = oldPlain.charAt(at + len);
+        let best = -1;
+        for (let i = newPlain.indexOf(s.p); i !== -1; i = newPlain.indexOf(s.p, i + 1)) {
+          const fits = (prev && newPlain.charAt(i - 1) === prev) || (next && newPlain.charAt(i + len) === next);
+          const free = !marks.some(m => i < m.end && i + len > m.start);
+          if (fits && free && (best === -1 || Math.abs(i - at) < Math.abs(best - at))) best = i;
+        }
+        if (best !== -1) marks.push({ start: best, end: best + len, p: s.p });
+      }
+      at += len;
+    });
+    if (!marks.length) return after;
+    const out = [];
+    let pos = 0;
+    after.forEach(s => {
+      if (s.kanji) { out.push(s); pos += s.kanji.length; return; }
+      const text = s.text, from = pos;
+      let cut = 0;
+      marks.filter(m => m.start >= from && m.end <= from + text.length).sort((a, b) => a.start - b.start).forEach(m => {
+        if (m.start - from > cut) out.push({ text: text.slice(cut, m.start - from) });
+        out.push({ p: m.p });
+        cut = m.end - from;
+      });
+      if (cut < text.length) out.push({ text: text.slice(cut) });
+      pos += text.length;
+    });
+    return out;
+  }
+  function weField(name, label, value, opts) {
+    const esc = window.RaumeStudy.shared.escapeHtml;
+    opts = opts || {};
+    return '<label class="ks-row we-row"><span class="ks-label">' + label + '</span>' +
+      '<input type="text" class="we-input" name="' + name + '" value="' + esc(value || '') + '"' +
+      (opts.ja ? ' lang="ja"' : '') + (opts.placeholder ? ' placeholder="' + esc(opts.placeholder) + '"' : '') +
+      ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>';
+  }
+  function wordEditHtml(row) {
+    const verb = row.type === 'verb-pair';
+    const own = !!row.__custom;
+    const jpCard = verb
+      ? weField('jp0', 'Plain form', segText(row.forms[0].jp), { ja: true, placeholder: '食(た)べる' }) +
+        weField('ro0', 'Romaji', row.forms[0].romaji, { placeholder: 'taberu' }) +
+        weField('jp1', 'Polite form', segText(row.forms[1].jp), { ja: true, placeholder: '食(た)べます' }) +
+        weField('ro1', 'Romaji', row.forms[1].romaji, { placeholder: 'tabemasu' })
+      : weField('jp0', 'Word', segText(row.jp), { ja: true, placeholder: 'お茶(ちゃ)' }) +
+        weField('ro0', 'Romaji', row.romaji, { placeholder: 'ocha' });
+    const restore = !own && wordEdits.isEdited(row.id)
+      ? '<div class="ks-card"><button type="button" class="ks-row we-restore">Restore original</button></div>' : '';
+    return '<div class="ks-grab" aria-hidden="true"></div>' +
+      '<form class="we-form" novalidate>' +
+      '<div class="we-top"><button type="button" class="we-cancel">Cancel</button>' +
+      '<h2 class="we-title" id="kanjiSheetTitle">Edit word</h2>' +
+      '<button type="submit" class="we-save">Save</button></div>' +
+      '<h3 class="ks-group-head">Japanese</h3><div class="ks-card">' + jpCard + '</div>' +
+      '<h3 class="ks-group-head">English</h3><div class="ks-card">' +
+        weField('en', 'Meaning', row.english, { placeholder: verb ? 'to eat' : 'green tea' }) +
+        (own ? '' : weField('note', 'Note', row.enNote, { placeholder: 'Optional' })) + '</div>' +
+      '<p class="we-error" role="alert" hidden></p>' + restore +
+      '</form>';
+  }
+  function openWordEdit(tr) {
+    const row = editableRow(tr);
+    const sheet = document.getElementById('kanjiSheet'), scrim = document.getElementById('kanjiScrim');
+    if (!row || !sheet) return;
+    closeKanjiSheet();
+    wordEditId = row.id;
+    sheet.classList.add('word-edit-sheet');
+    sheet.innerHTML = wordEditHtml(row);
+    sheet.hidden = false;
+    if (scrim) scrim.hidden = false;
+    kanjiOpener = tr;
+    const first = sheet.querySelector('.we-input');
+    if (first) first.focus({ preventScroll: true });
+  }
+  vocab.openWordEdit = openWordEdit;
+  function weError(sheet, text) {
+    const p = sheet.querySelector('.we-error');
+    if (p) { p.textContent = text; p.hidden = false; }
+  }
+  // What a field holds, as segments: unchanged text keeps the word's own
+  // segments (particles and all); changed text is parsed afresh.
+  function weJapanese(text, before, label) {
+    const cv = window.RaumeStudy.customVocab;
+    if (text === segText(before)) return { segments: before };
+    const parsed = cv.parseFurigana(text);
+    if (parsed.error) return { error: label + ': ' + parsed.error + '.' };
+    return { segments: keepParticles(before, parsed.segments) };
+  }
+  // Meanings are separated by commas only, as everywhere in the tables.
+  function weMeaning(text) {
+    return text.replace(/\s*[;；]\s*|\s+[\/／]\s+/g, ', ').replace(/\s+/g, ' ').trim();
+  }
+  function saveWordEdit(sheet) {
+    const row = wordEditId && vocab.rawRow(wordEditId);
+    if (!row) { closeKanjiSheet(); return; }
+    const val = name => { const f = sheet.querySelector('.we-input[name="' + name + '"]'); return f ? f.value.trim() : ''; };
+    const verb = row.type === 'verb-pair';
+    const english = weMeaning(val('en'));
+    const fields = { english: english, enNote: val('note') };
+    const forms = verb ? row.forms : [{ jp: row.jp, romaji: row.romaji }];
+    const parsed = [];
+    for (let i = 0; i < forms.length; i++) {
+      const label = verb ? (i ? 'Polite form' : 'Plain form') : 'Word';
+      const text = val('jp' + i), romaji = val('ro' + i);
+      if (!text) { weError(sheet, label + ' is empty.'); return; }
+      const jp = weJapanese(text, forms[i].jp, label);
+      if (jp.error) { weError(sheet, jp.error); return; }
+      if (!romaji) { weError(sheet, 'Romaji is empty.'); return; }
+      parsed.push({ jp: jp.segments, romaji: romaji });
+    }
+    if (!english) { weError(sheet, 'Meaning is empty.'); return; }
+    let stored = true;
+    try {
+      if (row.__custom) {
+        window.RaumeStudy.customVocab.updateRow(row.id, {
+          segments: parsed[0].jp, romaji: parsed[0].romaji, english: english,
+          verb: verb ? { jp: parsed[1].jp, romaji: parsed[1].romaji, verbClass: row.verbClass } : null
+        });
+      } else {
+        if (verb) fields.forms = parsed; else { fields.jp = parsed[0].jp; fields.romaji = parsed[0].romaji; }
+        stored = wordEdits.save(row.id, fields);
+      }
+    } catch (err) { weError(sheet, err.message || 'Couldn’t save that word.'); return; }
+    if (!stored) { weError(sheet, 'Couldn’t save on this device: its storage is full.'); return; }
+    closeKanjiSheet();
+  }
+  document.addEventListener('submit', function (event) {
+    const form = event.target.closest && event.target.closest('#kanjiSheet .we-form');
+    if (!form) return;
+    event.preventDefault();
+    saveWordEdit(document.getElementById('kanjiSheet'));
+  });
+  document.addEventListener('click', function (event) {
+    const t = event.target;
+    if (!t || !t.closest) return;
+    if (t.closest('#kanjiSheet .we-cancel')) { closeKanjiSheet(); return; }
+    if (t.closest('#kanjiSheet .we-restore') && wordEditId) {
+      if (!wordEdits.reset(wordEditId)) { weError(document.getElementById('kanjiSheet'), 'Couldn’t save on this device: its storage is full.'); return; }
+      closeKanjiSheet();
+    }
+  });
+  // An edit -- made here, or synced from another device -- repaints just
+  // that word's rows in place: open tables, sort and scroll stay as they
+  // were, and the row keeps its hidden / known / revealed state.
+  function repaintWords(ids) {
+    const fc = window.RaumeStudy.flashcards;
+    if (fc && fc.vocabIndex && fc.vocabIndex.resetIndex) fc.vocabIndex.resetIndex();
+    (ids || []).forEach(id => {
+      const row = vocab.rawRow(id);
+      if (!row) return;
+      document.querySelectorAll('#vocabulary tbody tr[data-vocab-id]').forEach(old => {
+        if (old.dataset.vocabId !== id) return;
+        const tmp = document.createElement('tbody');
+        tmp.innerHTML = vocab.rowHtml(row);
+        const tr = tmp.firstElementChild;
+        if (!tr) return;
+        tr.className = old.className;
+        Object.keys(old.dataset).forEach(k => { tr.dataset[k] = old.dataset[k]; });
+        old.replaceWith(tr);
+      });
+    });
+    const views = fc && fc.views;
+    if (views && views.refreshRowToggleButtons) views.refreshRowToggleButtons();
+    const search = document.getElementById('tableSearch');
+    if (search && search.value.trim()) search.dispatchEvent(new Event('input'));
+  }
+  if (wordEdits) wordEdits.onChange(repaintWords);
 
   function showStandalonePage(which) {
     closeKanjiSheet();

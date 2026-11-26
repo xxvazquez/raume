@@ -147,6 +147,13 @@ alter table public.flashcard_settings add column if not exists leech_kept jsonb 
 -- newest change per kanji wins on merge.
 alter table public.flashcard_settings add column if not exists known_kanji jsonb not null default '{}'::jsonb;
 
+-- The reader's own edits to built-in words (js/vocab/word-edits.js): a word's
+-- Japanese, romaji, English or note, keyed by its permanent vocab id and laid
+-- over the Git dataset. Shape: { "<vocabId>": { "t": <ms>, "jp", "romaji",
+-- "english", "enNote" } } ("forms" for a verb), or { "t", "x": 1 } once
+-- restored; newest change per word wins on merge.
+alter table public.flashcard_settings add column if not exists word_edits jsonb not null default '{}'::jsonb;
+
 -- Finished Puzzles games (Match and Listening) for the Dashboard's Puzzles
 -- card -- practice only, never FSRS. The client keeps the newest 500 and
 -- merges by id. Shape: [{ "id": "...", "at": "<ISO>", "mode": "match" |

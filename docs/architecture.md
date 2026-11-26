@@ -81,7 +81,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`, `notes`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `word_edits` (your changes to built-in words — see below), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - **Today's tracker** — the flashcard cache's `day`: `{ date, count, fresh,
   reviewed }`, the new cards met today (`count`, held to *New cards per day*,
@@ -117,6 +117,17 @@ flowchart LR
   value this device already cleared. Deleting a table of your own also
   forgets its record and its place in any saved order (`tableCustom.forget`),
   so nothing lingers in the settings row.
+- **Word edits** (`js/vocab/word-edits.js`, `RaumeStudy.wordEdits`) — the
+  reader's changes to a built-in word (its Japanese, romaji, English or note),
+  made from the row's hold menu › Edit. `data/vocabulary.js` is never touched:
+  each edit is keyed by the row's permanent vocab id in `raume-word-edits`
+  (`{ vocabId: { t, jp, romaji, english, enNote } }`, `forms` in place of
+  `jp`/`romaji` for a verb; Restore original keeps `{ t, x: 1 }` so a merge can
+  tell it from never-edited) and patched onto `RaumeStudy.data.vocabularyTables`
+  before the first render, so search, print, speech and flashcards (answers
+  included) all see the edited word and its FSRS history stays with it.
+  Signed in, the whole object is pushed to `flashcard_settings.word_edits`;
+  `fetchAllFromServer()` merges per word, newest change winning.
 - **Custom vocabulary** (`js/vocab/custom-vocab.js`, `RaumeStudy.customVocab`) —
   the reader's own rows and tables. Two `localStorage` keys, mirroring the
   flashcards cache split: `raume-custom-vocab-guest-v1` (guest = authoritative)
@@ -400,6 +411,11 @@ attempted once and logged. `js/flashcards/data-ops.js`:
   for the streak the later study day wins, carrying on the account's run
   when that ended the same day or the day before. Leech Keeps, the journey, Known
   kanji and puzzle runs don't need it -- the fetch merges both sides.
+- **Word edits** (`raume-word-edits-dirty-v1`) -- the same dirty flag:
+  `saveWordEditsRemoteQueued()` pushes the whole current object, one push at
+  a time; on failure the flag is set and `syncWordEditsIfDirty()` retries on
+  sign-in, on reconnect and with every sync. Each word carries its own
+  timestamp, so a late retry never undoes a newer edit from another device.
 - **Table customisations** (`raume-table-custom-dirty-v1`) -- simpler, since
   `js/vocab/table-custom.js` always pushes its *whole* current state
   (idempotent, last-edit-wins), so there's no op log to replay -- just a
@@ -438,6 +454,7 @@ js/
     table-custom.js      per-table names / icons / order
     kanji-known.js       kanji and words marked Known (green tiles / rows)
     custom-vocab.js      the reader's own rows / tables, merged into the dataset
+    word-edits.js        the reader's edits to built-in words, patched onto the dataset
     kanji-write.js       the kanji sheet's Write it pad (stroke-order practice + judge)
     customize.js         the Customize page
     render.js            tables, nav, sorting

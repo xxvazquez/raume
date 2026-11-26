@@ -228,7 +228,8 @@
     <details class="help-group">
       <summary><span class="help-tile" data-tile="orange" aria-hidden="true"><svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.3 3.7 14.3 5.7 6 14H4v-2z"/></svg></span><span class="help-sum"><h3>Making it yours</h3><span class="help-sub">Hide, customize, your words, sync</span></span></summary>
       <ul class="help-rows">
-        <li><span class="help-term">Hold a word</span><span class="help-desc">Or right-click it: Play, Copy, Add to flashcards, Mark as known, Hide row.</span></li>
+        <li><span class="help-term">Hold a word</span><span class="help-desc">Or right-click it: Play, Copy, Add to flashcards, Mark as known, Edit, Hide row.</span></li>
+        <li><span class="help-term">Edit a word</span><span class="help-desc">Hold it › Edit. Restore original undoes it.</span></li>
         <li><span class="help-term">Known words</span><span class="help-desc">Soft green, still fully visible. Mark them yourself, or they turn green once you’ve known their meaning in flashcards for three weeks.</span></li>
         <li><span class="help-term">Tricky words</span><span class="help-desc">Soft amber, for words you keep forgetting in flashcards.</span></li>
         <li><span class="help-term">Irregular words</span><span class="help-desc">Their text is red.</span></li>
@@ -297,6 +298,7 @@
      js/vocab/icons.js / table-custom.js / icon-picker.js -> per-table icon & name personalisation
      js/vocab/kanji-known.js -> RaumeStudy.knownKanji (kanji marked Known in the Kanji sheet)
      js/vocab/custom-vocab.js -> RaumeStudy.customVocab (reader's own rows/tables, merged into the dataset)
+     js/vocab/word-edits.js -> RaumeStudy.wordEdits (reader's edits to built-in words, patched onto the dataset)
   6. js/vocab/render.js       -> RaumeStudy.vocab  (tables + top-nav rendering, sorting)
   7. js/vocab/interactions.js -> RaumeStudy.vocab  (routing, search, view modes, menus, print, polite)
      js/vocab/kanji-write.js  -> RaumeStudy.kanjiWrite (the kanji sheet's Write it pad + stroke judge)
@@ -336,6 +338,7 @@
 <script defer src="js/vocab/kanji-known.js?v=__CACHEBUST__"></script>
 <script defer src="js/vocab/icon-picker.js?v=__CACHEBUST__"></script>
 <script defer src="js/vocab/custom-vocab.js?v=__CACHEBUST__"></script>
+<script defer src="js/vocab/word-edits.js?v=__CACHEBUST__"></script>
 <script defer src="js/vocab/render.js?v=__CACHEBUST__"></script>
 <script defer src="js/vocab/interactions.js?v=__CACHEBUST__"></script>
 <script defer src="js/vocab/kanji-write.js?v=__CACHEBUST__"></script>

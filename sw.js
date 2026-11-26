@@ -55,6 +55,7 @@ const VERSIONED = [
   'js/vocab/kanji-known.js',
   'js/vocab/icon-picker.js',
   'js/vocab/custom-vocab.js',
+  'js/vocab/word-edits.js',
   'js/vocab/render.js',
   'js/vocab/interactions.js',
   'js/vocab/kanji-write.js',

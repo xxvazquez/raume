@@ -213,6 +213,8 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     await mergeTodayFromServer(client, user);
     // Kanji marked Known (js/vocab/kanji-known.js) ride in this row too.
     if (window.RaumeStudy.knownKanji) window.RaumeStudy.knownKanji.applyRemote(settingsRow.known_kanji || {});
+    // And the reader's edits to built-in words (js/vocab/word-edits.js).
+    if (window.RaumeStudy.wordEdits) window.RaumeStudy.wordEdits.applyRemote(settingsRow.word_edits || {});
     // So do finished Match / Listening games (puzzle-runs.js).
     if (window.RaumeStudy.flashcards.puzzleRuns) window.RaumeStudy.flashcards.puzzleRuns.applyRemote(settingsRow.puzzle_runs || []);
     // The vocabulary page's per-table icons live in this same row -- hand
@@ -721,7 +723,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
   var syncErrored = false;
   function onSyncStateChange(fn) { syncStateListeners.push(fn); }
   function totalPending() {
-    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount() + cvOutboxPending() + (tcDirty() ? 1 : 0) + (hasPendingSettings() ? 1 : 0));
+    return isGuestMode() ? 0 : ((getCache().logsOutbox || []).length + kanaPendingCount() + cvOutboxPending() + (tcDirty() ? 1 : 0) + (weDirty() ? 1 : 0) + (hasPendingSettings() ? 1 : 0));
   }
   function getSyncState() {
     var online = typeof navigator === "undefined" || navigator.onLine !== false;
@@ -753,6 +755,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
       out.push({ kind: "cv", op: e.op, payload: e.payload });
     });
     if (tcDirty()) out.push({ kind: "table" });
+    if (weDirty()) out.push({ kind: "words" });
     if (hasPendingSettings()) out.push({ kind: "settings", keys: Object.keys(cache.pendingSettings) });
     return out;
   }
@@ -765,6 +768,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     syncKanaOutbox();
     syncCvOutbox();
     syncTableCustomIfDirty();
+    syncWordEditsIfDirty();
     syncSettings();
   }
   function notifySyncStateChange() {
@@ -964,8 +968,46 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     saveTableCustomRemoteQueued();
   }
 
+  // Edits to built-in words (js/vocab/word-edits.js) go the same way: the
+  // whole object each time, one push at a time, a persisted dirty flag on
+  // failure. Each word carries its own timestamp, so the account merges per
+  // word and a retry can never undo a newer edit from another device.
+  var WE_DIRTY_KEY = "raume-word-edits-dirty-v1";
+  function weDirty() {
+    try { return window.localStorage.getItem(WE_DIRTY_KEY) === "1"; } catch (e) { return false; }
+  }
+  function setWeDirty(v) {
+    try {
+      if (v) window.localStorage.setItem(WE_DIRTY_KEY, "1");
+      else window.localStorage.removeItem(WE_DIRTY_KEY);
+    } catch (e) {}
+  }
+  var wePushChain = Promise.resolve(), wePushWaiting = false;
+  function saveWordEditsRemoteQueued() {
+    if (wePushWaiting) return wePushChain;
+    wePushWaiting = true;
+    wePushChain = wePushChain.then(async function () {
+      wePushWaiting = false;
+      var we = window.RaumeStudy.wordEdits;
+      try {
+        if (!getClient() || !currentUser()) throw new Error("not signed in");
+        await withTimeout(saveFsrsSettingsRemote({ word_edits: we ? we.getAll() : {} }), "word edit sync");
+        setWeDirty(false);
+      } catch (e) {
+        console.warn("Flashcards: could not sync a word edit, will retry", e);
+        setWeDirty(true);
+      }
+      notifySyncStateChange();
+    });
+    return wePushChain;
+  }
+  function syncWordEditsIfDirty() {
+    if (!weDirty() || !configured() || !currentUser()) return;
+    saveWordEditsRemoteQueued();
+  }
+
   window.addEventListener("online", function () {
-    notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncSettings();
+    notifySyncStateChange(); syncOutbox(); syncKanaOutbox(); syncCvOutbox(); syncTableCustomIfDirty(); syncWordEditsIfDirty(); syncSettings();
   });
   window.addEventListener("offline", function () { notifySyncStateChange(); });
 
@@ -1163,6 +1205,7 @@ window.RaumeStudy.flashcards.dataOps = (function () {
     saveDirectionSettings: saveDirectionSettings, refreshData: refreshData,
     saveTableCustomRemote: saveTableCustomRemote, saveKnownKanjiRemote: saveKnownKanjiRemote, savePuzzleRunsRemote: savePuzzleRunsRemote, saveJourneyRemote: saveJourneyRemote, saveTableCustomRemoteQueued: saveTableCustomRemoteQueued,
     syncTableCustomIfDirty: syncTableCustomIfDirty,
+    saveWordEditsRemoteQueued: saveWordEditsRemoteQueued, syncWordEditsIfDirty: syncWordEditsIfDirty,
     customVocabAddRows: customVocabAddRows, customVocabDeleteRows: customVocabDeleteRows,
     customVocabAddTable: customVocabAddTable, customVocabDeleteTable: customVocabDeleteTable,
     customVocabAddRowsQueued: customVocabAddRowsQueued, customVocabDeleteRowsQueued: customVocabDeleteRowsQueued,

@@ -761,6 +761,7 @@ window.RaumeStudy.flashcards.views = (function () {
         var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + sm.cards + " card" + (sm.cards === 1 ? "" : "s") + ")"];
         if (sm.kanaCards) parts.push(sm.kanaCards + " Kana card" + (sm.kanaCards === 1 ? "" : "s"));
         if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
+        if (sm.editedWords) parts.push(sm.editedWords + " edited word" + (sm.editedWords === 1 ? "" : "s"));
         if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
         if (sm.knownKanji) parts.push(sm.knownKanji + " marked known");
         if (sm.puzzleGames) parts.push(sm.puzzleGames + " puzzle game" + (sm.puzzleGames === 1 ? "" : "s"));
