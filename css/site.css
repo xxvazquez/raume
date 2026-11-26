@@ -4701,8 +4701,12 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-vf-blank { min-width: 4.5em; cursor: default; }
 .fc-vf-blank.fc-sp-right { height: auto; min-height: 1.45em; padding: .15em .45em; border-radius: .725em; font-weight: 400; color: var(--right-strong); }
 .fc-vf-blank rt { color: var(--furigana); }
-.fc-vf-grid { max-width: 420px; margin-inline: auto; }
+.fc-sp-tail { white-space: nowrap; }
+/* Always the 2 × 2, a phone too: the places are the point (Listening's
+   own grid stacks under 380px). */
+.fc-vf-grid, .fc-ls-choices.fc-vf-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 420px; margin-inline: auto; }
 .fc-vf-choice { text-align: center; font: 400 19px/1.5 var(--font-jp); padding-block: 8px; }
+@media (max-width: 380px) { .fc-ls-choices .fc-vf-choice { font-size: 15px; padding-inline: 12px; } }
 .fc-vf-choice rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
 /* Meaning: the Japanese leads the card at 22px, its romaji's line held
    open under it (filled once answered, so ▶ below never moves); the three English choices are Listening's
@@ -4716,8 +4720,10 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Each circle says right or wrong itself: no wash on the whole line. */
 .fc-sp-line.fc-sb-right, .fc-sp-line.fc-sb-wrong { background: none; }
 .fc-sp-line.fc-sb-wrong { animation: fc-ws-miss .3s ease; }
+/* Room under the last line for a wrong circle's right particle. */
+.fc-sp-line.fc-sb-wrong:has(.fc-sp-fix) { padding-bottom: 10px; }
 .fc-sp-choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 360px; margin: 14px auto 0; }
-.fc-sp-choice { min-width: 52px; font-size: 21px; font-weight: 700; color: var(--particle); }
+.fc-sp-choice { min-width: 48px; font-size: 21px; font-weight: 700; color: var(--particle); }
 @media (prefers-reduced-motion: reduce) {
   .fc-sb-wrong, .fc-sp-line.fc-sb-wrong, .fc-sb-answer:not([hidden]) { animation: none; }
   .fc-sb-tile { transition: none; }

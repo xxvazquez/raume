@@ -1326,7 +1326,10 @@ one order (は が を に で へ と も の から まで より か). **Verb
 verb's blank as that circle made long — a capsule a few kana wide — and
 offers the four forms as Listening's 2 × 2 choices at 19px with furigana,
 **always in the same places**: present on top, past below, the negative on
-the right — the grid itself teaches the pattern. Answered, Listening's ✓ / ✕
+the right — the grid itself teaches the pattern, so it stays 2 × 2 on the
+narrowest iPhone too (the forms drop to 15px there; Listening's own grid
+stacks). A closing 。 never starts a line: it holds on to the blank before
+it, the verb's capsule or a particle's circle. Answered, Listening's ✓ / ✕
 marks the choices and the blank fills sage with the right form, so the line
 reads as the finished sentence; under it only the romaji and ▶. **Meaning**
 puts the Japanese first in the card at 22px, its romaji's line held open

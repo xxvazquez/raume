@@ -1837,17 +1837,26 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // is outlined in the tint. Once marked, a wrong one shows the right
     // particle under it.
     function blankLineHtml(cur, marked) {
-      var next = filled.indexOf(null);
+      var next = filled.indexOf(null), held = "";
+      var LEADING_PUNCT = /^[。、！？!?…」]+/;
       return cur.word.jp.map(function (s, i) {
         var b = cur.word.blanks.indexOf(i);
-        if (b === -1) return V.jpSegmentsHtml([s]);
+        if (b === -1) {
+          // Punctuation the blank before it already took.
+          if (held && s.text) { var rest = s.text.slice(held.length); held = ""; return rest ? V.jpSegmentsHtml([{ text: rest }]) : ""; }
+          return V.jpSegmentsHtml([s]);
+        }
         var got = filled[b], cls = "fc-sp-blank" + (got ? " fc-sp-filled" : "");
         if (marked) cls += got === s.p ? " fc-sp-right" : " fc-sp-wrong";
         else if (b === next) cls += " fc-sp-next";
-        return '<button type="button" class="' + cls + '" data-b="' + b + '" aria-label="' +
+        // A 。 after the circle holds on to it: a line never starts with it.
+        var after = cur.word.jp[i + 1], punct = after && after.text && cur.word.blanks.indexOf(i + 1) === -1 ? (after.text.match(LEADING_PUNCT) || [""])[0] : "";
+        held = punct;
+        var btn = '<button type="button" class="' + cls + '" data-b="' + b + '" aria-label="' +
           (got ? "Blank " + (b + 1) + ": " + got : "Blank " + (b + 1) + ", empty") + '"' + (marked ? " disabled" : "") + ">" +
           '<span class="fc-sp-got">' + esc(got || "") + "</span>" +
           (marked && got !== s.p ? '<span class="fc-sp-fix">' + esc(s.p) + "</span>" : "") + "</button>";
+        return punct ? '<span class="fc-sp-tail">' + btn + esc(punct) + "</span>" : btn;
       }).join("");
     }
     function drawBlanks(marked) {
@@ -1885,8 +1894,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       return cur.word.segs.map(function (segs, i) {
         if (i < mv.tile || i >= mv.tile + span) return V.jpSegmentsHtml(segs);
         if (i > mv.tile) return "";
-        return '<span class="fc-sp-blank fc-vf-blank' + (filledWith ? " fc-sp-right" : " fc-sp-next") + '" aria-label="' + (filledWith ? "The verb" : "Blank: the verb") + '">' +
-          (filledWith ? V.jpSegmentsHtml(filledWith) : "") + "</span>" + esc(cur.grid.punct);
+        // The closing 。 holds on to the verb: a line never starts with it.
+        return '<span class="fc-sp-tail"><span class="fc-sp-blank fc-vf-blank' + (filledWith ? " fc-sp-right" : " fc-sp-next") + '" aria-label="' + (filledWith ? "The verb" : "Blank: the verb") + '">' +
+          (filledWith ? V.jpSegmentsHtml(filledWith) : "") + "</span>" + esc(cur.grid.punct) + "</span>";
       }).join("");
     }
     function renderVerbForm(cur) {
@@ -3157,7 +3167,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     oddone: "Spot the word that doesn’t belong",
     speedsort: "Sort each word into its bucket, fast",
     wordchain: "Each word starts on the kana the last one ended on",
-    sentences: "Put the Japanese in order for the English"
+    sentences: "Build, complete and read whole sentences"
   };
   var CHECK_ICON = '<svg class="fc-gs-check" viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.5 7.5 13.5 14.5 5"/></svg>';
   // Script, Word count, Sort by: the same row as Words from -- the value
@@ -3229,6 +3239,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     bindControls(panel);
     panel.querySelectorAll(".fc-gs-radio").forEach(function (r) {
       r.addEventListener("change", function () {
+        // Stats' Practise these list is sentences for Sentences and words for
+        // the rest: crossing between them, it can't follow -- back to
+        // Flashcards, where Words from can change it again.
+        if (state.source === "tricky" && (state.mode === "sentences") !== (r.value === "sentences")) { state.source = "flashcards"; state.tables = []; }
         state.mode = r.value;
         if (!isGame(state.mode) && state.size > GRID_MAX_WORDS) state.size = GRID_MAX_WORDS;
         saveSetup();
