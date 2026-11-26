@@ -506,14 +506,15 @@ window.RaumeStudy.flashcards.kana = (function () {
     p.toStudy = buildQueue(now || new Date()).length;
     return p;
   }
-  // One script's basic kana (every group but sokuon's words), chosen or not:
+  // One script's basic kana (every group but the sokuon / chōon words and the
+  // foreign sounds), chosen or not:
   // how many have been studied at least once -- in either direction, so a
   // kana met in the old romaji -> kana drill still counts -- the Dashboard's
   // Hiragana / Katakana awards.
   function scriptProgress(script) {
     var cards = load().cards, items = [], all = kanaData.allItems();
     Object.keys(all).forEach(function (g) {
-      all[g].forEach(function (it) { if (it.script === script && !it.word) items.push(it); });
+      all[g].forEach(function (it) { if (it.script === script && !it.word && !it.extra) items.push(it); });
     });
     var started = items.filter(function (it) { return cards[cardKey(it, "k2r")] || cards[cardKey(it, "r2k")]; }).length;
     return { started: started, total: items.length };

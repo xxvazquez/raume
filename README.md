@@ -338,7 +338,8 @@ many are Known, once one is),
 ### Kana trainer
 
 The tab opens on its own **Study now** card, then the groups to drill —
-**gojūon, dakuten, handakuten, yōon, sokuon** — for each script. See a kana,
+**gojūon, dakuten, handakuten, yōon, sokuon** — for each script, plus
+katakana's **chōon** (long-vowel ー words) and **foreign sounds** (ファ, ティ, ヴァ …). See a kana,
 type its reading in romaji (common alternates like `si` count; vowel length
 counts too). Same review card as words, with its own FSRS settings.
 

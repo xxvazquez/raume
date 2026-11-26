@@ -5,8 +5,10 @@
 // taught under: gojūon (the base syllabary), dakuten (voiced), handakuten
 // (the ° mark), yōon (small-ya combinations), and sokuon (the small tsu that
 // doubles a consonant -- practised in short example words, since it has no
-// reading on its own). Six concepts, per script. Data only -- no state, no
-// storage, no DOM.
+// reading on its own). Five concepts, per script, plus two katakana-only
+// ones: chōon (the long-vowel mark ー, also drilled in short words) and the
+// foreign sounds loanwords need (ファ, ティ, ヴァ ...). Data only -- no state,
+// no storage, no DOM.
 //
 // Romaji is derived from js/vocab/kana-romaji.js (the site's one kana->romaji
 // source) so the trainer and the page's reading layer can never disagree.
@@ -45,11 +47,20 @@ window.RaumeStudy.flashcards.kanaData = (function () {
   // without its English).
   var SOKUON_HIRA = ["きって", "がっこう", "ざっし", "きっぷ", "けっこん", "ちょっと", "いっぱい", "しゅっぱつ"];
   var SOKUON_KATA = ["コップ", "ベッド", "サッカー", "マッチ", "スリッパ", "バッグ", "チケット", "ネックレス"];
+  // Chōon: ー lengthens the vowel before it, so it too is drilled in words.
+  var CHOON_KATA = ["コーヒー", "ケーキ", "スーパー", "ノート", "テーブル", "ゲーム", "ボールペン", "パーティー"];
+  // Katakana-only combinations for sounds Japanese doesn't have.
+  var FOREIGN_KATA = [
+    "ヴァ", "ヴィ", "ヴ", "ヴェ", "ヴォ", "ファ", "フィ", "フェ", "フォ",
+    "ティ", "ディ", "シェ", "ジェ", "チェ"
+  ];
   var WORD_ENGLISH = {
     "きって": "stamp", "がっこう": "school", "ざっし": "magazine", "きっぷ": "ticket",
     "けっこん": "marriage", "ちょっと": "a little", "いっぱい": "full, a lot", "しゅっぱつ": "departure",
     "コップ": "cup, glass", "ベッド": "bed", "サッカー": "soccer", "マッチ": "match",
-    "スリッパ": "slippers", "バッグ": "bag", "チケット": "ticket", "ネックレス": "necklace"
+    "スリッパ": "slippers", "バッグ": "bag", "チケット": "ticket", "ネックレス": "necklace",
+    "コーヒー": "coffee", "ケーキ": "cake", "スーパー": "supermarket", "ノート": "notebook",
+    "テーブル": "table", "ゲーム": "game", "ボールペン": "ballpoint pen", "パーティー": "party"
   };
 
   // Extra accepted spellings, keyed by the Hepburn romaji the trainer shows.
@@ -71,7 +82,9 @@ window.RaumeStudy.flashcards.kanaData = (function () {
     { id: "kata-dakuten", script: "katakana", label: "Dakuten", src: DAKUTEN, kata: true },
     { id: "kata-handakuten", script: "katakana", label: "Handakuten", src: HANDAKUTEN, kata: true },
     { id: "kata-yoon", script: "katakana", label: "Yōon (combinations)", src: YOON, kata: true },
-    { id: "kata-sokuon", script: "katakana", label: "Sokuon", src: SOKUON_KATA, words: true }
+    { id: "kata-sokuon", script: "katakana", label: "Sokuon", src: SOKUON_KATA, words: true },
+    { id: "kata-choon", script: "katakana", label: "Chōon (long vowels)", src: CHOON_KATA, words: true },
+    { id: "kata-foreign", script: "katakana", label: "Foreign sounds", src: FOREIGN_KATA, extra: true }
   ];
   var DEFAULT_GROUPS = ["hira-gojuon"];
 
@@ -93,7 +106,7 @@ window.RaumeStudy.flashcards.kanaData = (function () {
     var answers = def.words
       ? [romaji]
       : uniq([romaji].concat(ALT_BY_ROMAJI[romaji] || []).concat(ALT_BY_KANA[kana] || []));
-    return { id: def.id + ":" + kana, kana: kana, romaji: romaji, answers: answers, script: def.script, groupId: def.id, word: !!def.words, english: def.words ? WORD_ENGLISH[kana] || "" : "" };
+    return { id: def.id + ":" + kana, kana: kana, romaji: romaji, answers: answers, script: def.script, groupId: def.id, word: !!def.words, extra: !!def.extra, english: def.words ? WORD_ENGLISH[kana] || "" : "" };
   }
 
   var itemCache = null;

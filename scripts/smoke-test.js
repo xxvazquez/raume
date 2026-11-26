@@ -3890,7 +3890,9 @@ async function main() {
   console.log("Flashcards: Kana tab");
   check("the kana tables expose the named groups per script with counts", (() => {
     const g = kd.groups();
-    return g.length === 10 && g.filter(x => x.script === "hiragana").length === 5
+    return g.length === 12 && g.filter(x => x.script === "hiragana").length === 5
+      && g.find(x => x.id === "kata-choon").count === 8
+      && g.find(x => x.id === "kata-foreign").count === 14
       && g.find(x => x.id === "hira-gojuon").count === 46
       && g.find(x => x.id === "hira-yoon").count === 33
       && g.find(x => x.id === "kata-dakuten").count === 20
@@ -3922,9 +3924,18 @@ async function main() {
     && !kh.checkKana(zasshi, "zasi") && !kh.checkKana(matchi, "machi"));
   const sokuon = kd.itemsFor(["hira-sokuon"]);
   check("sokuon is drilled as short doubled-consonant words, each with its English", sokuon.concat(kd.itemsFor(["kata-sokuon"])).every(it => it.word && it.kana.length > 1 && /[a-z]/.test(it.romaji) && /^[a-z]/.test(it.english)));
+  const kohi = kd.itemsFor(["kata-choon"]).find(it => it.kana === "コーヒー");
+  check("chōon is drilled in words: コーヒー reads kōhī, takes koohii, rejects kohi",
+    !!kohi && kohi.word && kohi.english === "coffee" && kohi.romaji === "kōhī"
+    && kh.checkKana(kohi, "koohii") && !kh.checkKana(kohi, "kohi"));
+  const foreign = kd.itemsFor(["kata-foreign"]);
+  check("foreign sounds read as single syllables (ファ fa, ティ ti, ヴォ vo) and stay out of the Katakana award",
+    foreign.find(it => it.kana === "ファ").romaji === "fa" && foreign.find(it => it.kana === "ティ").romaji === "ti"
+    && foreign.find(it => it.kana === "ヴォ").romaji === "vo" && foreign.every(it => it.extra && !it.word)
+    && window.RaumeStudy.flashcards.kana.scriptProgress("katakana").total === 104);
 
   document.querySelector('.fc-tab[data-tab="kana"]').click();
-  check("the Kana tab opens on a group picker with a Study button", !!document.getElementById("fcKanaStart") && document.querySelectorAll("#fcPanelKana .fc-kana-group-cb").length === 10);
+  check("the Kana tab opens on a group picker with a Study button", !!document.getElementById("fcKanaStart") && document.querySelectorAll("#fcPanelKana .fc-kana-group-cb").length === 12);
   check("hiragana gojūon is on by default", document.querySelector('#fcPanelKana .fc-kana-group-cb[data-group="hira-gojuon"]').checked);
   // Each toggle re-renders the panel, so re-query the checkbox every time.
   document.querySelector('#fcPanelKana .fc-kana-group-cb[data-group="hira-gojuon"]').click();
