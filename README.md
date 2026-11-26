@@ -88,7 +88,7 @@ the grammar it shows.
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
 | **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |
-| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times) counts as N5. Sentences, place names and dishes the lists leave out have none. |
+| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times) counts as N5. Sentences, place names and dishes the lists leave out have none. Your own words — class tables included — take the level of the same word in raume's tables. |
 
 The ⓘ lists:
 
@@ -354,6 +354,7 @@ Choices are remembered on this device.
 | Setting | Choices |
 | --- | --- |
 | **Words from** | *Flashcards* (leaning toward words you're still learning) or any number of tables, in or out of flashcards |
+| **JLPT level** | *All*, or only one level's words from those (N5 … N1). Puzzles and every word game; not Sentences |
 | **Script** | *Romaji* (long vowels spelled out: *koohii*), *Japanese* (as written — Match and Word search only), *Hiragana* or *Katakana*. A word is never forced into a script it isn't written in |
 | **Word count** | 10–40; Match and Listening up to 100 or *All* |
 

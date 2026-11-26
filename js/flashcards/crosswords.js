@@ -205,9 +205,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var index = vocabIndex();
     return poolFromEntries((ids || []).map(function (id) { return index[id]; }).filter(Boolean));
   }
+  // JLPT level narrows either source to that level's words (the vocab
+  // index's jlpt); Stats' Tricky words is a fixed list and plays whole.
   function wordPool() {
-    return state.source === "table" ? tableWordPool(state.tables)
-      : state.source === "tricky" ? idsWordPool(state.trickyIds) : flashcardsWordPool();
+    if (state.source === "tricky") return idsWordPool(state.trickyIds);
+    var pool = state.source === "table" ? tableWordPool(state.tables) : flashcardsWordPool();
+    var lv = Number(state.level);
+    if (!lv) return pool;
+    var index = vocabIndex();
+    return pool.filter(function (w) { return index[w.id] && index[w.id].jlpt === lv; });
   }
   // The N5 Kanji tables hold single characters, not words to play with.
   function vocabTables() {
@@ -2912,7 +2918,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // choices are remembered on this device for next time (SETUP_KEY); the
   // puzzle itself still isn't.
   var SETUP_KEY = "raume-games-setup";
-  var SETUP_FIELDS = ["mode", "source", "tables", "script", "size", "sortBy", "register", "exercise"];
+  var SETUP_FIELDS = ["mode", "source", "tables", "level", "script", "size", "sortBy", "register", "exercise"];
+  var LEVEL_OPTS = [["", "All"], ["5", "N5"], ["4", "N4"], ["3", "N3"], ["2", "N2"], ["1", "N1"]];
   function loadSetup(kind) {
     try { return (JSON.parse(localStorage.getItem(SETUP_KEY)) || {})[kind] || {}; } catch (e) { return {}; }
   }
@@ -2926,12 +2933,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     } catch (e) { /* private mode: just not remembered */ }
   }
   function freshState(kind) {
-    var st = { kind: kind, source: "flashcards", tables: [], tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
+    var st = { kind: kind, source: "flashcards", tables: [], level: "", tablesOpen: false, mode: kind === "games" ? "match" : "crossword",
       script: "romaji", size: 15, sortBy: "tables", register: "both", exercise: "build", puzzle: null, poolCount: 0, notes: "", started: false };
     var saved = loadSetup(kind);
     var modes = MODE_OPTS.map(function (o) { return o[0]; });
     if (modes.indexOf(saved.mode) !== -1 && (PUZZLE_MODES.indexOf(saved.mode) !== -1) === (kind === "puzzles")) st.mode = saved.mode;
     if (saved.source === "table" && Array.isArray(saved.tables) && saved.tables.length) { st.source = "table"; st.tables = saved.tables.map(String); }
+    if (LEVEL_OPTS.some(function (o) { return o[0] === saved.level; })) st.level = saved.level;
     if (SCRIPT_OPTS.some(function (o) { return o[0] === saved.script; })) st.script = saved.script;
     if (typeof saved.size === "number" && saved.size > 0) st.size = saved.size;
     if (typeof saved.sortBy === "string") st.sortBy = saved.sortBy;
@@ -3231,7 +3239,15 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       picks.push(["exercise", "Exercise", optionLabel(EXERCISE_OPTS, state.exercise), EXERCISE_OPTS]);
       picks.push(["register", "Register", optionLabel(REGISTER_OPTS, state.register), REGISTER_OPTS]);
     }
-    else if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
+    else {
+      // JLPT level: right under Words from, the other half of "which words".
+      if (state.source !== "tricky") picks.push(["level", "JLPT level", optionLabel(LEVEL_OPTS, state.level), LEVEL_OPTS]);
+      if (state.level && state.source !== "tricky" && state.poolCount < MIN_WORDS && !noOdd) {
+        why = "There aren’t enough N" + state.level + " words here" + (state.poolCount ? " — these have " + state.poolCount : "") +
+          ". Pick All or another JLPT level, or tick more tables under Words from.";
+      }
+      if (state.mode !== "listening" && state.mode !== "wordchain") picks.push(["script", "Script", optionLabel(SCRIPT_OPTS, state.script), scriptOpts()]);
+    }
     picks.push(["size", sentences ? "Sentence count" : "Word count", sizeLabel(), sizeOpts()]);
     if (state.mode === "speedsort" && state.sortAvail && state.sortAvail.length) picks.push(["sortBy", "Sort by", optionLabel(SORT_OPTS, state.sortBy), state.sortAvail]);
     // Two columns on a wide window (the style; then Words, Start and

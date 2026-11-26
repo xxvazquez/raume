@@ -248,6 +248,37 @@ window.RaumeStudy.customVocab = (function () {
   // Merge every custom table + row into RaumeStudy.data.vocabularyTables in
   // place. Idempotent -- strips whatever it injected last time first (marked
   // __custom), so it's safe to call on every change and after every sync.
+  // A word of your own takes the JLPT level of the same word in raume's
+  // tables -- written the same (先生), or, failing that, read the same when
+  // that reading has one level only (せんせい). Every class word is also in
+  // raume's own tables, so a class table is levelled like the rest; a word
+  // raume doesn't have stays unlevelled, as its own unlisted words do.
+  function builtInLevels(all) {
+    var byText = {}, byReading = {};
+    // The same writing twice keeps its easier level; a reading shared by
+    // words of different levels (はし) is no answer at all.
+    function note(map, k, n, ambiguousToZero) {
+      if (!k) return;
+      if (!(k in map)) map[k] = n;
+      else if (map[k] !== n) map[k] = ambiguousToZero ? 0 : Math.max(map[k], n);
+    }
+    all.forEach(function (t) {
+      if (t.__custom) return;
+      t.rows.forEach(function (row) {
+        var n = Number(row.jlpt);
+        if (row.__custom || !(n >= 1 && n <= 5)) return;
+        var jp = row.type === "verb-pair" && row.forms ? row.forms[0].jp : row.jp;
+        note(byText, plainOf(jp || []), n, false);
+        note(byReading, readingOf(jp || []), n, true);
+      });
+    });
+    return function (jp) {
+      var text = plainOf(jp || []);
+      if (byText[text]) return byText[text];
+      return byReading[readingOf(jp || [])] || 0;
+    };
+  }
+  function readingOf(segs) { return segs.map(function (s) { return s.reading || s.text || ""; }).join(""); }
   function applyToDataset() {
     var data = window.RaumeStudy.data;
     if (!data || !Array.isArray(data.vocabularyTables)) return;
@@ -260,6 +291,7 @@ window.RaumeStudy.customVocab = (function () {
       }
     }
     var c = load();
+    var levelOf = builtInLevels(all);
     var customById = {};
     c.tables.slice().sort(bySort).forEach(function (t) {
       var obj = { id: t.id, title: t.title, category: t.category || DEFAULT_CATEGORY, rows: [], __custom: true };
@@ -276,10 +308,13 @@ window.RaumeStudy.customVocab = (function () {
       // A verb becomes a verb pair like the built-in ones (both forms in the
       // table, its group, the Verb -> conjugated form cards); it keeps jp / romaji
       // for the lists that show one line per word.
-      target.rows.push(r.verb
+      var row = r.verb
         ? { id: r.id, type: "verb-pair", forms: [{ jp: r.jp, romaji: r.romaji }, { jp: r.verb.jp, romaji: r.verb.romaji }],
             verbClass: r.verb.verbClass, jp: r.jp, romaji: r.romaji, english: r.english, __custom: true }
-        : { id: r.id, type: "word", jp: r.jp, romaji: r.romaji, english: r.english, __custom: true });
+        : { id: r.id, type: "word", jp: r.jp, romaji: r.romaji, english: r.english, __custom: true };
+      var lv = levelOf(r.jp);
+      if (lv) row.jlpt = lv;
+      target.rows.push(row);
       if (!target.__custom) target.__hasCustomRows = true;
     });
     Object.keys(customById).forEach(function (id) {

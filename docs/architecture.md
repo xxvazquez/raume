@@ -640,7 +640,11 @@ and dishes outside the lists carry none. Rows render it as `data-jlpt` (the
 Options › JLPT level filter: `body[data-jlpt-filter]` in CSS, `.level-empty`
 on tables / headings / directory links left with none; the search's `n4`
 token) and a `.level-note` the ⓘ reads. The filter is per device
-(`raume-jlpt-filter`).
+(`raume-jlpt-filter`). A custom row has no level of its own: at merge time
+(`custom-vocab.js` `builtInLevels`) it takes the level of the built-in word
+written the same, else of the one read the same when that reading has a
+single level. Puzzles / Games setup carries a `level` field (`wordPool()`
+filters by the vocab index's `jlpt`; Tricky words ignores it).
 
 `english` holds only what a learner types; context for it goes in an optional
 `enNote` (どの: `english: "which"`, `enNote: "before a noun"`). The note follows

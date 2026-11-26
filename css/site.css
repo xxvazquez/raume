@@ -6548,6 +6548,7 @@ mark.fc-diff-co {
 .fc-gs-words .fc-gs-menu-at-1 { top: 96px; }
 .fc-gs-words .fc-gs-menu-at-2 { top: 140px; }
 .fc-gs-words .fc-gs-menu-at-3 { top: 184px; }
+.fc-gs-words .fc-gs-menu-at-4 { top: 228px; }
 /* Too little room under the row: the menu opens over it instead
    (placeMenu), its bottom 8px above row N's top. */
 @media (min-width: 641px) {
@@ -6555,6 +6556,7 @@ mark.fc-diff-co {
   .fc-gs-words .fc-gs-menu-at-1.fc-gs-menu-up { bottom: calc(100% - 36px); }
   .fc-gs-words .fc-gs-menu-at-2.fc-gs-menu-up { bottom: calc(100% - 80px); }
   .fc-gs-words .fc-gs-menu-at-3.fc-gs-menu-up { bottom: calc(100% - 124px); }
+  .fc-gs-words .fc-gs-menu-at-4.fc-gs-menu-up { bottom: calc(100% - 168px); }
 }
 /* A single-choice menu: checkmark rows, no title (an iOS menu has none) --
    the title shows only on a phone's sheet. */

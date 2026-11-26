@@ -2191,6 +2191,16 @@ async function main() {
       return gone && vegTable.rows.some(r => r.id === made.id) && !!document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
     })());
     if (delBtn()) delBtn().click(); else cvNs.deleteRow(made.id);
+    const sensei = cvNs.addRow(String(vegTable.id), cvNs.parseImport("先生(せんせい),sensei,teacher").rows[0]);
+    const kana = cvNs.addRow(String(vegTable.id), cvNs.parseImport("せんせい,sensei,teacher").rows[0]);
+    check("your own word takes the JLPT level of the same word in raume's tables, written alike or read alike", (() => {
+      const row = id => vegTable.rows.find(r => r.id === id);
+      const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + sensei.id + '"]');
+      return row(sensei.id).jlpt === 5 && row(kana.id).jlpt === 5 && !!tr && tr.dataset.jlpt === "5"
+        && window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[sensei.id].jlpt === 5 && !row(made.id);
+    })());
+    cvNs.deleteRow(sensei.id);
+    cvNs.deleteRow(kana.id);
     check("deleting it again removes it, restoring the dataset", vegTable.rows.length === before
       && !window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[made.id]);
   }
@@ -4122,7 +4132,7 @@ async function main() {
     const rows = [...panel.querySelectorAll(".fc-gs-words .fc-gs-pick .set-label")].map(l => l.textContent);
     return !panel.querySelector(".fc-xw-grid") && !panel.querySelector(".fc-xw-actions")
       && modes.map(r => r.value).join() === "crossword,arroword,wordsearch" && modes[0].checked
-      && rows.join("|") === "Words from|Script|Word count"
+      && rows.join("|") === "Words from|JLPT level|Script|Word count"
       && panel.querySelector("#fcXwSource .fc-xw-menu-val").textContent === "Flashcards"
       && panel.querySelector('.fc-gs-opt[data-pick="script"][aria-checked="true"]').dataset.value === "romaji"
       && !document.getElementById("fcGsStart").disabled && !!document.getElementById("fcGsStats");
@@ -4130,7 +4140,7 @@ async function main() {
   check("Words from, Script and Word count are one kind of row -- the value and ⌃⌄ -- and Script / Word count open the same glass menu of checkmark rows: a tap picks and closes it, Escape closes it", (() => {
     const panel = document.getElementById("fcPanelCrosswords");
     const rows = [...panel.querySelectorAll(".fc-gs-words .fc-gs-pick")];
-    const same = rows.length === 3 && rows.every(r => r.tagName === "BUTTON" && r.querySelector(".fc-xw-updown") && !r.querySelector("select, .fc-xw-row-chev"));
+    const same = rows.length === 4 && rows.every(r => r.tagName === "BUTTON" && r.querySelector(".fc-xw-updown") && !r.querySelector("select, .fc-xw-row-chev"));
     const row = panel.querySelector('.fc-gs-pick[data-pick="size"]'), menu = document.getElementById("fcGsMenu-size");
     row.click();
     const opened = !menu.hidden && row.getAttribute("aria-expanded") === "true" && menu.classList.contains("fc-xw-sheet")
@@ -4146,6 +4156,20 @@ async function main() {
     document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="size"]').click();
     document.querySelector('#fcGsMenu-size .fc-gs-opt[data-value="' + before + '"]').click();
     return same && opened && esc && picked && xw.state.size === before;
+  })());
+  check("JLPT level narrows a puzzle's words to that level, and All puts them all back", (() => {
+    const idx = window.RaumeStudy.flashcards.vocabIndex.getVocabIndex();
+    const pickLevel = v => {
+      document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="level"]').click();
+      document.querySelector('#fcGsMenu-level .fc-gs-opt[data-value="' + v + '"]').click();
+    };
+    const all = xw.wordPool().length;
+    pickLevel("5");
+    const n5 = xw.wordPool();
+    const narrowed = xw.state.level === "5" && n5.length > 0 && n5.length <= all && n5.every(w => idx[w.id].jlpt === 5)
+      && document.querySelector('#fcPanelCrosswords .fc-gs-pick[data-pick="level"] .fc-xw-menu-val').textContent.indexOf("N5") === 0;
+    pickLevel("");
+    return narrowed && xw.state.level === "" && xw.wordPool().length === all;
   })());
   xwStart();
   check("the Puzzles tab renders a puzzle once there are enough flashcard words -- never fewer than 6 of them",
