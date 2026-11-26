@@ -1325,7 +1325,11 @@ offers the four forms as Listening's 2 × 2 choices at 19px with furigana,
 **always in the same places**: present on top, past below, the negative on
 the right — the grid itself teaches the pattern. Answered, Listening's ✓ / ✕
 marks the choices and the blank fills sage with the right form, so the line
-reads as the finished sentence; under it only the romaji and ▶.
+reads as the finished sentence; under it only the romaji and ▶. **Meaning**
+puts the Japanese first in the card at 22px, its romaji's line held open
+under it (filled once answered, so ▶ beneath never moves — one ▶, never a
+second with the answer), and stacks the three English choices full width as
+Listening's tiles: sentences are too long for its 2 × 2.
 
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong

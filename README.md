@@ -476,6 +476,10 @@ confetti; reduced motion is honoured.
     plain る / ない / た / なかった, or たい / たくない / たかった /
     たくなかった). Only the English tells them apart. 67 sentences, each
     with its verb marked by hand.
+  - *Meaning*: read the Japanese (▶ plays it) and pick its English from
+    three. The wrong two are the sentences that look most like it — the
+    same words or pattern, a question among questions — never one that
+    means the same. The romaji shows once you answer.
 - **Register** picks *Polite*, *Casual* or both; no *Words from*.
 - Each answer shows the whole sentence with its romaji and ▶. A miss (or
   **Show answer**) comes back at the end; missed sentences join Tricky words.

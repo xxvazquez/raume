@@ -4792,7 +4792,7 @@ async function main() {
     const regs = {};
     ["polite", "casual", "both"].forEach(r => { xw.state.register = r; regs[r] = xw.sentencePool(); });
     xw.state.register = "both";
-    return rows === "exercise|register|size" && exercises === "Build|Particles|Verb form" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
+    return rows === "exercise|register|size" && exercises === "Build|Particles|Verb form|Meaning" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
       && regs.polite.every(s => byId(s.id).enNote !== "casual") && regs.casual.every(s => byId(s.id).enNote === "casual")
       && regs.both.length === regs.polite.length + regs.casual.length && regs.both.every(s => s.tiles.length >= 3);
   })());
@@ -4941,6 +4941,46 @@ async function main() {
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
     return !!document.querySelector("#fcPanelGames .fc-mt-done") && last.setup === "sentences|both|" + n + "|verbform"
       && last.right === n - 1 && last.missed.join() === vfFirst.word.id;
+  })());
+  console.log("Flashcards: Sentences › Meaning");
+  check("Meaning's wrong choices are other sentences of the same register, never one meaning the same, and lean on look-alikes", (() => {
+    const rows = window.RaumeStudy.data.vocabularyTables.flatMap(t => t.rows).filter(r => r.tiles);
+    const byEn = {};
+    rows.forEach(r => { byEn[r.english] = r; });
+    return rows.every(r => {
+      const m = xw.meaningChoices(r);
+      return m.choices.length === 3 && new Set(m.choices).size === 3 && m.choices[m.answer] === r.english
+        && m.choices.every(en => (byEn[en].enNote === "casual") === (r.enNote === "casual"));
+    });
+  })());
+  xwPick("exercise", "meaning");
+  xwStart();
+  const mnCur = () => xw.state.puzzle.questions.find(q => q.word.id === document.querySelector("#fcPanelGames .fc-mn-card").dataset.sentence);
+  const mnFirst = mnCur();
+  check("a Meaning question: the Japanese with its furigana, its romaji kept back, and three English choices stacked", (() => {
+    return !!mnFirst && document.querySelectorAll("#fcPanelGames .fc-mn-choices .fc-mn-choice").length === 3
+      && document.querySelector("#fcPanelGames .fc-sb-answer").hidden && !document.querySelector("#fcPanelGames .fc-sb-clue")
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  check("a wrong meaning: ✕ on yours, ✓ on the right one, then the romaji (and one ▶ only) and Next", (() => {
+    const wrong = (mnFirst.meaning.answer + 1) % 3;
+    document.querySelector('#fcPanelGames .fc-mn-choice[data-i="' + wrong + '"]').click();
+    const ok = document.querySelector('#fcPanelGames .fc-mn-choice[data-i="' + wrong + '"]').classList.contains("fc-ls-chosen-wrong")
+      && document.querySelector('#fcPanelGames .fc-mn-choice[data-i="' + mnFirst.meaning.answer + '"]').classList.contains("fc-mt-right")
+      && document.querySelector("#fcPanelGames .fc-sb-answer").textContent.includes(mnFirst.word.romaji)
+      && document.querySelectorAll("#fcPanelGames .fc-sb-say").length <= 1 && !document.querySelector("#fcPanelGames .fc-ls-next").hidden;
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok;
+  })());
+  for (let k = 0; k < 80 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    document.querySelector('#fcPanelGames .fc-mn-choice[data-i="' + mnCur().meaning.answer + '"]').click();
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+  }
+  check("...and a Meaning game logs under its own setup", (() => {
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
+    return !!document.querySelector("#fcPanelGames .fc-mt-done") && last.setup === "sentences|both|" + n + "|meaning"
+      && last.right === n - 1 && last.missed.join() === mnFirst.word.id;
   })());
   xwPick("exercise", "build");
   xwPick("mode", "listening");

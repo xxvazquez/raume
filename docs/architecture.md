@@ -313,7 +313,7 @@ puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
 match / listening / kanatiles / oddone / speedsort / wordchain / sentences / crossword / arroword / wordsearch; `setup` is
 `source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana|type` for Word chain;
-Sentences is `sentences|both·polite·casual|count` (`|particles` or `|verbform` added for those exercises), `missed` its sentence ids,
+Sentences is `sentences|both·polite·casual|count` (`|particles`, `|verbform` or `|meaning` added for those exercises), `missed` its sentence ids,
 typed since 2026-10 — older `kana` runs were the pick-from-four version); a Word chain run also keeps
 `help` (hints) when it used any;
 `ended` marks a Match / Listening game stopped early (only its finished

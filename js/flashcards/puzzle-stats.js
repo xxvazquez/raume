@@ -78,7 +78,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     // Sentences: the exercise leads ("Particles", or Build for the keys from
     // before there was a choice).
     var name = src === "flashcards" ? "Flashcards" : src === "tricky" ? "Tricky words"
-      : src === "sentences" ? (parts[3] === "particles" ? "Particles" : parts[3] === "verbform" ? "Verb form" : "Build") : "";
+      : src === "sentences" ? (parts[3] === "particles" ? "Particles" : parts[3] === "verbform" ? "Verb form" : parts[3] === "meaning" ? "Meaning" : "Build") : "";
     if (!name && src.indexOf("tables:") === 0) {
       var ids = src.slice(7).split(",");
       var titles = (window.RaumeStudy.data.vocabularyTables || [])

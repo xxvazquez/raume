@@ -1611,9 +1611,66 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // plain る / ない / た / なかった, or たい / たくない / たかった / たくなかった
   // -- whichever set the sentence's own form is in. Every choice is real
   // Japanese; only the English (tense, "not", "want") tells them apart.
+  // The Meaning exercise turns it round: the Japanese (▶ to hear it, its
+  // romaji kept back until you answer) and three English sentences stacked
+  // full width. The two wrong ones are the sentences that look most like
+  // it -- the same words, the same pattern, a question among questions, a
+  // negative among negatives -- so the Japanese has to be read; never one
+  // that means the same, and always the same register.
   // -----------------------------------------------------------------------
   var REGISTER_OPTS = [["both", "Polite and casual"], ["polite", "Polite"], ["casual", "Casual"]];
-  var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"], ["verbform", "Verb form"]];
+  var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"], ["verbform", "Verb form"], ["meaning", "Meaning"]];
+  var MEANING_CHOICES = 3;
+  // What two sentences share, for the look-alikes: their content pieces
+  // (not a lone particle, です or punctuation), their kanji, the pattern's
+  // headline, and whether each asks or says no.
+  var LIGHT_TILE = /^(は|が|を|に|で|へ|と|も|の|か|よ|ね|な|です|だ|ます)$/;
+  function sentenceFeatures(row) {
+    var pieces = {}, kanji = {};
+    row.tiles.forEach(function (t) {
+      var bare = t.replace(/[。、！？!?…「」]/g, "");
+      if (bare && !LIGHT_TILE.test(bare)) pieces[bare] = true;
+    });
+    row.jp.forEach(function (s) { if (s.kanji) Array.from(s.kanji).forEach(function (c) { kanji[c] = true; }); });
+    var en = String(row.english);
+    return {
+      pieces: pieces, kanji: kanji, pattern: String(row.pattern || "").split(":")[0].trim(),
+      ask: /\?\s*$/.test(en), no: /n't\b|\bnot\b|\bno\b|\bnobody\b|\bnothing\b|\bnever\b/i.test(en),
+      words: en.toLowerCase().replace(/[^a-z' ]/g, " ").split(/\s+/).filter(Boolean)
+    };
+  }
+  function overlap(a, b) { return Object.keys(a).filter(function (k) { return b[k]; }).length; }
+  // Too close in meaning to be a wrong answer: the same words, near enough.
+  function sameMeaning(a, b) {
+    var A = {}, B = {};
+    a.words.forEach(function (w) { A[w] = true; });
+    b.words.forEach(function (w) { B[w] = true; });
+    var shared = overlap(A, B), all = Object.keys(A).length + Object.keys(B).length - shared;
+    return !all || shared / all >= 0.7;
+  }
+  function meaningChoices(row) {
+    var casual = row.enNote === "casual", me = sentenceFeatures(row);
+    var scored = [];
+    (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
+      t.rows.forEach(function (other) {
+        if (other === row || !Array.isArray(other.tiles) || (other.enNote === "casual") !== casual) return;
+        var f = sentenceFeatures(other);
+        if (other.english === row.english || sameMeaning(me, f)) return;
+        var score = 3 * overlap(me.pieces, f.pieces) + overlap(me.kanji, f.kanji) +
+          (me.pattern && me.pattern === f.pattern ? 2 : 0) + (me.ask === f.ask ? 1 : 0) + (me.no === f.no ? 1 : 0) + Math.random();
+        scored.push({ en: other.english, score: score, f: f });
+      });
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    // From the closest six, two that don't mean the same as each other.
+    var picked = [];
+    shuffle(scored.slice(0, 6)).some(function (c) {
+      if (!picked.some(function (p) { return sameMeaning(p.f, c.f); })) picked.push(c);
+      return picked.length === MEANING_CHOICES - 1;
+    });
+    var choices = shuffle(picked.map(function (c) { return c.en; }).concat([row.english]));
+    return { choices: choices, answer: choices.indexOf(row.english) };
+  }
   var VERB_GRID_LABELS = ["present", "present negative", "past", "past negative"];
   var CLOSING_PUNCT = /[。、！？!?…]+$/;
   function segReading(segs) { return segs.map(function (s) { return s.reading || s.text || s.p || s.kanji || ""; }).join(""); }
@@ -1707,7 +1764,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       t.rows.forEach(function (row) {
         if (!Array.isArray(row.tiles)) return;
         var blanks = particleBlanks(row.jp);
-        if (state.exercise === "particles" ? !blanks.length : state.exercise === "verbform" ? !row.mainVerb : row.tiles.length < SENTENCE_MIN_TILES) return;
+        if (state.exercise === "particles" ? !blanks.length : state.exercise === "verbform" ? !row.mainVerb
+          : state.exercise === "build" && row.tiles.length < SENTENCE_MIN_TILES) return;
         if (only && only.indexOf(row.id) === -1) return;
         var casual = row.enNote === "casual";
         if ((state.register === "polite" && casual) || (state.register === "casual" && !casual)) return;
@@ -1729,6 +1787,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       placements: picked,
       questions: picked.map(function (s) {
         if (state.exercise === "verbform") return { word: s, grid: s.grid };
+        if (state.exercise === "meaning") return { word: s, meaning: meaningChoices(window.RaumeStudy.vocab.rawRow(s.id)) };
         if (state.exercise === "particles") {
           var want = [];
           s.blanks.forEach(function (i) { if (want.indexOf(s.jp[i].p) === -1) want.push(s.jp[i].p); });
@@ -1758,7 +1817,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var queue, at, score, missed, retried, placed, startedAt, pausedMs, pausedAt, done, locked, streak = streakMeter();
     var total = p.questions.length;
     var V = window.RaumeStudy.vocab;
-    var particles = state.exercise === "particles", verbform = state.exercise === "verbform", exercise = state.exercise;
+    var particles = state.exercise === "particles", verbform = state.exercise === "verbform", meaning = state.exercise === "meaning", exercise = state.exercise;
     // Particles: `filled` holds each blank's choice (null while empty).
     var filled;
     function count() { setCount(countEl, Math.min(at + 1, total), total); }
@@ -1855,12 +1914,44 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       }
       miss();
     }
+    // Meaning: the Japanese and ▶ in the card, three English choices under it.
+    function renderMeaning(cur) {
+      boardEl.innerHTML =
+        '<div class="fc-ls-card fc-sb-card fc-mn-card" data-sentence="' + esc(cur.word.id) + '">' +
+        // The romaji's line is held open under the Japanese, so ▶ never
+        // moves when it fills.
+        '<p class="fc-sb-whole fc-mn-jp jpword" lang="ja">' + V.jpSegmentsHtml(cur.word.jp) + "</p>" +
+        '<p class="fc-sb-answer" aria-live="polite" hidden></p>' +
+        (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "") + "</div>" +
+        '<div class="fc-ls-choices fc-mn-choices" role="group" aria-label="What it means">' + cur.meaning.choices.map(function (en, i) {
+          return '<button type="button" class="fc-mt-tile fc-ls-choice fc-mn-choice" data-i="' + i + '">' + esc(en) + "</button>";
+        }).join("") + "</div>" +
+        '<div class="fc-ls-next-row"><button type="button" class="fc-btn fc-kt-reveal fc-sb-reveal">Show answer</button>' +
+        '<button type="button" class="fc-btn fc-btn-primary fc-ls-next" hidden>Next</button></div>';
+    }
+    function answerMeaning(btn) {
+      var cur = q(), right = btn ? +btn.dataset.i === cur.meaning.answer : false, rightBtn = null;
+      boardEl.querySelectorAll(".fc-mn-choice").forEach(function (b) {
+        b.disabled = true;
+        if (+b.dataset.i === cur.meaning.answer) { b.classList.add("fc-mt-right"); rightBtn = b; }
+      });
+      if (btn && !right) btn.classList.add("fc-mt-wrong", "fc-ls-chosen-wrong");
+      answerFeel(rightBtn, btn);
+      if (right) {
+        streak.hit(true);
+        if (!retried[cur.word.id]) score++;
+        showWhole(true);
+        return;
+      }
+      miss();
+    }
     function render() {
       var cur = q();
       count();
       placed = [];
       locked = false;
       if (particles) { renderParticles(cur); return; }
+      if (meaning) { renderMeaning(cur); return; }
       if (verbform) { renderVerbForm(cur); return; }
       boardEl.innerHTML =
         '<div class="fc-ls-card fc-sb-card">' +
@@ -1886,12 +1977,13 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var ans = boardEl.querySelector(".fc-sb-answer");
       // Verb form's line already reads as the whole sentence once its blank
       // fills: under it only the romaji and ▶, not the Japanese again.
-      ans.innerHTML = (verbform ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
+      ans.innerHTML = (verbform || meaning ? '<span class="fc-sb-romaji">' + esc(cur.word.romaji) + "</span>"
         : (right ? "" : '<span class="fc-sb-answer-head">The sentence</span>') + sentenceHtml(cur.word)) +
-        (canSpeak() ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
+        // Meaning's card has had its ▶ from the start.
+        (canSpeak() && !meaning ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
       ans.hidden = false;
       boardEl.querySelectorAll(".fc-sb-tile").forEach(function (t) { t.disabled = true; });
-      boardEl.querySelectorAll(".fc-vf-choice").forEach(function (b) { b.disabled = true; });
+      boardEl.querySelectorAll(".fc-vf-choice, .fc-mn-choice").forEach(function (b) { b.disabled = true; });
       if (particles || verbform) boardEl.querySelector(".fc-sp-line").classList.add(right ? "fc-sb-right" : "fc-sb-wrong");
       boardEl.querySelector(".fc-sb-reveal").hidden = true;
       var nextBtn = boardEl.querySelector(".fc-ls-next");
@@ -1936,8 +2028,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (locked) return;
       if (e.target.closest(".fc-sb-reveal")) {
         if (verbform) { answerVerbForm(null); return; }
+        if (meaning) { answerMeaning(null); return; }
         if (particles) drawBlanks(true);
         miss();
+        return;
+      }
+      if (meaning) {
+        var en = e.target.closest(".fc-mn-choice");
+        if (en && !en.disabled) answerMeaning(en);
         return;
       }
       if (verbform) {
@@ -1979,7 +2077,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         accuracyStatsHtml("sentences", score, total, run) +
         (missed.length ? "" : '<p class="fc-mt-done-meta">Every sentence right first time</p>') +
         doneActionsHtml("fcSbAgain") + "</div>" +
-        missedListHtml(particles || verbform ? "Sentences to try again" : "Sentences to build again", missed.map(function (s) {
+        missedListHtml(particles || verbform || meaning ? "Sentences to try again" : "Sentences to build again", missed.map(function (s) {
           return '<li class="fc-sb-missed">' + sentenceHtml(s) + '<span class="fc-ls-missed-en">' + esc(s.clue) + "</span></li>";
         }));
       bindDoneActions("fcSbAgain");
@@ -3633,6 +3731,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return state.mode === "wordchain" ? "Type a word that starts with the kana the last one ends on — romaji turns into kana as you type, and あ | ア picks hiragana or katakana. Any word in the vocabulary counts. Hint shows the English of one that would work, and tapped again the word itself; ⓘ has the rules."
       : state.mode === "speedsort" ? "Tap the bucket each word belongs in, as fast as you can. A wrong bucket adds a second."
       : state.mode === "oddone" ? "Three of the four words come from one table. Tap the one that doesn’t belong."
+      : state.mode === "sentences" && state.exercise === "meaning" ? "Read the Japanese — ▶ plays it — and pick what it means. Keys 1–3 pick too. Its romaji shows once you answer. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" && state.exercise === "verbform" ? "Read the English, then pick the form of the verb it needs. The four forms always sit in the same places: present on top, past below, the negative on the right. Keys 1–4 pick too. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" && state.exercise === "particles" ? "Read the English, then fill each circle with its particle — they fill left to right; tap a filled one to clear it. Stuck? Show answer, and the sentence comes back at the end."
       : state.mode === "sentences" ? "Read the English, then tap the Japanese pieces in order to say it. Tap a placed piece to take it back. Stuck? Show answer, and the sentence comes back at the end."
@@ -4221,7 +4320,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       wordPool: wordPool, flashcardsWordPool: flashcardsWordPool, tableWordPool: tableWordPool, weightedOrder: weightedOrder, generate: generate,
-      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, particleBlanks: particleBlanks, verbGrid: verbGrid, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
+      buildGrid: buildGrid, buildWordSearch: buildWordSearch, buildMatch: buildMatch, buildListening: buildListening, buildKanaTiles: buildKanaTiles, kanaDecoys: kanaDecoys, sentencePool: sentencePool, buildSentences: buildSentences, particleBlanks: particleBlanks, verbGrid: verbGrid, meaningChoices: meaningChoices, tileSegments: tileSegments, buildOddOne: buildOddOne, buildSpeedSort: buildSpeedSort, sortBuckets: sortBuckets, buildTypedChain: buildTypedChain, chainKey: chainKey, chainDictionary: chainDictionary, chainHead: chainHead, chainTail: chainTail, matchRounds: matchRounds, bestTime: bestTime, toHiragana: toHiragana, toKatakana: toKatakana, scriptedAnswer: scriptedAnswer,
       foldRomajiForGrid: foldRomajiForGrid, isGiveaway: isGiveaway, MIN_WORDS: MIN_WORDS,
       // the tab showing (or last shown): Puzzles' or Games' settings
       get state() { return state; }, states: states

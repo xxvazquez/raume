@@ -4693,6 +4693,14 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-vf-grid { max-width: 420px; margin-inline: auto; }
 .fc-vf-choice { text-align: center; font: 400 19px/1.5 var(--font-jp); padding-block: 8px; }
 .fc-vf-choice rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
+/* Meaning: the Japanese leads the card at 22px, its romaji's line held
+   open under it (filled once answered, so ▶ below never moves); the three English choices are Listening's
+   tiles stacked full width -- sentences are too long for its 2 × 2. */
+.fc-mn-jp { margin: 0; font-size: 22px; line-height: 1.7; text-align: center; }
+.fc-mn-card .fc-sb-answer { min-height: 1.4em; margin-top: -6px; }
+.fc-mn-card .fc-sb-answer[hidden] { display: flex; visibility: hidden; }
+.fc-mn-choices { grid-template-columns: minmax(0, 1fr); max-width: 520px; margin-inline: auto; }
+.fc-mn-choice { text-align: left; font-size: 15px; line-height: 1.35; padding: 12px 40px 12px 16px; }
 /* Each circle says right or wrong itself: no wash on the whole line. */
 .fc-sp-line.fc-sb-right, .fc-sp-line.fc-sb-wrong { background: none; }
 .fc-sp-line.fc-sb-wrong { animation: fc-ws-miss .3s ease; }
