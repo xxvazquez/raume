@@ -478,8 +478,9 @@ confetti; reduced motion is honoured.
     with its verb marked by hand.
   - *Meaning*: read the Japanese (▶ plays it) and pick its English from
     three. The wrong two are the sentences that look most like it — the
-    same words or pattern, a question among questions — never one that
-    means the same. The romaji shows once you answer.
+    same words or pattern, a question among questions, from either
+    register — never one that means the same. The romaji shows once you
+    answer.
 - **Register** picks *Polite*, *Casual* or both; no *Words from*.
 - Each answer shows the romaji and ▶ (and, after a miss, the sentence as it
   should be). A miss (or **Show answer**) comes back at the end; missed

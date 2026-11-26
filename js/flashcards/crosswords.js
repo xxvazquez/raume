@@ -1616,7 +1616,9 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // full width. The two wrong ones are the sentences that look most like
   // it -- the same words, the same pattern, a question among questions, a
   // negative among negatives -- so the Japanese has to be read; never one
-  // that means the same, and always the same register.
+  // that means the same. The same register is preferred, not required: the
+  // casual set alone is too small to find look-alikes in, and the English
+  // doesn't show the register anyway.
   // -----------------------------------------------------------------------
   var REGISTER_OPTS = [["both", "Polite and casual"], ["polite", "Polite"], ["casual", "Casual"]];
   var EXERCISE_OPTS = [["build", "Build"], ["particles", "Particles"], ["verbform", "Verb form"], ["meaning", "Meaning"]];
@@ -1653,11 +1655,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     var scored = [];
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
       t.rows.forEach(function (other) {
-        if (other === row || !Array.isArray(other.tiles) || (other.enNote === "casual") !== casual) return;
+        if (other === row || !Array.isArray(other.tiles)) return;
         var f = sentenceFeatures(other);
         if (other.english === row.english || sameMeaning(me, f)) return;
         var score = 3 * overlap(me.pieces, f.pieces) + overlap(me.kanji, f.kanji) +
-          (me.pattern && me.pattern === f.pattern ? 2 : 0) + (me.ask === f.ask ? 1 : 0) + (me.no === f.no ? 1 : 0) + Math.random();
+          (me.pattern && me.pattern === f.pattern ? 2 : 0) + (me.ask === f.ask ? 1 : 0) + (me.no === f.no ? 1 : 0) +
+          ((other.enNote === "casual") === casual ? 1 : 0) + Math.random();
         scored.push({ en: other.english, score: score, f: f });
       });
     });

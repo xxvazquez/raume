@@ -4950,14 +4950,14 @@ async function main() {
       && last.right === n - 1 && last.missed.join() === vfFirst.word.id;
   })());
   console.log("Flashcards: Sentences › Meaning");
-  check("Meaning's wrong choices are other sentences of the same register, never one meaning the same, and lean on look-alikes", (() => {
+  check("Meaning's wrong choices are other sentences (either register), never the same English, and lean on look-alikes", (() => {
     const rows = window.RaumeStudy.data.vocabularyTables.flatMap(t => t.rows).filter(r => r.tiles);
     const byEn = {};
     rows.forEach(r => { byEn[r.english] = r; });
     return rows.every(r => {
       const m = xw.meaningChoices(r);
       return m.choices.length === 3 && new Set(m.choices).size === 3 && m.choices[m.answer] === r.english
-        && m.choices.every(en => (byEn[en].enNote === "casual") === (r.enNote === "casual"));
+        && m.choices.every(en => !!byEn[en] && (en === r.english) === (byEn[en] === r));
     });
   })());
   check("a sentence whose Japanese was edited sits out of Build and Verb form (its pieces no longer match) but still plays in Particles and Meaning", (() => {
