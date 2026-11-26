@@ -579,8 +579,8 @@ with reduced motion on, it's all a plain change of state.
   next word plays by itself. Wrong: a ✕ on your pick, a ✓ on the right one,
   the word shown, and **Next** when you're ready.
 - At the end: your score ("12 / 15"), this game's accuracy beside your
-  average over all Listening games, and the words you missed, each with a
-  speaker to hear it again. **Play again** for new words; the **⋯** menu's
+  average over all Listening games, and under that card the words you
+  missed, each with a speaker to hear it again. **Play again** for new words; the **⋯** menu's
   *Restart* asks the same ones again. **⏸** pauses (the choices hidden);
   *End game* shows the score so far; the words you answered count toward
   your accuracy (never a best).
@@ -624,7 +624,8 @@ with reduced motion on, it's all a plain change of state.
   or more themed tables, three or more words from one of them: the setup
   screen says so and keeps Start off with a single table (a mixed class
   list included — its table says nothing about what each word is).
-- The score is sets right; the end card lists the odd ones you missed. ⏸
+- The score is sets right; under the end card, the odd ones you missed
+  (each word once). ⏸
   and End game work as in Listening.
 
 </details>

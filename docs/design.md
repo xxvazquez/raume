@@ -1307,8 +1307,12 @@ and romaji in grey. Under the card, the four choices are Match's white tiles in
 a 2x2 grid (one column under 380px), centred. After an answer the right one
 washes sage with a ✓, a wrong pick coral with a ✕ (the mark, not only the
 hue), the other two drop to half opacity; Next (filled) appears only after a
-wrong pick. The end card is Match's, with the missed words as hairline rows:
-a round grey speaker, the word and its reading, the English trailing.
+wrong pick. The end card is Match's; the missed words sit under it as Word
+chain's chain does (`missedListHtml`) — a list header with no colon
+("Words to listen to again"), then their own inset-grouped white card of
+hairline rows: a round grey speaker, the word and its reading, the English
+trailing. Kana tiles, Odd one out and Speed sort list theirs the same way,
+never as rows inside the result card; a word missed twice is listed once.
 
 Saved as a PDF (`js/flashcards/puzzle-pdf.js`), a puzzle is a worksheet drawn
 on A4 canvases at ~200 dpi — never the browser's print engine, which laid the

@@ -914,6 +914,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       reset: function () { clearTimeout(timer); n = 0; draw(-1); }
     };
   }
+  // The words to go over again, under the result card as Word chain's
+  // chain is: a list header (no colon) over an inset-grouped white card --
+  // never rows crammed into the result card.
+  function missedListHtml(title, rows) {
+    return rows.length ? '<h3 class="help-head fc-wc-chain-head">' + esc(title) + '</h3><ul class="fc-ls-missed">' + rows.join("") + "</ul>" : "";
+  }
   // A finished game's buttons: Play again (new words), and Stats.
   function doneActionsHtml(againId) {
     return '<div class="fc-mt-done-actions"><button type="button" class="fc-btn fc-btn-primary" id="' + againId + '">Play again</button>' +
@@ -1322,12 +1328,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + p.questions.length + "</p>" +
         accuracyStatsHtml("listening", score, p.questions.length, run) +
-        '<p class="fc-mt-done-meta">' + (missed.length ? "Words to listen to again:" : "Every word right") + "</p>" +
-        (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w, i) {
+        (missed.length ? "" : '<p class="fc-mt-done-meta">Every word right</p>') +
+        doneActionsHtml("fcLsAgain") + "</div>" +
+        missedListHtml("Words to listen to again", missed.map(function (w, i) {
           return '<li><button type="button" class="fc-ls-say" data-m="' + i + '" aria-label="Play">' + SPEAKER_ICON + "</button>" +
             '<span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
-        }).join("") + "</ul>" : "") +
-        doneActionsHtml("fcLsAgain") + "</div>";
+        }));
       bindDoneActions("fcLsAgain");
     }
     boardEl.addEventListener("click", function (e) {
@@ -1529,11 +1535,11 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + total + "</p>" +
         stats(score, total, run) +
-        '<p class="fc-mt-done-meta">' + (missed.length ? "Words to spell again:" : "Every word right first time") + "</p>" +
-        (missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
+        (missed.length ? "" : '<p class="fc-mt-done-meta">Every word right first time</p>') +
+        doneActionsHtml("fcKtAgain") + "</div>" +
+        missedListHtml("Words to spell again", missed.map(function (w) {
           return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
-        }).join("") + "</ul>" : "") +
-        doneActionsHtml("fcKtAgain") + "</div>";
+        }));
       bindDoneActions("fcKtAgain");
     }
     function pause() {
@@ -1689,10 +1695,14 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var btn = e.target.closest(".fc-oo-word");
       if (btn && !btn.disabled && !answered) answer(btn);
     });
+    // A word can be the odd one in two sets: it's listed once.
     function missedHtml() {
-      return missed.length ? '<ul class="fc-ls-missed">' + missed.map(function (w) {
+      var seen = {};
+      return missedListHtml("Odd ones you missed", missed.filter(function (w) {
+        return seen[w.id] ? false : (seen[w.id] = true);
+      }).map(function (w) {
         return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(w) + '</span><span class="fc-ls-missed-en">' + esc(w.clue) + "</span></li>";
-      }).join("") + "</ul>" : "";
+      }));
     }
     function finish() {
       done = true;
@@ -1704,8 +1714,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       boardEl.innerHTML = '<div class="fc-mt-done" role="status">' +
         '<p class="fc-mt-done-time">' + score + " / " + total + "</p>" +
         accuracyStatsHtml("oddone", score, total, run) +
-        '<p class="fc-mt-done-meta">' + (missed.length ? "Odd ones you missed:" : "Every set right") + "</p>" +
-        missedHtml() + doneActionsHtml("fcOoAgain") + "</div>";
+        (missed.length ? "" : '<p class="fc-mt-done-meta">Every set right</p>') +
+        doneActionsHtml("fcOoAgain") + "</div>" + missedHtml();
       bindDoneActions("fcOoAgain");
     }
     function pause() {
@@ -1888,10 +1898,10 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (btn && !btn.disabled && phase === "play") answer(btn);
     });
     function mistakesHtml() {
-      return mistakes.length ? '<ul class="fc-ls-missed">' + mistakes.map(function (m) {
+      return missedListHtml("Sorted the wrong way", mistakes.map(function (m) {
         return '<li><span class="fc-ls-missed-word">' + spokenWordHtml(m.word) + '</span><span class="fc-ls-missed-en">' +
           esc(p.buckets[m.right].label) + ", not " + esc(p.buckets[m.chosen].label) + "</span></li>";
-      }).join("") + "</ul>" : "";
+      }));
     }
     function finish() {
       setPhase("done");
@@ -1904,8 +1914,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<p class="fc-mt-done-time">' + formatClock(total_ms) + "</p>" +
         '<p class="fc-mt-done-meta">' + score + " / " + total + " right · " + (mistakes.length === 1 ? "1 mistake" : mistakes.length + " mistakes") + "</p>" +
         accuracyStatsHtml("speedsort", score, total, run) +
-        (mistakes.length ? '<p class="fc-mt-done-meta">Sorted the wrong way:</p>' : "") + mistakesHtml() +
-        doneActionsHtml("fcSsAgain") + "</div>";
+        doneActionsHtml("fcSsAgain") + "</div>" + mistakesHtml();
       bindDoneActions("fcSsAgain");
     }
     function pause() {

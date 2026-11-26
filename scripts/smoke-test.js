@@ -4637,9 +4637,10 @@ async function main() {
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("listening").pop();
     return !!last && last.missed.join() === String(lsQ()[0].word.id) && /\|\d+$/.test(last.setup);
   })());
-  check("a right pick moves on by itself; the end card scores it and lists the missed word with a speaker to hear it again", (() => {
+  check("a right pick moves on by itself; the end card scores it and the list under it has the missed word with a speaker to hear it again", (() => {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
-    const missed = done ? [...done.querySelectorAll(".fc-ls-missed li")] : [];
+    // The missed words sit under the result card, in their own list card.
+    const missed = done ? [...document.querySelectorAll("#fcPanelGames .fc-mt-done + .help-head + .fc-ls-missed li")] : [];
     if (!done || missed.length !== 1) return false;
     const n = lsQ().length;
     missed[0].querySelector(".fc-ls-say").click();
@@ -4729,8 +4730,10 @@ async function main() {
     const done = document.querySelector("#fcPanelGames .fc-mt-done");
     const n = xw.state.puzzle.questions.length;
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("kanatiles").pop();
+    // The words to spell again sit under the result card, in their own list card.
+    const list = [...document.querySelectorAll("#fcPanelGames .fc-mt-done + .help-head + .fc-ls-missed li")].map(li => li.textContent).join("|");
     return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 2) + " / " + n
-      && done.textContent.includes(ktFirst.word.clue) && done.textContent.includes(ktShown.word.clue) && !!last && last.right === n - 2 && last.n === n
+      && list.includes(ktFirst.word.clue) && list.includes(ktShown.word.clue) && !!last && last.right === n - 2 && last.n === n
       && last.missed.join() === [ktFirst.word.id, ktShown.word.id].join() && last.setup === "flashcards|hiragana|" + n;
   })());
   xwPick("mode", "listening");
@@ -4855,7 +4858,7 @@ async function main() {
     const n = xw.state.puzzle.items.length;
     const last = window.RaumeStudy.flashcards.puzzleRuns.live("speedsort").pop();
     return !!done && new RegExp((n - 1) + " / " + n + " right · 1 mistake").test(done.textContent)
-      && /, not /.test(done.textContent) && !!last && last.right === n - 1 && last.missed.join() === String(ssFirst.word.id)
+      && /, not /.test((document.querySelector("#fcPanelGames .fc-mt-done + .help-head + .fc-ls-missed") || {}).textContent) && !!last && last.right === n - 1 && last.missed.join() === String(ssFirst.word.id)
       && /\|tables$/.test(last.setup);
   })());
   xwSource("flashcards");

@@ -4750,14 +4750,17 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   from { box-shadow: var(--control-lift), 0 0 0 0 color-mix(in srgb, var(--section) 35%, transparent); }
   to { box-shadow: var(--control-lift), 0 0 0 12px color-mix(in srgb, var(--section) 0%, transparent); }
 }
-.fc-ls-missed { list-style: none; margin: 4px 0 14px; padding: 0; align-self: stretch; }
+/* Words to go over again: an inset-grouped white card under the result
+   card (missedListHtml), hairlines inset to the text -- Word chain's
+   chain card. */
+.fc-ls-missed { list-style: none; margin: 0; padding: 0; background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .fc-ls-missed li {
-  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 4px;
-  border-top: 1px solid var(--row-line);
+  position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 16px; box-sizing: border-box;
 }
+.fc-ls-missed li + li::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: 1px solid var(--row-line); }
 .fc-ls-missed .fc-ls-written { font-size: 17px; }
 .fc-ls-missed-word { display: flex; flex-direction: column; min-width: 0; }
-.fc-ls-missed-en { margin-left: auto; color: var(--muted); text-align: right; font-size: var(--fs-small); }
+.fc-ls-missed-en { margin-left: auto; color: var(--muted); text-align: right; font-size: 15px; }
 .fc-ls-say {
   appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
