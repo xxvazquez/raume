@@ -1303,6 +1303,17 @@ the kana at 24px), a used tile dimmed in place so nothing shifts, laid out in
 row width) — never one tile left alone on a row (Laura, 2026-09-28). Its
 Stats hue is green.
 
+**Sentences** keeps Kana tiles' toolbar and card: the English at 19px, then
+the line you build — a `--group-ground` well (14px corners, at least 60px
+tall) that wraps like text, "Tap the pieces in order" in grey while empty;
+right washes it sage, wrong coral with the shake. The bank below is Kana
+tiles' white capsules sized to their words (44px tall, 12px corners, the
+Japanese at 19px with 10px furigana, particles blue), a used piece dimmed in
+place; placed pieces keep full strength once the round locks, so a wrong
+order stays readable. The answer — "The sentence" in grey after a miss, the
+sentence at 19px, its romaji, ▶ — rises in under the line. Its Stats hue is
+blue (puzzles' blue never shares the Game stats screen).
+
 **Listening** keeps Match's toolbar, with a quiet "3 / 15" counter where the
 clock was. One white card holds a 76px round ▶ filled in the section's strong
 tone (a press scales it to 94%), a grey "Tap to listen" under it until the

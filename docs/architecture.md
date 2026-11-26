@@ -306,13 +306,14 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-games-setup` — the
 Puzzles and Games setup screens' last choices (`{ puzzles, games }`, each mode /
-source / tables / script / size / sortBy; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-table-picker-recent` — the Customize table sheet's Recent tables (ids, newest first, at most four; browser-local), `raume-notes-study` — a lesson note's Romaji / English / Furigana / Quiz choices (browser-local; the notes themselves live in IndexedDB `raume-notes`, see Class notes), `raume-rings-shown` — the date
+source / tables / script / size / sortBy / register; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-table-picker-recent` — the Customize table sheet's Recent tables (ids, newest first, at most four; browser-local), `raume-notes-study` — a lesson note's Romaji / English / Furigana / Quiz choices (browser-local; the notes themselves live in IndexedDB `raume-notes`, see Class notes), `raume-rings-shown` — the date
 the Dashboard's rings last drew up from nothing (once a day; browser-local)), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
 an array of `{ id, at, mode, n, ms, miss | right | help, setup, splits, missed }` — `mode` is
-match / listening / kanatiles / oddone / speedsort / wordchain / crossword / arroword / wordsearch; `setup` is
-`source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana|type` for Word chain,
+match / listening / kanatiles / oddone / speedsort / wordchain / sentences / crossword / arroword / wordsearch; `setup` is
+`source|script|count` (source `flashcards`, `tables:<ids>` or `tricky`; script `kana|type` for Word chain;
+Sentences is `sentences|both·polite·casual|count`, `missed` its sentence ids,
 typed since 2026-10 — older `kana` runs were the pick-from-four version); a Word chain run also keeps
 `help` (hints) when it used any;
 `ended` marks a Match / Listening game stopped early (only its finished

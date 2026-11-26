@@ -4435,7 +4435,7 @@ async function main() {
     const puzzles = opts("#fcPanelCrosswords");
     xwStart();
     document.querySelector('.fc-tab[data-tab="games"]').click();
-    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone|speedsort|wordchain"
+    return puzzles === "crossword|arroword|wordsearch" && opts("#fcPanelGames") === "match|listening|kanatiles|oddone|speedsort|wordchain|sentences"
       && xw.state === xw.states.games && xw.state.mode === "match" && !document.querySelector("#fcPanelGames .fc-mt-tile")
       && /Pair each word/.test(document.querySelector("#fcPanelGames .fc-gs-mode").textContent);
   })());
@@ -4774,6 +4774,79 @@ async function main() {
       && list.includes(ktFirst.word.clue) && list.includes(ktShown.word.clue) && !!last && last.right === n - 2 && last.n === n
       && last.missed.join() === [ktFirst.word.id, ktShown.word.id].join() && last.setup === "flashcards|hiragana|" + n;
   })());
+  console.log("Flashcards: Sentences");
+  check("every Everyday Sentence cuts into its pieces cleanly (each with its own furigana and particles); one- and two-piece sentences sit out", (() => {
+    const rows = window.RaumeStudy.data.vocabularyTables.flatMap(t => t.rows).filter(r => r.tiles);
+    const plain = segs => segs.map(s => s.kanji || s.text || s.p).join("");
+    const cut = rows.every(r => { const segs = xw.tileSegments(r); return !!segs && segs.every((s, i) => plain(s) === r.tiles[i]); });
+    return rows.length >= 200 && cut;
+  })());
+  xwPick("mode", "sentences");
+  check("Sentences' setup: Register and Sentence count, no Words from or Script; Register narrows the pool to polite or casual", (() => {
+    xwSetup();
+    const panel = document.querySelector("#fcPanelGames");
+    const rows = [...panel.querySelectorAll(".fc-gs-pick")].map(b => b.dataset.pick || b.id).join("|");
+    const label = panel.querySelector('.fc-gs-pick[data-pick="size"] .set-label').textContent;
+    const byId = id => window.RaumeStudy.vocab.rawRow(id);
+    const regs = {};
+    ["polite", "casual", "both"].forEach(r => { xw.state.register = r; regs[r] = xw.sentencePool(); });
+    xw.state.register = "both";
+    return rows === "register|size" && label === "Sentence count" && !panel.querySelector("#fcXwSource")
+      && regs.polite.every(s => byId(s.id).enNote !== "casual") && regs.casual.every(s => byId(s.id).enNote === "casual")
+      && regs.both.length === regs.polite.length + regs.casual.length && regs.both.every(s => s.tiles.length >= 3);
+  })());
+  xwStart();
+  const sbQ = () => document.querySelector("#fcPanelGames .fc-sb-clue").textContent;
+  const sbCur = () => xw.state.puzzle.questions.find(q => q.word.clue === sbQ());
+  const sbTap = i => document.querySelector('#fcPanelGames .fc-sb-bank .fc-sb-tile[data-t="' + i + '"]').click();
+  check("a Sentences question: the English, an empty line, the sentence's own pieces (furigana on kanji, particles blue), a counter", (() => {
+    const q = sbCur();
+    const bank = [...document.querySelectorAll("#fcPanelGames .fc-sb-bank .fc-sb-tile")];
+    const kanjiTile = q.word.segs.findIndex(s => s.some(x => x.kanji)), pTile = q.word.segs.findIndex(s => s.some(x => x.p));
+    return !!q && bank.length === q.word.tiles.length && !!document.querySelector("#fcPanelGames .fc-sb-line-empty")
+      && (kanjiTile === -1 || !!document.querySelector('#fcPanelGames .fc-sb-bank .fc-sb-tile[data-t="' + kanjiTile + '"] rt'))
+      && (pTile === -1 || !!document.querySelector('#fcPanelGames .fc-sb-bank .fc-sb-tile[data-t="' + pTile + '"] .particle'))
+      && document.getElementById("fcLsCount").textContent === "1 / " + xw.state.puzzle.questions.length
+      && q.order.map(i => q.word.tiles[i]).join("") !== q.word.answer
+      && document.querySelectorAll("#fcPanelGames [style]").length === 0;
+  })());
+  const sbFirst = sbCur();
+  check("tapping a placed piece sends just that one back to the bank", (() => {
+    sbTap(0); sbTap(1);
+    document.querySelector('#fcPanelGames .fc-sb-placed[data-at="0"]').click();
+    const placed = [...document.querySelectorAll("#fcPanelGames .fc-sb-placed")].map(t => +t.dataset.t);
+    const ok = placed.join() === "1" && !document.querySelector('#fcPanelGames .fc-sb-bank .fc-sb-tile[data-t="0"]').disabled;
+    document.querySelector("#fcPanelGames .fc-sb-placed").click();
+    return ok && !document.querySelector("#fcPanelGames .fc-sb-placed");
+  })());
+  check("a wrong order: the line washes coral, the sentence shows whole with its romaji, Next waits -- and it comes back at the end", (() => {
+    [...sbFirst.word.tiles.keys()].reverse().forEach(sbTap);
+    const ans = document.querySelector("#fcPanelGames .fc-sb-answer");
+    const ok = document.querySelector("#fcPanelGames .fc-sb-line").classList.contains("fc-sb-wrong")
+      && !ans.hidden && ans.textContent.includes(sbFirst.word.romaji) && !document.querySelector("#fcPanelGames .fc-ls-next").hidden
+      && [...document.querySelectorAll("#fcPanelGames .fc-sb-bank .fc-sb-tile")].every(t => t.disabled);
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok && sbQ() !== sbFirst.word.clue;
+  })());
+  check("the right order washes the line sage and shows the sentence too, with Next", (() => {
+    sbCur().word.tiles.forEach((t, i) => sbTap(i));
+    const ok = document.querySelector("#fcPanelGames .fc-sb-line").classList.contains("fc-sb-right")
+      && !document.querySelector("#fcPanelGames .fc-sb-answer").hidden;
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+    return ok;
+  })());
+  for (let k = 0; k < 80 && !document.querySelector("#fcPanelGames .fc-mt-done"); k++) {
+    sbCur().word.tiles.forEach((t, i) => sbTap(i));
+    document.querySelector("#fcPanelGames .fc-ls-next").click();
+  }
+  check("the end scores first-time sentences, lists the one to build again, and logs a sentences game", (() => {
+    const done = document.querySelector("#fcPanelGames .fc-mt-done");
+    const n = xw.state.puzzle.questions.length;
+    const last = window.RaumeStudy.flashcards.puzzleRuns.live("sentences").pop();
+    const list = [...document.querySelectorAll("#fcPanelGames .fc-ls-missed li")].map(li => li.textContent).join("|");
+    return !!done && done.querySelector(".fc-mt-done-time").textContent === (n - 1) + " / " + n && list.includes(sbFirst.word.clue)
+      && !!last && last.right === n - 1 && last.n === n && last.missed.join() === sbFirst.word.id && last.setup === "sentences|both|" + n;
+  })());
   xwPick("mode", "listening");
 
   console.log("Flashcards: Odd one out");
@@ -5067,7 +5140,7 @@ async function main() {
     const sel = document.getElementById("fcStMode");
     const segs = [...sel.options].map(o => o.textContent);
     return !panel.hidden && document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Game stats"
-      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain"
+      && !!document.getElementById("fcBack") && segs.join("|") === "Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain|Sentences"
       && sel.value === "listening" && panel.querySelector(".fc-st-modes .fc-xw-title-text").textContent === "Listening"
       && /accuracy/.test(panel.querySelector(".fc-st-hero").textContent) && /Reset Listening stats/.test(panel.textContent);
   })());

@@ -154,6 +154,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Kana tiles</span><span class="help-desc">Spell the word by tapping its kana in order; some tiles are look-alikes.</span></li>' +
       '<li><span class="help-term">Odd one out</span><span class="help-desc">Three words share a table: tap the one that doesn’t. Needs two or more themed tables.</span></li>' +
       '<li><span class="help-term">Speed sort</span><span class="help-desc">Tap the bucket each word belongs in — a table, い / な, or u / ru — against the clock.</span></li>' +
+      '<li><span class="help-term">Sentences</span><span class="help-desc">See the English, tap the Japanese pieces into order. Register picks polite or casual.</span></li>' +
       '<li><span class="help-term">Word chain</span><span class="help-desc">Type a word starting with the kana the last one ends on; romaji turns into kana. ⓘ has the rules.</span></li>' +
       '<li><span class="help-term">In a row</span><span class="help-desc">The five dots by the counter fill with each right answer in a row; a miss empties them.</span></li>' +
       '<li><span class="help-term">Stats</span><span class="help-desc">On the setup screen or ⋯, for puzzles too: bests, a trend, and your tricky words — Practise these plays just them.</span></li>' +

@@ -384,8 +384,8 @@ sit beside the grid.
 
 ### Games
 
-**Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort** and
-**Word chain** — same setup screen and toolbar as Puzzles. On a keyboard,
+**Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort**,
+**Word chain** and **Sentences** — same setup screen and toolbar as Puzzles. On a keyboard,
 arrows move, Enter or Space picks and 1–4 picks a choice. Switching tab
 pauses a game; coming back finds it where you left it. Nothing is scheduled;
 every finished game goes to the Dashboard and [Stats](#stats).
@@ -456,6 +456,18 @@ confetti; reduced motion is honoured.
   counts as its big kana, and a word ending in ん isn't accepted.
 - **Hint** shows one fitting word's English, then the word; ⋯ › *Skip* plays
   a link for you. Only a link with no miss, hint or skip scores.
+
+</details>
+
+<details>
+<summary><b>Sentences</b></summary>
+
+- See the English, tap the Japanese pieces into order. The pieces carry
+  their furigana; particles are blue. Tap a placed piece to send it back.
+- Plays the Everyday Sentences table (sentences of three pieces or more).
+  **Register** picks *Polite*, *Casual* or both; no *Words from*.
+- Each answer shows the whole sentence with its romaji and ▶. A miss (or
+  **Show answer**) comes back at the end; missed sentences join Tricky words.
 
 </details>
 

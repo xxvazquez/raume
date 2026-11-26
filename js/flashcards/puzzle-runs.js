@@ -2,7 +2,7 @@
 // crossword, arroword and word search solved -- for the Dashboard's Puzzles
 // and Games cards (counts, day streaks, games per day) and the Stats
 // screen. Practice only -- nothing here touches FSRS. One record per game:
-//   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" | "oddone" | "speedsort" | "wordchain" |
+//   { id, at: ISO time, mode: "match" | "listening" | "kanatiles" | "oddone" | "speedsort" | "wordchain" | "sentences" |
 //     "crossword" | "arroword" | "wordsearch", n: pairs / questions / words, ms: time
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
 //     help: letters / words revealed (grids; hints in typed Word chain), setup: source|script|count
@@ -28,7 +28,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
 
   var KEY = "raume-puzzle-runs";
   var MAX = 500;
-  var MODES = ["match", "listening", "kanatiles", "oddone", "speedsort", "wordchain", "crossword", "arroword", "wordsearch"];
+  var MODES = ["match", "listening", "kanatiles", "oddone", "speedsort", "wordchain", "sentences", "crossword", "arroword", "wordsearch"];
   var cache = null;
   var listeners = [];
   var remotePush = null;
@@ -172,9 +172,9 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
   }
 
   // --- Stats (js/flashcards/puzzle-stats.js) ---
-  var GAME_MODES = ["match", "listening", "kanatiles", "oddone", "speedsort", "wordchain"];
+  var GAME_MODES = ["match", "listening", "kanatiles", "oddone", "speedsort", "wordchain", "sentences"];
   // Games scored right / asked (the rest are timed).
-  function isScored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort" || mode === "wordchain"; }
+  function isScored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort" || mode === "wordchain" || mode === "sentences"; }
   function isGameMode(mode) { return GAME_MODES.indexOf(mode) !== -1; }
   function dayKey(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
   // Days in a row with at least one game: the run ending today (or
@@ -289,7 +289,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
 
   return {
     record: record, all: all, live: live, reset: reset, summary: summary,
-    styleStats: styleStats, trickyWords: trickyWords, bestRound: bestRound, isGameMode: isGameMode, GAME_MODES: GAME_MODES, sanitize: function (arr) { return capped(clean(arr)); },
+    styleStats: styleStats, trickyWords: trickyWords, bestRound: bestRound, isGameMode: isGameMode, isScored: isScored, GAME_MODES: GAME_MODES, sanitize: function (arr) { return capped(clean(arr)); },
     applyRemote: applyRemote, onChange: onChange, setRemotePush: setRemotePush,
     STORAGE_KEY: KEY, MAX: MAX
   };

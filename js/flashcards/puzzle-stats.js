@@ -17,14 +17,15 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   var esc = window.RaumeStudy.shared.escapeHtml;
   var MODES = {
     puzzles: [["crossword", "Crossword"], ["arroword", "Arroword"], ["wordsearch", "Word search"]],
-    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"], ["speedsort", "Speed sort"], ["wordchain", "Word chain"]]
+    games: [["match", "Match"], ["listening", "Listening"], ["kanatiles", "Kana tiles"], ["oddone", "Odd one out"], ["speedsort", "Speed sort"], ["wordchain", "Word chain"], ["sentences", "Sentences"]]
   };
-  var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana", kana: "Kana" };
+  var SCRIPTS = { romaji: "Romaji", native: "Japanese", hiragana: "Hiragana", katakana: "Katakana", kana: "Kana",
+    both: "Polite and casual", polite: "Polite", casual: "Casual" };
   var PRACTISE_WORDS = 20;
   var TITLE_CHEVRON = '<svg class="fc-xw-title-chev" viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7l4 4 4-4"/></svg>';
   // Each style's own hue (the --tile palette), as Fitness gives each ring
   // one: its headline figures and its trend line wear it.
-  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green", oddone: "amber", speedsort: "clay", wordchain: "slate" };
+  var HUES = { crossword: "blue", arroword: "indigo", wordsearch: "teal", match: "purple", listening: "orange", kanatiles: "green", oddone: "amber", speedsort: "clay", wordchain: "slate", sentences: "blue" };
   var CHEVRON = '<svg class="fc-st-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7l3.5 4 3.5-4"/></svg>';
   var view = { kind: "games", mode: "match", open: null };
 
@@ -63,7 +64,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function days(n) { return n + (n === 1 ? " day" : " days"); }
   function pct(x) { return Math.round(x * 100) + "%"; }
   // One game's headline: its time, or for Listening its score.
-  function scored(mode) { return mode === "listening" || mode === "kanatiles" || mode === "oddone" || mode === "speedsort" || mode === "wordchain"; }
+  function scored(mode) { return S.puzzleRuns.isScored(mode); }
   function runValue(r) { return scored(r.mode) ? (r.right || 0) + " / " + r.n : clock(r.ms); }
   function measureText(mode, v) {
     if (scored(mode)) return pct(v);
@@ -74,14 +75,14 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   // 15 words" } -- a list row's title and its grey second line.
   function setupParts(key) {
     var parts = String(key).split("|"), src = parts[0];
-    var name = src === "flashcards" ? "Flashcards" : src === "tricky" ? "Tricky words" : "";
+    var name = src === "flashcards" ? "Flashcards" : src === "tricky" ? "Tricky words" : src === "sentences" ? "Everyday Sentences" : "";
     if (!name && src.indexOf("tables:") === 0) {
       var ids = src.slice(7).split(",");
       var titles = (window.RaumeStudy.data.vocabularyTables || [])
         .filter(function (t) { return ids.indexOf(String(t.id)) !== -1; }).map(function (t) { return t.title; });
       name = titles.length && titles.length <= 2 ? titles.join(", ") : ids.length + " tables";
     }
-    return { title: name || src, detail: (SCRIPTS[parts[1]] || parts[1]) + " · " + parts[2] + " words" };
+    return { title: name || src, detail: (SCRIPTS[parts[1]] || parts[1]) + " · " + parts[2] + (src === "sentences" ? " sentences" : " words") };
   }
   function setupLabel(key) { var sp = setupParts(key); return sp.title + " · " + sp.detail; }
 
@@ -114,6 +115,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     }
     else if (mode === "listening") rows += row("Words heard", String(st.words));
     else if (mode === "kanatiles") rows += row("Words spelled", String(st.words));
+    else if (mode === "sentences") rows += row("Sentences built", String(st.words));
     else if (mode === "oddone") rows += row("Sets played", String(st.words));
     else if (mode === "speedsort") rows += row("Words sorted", String(st.words));
     else if (mode === "wordchain") rows += row("Links made", String(st.words)) + (st.help ? row("Hints used", String(st.help)) : "");
@@ -172,10 +174,21 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
         '<span class="set-value">' + esc(runValue(b.best)) + CHEVRON + "</span></button>" + hist;
     }).join(""), "fc-st-bests");
   }
+  // Practise these plays what the style can: sentences in Sentences, words
+  // everywhere else (a sentence is no word to spell or match).
+  function isSentence(id) {
+    var row = window.RaumeStudy.vocab.rawRow && window.RaumeStudy.vocab.rawRow(id);
+    return !!(row && row.tiles);
+  }
+  function practiseIds() {
+    var index = S.vocabIndex.getVocabIndex(), want = view.mode === "sentences";
+    return runs().trickyWords(Infinity, 1).filter(function (t) { return index[t.id] && isSentence(t.id) === want; })
+      .slice(0, PRACTISE_WORDS).map(function (t) { return t.id; });
+  }
   function trickyHtml() {
     var index = S.vocabIndex.getVocabIndex();
     var list = runs().trickyWords(12).filter(function (t) { return index[t.id]; });
-    var practise = runs().trickyWords(PRACTISE_WORDS, 1).filter(function (t) { return index[t.id]; });
+    var practise = practiseIds();
     if (!list.length) {
       return group("Tricky words", '<p class="fc-st-note">Words you miss in two or more games collect here — across every puzzle and game.</p>');
     }
@@ -226,7 +239,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
     });
     var practise = document.getElementById("fcStPractise");
     if (practise) practise.addEventListener("click", function () {
-      var ids = runs().trickyWords(PRACTISE_WORDS, 1).map(function (t) { return t.id; });
+      var ids = practiseIds();
       S.crosswords.playWords(view.kind, view.mode, ids);
       S.setActiveTab(view.kind === "games" ? "games" : "crosswords");
       S.render({ top: true });

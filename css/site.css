@@ -4614,6 +4614,54 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-kt-tile:disabled { opacity: .3; cursor: default; }
 .fc-kt-tile:focus-visible, .fc-kt-slot:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .fc-kt-wrong { animation: none; } .fc-kt-tile { transition: none; } }
+
+/* Sentences (crosswords.js wireSentences): the English in the card, the
+   line you build under it -- a ground-grey well that holds the placed
+   pieces and wraps like text -- and the bank of pieces below, Kana tiles'
+   white capsules sized to their words, furigana over the kanji, particles
+   in their blue. Right washes the line sage, wrong coral with the shake;
+   then the whole sentence, its romaji and ▶. */
+.fc-sb-card { gap: 14px; }
+.fc-sb-clue { margin: 0; color: var(--ink); font-size: 19px; line-height: 1.35; text-align: center; }
+.fc-sb-line {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 6px;
+  width: 100%; min-height: 60px; padding: 8px; box-sizing: border-box;
+  border-radius: 14px; background: var(--group-ground);
+}
+.fc-sb-line-empty { align-self: center; color: var(--muted); font-size: 14px; }
+.fc-sb-right { background: color-mix(in srgb, var(--right) 16%, var(--paper)); }
+.fc-sb-wrong { background: color-mix(in srgb, var(--wrong) 14%, var(--paper)); animation: fc-ws-miss .3s ease; }
+.fc-sb-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 520px; margin: 14px auto 0; }
+.fc-sb-tile {
+  appearance: none; border: 0; margin: 0; min-height: 44px; padding: 4px 12px 6px; border-radius: 12px;
+  display: inline-flex; align-items: flex-end; justify-content: center;
+  background: var(--paper); color: var(--ink); box-shadow: var(--control-lift);
+  font: 400 19px/1.2 var(--font-jp); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: opacity .15s ease, transform .1s ease;
+}
+.fc-sb-tile ruby { ruby-position: over; }
+.fc-sb-tile rt, .fc-sb-whole rt { font: 400 10px/1 var(--font-jp); color: var(--furigana); }
+.fc-sb-tile:active { transform: scale(.95); }
+.fc-sb-tile:disabled { opacity: .3; cursor: default; }
+.fc-sb-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
+.fc-sb-placed { box-shadow: none; background: var(--paper); }
+/* What you built stays readable once the round locks: only the bank dims. */
+.fc-sb-placed:disabled { opacity: 1; cursor: default; }
+.fc-sb-right .fc-sb-placed { color: var(--right-strong); }
+.fc-sb-answer { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; text-align: center; }
+.fc-sb-answer[hidden] { display: none; }
+.fc-sb-answer-head { font-size: var(--fs-small); color: var(--muted); }
+.fc-sb-whole { font: 400 19px/1.6 var(--font-jp); color: var(--ink); }
+.fc-sb-romaji { color: var(--muted); font-size: 14px; }
+.fc-sb-say { margin-top: 0; }
+.fc-ls-missed li.fc-sb-missed { flex-direction: column; align-items: flex-start; gap: 2px; }
+.fc-sb-missed .fc-sb-whole { font-size: 17px; }
+.fc-sb-missed .fc-ls-missed-en { margin-left: 0; text-align: left; }
+.fc-sb-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .fc-sb-wrong, .fc-sb-answer:not([hidden]) { animation: none; }
+  .fc-sb-tile { transition: none; }
+}
 /* Odd one out: a quiet question over a 2 × 2 of Match's white tiles, the
    word centred and large; answering drops each word's English under it,
    washes the odd one sage (your wrong pick coral, with ✕), and one grey
