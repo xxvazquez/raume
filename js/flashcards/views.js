@@ -81,7 +81,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Add</span><span class="help-desc">A whole table from Library, or single words from Library or a search result.</span></li>' +
       '<li><span class="help-term">Pause</span><span class="help-desc">Stops reviews but keeps all progress. Paused words collect under Archived.</span></li>' +
-      '<li><span class="help-term">Pause table</span><span class="help-desc">The whole table sleeps; Resume brings every card back as it was.</span></li>' +
+      '<li><span class="help-term">Pause table</span><span class="help-desc">Under My flashcards, the whole table sleeps; Resume brings every card back as it was.</span></li>' +
       '<li><span class="help-term">Undo</span><span class="help-desc">Right after a pause, Undo at the bottom takes it back.</span></li>' +
       '<li><span class="help-term">Swipe a word</span><span class="help-desc">On a phone, swipe a Library word left to Pause, Add or Restore it.</span></li>' +
       '<li><span class="help-term">Nothing is deleted</span><span class="help-desc">Scheduling and review history are kept for good.</span></li>' +
@@ -310,18 +310,15 @@ window.RaumeStudy.flashcards.views = (function () {
             '<span class="fc-manage-table-label">' + iconHtml + '<span class="fc-manage-table-text"><span class="fc-manage-table-title">' + esc(displayTitle) + '</span>' +
             progressHtml + "</span></span>";
           // Table-level actions per filter. A paused table (only ever shown
-          // under "all") gets just Resume. Otherwise "all" shows only what
-          // applies -- Add table until it's full, Pause table once something's
-          // in -- so a fresh deck isn't 23 rows of dead buttons; "My flashcards"
-          // gets Pause table; "Archived" gets Restore table (un-pause the words
-          // paused one at a time).
+          // under "all") gets just Resume. Otherwise "all" is for adding: Add
+          // table until it's full, then nothing -- never Pause in Add's place,
+          // where a second tap would pause what you just added. "My
+          // flashcards" gets Pause table; "Archived" gets Restore table
+          // (un-pause the words paused one at a time).
           if (tablePaused) {
             html += '<div class="fc-manage-table-actions">' + tableActionBtn("resume-table", tableId) + "</div>";
           } else if (manageFilter === "all") {
-            var actions = "";
-            if (addedCount < table.ids.length) actions += tableActionBtn("add-table", tableId);
-            if (addedCount) actions += tableActionBtn("remove-table", tableId);
-            html += '<div class="fc-manage-table-actions">' + actions + "</div>";
+            if (addedCount < table.ids.length) html += '<div class="fc-manage-table-actions">' + tableActionBtn("add-table", tableId) + "</div>";
           } else if (manageFilter === "mine" && addedCount) {
             html += '<div class="fc-manage-table-actions">' + tableActionBtn("remove-table", tableId) + "</div>";
           } else if (manageFilter === "archived") {

@@ -301,7 +301,7 @@ menu). Settings, Help, Awards and Stats slide in as pushed screens with a
 
 | Screen | What it does |
 | --- | ------------ |
-| **Library** | Every table by category, filtered All / My flashcards / Archived. Add or **Pause** a table, **Add all** a category, or open a table for single words — on a phone, swipe a word left for Pause / Add / Restore |
+| **Library** | Every table by category, filtered All / My flashcards / Archived. Add a table (**Pause** it under My flashcards), **Add all** a category, or open a table for single words — on a phone, swipe a word left for Pause / Add / Restore |
 | **Settings** | Study directions and FSRS settings (retention, max interval, fuzz, new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). Guests get **Back up & restore** — one JSON file. Changes save as you make them |
 | **Help** | Adding & pausing, Library icons, reviewing, Dashboard, each tab, syncing |
 | **Awards** | Every award by kind — from the Dashboard's **Show all** |

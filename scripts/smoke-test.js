@@ -2650,7 +2650,8 @@ async function main() {
   // Fully-added vs. untouched should be structurally distinguishable, not just
   // by colour (jsdom can't resolve the var()-based border anyway -- checked in
   // the browser instead). Add a whole table, assert the count picks up the
-  // done flag and the button swaps to Pause, then pause it straight back so
+  // done flag and its Add goes (no Pause in its place), then pause it from
+  // My flashcards so
   // the counts the rest of this section expects aren't disturbed.
   console.log("Manage: a fully-added table's count picks up the accent");
   const doneTableId = firstManageTable.querySelector(".fc-manage-table-toggle").dataset.tableId;
@@ -2659,8 +2660,8 @@ async function main() {
   const doneTable = document.querySelector('.fc-manage-table-toggle[data-table-id="' + doneTableId + '"]').closest(".fc-manage-table");
   check("its progress count is flagged done once every word in it is added",
     doneTable.querySelector(".fc-manage-table-progress").classList.contains("fc-manage-progress-done"));
-  check("'Pause table' replaces 'Add table' once a table is fully added",
-    !!doneTable.querySelector('[data-table-action="remove-table"]') && !doneTable.querySelector('[data-table-action="add-table"]'));
+  check("a fully added table drops Add under All vocabulary, with no Pause in its place",
+    !doneTable.querySelector('[data-table-action="remove-table"]') && !doneTable.querySelector('[data-table-action="add-table"]'));
   check("a still-untouched table's count and button are unaffected", (() => {
     const untouched = [...document.querySelectorAll("#fcPanelManage .fc-manage-table")].find(t => t !== doneTable);
     return !!untouched && !untouched.querySelector(".fc-manage-table-progress").classList.contains("fc-manage-progress-done")
@@ -2674,7 +2675,9 @@ async function main() {
     const sched = window.RaumeStudy.flashcards.scheduling;
     const store = window.RaumeStudy.flashcards.store;
     const before = { queue: sched.buildQueue(new Date()).length, total: sched.computeStats(new Date()).total };
-    doneTable.querySelector('[data-table-action="remove-table"]').click();
+    document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="mine"]').click(); await flush();
+    document.querySelector('.fc-manage-table-toggle[data-table-id="' + doneTableId + '"]')
+      .closest(".fc-manage-table").querySelector('[data-table-action="remove-table"]').click();
     await flush();
     check("Pause table offers Undo", /Table paused/.test((document.querySelector(".undo-toast") || {}).textContent || ""));
     check("the table is now in pausedTables, its cards untouched", () =>
@@ -2701,10 +2704,12 @@ async function main() {
   }
 
   // Put the table back to paused for the assertions the rest of this section
-  // expects (a quiet, empty-ish dashboard).
+  // expects (a quiet, empty-ish dashboard) -- from My flashcards, then back.
+  document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="mine"]').click(); await flush();
   document.querySelector('.fc-manage-table-toggle[data-table-id="' + doneTableId + '"]')
     .closest(".fc-manage-table").querySelector('[data-table-action="remove-table"]').click();
   await flush();
+  document.querySelector('#fcPanelManage .fc-manage-filters button[data-filter="all"]').click(); await flush();
 
   firstManageTable.querySelector(".fc-manage-table-toggle").click(); // sync render -- re-query fresh, this reference is now stale
   check("clicking the toggle expands just that table", !document.querySelector("#fcPanelManage .fc-manage-table").classList.contains("fc-manage-table-collapsed"));
