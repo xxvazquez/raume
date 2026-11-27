@@ -543,8 +543,12 @@ Web Speech.
   file when the manifest lists it — the two copies of the hash function and
   `AUDIO_GEN_VERSION` **must be bumped together** if the voice or synthesis
   params ever change, so old and new audio never collide under one hash.
-  Readings come from the same segments `jpReadingOf` already builds for the
-  Web Speech fallback (kanji read via its furigana, never guessed).
+  Readings come from `jpSpokenOf` (`js/vocab/render.js`, mirrored in the
+  script): the reading `jpReadingOf` builds (kanji read via its furigana,
+  never guessed), except a particle standing alone — は / へ are said わ / え.
+  It keys on the row's particle segment, not the text, so 歯 (は) keeps "ha";
+  inside a phrase the voice reads particles right by itself. Every speaker
+  and auto-play (tables, flashcards, puzzles, games) goes through it.
 - **Regenerating** (from the GitHub Actions tab, "Generate pronunciation
   audio" workflow):
   1. Run with mode `preview` — asks the engine's own `GET /speakers` for its

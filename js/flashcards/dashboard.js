@@ -1428,7 +1428,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // every direction gets here eventually, including the two (ro-en,
     // en-ro) where the Japanese word itself only appears now, in the
     // reveal's context line, not as the prompt.
-    speech.speak(entry.jpReading);
+    speech.speak(entry.jpSpoken || entry.jpReading);
     // Update the card in place so the answer field keeps focus -- rebuilding
     // the panel here would drop focus to <body> and close a phone's on-screen
     // keyboard on every single card. Full render only if the shell is gone.
@@ -1576,7 +1576,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     session.correct = !result.revealed && !result.hints;
     session.checked = true;
     session.preview = previewRatings(getScheduler(getCache().settings), cur.card, new Date());
-    speech.speak(cur.entry.jpReading);
+    speech.speak(cur.entry.jpSpoken || cur.entry.jpReading);
     if (!syncReviewCard()) rerender();
   }
   function renderReview(panel) {

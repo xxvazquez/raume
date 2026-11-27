@@ -42,6 +42,15 @@ function jpReadingOf(segments) {
   return segments.map((seg) => seg.reading || seg.kanji || seg.text || seg.p || "").join("");
 }
 
+// Mirrors js/vocab/render.js's jpSpokenOf: a particle standing alone is
+// said "wa" / "e", not "ha" / "he" -- decided from its particle segment, so
+// 歯 (は, tooth) keeps its own reading.
+const SPOKEN_PARTICLE = { "は": "わ", "へ": "え" };
+function jpSpokenOf(segments) {
+  if (segments.length === 1 && SPOKEN_PARTICLE[segments[0].p]) return SPOKEN_PARTICLE[segments[0].p];
+  return jpReadingOf(segments);
+}
+
 function collectReadings() {
   const source = fs.readFileSync(path.join(__dirname, "..", "data", "vocabulary.js"), "utf8");
   const sandbox = { window: {} };
@@ -50,8 +59,8 @@ function collectReadings() {
   const readings = new Set();
   for (const table of tables) {
     for (const row of table.rows) {
-      if (row.jp) readings.add(jpReadingOf(row.jp));
-      if (row.forms) for (const f of row.forms) if (f.jp) readings.add(jpReadingOf(f.jp));
+      if (row.jp) readings.add(jpSpokenOf(row.jp));
+      if (row.forms) for (const f of row.forms) if (f.jp) readings.add(jpSpokenOf(f.jp));
     }
   }
   readings.delete("");

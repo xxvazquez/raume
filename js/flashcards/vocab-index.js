@@ -252,6 +252,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
         var entry = { vocabId: row.id, category: table.category || "", tableTitle: table.title, tableId: table.id, jlpt: Number(row.jlpt) || 0 };
         var jpHtmlFn = window.RaumeStudy.vocab.jpSegmentsHtml || function () { return ""; };
         var jpReadingFn = window.RaumeStudy.vocab.jpReadingOf || function () { return ""; };
+        var jpSpokenFn = window.RaumeStudy.vocab.jpSpokenOf || jpReadingFn;
         var speakBtnFn = window.RaumeStudy.vocab.speakButtonHtml || function () { return ""; };
         if (row.type === "verb-pair") {
           entry.jpHtml = row.forms.map(function (f) {
@@ -273,12 +274,13 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
           // Each form and its speaker are one unit: a line breaks between
           // the forms, never inside one (勉強しま / す).
           entry.jpPromptHtml = row.forms.map(function (f) {
-            return '<span class="fc-jp-form"><span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpReadingFn(f.jp)) + "</span>";
+            return '<span class="fc-jp-form"><span class="jpword">' + jpHtmlFn(f.jp) + "</span>" + speakBtnFn(jpSpokenFn(f.jp)) + "</span>";
           }).join('<span class="fc-jp-slash"> / </span>');
           // The dictionary (plain) form's reading, regardless of which form
           // show-polite currently displays -- good enough for the reveal's
           // autoplay without tracking that toggle's state here too.
           entry.jpReading = jpReadingFn(row.forms[0].jp);
+          entry.jpSpoken = jpSpokenFn(row.forms[0].jp);
           entry.romajiDisplay = row.forms.map(function (f) { return f.romaji; }).join(" / ");
           entry.romajiUsable = row.forms.every(function (f) { return isRomajiUsable(f.romaji); });
           entry.romajiAnswers = entry.romajiUsable
@@ -327,8 +329,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
             : '<span class="jpword">' + jpHtmlFn(row.jp) + "</span>";
           entry.jpInlineHtml = entry.jpHtml;
           entry.jpPlain = jpPlainOf(row.jp);
-          entry.jpPromptHtml = entry.jpHtml + speakBtnFn(jpReadingFn(row.jp));
+          entry.jpPromptHtml = entry.jpHtml + speakBtnFn(jpSpokenFn(row.jp));
           entry.jpReading = jpReadingFn(row.jp);
+          entry.jpSpoken = jpSpokenFn(row.jp);
           entry.romajiDisplay = row.romaji;
           entry.romajiUsable = isRomajiUsable(row.romaji);
           // Two readings ("yon / shi", "maitoshi / mainen") are two right

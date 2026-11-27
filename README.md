@@ -84,7 +84,7 @@ the grammar it shows.
 | **Furigana** | Always shown. Consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and each reading starts where its kanji start. |
 | **Katakana** | Hover or tap any katakana to see its romaji. |
 | **Particles** | Blue and bold everywhere; tap one for how it’s read (は is “wa”). |
-| **Speaker** | Plays a recorded native-voice clip; your own words use the device's voice. |
+| **Speaker** | Plays a recorded native-voice clip; your own words use the device's voice. A particle on its own is said as a particle: は “wa”, へ “e” (歯, tooth, stays “ha”). |
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
 | **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
 | **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |

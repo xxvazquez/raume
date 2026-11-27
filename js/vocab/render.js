@@ -98,6 +98,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return segments.map(function (seg) { return seg.reading || seg.kanji || seg.text || seg.p; }).join('');
   }
   vocab.jpReadingOf = jpReadingOf;
+  // What a speaker says. Same as the reading, except a particle standing on
+  // its own: written は / へ, it's said "wa" / "e" -- and a lone kana can't
+  // tell it apart from 歯 (は, tooth), so it's decided here, from the row's
+  // particle segment, never from the text. Inside a phrase the voice already
+  // reads its particles right. scripts/generate-audio.js mirrors this.
+  var SPOKEN_PARTICLE = { 'は': 'わ', 'へ': 'え' };
+  function jpSpokenOf(segments) {
+    if (segments && segments.length === 1 && SPOKEN_PARTICLE[segments[0].p]) return SPOKEN_PARTICLE[segments[0].p];
+    return jpReadingOf(segments);
+  }
+  vocab.jpSpokenOf = jpSpokenOf;
   // decorateKana: wrap katakana in hover/tap romaji targets (see
   // js/vocab/kana-romaji.js). On for the vocabulary tables; off for flashcard
   // prompts (passed straight through), where it would spoil a romaji answer.
@@ -353,7 +364,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // .jp-line pins the speaker button to the cell's right edge regardless of
     // word length -- see css/site.css for why (same fix as .meaning-cell's
     // row-actions cluster, mirrored to the other side).
-    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpReadingOf(row.jp)) + '</div>' + adjNote(row) + '</td>';
+    return '<td class="jp' + adjClass(row.adj) + '" lang="ja"><div class="jp-line">' + inner + speakButton(jpSpokenOf(row.jp)) + '</div>' + adjNote(row) + '</td>';
   }
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.
@@ -470,7 +481,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // (each form carries its own speaker + romaji reveal).
   var VERB_FORM_CLASS = ['verb-form-plain', 'verb-form-polite'];
   function verbPairRow(row) {
-    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpReadingOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
+    var jp = row.forms.map(function (f, fi) { return '<div class="verb-form ' + (VERB_FORM_CLASS[fi] || '') + '"><div class="jp-line"><span class="jpword"' + romajiAttr(f.romaji) + '>' + jpGroupedSegments(f.jp) + '</span>' + speakButton(jpSpokenOf(f.jp)) + '</div></div>'; }).join('') + verbNote(row);
     return '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + '><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row) + verbFormsNote(row) + levelNote(row), row.enNote) + '</tr>';
   }
   // A kanji row (the Kanji section): drawn as a tile in a grid -- the
@@ -662,7 +673,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       '<div class="ks-top"><span class="ks-char" lang="ja">' + esc(ch) + '</span>' +
       '<div class="ks-title"><h2 class="ks-meaning" id="kanjiSheetTitle">' + esc(row.english) + '</h2>' +
       (row.enNote ? '<p class="ks-note">' + esc(row.enNote) + '</p>' : '') + knownButtonHtml(row.id) + '</div>' +
-      speakButton(jpReadingOf(row.jp)) +
+      speakButton(jpSpokenOf(row.jp)) +
       '<button type="button" class="ks-close" aria-label="Close">' + CLOSE_ICON + '</button></div>' +
       cardHead('readings') + '<div class="ks-card">' +
       (row.on || []).map(function (r) { return kanjiReadingRowHtml(row, 'on', r); }).join('') +

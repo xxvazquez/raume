@@ -157,7 +157,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // romajiShown: the romaji as the tables print it (ōi, not the typeable
       // grid spelling ooi) -- for the games you tap rather than type.
       var shownRomaji = romaji ? String(entry.romajiDisplay).split(" / ")[0].replace(/^~/, "").trim() : "";
-      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, romajiShown: shownRomaji || null, tableId: entry.tableId, speak: entry.jpReading });
+      pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, romajiShown: shownRomaji || null, tableId: entry.tableId, speak: entry.jpSpoken || entry.jpReading });
     });
     return pool;
   }
@@ -1792,7 +1792,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         var V = window.RaumeStudy.vocab;
         out.push({
           id: row.id, clue: row.english, tiles: row.tiles, segs: segs, answer: row.tiles.join(""), blanks: blanks, mainVerb: row.mainVerb || null,
-          romaji: row.romaji, jp: row.jp, speak: V.jpReadingOf(row.jp), tableId: t.id, weight: tricky[row.id] ? 2 : 1
+          romaji: row.romaji, jp: row.jp, speak: (V.jpSpokenOf || V.jpReadingOf)(row.jp), tableId: t.id, weight: tricky[row.id] ? 2 : 1
         });
       });
     });
@@ -2610,7 +2610,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (!/^[ぁ-ゖァ-ヶー一-龯々]+$/.test(written)) written = reading;
       var key = chainKey(reading);
       if ((d.byKey[key] || []).some(function (o) { return o.written === written; })) return;
-      var w = { id: e.vocabId, answer: reading, written: written, clue: clue, head: head, tail: tail, key: key, speak: e.jpReading };
+      var w = { id: e.vocabId, answer: reading, written: written, clue: clue, head: head, tail: tail, key: key, speak: e.jpSpoken || e.jpReading };
       d.all.push(w);
       d.byId[w.id] = w;
       (d.byKey[key] = d.byKey[key] || []).push(w);
