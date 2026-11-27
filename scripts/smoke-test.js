@@ -134,6 +134,13 @@ async function main() {
   const gakkou = kd.itemsFor(["hira-sokuon"]).find(it => it.romaji === "gakkou");
 
   if (want("reference")) {
+  check("table rows draw their icons as one masked <i> each, never an inline <svg> (half the page's elements were row SVGs)", (() => {
+    const rows = document.querySelectorAll("#vocabulary tbody tr[data-vocab-id]");
+    const ic = document.querySelectorAll("#vocabulary tbody .ic");
+    const btn = document.querySelector("#vocabulary tbody .fc-toggle-btn");
+    return rows.length > 1000 && !document.querySelector("#vocabulary tbody svg") && ic.length > rows.length * 3
+      && !!btn && btn.querySelectorAll(".ic").length === 1;
+  })());
   console.log("Global pull-to-refresh (touch)");
   (() => {
     function touch(type, y, opts) {

@@ -180,7 +180,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // Hidden by default (css/site.css) until js/shared.js confirms the browser
   // actually has a Japanese voice installed -- see RaumeStudy.shared.speech.
-  var SPEAKER_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7v4h3l4 3V4L5 7H2Z"/><path d="M12 6.3a3 3 0 0 1 0 5.4"/><path d="M14.2 4.3a6 6 0 0 1 0 9.4"/></svg>';
+  var SPEAKER_ICON = '<i class="ic ic-speak" aria-hidden="true"></i>';
   function speakButton(reading) {
     if (!reading) return '';
     return '<button type="button" class="jp-speak-btn" data-jp-speak="' + esc(reading) + '" aria-label="Play pronunciation">' + SPEAKER_ICON + '</button>';
@@ -368,7 +368,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // A slashed eye -- the button's action is "hide this row," and a plain
   // open eye reads as "reveal" (the opposite) far more often than not.
-  var EYE_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9c1.8-3.2 4.5-4.8 7-4.8s5.2 1.6 7 4.8c-1.8 3.2-4.5 4.8-7 4.8S3.8 12.2 2 9Z"/><circle cx="9" cy="9" r="2"/><path d="M3.5 3.5l11 11"/></svg>';
+  var EYE_ICON = '<i class="ic ic-eye" aria-hidden="true"></i>';
   // The main study areas. Grammar and the N5 kanji are promoted out of the
   // general vocabulary list into their own top-level sections; everything
   // else lives under Vocabulary, still grouped by its category.
@@ -389,12 +389,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // js/flashcards/views.js (refreshRowToggleButtons + the delegated handler).
   // Add / in your flashcards: a + and, once added, the Practice tab's own
   // cards glyph (its front card filled) in Practice's tone -- never a ✓,
-  // which would read as the known mark on the same row.
-  var FC_TOGGLE_ADD = '<svg class="fc-ic-add" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
-  var FC_TOGGLE_ADDED = '<svg class="fc-ic-added" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" fill="currentColor"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+  // which would read as the known mark on the same row. One <i>, its mask
+  // swapped by aria-pressed (css/site.css .ic-add).
+  var FC_TOGGLE_ADD = '<i class="ic ic-add" aria-hidden="true"></i>';
   function flashcardToggle(vocabId) {
     if (!vocabId) return '';
-    return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-pressed="false" aria-label="Add to flashcards">' + FC_TOGGLE_ADD + FC_TOGGLE_ADDED + '</button>';
+    return '<button type="button" class="fc-toggle-btn" data-vocab-id="' + esc(vocabId) + '" aria-pressed="false" aria-label="Add to flashcards">' + FC_TOGGLE_ADD + '</button>';
   }
   // Wrapped in its own cluster so it can sit as a fixed-width flex item
   // pinned to the Meaning cell's right edge (see css/site.css), instead of
@@ -403,7 +403,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // it takes) gets one ⓘ instead of a strip of capsules beside the meaning:
   // tapping it opens the popover listing every one of them
   // (js/vocab/interactions.js openInfoPop). The English keeps the width.
-  var INFO_ICON = '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.4" stroke-linecap="round"/><circle cx="9" cy="5.7" r=".9" fill="currentColor" stroke="none"/></svg>';
+  var INFO_ICON = '<i class="ic ic-info" aria-hidden="true"></i>';
   function rowInfoButton() {
     return '<button type="button" class="row-info-btn" aria-label="Details" aria-expanded="false">' + INFO_ICON + '</button>';
   }

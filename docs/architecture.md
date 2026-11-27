@@ -14,7 +14,13 @@
 - **Strict CSP.** `style-src 'self'` with no `'unsafe-inline'` — inline
   `style="…"` attributes are blocked, and the smoke test asserts there are zero
   of them. All positioning and styling goes through CSS classes. `img-src` also
-  allows `data:` so uploaded table icons can be data URLs.
+  allows `data:` so uploaded table icons can be data URLs — and so the
+  repeated row icons (speaker, ⓘ, hide, add) can be CSS masks: each is one
+  empty `<i class="ic ic-…">` drawn by a data-URL `mask` in `currentColor`
+  (`css/site.css` `.ic`), not an inline `<svg>` per row. Every table's rows
+  are in the DOM at once (search, the JLPT filter and the row washes read
+  them), so a row's element count is kept low; the smoke test fails on an
+  `<svg>` back inside a table row.
 - **Cache-busting.** Asset URLs carry `?v=__CACHEBUST__`; on deploy
   `scripts/stamp-asset-versions.js` replaces it with each file's own content
   hash (and fills `sw.js`'s `ASSET_VERSIONS` map to match), so a deploy

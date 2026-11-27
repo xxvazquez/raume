@@ -624,7 +624,8 @@ and Help.
   as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Library's buttons keep a one-word label
-  (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, ⓘ, +, ⋯)
+  (Add / Pause / Resume / Restore); the per-row glyphs (speaker, hide, ⓘ, +, ⋯ —
+  CSS-masked `.ic` elements in the button's colour, see `docs/architecture.md`)
   are spelled out in the Options sheet's **Row icons** group — iOS subtitle
   cells: the glyph in its own column, a 15px name, one 13px grey line under it,
   the hairline starting at the words. The row washes get the same treatment
