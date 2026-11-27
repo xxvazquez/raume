@@ -420,11 +420,32 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // Same "which language" cue as the label above the prompt, but repeated
   // right inside the input itself -- the label can be easy to skim past,
   // and this is exactly where your eyes are when you start typing.
+  // Answer in kana (store.answerInKana): an English → Romaji card takes the
+  // reading in kana. Romaji typed into it turns into kana as you go
+  // (kanaRomaji.toKana, as a Japanese keyboard does), or a Japanese keyboard
+  // types kana straight in. Japanese → Romaji stays romaji: its prompt
+  // already shows the kana.
+  function isKanaTarget(direction) {
+    return direction === "en-ro" && window.RaumeStudy.flashcards.store.answerInKana();
+  }
+  // Whatever's in the field as kana: romaji left in it converted, finished.
+  function typedKana(input) {
+    var s = String(input == null ? "" : input).trim();
+    return /[a-z]/i.test(s) ? window.RaumeStudy.kanaRomaji.toKana(s.replace(/\s+/g, ""), true) : s;
+  }
+  // Kana compared by sound: katakana as hiragana (a romaji keyboard types
+  // hiragana), spaces and punctuation left out.
+  function foldKana(s) {
+    return String(s == null ? "" : s).replace(/[\u30a1-\u30f6]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); })
+      .replace(/[\s\u3000・、。,.!?！？〜~]/g, "");
+  }
   function answerPlaceholderFor(direction) {
+    if (isKanaTarget(direction)) return "Kana";
     return direction === "jp-en" || direction === "ro-en" ? "English" : "Romaji";
   }
   function expectedDisplayFor(entry, direction) {
     if (isWriteDirection(direction)) return (writeCharsFor(entry, direction) || []).join("");
+    if (isKanaTarget(direction)) return entry.jpReading || entry.jpPlain;
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;
   }
   // One extra field for the answer reveal, beyond the one actually tested --
@@ -451,6 +472,14 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return answers.some(function (a) { return a === norm || (loose && squashEnglish(a) === loose); });
   }
   function checkAnswer(entry, direction, input) {
+    if (isKanaTarget(direction)) {
+      // Right when it spells the reading -- or sounds like one of the card's
+      // romaji answers (こうひい for コーヒー, another form of the word).
+      var kana = typedKana(input);
+      if (!kana || /[a-z]/i.test(kana)) return false;
+      if (foldKana(kana) === foldKana(entry.jpReading)) return true;
+      input = window.RaumeStudy.kanaRomaji.toRomaji(kana);
+    }
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var norm = normalizeAnswer(input, isRomajiTarget);
     var answers = isRomajiTarget ? entry.romajiAnswers : entry.englishAnswers;
@@ -484,6 +513,10 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // says which one it wants and lets you answer again instead of grading it.
   function otherLanguageHint(entry, direction, input) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
+    if (isKanaTarget(direction)) {
+      return entry.englishAnswers.indexOf(normalizeAnswer(input, false)) !== -1
+        ? "That’s the meaning — type the reading in kana." : "";
+    }
     if (isRomajiTarget) {
       return entry.englishAnswers.indexOf(normalizeAnswer(input, false)) !== -1
         ? "That’s the meaning — type the romaji reading." : "";
@@ -497,6 +530,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // like the wrong-language case above.
   function otherWordHint(entry, direction, input) {
     if (direction !== "en-ro") return "";
+    if (isKanaTarget(direction)) input = window.RaumeStudy.kanaRomaji.toRomaji(typedKana(input));
     var norm = normalizeAnswer(input, true);
     if (!norm) return "";
     var index = getVocabIndex();
@@ -580,6 +614,11 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   function answerCompareHtml(entry, direction, typedRaw) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     var typed = String(typedRaw == null ? "" : typedRaw).trim();
+    // Kana: the reading and what you wrote, side by side -- a letter diff
+    // is a romaji thing.
+    if (isKanaTarget(direction)) {
+      return { youHtml: esc(typedKana(typed) || "(nothing)"), correctHtml: esc(entry.jpReading || entry.jpPlain), note: "", near: false, marked: false };
+    }
     if (!isRomajiTarget) {
       return { youHtml: esc(typed || "(nothing)"), correctHtml: esc(entry.englishDisplay), note: "", near: false, marked: false };
     }
@@ -631,6 +670,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   return {
     formsFor: formsFor, getVocabIndex: getVocabIndex, resetIndex: resetIndex, directionsForEntry: directionsForEntry, writeCharsFor: writeCharsFor,
     promptFor: promptFor, askLabelFor: askLabelFor, answerPlaceholderFor: answerPlaceholderFor,
+    isKanaTarget: isKanaTarget, typedKana: typedKana,
     expectedDisplayFor: expectedDisplayFor, contextDisplayFor: contextDisplayFor, checkAnswer: checkAnswer,
     otherLanguageHint: otherLanguageHint, otherWordHint: otherWordHint, homophonesOf: homophonesOf, cardView: cardView,
     answerCompareHtml: answerCompareHtml,

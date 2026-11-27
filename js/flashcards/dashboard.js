@@ -1427,6 +1427,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // A Verb → form card checks as a romaji card for this review's form.
     var view = vidx.cardView(entry, card), dir = view.direction;
     entry = view.entry;
+    // Answer in kana: romaji still in the field (a last "n") becomes kana,
+    // so "You wrote" shows what was meant.
+    if (vidx.isKanaTarget(dir)) session.userAnswer = input.value = vidx.typedKana(input.value);
     session.correct = checkAnswer(entry, dir, input.value);
     // Right answer, wrong language: say which one the card wants and keep the
     // field open (text selected, ready to overtype) -- no grade, no reveal.
@@ -1635,6 +1638,15 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
     syncReviewCard();
     var input = document.getElementById("fcAnswerInput");
+    // Answer in kana: the romaji at the end of the field turns into kana as
+    // it's typed, as a Japanese keyboard's romaji input does (a half-typed
+    // syllable -- k, ky, a lone n -- waits for its vowel). A Japanese
+    // keyboard's own composing is left alone.
+    if (input) input.addEventListener("input", function (e) {
+      if (input.dataset.kana !== "1" || e.isComposing) return;
+      var m = /^([\s\S]*?)([a-zA-Z'-]*)$/.exec(input.value), conv = window.RaumeStudy.kanaRomaji.toKana(m[2], false);
+      if (conv !== m[2]) input.value = m[1] + conv;
+    });
     if (input && !session.checked && !input.form.hidden) input.focus({ preventScroll: true });
   }
 
@@ -1686,6 +1698,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // dropped onto it between cards knows what they're answering.
     input.setAttribute("aria-label", askLabelFor(dir, entry) + ": " + (prompt.text || entry.jpPlain));
     input.placeholder = answerPlaceholderFor(dir);
+    // Answer in kana: the field converts romaji as you type (renderReview).
+    var kanaField = vidx.isKanaTarget(dir);
+    input.dataset.kana = kanaField ? "1" : "";
+    if (kanaField) input.setAttribute("lang", "ja"); else input.removeAttribute("lang");
     input.value = session.userAnswer || "";
     var form = shell.querySelector("#fcAnswerForm");
     var dyn = shell.querySelector(".fc-review-dynamic");

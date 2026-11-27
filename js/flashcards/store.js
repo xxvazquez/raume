@@ -24,6 +24,18 @@ window.RaumeStudy.flashcards.store = (function () {
   // Off until switched on, and sent up apart from the rest: an account whose
   // database predates one refuses its cards, which mustn't stop a word.
   function isOptInDirection(d) { return isWriteDirection(d) || isVerbFormDirection(d); }
+  // Settings › Answer in kana: English → Romaji cards are answered in kana
+  // instead. Per device, like the keyboard it's typed on -- not synced.
+  // Kept in memory too, for when localStorage can't be used.
+  var ANSWER_KANA_KEY = "raume-answer-kana", answerKanaMem = null;
+  function answerInKana() {
+    if (answerKanaMem !== null) return answerKanaMem;
+    try { return localStorage.getItem(ANSWER_KANA_KEY) === "1"; } catch (e) { return false; }
+  }
+  function setAnswerInKana(on) {
+    answerKanaMem = !!on;
+    try { if (on) localStorage.setItem(ANSWER_KANA_KEY, "1"); else localStorage.removeItem(ANSWER_KANA_KEY); } catch (e) {}
+  }
   function isVerbFormDirection(d) { return d === "jp-vf" || d === "jp-vn"; }
   var DIRECTION_LABEL = {
     "jp-en": "Japanese → English",
@@ -533,6 +545,7 @@ window.RaumeStudy.flashcards.store = (function () {
 
   return {
     DIRECTIONS: DIRECTIONS, DIRECTION_LABEL: DIRECTION_LABEL, isWriteDirection: isWriteDirection, isOptInDirection: isOptInDirection, isVerbFormDirection: isVerbFormDirection, RATING_NAMES: RATING_NAMES,
+    answerInKana: answerInKana, setAnswerInKana: setAnswerInKana,
     CACHE_SCHEMA_VERSION: CACHE_SCHEMA_VERSION,
     getStoredMode: getStoredMode, setStoredMode: setStoredMode,
     setSession: setSession, isGuestMode: isGuestMode, hasActiveSession: hasActiveSession,

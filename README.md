@@ -220,9 +220,15 @@ to flashcards**, or single words from **Library** or a search result.
   **EN → Japanese (kanji)**. A verb can add two more, each asking a
   different form every time, typed in romaji: **Verb → polite form** (〜ません,
   〜ました, 〜ませんでした, the て-form) and **Verb → plain form** (〜ない, 〜た,
-  〜なかった). You never type Japanese.
+  〜なかった). Typed answers are romaji, unless you turn on **Answer in
+  kana**.
 - **Study directions** in Settings picks which you get; the handwritten two
   and verb forms are off until you turn them on.
+- **Answer in kana** (Settings, per device) has EN → Romaji cards take the
+  reading in kana instead: romaji you type turns into kana as you go, as a
+  Japanese keyboard does, or type with a Japanese keyboard. It counts when it
+  spells the reading or sounds like it (こうひい for コーヒー); the reveal
+  shows the reading in kana.
 - A session mixes everything due today (plus learning steps due within 20
   minutes) with the day's new cards, freshly shuffled, never the same word
   twice in a row. A review is ready all day on its due date, whatever hour it
@@ -309,7 +315,7 @@ menu). Settings, Help, Awards and Stats slide in as pushed screens with a
 | Screen | What it does |
 | --- | ------------ |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add a table (**Pause** it under My flashcards), **Add all** a category, or open a table for single words — on a phone, swipe a word left for Pause / Add / Restore |
-| **Settings** | Study directions and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). Guests get **Back up & restore** — one JSON file. Changes save as you make them |
+| **Settings** | Study directions, **Answer in kana** (per device), and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). Guests get **Back up & restore** — one JSON file. Changes save as you make them |
 | **Help** | Adding & pausing, Library icons, reviewing, Dashboard, each tab, syncing |
 | **Awards** | Every award by kind — from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — see [Stats](#stats) |

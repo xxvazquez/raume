@@ -108,6 +108,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Kanji cards</span><span class="help-desc">Its meaning, and any one reading — yama or san.</span></li>' +
       '<li><span class="help-term">New words</span><span class="help-desc">Each starts Japanese → English; its other directions follow once you’ve seen it.</span></li>' +
       '<li><span class="help-term">Study directions</span><span class="help-desc">Settings turns each direction on or off — progress is kept.</span></li>' +
+      '<li><span class="help-term">Answer in kana</span><span class="help-desc">English → Romaji cards take kana: romaji you type turns into kana.</span></li>' +
       (window.RaumeStudy.flashcards.appBadge && window.RaumeStudy.flashcards.appBadge.supported
         ? '<li><span class="help-term">Badge</span><span class="help-desc">Settings › App icon puts the number of cards to study on raume’s icon.</span></li>' : '') +
       '<li><span class="help-term">Writing</span><span class="help-desc">Off until you turn it on: write the word stroke by stroke, in kana (みず) or with its kanji (水).</span></li>' +
@@ -552,6 +553,7 @@ window.RaumeStudy.flashcards.views = (function () {
     retention: ["indigo", '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.2"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'],
     interval: ["blue", '<rect x="3" y="4" width="12" height="11" rx="2"/><path d="M3 8h12M6.5 2.5v3M11.5 2.5v3"/>'],
     perDay: ["green", '<path d="M9 4.5v9M4.5 9h9"/>'],
+    kana: ["teal", '<path d="M4 6.5h7.5M7.5 3.5c-.3 4.6-1.6 8.3-4 11M7 9.5c1.6 2.6 3.9 4.3 6.5 5M11.5 9.5c1.6 0 3 1.2 3 3"/>'],
     badge: ["clay", '<rect x="2.5" y="4.5" width="11" height="11" rx="3"/><circle cx="13.5" cy="4.5" r="2.6" fill="currentColor" stroke="none"/>'],
     fuzz: ["slate", '<path d="M3 5.5h2.5c3.5 0 3.5 7 7 7H15M3 12.5h2.5c1.4 0 2.2-1.1 2.8-2.4M10.2 7.9c.6-1.3 1.4-2.4 2.8-2.4H15M13 3.5l2 2-2 2M13 10.5l2 2-2 2"/>']
   };
@@ -620,6 +622,8 @@ window.RaumeStudy.flashcards.views = (function () {
         return '<label class="set-row fc-direction-check"><input type="checkbox" data-direction="' + d + '" class="fc-dir-checkbox" ' + ((store.isOptInDirection(d) ? s.enabled_directions[d] === true : s.enabled_directions[d] !== false) ? "checked" : "") + ">" + esc(DIRECTION_LABEL[d]) + "</label>";
       }).join(""), "Study now only draws from the ticked directions. Turning one off keeps its cards and progress.") +
       '<div class="fc-auth-error" id="fcDirError" hidden>At least one direction has to stay on.</div>' +
+      setGroup("Answers", setSwitch("fcAnswerKana", "Answer in kana", store.answerInKana(), "kana"),
+        "English → Romaji cards take the reading in kana: romaji you type turns into kana as you go, or use a Japanese keyboard. Set on this device only.") +
       setGroup("Word cards",
         setPick("fcRetention", "Desired retention", Math.round(s.fsrs_request_retention * 100), "retention") +
         setPick("fcMaxInterval", "Maximum interval", s.fsrs_maximum_interval, "interval") +
@@ -703,6 +707,12 @@ window.RaumeStudy.flashcards.views = (function () {
           // Refused: the iPhone only shows it once notifications are allowed.
           if (note) note.textContent = wanted && !on ? "Allow notifications for raume in iPhone Settings to show the badge." : "Saved";
         });
+        return;
+      }
+      if (target.id === "fcAnswerKana") {
+        store.setAnswerInKana(target.checked);
+        var saved = document.getElementById("fcSettingsSaved");
+        if (saved) saved.textContent = "Saved";
         return;
       }
       if (target.classList.contains("set-pick-select")) {

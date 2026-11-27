@@ -3356,6 +3356,22 @@ async function main() {
       && vi.checkAnswer(cook, "en-ro", "ryouri shimasu")
       && !vi.checkAnswer(plain, "en-ro", "o " + plain.romajiDisplay.split(" / ")[0]);
   })());
+  check("Answer in kana: English → Romaji takes the reading in kana, typed straight or turned from romaji, and reveals it in kana; Japanese → Romaji stays romaji", (() => {
+    const fc = window.RaumeStudy.flashcards, vi = fc.vocabIndex;
+    const entries = Object.values(vi.getVocabIndex());
+    const coffee = entries.find(e => e.jpReading === "コーヒー");
+    const cook = entries.find(e => e.romajiDisplay === "ryōri suru / ryōri shimasu");
+    fc.store.setAnswerInKana(true);
+    try {
+      return !!coffee && !!cook
+        && vi.answerPlaceholderFor("en-ro") === "Kana" && vi.answerPlaceholderFor("jp-ro") === "Romaji"
+        && vi.checkAnswer(coffee, "en-ro", "コーヒー") && vi.checkAnswer(coffee, "en-ro", "こーひー")
+        && vi.checkAnswer(coffee, "en-ro", "ko-hi-") && !vi.checkAnswer(coffee, "en-ro", "こひ")
+        && vi.checkAnswer(cook, "en-ro", "りょうり します")
+        && vi.expectedDisplayFor(coffee, "en-ro") === "コーヒー"
+        && vi.typedKana("konnnichiha") === "こんにちは";
+    } finally { fc.store.setAnswerInKana(false); }
+  })());
   check("today's reviews from another device fold into this one's tally: one shared new-card allowance, a card introduced and reviewed counted once", (() => {
     const fc = window.RaumeStudy.flashcards, c = fc.store.getCache(), saved = c.day ? JSON.parse(JSON.stringify(c.day)) : null;
     const now = new Date();
