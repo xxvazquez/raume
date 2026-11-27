@@ -29,6 +29,49 @@ Every note has the same shape, so lessons read alike side by side:
 Notes are Japanese and English only -- never Polish: class material that
 arrives with Polish glosses or translations keeps just the English.
 
+House rules. Every note follows these, so notes read the same and stay
+easy to review. render() stops on the ones marked (checked):
+
+1. One note per lesson, named by its date, built with this kit only --
+   no hand-written HTML, styles or one-off layouts. Missing a layout?
+   Add one shared component here.
+2. Sections only in OUTLINE order. Drills that practise one pattern sit
+   under that pattern's Grammar section. Standalone exercises (a test,
+   translations, a reading) go in Practice, and mistakes worth
+   remembering go in Watch out.
+3. A note teaches patterns, rules and exercises. Words go to the class
+   table through words() (checked), not into the note. That includes
+   time, numbers and counters, which are vocabulary.
+4. Say each thing once. A word is listed once (checked). A rule is
+   stated where it's taught, and its wrong-vs-right example lives in
+   Watch out, not in both places. Drop any list that repeats another
+   list, any tip that only restates the rows above it, and any example
+   whose meaning doesn't match the rule it sits under.
+5. No arrows (→ ⇒ ->) anywhere in a note (checked). Before/after and
+   pairs are two columns, laid out as iOS would: lst(..., head=["Polite",
+   "Casual"]), each row one pair.
+6. Visual first: a leading emoji or glyph on rows where one helps the
+   eye (greetings, Q&A drills, objects), a short label where a time or
+   kind matters, coloured highlights (hl) on the part that changes.
+7. A tip is a short rule plus examples, one per line, never Japanese run
+   into the sentence. No empty tips: a tip with nothing to add is cut.
+8. Japanese: furigana on every kanji (checked), raume's N5 kanji only,
+   other words in kana (checked), particles marked, words spaced as a
+   textbook spaces them, the same spelling everywhere in the note (one
+   word in kana throughout, not kana in one line and kanji in the next).
+9. Romaji: Hepburn, spelling the Japanese (checked). A sentence (its
+   Japanese ends in 。) starts with a capital and ends with a full stop
+   or question mark (checked); a word or phrase is lower case. Names
+   are capitalised.
+10. English translates what the Japanese says, no more. A word's
+    meanings are separated by commas, never " / " or ";" (checked);
+    a verb reads "to ...".
+11. Accurate: decide Japanese as a native teacher would. Fix a line
+    that isn't natural Japanese rather than copying it, and say so
+    when handing the note over.
+12. Before replacing a note in the app, carry any edits made there in
+    the app back into the lesson file first.
+
 Lesson files hold the reader's own notes, so they never go in the repo:
 keep them in private-notes/ (gitignored) or anywhere outside it.
 
@@ -232,6 +275,10 @@ def _check(jp, ro):
     beyond = [c for c in dict.fromkeys(_KANJI_RE.findall(re.sub(r"<rt>.*?</rt>", "", jp))) if _N5 and c not in _N5]
     if beyond:
         _problems.append(f"{''.join(beyond)} isn't one of raume's N5 kanji -- write the word in kana: {plain}")
+    ro_plain = html.unescape(re.sub(r"<[^>]+>", "", ro or "")).strip()
+    if ro_plain and plain.strip().endswith("。"):
+        if ro_plain[0].isalpha() and not ro_plain[0].isupper() or not ro_plain.endswith((".", "?", "!")):
+            _problems.append(f"a sentence's romaji starts with a capital and ends with a full stop: {plain} -> {ro_plain!r}")
     if ro and not rd.bare:
         said = kana_romaji("".join(rd.out))
         if _same_spelling(said) != _same_spelling(html.unescape(re.sub(r"<[^>]+>", "", ro))):
@@ -329,6 +376,8 @@ def words(items):
         _note_listed(jp, "the lesson's words")
         if re.search(r"\s|\[|[,，]", jp) or re.search(f"(?<![{KANJI}])[(（]", jp):
             _problems.append(f"{jp}: a word for its table is one word -- no spaces, particles or (な)")
+        if re.search(r" / |;", en):
+            _problems.append(f"{jp}: separate meanings with commas, not “ / ” or “;”: {en!r}")
         _words.append((jp.replace("（", "(").replace("）", ")"), ro.lower(), en.replace(" · ", ", ")))
 
 
@@ -495,6 +544,10 @@ def render(out_html, date, title, desc, sections, eyebrow=None, source=None):
     order = {k: i for i, (k, _, _) in enumerate(OUTLINE)}
     sections = sorted(sections, key=lambda s: order[s[0]])
     body = "".join(_section_html(i + 1, *s) for i, s in enumerate(sections))
+    arrows = re.findall(r"[^<>]{0,30}(?:→|⇒|-&gt;|->)[^<>]{0,30}", re.sub(r"<[^>]+>", " ", body + desc + title))
+    if arrows:
+        raise SystemExit("Fix these before the note is written:\n" + "\n".join(
+            f"  - no arrows in a note -- lay a pair out as two columns: …{a.strip()}…" for a in arrows))
     eyebrow = eyebrow or lesson_name(date)
     name = eyebrow
     page = f"""<!doctype html>

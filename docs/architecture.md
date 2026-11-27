@@ -255,7 +255,11 @@ and deleting need a connection and say so when they fail.
   any kanji outside raume's 102 N5 kanji (read from the N5 Kanji tables in
   `data/vocabulary.js`) — those words are written in kana. It also stops
   on a word listed in two word lists (`tiles`): a class note lists each
-  word once, so it reviews at a glance. A lesson note is
+  word once, so it reviews at a glance. The kit's docstring holds the
+  house rules every note follows (one shape, no word lists, each thing said
+  once, no arrows — pairs are two columns, emoji where they help, no empty
+  tips, consistent spelling, sentence romaji capitalised with a full stop,
+  meanings split by commas); `render()` stops on the ones it can check. A lesson note is
   named by its date — "Sat 21 Nov 2026" (`lesson_name`; notes saved earlier as "Sat, Nov 21st 2026" count too, and the app shows either as the device writes dates) — in its
   `<title>` and eyebrow; `title` is the lesson's topic, shown over the
   description. Lesson files are personal content: they live in
