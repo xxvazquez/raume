@@ -1994,6 +1994,15 @@ body.icon-picker-open { overflow: hidden; }
   .rn-qa .rn-r > .rn-st:nth-child(3) { grid-column: 2; }
   .rn-qa .rn-hdr { display: none; }
   .rn-qa .rn-hdr + .rn-r { border-top: 0; }
+  /* Pairs of short words (note_kit marks them rn-pairs) stay side by side,
+     header and all, as a table would on a phone -- only long sentences
+     stack. Japanese wraps at its spaces, never mid-word. */
+  .rn-qa.rn-pairs .rn-r { grid-template-columns: 30px 1fr 1fr; column-gap: 10px; }
+  .rn-qa.rn-pairs.rn-labelled .rn-r { grid-template-columns: 52px 1fr 1fr; }
+  .rn-qa.rn-pairs .rn-r > .rn-st:nth-child(3) { grid-column: auto; }
+  .rn-qa.rn-pairs .rn-hdr { display: grid; }
+  .rn-qa.rn-pairs .rn-hdr + .rn-r { border-top: 1px solid var(--row-line); }
+  .rn-pairs .rn-jp { word-break: keep-all; }
   .rn-cols2 .rn-list { column-count: 1; }
 }
 @media (max-width: 640px) {

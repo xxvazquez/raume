@@ -46,10 +46,12 @@ easy to review. render() stops on the ones marked (checked):
    stated where it's taught, and its wrong-vs-right example lives in
    Watch out, not in both places. Drop any list that repeats another
    list, any tip that only restates the rows above it, and any example
-   whose meaning doesn't match the rule it sits under.
+   whose meaning doesn't match the rule it sits under. Across notes,
+   repeating a rule is fine: class notes are for revision.
 5. No arrows (→ ⇒ ->) anywhere in a note (checked). Before/after and
    pairs are two columns, laid out as iOS would: lst(..., head=["Polite",
-   "Casual"]), each row one pair.
+   "Casual"]), each row one pair. Short pairs stay two columns on a phone
+   too (PAIR_CHARS): space a long phrase as a textbook does so it fits.
 6. Visual first: a leading emoji or glyph on rows where one helps the
    eye (greetings, Q&A drills, objects), a short label where a time or
    kind matters, coloured highlights (hl) on the part that changes.
@@ -298,6 +300,26 @@ def stack(jp, ro, en, tag=None, ans=False, check=True):
             f'<div class="rn-ro">{_text(ro)}</div><div class="rn-en">{_text(en)}</div></div>')
 
 
+# A pair of Japanese words fits two columns even on a phone; a sentence
+# doesn't. A two-column list whose Japanese is all short -- at most 8
+# characters between spaces -- is marked rn-pairs and stays side by side
+# there (the Japanese wraps at its spaces). Space a longer phrase as a
+# textbook does (ありがとう ございます) to keep its list in pairs.
+PAIR_CHARS = 8
+
+
+def _short_pairs(rows):
+    for _, cells in rows:
+        if len(cells) != 2:
+            return False
+        for c in cells:
+            for jp in re.findall(r'<div class="rn-jp"[^>]*>(.*?)</div>', c):
+                plain = html.unescape(re.sub(r"<[^>]+>", "", re.sub(r"<rt>.*?</rt>", "", jp)))
+                if any(len(w) > PAIR_CHARS for w in re.split(r"\s+", plain.replace(" ✗", "").replace(" ✓", ""))):
+                    return False
+    return True
+
+
 def lst(rows, cols="qa", head=None, lead="em"):
     """rows: [(lead, [cell, ...])]. cols 'qa' = question + answer, 'one' = one column.
     lead: 'em' (an emoji), 'num' (a numbered dot) or 'lbl' (a short label)."""
@@ -315,6 +337,8 @@ def lst(rows, cols="qa", head=None, lead="em"):
             cells = [c.replace('class="rn-st"', 'class="rn-st rn-ans"', 1) for c in cells]
         out.append(f'<div class="rn-r"><div class="rn-lead rn-{lead}">{l}</div>' + "".join(cells) + "</div>")
     extra = " rn-labelled" if lead == "lbl" else ""
+    if cols == "qa" and _short_pairs(rows):
+        extra += " rn-pairs"
     return f'<div class="rn-list rn-{cols}{extra}">{h}{"".join(out)}</div>'
 
 
