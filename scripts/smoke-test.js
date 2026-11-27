@@ -2348,6 +2348,18 @@ async function main() {
       && !document.body.classList.contains("tpick-open"));
     document.querySelector("#customizePage .cv-add-btn").click();
     check("...and a word added straight after goes into it", cvNs.customRows().some(r => r.tableId === newTable.id && r.romaji === "ue"));
+    check("search shows a word once: raume's row, not its repeat in your own table", (() => {
+      window.RaumeStudy.vocab.applyTableOrder(); // as entering a page does
+      const s = document.getElementById("tableSearch");
+      s.value = "above"; s.dispatchEvent(new window.Event("input", { bubbles: true }));
+      const own = document.getElementById("table-" + newTable.id);
+      const ownRow = own && own.querySelector("tbody tr");
+      const raume = document.querySelector('#vocabulary .table-section:not([data-table^="ct-"]) tr[data-vocab-id="v0485"]');
+      const ok = !!ownRow && ownRow.classList.contains("search-hidden") && own.classList.contains("search-hidden")
+        && !!raume && !raume.classList.contains("search-hidden");
+      s.value = ""; s.dispatchEvent(new window.Event("input", { bubbles: true }));
+      return ok;
+    })());
     cvNs.deleteTable(newTable.id);
   }
   cvNs.setRemote(null);

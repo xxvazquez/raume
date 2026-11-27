@@ -1229,6 +1229,35 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return toHiragana(out);
     }
 
+    // Your own tables (class tables included) have ct- ids.
+    function isOwnTable(section) {
+      return /^ct-/.test(section.dataset.table || '') ? 1 : 0;
+    }
+    // The same word twice: read the same, and either written the same in
+    // kanji (先生) or sharing a meaning -- one reading alone isn't enough,
+    // はし is chopsticks in one table and bridge in another. Records the
+    // row when it's the first of its word. Only a row of your own is ever
+    // dropped -- a word raume files under two tables shows in both.
+    function isRepeat(info, seen, own) {
+      const w = info.jpword;
+      if (!w || w.classList.contains('kanji-char')) return false; // kanji tiles
+      const reading = info.readings[0];
+      let writing = '';
+      const walker = document.createTreeWalker(w, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (!n.parentElement.closest('rt, .furigana, .visually-hidden, .jp-romaji-line')) writing += n.data;
+      }
+      writing = writing.replace(/\s+/g, '');
+      const meanings = info.english.replace(/\([^)]*\)/g, ' ').split(',')
+        .map(m => m.replace(/^\s*to\s+/, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+      const kin = seen.get(reading) || [];
+      const repeat = kin.some(k => (k.writing === writing && /[一-鿿]/.test(writing)) ||
+        k.meanings.some(m => meanings.indexOf(m) !== -1));
+      if (!repeat || !own) { kin.push({ writing, meanings }); seen.set(reading, kin); }
+      return repeat && !!own;
+    }
+
     // Long vowels in romaji are stored with a macron (ōkii) but can't be
     // typed on a normal keyboard -- a search for "ookii" has to find it too.
     // Expands a macron to its doubled-letter spelling (ō -> oo) rather than
@@ -1548,7 +1577,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (expandBar) expandBar.classList.toggle('search-hidden', Boolean(q));
       if (q) document.body.classList.remove('expand-all-mode');
 
-      sections.forEach((section, originalIndex) => {
+      // A word in raume's tables and again in a class table (Sakura, WSJJ --
+      // which hold every word that class taught) turns up once: raume's
+      // row, then the first table of your own it's in. raume's tables are
+      // searched first so theirs is the one kept; a raume table you hid, or
+      // a level filtered out, leaves the class row showing.
+      const seen = new Map();
+      const passOrder = sections.map((section, originalIndex) => ({ section, originalIndex }))
+        .sort((a, b) => isOwnTable(a.section) - isOwnTable(b.section) || a.originalIndex - b.originalIndex);
+      passOrder.forEach(({ section, originalIndex }) => {
         const tbody = section.querySelector('tbody');
         let sectionRows = 0, sectionBest = null;
         if (!q) {
@@ -1564,11 +1601,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         }
         // A table the reader hid never turns up in results either.
         const userHidden = section.classList.contains('user-hidden');
+        const own = isOwnTable(section);
         const ranked = [];
         [...tbody.rows].sort(byOriginalIndex).forEach(row => {
           const info = infoFor(row);
           const hit = userHidden || (lvSet.length && lvSet.indexOf(row.dataset.jlpt) === -1) ? { rank: null }
             : mq ? rankRow(info, mq, qx, prefixOnly, hide) : { rank: 0 };
+          if (hit.rank !== null && isRepeat(info, seen, own)) hit.rank = null;
           const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
           r.row.classList.toggle('search-hidden', !r.match);
           if (r.match) {
