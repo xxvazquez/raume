@@ -4071,6 +4071,13 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    only when it doesn't fit does it drop -- whole -- under it. A note under
    every such row made those rows taller than their neighbours. */
 .meaning-note { display: inline-block; max-width: 100%; color: var(--muted); font-size: var(--fs-small); letter-spacing: .005em; }
+/* Search only: the tables of yours a result's word is also in (their own
+   rows are left out of the results). A line of its own under the meaning,
+   the row icons staying on the first line. */
+.meaning-cell.has-also { flex-wrap: wrap; }
+.meaning-cell.has-also .meaning-text { flex-basis: 0; }
+.search-also { flex: 0 0 100%; order: 9; color: var(--muted); font-size: var(--fs-small); letter-spacing: .005em; }
+body:not(.is-searching) .search-also { display: none; }
 
 /* い/な-adjective badge: a small capsule in the trailing cluster beside the row
    icons (so the meaning text keeps one left edge on every row) -- a tint of

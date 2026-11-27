@@ -65,7 +65,7 @@ the grammar it shows.
 
 | | |
 | --- | --- |
-| **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. A word that's also in a table of your own (a class table) shows once, in raume's table. Clearing the search puts back the tables you had open. |
+| **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. A word that's also in a table of your own (a class table) shows once, in raume's table, with "Also in: Sakura" under its meaning. Clearing the search puts back the tables you had open. |
 | **JLPT level** | Type **n5** … **n1** as a word of its own for that level's words: **n4** lists them all, **n4 eat** only those matching *eat*. **n0** finds the words not on the JLPT lists. |
 | **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), a verb's *to* is never needed, and any one meaning typed whole is an exact match (*see* finds *to see, to watch* first). Only visible columns are searched, plus romaji. |
 | **+ on a result** | Adds the word to flashcards; it turns into Practice's cards icon (tap again to pause). |

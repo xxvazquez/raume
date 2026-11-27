@@ -1237,10 +1237,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // kanji (先生) or sharing a meaning -- one reading alone isn't enough,
     // はし is chopsticks in one table and bridge in another. Records the
     // row when it's the first of its word. Only a row of your own is ever
-    // dropped -- a word raume files under two tables shows in both.
-    function isRepeat(info, seen, own) {
+    // dropped -- a word raume files under two tables shows in both. Returns
+    // the kept row's entry (its .row and the .also tables it stands for).
+    function repeatOf(info, seen, own, row) {
       const w = info.jpword;
-      if (!w || w.classList.contains('kanji-char')) return false; // kanji tiles
+      if (!w || w.classList.contains('kanji-char')) return null; // kanji tiles
       const reading = info.readings[0];
       let writing = '';
       const walker = document.createTreeWalker(w, NodeFilter.SHOW_TEXT);
@@ -1252,10 +1253,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const meanings = info.english.replace(/\([^)]*\)/g, ' ').split(',')
         .map(m => m.replace(/^\s*to\s+/, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
       const kin = seen.get(reading) || [];
-      const repeat = kin.some(k => (k.writing === writing && /[一-鿿]/.test(writing)) ||
+      const repeat = kin.find(k => (k.writing === writing && /[一-鿿]/.test(writing)) ||
         k.meanings.some(m => meanings.indexOf(m) !== -1));
-      if (!repeat || !own) { kin.push({ writing, meanings }); seen.set(reading, kin); }
-      return repeat && !!own;
+      if (!repeat || !own) { kin.push({ writing, meanings, row, also: [] }); seen.set(reading, kin); }
+      return own ? repeat || null : null;
     }
 
     // Long vowels in romaji are stored with a macron (ōkii) but can't be
@@ -1558,6 +1559,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       const hide = { japanese: isHidden('japanese'), furigana: isHidden('furigana'), english: isHidden('english') };
 
       highlighted.forEach(clearHighlights);
+      // The "Also in" lines are this search's; each search writes its own.
+      vocabHost.querySelectorAll('.search-also').forEach(el => {
+        el.parentElement.classList.remove('has-also'); el.remove();
+      });
+      const alsoRows = new Set();
       highlighted.clear();
 
       // Category sub-headings + the per-section table-index dropdown are
@@ -1607,7 +1613,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           const info = infoFor(row);
           const hit = userHidden || (lvSet.length && lvSet.indexOf(row.dataset.jlpt) === -1) ? { rank: null }
             : mq ? rankRow(info, mq, qx, prefixOnly, hide) : { rank: 0 };
-          if (hit.rank !== null && isRepeat(info, seen, own)) hit.rank = null;
+          const kept = hit.rank !== null ? repeatOf(info, seen, own, row) : null;
+          if (kept) {
+            hit.rank = null;
+            const name = section.querySelector('.section-title-text');
+            if (name && kept.also.indexOf(name.textContent) === -1) kept.also.push(name.textContent);
+            alsoRows.add(kept);
+          }
           const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
           r.row.classList.toggle('search-hidden', !r.match);
           if (r.match) {
@@ -1626,6 +1638,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         // A sentence table (Everyday Sentences, or one of your own) follows the
         // word tables: "beer" finds the word first, then sentences using it.
         sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex, sentences: !!section.querySelector('table.vocab-sentences') });
+      });
+      // The row kept for a word names the tables of yours it stands for, under
+      // its meaning: the repeat is gone from the results, not from raume.
+      alsoRows.forEach(k => {
+        const cell = k.row.querySelector('.meaning-cell');
+        if (!cell) return;
+        const line = document.createElement('span');
+        line.className = 'search-also';
+        line.textContent = 'Also in: ' + k.also.join(', ');
+        cell.classList.add('has-also');
+        cell.appendChild(line);
       });
       if (!q && preSearch) {
         document.body.classList.toggle('expand-all-mode', preSearch.expandAll);
