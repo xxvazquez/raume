@@ -68,7 +68,7 @@ create table if not exists public.flashcard_settings (
   -- come from ts-fsrs's own generatorParameters() defaults.
   fsrs_request_retention double precision not null default 0.9,
   fsrs_maximum_interval integer not null default 36500,
-  fsrs_enable_fuzz boolean not null default false,
+  fsrs_enable_fuzz boolean not null default true,
   -- Session/queue setting -- NOT part of FSRS itself, kept in its own
   -- clearly-named column so it's never confused with the FSRS settings above.
   queue_new_cards_per_day integer not null default 20,
@@ -129,8 +129,10 @@ alter table public.flashcard_settings add column if not exists kana_prefs jsonb 
 -- daily new-card cap, kept in their own column so the two trainers can run
 -- different retention targets. Empty {} means "use the defaults". Shape:
 -- { "fsrs_request_retention": 0.9, "fsrs_maximum_interval": 36500,
---   "fsrs_enable_fuzz": false, "new_per_day": 15 }.
+--   "fsrs_enable_fuzz": true, "new_per_day": 15 }.
 alter table public.flashcard_settings add column if not exists kana_fsrs jsonb not null default '{}'::jsonb;
+-- Fuzz is on by default (it was off before 2026-11); existing rows keep their value.
+alter table public.flashcard_settings alter column fsrs_enable_fuzz set default true;
 
 -- Whole tables paused as a unit ("Pause table" in Manage). A flat list of
 -- vocabulary table ids -- an overlay, not a state on the cards: the cards keep

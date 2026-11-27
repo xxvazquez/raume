@@ -189,7 +189,7 @@ window.RaumeStudy.flashcards.store = (function () {
   // -----------------------------------------------------------------------
   function defaultSettings() {
     return {
-      fsrs_request_retention: 0.9, fsrs_maximum_interval: 36500, fsrs_enable_fuzz: false,
+      fsrs_request_retention: 0.9, fsrs_maximum_interval: 36500, fsrs_enable_fuzz: true,
       queue_new_cards_per_day: 20, schema_version: 1,
       current_streak: 0, longest_streak: 0, last_study_date: null,
       // Which directions actually get studied -- not an FSRS setting, and
@@ -464,7 +464,7 @@ window.RaumeStudy.flashcards.store = (function () {
   // retention target. `new_per_day` is pacing, not an FSRS setting, but it
   // rides in the same blob.
   function defaultKanaFsrs() {
-    return { fsrs_request_retention: 0.9, fsrs_maximum_interval: 36500, fsrs_enable_fuzz: false, new_per_day: 15 };
+    return { fsrs_request_retention: 0.9, fsrs_maximum_interval: 36500, fsrs_enable_fuzz: true, new_per_day: 15 };
   }
   function sanitizeKanaFsrs(raw) {
     var d = defaultKanaFsrs();
@@ -473,7 +473,7 @@ window.RaumeStudy.flashcards.store = (function () {
     return {
       fsrs_request_retention: ret >= 0.7 && ret <= 0.99 ? ret : d.fsrs_request_retention,
       fsrs_maximum_interval: maxI >= 1 && maxI <= 36500 ? Math.round(maxI) : d.fsrs_maximum_interval,
-      fsrs_enable_fuzz: raw.fsrs_enable_fuzz === true,
+      fsrs_enable_fuzz: typeof raw.fsrs_enable_fuzz === "boolean" ? raw.fsrs_enable_fuzz : d.fsrs_enable_fuzz,
       new_per_day: npd >= 0 && npd <= 1000 ? Math.round(npd) : d.new_per_day
     };
   }
