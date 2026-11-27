@@ -331,10 +331,12 @@ kept. **Undo** takes a pause back.
 
 Under **Details**: card progress, reviews this week, due next 7 days,
 **Trends** (last 90 days against your year — reviews a day, recall, study
-days a week — after 120 days of history), Kana, Puzzles and Games (results,
-streak, the last three, **See stats**), Kanji, **JLPT levels** (each
-level's words in the reference — and the words not on the lists — and how
-many are Known, once one is),
+days a week — after 120 days of history), Kana (every basic kana started —
+the same count as Kana started — and how many to study now), Puzzles and
+Games (results, streak, the last three, **See stats**), Kanji, **JLPT
+levels** (each level's words in the reference — and the words not on the
+lists — and how many are Known, once one is; each word counts once however
+many tables hold it, and sentences stay out),
 **Missed today**, **Leeches**
 (forgotten 8+ times; *Pause* or *Keep*) and **Words to review**.
 

@@ -1227,19 +1227,43 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // the same Known as the green row wash (marked by you, or every card of
   // the word remembered three weeks or more). A level the reference has no
   // words for doesn't show; the card waits for a first known word.
+  // Words only, each counted once: sentences stay out, and a word that sits
+  // in several tables (水 in Drinks and in a class table, or written みず
+  // there) is one word -- same reading, same first meaning -- Known when
+  // any of its rows is.
+  var SENTENCE_MARKS = /[。、？！?!]/;
+  function jlptWordKey(r) {
+    var v = window.RaumeStudy.vocab;
+    var jp = r.type === "verb-pair" ? (r.forms && r.forms[0] && r.forms[0].jp) : r.jp;
+    if (!jp) return null;
+    var text = jp.map(function (s) { return s.kanji || s.text || s.p || ""; }).join("");
+    if (SENTENCE_MARKS.test(text)) return null;
+    var meaning = String(r.english || "").toLowerCase().split(",")[0]
+      .replace(/\([^)]*\)/g, "").replace(/^\s*to\s+/, "").trim();
+    return v.jpReadingOf(jp) + "|" + meaning;
+  }
   function jlptCounts() {
     var v = window.RaumeStudy.vocab;
-    if (!v || !v.knownWordTest) return null;
-    var isKnown = v.knownWordTest(), by = {};
+    if (!v || !v.knownWordTest || !v.jpReadingOf) return null;
+    var isKnown = v.knownWordTest(), words = {};
     (window.RaumeStudy.data.vocabularyTables || []).forEach(function (t) {
-      if (t.tableClass === "vocab-kanji") return;   // the Kanji card counts those
+      // The Kanji card counts kanji; sentences aren't words.
+      if (t.tableClass === "vocab-kanji" || t.tableClass === "vocab-sentences") return;
       t.rows.forEach(function (r) {
         var n = Number(r.jlpt) || 0;   // 0: not on the JLPT lists
         if (!r.id || !(n >= 0 && n <= 5)) return;
-        var c = by[n] || (by[n] = { level: n, known: 0, total: 0 });
-        c.total++;
-        if (isKnown(r.id)) c.known++;
+        var key = jlptWordKey(r);
+        if (!key) return;
+        var w = words[key] || (words[key] = { level: n, known: false });
+        if (!w.level && n) w.level = n;
+        if (!w.known && isKnown(r.id)) w.known = true;
       });
+    });
+    var by = {};
+    Object.keys(words).forEach(function (k) {
+      var w = words[k], c = by[w.level] || (by[w.level] = { level: w.level, known: 0, total: 0 });
+      c.total++;
+      if (w.known) c.known++;
     });
     return [5, 4, 3, 2, 1, 0].filter(function (n) { return by[n]; }).map(function (n) { return by[n]; });
   }
@@ -1255,12 +1279,18 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       }).join("") + "</div>";
   }
   // --- Dashboard: Kana ---
-  // The Kana trainer's chosen groups: how many cards started (a sage bar,
-  // like Kanji) and how many a session would hold now.
+  // Every basic kana started (a sage bar, like Kanji) -- the same count as
+  // the Kana started figure and the Hiragana / Katakana awards, so the
+  // screen never shows two different kana totals -- and how many a session
+  // of the chosen groups would hold now.
   function kanaCardHtml(now) {
     var kana = window.RaumeStudy.flashcards.kana;
     if (!kana || !kana.summary) return "";
     var k = kana.summary(now);
+    if (kana.scriptProgress) {
+      var all = ["hiragana", "katakana"].map(kana.scriptProgress);
+      k = { started: all[0].started + all[1].started, total: all[0].total + all[1].total, toStudy: k.toStudy };
+    }
     if (!k.total) return "";
     return '<div class="fc-viz-card fc-viz-wide fc-dash-kana">' + vizTitle("Kana") +
       '<div class="fc-kj-row"><span class="fc-kj-count"><b>' + k.started + "</b> of " + k.total + " started" +
@@ -1268,7 +1298,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       // Secondary even with kana to study: Study now is the screen's one
       // filled button.
       '<button type="button" class="fc-btn" data-dash-go="kana">' + (k.toStudy ? "Study kana" : "Open Kana") + "</button></div>" +
-      progressBarHtml(k.started, k.total, k.started + " of " + k.total + " kana cards started") + "</div>";
+      progressBarHtml(k.started, k.total, k.started + " of " + k.total + " kana started") + "</div>";
   }
   // The Puzzles / Games / Kana / Kanji cards' buttons: to that tab, or the
   // Kanji section.

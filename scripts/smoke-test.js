@@ -3748,6 +3748,31 @@ async function main() {
       && /^26\/30$/.test(journey.querySelectorAll(".fc-journey-val")[2].textContent)
       && /\/208$/.test(journey.querySelectorAll(".fc-journey-val")[0].textContent)
       && journey.querySelectorAll(".fc-stat-tile").length === 3);
+    const kanaCard = panel.querySelector(".fc-dash-kana .fc-kj-count");
+    check("the Kana card counts the same 208 basic kana as the Kana started figure",
+      !!kanaCard && / of 208 started/.test(kanaCard.textContent));
+    // JLPT levels: words only, each once. A class-table copy of a word (same
+    // reading and meaning, its own id) and a sentence add nothing.
+    const n5Total = () => {
+      const lv = [...panel.querySelectorAll(".fc-jlpt-card .fc-jlpt-level")].find(l => l.querySelector(".fc-jlpt-name").textContent === "N5");
+      return lv ? Number(lv.querySelector(".fc-kj-count").textContent.match(/of (\d+)/)[1]) : NaN;
+    };
+    const n5Rows = window.RaumeStudy.data.vocabularyTables
+      .filter(t => t.tableClass !== "vocab-kanji" && t.tableClass !== "vocab-sentences")
+      .reduce((n, t) => n + t.rows.filter(r => r.id && r.jlpt === 5).length, 0);
+    const before = n5Total();
+    const src = window.RaumeStudy.data.vocabularyTables.find(t => t.rows.some(r => r.id === vocabIds[0]));
+    const orig = src.rows.find(r => r.id === vocabIds[0]);
+    window.RaumeStudy.data.vocabularyTables.push({ id: "smoke-dupe", title: "Smoke", rows: [
+      Object.assign({}, orig, { id: "smoke-dupe-1" }),
+      { id: "smoke-dupe-2", jlpt: 5, type: "word", jp: [{ text: "みずをください。" }], romaji: "mizu o kudasai.", english: "Water, please." }
+    ] });
+    F.render();
+    const after = n5Total();
+    window.RaumeStudy.data.vocabularyTables.pop();
+    F.render();
+    check("JLPT levels counts each N5 word once and no sentences (" + before + " of " + n5Rows + " N5 rows; a copy and a sentence add none: " + after + ")",
+      before > 0 && before <= n5Rows && after === before);
     const today = fcStore.localDateStr(now);
     check("an award unlocks the day it's earned and is noted in the synced journey (25 words mastered; 100 reviews from 30 cards x 4 reps)",
       c.journey.awards["words-25"] === today && c.journey.awards["reviews-100"] === today
