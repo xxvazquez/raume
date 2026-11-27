@@ -1057,6 +1057,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1503","jlpt":5,"type":"word","jp":[{"text":"くつや"}],"romaji":"kutsuya","english":"shoe shop"},
     {"id":"v1559","jlpt":3,"type":"word","jp":[{"text":"えいぎょう"},{"kanji":"時間","reading":"じかん"}],"romaji":"eigyō jikan","english":"opening hours"},
     {"id":"v1644","type":"word","jp":[{"text":"レンタル"}],"romaji":"rentaru","english":"rental"},
+    {"id":"v1680","jlpt":4,"type":"word","jp":[{"text":"おみやげ"}],"romaji":"omiyage","english":"souvenir"},
     ]
   },
   {
@@ -1080,6 +1081,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1602","jlpt":4,"type":"word","jp":[{"text":"ふね"}],"romaji":"fune","english":"boat, ship"},
     {"id":"v1616","jlpt":3,"type":"word","jp":[{"text":"とおり"}],"romaji":"tōri","english":"street"},
     {"id":"v1632","jlpt":5,"type":"word","jp":[{"text":"じどうしゃ"}],"romaji":"jidōsha","english":"car, automobile"},
+    {"id":"v1681","jlpt":4,"type":"word","jp":[{"text":"くうこう"}],"romaji":"kūkō","english":"airport"},
     ]
   },
   {
@@ -1258,6 +1260,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1648","type":"word","jp":[{"text":"イメージ"}],"romaji":"imēji","english":"image"},
     {"id":"v1649","type":"word","jp":[{"text":"トラブル"}],"romaji":"toraburu","english":"trouble"},
     {"id":"v1650","type":"word","jp":[{"text":"サポート"}],"romaji":"sapōto","english":"support"},
+    {"id":"v1682","jlpt":5,"type":"word","jp":[{"text":"にもつ"}],"romaji":"nimotsu","english":"luggage, baggage"},
     ]
   },
   {
@@ -1296,6 +1299,9 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1623","jlpt":3,"type":"word","jp":[{"text":"どくしょ"}],"romaji":"dokusho","english":"reading","enNote":"books"},
     {"id":"v1626","jlpt":2,"type":"word","jp":[{"text":"すもう"}],"romaji":"sumō","english":"sumo"},
     {"id":"v1651","type":"word","jp":[{"text":"バレーボール"}],"romaji":"barēbōru","english":"volleyball"},
+    {"id":"v1683","jlpt":5,"type":"word","jp":[{"text":"りょこう"}],"romaji":"ryokō","english":"travel, trip"},
+    {"id":"v1684","jlpt":5,"type":"word","jp":[{"text":"なつやすみ"}],"romaji":"natsuyasumi","english":"summer holidays, summer vacation"},
+    {"id":"v1685","type":"word","jp":[{"text":"ふゆやすみ"}],"romaji":"fuyuyasumi","english":"winter holidays, winter vacation"},
     ]
   },
   {

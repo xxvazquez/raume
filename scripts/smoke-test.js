@@ -2348,7 +2348,7 @@ async function main() {
       && !document.body.classList.contains("tpick-open"));
     document.querySelector("#customizePage .cv-add-btn").click();
     check("...and a word added straight after goes into it", cvNs.customRows().some(r => r.tableId === newTable.id && r.romaji === "ue"));
-    check("search shows a word once: raume's row, not its repeat in your own table", (() => {
+    check("search shows a word once: raume's row, not its repeat in your own table, naming that table under it (Also in:)", (() => {
       window.RaumeStudy.vocab.applyTableOrder(); // as entering a page does
       const s = document.getElementById("tableSearch");
       s.value = "above"; s.dispatchEvent(new window.Event("input", { bubbles: true }));
@@ -2357,8 +2357,10 @@ async function main() {
       const raume = document.querySelector('#vocabulary .table-section:not([data-table^="ct-"]) tr[data-vocab-id="v0485"]');
       const ok = !!ownRow && ownRow.classList.contains("search-hidden") && own.classList.contains("search-hidden")
         && !!raume && !raume.classList.contains("search-hidden");
+      const also = raume && raume.querySelector(".meaning-cell .search-also");
+      const named = !!also && also.textContent === "Also in: Positions" && !also.closest(".meaning-text");
       s.value = ""; s.dispatchEvent(new window.Event("input", { bubbles: true }));
-      return ok;
+      return ok && named && !document.querySelector("#vocabulary .search-also");
     })());
     cvNs.deleteTable(newTable.id);
   }
