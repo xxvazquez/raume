@@ -118,12 +118,12 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Rings</span><span class="help-desc">Review: today’s due cards done. Learn: new cards, of your daily number. Play: one game or puzzle.</span></li>' +
       '<li><span class="help-term">Study now</span><span class="help-desc">Starts today’s due reviews and new cards; the number is how many.</span></li>' +
       '<li><span class="help-term">Study from</span><span class="help-desc">All flashcards, one JLPT level’s words or several together (N5 + N4), the words not on the JLPT lists, or one table. Study now follows it; the rings still count everything.</span></li>' +
-      '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row with a review; the dots are this week.</span></li>' +
+      '<li><span class="help-term">Streak</span><span class="help-desc">Days in a row you studied: a review, kana, or a finished puzzle or game. The dots are this week.</span></li>' +
       '<li><span class="help-term">Awards</span><span class="help-desc">Grey ones show how far along you are; tap one for what it’s for.</span></li>' +
       '<li><span class="help-term">Highlights</span><span class="help-desc">A line only when there’s news, like a new best Match pace.</span></li>' +
       '<li><span class="help-term">Due next 7 days</span><span class="help-desc">Cards coming due each day; overdue counts as today.</span></li>' +
       '<li><span class="help-term">Trends</span><span class="help-desc">Your last 90 days against your year, after 120 days of study.</span></li>' +
-      '<li><span class="help-term">Puzzles · Games</span><span class="help-desc">Solved or played, your streak, the latest three and See stats.</span></li>' +
+      '<li><span class="help-term">Puzzles · Games</span><span class="help-desc">Solved or played, this week, the latest three and See stats.</span></li>' +
       '<li><span class="help-term">Missed today</span><span class="help-desc">Words you missed, most-missed first — tap one to practise it.</span></li>' +
       '<li><span class="help-term">Leeches</span><span class="help-desc">Words forgotten 8+ times after learning. Pause, or Keep studying.</span></li>' +
       '<li><span class="help-term">Words to review</span><span class="help-desc">Words you often miss, as a table to sort and print; ⋯ hides a column.</span></li>' +

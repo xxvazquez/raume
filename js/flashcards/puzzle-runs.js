@@ -114,6 +114,10 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     }
     else r.help = run.help || 0;
     save(load().concat([r]));
+    // A finished puzzle or game is a study day for the one streak; one
+    // ended early isn't (as for the awards).
+    var ops = window.RaumeStudy.flashcards.dataOps;
+    if (!r.ended && ops && ops.recordStudyActivity) ops.recordStudyActivity(new Date());
     return r;
   }
   function save(arr) {

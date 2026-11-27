@@ -240,6 +240,8 @@ window.RaumeStudy.flashcards.kana = (function () {
     }
     save();
     if (signedIn()) dataOps.syncKanaOutbox();
+    // A kana review is a study day for the one streak.
+    dataOps.recordStudyActivity(now);
     session.reviewedCount++;
     if (session.correct === true) session.correctCount++;
     session.seen[key] = true;
@@ -521,6 +523,13 @@ window.RaumeStudy.flashcards.kana = (function () {
   return {
     renderKana: renderKana, clearSession: clearSession, summary: summary,
     toStudyCount: function (now) { return buildQueue(now || new Date()).length; }, scriptProgress: scriptProgress,
+    // Local dates of each kana card's latest review: the Dashboard's week
+    // dots count them as study days.
+    studyDays: function () {
+      var cards = load().cards;
+      return Object.keys(cards).map(function (k) { return cards[k].last_review; }).filter(Boolean)
+        .map(function (t) { return localDateStr(new Date(t)); });
+    },
     // pure hooks for scripts/smoke-test.js
     __testHooks: {
       checkKana: checkKana, buildQueue: buildQueue, selectedItems: selectedItems,

@@ -324,7 +324,7 @@ kept. **Undo** takes a pause back.
 | --- | --- |
 | **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of your daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
 | **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…), **Words not on the JLPT lists**, or one table. Study now follows it; everything else still counts all cards |
-| **Streak** | Days in a row, this week as seven dots, and your best |
+| **Streak** | One streak for all study — a day counts for a flashcard review, a kana review or a finished puzzle or game (one ended early doesn't). Days in a row, this week as seven dots, and your best |
 | **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under your target) |
 | **Awards** | The newest six and the nearest to go; **Show all** for the rest |
 | **Highlights** | One line, only when there's news |
@@ -333,7 +333,7 @@ Under **Details**: card progress, reviews this week, due next 7 days,
 **Trends** (last 90 days against your year — reviews a day, recall, study
 days a week — after 120 days of history), Kana (every basic kana started —
 the same count as Kana started — and how many to study now), Puzzles and
-Games (results, streak, the last three, **See stats**), Kanji, **JLPT
+Games (results, how many this week, the last three, **See stats**), Kanji, **JLPT
 levels** (each level's words in the reference — and the words not on the
 lists — and how many are Known, once one is; each word counts once however
 many tables hold it, and sentences stay out),

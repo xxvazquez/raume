@@ -252,6 +252,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Reviews": '<circle cx="9" cy="9" r="6.5"/><path d="M6.2 9.2l2 2 3.8-4.1"/>',
     "Games played": '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/>',
     "Puzzles solved": '<rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M3 9h12M9 3v12"/>',
+    "This week": '<rect x="3" y="4" width="12" height="11" rx="1.8"/><path d="M3 7.5h12M6.5 2.5v3M11.5 2.5v3"/>',
     "Retention": '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3.4"/><circle cx="9" cy="9" r=".6" fill="currentColor"/>'
   };
   var INFO_GLYPH = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4.3"/><circle cx="9" cy="5.6" r=".4" fill="currentColor"/></svg>';
@@ -259,7 +260,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // (#fcRetentionNote) -- hidden until asked for, never a standing footnote.
   var STAT_HUES = {
     "Day streak": "orange", "Total cards": "blue", "Reviews": "green", "Retention": "indigo",
-    "Games played": "purple", "Puzzles solved": "teal"
+    "Games played": "purple", "Puzzles solved": "teal", "This week": "amber"
   };
   // `below`: why a figure is flagged ("below your 90% target") -- a down
   // arrow beside it and the words for VoiceOver, so the state never rests
@@ -454,7 +455,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
 
   // The streak: the number with a flame, then this week as seven dots --
   // filled for a day you studied, hollow for one you didn't, today half
-  // until its Review ring closes, the days ahead a grey track. The week
+  // until its Review ring closes, the days ahead a grey track. One streak
+  // for all study: a day counts for flashcard reviews, kana reviews or a
+  // finished puzzle or game (data-ops recordStudyActivity). The week
   // starts where the locale's does (Monday when it can't say).
   function weekStart() {
     try {
@@ -473,10 +476,20 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
   var FLAME_ICON = '<svg class="fc-streak-flame" data-tile="orange" viewBox="0 0 18 18" width="22" height="22" fill="currentColor" aria-hidden="true">' +
     '<path d="M9 16c2.8 0 4.5-1.9 4.5-4.3 0-2.9-2.4-4.3-3.2-7.2-.9 1.6-1.3 2.6-1.3 3.9-.9-.6-1.4-1.4-1.6-2.4C6 7.4 4.5 9.2 4.5 11.7 4.5 14.1 6.2 16 9 16Z"/></svg>';
+  // Days with a finished puzzle or game, or a kana review (each kana card's
+  // latest -- its history lives on the account) -- the study days the
+  // review log doesn't hold.
+  function studyDaysBeyondReviews() {
+    var days = [], F = window.RaumeStudy.flashcards;
+    if (F.puzzleRuns) F.puzzleRuns.all().forEach(function (r) { if (!r.ended) days.push(localDateStr(new Date(r.at))); });
+    if (F.kana && F.kana.studyDays) days = days.concat(F.kana.studyDays());
+    return days;
+  }
   function streakStripHtml(now, rings) {
     var settings = getCache().settings, streak = liveStreak(now), best = Math.max(settings.longest_streak || 0, streak);
     var studied = {};
     (weeklyActivity || []).forEach(function (d) { if (d.count > 0) studied[d.date] = true; });
+    studyDaysBeyondReviews().forEach(function (day) { studied[day] = true; });
     var todayStr = localDateStr(now);
     if (settings.last_study_date === todayStr) studied[todayStr] = true;
     var start = new Date(now); start.setHours(12, 0, 0, 0);
@@ -1180,6 +1193,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     return '<div class="fc-pz-actions"><button type="button" class="fc-btn" data-dash-go="' + kind + '">' + (kind === "games" ? "Play a game" : "Play a puzzle") + "</button>" +
       (empty ? "" : '<button type="button" class="fc-pz-link" data-dash-go="stats-' + kind + '">See stats</button>') + "</div>";
   }
+  // How many in the last seven days (today included).
+  function weekCount(sum) { return sum.days.reduce(function (n, d) { return n + d.count; }, 0); }
   // Puzzles: grids and word searches solved, and the last few.
   function puzzlesCardHtml(now) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
@@ -1188,7 +1203,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var head = '<div class="fc-viz-card fc-viz-wide fc-puzzles-card">' + vizTitle("Puzzles");
     // Nothing solved yet: one line and the way in, not a card of zeroes.
     if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No puzzles solved yet.</p>' + pzActionsHtml("puzzles", true) + "</div></div>";
-    return head + '<div class="fc-stats-grid fc-pz-stats">' + statTile(sum.total, "Puzzles solved") + statTile(sum.streak, "Day streak") + "</div>" +
+    return head + '<div class="fc-stats-grid fc-pz-stats">' + statTile(sum.total, "Puzzles solved") + statTile(weekCount(sum), "This week") + "</div>" +
       '<h4 class="fc-pz-sub">Recent puzzles</h4><ul class="fc-pz-list">' + sum.recent.slice(0, 3).map(runRowHtml).join("") + "</ul>" +
       pzActionsHtml("puzzles") + "</div>";
   }
@@ -1201,8 +1216,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var head = '<div class="fc-viz-card fc-viz-wide fc-games-card">' + vizTitle("Games");
     if (!sum.total) return head + '<div class="fc-pz-empty"><p class="fc-note">No games yet.</p>' + pzActionsHtml("games", true) + "</div></div>";
     // Two figures that hold for every game; each game's own measure
-    // (accuracy, pace, fastest round) lives in its Stats.
-    var tiles = statTile(sum.total, "Games played") + statTile(sum.streak, "Day streak");
+    // (accuracy, pace, fastest round) lives in its Stats. No streak of its
+    // own: a finished game counts toward the one study streak up top.
+    var tiles = statTile(sum.total, "Games played") + statTile(weekCount(sum), "This week");
     return head + '<div class="fc-stats-grid fc-pz-stats">' + tiles + "</div>" +
       '<h4 class="fc-pz-sub">Games this week</h4>' +
       weeklyActivityChart(sum.days, "Games per day over the last 7 days", "No games yet this week.") +

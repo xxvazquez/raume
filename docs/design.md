@@ -1047,11 +1047,12 @@ be scannable at a glance:
   `.fc-dash-head`), one `.fc-viz-card` each for
   Card progress, Reviews this week and Due next 7 days (each only once it
   has something to chart — an empty chart is no news), Kana (the Kanji card's
-  layout: "25 of 112 started" with "35 to study now" under it, a white Study kana
+  layout: "25 of 208 started" (every basic kana) with "35 to study now" under it, a white Study kana
   — Open Kana when nothing is due; Study now stays the screen's one filled
   button — and the sage bar), Puzzles and Games (full
   width, always there, one card each: two stat cells that hold for every game —
-  solved / played and the day streak (each game's own measure is in its
+  solved / played and how many this week (no streak of their own — a
+  finished one counts toward the one streak; each game's own measure is in its
   Stats) — Games' week as the Reviews-this-week bars, then the last three as
   44px subtitle cells: the game's name, the date and whatever the result
   doesn't already say ("10 pairs · 2 misses") on the grey line, the result
@@ -1084,7 +1085,8 @@ be scannable at a glance:
   motion draw them at rest (`raume-rings-shown` holds the date);
 - **The streak strip** (`.fc-dash-streak`, its own white card): an orange
   flame (`--tile-orange`), the number at 28px semibold and "day streak" in
-  grey; then this week's seven days, the locale's first day first (Monday
+  grey — one streak for all study (reviews, kana, a finished puzzle or game);
+  then this week's seven days, the locale's first day first (Monday
   when it can't say) — an 11px muted letter over a 14px dot: filled orange
   studied, a pale orange ring missed, today half-filled until its Review ring
   closes (its letter in ink), the days ahead the bar track. One grey line

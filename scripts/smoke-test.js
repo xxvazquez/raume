@@ -5573,12 +5573,12 @@ async function main() {
       && !!g.querySelector('[data-dash-go="games"]') && !!g.querySelector('[data-dash-go="stats-games"]')
       && /Games played/.test(g.textContent) && !/Games played/.test(p.textContent);
   })());
-  check("the cards show two figures that hold for every game (count, day streak) and recent rows that say each fact once -- the game's name, the date under it, the result trailing", (() => {
+  check("the cards show two figures that hold for every game (count, this week) and recent rows that say each fact once -- the game's name, the date under it, the result trailing", (() => {
     const g = document.querySelector("#fcPanelDashboard .fc-games-card");
     const labels = [...g.querySelectorAll(".fc-stat-label")].map(l => l.textContent);
     const row = g.querySelector(".fc-pz-row");
     const name = row.querySelector(".fc-pz-what").firstChild.textContent;
-    return labels.join("|") === "Games played|Day streak" && /^(Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain)$/.test(name)
+    return labels.join("|") === "Games played|This week" && /^(Match|Listening|Kana tiles|Odd one out|Speed sort|Word chain)$/.test(name)
       && /^(\d+ \/ \d+|\d+:\d\d\.\d)$/.test(row.querySelector(".fc-pz-how").textContent)
       && !/ words?$/.test(row.querySelector(".fc-pz-when").textContent.split(" · ").pop() || "") ;
   })());
@@ -5618,6 +5618,17 @@ async function main() {
   window.RaumeStudy.flashcards.store.saveCache();
   window.RaumeStudy.flashcards.render();
 
+  check("one streak: a finished game is a study day, one ended early isn't (last: the two runs stay)", (() => {
+    const F = window.RaumeStudy.flashcards, set = F.store.getCache().settings;
+    const saved = { c: set.current_streak, l: set.longest_streak, d: set.last_study_date };
+    set.last_study_date = null; set.current_streak = 0;
+    F.puzzleRuns.record({ mode: "match", n: 4, ms: 9000, ended: true });
+    const afterEnded = set.last_study_date;
+    F.puzzleRuns.record({ mode: "match", n: 4, ms: 9000 });
+    const ok = afterEnded === null && set.last_study_date === F.store.localDateStr(new Date()) && set.current_streak === 1;
+    set.current_streak = saved.c; set.longest_streak = saved.l; set.last_study_date = saved.d;
+    return ok;
+  })());
   }
   if (want("flashcards")) {
   check("Library and Words you've added rows swipe like Mail: vertical scrolling stays the browser's, and each swipe is a row's own button", (() => {
