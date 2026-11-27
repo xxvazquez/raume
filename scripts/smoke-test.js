@@ -247,7 +247,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 58 table sections", sections.length === 58);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 1514 vocabulary rows", totalRows === 1514);
+  check("renders 1518 vocabulary rows", totalRows === 1518);
   check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
     const forms = id => JSON.parse(document.querySelector('tr[data-vocab-id="' + id + '"] .verb-forms-note')?.dataset.forms || "[]").map(f => f[0]);
     const iku = forms("v0141"), oyogu = forms("v0155"), kuru = forms("v0135"), taberu = forms("v0139");
@@ -5932,6 +5932,14 @@ async function main() {
   const particleEntry = Object.values(vocabIndex).find(e => e.englishDisplay === "topic, contrast");
   check("a particle entry's flashcard prompt carries the blue/bold .particle span", () =>
     !!particleEntry && /<span class="particle"[^>]*>は<\/span>/.test(fc.promptFor(particleEntry, "jp-en").html));
+  check("a lone particle は is spoken \"wa\" (prompt, reveal and table row) while 歯 (は, tooth) stays \"ha\"", (() => {
+    const tooth = Object.values(vocabIndex).find(e => e.vocabId === "v0867");
+    const row = document.querySelector('#vocabulary tr[data-vocab-id="v0227"] .jp-speak-btn');
+    return !!particleEntry && !!tooth && !!row
+      && /data-jp-speak="わ"/.test(fc.promptFor(particleEntry, "jp-en").html) && particleEntry.jpSpoken === "わ"
+      && particleEntry.jpReading === "は" && row.dataset.jpSpeak === "わ"
+      && tooth.jpSpoken === "は" && /data-jp-speak="は"/.test(fc.promptFor(tooth, "jp-en").html);
+  })());
   const verbPairEntry = Object.values(vocabIndex).find(e => (e.romajiDisplay || "").includes(" / "));
   check("a verb-pair entry's prompt carries one speaker button per form (plain and polite)", (() => {
     if (!verbPairEntry) return false;

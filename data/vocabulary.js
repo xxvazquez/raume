@@ -783,6 +783,10 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0622","jlpt":5,"type":"word","jp":[{"kanji":"毎年","reading":"まいとし / まいねん"}],"romaji":"maitoshi / mainen","english":"every year","irregular":true},
     {"id":"v1371","jlpt":4,"type":"word","jp":[{"text":"しゅうまつ"}],"romaji":"shūmatsu","english":"weekend"},
     {"id":"v1544","jlpt":5,"type":"word","jp":[{"kanji":"一日","reading":"いちにち"}],"romaji":"ichinichi","english":"a day, one day"},
+    {"id":"v1676","jlpt":5,"type":"word","jp":[{"text":"〜"},{"kanji":"週間","reading":"しゅうかん"}],"romaji":"~shūkan","english":"weeks","enNote":"a length of time"},
+    {"id":"v1677","jlpt":5,"type":"word","jp":[{"kanji":"一週間","reading":"いっしゅうかん"}],"romaji":"isshūkan","english":"a week, one week","enNote":"a length of time"},
+    {"id":"v1678","jlpt":5,"type":"word","jp":[{"text":"〜か"},{"kanji":"月","reading":"げつ"}],"romaji":"~kagetsu","english":"months","enNote":"a length of time"},
+    {"id":"v1679","jlpt":5,"type":"word","jp":[{"kanji":"一","reading":"いっ"},{"text":"か"},{"kanji":"月","reading":"げつ"}],"romaji":"ikkagetsu","english":"a month, one month","enNote":"a length of time"},
     ]
   },
   {
