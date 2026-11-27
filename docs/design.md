@@ -903,7 +903,10 @@ and Help.
   (い-adjective shortened to い-adj.), Watch out (orange), Tip (amber), Note N or Example
   (grey), or the kana a tip is about set at 18px — and a hairline under
   it, so where one idea ends is always drawn. A right / wrong example
-  (✓ / ✗) is its own 16px Japanese line under the explanation. A form
+  (✓ / ✗) is its own 16px Japanese line under the explanation. Two-column lists of short
+  pairs (Polite | Casual, Word | Not, Wrong | Right) stay side by side
+  with their header on a phone too, as a table would, instead of
+  stacking into one tall column; only sentence lists stack. A form
   that doesn't exist (no Japanese, or a bare dash) gets no speaker: just
   its English, grey italic, saying so. Every speaker sits at the trailing
   edge of its Japanese's first line, as in the reference tables, so they
