@@ -2492,6 +2492,19 @@ async function main() {
       if (rn2) rn2.remove();
       return ok;
     })());
+    check("a heading over tips stays a heading and the tips become labelled rows, not a fold", (() => {
+      const spot4 = document.createElement("p");
+      host.appendChild(spot4);
+      nh.showLessonHtml('<html><head><meta name="raume-note" content="1"></head><body><article class="rn"><section class="rn-sec" data-tile="blue">' +
+        '<h2 class="rn-sec-head"><span class="rn-sec-num" aria-hidden="true">1</span><span>に or で</span><span class="rn-sub">where</span></h2>' +
+        '<h3 class="rn-h3">Quick test</h3><div class="rn-tips"><div class="rn-tip"><span class="rn-dot">で</span><div>Doing</div></div>' +
+        '<div class="rn-tip"><span class="rn-dot">に</span><div>There</div></div></div></section></article></body></html>', spot4);
+      const rn4 = host.querySelectorAll(".rn")[1], h = rn4 && rn4.querySelector(".rn-sec-body > .rn-h3");
+      const ok = !!h && h.textContent === "Quick test" && !rn4.querySelector(".rn-fold")
+        && rn4.querySelectorAll(".rn-sec-body > .rn-lrow").length === 2 && h.nextElementSibling.classList.contains("rn-lrow");
+      if (rn4) rn4.remove();
+      return ok;
+    })());
     check("a section reads as a page heading that folds: its kind's tile, title, \"N · kind\" under it, open to start; each idea a labelled row", (() => {
       const spot3 = document.createElement("p");
       host.appendChild(spot3);

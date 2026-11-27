@@ -605,7 +605,9 @@ window.RaumeStudy.notes = (function () {
     var blocks = [];
     body.querySelectorAll(".rn-h3").forEach(function (h) {
       var next = h.nextElementSibling;
-      if (next && !next.classList.contains("rn-h3")) blocks.push({ block: next, h: h });
+      // A heading over the lesson's ideas ("Quick test" over tips) stays a
+      // heading: those always show, as labelled rows.
+      if (next && !next.matches(".rn-h3, .rn-tips, .rn-tip, .rn-formula, .rn-two")) blocks.push({ block: next, h: h });
     });
     body.querySelectorAll(".rn-tiles").forEach(function (list) {
       var block = list.parentElement.classList.contains("rn-cols2") ? list.parentElement : list;
