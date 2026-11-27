@@ -247,7 +247,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 58 table sections", sections.length === 58);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 1479 vocabulary rows", totalRows === 1479);
+  check("renders 1506 vocabulary rows", totalRows === 1506);
   check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
     const forms = id => JSON.parse(document.querySelector('tr[data-vocab-id="' + id + '"] .verb-forms-note')?.dataset.forms || "[]").map(f => f[0]);
     const iku = forms("v0141"), oyogu = forms("v0155"), kuru = forms("v0135"), taberu = forms("v0139");

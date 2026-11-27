@@ -953,6 +953,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1528","jlpt":5,"type":"word","jp":[{"kanji":"大人","reading":"おとな"}],"romaji":"otona","english":"adult"},
     {"id":"v1531","jlpt":4,"type":"word","jp":[{"text":"おきゃくさん"}],"romaji":"okyakusan","english":"guest, customer"},
     {"id":"v1613","jlpt":4,"type":"word","jp":[{"text":"ぼく"}],"romaji":"boku","english":"I","enNote":"used by men and boys"},
+    {"id":"v1641","type":"word","jp":[{"text":"ライバル"}],"romaji":"raibaru","english":"rival"},
     ]
   },
   {
@@ -976,6 +977,8 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0873","jlpt":5,"type":"word","jp":[{"kanji":"医者","reading":"いしゃ"}],"romaji":"isha","english":"doctor"},
     {"id":"v0406","jlpt":5,"type":"word","jp":[{"kanji":"薬","reading":"くすり"}],"romaji":"kusuri","english":"medicine"},
     {"id":"v1600","jlpt":5,"type":"word","jp":[{"text":"こえ"}],"romaji":"koe","english":"voice"},
+    {"id":"v1642","type":"word","jp":[{"text":"ストレス"}],"romaji":"sutoresu","english":"stress"},
+    {"id":"v1643","type":"word","jp":[{"text":"ダイエット"}],"romaji":"daietto","english":"diet"},
     ]
   },
   {
@@ -1047,6 +1050,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1502","jlpt":5,"type":"word","jp":[{"text":"パンや"}],"romaji":"pan'ya","english":"bakery"},
     {"id":"v1503","jlpt":5,"type":"word","jp":[{"text":"くつや"}],"romaji":"kutsuya","english":"shoe shop"},
     {"id":"v1559","jlpt":3,"type":"word","jp":[{"text":"えいぎょう"},{"kanji":"時間","reading":"じかん"}],"romaji":"eigyō jikan","english":"opening hours"},
+    {"id":"v1644","type":"word","jp":[{"text":"レンタル"}],"romaji":"rentaru","english":"rental"},
     ]
   },
   {
@@ -1242,6 +1246,12 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1633","jlpt":4,"type":"word","jp":[{"text":"じゅうしょ"}],"romaji":"jūsho","english":"address"},
     {"id":"v1620","jlpt":5,"type":"word","jp":[{"text":"きいろ"}],"romaji":"kiiro","english":"yellow","enNote":"noun"},
     {"id":"v1621","jlpt":5,"type":"word","jp":[{"text":"ちゃいろ"}],"romaji":"chairo","english":"brown","enNote":"noun"},
+    {"id":"v1645","type":"word","jp":[{"text":"プレゼント"}],"romaji":"purezento","english":"present, gift"},
+    {"id":"v1646","type":"word","jp":[{"text":"メモ"}],"romaji":"memo","english":"memo, note"},
+    {"id":"v1647","type":"word","jp":[{"text":"パンフレット"}],"romaji":"panfuretto","english":"pamphlet"},
+    {"id":"v1648","type":"word","jp":[{"text":"イメージ"}],"romaji":"imēji","english":"image"},
+    {"id":"v1649","type":"word","jp":[{"text":"トラブル"}],"romaji":"toraburu","english":"trouble"},
+    {"id":"v1650","type":"word","jp":[{"text":"サポート"}],"romaji":"sapōto","english":"support"},
     ]
   },
   {
@@ -1279,6 +1289,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1619","jlpt":4,"type":"word","jp":[{"text":"おしょうがつ"}],"romaji":"oshōgatsu","english":"New Year"},
     {"id":"v1623","jlpt":3,"type":"word","jp":[{"text":"どくしょ"}],"romaji":"dokusho","english":"reading","enNote":"books"},
     {"id":"v1626","jlpt":2,"type":"word","jp":[{"text":"すもう"}],"romaji":"sumō","english":"sumo"},
+    {"id":"v1651","type":"word","jp":[{"text":"バレーボール"}],"romaji":"barēbōru","english":"volleyball"},
     ]
   },
   {
@@ -1298,6 +1309,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1593","type":"word","jp":[{"text":"ひよこ"}],"romaji":"hiyoko","english":"chick"},
     {"id":"v1594","jlpt":3,"type":"word","jp":[{"text":"うま"}],"romaji":"uma","english":"horse"},
     {"id":"v1604","jlpt":4,"type":"word","jp":[{"text":"むし"}],"romaji":"mushi","english":"insect, bug"},
+    {"id":"v1652","type":"word","jp":[{"text":"ゴリラ"}],"romaji":"gorira","english":"gorilla"},
     ]
   },
   {
@@ -1341,6 +1353,19 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1572","jlpt":5,"type":"word","jp":[{"text":"ください"}],"romaji":"kudasai","english":"please give me"},
     {"id":"v1573","jlpt":5,"type":"word","jp":[{"text":"どうも"}],"romaji":"dōmo","english":"thanks, very"},
     {"id":"v1629","jlpt":5,"type":"word","jp":[{"text":"どうぞ"}],"romaji":"dōzo","english":"please, go ahead"},
+    {"id":"v1653","jlpt":5,"type":"word","jp":[{"text":"おやすみなさい"}],"romaji":"oyasuminasai","english":"good night"},
+    {"id":"v1654","type":"word","jp":[{"text":"おやすみ"}],"romaji":"oyasumi","english":"good night","enNote":"casual"},
+    {"id":"v1655","jlpt":5,"type":"word","jp":[{"text":"どういたしまして"}],"romaji":"dō itashimashite","english":"you're welcome"},
+    {"id":"v1656","jlpt":5,"type":"word","jp":[{"text":"ごめんなさい"}],"romaji":"gomennasai","english":"I'm sorry"},
+    {"id":"v1657","type":"word","jp":[{"text":"ごめん"}],"romaji":"gomen","english":"sorry","enNote":"casual"},
+    {"id":"v1658","type":"word","jp":[{"text":"またね"}],"romaji":"mata ne","english":"see you","enNote":"casual"},
+    {"id":"v1659","type":"word","jp":[{"text":"バイバイ"}],"romaji":"baibai","english":"bye-bye","enNote":"casual"},
+    {"id":"v1660","jlpt":5,"type":"word","jp":[{"text":"いってきます"}],"romaji":"ittekimasu","english":"I'm off","enNote":"leaving home"},
+    {"id":"v1661","jlpt":5,"type":"word","jp":[{"text":"いってらっしゃい"}],"romaji":"itterasshai","english":"see you later","enNote":"to someone leaving home"},
+    {"id":"v1662","jlpt":5,"type":"word","jp":[{"text":"ただいま"}],"romaji":"tadaima","english":"I'm home"},
+    {"id":"v1663","jlpt":5,"type":"word","jp":[{"text":"おかえりなさい"}],"romaji":"okaerinasai","english":"welcome home"},
+    {"id":"v1664","type":"word","jp":[{"text":"おかえり"}],"romaji":"okaeri","english":"welcome home","enNote":"casual"},
+    {"id":"v1665","type":"word","jp":[{"text":"ごちそうさま"}],"romaji":"gochisōsama","english":"said after eating","enNote":"casual"},
     ]
   },
   {
@@ -1625,6 +1650,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1535","jlpt":3,"type":"word","jp":[{"text":"じゅんばん"}],"romaji":"junban","english":"order, turn"},
     {"id":"v1598","jlpt":3,"type":"word","jp":[{"text":"たいいく"}],"romaji":"taiiku","english":"PE, physical education"},
     {"id":"v1617","jlpt":5,"type":"word","jp":[{"text":"べんきょう"}],"romaji":"benkyō","english":"study"},
+    {"id":"v1666","type":"word","jp":[{"text":"テキスト"}],"romaji":"tekisuto","english":"textbook, text"},
     ]
   },
   {
@@ -1647,6 +1673,7 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1448","jlpt":5,"type":"word","jp":[{"text":"しゃいん"}],"romaji":"shain","english":"employee"},
     {"id":"v1482","jlpt":3,"type":"word","jp":[{"text":"かしゅ"}],"romaji":"kashu","english":"singer"},
     {"id":"v1563","jlpt":4,"type":"word","jp":[{"text":"しゃちょう"}],"romaji":"shachō","english":"company president"},
+    {"id":"v1667","type":"word","jp":[{"text":"ビジネス"}],"romaji":"bijinesu","english":"business"},
     ]
   },
   {
