@@ -247,7 +247,7 @@ async function main() {
   const sections = document.querySelectorAll(".table-section");
   check("renders 58 table sections", sections.length === 58);
   const totalRows = document.querySelectorAll(".vocab tbody tr").length;
-  check("renders 1506 vocabulary rows", totalRows === 1506);
+  check("renders 1514 vocabulary rows", totalRows === 1514);
   check("a verb's ⓘ data lists its polite and plain forms and て-form, worked out by group (行った, 泳いで, 来(こ)ない, ある → ない)", (() => {
     const forms = id => JSON.parse(document.querySelector('tr[data-vocab-id="' + id + '"] .verb-forms-note')?.dataset.forms || "[]").map(f => f[0]);
     const iku = forms("v0141"), oyogu = forms("v0155"), kuru = forms("v0135"), taberu = forms("v0139");
@@ -549,7 +549,7 @@ async function main() {
     const godanIchidan = rows.filter(r => !r.cells[1].querySelector(".verb-badge-irregular"));
     const kiru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kiru");
     const kuru = rows.find(r => r.querySelector(".jpword").dataset.romaji === "kuru");
-    return badgeOk && rows.length === 91 && document.querySelectorAll(".vocab .adj-note").length === 0
+    return badgeOk && rows.length === 93 && document.querySelectorAll(".vocab .adj-note").length === 0
       && irr.length === 6 && irr.every(r => /—/.test(r.cells[1].querySelector(".verb-badge-irr").dataset.role))
       && !!kiru && kiru.cells[1].querySelector(".verb-badge-godan.verb-badge-irr")
       && !!kuru && kuru.cells[1].querySelector(".verb-badge-irregular.verb-badge-irr")

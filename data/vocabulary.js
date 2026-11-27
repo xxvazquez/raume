@@ -395,6 +395,8 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v0758","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"借","reading":"か"},{"text":"りる"}],"romaji":"kariru"},{"jp":[{"kanji":"借","reading":"か"},{"text":"ります"}],"romaji":"karimasu"}],"english":"to borrow","verbClass":"ichidan","particles":[{"p":"を","role":"what you borrow"},{"p":"に / から","role":"who you borrow from"}]},
     {"id":"v0759","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"返","reading":"かえ"},{"text":"す"}],"romaji":"kaesu"},{"jp":[{"kanji":"返","reading":"かえ"},{"text":"します"}],"romaji":"kaeshimasu"}],"english":"to give back, to return","enNote":"a thing","verbClass":"godan","particles":[{"p":"を","role":"what you give back"},{"p":"に","role":"who you give it back to"}]},
     {"id":"v0760","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"着","reading":"き"},{"text":"る"}],"romaji":"kiru"},{"jp":[{"kanji":"着","reading":"き"},{"text":"ます"}],"romaji":"kimasu"}],"english":"to wear, to put on","enNote":"shirts, jackets","verbClass":"ichidan","particles":[{"p":"を","role":"what you put on"}]},
+    {"id":"v1668","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"text":"はく"}],"romaji":"haku"},{"jp":[{"text":"はきます"}],"romaji":"hakimasu"}],"english":"to wear, to put on","enNote":"shoes, socks, trousers, skirts","verbClass":"godan","particles":[{"p":"を","role":"what you put on"}]},
+    {"id":"v1669","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"text":"かぶる"}],"romaji":"kaburu"},{"jp":[{"text":"かぶります"}],"romaji":"kaburimasu"}],"english":"to wear, to put on","enNote":"hats","verbClass":"godan","particles":[{"p":"を","role":"what you put on"}]},
     {"id":"v0761","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"働","reading":"はたら"},{"text":"く"}],"romaji":"hataraku"},{"jp":[{"kanji":"働","reading":"はたら"},{"text":"きます"}],"romaji":"hatarakimasu"}],"english":"to work","verbClass":"godan","particles":[{"p":"で","role":"where you work"}]},
     {"id":"v0762","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"立","reading":"た"},{"text":"つ"}],"romaji":"tatsu"},{"jp":[{"kanji":"立","reading":"た"},{"text":"ちます"}],"romaji":"tachimasu"}],"english":"to stand up","verbClass":"godan","particles":[]},
     {"id":"v0763","jlpt":5,"type":"verb-pair","forms":[{"jp":[{"kanji":"座","reading":"すわ"},{"text":"る"}],"romaji":"suwaru"},{"jp":[{"kanji":"座","reading":"すわ"},{"text":"ります"}],"romaji":"suwarimasu"}],"english":"to sit down","verbClass":"godan","particles":[{"p":"に","role":"what you sit on"}]},
@@ -1716,6 +1718,12 @@ window.RaumeStudy.data = { vocabularyTables: [
     {"id":"v1446","type":"word","jp":[{"text":"Tシャツ"}],"romaji":"tīshatsu","english":"T-shirt"},
     {"id":"v1575","jlpt":5,"type":"word","jp":[{"text":"ネクタイ"}],"romaji":"nekutai","english":"necktie"},
     {"id":"v1588","jlpt":5,"type":"word","jp":[{"text":"スリッパ"}],"romaji":"surippa","english":"slippers"},
+    {"id":"v1670","jlpt":5,"type":"word","jp":[{"text":"シャツ"}],"romaji":"shatsu","english":"shirt"},
+    {"id":"v1671","jlpt":5,"type":"word","jp":[{"text":"ズボン"}],"romaji":"zubon","english":"trousers, pants"},
+    {"id":"v1672","jlpt":5,"type":"word","jp":[{"text":"スカート"}],"romaji":"sukāto","english":"skirt"},
+    {"id":"v1673","jlpt":5,"type":"word","jp":[{"text":"くつした"}],"romaji":"kutsushita","english":"socks"},
+    {"id":"v1674","jlpt":5,"type":"word","jp":[{"text":"コート"}],"romaji":"kōto","english":"coat"},
+    {"id":"v1675","jlpt":5,"type":"word","jp":[{"text":"うわぎ"}],"romaji":"uwagi","english":"jacket"},
     ]
   },
   {
