@@ -223,9 +223,10 @@ to flashcards**, or single words from **Library** or a search result.
   〜なかった). You never type Japanese.
 - **Study directions** in Settings picks which you get; the handwritten two
   and verb forms are off until you turn them on.
-- A session mixes everything due (plus learning steps due within 20 minutes)
-  with the day's new cards, freshly shuffled, never the same word twice in a
-  row.
+- A session mixes everything due today (plus learning steps due within 20
+  minutes) with the day's new cards, freshly shuffled, never the same word
+  twice in a row. A review is ready all day on its due date, whatever hour it
+  was set at.
 - A new word starts **JP → EN**; its other directions join once you've seen
   it.
 

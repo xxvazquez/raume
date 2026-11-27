@@ -216,17 +216,24 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // A learning/relearning step is meant to come back in minutes -- making
   // someone sit out a 10-minute step before they can finish a session is
   // silly, so those count as "ready" a short way ahead of their due time
-  // (Anki calls this the learn-ahead limit). Review cards, whose intervals
-  // are days, still only count once they are genuinely due.
+  // (Anki calls this the learn-ahead limit). A review card's interval is in
+  // days, so it is ready all of the day it falls due, not only from the
+  // hour of yesterday's review -- otherwise a card reviewed at 9pm isn't
+  // back until 9pm, and a morning session can't clear what the Review ring
+  // counts as due today.
   var LEARN_AHEAD_MS = 20 * 60 * 1000;
+  function endOfDay(now) {
+    var d = new Date(now || new Date()); d.setHours(23, 59, 59, 999);
+    return d;
+  }
+  function isReady(card, now) {
+    if (!card || card.state === 0) return false;
+    var t = (now || new Date()).getTime(), due = new Date(card.due).getTime();
+    if (card.state === 1 || card.state === 3) return due <= t + LEARN_AHEAD_MS;
+    return due <= endOfDay(now).getTime();
+  }
   function readyToStudy(now) {
-    var t = (now || new Date()).getTime();
-    return scopedCards().filter(function (card) {
-      if (card.state === 0) return false;
-      var due = new Date(card.due).getTime();
-      if (card.state === 1 || card.state === 3) return due <= t + LEARN_AHEAD_MS;
-      return due <= t;
-    });
+    return scopedCards().filter(function (card) { return isReady(card, now); });
   }
   // New cards introduced today, across every session -- not just the one
   // being built right now. Without this, "New cards per day" only capped a
@@ -320,7 +327,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       if (card.state === 0) newCount++;
       else if (card.state === 1 || card.state === 3) learningCount++;
       else reviewCount++;
-      if (card.state !== 0 && new Date(card.due) <= now) dueCount++;
+      if (isReady(card, now)) dueCount++;
       var r = retrievabilityOf(scheduler, card, now);
       if (r != null) { retSum += r; retN++; }
     });
@@ -346,6 +353,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
     studyTables: studyTables, studyLevels: studyLevels, scopeLevels: scopeLevels, studyScope: studyScope, scopedCards: scopedCards,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
+    endOfDay: endOfDay, isReady: isReady,
     readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay,
     mergeToday: mergeToday

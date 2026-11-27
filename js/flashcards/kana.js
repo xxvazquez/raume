@@ -39,7 +39,6 @@ window.RaumeStudy.flashcards.kana = (function () {
   // newPerDay() is the daily new-card cap.
   function fsrs() { return load().fsrs || store.defaultKanaFsrs(); }
   function newPerDay() { return fsrs().new_per_day; }
-  var LEARN_AHEAD_MS = 20 * 60 * 1000; // match scheduling.js: a short learning step counts as ready
   // One direction: see the kana, type its romaji. (Romaji -> kana was
   // dropped -- typing kana needs a kana keyboard, and reading romaji back
   // isn't recall. Its old |r2k cards stay in storage, just never dealt.)
@@ -98,10 +97,9 @@ window.RaumeStudy.flashcards.kana = (function () {
     return selectedItems().map(function (it) { return { item: it, dir: DIR }; });
   }
 
-  function dueState(card, now) {
-    var ahead = (card.state === 1 || card.state === 3) ? LEARN_AHEAD_MS : 0;
-    return new Date(card.due).getTime() <= now.getTime() + ahead;
-  }
+  // Ready by the vocab queue's rule: learning steps a short way ahead,
+  // reviews all of the day they fall due.
+  function dueState(card, now) { return sched.isReady(card, now); }
   // Deal units out round-robin by kana, so an item's two directions never land
   // back to back (the vocab queue's spaceByVocab, scoped to one kana).
   function spaceByItem(units) {

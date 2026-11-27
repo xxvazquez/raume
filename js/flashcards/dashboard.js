@@ -327,10 +327,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var day = sched.todayDay(now), fresh = {}, seen = {};
     day.fresh.forEach(function (id) { fresh[id] = true; });
     day.reviewed.forEach(function (id) { if (!fresh[id]) seen[id] = true; });
-    var endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
     var cleared = Object.keys(seen).length;
     var left = studyableCards().filter(function (c) {
-      return c.state !== 0 && !seen[c.id] && !fresh[c.id] && new Date(c.due) <= endToday;
+      return c.state !== 0 && !seen[c.id] && !fresh[c.id] && new Date(c.due) <= sched.endOfDay(now);
     }).length;
     var perDay = Math.max(0, getCache().settings.queue_new_cards_per_day || 0);
     var learnGoal = Math.min(perDay, day.count + sched.introducibleCount(true));
@@ -447,8 +446,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       var next = sched.scopedCards().filter(function (c) { return c.state !== 0; })
         .map(function (c) { return new Date(c.due).getTime(); })
         .filter(function (t) { return t > now.getTime(); }).sort(function (a, b) { return a - b; })[0];
-      var endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
-      text = next && next <= endToday.getTime() ? "Next review " + verboseUntil(now, next)
+      text = next && next <= sched.endOfDay(now).getTime() ? "Next review " + verboseUntil(now, next)
         : "Nothing due — learn new words or play";
     }
     return '<p class="fc-rings-line">' + esc(text) + "</p>";

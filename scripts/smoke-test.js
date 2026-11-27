@@ -3486,6 +3486,15 @@ async function main() {
     return !!far && text(far.correctHtml) === "nomu / nomimasu"
       && text(near.correctHtml) === "nomu / nomimasu" && /^nomu \/ nomimas<mark/.test(near.correctHtml);
   })());
+  check("a review card is ready all of its due day; a learning step only 20 minutes ahead", (() => {
+    const sched = window.RaumeStudy.flashcards.scheduling;
+    const morning = new Date(2026, 10, 27, 8, 0), evening = new Date(2026, 10, 27, 21, 0), tomorrow = new Date(2026, 10, 28, 8, 0);
+    return sched.isReady({ state: 2, due: evening.toISOString() }, morning)
+      && !sched.isReady({ state: 2, due: tomorrow.toISOString() }, evening)
+      && !sched.isReady({ state: 1, due: evening.toISOString() }, morning)
+      && sched.isReady({ state: 3, due: new Date(morning.getTime() + 10 * 60000).toISOString() }, morning)
+      && !sched.isReady({ state: 0, due: morning.toISOString() }, evening);
+  })());
   document.querySelector('.fc-rating-btn[data-rating="again"]').click();
   await flush();
   check("rating advances in place -- the answer field survives to the next card, ratings + lock cleared", () =>

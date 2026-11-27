@@ -188,7 +188,7 @@ window.RaumeStudy.flashcards.views = (function () {
     if (state !== "active") return state; // none | archived
     var now = new Date();
     var due = cardsForVocab(vocabId).some(function (c) {
-      return c.active && c.state !== 0 && new Date(c.due) <= now;
+      return c.active && sched.isReady(c, now);
     });
     return due ? "due" : "active";
   }
