@@ -3486,6 +3486,11 @@ async function main() {
     return !!far && text(far.correctHtml) === "nomu / nomimasu"
       && text(near.correctHtml) === "nomu / nomimasu" && /^nomu \/ nomimas<mark/.test(near.correctHtml);
   })());
+  const queueTotalOf = () => Number((/\/ (\d+)/.exec(document.querySelector(".fc-review-progress").textContent) || [])[1]);
+  const queueTotalBeforeAgain = queueTotalOf();
+  document.querySelector('.fc-rating-btn[data-rating="again"]').click();
+  await flush();
+  check("Again puts the card back later in the same session -- the queue grows by one", queueTotalOf() === queueTotalBeforeAgain + 1);
   check("a review card is ready all of its due day; a learning step only 20 minutes ahead", (() => {
     const sched = window.RaumeStudy.flashcards.scheduling;
     const morning = new Date(2026, 10, 27, 8, 0), evening = new Date(2026, 10, 27, 21, 0), tomorrow = new Date(2026, 10, 28, 8, 0);
@@ -3495,8 +3500,6 @@ async function main() {
       && sched.isReady({ state: 3, due: new Date(morning.getTime() + 10 * 60000).toISOString() }, morning)
       && !sched.isReady({ state: 0, due: morning.toISOString() }, evening);
   })());
-  document.querySelector('.fc-rating-btn[data-rating="again"]').click();
-  await flush();
   check("rating advances in place -- the answer field survives to the next card, ratings + lock cleared", () =>
     document.getElementById("fcAnswerInput") === answerInput
     && document.querySelectorAll(".fc-rating-btn").length === 0

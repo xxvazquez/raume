@@ -97,7 +97,7 @@ window.RaumeStudy.flashcards.views = (function () {
       '<h3 class="help-head">Reviewing</h3>' +
       '<ul class="help-rows help-card">' +
       '<li><span class="help-term">Checking</span><span class="help-desc">Type the answer, then Return or ↑. Leave it blank to just see the answer.</span></li>' +
-      '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — tap one or press its number.</span></li>' +
+      '<li><span class="help-term"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span class="help-desc">Again, Hard, Good, Easy — tap one or press its number. Again comes back later in the session.</span></li>' +
       '<li><span class="help-term">End session</span><span class="help-desc">Every rating is already saved; this just stops early.</span></li>' +
       '<li><span class="help-term">Several meanings</span><span class="help-desc">Any one counts, or several together: grandfather, old man.</span></li>' +
       '<li><span class="help-term">Grey note</span><span class="help-desc">A hint like “before a noun” — type just the meaning.</span></li>' +

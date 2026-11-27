@@ -243,6 +243,7 @@ window.RaumeStudy.flashcards.kana = (function () {
     session.reviewedCount++;
     if (session.correct === true) session.correctCount++;
     session.seen[key] = true;
+    if (ratingName === "Again" && sched.isReady(card, now)) sched.requeueMissed(session.queue, session.index, unit);
     session.index++;
     session.checked = false;
     session.correct = null;

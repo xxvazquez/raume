@@ -235,6 +235,14 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   function readyToStudy(now) {
     return scopedCards().filter(function (card) { return isReady(card, now); });
   }
+  // A card rated Again comes back later in the same session, as its
+  // learning step intends, rather than waiting for the next one: a few
+  // cards on, so it isn't the very next prompt (or at the end, in a short
+  // queue).
+  var REQUEUE_GAP = 4;
+  function requeueMissed(queue, index, item) {
+    queue.splice(Math.min(index + 1 + REQUEUE_GAP, queue.length), 0, item);
+  }
   // New cards introduced today, across every session -- not just the one
   // being built right now. Without this, "New cards per day" only capped a
   // single queue build: study three short sessions in a day instead of one
@@ -353,7 +361,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     activeCards: activeCards, studyableCards: studyableCards, leechWords: leechWords,
     studyTables: studyTables, studyLevels: studyLevels, scopeLevels: scopeLevels, studyScope: studyScope, scopedCards: scopedCards,
     LEECH_LAPSES: LEECH_LAPSES, shuffle: shuffle, spaceByVocab: spaceByVocab,
-    endOfDay: endOfDay, isReady: isReady,
+    endOfDay: endOfDay, isReady: isReady, requeueMissed: requeueMissed,
     readyToStudy: readyToStudy, buildQueue: buildQueue, introducibleCount: introducibleCount, computeStats: computeStats,
     todayNewCount: todayNewCount, bumpNewToday: bumpNewToday, markReviewedToday: markReviewedToday, todayDay: todayDay,
     mergeToday: mergeToday

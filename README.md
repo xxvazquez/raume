@@ -240,6 +240,8 @@ card  →  type answer (or leave it blank), Return or ↑  →  verdict + answer
 - The field stays focused from card to card, so a phone keyboard stays open.
 - After a wrong answer, **Again / Hard** come first; Good / Easy are dimmed
   but still one tap away for a typo.
+- **Again** brings the card back a few cards later in the same session (Kana
+  too).
 - The navigation hides during a session; results are announced to screen
   readers.
 - The wrap-up shows today's rings, cards · % right · minutes, and only real

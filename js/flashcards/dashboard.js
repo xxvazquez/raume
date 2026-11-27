@@ -1828,6 +1828,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     weeklyActivity = null;
     invalidateInsights();
     session.seen[cardId] = true;
+    if (ratingName === "Again" && sched.isReady(card, now)) sched.requeueMissed(session.queue, session.index, cardId);
     session.reviewedCount++;
     if (session.correct === true) session.correctCount++;
     session.index++;
