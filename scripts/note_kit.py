@@ -291,6 +291,8 @@ def _check(jp, ro):
 def stack(jp, ro, en, tag=None, ans=False, check=True):
     """Japanese / romaji / English. ans=True marks it as something Quiz covers;
     check=False leaves this line out of render()'s Japanese check."""
+    if not str(jp).strip():
+        _problems.append(f"a line with no Japanese ({en!r}) -- use blank() for a cell that has none")
     jp = jp_markup(jp)
     if check:
         _check(jp, ro)
@@ -476,6 +478,12 @@ def kinds(*cards):
 
 def slot(t):
     return f'<span class="rn-slot">{t}</span>'
+
+
+def blank(text):
+    """A list cell with no Japanese -- a short grey note such as "no では
+    form" -- so a list never holds an empty Japanese line."""
+    return f'<div class="rn-st rn-st-none"><div class="rn-en">{_text(text)}</div></div>'
 
 
 def cols2(block):
