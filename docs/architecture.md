@@ -290,22 +290,26 @@ something loaded it again. The client is created with its own `fetch`
 (`data-ops.js` `skewTolerantFetch`), which waits a second and sends a request
 refused that way again, up to four times — every query, Notes included.
 
-### Guest backup
+### Backup & restore
 
-`js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) is guest-only —
-signed-in data already lives in the account. `buildBackup()` snapshots six
-things into `{format: "raume-backup", version: 1, exportedAt, data}`: the guest
+`js/flashcards/backup.js` (`RaumeStudy.flashcards.backup`) writes one file
+format, `{format: "raume-backup", version: 2, exportedAt, data | account}`, in
+both modes (`mode()`: `"device"` for a guest, `"account"` signed in). Version 2
+added `account`; a guest file's shape is unchanged from version 1, and files
+from a newer `version` are refused.
+
+**Guest (`data`).** `buildBackup()` snapshots the guest
 flashcard cache (`raume-flashcards-guest-v1`), the guest Kana cache
 (`raume-kana-v1`), table customisations (`raume-table-custom`), the guest
 custom vocabulary (`raume-custom-vocab-guest-v1`), Known kanji
-(`raume-kanji-known`) and finished puzzle games (`raume-puzzle-runs`). A backup
-made before those last two existed doesn't mention them, and restoring it leaves
+(`raume-kanji-known`), word edits and finished puzzle games (`raume-puzzle-runs`). A backup
+made before those last ones existed doesn't mention them, and restoring it leaves
 the device's own untouched rather than clearing them. Built-in vocabulary is never
 included (cards reference it by `vocab_id`). `parseBackup()` re-runs every
 section through the same validator the live app loads it with
 (`store.validateCache` / `validateKanaCache`, `customVocab.sanitize`), so a bad
-file drops invalid records but can't produce an unreadable shape, and refuses
-files from a newer `version`. `applyBackup()` **replaces** those keys (a section
+file drops invalid records but can't produce an unreadable shape.
+`applyBackup()` **replaces** those keys (a section
 the backup lacked is cleared, not merged) and rolls every key back if any write
 fails; the Settings tab then reloads the page so every module re-reads storage.
 The keys come from constants those modules export
@@ -313,12 +317,38 @@ The keys come from constants those modules export
 `customVocab.GUEST_KEY`) rather than being repeated, so a renamed key carries
 the backup along.
 
-`downloadBackup()` saves the file: on iPhone / iPad through the share sheet
+**Signed in (`account`).** The account is the only full copy (local caches
+clear on sign-out; Supabase's free plan keeps no backups), so
+`buildAccountBackup()` reads every row the account owns with the anon key —
+`flashcards`, `review_logs`, `kana_cards`, `kana_review_logs`, the
+`flashcard_settings` row, `custom_tables`, `custom_rows` and `notes` (html
+four notes at a time; they can be 5 MB each) — through `fetchAllRows`, with
+`user_id` stripped. `restoreAccount()` **merges**: custom tables and words
+are added by id (`upsert … ignoreDuplicates`); cards are matched on their
+natural key (`vocab_id` / `kana_id` + `direction`), missing ones inserted,
+and one the account has moved forward only when the file has more `reps`
+(guarded on the account's reps, as a review is); reviews are remapped to the
+account's card ids and added once (`client_review_id`); a missing settings
+row comes back whole, otherwise every setting stays and each list or map
+gains what the file adds (`mergedSettings`: paused tables unioned, Known
+kanji / word edits newest-wins, journey / leech merges as on sign-in, games
+by id, the higher longest streak); a note is added if missing and replaced
+only by a newer `updated_at`. Nothing is ever deleted, so a restore that
+fails part way is finished by running it again. Settings then reloads.
+
+`raume-last-backup` (browser-local) is when this device last saved a
+backup in either mode; the Save row shows it ("Today", "N days ago",
+"Never") — the only reminder, as iOS can't run a background schedule.
+
+`saveText()` saves the file (`downloadBackup()` for a guest): on iPhone / iPad through the share sheet
 (`navigator.share({ files })`, when `navigator.canShare` accepts the file —
 Save to Files, AirDrop, Mail), since an `<a download>` in the home-screen app
 has nowhere to put it; everywhere else an `<a download>` on an object URL,
 kept until the next backup or a minute later. It resolves `"shared"`,
-`"download"` or `"cancelled"` (the sheet closed — not an error).
+`"download"` or `"cancelled"` (the sheet closed — not an error). An account
+backup is read from the network first, which outlasts the tap WebKit needs
+to open the share sheet, so when `needsShareTap()` Settings shows a "Your
+backup is ready" sheet whose Save… tap opens it.
 
 ### localStorage keys
 
@@ -330,7 +360,7 @@ All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
 collapsible sections a reader has open, keyed per item, browser-local only
 (not part of the account sync any of the others above get), `raume-games-setup` — the
 Puzzles and Games setup screens' last choices (`{ puzzles, games }`, each mode /
-source / tables / script / size / sortBy / register / exercise; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-answer-kana` — `"1"` when Settings › Answers › Answer in kana is on (browser-local; `store.answerInKana`, read by `vocab-index.js` for English → Romaji cards), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-table-picker-recent` — the Customize table sheet's Recent tables (ids, newest first, at most four; browser-local), `raume-notes-study` — a lesson note's Romaji / English / Furigana / Quiz choices (browser-local; the notes themselves live in IndexedDB `raume-notes`, see Class notes), `raume-rings-shown` — the date
+source / tables / script / size / sortBy / register / exercise; browser-local), the guest flashcard cache's `reviewDays` (`{ "YYYY-MM-DD": [reviews, of cards in review, remembered] }`, 400 days kept, for the Dashboard's Trends; signed in, Trends count a year of `review_logs` instead, once a day), `raume-answer-kana` — `"1"` when Settings › Answers › Answer in kana is on (browser-local; `store.answerInKana`, read by `vocab-index.js` for English → Romaji cards), `raume-app-badge` — `"1"` when Settings › App icon › Badge is on (browser-local; `bootstrap.js` recounts after every `store.onSave`, on visibility change and every five minutes), `raume-last-backup` — when this device last saved a backup (ISO time; browser-local), `raume-recent-searches` — the reference search's Recent list (newest first, at most eight; browser-local), `raume-table-picker-recent` — the Customize table sheet's Recent tables (ids, newest first, at most four; browser-local), `raume-notes-study` — a lesson note's Romaji / English / Furigana / Quiz choices (browser-local; the notes themselves live in IndexedDB `raume-notes`, see Class notes), `raume-rings-shown` — the date
 the Dashboard's rings last drew up from nothing (once a day; browser-local)), `raume-puzzle-runs` — every finished
 puzzle and game, for the Dashboard's Puzzles / Games cards and the Stats screen
 ([`js/flashcards/puzzle-runs.js`](../js/flashcards/puzzle-runs.js)):
@@ -492,7 +522,7 @@ js/
     vocab-index.js       lookup + answer checking
     scheduling.js        FSRS-6 + the session queue
     data-ops.js          auth, Supabase sync, guest store, streak
-    backup.js            guest-mode export / import of the on-device data (JSON file)
+    backup.js            backup & restore: guest data or the whole account (JSON file)
     puzzle-runs.js       every finished puzzle and game: the log, its numbers, Tricky words, reset
     puzzle-pdf.js        Puzzles' Save as PDF: A4 canvases packed into a hand-written PDF
     puzzle-stats.js      the Stats screen for Puzzles and Games (a pushed screen)

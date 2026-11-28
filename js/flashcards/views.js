@@ -168,7 +168,9 @@ window.RaumeStudy.flashcards.views = (function () {
       '<li><span class="help-term">Status</span><span class="help-desc"><em>Syncing…</em>, <em>Offline</em>, or <em>couldn’t sync</em> with Sync now to retry.</span></li>' +
       '<li><span class="help-term">What’s pending?</span><span class="help-desc">Lists exactly what hasn’t reached your account yet.</span></li>' +
       '<li><span class="help-term">Signing out</span><span class="help-desc">Anything not yet synced stays on this device and syncs the next time you sign in here.</span></li>' +
-      '<li><span class="help-term">Guest</span><span class="help-desc">Starts with Fruits added; everything stays in this browser — Settings › Back up &amp; restore saves a copy.</span></li>' +
+      '<li><span class="help-term">Guest</span><span class="help-desc">Starts with Fruits added; everything stays in this browser.</span></li>' +
+      '<li><span class="help-term">Back up</span><span class="help-desc">Settings › Back up &amp; restore saves everything to one file — notes too when signed in.</span></li>' +
+      '<li><span class="help-term">Restore</span><span class="help-desc">Signed in, it adds back what the account is missing; as a guest, it replaces this browser’s data.</span></li>' +
       '</ul>';
   }
 
@@ -210,13 +212,15 @@ window.RaumeStudy.flashcards.views = (function () {
   }
 
   // Rows currently hidden via the vocabulary page's own eye icon are read
-  // straight from that page's own DOM (it's always fully rendered, just
-  // hidden/shown by class -- see js/vocab/interactions.js) so a bulk table-add
-  // here matches the same one on the vocabulary page exactly, regardless of
-  // which page happens to be open right now.
+  // straight from that page's own DOM (hidden/shown by class -- see
+  // js/vocab/interactions.js) so a bulk table-add here matches the same one
+  // on the vocabulary page exactly, regardless of which page happens to be
+  // open right now. A table never opened is built first (render.js
+  // ensureRows) -- it has no hidden rows, but no rows at all until then.
   function visibleVocabIdsForTable(tableId) {
     var section = document.querySelector('.table-section[data-table="' + tableId + '"]');
     if (!section) return [];
+    if (window.RaumeStudy.vocab.ensureRows) window.RaumeStudy.vocab.ensureRows(section);
     return [].slice.call(section.querySelectorAll("tbody tr:not(.row-hidden)"))
       .map(function (tr) { return tr.dataset.vocabId; }).filter(Boolean);
   }
@@ -721,23 +725,37 @@ window.RaumeStudy.flashcards.views = (function () {
       saving = saving.then(function () { return saveAll(target); });
     });
   }
-  // --- Back up & restore (guest mode) ---
-  // Guest data lives only in this browser, so this is the one place a reader can
-  // get it out (and back in). Signed-in progress is already in the account.
+  // --- Back up & restore ---
+  // Guest mode: this browser is the only copy, and a restore replaces it.
+  // Signed in: the account is the only copy (the free Supabase plan keeps no
+  // backups), and a restore merges into it. One file format for both.
+  function lastBackupText(iso) {
+    if (!iso) return "Never";
+    var then = new Date(iso); then.setHours(0, 0, 0, 0);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var days = Math.round((today - then) / 86400000);
+    return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days + " days ago";
+  }
+  function plural(n, word) { return n + " " + word + (n === 1 ? "" : "s"); }
+  function fileSize(bytes) {
+    return bytes < 1024 * 1024 ? Math.max(1, Math.round(bytes / 1024)) + " KB" : (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
   function backupSectionHtml() {
     var backup = window.RaumeStudy.flashcards.backup;
-    if (!backup) return "";
-    if (!backup.available()) {
-      return '<h3 class="help-head">Back up &amp; restore</h3><p class="set-foot set-foot-alone">Your progress is saved to your account, so there is nothing to back up here.</p>';
-    }
+    if (!backup || !backup.available()) return "";
+    var foot = backup.mode() === "account"
+      ? "Your account is the only full copy of your notes, flashcards and progress. A backup saves all of it to one file; restoring adds back whatever the account is missing and never deletes or replaces newer work. The Save row shows when this device last made one."
+      : "This device is the only copy of your flashcards, Kana progress, table customisations and your own words. Restoring replaces what's here with the file. The Save row shows when this device last made one.";
     // The explainer sits behind the header's ⓘ like every other Settings card.
     return '<h3 class="help-head set-head">Back up &amp; restore' +
       '<button type="button" class="fc-stat-info set-info" aria-expanded="false" aria-controls="fcBackupFoot" aria-label="About Back up &amp; restore">' + INFO_GLYPH + '</button></h3>' +
       '<div class="help-card set-card-actions">' +
-      '<button type="button" class="set-row set-action" id="fcBackupExport">Save a backup…</button>' +
-      '<button type="button" class="set-row set-action" id="fcBackupImport">Restore from a file…</button>' +
+      '<button type="button" class="set-row set-action set-action-value" id="fcBackupExport"><span>Save a backup…</span>' +
+      '<span class="set-value" id="fcBackupLast">' + esc(lastBackupText(backup.lastBackupAt())) + '</span></button>' +
+      '<button type="button" class="set-row set-action set-action-value" id="fcBackupImport"><span>Restore from a file…</span>' +
+      '<span class="set-value" id="fcBackupBusy"></span></button>' +
       '<input type="file" id="fcBackupFile" accept="application/json,.json" hidden></div>' +
-      '<p class="set-foot" id="fcBackupFoot" hidden>This device is the only copy of your flashcards, Kana progress, table customisations and your own words. Restoring replaces what\'s here with the file.</p>' +
+      '<p class="set-foot" id="fcBackupFoot" hidden>' + esc(foot) + '</p>' +
       '<div class="fc-auth-error" id="fcBackupError" role="alert" hidden></div>';
   }
   function wireBackup() {
@@ -747,11 +765,38 @@ window.RaumeStudy.flashcards.views = (function () {
     var importBtn = document.getElementById("fcBackupImport");
     var fileInput = document.getElementById("fcBackupFile");
     var errorBox = document.getElementById("fcBackupError");
+    var lastEl = document.getElementById("fcBackupLast");
+    var busyEl = document.getElementById("fcBackupBusy");
+    var account = backup.mode() === "account";
     function showError(msg) { errorBox.textContent = msg; errorBox.hidden = !msg; }
+    // While an account backup or restore runs, both rows wait; the row at
+    // work says so in its value.
+    function busy(el, text) {
+      exportBtn.disabled = importBtn.disabled = !!text;
+      if (el === lastEl) lastEl.textContent = text || lastBackupText(backup.lastBackupAt());
+      else busyEl.textContent = text || "";
+    }
+    function saved(result) { busy(lastEl, ""); return result; }
+    function failed(e) { busy(lastEl, ""); showError("Couldn't create the backup file — " + ((e && e.message) || "try again.")); }
     exportBtn.addEventListener("click", function () {
       showError("");
-      function failed(e) { showError("Couldn't create the backup file — " + ((e && e.message) || "try again.")); }
-      try { backup.downloadBackup().catch(failed); } catch (e) { failed(e); }
+      if (!account) {
+        try { backup.downloadBackup().then(saved, failed); } catch (e) { failed(e); }
+        return;
+      }
+      busy(lastEl, "Preparing…");
+      backup.prepareAccountBackup().then(function (json) {
+        if (!backup.needsShareTap(json)) return backup.saveText(json).then(saved);
+        // The share sheet needs a tap of its own once the file is ready.
+        busy(lastEl, "");
+        window.RaumeStudy.shared.confirmSheet({
+          title: "Your backup is ready",
+          message: fileSize(new Blob([json]).size) + ". Save it to Files or iCloud Drive.",
+          confirm: "Save…",
+          safe: true,
+          onConfirm: function () { backup.saveText(json).then(saved, failed); }
+        });
+      }).catch(failed);
     });
     importBtn.addEventListener("click", function () { showError(""); fileInput.click(); });
     fileInput.addEventListener("change", function () {
@@ -762,15 +807,35 @@ window.RaumeStudy.flashcards.views = (function () {
       file.text().then(function (text) {
         var parsed = backup.parseBackup(text);
         if (!parsed.ok) { showError(parsed.error); return; }
+        if (account && parsed.kind !== "account") { showError("That backup was made without an account. Sign out to restore it on this device."); return; }
+        if (!account && parsed.kind === "account") { showError("That backup is of an account. Sign in to restore it."); return; }
         var sm = parsed.summary;
         var when = sm.exportedAt && !isNaN(Date.parse(sm.exportedAt)) ? " from " + new Date(sm.exportedAt).toLocaleDateString() : "";
-        var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + sm.cards + " card" + (sm.cards === 1 ? "" : "s") + ")"];
-        if (sm.kanaCards) parts.push(sm.kanaCards + " Kana card" + (sm.kanaCards === 1 ? "" : "s"));
+        var parts = [sm.words + " word" + (sm.words === 1 ? "" : "s") + " in flashcards (" + plural(sm.cards, "card") + ")"];
+        if (sm.reviews) parts.push(plural(sm.reviews, "review"));
+        if (sm.kanaCards) parts.push(plural(sm.kanaCards, "Kana card"));
+        if (sm.notes) parts.push(plural(sm.notes, "note"));
         if (sm.customWords) parts.push(sm.customWords + " of your own word" + (sm.customWords === 1 ? "" : "s"));
-        if (sm.editedWords) parts.push(sm.editedWords + " edited word" + (sm.editedWords === 1 ? "" : "s"));
-        if (sm.customisedTables) parts.push(sm.customisedTables + " customised table" + (sm.customisedTables === 1 ? "" : "s"));
+        if (sm.editedWords) parts.push(plural(sm.editedWords, "edited word"));
+        if (sm.customisedTables) parts.push(plural(sm.customisedTables, "customised table"));
         if (sm.knownKanji) parts.push(sm.knownKanji + " marked known");
-        if (sm.puzzleGames) parts.push(sm.puzzleGames + " puzzle game" + (sm.puzzleGames === 1 ? "" : "s"));
+        if (sm.puzzleGames) parts.push(plural(sm.puzzleGames, "puzzle game"));
+        if (account) {
+          window.RaumeStudy.shared.confirmSheet({
+            title: "Restore the backup" + when + "?",
+            message: "It holds " + parts.join(", ") + ". Your account gets back whatever it's missing; nothing newer is replaced and nothing is deleted.",
+            confirm: "Restore",
+            safe: true,
+            onConfirm: function () {
+              busy(busyEl, "Restoring…");
+              backup.restoreAccount(parsed.backup).then(function () { window.location.reload(); }, function (e) {
+                busy(busyEl, "");
+                showError("The restore stopped part way — " + ((e && e.message) || "check the connection") + ". Nothing was deleted; restore the same file again to finish.");
+              });
+            }
+          });
+          return;
+        }
         window.RaumeStudy.shared.confirmSheet({
           title: "Restore the backup" + when + "?",
           message: "It holds " + parts.join(", ") + ". This replaces everything Practice has on this device — anything since the backup is lost.",
@@ -793,7 +858,14 @@ window.RaumeStudy.flashcards.views = (function () {
   // is refreshed here when a search starts and after every add/pause.
   // -----------------------------------------------------------------------
   function refreshRowToggleButtons() {
-    document.querySelectorAll(".fc-toggle-btn").forEach(function (btn) {
+    refreshToggleButtonsIn(document);
+    // The mode's cards just changed, so which words are mastered may have too.
+    if (window.RaumeStudy.vocab.refreshKnownRows) window.RaumeStudy.vocab.refreshKnownRows();
+  }
+  // A table built later (js/vocab/render.js ensureRows) gets its toggles' state then.
+  if (window.RaumeStudy.vocab.onRowsBuilt) window.RaumeStudy.vocab.onRowsBuilt(function (section) { refreshToggleButtonsIn(section); });
+  function refreshToggleButtonsIn(root) {
+    root.querySelectorAll(".fc-toggle-btn").forEach(function (btn) {
       var state = vocabState(btn.dataset.vocabId);
       var added = state === "active";
       btn.classList.toggle("fc-added", added);
@@ -801,8 +873,6 @@ window.RaumeStudy.flashcards.views = (function () {
       btn.title = added ? "Pause (keeps its progress — add it back anytime)" : "Add to flashcards";
       btn.setAttribute("aria-label", btn.title);
     });
-    // The mode's cards just changed, so which words are mastered may have too.
-    if (window.RaumeStudy.vocab.refreshKnownRows) window.RaumeStudy.vocab.refreshKnownRows();
   }
   document.addEventListener("click", function (event) {
     var btn = event.target.closest && event.target.closest(".fc-toggle-btn");

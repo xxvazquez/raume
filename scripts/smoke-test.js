@@ -2919,7 +2919,7 @@ async function main() {
   check("backup is offered in guest mode", !!backupApi && backupApi.available() === true);
   const liveCardCount = Object.keys(window.RaumeStudy.flashcards.store.getCache().cards).length;
   const builtBackup = backupApi.buildBackup();
-  check("a backup carries its format + version and the guest flashcards, with no account or sync queue", builtBackup.format === "raume-backup" && builtBackup.version === 1
+  check("a backup carries its format + version and the guest flashcards, with no account or sync queue", builtBackup.format === "raume-backup" && builtBackup.version === 2
     && Object.keys(builtBackup.data.flashcards.cards).length === liveCardCount && builtBackup.data.flashcards.userId === null && builtBackup.data.flashcards.logsOutbox.length === 0);
   check("it names the file by date", /^raume-backup-\d{4}-\d{2}-\d{2}\.json$/.test(backupApi.fileName()));
   await (async () => {
@@ -2949,6 +2949,7 @@ async function main() {
       const r2 = await backupApi.downloadBackup();
       check("on desktop / Android it's a plain download, its URL not revoked straight away",
         r2 === "download" && shared === null && clicked === backupApi.fileName() && revoked === 0);
+      if (storageUsable) check("a saved backup is remembered on this device for Settings' \"last backed up\"", !!backupApi.lastBackupAt() && Date.now() - Date.parse(backupApi.lastBackupAt()) < 60000);
     } finally {
       if (realUA) Object.defineProperty(nav, "userAgent", realUA); else delete nav.userAgent;
       delete nav.share; delete nav.canShare;
@@ -3010,6 +3011,123 @@ async function main() {
   } finally {
     if (realStorage) Object.defineProperty(window, "localStorage", realStorage); else delete window.localStorage;
   }
+  await (async () => {
+    // Signed in: the account's rows out to a file and merged back in, against
+    // an in-memory stand-in for the Supabase client (the harness has no live
+    // project). Only the query shapes backup.js uses.
+    function fakeSupabase(db) {
+      let n = 0;
+      return { from(table) {
+        const st = { filters: [], op: "select", cols: "*", ret: "*", rows: null, patch: null, opts: null, single: false, range: null };
+        const api = {
+          select(cols) { if (st.op === "select") st.cols = cols || "*"; else st.ret = cols || "*"; return api; },
+          eq(c, v) { st.filters.push(r => r[c] === v); return api; },
+          in(c, arr) { st.filters.push(r => arr.includes(r[c])); return api; },
+          order() { return api; },
+          range(a, b) { st.range = [a, b]; return api; },
+          maybeSingle() { st.single = true; return api; },
+          insert(rows) { st.op = "insert"; st.rows = [].concat(rows); return api; },
+          upsert(rows, o) { st.op = "upsert"; st.rows = [].concat(rows); st.opts = o; return api; },
+          update(p) { st.op = "update"; st.patch = p; return api; },
+          then(ok, bad) { return Promise.resolve().then(run).then(ok, bad); }
+        };
+        function proj(r, cols) {
+          if (cols === "*") return Object.assign({}, r);
+          const o = {}; cols.split(",").forEach(c => { if (c in r) o[c] = r[c]; }); return o;
+        }
+        function run() {
+          const all = db[table] || (db[table] = []), hit = r => st.filters.every(f => f(r));
+          if (st.op === "select") {
+            let out = all.filter(hit);
+            if (st.range) out = out.slice(st.range[0], st.range[1] + 1);
+            out = out.map(r => proj(r, st.cols));
+            return { data: st.single ? out[0] || null : out, error: null };
+          }
+          if (st.op === "update") { const rows = all.filter(hit); rows.forEach(r => Object.assign(r, st.patch)); return { data: rows.map(r => proj(r, st.ret)), error: null }; }
+          const made = [];
+          for (const row of st.rows) {
+            const r = Object.assign({}, row);
+            if (r.id && all.some(x => x.id === r.id)) {
+              if (st.op === "upsert" && st.opts.ignoreDuplicates) continue;
+              return { data: null, error: { code: "23505", message: "duplicate id" } };
+            }
+            if (st.op === "upsert") {
+              const keys = st.opts.onConflict.split(",");
+              if (all.some(x => keys.every(k => x[k] === r[k]))) continue;
+            }
+            if (!r.id) r.id = table + "-new-" + (++n);
+            all.push(r); made.push(r);
+          }
+          return { data: made.map(r => proj(r, st.ret)), error: null };
+        }
+        return api;
+      } };
+    }
+    const ops = window.RaumeStudy.flashcards.dataOps;
+    const real = { getClient: ops.getClient, currentUser: ops.currentUser };
+    const card = (id, uid, vocab, reps, extra) => Object.assign({ id, user_id: uid, vocab_id: vocab, direction: "jp-en", active: true, state: reps ? 2 : 0, due: "2026-12-01T00:00:00Z", stability: reps, difficulty: 5, scheduled_days: reps, reps, lapses: 0, learning_steps: 0, last_review: null }, extra);
+    const log = (id, uid, cardId, crid) => ({ id, user_id: uid, card_id: cardId, client_review_id: crid, rating: 3, state: 2, reviewed_at: "2026-11-20T10:00:00Z" });
+    const dbA = {
+      flashcards: [card("a1", "u1", "v0001", 3), card("a2", "u1", "v0002", 1), card("a3", "u1", "v0003", 2), card("x1", "u2", "v0001", 9)],
+      review_logs: [log("l1", "u1", "a1", "r1"), log("l2", "u1", "a1", "r2"), log("l3", "u1", "a2", "r3"), log("l4", "u1", "a3", "r4"), log("lx", "u2", "x1", "rx")],
+      kana_cards: [{ id: "k1", user_id: "u1", kana_id: "a", direction: "k2r", active: true, state: 2, reps: 4 }],
+      kana_review_logs: [log("kl1", "u1", "k1", "kr1")],
+      flashcard_settings: [{ user_id: "u1", fsrs_request_retention: 0.85, paused_tables: ["t1"], longest_streak: 12, puzzle_runs: [], kana_prefs: { groups: ["a"] } }],
+      custom_tables: [{ id: "ct-1", user_id: "u1", title: "Mine", category: "My vocabulary", sort_index: 0 }],
+      custom_rows: [{ id: "cr-1", user_id: "u1", target_table: "ct-1", jp: [["ねこ"]], romaji: "neko", english: "cat", sort_index: 0 }],
+      notes: [
+        { id: "n1", user_id: "u1", title: "Lesson 1", note_date: "2026-11-01", html: "<p>old</p>", size: 10, updated_at: "2026-11-01T00:00:00Z" },
+        { id: "n2", user_id: "u1", title: "Lesson 2", note_date: "2026-11-08", html: "<p>two</p>", size: 10, updated_at: "2026-11-08T00:00:00Z" },
+        { id: "nx", user_id: "u2", title: "Someone else", note_date: "2026-11-08", html: "<p>x</p>", size: 8, updated_at: "2026-11-08T00:00:00Z" }
+      ]
+    };
+    try {
+      ops.getClient = () => fakeSupabase(dbA); ops.currentUser = () => ({ id: "u1" });
+      const json = await backupApi.prepareAccountBackup();
+      const file = JSON.parse(json);
+      check("an account backup holds every row the account owns -- cards, every review, Kana, settings, custom words, every note -- and no one else's",
+        file.format === "raume-backup" && file.version === 2 && !file.data && file.account.flashcards.length === 3 && file.account.reviewLogs.length === 4
+        && file.account.kanaCards.length === 1 && file.account.kanaReviewLogs.length === 1 && file.account.settings.fsrs_request_retention === 0.85
+        && file.account.customTables.length === 1 && file.account.customRows.length === 1 && file.account.notes.length === 2
+        && file.account.notes.every(n => n.html) && !json.includes('"user_id"'));
+      const parsedAcc = backupApi.parseBackup(json);
+      check("...and parses as an account backup with a summary for the confirm",
+        parsedAcc.ok && parsedAcc.kind === "account" && parsedAcc.summary.words === 3 && parsedAcc.summary.cards === 3 && parsedAcc.summary.reviews === 4 && parsedAcc.summary.notes === 2);
+      check("a guest backup parses as a device one", backupApi.parseBackup(JSON.stringify(builtBackup)).kind === "device");
+      check("a damaged account section is refused", backupApi.parseBackup(JSON.stringify({ format: "raume-backup", version: 2, account: { flashcards: "nope" } })).ok === false);
+
+      // Into an account that moved on in places and lost things in others.
+      const dbB = {
+        flashcards: [card("b1", "u9", "v0001", 5), card("b2", "u9", "v0002", 0), card("b9", "u9", "v0099", 1)],
+        review_logs: [log("m1", "u9", "b1", "r1"), log("m9", "u9", "b9", "r9")],
+        kana_cards: [], kana_review_logs: [],
+        flashcard_settings: [{ user_id: "u9", fsrs_request_retention: 0.9, paused_tables: ["t2"], longest_streak: 4, puzzle_runs: [], kana_prefs: {} }],
+        custom_tables: [], custom_rows: [],
+        notes: [{ id: "n1", user_id: "u9", title: "Lesson 1", note_date: "2026-11-01", html: "<p>edited later</p>", size: 20, updated_at: "2026-11-20T00:00:00Z" }]
+      };
+      ops.getClient = () => fakeSupabase(dbB); ops.currentUser = () => ({ id: "u9" });
+      await backupApi.restoreAccount(parsedAcc.backup);
+      const fc = id => dbB.flashcards.find(c => c.vocab_id === id);
+      check("restoring adds the cards the account lost, moves a card on only when the file has more reviews, and keeps a newer one",
+        dbB.flashcards.length === 4 && fc("v0003").user_id === "u9" && fc("v0003").reps === 2 && fc("v0002").reps === 1 && fc("v0001").reps === 5 && fc("v0099").reps === 1);
+      check("...adds each missing review once, on the account's own card ids",
+        dbB.review_logs.length === 5 && dbB.review_logs.filter(l => l.client_review_id === "r1").length === 1
+        && dbB.review_logs.find(l => l.client_review_id === "r3").card_id === "b2" && dbB.review_logs.find(l => l.client_review_id === "r4").card_id === fc("v0003").id);
+      check("...brings back Kana cards with their reviews, custom tables and words",
+        dbB.kana_cards.length === 1 && dbB.kana_review_logs.length === 1 && dbB.kana_review_logs[0].card_id === dbB.kana_cards[0].id
+        && dbB.custom_tables.length === 1 && dbB.custom_rows.length === 1 && dbB.custom_rows[0].user_id === "u9");
+      const setB = dbB.flashcard_settings[0];
+      check("...keeps the account's own settings while its lists gain what the file adds",
+        setB.fsrs_request_retention === 0.9 && setB.paused_tables.join() === "t2,t1" && setB.longest_streak === 12 && setB.kana_prefs.groups[0] === "a");
+      check("...adds a lost note and never replaces a newer one",
+        dbB.notes.length === 2 && dbB.notes.find(n => n.id === "n1").html === "<p>edited later</p>" && dbB.notes.find(n => n.id === "n2").user_id === "u9");
+      const snapshot = JSON.stringify(dbB);
+      await backupApi.restoreAccount(parsedAcc.backup);
+      check("restoring the same file again changes nothing", JSON.stringify(dbB) === snapshot);
+    } finally {
+      ops.getClient = real.getClient; ops.currentUser = real.currentUser;
+    }
+  })();
   // Settings and Help open like a pushed screen from the title bar; Back
   // returns to the segment you came from.
   check("the Flashcards sub-tabs are five segments -- Settings and Help moved to the title bar",
@@ -3021,6 +3139,7 @@ async function main() {
     document.querySelector("#flashcardsPage .fc-titlebar h1").textContent === "Settings"
     && !!document.getElementById("fcBack") && !document.querySelector("#flashcardsPage .fc-tabs"));
   check("Settings offers Save a backup / Restore in guest mode", !!document.getElementById("fcBackupExport") && !!document.getElementById("fcBackupImport") && !!document.getElementById("fcBackupFile"));
+  check("...the Save row's value says when this device last saved one", document.getElementById("fcBackupLast").textContent === (storageUsable ? "Today" : "Never"));
   check("...with its explainer behind the header's ⓘ, not a standing footnote", document.getElementById("fcBackupFoot").hidden === true
     && document.querySelector('.set-info[aria-controls="fcBackupFoot"]') !== null);
   {
@@ -3032,7 +3151,7 @@ async function main() {
     check("choosing a backup asks with the iOS action sheet (what it holds, a red Restore) -- Cancel changes nothing", (() => {
       const sheet = document.querySelector(".ios-confirm");
       const ok = !!sheet && /Restore the backup/.test(sheet.querySelector(".ios-confirm-title").textContent) && /It holds/.test(sheet.textContent)
-        && document.getElementById("iosConfirmGo").textContent === "Restore";
+        && document.getElementById("iosConfirmGo").textContent === "Restore" && document.getElementById("iosConfirmGo").classList.contains("ios-confirm-destroy");
       if (sheet) document.getElementById("iosConfirmCancel").click();
       return ok && !document.querySelector(".ios-confirm") && JSON.stringify(window.RaumeStudy.flashcards.store.getCache().cards) === cardsBefore;
     })());

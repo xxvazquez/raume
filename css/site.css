@@ -2616,6 +2616,10 @@ body.tpick-open { overflow: hidden; }
   appearance: none; border: 0; background: transparent; text-align: left;
   color: var(--tint); justify-content: flex-start;
 }
+/* An action row with a quiet value on the right (Last backed up). */
+.set-action.set-action-value { justify-content: space-between; gap: 12px; }
+.set-action:disabled { cursor: default; }
+.set-action:disabled > span:first-child { opacity: .45; }
 @media (hover: hover) { .set-action:hover { background: var(--row-hover); } }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .set-foot[hidden] { display: none; }

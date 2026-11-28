@@ -315,7 +315,7 @@ menu). Settings, Help, Awards and Stats slide in as pushed screens with a
 | Screen | What it does |
 | --- | ------------ |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add a table (**Pause** it under My flashcards), **Add all** a category, or open a table for single words — on a phone, swipe a word left for Pause / Add / Restore |
-| **Settings** | Study directions, **Answer in kana** (per device), and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). Guests get **Back up & restore** — one JSON file. Changes save as you make them |
+| **Settings** | Study directions, **Answer in kana** (per device), and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). **Back up & restore** saves one JSON file (on iPhone, Save to Files / iCloud Drive), its row saying when this device last made one: a guest's copy of this browser, or everything in the account, notes included. Changes save as you make them |
 | **Help** | Adding & pausing, Library icons, reviewing, Dashboard, each tab, syncing |
 | **Awards** | Every award by kind — from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — see [Stats](#stats) |
@@ -536,7 +536,7 @@ Practice starts by asking you to pick one of two modes. The two never mix.
 | Where data lives | This browser's `localStorage` | Your own [Supabase](SUPABASE_SETUP.md) project, per account via Row Level Security |
 | Network | None | Syncs; works offline and catches up on reconnect |
 | First visit | Starts with the Fruits table added | Your own deck |
-| Backup | Settings › Back up & restore | The account is the backup |
+| Backup | Settings › Back up & restore — restoring replaces this browser's data | Settings › Back up & restore — one file with every note, card, review and setting; restoring merges (adds what's missing, never deletes) |
 | Custom tables, class notes | — | Yes |
 | New accounts | — | Off by default: `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |
 

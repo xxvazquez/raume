@@ -213,7 +213,9 @@ window.RaumeStudy.shared = (function () {
   // optional title, the message in grey, the red destructive button, and
   // Cancel on its own (focused, so Return backs out). A tap on the dimmed
   // page, Escape or Cancel backs out; nothing happens until the red button.
-  // o: { title?, message, confirm, onConfirm }. Focus goes back to whatever
+  // o: { title?, message, confirm, onConfirm, safe? } -- `safe` for the rare
+  // sheet whose action destroys nothing (saving a file, a merging restore):
+  // its button is the tinted, semibold one instead of red. Focus goes back to whatever
   // opened it, if that's still on the page.
   function confirmSheet(o) {
     var old = document.querySelector(".ios-confirm");
@@ -226,7 +228,7 @@ window.RaumeStudy.shared = (function () {
       '<div class="ios-confirm-group"><div class="ios-confirm-msg" id="iosConfirmMsg">' +
       (o.title ? '<p class="ios-confirm-title">' + escapeHtml(o.title) + "</p>" : "") +
       "<p>" + escapeHtml(o.message) + "</p></div>" +
-      '<button type="button" class="ios-confirm-destroy" id="iosConfirmGo">' + escapeHtml(o.confirm) + "</button></div>" +
+      '<button type="button" class="' + (o.safe ? "ios-confirm-go" : "ios-confirm-destroy") + '" id="iosConfirmGo">' + escapeHtml(o.confirm) + "</button></div>" +
       '<button type="button" class="ios-confirm-cancel" id="iosConfirmCancel">Cancel</button></div>';
     document.body.appendChild(host);
     function close() {

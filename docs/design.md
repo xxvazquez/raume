@@ -1441,8 +1441,11 @@ Match game so far is cleared…") and a red **Reset Stats**, then **Cancel**
 as its own solid white group (focused, so Return backs out); a centred
 320px alert of the same parts on a wide window. It's the one confirmation
 in the app (`RaumeStudy.shared.confirmSheet`, optional semibold title over
-the message) — Restore a backup (**Restore**) and deleting one of your own
+the message) — Restore a guest backup (**Restore**) and deleting one of your own
 tables (**Delete Table**) use it too; never the browser's `window.confirm`.
+With `safe: true`, for the rare sheet whose action destroys nothing (an
+account backup's **Save…**, its merging **Restore**), the button is the
+tinted semibold `.ios-confirm-go` instead of red.
 What can be taken back doesn't ask: it happens at once and offers **Undo**,
 as in Mail (`.undo-toast`, `RaumeStudy.shared.undoToast`) — a glass capsule
 centred near the bottom (just above the tab bar on a phone), what happened
