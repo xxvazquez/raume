@@ -317,7 +317,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
   // Jump straight to a table: switch section if needed, open it (collapsing
   // its category siblings), scroll it into view. A table in a folded
-  // category unfolds that category -- you asked to see it.
+  // category unfolds that category -- the jump asked to see it.
   function goToTable(id, opts) {
     opts = opts || {};
     const section = document.querySelector('#vocabulary .table-section[data-table="' + id + '"]');

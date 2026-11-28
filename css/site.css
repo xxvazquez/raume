@@ -1053,7 +1053,7 @@ body { --switch-on: var(--tint); }
   position: absolute; right: 16px; top: 50%;
   /* The same compact switch as Settings (.set-switch) -- one switch
      app-wide, 42 x 26: iOS's shape, a size that sits quietly in a 44px row
-     (51 x 31 read as oversized here -- Laura). The thumb sits 2px inside the
+     (51 x 31 read as oversized here). The thumb sits 2px inside the
      track at either end: off at 16 + 42 - 2 - 22 = 34px from the row's
      edge, on at 16 + 2 = 18px. */
   width: 42px; height: 26px; margin-top: -13px;
@@ -1262,7 +1262,7 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 .bar-capsule .tindex-trigger, .bar-capsule .options-btn { height: 36px; border-radius: 999px; }
 /* Search: solid white, a hairline edge and a very soft lift -- not glass,
-   which read as grey over the grey ground (Laura, 2026-09-24) -- matching
+   which read as grey over the grey ground (2026-09-24) -- matching
    the Tables | Options capsule beside it. */
 .page-vocab .search-box {
   background: var(--paper);
@@ -3810,7 +3810,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .site-nav {
     position: fixed; top: auto; z-index: 50;
     /* 12px in, not 16: five tabs need the width -- "Vocabulary" kept a few
-       px from its highlight's edges on a 375pt iPhone at 16 (Laura). */
+       px from its highlight's edges on a 375pt iPhone at 16. */
     left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: var(--tabbar-gap);
     height: var(--tabbar-h); gap: 0; padding: 4px;
     align-items: stretch; overflow: visible;
@@ -6408,7 +6408,7 @@ mark.fc-diff-co {
 }
 @media (max-width: 640px) {
   .page-vocab .vocab-toolbar { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
-  /* The tab bar is iOS 26's (Laura, 2026-10-08): a floating Liquid Glass
+  /* The tab bar is iOS 26's (2026-10-08): a floating Liquid Glass
      capsule -- translucent fill and blur so the content scrolling under it
      shows through, the bright top rim, a hairline edge, one soft shadow --
      and the selected tab on a rounded neutral highlight, its icon and label

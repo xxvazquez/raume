@@ -275,7 +275,7 @@ and Help.
   `--tile-<key>` tokens, dark mode dims the fill to 80%, print drops the tile).
   These dusty mid-tones are the only colour in a row and say which group a
   table is in; the rest of the row stays neutral. **The same `--tile` hues
-  are raume's iOS-style accent family elsewhere** (Laura, 2026-09-28: iOS
+  are raume's iOS-style accent family elsewhere** (2026-09-28: iOS
   uses colour with purpose, raume read too white), always as identity, never
   decoration: each Dashboard card title leads with a 24px tile
   (`.fc-title-tile` — Card progress slate, Reviews this week blue, Due next 7
@@ -445,8 +445,7 @@ and Help.
     (`--seg-thumb`: white in light, a grey a step above the track in dark;
     `--seg-thumb-shadow`), its label in ink (`--seg-thumb-ink`), weight 600.
     Neutral, not the section tone: the pale section wash it used to be
-    (2026-09-27) blended into the white and grey around it (Laura,
-    2026-11-25). Single-select only — never several segments raised at once. A
+    (2026-09-27) blended into the white and grey around it (2026-11-25). Single-select only — never several segments raised at once. A
     multi-select on/off set is switches (the reference Options sheet's Japanese /
     Furigana / English) or checkmark items in a ⋯ menu (the dashboard's Words to
     review: `.col-menu-item`, `role="menuitemcheckbox"`, tick leading, a ground
@@ -476,7 +475,7 @@ and Help.
     17px text + a small tint chevron, a native `<select>` laid invisibly over
     it (UIKit's navigation title menu). In play on Puzzles / Games the same
     title is a back button instead — ‹ + the name, to the setup screen.
-  - **Setup screen** (`.fc-gs`, Puzzles / Games — Laura, 2026-10-02: a game
+  - **Setup screen** (`.fc-gs`, Puzzles / Games — 2026-10-02: a game
     starts from its own setup, never mid-game with a random one): Settings
     cards — the styles as checkmark rows with a grey line on how each plays,
     then **value rows** (`.fc-gs-pick`: name left, value + faint ⌃⌄ right —
@@ -492,7 +491,7 @@ and Help.
     Stats on the right — so the whole setup is in view and no half of the
     screen sits empty; narrower, one 560px column. The 640px game boards centre in
     Practice's 900px column under the full-width toolbar. Never a
-    row of pills over the content (Laura, 2026-09-28).
+    row of pills over the content (2026-09-28).
   - **Options sheet** (`.options-sheet`, opened by the sticky bar's `.options-btn`):
     an inset-grouped list on `--group-ground` — 13px sentence-case group headers
     (Show / Study), white `--radius-card` cards of 44px rows with inset hairlines, switches
@@ -657,7 +656,7 @@ and Help.
   the bar itself, which has no `position: fixed` children. Five equal tabs, an
   icon over a 10.5px label (iOS's ~10pt), unselected in `--muted`, the selected
   one in its section tone on a rounded neutral highlight (`--tab-select`, ink 11%,
-  concentric inside the capsule), same weight. (Laura, 2026-10-08 — replacing
+  concentric inside the capsule), same weight. (2026-10-08 — replacing
   the traditional square, full-width bar.) Nothing is added or removed (same
   five links, same taps); the icons are CSS masks on `.site-nav-link::before`
   (inline `data:` SVGs, allowed by the CSP's `img-src`), so the JS-built markup
@@ -1318,7 +1317,7 @@ sage, wrong coral with Match's shake and the spelling shown under it. The
 bank below the card is Match's white tiles made square (52px, 14px corners,
 the kana at 24px), a used tile dimmed in place so nothing shifts, laid out in
 **balanced rows** of at most five (6 → 3 + 3, 7 → 4 + 3; `data-cols` sets the
-row width) — never one tile left alone on a row (Laura, 2026-09-28). Its
+row width) — never one tile left alone on a row (2026-09-28). Its
 Stats hue is green.
 
 **Sentences** keeps Kana tiles' toolbar and card: the English at 19px, then
@@ -1336,7 +1335,7 @@ choices under the card never drop when you answer (a miss in Build or
 Particles still grows by the sentence it adds). Its Stats hue is
 blue (puzzles' blue never shares the Game stats screen). Its **Particles**
 exercise sets the sentence at 22px with each particle a **circle** to fill —
-how a Japanese worksheet marks one (Laura, 2026-11-26), never [ ＿ ] — a kana
+how a Japanese worksheet marks one (2026-11-26), never [ ＿ ] — a kana
 wide: an outline while empty (the next one a thicker tint ring), your choice
 inside in particle blue once filled; marked, it fills sage or coral, a wrong
 one struck through with the right particle bold and small under it. Six
@@ -1465,7 +1464,7 @@ finished game's card puts a white Stats beside Play again.
 
 The sub-tabs are five segments (Dashboard / Kana / Puzzles / Games / Library —
 what you do first, your collection last; Library is the Music / Books tab's
-name for it, "Manage" read as a settings verb — Laura, 2026-09-29) —
+name for it, "Manage" read as a settings verb — 2026-09-29) —
 the most an iOS segmented control holds and still reads at a glance, so
 nothing more joins without restructuring. Settings and Help
 are plain tint-text buttons at the title's trailing edge (an iOS navigation
