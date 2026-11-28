@@ -107,7 +107,7 @@ adjectives, and get no badge.
 
 | | |
 | --- | --- |
-| **Grid** | Each theme is a grid of tiles: the kanji, its on readings (katakana) and kun readings (hiragana). Themes run in teaching order, kanji in natural order (一 二 三…). |
+| **Grid** | Each theme is a grid of tiles: the kanji, its on readings (katakana), kun readings (hiragana) and its first meaning (山 *mountain*); every meaning is in its sheet. Themes run in teaching order, kanji in natural order (一 二 三…). |
 | **Kanji sheet** | Tap a tile: each reading with its romaji and a speaker, stroke count, radical, an example word, **Words with** it (every word that uses it) and **Add to flashcards**. The ⓘ beside **Readings** and **Writing** explains that card for a beginner. |
 | **Stroke order** | The sheet draws the kanji stroke by stroke, each stroke numbered; **Replay** draws it again. |
 | **Write it** | A pad under the drawing: draw each stroke in order. A right stroke snaps clean; a wrong one shakes and counts a miss; three misses shows it as a hint. **Outline** shows the kanji to trace (off for a real test). Then **Again** or **Next kanji**. Practice only. |

@@ -326,7 +326,7 @@ async function main() {
   })());
   check("a closed kanji table is closed: its grid's display never outranks .collapsed", allCssRules.some(r =>
     r.selectorText === "body:not(.is-searching) .table-section.collapsed .vocab.vocab-kanji" && r.style.display === "none"));
-  check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, the meaning kept for search and the sheet", (() => {
+  check("the Kanji section: 102 N5 kanji in 7 themed tables, themes in teaching order (Numbers & Money first, not A-Z), kanji in authored order (一 first), each a tile -- the bare character over its on readings and then its kun readings, each on its own line, its first meaning under them (間 reads between, not between, interval), the full meaning kept for search and the sheet", (() => {
     const kanjiSecs = [...document.querySelectorAll('#vocabulary .table-section[data-category="N5 Kanji"]')];
     const rows = kanjiSecs.flatMap(s => [...s.querySelectorAll("tbody tr")]);
     const yama = rows.find(r => r.querySelector(".kanji-char").textContent === "山");
@@ -338,7 +338,10 @@ async function main() {
       && yama.querySelector(".kanji-on").textContent === "サン" && yama.querySelector(".kanji-kun").textContent === "やま"
       && rows.find(r => r.querySelector(".kanji-char").textContent === "九").querySelector(".kanji-on").textContent === "キュウ・ク"
       && yama.querySelector(".jpword").dataset.romaji === "yama / san"
-      && miru.querySelector(".kanji-okuri").textContent === "る" && yama.cells[1].querySelector(".meaning-text").textContent === "mountain";
+      && miru.querySelector(".kanji-okuri").textContent === "る" && yama.cells[1].querySelector(".meaning-text").textContent === "mountain"
+      && yama.querySelector(".kanji-gloss").textContent === "mountain"
+      && rows.find(r => r.querySelector(".kanji-char").textContent === "間").querySelector(".kanji-gloss").textContent === "between"
+      && rows.every(r => r.querySelector(".kanji-gloss").textContent.length > 0);
   })());
   check("tapping a kanji tile opens its sheet -- readings, strokes and radical, an example with furigana, the reader's words that use it folded away (not repeating the example), Add to flashcards -- and Escape closes it, back on the tile", (() => {
     const sheet = document.getElementById("kanjiSheet"), scrim = document.getElementById("kanjiScrim");

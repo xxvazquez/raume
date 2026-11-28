@@ -186,8 +186,10 @@ its card, like a Photos grid, on the title row's 16px edge with 10px between
 tiles: each tile a `--group-ground` rounded square (14px), the character at 34px in
 ink, its on readings (katakana) on one line and its kun readings (hiragana)
 on the next at 11px in the furigana tone, ・ between readings with its
-full-width bearings pulled in (hidden with furigana), centred -- no meaning
-or romaji on the tile: those are in the sheet a tap opens; hover
+full-width bearings pulled in (hidden with furigana), then its first
+meaning (`.kanji-gloss`, 山 "mountain", 間 "between" -- not every meaning) at
+`--fs-micro` muted, hidden with English and covered by Cover answers;
+centred -- the full meaning and romaji are in the sheet a tap opens; hover
 washes it in the section tone, a press scales it to 97%. It is still a real
 table underneath (display swapped to grid), so search, hide, print and the
 Tables directory are unchanged; in a search-results table a kanji row is an

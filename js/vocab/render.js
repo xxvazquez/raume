@@ -425,8 +425,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // popover reads, and still reach a screen reader through their labels.
   // row.enNote is context for the meaning ("before a noun"), set apart under
   // it in small grey -- read, never typed as part of a flashcard answer.
-  function meaningCell(english, vocabId, badges, note) {
-    return '<td><div class="meaning-cell"><span class="meaning-text">' + esc(english) +
+  function meaningCell(english, vocabId, badges, note, lead) {
+    return '<td><div class="meaning-cell">' + (lead || '') + '<span class="meaning-text">' + esc(english) +
       (note ? ' <span class="meaning-note">' + esc(note) + '</span>' : '') + '</span>' +
       (badges ? '<span class="row-badges">' + badges + '</span>' : '') + rowActions(vocabId, !!badges) + '</div></td>';
   }
@@ -485,7 +485,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + '><td class="jp" lang="ja">' + jp + '</td>' + meaningCell(row.english, row.id, verbBadge(row) + particleChips(row) + verbFormsNote(row) + levelNote(row), row.enNote) + '</tr>';
   }
   // A kanji row (the Kanji section): drawn as a tile in a grid -- the
-  // character large, its meaning small under it (css/site.css .vocab-kanji).
+  // character large, its readings and first meaning small under it
+  // (css/site.css .vocab-kanji).
   // It stays a real table row so search, hide, print and the Tables
   // directory treat it like any other; its readings ride along hidden, with
   // the .furigana class so search counts them as readings. Tapping the tile
@@ -493,6 +494,18 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function kanjiReadingHtml(r) {
     var dot = r.indexOf('.');
     return dot === -1 ? esc(r) : esc(r.slice(0, dot)) + '<span class="kanji-okuri">' + esc(r.slice(dot + 1)) + '</span>';
+  }
+  // A tile's gloss: the first meaning only ("between, interval" -> "between"),
+  // so every tile keeps one short line; a comma inside brackets isn't a split.
+  function firstMeaning(english) {
+    var depth = 0, s = String(english || '');
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (c === '(') depth++;
+      else if (c === ')') depth = Math.max(0, depth - 1);
+      else if (c === ',' && !depth) return s.slice(0, i);
+    }
+    return s;
   }
   function kanjiRow(row) {
     var ch = row.jp[0].kanji;
@@ -505,7 +518,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<tr data-vocab-id="' + esc(row.id || '') + '"' + jlptAttr(row) + ' class="kanji-tile' + (known ? ' kanji-known' : '') + '" tabindex="0" aria-haspopup="dialog">' +
       '<td class="jp" lang="ja"><div class="kanji-stack"><span class="jpword kanji-char"' + romajiAttr(row.romaji) + '>' + esc(ch) + '</span>' +
       '<span class="kanji-readings furigana">' + readings + '</span></div></td>' +
-      meaningCell(row.english, row.id, '', '') + '</tr>';
+      meaningCell(row.english, row.id, '', '', '<span class="kanji-gloss">' + esc(firstMeaning(row.english)) + '</span>') + '</tr>';
   }
   var CHECK_ICON = '<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>';
   function knownButtonHtml(id) {
