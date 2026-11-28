@@ -1287,6 +1287,15 @@ body.selftest-mode .selftest-hint { display: block; }
   -webkit-tap-highlight-color: transparent;
 }
 .cat-fold:focus-visible { outline: 2px solid var(--section); outline-offset: -6px; border-radius: 10px; }
+/* Skip to content: the first stop for a keyboard (an iPad's), out of sight
+   until focused -- then a capsule over the masthead. */
+.skip-link {
+  position: absolute; left: 12px; top: 8px; z-index: 1000; transform: translateY(-200%);
+  padding: 10px 16px; border-radius: var(--radius-button); background: var(--paper); color: var(--ink);
+  font: 500 var(--fs-small)/1.2 var(--font-ui); text-decoration: none; box-shadow: var(--glass-shadow);
+}
+.skip-link:focus-visible { transform: none; }
+main.app:focus { outline: none; }
 .cat-heading-name { min-width: 0; }
 .cat-fold-icon {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
@@ -1419,7 +1428,7 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 #vocabulary .section-toggle-icon { margin-top: 0; }
 
-.section-title { margin: 0; flex: 0 1 auto; min-width: 0; }
+.section-title { margin: 0; flex: 0 1 auto; min-width: 0; font-size: 1.5em; }
 .section-toggle {
   appearance: none;
   border: 0;
@@ -6253,6 +6262,12 @@ mark.fc-diff-co {
 .options-btn { min-width: 44px; justify-content: center; }
 #vocabulary .section-head { position: relative; }
 #vocabulary .section-toggle::after { content: ""; position: absolute; inset: 0; }
+/* Its focus ring is the whole title row's, rounded like an inset row --
+   not a square box hugging the title text. A closed table's row sits
+   inside its card's 16px padding; an open one's spans the card. */
+#vocabulary .section-toggle:focus-visible { outline: none; }
+#vocabulary .section-toggle:focus-visible::after { inset: 3px -13px; border-radius: 12px; box-shadow: inset 0 0 0 2px var(--section); }
+#vocabulary .table-section:not(.collapsed) .section-toggle:focus-visible::after { inset: 3px; }
 #vocabulary .section-head > .controls { position: relative; z-index: 1; }
 /* Every other small control gets the same invisible pad, grown only on the
    sides shorter than 44px (min() keeps a bigger control's hit area its own
@@ -6320,6 +6335,11 @@ mark.fc-diff-co {
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root { --glass-bg: color-mix(in srgb, var(--paper) 62%, transparent); }
   :root[data-theme="dark"] { --glass-bg: color-mix(in srgb, var(--paper) 58%, transparent); }
+  /* The phone tab bar's 10px labels need more fill under them: over a row
+     of table tiles the 62% / 58% glass left them near 4:1 -- this keeps
+     them at 4.5:1 or better, and the bar still reads as glass. */
+  :root { --tabbar-bg: color-mix(in srgb, var(--paper) 74%, transparent); }
+  :root[data-theme="dark"] { --tabbar-bg: color-mix(in srgb, var(--paper) 78%, transparent); }
 }
 .options-sheet, .tindex-menu, .section-menu-list, .search-recents {
   -webkit-backdrop-filter: var(--glass-blur);
@@ -6358,7 +6378,7 @@ mark.fc-diff-co {
      in the section tone. It has no position:fixed children, so the blur sits
      on the bar itself. */
   .site-nav {
-    background: var(--glass-bg);
+    background: var(--tabbar-bg, var(--glass-bg));
     -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-edge);
   }
@@ -7048,7 +7068,7 @@ body.title-collapsed:not(:has(#vocabPage:not([hidden]))) .compact-title {
    tokens cover menus, popovers, the phone tab bar and Undo; the surfaces
    that mix their own translucent ground are listed after. */
 @media (prefers-reduced-transparency: reduce) {
-  :root, :root[data-theme="dark"] { --glass-bg: var(--paper); --glass-blur: none; }
+  :root, :root[data-theme="dark"] { --glass-bg: var(--paper); --tabbar-bg: var(--paper); --glass-blur: none; }
   .options-sheet, .fc-xw-sheet, .account-menu,
   .page-vocab .vocab-toolbar::before, .masthead::before,
   body.title-collapsed .compact-title { background: var(--group-ground); }

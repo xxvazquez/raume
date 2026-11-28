@@ -741,6 +741,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   // `.table-section` / `.vocab` (search, print, column visibility, row hiding).
   function sectionMarkup(o) {
     var controls = o.controls || {};
+    var hTag = o.section === 'vocabulary' ? 'h3' : 'h2';
     var ctrlParts =['<span class="rows-hidden-status" hidden><span class="rows-hidden-count"></span> · <button type="button" class="show-all-rows">Show all</button></span>'];
     // Secondary actions collapse into a quiet overflow menu so only its icon
     // sits next to the title. Print is a standalone icon on desktop, but on
@@ -783,10 +784,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // controls.addTable gate as the menu item) -- a synthetic table like
       // Flashcards' Words to review has nothing to persist an icon against.
       (controls.addTable ? tableIconSlot(o.id) : '') +
-      '<h2 class="section-title"><button type="button" class="section-toggle" aria-expanded="' + (o.collapsed ? 'false' : 'true') + '" aria-controls="vocab-' + o.id + '">' +
+      // Under a Vocabulary category heading (an h2) a table's title is an
+      // h3; Grammar and Kanji have no category headings, so theirs are h2.
+      '<' + hTag + ' class="section-title"><button type="button" class="section-toggle" aria-expanded="' + (o.collapsed ? 'false' : 'true') + '" aria-controls="vocab-' + o.id + '">' +
       '<span class="section-toggle-icon">' + CHEVRON_ICON + '</span>' +
       '<span class="section-title-text" id="secttl-' + o.id + '">' + esc(title) + '</span>' +
-      '</button></h2>' +
+      '</button></' + hTag + '>' +
       '<div class="controls">' + ctrlParts.join('') + '</div></div>' +
       // aria-labelledby the visible title so a screen reader announces the table
       // by name ("Cooking Ingredients, table") instead of a bare "table".
@@ -1100,6 +1103,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       '<div class="tindex-grab" aria-hidden="true"></div>' + panels + '</div>' +
       '<div class="tindex-scrim"></div>';
   }
+  // A Vocabulary category's name as its fold button reads it.
+  function catLabel(name, n) { return name + ', ' + n + (n === 1 ? ' table' : ' tables'); }
   // Assemble #vocabulary: every table, grouped section -> category -> table
   // (categories and tables alphabetical). The Vocabulary section carries a
   // quiet, foldable category sub-heading before each of its groups; Grammar and Kanji
@@ -1117,9 +1122,12 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           // applyCategoryFolds) -- the chevron at its trailing edge, as in
           // an iOS sidebar section.
           html += '<h2 class="cat-heading page-hidden" data-section="' + sec + '" data-category="' + esc(g.name) + '">' +
-            '<button type="button" class="cat-fold" aria-expanded="true">' +
+            // Named in full on the button ("Around Town, 8 tables"): a count
+            // span's own aria-label isn't read, so the heading ran together
+            // as "Around Town8".
+            '<button type="button" class="cat-fold" aria-expanded="true" aria-label="' + esc(catLabel(g.name, g.tables.length)) + '">' +
             '<span class="cat-heading-name">' + esc(g.name) + '</span>' +
-            '<span class="cat-heading-count" aria-label="' + g.tables.length + ' tables">' + g.tables.length + '</span>' +
+            '<span class="cat-heading-count" aria-hidden="true">' + g.tables.length + '</span>' +
             '<span class="cat-fold-icon">' + CHEVRON_ICON + '</span></button></h2>';
         }
         g.tables.forEach(function (t) { html += renderTable(t) + '\n'; });
@@ -1210,7 +1218,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           if (h) {
             h.classList.toggle('user-hidden', shown === 0);
             var count = h.querySelector('.cat-heading-count');
-            if (count) { count.textContent = shown; count.setAttribute('aria-label', shown + ' tables'); }
+            if (count) count.textContent = shown;
+            var fold = h.querySelector('.cat-fold');
+            if (fold) fold.setAttribute('aria-label', catLabel(g.name, shown));
             ordered.push(h);
           }
         }

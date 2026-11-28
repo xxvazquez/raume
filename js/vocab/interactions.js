@@ -2366,6 +2366,15 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // section or table can be linked to and survives a reload.
     routeFromHash();
 
+    // Skip to content: focus <main> (the next Tab lands on the page's first
+    // control) without letting "#main" reach the hash router.
+    const skip = document.querySelector('.skip-link');
+    if (skip) skip.addEventListener('click', function (e) {
+      e.preventDefault();
+      const main = document.getElementById('main');
+      if (main) main.focus();
+    });
+
     // Casual / polite: one page-wide switch. Verb tables carry both forms in the
     // markup; body.show-polite swaps which one is visible via CSS. Preference
     // persists client-side.

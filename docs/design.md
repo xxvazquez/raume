@@ -657,8 +657,10 @@ and Help.
   floating Liquid Glass capsule (`position: fixed`), 12px in from the sides (five tabs need the width; labels 10px) and
   just above the home indicator (`--tabbar-gap`: the bottom safe-area inset less
   12px, at least 12px), 58px tall with 4px inside. Its glass is the system's —
-  `--glass-bg` with `--glass-blur`, the bright top rim, the hairline edge, the one
-  soft shadow — so content scrolling under it shows through; the blur sits on
+  `--glass-blur`, the bright top rim, the hairline edge, the one soft shadow —
+  over a denser fill of its own (`--tabbar-bg`: paper 74%, 78% in dark, where
+  menus take 62% / 58%), so its 10px labels stay at 4.5:1 or better even over
+  a row of table tiles, and content scrolling under it still shows through; the blur sits on
   the bar itself, which has no `position: fixed` children. Five equal tabs, an
   icon over a 10.5px label (iOS's ~10pt), unselected in `--muted`, the selected
   one in its section tone on a rounded neutral highlight (`--tab-select`, ink 11%,
@@ -1030,7 +1032,15 @@ soft glow and "5 in a row" (the words dropped at phone width, where the glow
 says it), then they empty; a miss empties them.
 
 Every control takes the same focus ring: a 2px `--section` outline at a 2px
-offset (the search box included). The Kana group picker and the Settings
+offset (the search box included). A table's title row and a Vocabulary
+category header ring the whole row instead, rounded (12px / 10px) and inset
+like an iOS list row, never a square box hugging the title text. The page
+opens with a **Skip to content** link, out of sight until a keyboard focuses
+it, then a white capsule over the masthead; it moves focus to `<main>`
+without touching the hash route. Headings run h1 (the section's name) → h2
+(a Vocabulary category, named in full on its fold button: "Around Town, 8
+tables") → h3 (its tables); Grammar and Kanji, with no categories, title
+their tables h2. The Kana group picker and the Settings
 study-directions block render as iOS Settings-style checkmark rows — the
 whole row is the tap target, the native checkbox is visually hidden (kept
 for accessibility), and a CSS tick fades in at the trailing edge on

@@ -1350,6 +1350,33 @@ async function main() {
     return calls.length === 1 && calls[0].top === 0 && kept && grammarNav.classList.contains("active");
   })());
 
+  console.log("Reference accessibility");
+  check("headings nest: a Vocabulary category is an h2 named in full on its fold button (Around Town, 8 tables -- the count itself aria-hidden), its tables h3; Grammar and Kanji tables are h2", (() => {
+    const cat = document.querySelector('#vocabulary .cat-heading[data-category="Around Town"]');
+    const n = [...document.querySelectorAll('#vocabulary .table-section[data-category="Around Town"]')].length;
+    return cat.tagName === "H2" && cat.querySelector(".cat-fold").getAttribute("aria-label") === "Around Town, " + n + " tables"
+      && cat.querySelector(".cat-heading-count").getAttribute("aria-hidden") === "true"
+      && [...document.querySelectorAll('#vocabulary .table-section[data-section="vocabulary"] .section-title')].every(h => h.tagName === "H3")
+      && [...document.querySelectorAll('#vocabulary .table-section:is([data-section="grammar"], [data-section="kanji"]) .section-title')].every(h => h.tagName === "H2");
+  })());
+  check("Skip to content is the page's first focusable element and moves focus to <main> without changing the route", (() => {
+    const skip = document.querySelector(".skip-link"), main = document.getElementById("main");
+    const first = document.querySelector("a[href], button, input, [tabindex]:not([tabindex='-1'])");
+    const hash = window.location.hash;
+    skip.click();
+    return first === skip && skip.getAttribute("href") === "#main" && main.tagName === "MAIN" && main.getAttribute("tabindex") === "-1"
+      && document.activeElement === main && window.location.hash === hash;
+  })());
+  check("a table title row's focus ring rings the whole row, rounded -- not a square box around the title text", (() => {
+    const r = allCssRules.find(x => x.selectorText === "#vocabulary .section-toggle:focus-visible::after");
+    return !!r && r.style.borderRadius === "12px" && /var\(--section\)/.test(r.style.boxShadow)
+      && allCssRules.some(x => x.selectorText === "#vocabulary .section-toggle:focus-visible" && x.style.outline === "none");
+  })());
+  check("the phone tab bar takes its own denser glass fill (--tabbar-bg), solid under Reduce Transparency", (() => {
+    return allCssRules.some(x => x.selectorText === ".site-nav" && /--tabbar-bg/.test(x.style.background))
+      && allCssRules.some(x => /prefers-reduced-transparency/.test((x.parentRule && x.parentRule.conditionText) || (x.parentRule && x.parentRule.media && x.parentRule.media.mediaText) || "") && x.style.getPropertyValue("--tabbar-bg").trim() === "var(--paper)");
+  })());
+
   console.log("Romaji reveal");
   const saltRow = document.querySelector('#vocabulary .table-section:not([data-section="grammar"]) tbody tr .jpword[data-romaji="shio"]').closest("tr");
   check("romaji sits behind a tap on the word itself, hidden until then", (() => {
@@ -2197,8 +2224,9 @@ async function main() {
   check("...parked after every visible table, so it never splits a group's rounded card",
     [...document.querySelectorAll("#vocabulary .table-section")].pop() === hideSec);
   check("...dropped from the Tables directory", !document.querySelector('#tindexMenu a[data-target="' + hideId + '"]'));
-  check("...and its category heading counts one table fewer",
-    Number(document.querySelector('#vocabulary .cat-heading[data-category="' + hideCat + '"] .cat-heading-count').textContent) === catCountBefore - 1);
+  check("...and its category heading counts one table fewer, its fold button named to match",
+    Number(document.querySelector('#vocabulary .cat-heading[data-category="' + hideCat + '"] .cat-heading-count').textContent) === catCountBefore - 1
+      && document.querySelector('#vocabulary .cat-heading[data-category="' + hideCat + '"] .cat-fold').getAttribute("aria-label") === hideCat + ", " + (catCountBefore - 1) + (catCountBefore - 1 === 1 ? " table" : " tables"));
   check("...and it never turns up in search results", (() => {
     const input = document.getElementById("tableSearch");
     const word = hideSec.querySelector("tbody tr td.en, tbody tr td:last-child").textContent.trim().split(/\s+/)[0];
