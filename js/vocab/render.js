@@ -2,8 +2,8 @@
 //
 // Builds every vocabulary table (grouped section -> category -> table) and the
 // top navigation from RaumeStudy.data, and owns per-table sorting.
-// Runs its render
-// synchronously at load (same lifecycle as the old js/app.js). The interaction
+// Runs its render synchronously at load (same lifecycle as the old
+// js/app.js); a table's rows wait until it first opens (ensureRows). The interaction
 // half -- navigation, search, event wiring -- lives in js/vocab/interactions.js
 // and augments the same RaumeStudy.vocab object. See the load-order comment in
 // index.html.
@@ -782,23 +782,94 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       '</tr></thead><tbody>\n    ' +
       o.rowsHtml + '\n  </tbody></table></section>';
   }
+  // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
+  // authored order -- a run of sentences reads in the order it was written.
+  // Kanji tables keep theirs too: 一 二 三 in order, not eight, five, four.
+  // So does a table marked `ordered` -- a sequence taught in its own order
+  // (ひとつ ふたつ みっつ, おととい きのう きょう, これ それ あれ), which
+  // A-Z by English would scramble.
+  function isAuthored(t) {
+    return t.tableClass === 'vocab-sentences' || t.tableClass === 'vocab-kanji' || !!t.ordered;
+  }
   function renderTable(t) {
-    // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
-    // authored order -- a run of sentences reads in the order it was written.
-    // Kanji tables keep theirs too: 一 二 三 in order, not eight, five, four.
-    // So does a table marked `ordered` -- a sequence taught in its own order
-    // (ひとつ ふたつ みっつ, おととい きのう きょう, これ それ あれ), which
-    // A-Z by English would scramble.
-    var sentences = t.tableClass === 'vocab-sentences';
-    var authored = sentences || t.tableClass === 'vocab-kanji' || !!t.ordered;
-    var rows = authored ? t.rows.slice() : t.rows.slice().sort(byEnglish);
+    tableById[t.id] = t;
     return sectionMarkup({
       id: t.id, title: t.title, category: t.category, section: sectionOf(t.category), tableClass: t.tableClass,
-      rowsHtml: rowsHtmlFor(rows),
+      rowsHtml: '',
       controls: { addTable: true, print: true },
-      sectionClass: 'page-hidden', collapsed: true, defaultSort: !authored
+      sectionClass: 'page-hidden rows-pending', collapsed: true, defaultSort: !isAuthored(t)
     });
   }
+  // A table's rows are built the first time it opens -- or a search shows
+  // it, or it's printed -- not at load: all ~1500 rows up front were 2 MB
+  // of markup and ~40k elements on every launch, nearly all of it in
+  // tables nobody opened. Until then its section is .rows-pending with an
+  // empty tbody, and search, the level filter and the row washes read the
+  // data (tableRows, rowSearchText) instead. Once built, a table keeps its
+  // rows; renderAllTables starts every table over.
+  var tableById = {}, orderCache = {}, builtHooks = [];
+  function tableRows(id) {
+    var t = tableById[id];
+    if (!t) return [];
+    return orderCache[id] || (orderCache[id] = isAuthored(t) ? t.rows.slice() : t.rows.slice().sort(byEnglish));
+  }
+  vocab.tableRows = tableRows;
+  // The data changed under the tables (a word edit, a sync): orders and
+  // anything derived from the rows are worked out afresh.
+  var dataHooks = [];
+  vocab.onRowDataChange = function (fn) { dataHooks.push(fn); };
+  vocab.rowDataChanged = function () {
+    orderCache = {};
+    dataHooks.forEach(function (fn) { fn(); });
+  };
+  function ensureRows(section) {
+    if (!section || !section.classList.contains('rows-pending')) return false;
+    section.classList.remove('rows-pending');
+    var tbody = section.querySelector('tbody');
+    if (!tbody) return false;
+    tbody.innerHTML = rowsHtmlFor(tableRows(section.dataset.table));
+    for (var i = 0; i < tbody.rows.length; i++) tbody.rows[i].dataset.originalIndex = i;
+    // What a row's state says about it (known / tricky wash, level filter,
+    // hidden columns, its flashcard toggle) is applied by whoever owns it.
+    builtHooks.forEach(function (fn) { fn(section); });
+    return true;
+  }
+  vocab.ensureRows = ensureRows;
+  vocab.onRowsBuilt = function (fn) { builtHooks.push(fn); };
+  vocab.buildAllRows = function (sections) {
+    Array.prototype.forEach.call(sections || document.querySelectorAll('#vocabulary .table-section.rows-pending'), ensureRows);
+  };
+  // What search reads off a row, from the data -- exactly the text its
+  // markup shows (jpCell / verbPairRow / kanjiRow / meaningCell above):
+  // kanji = the Japanese without furigana, furigana = the readings over
+  // kanji, and per form that carries a romaji reveal (.jpword[data-romaji],
+  // in order) its reading (kana + furigana), its writing (kana + kanji) and
+  // the romaji. english is the meaning with its grey note after a space.
+  function segWriting(segs) { return segs.map(function (s) { return s.kanji || s.text || s.p || ''; }).join(''); }
+  function segReading(segs) { return segs.map(function (s) { return s.kanji ? s.reading || '' : s.text || s.p || ''; }).join(''); }
+  function segFurigana(segs) { return segs.map(function (s) { return s.kanji ? s.reading || '' : ''; }).join(''); }
+  vocab.rowSearchText = function (row) {
+    var english = String(row.english || '');
+    if (row.type === 'kanji') {
+      var ch = row.jp[0].kanji;
+      var okuri = function (r) { return String(r).replace('.', ''); };
+      return {
+        kanji: ch, furigana: (row.on || []).map(okuri).join('・') + (row.kun || []).map(okuri).join('・'),
+        forms: row.romaji ? [{ romaji: row.romaji, reading: ch, writing: ch }] : [],
+        english: english, kanjiTile: true
+      };
+    }
+    var forms = row.type === 'verb-pair' ? row.forms : [{ jp: row.jp, romaji: row.romaji }];
+    return {
+      kanji: forms.map(function (f) { return segWriting(f.jp); }).join(''),
+      furigana: forms.map(function (f) { return segFurigana(f.jp); }).join(''),
+      forms: forms.filter(function (f) { return f.romaji; }).map(function (f) {
+        return { romaji: f.romaji, reading: segReading(f.jp), writing: segWriting(f.jp) };
+      }),
+      english: english + (row.enNote ? ' ' + row.enNote : ''),
+      kanjiTile: false
+    };
+  };
   // Build a standard vocabulary table section from an arbitrary set of rows
   // (raw data/vocabulary.js row objects). Flashcards' "Words to Review" uses it
   // so that list is a real, sortable, printable table rather than a bespoke
@@ -1061,11 +1132,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     var we = window.RaumeStudy.wordEdits;
     if (we && we.applyToDataset) we.applyToDataset();
   }
-  function tagOriginalIndex() {
-    document.querySelectorAll('.vocab tbody').forEach(function (tbody) {
-      [...tbody.querySelectorAll('tr')].forEach(function (row, i) { row.dataset.originalIndex = i; });
-    });
-  }
   // A full re-paint of #vocabulary from the current dataset -- used when
   // signed-in custom vocab lands after the initial synchronous render. It
   // rebuilds every section, so expand/collapse and per-column sort reset to
@@ -1074,9 +1140,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function renderAllTables() {
     if (!host || !vocabularyTables) return;
     mergeCustomVocab();
+    tableById = {};
+    vocab.rowDataChanged();
     host.innerHTML = renderAll(vocabularyTables);
     if (indexHost) { indexHost.innerHTML = renderTableIndex(vocabularyTables); lastIndexHtml = null; }
-    tagOriginalIndex();
     // Every freshly rendered section starts .page-hidden. If the reader is
     // currently on a vocabulary section, re-run routing to reveal it again;
     // if they're on Flashcards / Customize / Help, leave the rebuilt DOM
@@ -1092,7 +1159,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (navHost) navHost.innerHTML = renderNav();
     if (indexHost) { indexHost.innerHTML = renderTableIndex(vocabularyTables); lastIndexHtml = null; }
   }
-  tagOriginalIndex();
 
   // Re-sequence the already-rendered #vocabulary headings/sections and rebuild
   // the table directory to match the current custom order (Customize page).

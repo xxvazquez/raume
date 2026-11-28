@@ -17,10 +17,21 @@
   allows `data:` so uploaded table icons can be data URLs — and so the
   repeated row icons (speaker, ⓘ, hide, add) can be CSS masks: each is one
   empty `<i class="ic ic-…">` drawn by a data-URL `mask` in `currentColor`
-  (`css/site.css` `.ic`), not an inline `<svg>` per row. Every table's rows
-  are in the DOM at once (search, the JLPT filter and the row washes read
-  them), so a row's element count is kept low; the smoke test fails on an
-  `<svg>` back inside a table row.
+  (`css/site.css` `.ic`), not an inline `<svg>` per row, so a row's element
+  count stays low; the smoke test fails on an `<svg>` back inside a table row.
+- **Table rows are built on open.** Load renders every table's header with an
+  empty `tbody` (`.rows-pending`); `render.js` `ensureRows` builds a table's
+  rows the first time it opens, a search shows it, it's printed or Add to
+  flashcards reads it, and it keeps them after. Building them all up front
+  was ~2 MB of markup and ~40k elements per launch (~4.8k now). So nothing
+  may assume a table's rows exist: search ranks rows from the data
+  (`tableRows` for a table's order, `rowSearchText` for exactly the text a
+  row shows) and builds only the tables it shows; the JLPT filter's empty
+  tables come from the data too. State that lives on a row — the known /
+  tricky wash, `.level-out`, hidden-column `aria-hidden`, the flashcard
+  toggle — is applied to built rows and, for a table built later, by an
+  `onRowsBuilt` hook. A data change (a word edit, a sync) calls
+  `rowDataChanged`, which drops cached orders and search text.
 - **Cache-busting.** Asset URLs carry `?v=__CACHEBUST__`; on deploy
   `scripts/stamp-asset-versions.js` replaces it with each file's own content
   hash (and fills `sw.js`'s `ASSET_VERSIONS` map to match), so a deploy
@@ -515,7 +526,7 @@ js/
     word-edits.js        the reader's edits to built-in words, patched onto the dataset
     kanji-write.js       the kanji sheet's Write it pad (stroke-order practice + judge)
     customize.js         the Customize page
-    render.js            tables, nav, sorting
+    render.js            tables (rows built on open), nav, sorting
     interactions.js      routing, search, view modes, print, theme
   flashcards/            the Flashcards feature
     store.js             state + local storage

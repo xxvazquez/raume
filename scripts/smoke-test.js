@@ -134,6 +134,58 @@ async function main() {
   const gakkou = kd.itemsFor(["hira-sokuon"]).find(it => it.romaji === "gakkou");
 
   if (want("reference")) {
+  console.log("Tables build their rows on open");
+  (() => {
+    const v = window.RaumeStudy.vocab, input = document.getElementById("tableSearch");
+    const secs = () => [...document.querySelectorAll("#vocabulary .table-section")];
+    const search = q => { input.value = q; input.dispatchEvent(new window.Event("input")); };
+    check("at load no table has rows yet -- each is built on its first open (every row up front was ~40k elements)",
+      secs().length === 58 && !document.querySelector("#vocabulary tbody tr") && secs().every(s => s.classList.contains("rows-pending")));
+    check("a search works from the data: it finds the word and builds only the tables it shows", (() => {
+      search("taberu");
+      const shown = secs().filter(s => !s.classList.contains("search-hidden"));
+      const built = secs().filter(s => !s.classList.contains("rows-pending"));
+      const hit = document.querySelector('#vocabulary tr[data-vocab-id="v0139"]:not(.search-hidden)');
+      const ok = shown.length > 0 && built.length === shown.length && shown.every(s => built.includes(s))
+        && !!hit && !!hit.querySelector(".search-hit") && /^\d+ matching rows? · \d+ tables?$/.test(document.getElementById("searchCount").textContent);
+      search("");
+      return ok;
+    })());
+    check("Options › JLPT level marks a table with none of that level empty from its data, built or not", (() => {
+      document.body.dataset.jlptFilter = "4";
+      v.markLevelEmpty();
+      const ok = secs().every(s => s.classList.contains("level-empty") === !v.tableRows(s.dataset.table).some(r => v.jlptLevel(r) === 4));
+      return ok;
+    })());
+    const fresh = secs().find(s => s.classList.contains("rows-pending") && s.dataset.section === "vocabulary" && !s.classList.contains("level-empty"));
+    const word = v.tableRows(fresh.dataset.table).find(r => r.id && r.type !== "kanji");
+    window.RaumeStudy.knownKanji.setKnown(word.id, true);
+    document.body.classList.add("hide-english");
+    fresh.querySelector(".section-toggle").click();
+    const rows = [...fresh.querySelectorAll("tbody tr")];
+    check("opening a table builds its rows in order, already carrying the level filter, the known wash and hidden-column state",
+      !fresh.classList.contains("rows-pending") && !fresh.classList.contains("collapsed")
+      && rows.length === v.tableRows(fresh.dataset.table).length
+      && rows.every((r, i) => r.dataset.vocabId === (v.tableRows(fresh.dataset.table)[i].id || "") && Number(r.dataset.originalIndex) === i)
+      && rows.every(r => r.classList.contains("level-out") === (r.dataset.jlpt !== "4"))
+      && fresh.querySelector('tr[data-vocab-id="' + word.id + '"]').classList.contains("known-row")
+      && rows.every(r => r.cells[1].getAttribute("aria-hidden") === "true"));
+    fresh.querySelector(".section-toggle").click();
+    window.RaumeStudy.knownKanji.setKnown(word.id, false);
+    document.body.classList.remove("hide-english");
+    v.applyColVisibility();
+    delete document.body.dataset.jlptFilter;
+    v.markLevelEmpty();
+    check("...and closing it keeps them: a table is built once", fresh.querySelectorAll("tbody tr").length === rows.length && !document.querySelector("#vocabulary .level-out, #vocabulary .level-empty"));
+    check("printing builds what it prints", (() => {
+      const pending = secs().find(s => s.classList.contains("rows-pending"));
+      pending.querySelector(".print-one").click();
+      window.dispatchEvent(new window.Event("afterprint"));
+      return !pending.classList.contains("rows-pending") && pending.querySelectorAll("tbody tr").length === v.tableRows(pending.dataset.table).length;
+    })());
+    // Everything below reads rows across every table.
+    v.buildAllRows();
+  })();
   check("table rows draw their icons as one masked <i> each, never an inline <svg> (half the page's elements were row SVGs)", (() => {
     const rows = document.querySelectorAll("#vocabulary tbody tr[data-vocab-id]");
     const ic = document.querySelectorAll("#vocabulary tbody .ic");
@@ -2222,6 +2274,7 @@ async function main() {
         && vi.checkAnswer(k, "jp-ro", "yama") && vi.checkAnswer(k, "jp-ro", "san") && vi.checkAnswer(k, "jp-en", "mountain");
     })());
     check("...it renders on the vocabulary page with real furigana", (() => {
+      window.RaumeStudy.vocab.buildAllRows(); // adding a word re-renders every table unbuilt
       const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
       return !!tr && !!tr.querySelector("ruby rt") && /eggplant/.test(tr.textContent);
     })());
@@ -2233,6 +2286,7 @@ async function main() {
       const gone = !document.querySelector(".ios-confirm") && !vegTable.rows.some(r => r.id === made.id)
         && !!toast && /Word deleted/.test(toast.textContent);
       toast.querySelector(".undo-toast-btn").click();
+      window.RaumeStudy.vocab.buildAllRows();
       return gone && vegTable.rows.some(r => r.id === made.id) && !!document.querySelector('#vocabulary tr[data-vocab-id="' + made.id + '"]');
     })());
     if (delBtn()) delBtn().click(); else cvNs.deleteRow(made.id);
@@ -2240,6 +2294,7 @@ async function main() {
     const kana = cvNs.addRow(String(vegTable.id), cvNs.parseImport("せんせい,sensei,teacher").rows[0]);
     check("your own word takes the JLPT level of the same word in raume's tables, written alike or read alike", (() => {
       const row = id => vegTable.rows.find(r => r.id === id);
+      window.RaumeStudy.vocab.buildAllRows();
       const tr = document.querySelector('#vocabulary tr[data-vocab-id="' + sensei.id + '"]');
       return row(sensei.id).jlpt === 5 && row(kana.id).jlpt === 5 && !!tr && tr.dataset.jlpt === "5"
         && window.RaumeStudy.flashcards.vocabIndex.getVocabIndex()[sensei.id].jlpt === 5 && !row(made.id);
@@ -2362,7 +2417,9 @@ async function main() {
       const own = document.getElementById("table-" + newTable.id);
       const ownRow = own && own.querySelector("tbody tr");
       const raume = document.querySelector('#vocabulary .table-section:not([data-table^="ct-"]) tr[data-vocab-id="v0485"]');
-      const ok = !!ownRow && ownRow.classList.contains("search-hidden") && own.classList.contains("search-hidden")
+      // Your table has no match left, so it isn't even built for this search.
+      const ok = !!own && (!ownRow || ownRow.classList.contains("search-hidden")) && own.classList.contains("search-hidden")
+        && window.RaumeStudy.vocab.tableRows(newTable.id).some(r => r.romaji === "ue")
         && !!raume && !raume.classList.contains("search-hidden");
       const also = raume && raume.querySelector(".meaning-cell .search-also");
       const named = !!also && also.textContent === "Also in: Positions" && !also.closest(".meaning-text");
@@ -2573,6 +2630,8 @@ async function main() {
 
   }
   if (want("flashcards")) {
+  // Tables build their rows on first open; the checks below read them.
+  window.RaumeStudy.vocab.buildAllRows();
   console.log("Flashcards: page navigation");
   check("no console errors from vendor/flashcards scripts loading", true); // JSDOM.fromFile above would have rejected on a thrown top-level error
   const flashcardsLink = document.querySelector('#siteNav .site-nav-link[data-page="flashcards"]');

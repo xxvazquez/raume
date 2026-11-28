@@ -31,6 +31,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       document.body.classList.remove('print-only');
       return;
     }
+    // A table never opened has no rows yet (render.js ensureRows).
+    if (vocab.buildAllRows) vocab.buildAllRows(targets);
     targets.forEach(s=>s.classList.add('print-target'));
     window.print();
   }
@@ -54,6 +56,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // otherwise slide it away -- scroll by however far it moved.
     const head = section.querySelector('.section-head') || section;
     const topBefore = head.getBoundingClientRect().top;
+    if (section.classList.contains('collapsed') && vocab.ensureRows) vocab.ensureRows(section);
     section.classList.toggle('collapsed');
     const toggle=section.querySelector('.section-toggle');
     toggle.setAttribute('aria-expanded', String(!section.classList.contains('collapsed')));
@@ -67,6 +70,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     if (vocab.syncTableIndexActive) vocab.syncTableIndexActive();
   }
   function expandSection(section) {
+    if (vocab.ensureRows) vocab.ensureRows(section);
     section.classList.remove('collapsed');
     section.querySelector('.section-toggle').setAttribute('aria-expanded','true');
   }
@@ -424,10 +428,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const mastered = masteredVocab(activeFlashcards());
     return function (id) { return wordKnown(id, mastered); };
   };
-  function refreshKnownRows() {
+  // Only built rows have a wash to set; a table built later gets its own
+  // as it's built (the onRowsBuilt hook below).
+  function refreshKnownRows(root) {
     const cards = activeFlashcards();
     const mastered = masteredVocab(cards), tricky = trickyVocab(cards);
-    document.querySelectorAll('#vocabulary tbody tr[data-vocab-id]:not(.kanji-tile)').forEach(function (tr) {
+    const scope = root && root.querySelectorAll ? root : document.getElementById('vocabulary');
+    if (!scope) return;
+    scope.querySelectorAll('tbody tr[data-vocab-id]:not(.kanji-tile)').forEach(function (tr) {
       const known = wordKnown(tr.dataset.vocabId, mastered);
       const isTricky = !known && !!tricky[tr.dataset.vocabId];
       tr.classList.toggle('known-row', known);
@@ -440,7 +448,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       }
     });
   }
-  vocab.refreshKnownRows = refreshKnownRows;
+  vocab.refreshKnownRows = function () { refreshKnownRows(); };
+  if (vocab.onRowsBuilt) vocab.onRowsBuilt(function (section) { refreshKnownRows(section); });
   document.addEventListener('DOMContentLoaded', function () {
     refreshKnownRows();
     const fc = window.RaumeStudy.flashcards;
@@ -879,6 +888,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function repaintWords(ids) {
     const fc = window.RaumeStudy.flashcards;
     if (fc && fc.vocabIndex && fc.vocabIndex.resetIndex) fc.vocabIndex.resetIndex();
+    if (vocab.rowDataChanged) vocab.rowDataChanged();
     (ids || []).forEach(id => {
       const row = vocab.rawRow(id);
       if (!row) return;
@@ -1106,71 +1116,63 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return Object.keys(COL_INDEX).filter(k => !isHidden(k));
     }
 
-    // What search reads off each row, taken once per row and kept (rows are
-    // only ever replaced wholesale -- renderAllTables -- never edited in
-    // place, so a fresh row is simply a new key). Walking and cloning every
-    // cell on every keystroke was most of a keystroke's cost on a phone.
-    // The jp cell mixes kanji/kana with <rt class="furigana"> readings and
-    // visually-hidden notes for assistive tech ("(い-adjective)",
-    // "(ru-verb)"); the readings are kept apart and the notes left out, so
-    // "Japanese" search covers just the kanji/kana -- a hidden "(ru-verb)"
-    // used to make "ru" match every ru-verb. The romaji reveal lives in a
-    // data-romaji attribute (css/site.css renders it via content: attr(...)),
-    // so it was never part of the cell's text to begin with.
-    const rowInfo = new WeakMap();
+    // What search reads off each row -- from the data, not the page, so a
+    // table never opened (render.js ensureRows) is searched all the same
+    // and only the tables a search shows get built. Taken once per row and
+    // kept until the data changes (a word edit, a sync: rowDataChanged).
+    // The text is exactly what the row shows (render.js rowSearchText):
+    // "Japanese" search covers just the kanji/kana -- the readings are
+    // kept apart, and the visually-hidden notes for assistive tech
+    // ("(ru-verb)") left out, so "ru" doesn't match every ru-verb.
+    let rowInfo = new WeakMap();
+    if (vocab.onRowDataChange) vocab.onRowDataChange(function () { rowInfo = new WeakMap(); });
     function infoFor(row) {
       let info = rowInfo.get(row);
       if (info) return info;
-      const jpCell = row.cells[0], enCell = row.cells[1];
-      let kanji = '', furigana = '';
-      if (jpCell) {
-        const walker = document.createTreeWalker(jpCell, NodeFilter.SHOW_TEXT);
-        let n;
-        while ((n = walker.nextNode())) {
-          const p = n.parentElement;
-          if (p.closest('.furigana')) furigana += n.data;
-          else if (!p.closest('.visually-hidden')) kanji += n.data;
-        }
-      }
-      // Every form a row shows -- a verb's plain and polite form both
-      // (tabemasu finds 食べます, not just taberu).
-      const jpwords = jpCell ? [...jpCell.querySelectorAll('.jpword[data-romaji]')] : [];
-      // English: every row keeps it in cells[1] (.meaning-text, so the
-      // row-action icons never register) -- word and sentence rows alike.
-      const enEl = enCell && enCell.querySelector('.meaning-text');
+      const text = vocab.rowSearchText(row);
       const fold = window.RaumeStudy.kanaRomaji.foldRomaji;
       info = {
-        jpCell, enCell, jpwords, jpword: jpwords[0] || null,
-        kanji: kanji.toLocaleLowerCase(),
-        furigana: furigana.toLocaleLowerCase(),
+        level: String(vocab.jlptLevel(row)),
+        kanjiTile: text.kanjiTile,
+        hasForm: text.forms.length > 0,
+        kanji: text.kanji.toLocaleLowerCase(),
+        furigana: text.furigana.toLocaleLowerCase(),
         // ...and in hiragana: a kanji's on readings are katakana (イチ),
         // and いち typed should find them too.
-        furiganaKana: toHiragana(furigana),
+        furiganaKana: toHiragana(text.furigana),
         // Each form's whole reading in hiragana -- furigana in place of its
         // kanji, the kana around it kept -- so たべ finds 食べる and 食べ物.
-        readings: jpwords.map(readingOf),
+        // Every form a row shows: a verb's plain and polite form both
+        // (tabemasu finds 食べます, not just taberu).
+        readings: text.forms.map(f => toHiragana(f.reading)),
+        writing: text.forms.length ? text.forms[0].writing.replace(/\s+/g, '') : '',
         // A word with two readings (四: "yon / shi") is each one on its own:
         // "yon" typed is an exact match, ranked above yōniku, which only
         // starts with it.
-        romaji: jpwords.map(w => alternativesOf(expandMacronsForSearch(w.dataset.romaji).toLocaleLowerCase())),
+        romaji: text.forms.map(f => alternativesOf(expandMacronsForSearch(f.romaji).toLocaleLowerCase())),
         // ...and folded (see foldRomaji): whole, and each of its words --
         // kin'en also as kinnen (kanaRomaji.romajiSpellings).
-        romajiFolded: jpwords.map(w => {
-          const spellings = window.RaumeStudy.kanaRomaji.romajiSpellings(w.dataset.romaji);
+        romajiFolded: text.forms.map(f => {
+          const spellings = window.RaumeStudy.kanaRomaji.romajiSpellings(f.romaji);
           return {
             whole: spellings.reduce((all, r) => all.concat(alternativesOf(r)), []).map(fold),
             words: spellings.reduce((all, r) => all.concat(String(r).split(/[\s-]+/).map(fold)), [])
           };
         }),
-        english: enEl ? enEl.textContent.toLocaleLowerCase() : ''
+        english: text.english.toLocaleLowerCase()
       };
       rowInfo.set(row, info);
       return info;
     }
+    // The cells a hit is marked in, read off the built row.
+    function cellsOf(tr) {
+      const jpCell = tr.cells[0], enCell = tr.cells[1];
+      return { jpCell, enCell, jpwords: jpCell ? [...jpCell.querySelectorAll('.jpword[data-romaji]')] : [] };
+    }
     // Taken ahead of time while the page is idle (and again on focus, for
-    // anything rendered since), so the first letter typed doesn't pay for it.
+    // anything added since), so the first letter typed doesn't pay for it.
     function warmIndex() {
-      vocabHost.querySelectorAll('.vocab tbody tr').forEach(infoFor);
+      sections.forEach(s => vocab.tableRows(s.dataset.table).forEach(infoFor));
     }
     if (window.requestIdleCallback) requestIdleCallback(warmIndex, { timeout: 3000 });
     else setTimeout(warmIndex, 1500);
@@ -1216,19 +1218,6 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       list.forEach(x => { const r = fn(x); if (r !== null && (best === null || r < best)) best = r; });
       return best;
     }
-    // A word's reading, hiragana: the furigana in place of each kanji, every
-    // kana kept, katakana folded to hiragana (コーヒー as こーひー).
-    function readingOf(jpword) {
-      let out = '';
-      const walker = document.createTreeWalker(jpword, NodeFilter.SHOW_TEXT);
-      let n;
-      while ((n = walker.nextNode())) {
-        if (n.parentElement.closest('rb, .jpmain, .visually-hidden, .jp-romaji-line')) continue;
-        out += n.data;
-      }
-      return toHiragana(out);
-    }
-
     // Your own tables (class tables included) have ct- ids.
     function isOwnTable(section) {
       return /^ct-/.test(section.dataset.table || '') ? 1 : 0;
@@ -1238,18 +1227,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // はし is chopsticks in one table and bridge in another. Records the
     // row when it's the first of its word. Only a row of your own is ever
     // dropped -- a word raume files under two tables shows in both. Returns
-    // the kept row's entry (its .row and the .also tables it stands for).
+    // the kept row's entry (its .row -- the search's result for it -- and
+    // the .also tables it stands for).
     function repeatOf(info, seen, own, row) {
-      const w = info.jpword;
-      if (!w || w.classList.contains('kanji-char')) return null; // kanji tiles
-      const reading = info.readings[0];
-      let writing = '';
-      const walker = document.createTreeWalker(w, NodeFilter.SHOW_TEXT);
-      let n;
-      while ((n = walker.nextNode())) {
-        if (!n.parentElement.closest('rt, .furigana, .visually-hidden, .jp-romaji-line')) writing += n.data;
-      }
-      writing = writing.replace(/\s+/g, '');
+      if (!info.hasForm || info.kanjiTile) return null; // kanji tiles
+      const reading = info.readings[0], writing = info.writing;
       const meanings = info.english.replace(/\([^)]*\)/g, ' ').split(',')
         .map(m => m.replace(/^\s*to\s+/, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
       const kin = seen.get(reading) || [];
@@ -1364,20 +1346,21 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           qx.folded && (qx.foldedWhole ? folded.words.includes(qx.folded)
             : folded.whole.concat(folded.words).some(f => f.startsWith(qx.folded))) ? 1 : null
         ].reduce((a, b) => b === null ? a : (a === null || b < a ? b : a), null);
-        if (take(r)) romajiHits.push(info.jpwords[i]);
+        if (take(r)) romajiHits.push(i);
       });
       if (!hide.english && take(rankWords(info.english, q, prefixOnly))) enHit = true;
       return { rank: best, jpHit, enHit, readingHit, onHit, romajiHits };
     }
-    function highlightRow(row, info, hit, q) {
+    function highlightRow(row, hit, q) {
       highlighted.add(row);
+      const info = cellsOf(row);
       if (hit.jpHit) highlightCell(info.jpCell, q);
       // Typed in hiragana, shown in katakana: mark it as shown.
       if (hit.onHit) highlightCell(info.jpCell, toHiragana(q).replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60)));
       if (hit.enHit) highlightCell(info.enCell, q);
       if (hit.readingHit) info.jpwords.forEach(w => markReading(w, q));
       if (hit.romajiHits.length && !markKanjiReadings(row, q)) {
-        hit.romajiHits.forEach(w => { if (!markReading(w, q)) markRomaji(w, q); });
+        hit.romajiHits.forEach(i => { const w = info.jpwords[i]; if (w && !markReading(w, q)) markRomaji(w, q); });
       }
     }
     // A word's reading is already on screen -- its kana, or the furigana over
@@ -1606,29 +1589,45 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
           return;
         }
         // A table the reader hid never turns up in results either.
+        // Ranked from the data; only a table with a match is built, then
+        // its rows are matched back to the results by id, in order.
         const userHidden = section.classList.contains('user-hidden');
         const own = isOwnTable(section);
-        const ranked = [];
-        [...tbody.rows].sort(byOriginalIndex).forEach(row => {
-          const info = infoFor(row);
-          const hit = userHidden || (lvSet.length && lvSet.indexOf(row.dataset.jlpt) === -1) ? { rank: null }
+        const results = vocab.tableRows(section.dataset.table).map((data, index) => {
+          const info = infoFor(data);
+          const hit = userHidden || (lvSet.length && lvSet.indexOf(info.level) === -1) ? { rank: null }
             : mq ? rankRow(info, mq, qx, prefixOnly, hide) : { rank: 0 };
-          const kept = hit.rank !== null ? repeatOf(info, seen, own, row) : null;
+          const r = { data, index, hit, tr: null };
+          const kept = hit.rank !== null ? repeatOf(info, seen, own, r) : null;
           if (kept) {
             hit.rank = null;
             const name = section.querySelector('.section-title-text');
             if (name && kept.also.indexOf(name.textContent) === -1) kept.also.push(name.textContent);
             alsoRows.add(kept);
           }
-          const r = { row, info, hit, rank: hit.rank, match: hit.rank !== null };
-          r.row.classList.toggle('search-hidden', !r.match);
-          if (r.match) {
-            ranked.push({ row: r.row, rank: r.rank, index: Number(r.row.dataset.originalIndex) });
-            if (mq) highlightRow(r.row, r.info, r.hit, mq);
-            sectionRows++;
-            if (sectionBest === null || r.rank < sectionBest) sectionBest = r.rank;
-          }
+          return r;
         });
+        const matches = results.filter(r => r.hit.rank !== null);
+        if (matches.length) {
+          vocab.ensureRows(section);
+          const byId = new Map();
+          [...tbody.rows].sort(byOriginalIndex).forEach(tr => {
+            const k = tr.dataset.vocabId || '';
+            if (!byId.has(k)) byId.set(k, []);
+            byId.get(k).push(tr);
+          });
+          results.forEach(r => { const list = byId.get(r.data.id || ''); r.tr = list && list.length ? list.shift() : null; });
+        }
+        const ranked = [], shown = new Set();
+        matches.forEach(r => {
+          if (!r.tr) return;
+          shown.add(r.tr);
+          ranked.push({ row: r.tr, rank: r.hit.rank, index: r.index });
+          if (mq) highlightRow(r.tr, r.hit, mq);
+          sectionRows++;
+          if (sectionBest === null || r.hit.rank < sectionBest) sectionBest = r.hit.rank;
+        });
+        [...tbody.rows].forEach(tr => tr.classList.toggle('search-hidden', !shown.has(tr)));
         ranked.sort((a, b) => a.rank - b.rank || a.index - b.index);
         placeInOrder(tbody, ranked.map(r => r.row), [...tbody.rows].filter(row => !row.classList.contains('search-hidden')));
 
@@ -1642,7 +1641,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       // The row kept for a word names the tables of yours it stands for, under
       // its meaning: the repeat is gone from the results, not from raume.
       alsoRows.forEach(k => {
-        const cell = k.row.querySelector('.meaning-cell');
+        const cell = k.row.tr && k.row.tr.querySelector('.meaning-cell');
         if (!cell) return;
         const line = document.createElement('span');
         line.className = 'search-also';
@@ -1842,22 +1841,28 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         b.setAttribute('aria-pressed', String(on));
       });
       updateOptionsDot();
-      document.querySelectorAll('.vocab').forEach(function (table) {
-        Object.keys(COL_INDEX).forEach(function (key) {
-          const col = COL_INDEX[key], hide = isHidden(key);
-          table.querySelectorAll('tbody td:nth-child(' + col + ')').forEach(function (cell) {
-            if (hide) cell.setAttribute('aria-hidden', 'true'); else cell.removeAttribute('aria-hidden');
-          });
-          const th = table.querySelector('thead th:nth-child(' + col + ')');
-          const sortBtn = th && th.querySelector('.sort-button');
-          if (sortBtn) sortBtn.disabled = hide;
+      document.querySelectorAll('.vocab').forEach(applyColAria);
+    }
+    function applyColAria(table) {
+      Object.keys(COL_INDEX).forEach(function (key) {
+        const col = COL_INDEX[key], hide = isHidden(key);
+        table.querySelectorAll('tbody td:nth-child(' + col + ')').forEach(function (cell) {
+          if (hide) cell.setAttribute('aria-hidden', 'true'); else cell.removeAttribute('aria-hidden');
         });
-        const furiHidden = isHidden('furigana') || isHidden('japanese');
-        table.querySelectorAll('.furigana').forEach(function (rt) {
-          if (furiHidden) rt.setAttribute('aria-hidden', 'true'); else rt.removeAttribute('aria-hidden');
-        });
+        const th = table.querySelector('thead th:nth-child(' + col + ')');
+        const sortBtn = th && th.querySelector('.sort-button');
+        if (sortBtn) sortBtn.disabled = hide;
+      });
+      const furiHidden = isHidden('furigana') || isHidden('japanese');
+      table.querySelectorAll('.furigana').forEach(function (rt) {
+        if (furiHidden) rt.setAttribute('aria-hidden', 'true'); else rt.removeAttribute('aria-hidden');
       });
     }
+    // A table built later (render.js ensureRows) starts in step too.
+    if (vocab.onRowsBuilt) vocab.onRowsBuilt(function (section) {
+      const table = section.querySelector('table.vocab');
+      if (table && Object.keys(COL_INDEX).concat('furigana').some(isHidden)) applyColAria(table);
+    });
     // Exposed so synthetic tables rendered outside this page (the Flashcards
     // dashboard's "Words to review") can sync their freshly-drawn ⋯ menu
     // checkmarks -- and their cells' aria-hidden -- to the current column state.
@@ -2390,6 +2395,16 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const LEVEL_KEY = 'raume-jlpt-filter';
     const levelChecks = document.getElementById('levelChecks');
     function levelSet() { return (document.body.dataset.jlptFilter || '').split(',').filter(Boolean); }
+    function markLevelRows(sec, lv, on) {
+      sec.querySelectorAll('tbody tr').forEach(function (tr) {
+        tr.classList.toggle('level-out', !!lv.length && !on[tr.dataset.jlpt]);
+      });
+    }
+    if (vocab.onRowsBuilt) vocab.onRowsBuilt(function (sec) {
+      const lv = levelSet(), on = {};
+      lv.forEach(function (v) { on[v] = true; });
+      if (lv.length) markLevelRows(sec, lv, on);
+    });
     function markLevelEmpty() {
       const lv = levelSet(), on = {};
       lv.forEach(function (v) { on[v] = true; });
@@ -2397,12 +2412,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       if (!host) return;
       const shownByCat = {};
       host.querySelectorAll('.table-section').forEach(function (sec) {
-        let any = false;
-        sec.querySelectorAll('tbody tr').forEach(function (tr) {
-          const keep = !lv.length || !!on[tr.dataset.jlpt];
-          tr.classList.toggle('level-out', !keep);
-          if (keep) any = true;
-        });
+        // From the data: a table not built yet has no rows to look at.
+        const any = !lv.length || vocab.tableRows(sec.dataset.table).some(function (r) { return on[vocab.jlptLevel(r)]; });
+        markLevelRows(sec, lv, on);
         const empty = !!lv.length && !any;
         sec.classList.toggle('level-empty', empty);
         if (sec.dataset.section !== 'vocabulary') return;
