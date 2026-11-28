@@ -454,7 +454,7 @@ and Help.
     review: `.col-menu-item`, `role="menuitemcheckbox"`, tick leading, a ground
     band setting the group off from Print).
   - **Switch** (the Options sheet's `.opt-switch` rows — Japanese / Furigana /
-    English, Cover answers, Show polite — plus Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
+    Romaji / English, Cover answers, Show polite — plus Settings › Fuzz): a 34–38px grey track whose thumb slides right when on, the
     track filling with the section's tint (`--switch-on` = `--tint`; the muted
     section tones read as a disabled grey track). The Options switches are `<button aria-pressed>` rows (pressed = on; a
     column switch is on while the column shows); the track and thumb are

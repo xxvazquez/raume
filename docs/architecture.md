@@ -364,6 +364,7 @@ backup is ready" sheet whose Save… tap opens it.
 ### localStorage keys
 
 All prefixed `raume-` (`raume-theme`, `raume-show-polite`,
+`raume-show-romaji` — Options › Show › Romaji, `'1'` = on,
 `raume-folded-categories` — the Vocabulary category headers folded shut (names; browser-local),
 `raume-highlight-progress` — the Options sheet's Highlight progress switch, `'0'` = off,
 `raume-table-custom`, `raume-custom-vocab-*`, `raume-flashcards-*`,

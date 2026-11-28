@@ -1392,6 +1392,17 @@ async function main() {
     jpword.click();
     return opened && !jpword.classList.contains('jp-romaji-on');
   })());
+  check("Options › Show › Romaji: off by default; on shows every row's romaji, lights the dot and is remembered; off again restores it", (() => {
+    const sw = document.getElementById("romajiToggle"), dot = document.getElementById("optionsDot");
+    const rule = allCssRules.find(r => r.selectorText === "body.show-romaji .vocab .jpword[data-romaji]:not(.jp-romaji-hit)::after");
+    const offAtStart = !!sw && sw.closest("#optionsSheet") && sw.getAttribute("aria-pressed") === "false" && !document.body.classList.contains("show-romaji");
+    sw.click();
+    const on = document.body.classList.contains("show-romaji") && sw.getAttribute("aria-pressed") === "true"
+      && dot.hidden === false && (!storageUsable || readLocalStorage("raume-show-romaji") === "1");
+    sw.click();
+    const off = !document.body.classList.contains("show-romaji") && dot.hidden === true && (!storageUsable || readLocalStorage("raume-show-romaji") === "0");
+    return offAtStart && on && off && !!rule && rule.style.display === "block";
+  })());
   check("a romaji-only match tints the furigana it spells, adds no romaji line, and clears with the query (shi -> し over 塩)", (() => {
     const input = document.getElementById("tableSearch");
     input.value = "shi";

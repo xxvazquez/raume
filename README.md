@@ -80,7 +80,7 @@ the grammar it shows.
 
 | | |
 | --- | --- |
-| **Columns** | **Japanese** (with furigana) and **English**. Tap a word for its **romaji**. Context for a meaning ("before a noun") follows the English in grey. |
+| **Columns** | **Japanese** (with furigana) and **English**. Tap a word for its **romaji**, or turn on Options › Show › **Romaji** for every row. Context for a meaning ("before a noun") follows the English in grey. |
 | **Furigana** | Always shown. Consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and each reading starts where its kanji start. |
 | **Katakana** | Hover or tap any katakana to see its romaji. |
 | **Particles** | Blue and bold everywhere; tap one for how it’s read (は is “wa”). |
@@ -122,6 +122,7 @@ dot on it means something is off its default.
 | Option | Does |
 | --- | --- |
 | **Japanese / Furigana / English** | Hide a column (never both text columns). |
+| **Romaji** | Every word's romaji under it, in every table. Off by default; a tap on a word still shows one. |
 | **JLPT level** | **All levels**, or tick one level or several (N5 + N4) to show only their words — **Not on the lists** among them. Tables and topics without any of them step aside, and search keeps to them too. |
 | **Cover answers** | Blanks the English (and the kanji readings); tap a row to reveal it. |
 | **Show polite** | Switches verbs to 〜ます. Only while the Verbs table is open. |

@@ -176,7 +176,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     const cl = document.body.classList;
     const pt = document.getElementById('politeToggle');
     const changed = cl.contains('hide-japanese') || cl.contains('hide-furigana') || cl.contains('hide-english')
-      || cl.contains('selftest-mode') || cl.contains('no-progress-hl') || (cl.contains('show-polite') && !!pt && !pt.hidden)
+      || cl.contains('show-romaji') || cl.contains('selftest-mode') || cl.contains('no-progress-hl') || (cl.contains('show-polite') && !!pt && !pt.hidden)
       || !!document.body.dataset.jlptFilter;
     dot.hidden = !changed;
     const btn = document.getElementById('optionsBtn');
@@ -2389,6 +2389,26 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       });
     }
     updatePoliteVisibility();
+
+    // Show › Romaji: every row's romaji caption at once (CSS on
+    // body.show-romaji); off by default, the tap on a word still works.
+    const ROMAJI_KEY = 'raume-show-romaji';
+    const romajiToggle = document.getElementById('romajiToggle');
+    function applyRomajiMode(on) {
+      document.body.classList.toggle('show-romaji', on);
+      romajiToggle.classList.toggle('active', on);
+      romajiToggle.setAttribute('aria-pressed', String(on));
+      try { localStorage.setItem(ROMAJI_KEY, on ? '1' : '0'); } catch (e) {}
+      updateOptionsDot();
+    }
+    if (romajiToggle) {
+      let startRomaji = false;
+      try { startRomaji = localStorage.getItem(ROMAJI_KEY) === '1'; } catch (e) {}
+      applyRomajiMode(startRomaji);
+      romajiToggle.addEventListener('click', function () {
+        applyRomajiMode(!document.body.classList.contains('show-romaji'));
+      });
+    }
 
     // Options › JLPT level: All levels, or any levels ticked (N5 + N4) --
     // only their rows show. Rows outside them get .level-out (hidden by CSS

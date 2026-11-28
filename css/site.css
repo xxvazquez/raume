@@ -3009,6 +3009,9 @@ body.is-searching #vocabulary .vocab .sort-button { display: none; }
   font-family: var(--font-ui); font-size: var(--fs-romaji); font-style: italic; line-height: 1.3; color: var(--romaji);
 }
 .jpword.jp-romaji-on::after { display: block; }
+/* Options › Show › Romaji: every reference row's caption at once; the tap
+   still works for one word while it's off. */
+body.show-romaji .vocab .jpword[data-romaji]:not(.jp-romaji-hit)::after { display: block; }
 /* A search match in the romaji shows the reading as a real line
    (.jp-romaji-line, js/vocab/interactions.js markRomaji) so only the
    matched run is marked; the attr() reveal steps aside meanwhile. */
