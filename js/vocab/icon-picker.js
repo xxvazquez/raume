@@ -1,6 +1,6 @@
 // A small, reusable icon picker. iconPicker.open(currentValue, onPick, opener,
 // opts): opens a centred panel (bottom sheet on a phone) with a searchable grid
-// of the built-in line icons plus an "upload your own" option; picking one calls
+// of the built-in line icons plus an "upload my own" option; picking one calls
 // onPick(value) and closes. value is a built-in name, a data: URL for an
 // uploaded image, or "" for "back to the automatic icon". opts (all optional):
 // { resettable, color, autoColor(), onColor(key) } -- with onColor the panel also

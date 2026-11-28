@@ -4,7 +4,7 @@
 // immediate source of truth so
 // headers render without waiting on the network; when the flashcards feature
 // reports a signed-in account it also syncs through Supabase (see
-// js/flashcards/data-ops.js + bootstrap.js), so a chosen icon follows you to
+// js/flashcards/data-ops.js + bootstrap.js), so a chosen icon follows me to
 // another device. Never touches the dataset or its validation.
 window.RaumeStudy = window.RaumeStudy || {};
 window.RaumeStudy.tableCustom = (function () {
@@ -49,8 +49,8 @@ window.RaumeStudy.tableCustom = (function () {
   function colorOf(id) { return entry(id).color || ""; }
   function getAll() { return JSON.parse(JSON.stringify(load())); }
   // Hidden from the reference pages entirely (Customize brings it back).
-  // Separate from Flashcards' Pause table -- this is about what you browse,
-  // not what you study.
+  // Separate from Flashcards' Pause table -- this is about what I browse,
+  // not what I study.
   function isHidden(id) { return !!entry(id).hidden; }
 
   // Set (or, with a falsy value, clear) one field of a table's record, pruning
@@ -85,7 +85,7 @@ window.RaumeStudy.tableCustom = (function () {
     });
   }
 
-  // A table of your own was deleted: drop everything held for it -- name,
+  // A table of my own was deleted: drop everything held for it -- name,
   // icon, colour, hidden, and its place in any saved order -- so the record
   // doesn't linger in the account's settings row after the table is gone.
   function forget(id) {

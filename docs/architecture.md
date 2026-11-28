@@ -98,7 +98,7 @@ flowchart LR
   `kana_review_logs`, `custom_tables`, `custom_rows`, `notes`), all under RLS.
   `flashcard_settings` also holds the FSRS knobs, the streak counters,
   `kana_prefs` (the Kana picker), `kana_fsrs` (the Kana trainer's separate FSRS
-  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `word_edits` (your changes to built-in words — see below), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
+  knobs), `paused_tables` (the tables paused as a unit — see below), `leech_kept` (leeches marked Keep — see below), `known_kanji` (kanji marked Known), `word_edits` (my changes to built-in words — see below), `puzzle_runs` (every finished puzzle and game) and `journey` (the Dashboard's level and awards — see below). Setup
   guide: [`SUPABASE_SETUP.md`](../SUPABASE_SETUP.md).
 - **Today's tracker** — the flashcard cache's `day`: `{ date, count, fresh,
   reviewed }`, the new cards met today (`count`, held to *New cards per day*,
@@ -113,7 +113,7 @@ flowchart LR
 - On first sign-in, guest progress is seeded up **once** — unless the account
   already has cards, in which case the account wins and guest data is ignored.
 - **Table customisations** (names / icons / order) follow the same pattern (an
-  unset icon falls back to the shipped table's default — or, for your own table, one
+  unset icon falls back to the shipped table's default — or, for my own table, one
   suggested from its name — in `render.js`, never stored; a record is
   `{ name?, icon?, color?, hidden? }`, `color` a key from `icons.colors`,
   `hidden: true` = left out of the reference pages, directory and search —
@@ -131,7 +131,7 @@ flowchart LR
   only while it's on screen. Pushes to the account run one at a time and each
   sends the state as it is when it goes out (`saveTableCustomRemoteQueued`),
   so two quick edits can't land out of order and leave the account holding a
-  value this device already cleared. Deleting a table of your own also
+  value this device already cleared. Deleting a table of my own also
   forgets its record and its place in any saved order (`tableCustom.forget`),
   so nothing lingers in the settings row.
 - **Word edits** (`js/vocab/word-edits.js`, `RaumeStudy.wordEdits`) — the
@@ -211,7 +211,7 @@ flowchart LR
   nothing left in study as no pick, so a stale id reads as All flashcards.
   It can also hold JLPT levels — `jlpt:4`, or several as `jlpt:5,4` — their
   words across every table (`scopeLevels()` parses it, `studyLevels()` lists
-  the levels your cards span; the Dashboard offers each level and the
+  the levels my cards span; the Dashboard offers each level and the
   easiest ones together; the vocab index carries each entry's `jlpt`).
 
 ### Class notes
@@ -384,7 +384,7 @@ typed since 2026-10 — older `kana` runs were the pick-from-four version); a Wo
 `ended` marks a Match / Listening game stopped early (only its finished
 rounds / answered words, with `sizes` = those Match rounds' pair counts —
 it counts everywhere except personal bests and the finish card's rank);
-`missed` the vocab ids a game caught you on (a wrong pair, a wrong answer, a
+`missed` the vocab ids a game caught me on (a wrong pair, a wrong answer, a
 revealed word or letter, a square Check marked wrong — Tricky words); a grid or
 word search is logged once when solved, never when revealed in full. Reset stats
 for a style adds a marker `{ mode, reset: true }` and drops that style's older
@@ -568,7 +568,7 @@ icons/                  PWA app icons — see scripts/generate-icons.py; launch/
 logo.png                master mark; source art for the favicon + icons, not served
 scripts/                vocab validator, id + icon + audio generators, smoke + SW tests,
                         note_kit.py (builds lesson notes for the Notes page)
-private-notes/          gitignored: your own lesson files and the notes they build
+private-notes/          gitignored: my own lesson files and the notes they build
 ```
 
 ## Pronunciation audio
@@ -633,7 +633,7 @@ Web Speech.
 Installable and offline-capable once visited.
 
 - **Android / Chrome / Edge** show an install prompt automatically; `sw.js`
-  precaches the app shell and caches versioned assets as you browse.
+  precaches the app shell and caches versioned assets as I browse.
 - **iOS / Safari** — Share → Add to Home Screen. The `apple-touch-icon` and
   `apple-mobile-web-app-*` tags in `index.html` handle the icon, name, and
   chrome-less launch. The `apple-touch-startup-image` links (one per iPhone /
@@ -673,7 +673,7 @@ npm run generate:launch     # rebuild icons/launch/ (--group-ground launch image
 npm run vendor:libs         # re-copy the vendored libs after a version bump
 ```
 
-Verb rows also carry `particles: [{ p: "を", role: "what you eat" }]` — the core
+Verb rows also carry `particles: [{ p: "を", role: "what I eat" }]` — the core
 arguments a verb takes (`p` may be a pair like `"に / へ"`), `[]` for none — and 好き /
 嫌い / 上手 / 下手 carry `が`. `npm run validate` requires the field on every verb and
 checks each entry is a known particle with a role.

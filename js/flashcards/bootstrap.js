@@ -49,10 +49,10 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // App shell / tab routing
   // -----------------------------------------------------------------------
   var activeTab = "dashboard";
-  // Settings and Help are screens you visit, not places you switch between
+  // Settings and Help are screens I visit, not places I switch between
   // -- they open like a pushed iOS screen (a Back button, their own title)
   // instead of being two more segments. Back returns to whichever of the
-  // five segments you came from.
+  // five segments I came from.
   // The Stats screen (puzzle-stats.js) is pushed too, from Puzzles, Games
   // or the Dashboard; its title names which. So is Awards, from the
   // Dashboard's Show all.
@@ -63,12 +63,12 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
 
   // Screen changes move the way iOS moves them: a pushed screen (Settings,
   // Help, Stats, Awards) slides in from the right over the screen it came
-  // from, Back slides it away and returns you to where you were scrolled,
+  // from, Back slides it away and returns me to where I was scrolled,
   // and a review card turns into the wrap-up as a session ends. A View
   // Transition: the tab bar and top bar hold still while the page moves.
   // Where the browser has none, or Reduce Motion is on, the screen just
   // changes. Callers never scroll after render() -- a push lands at the top
-  // and Back restores your place as part of the change itself; a caller
+  // and Back restores my place as part of the change itself; a caller
   // starting something new from a pushed screen passes { top: true }.
   var shownPushed = false, shownDone = false, pushedFromY = 0;
   function isPushedTab(t) { return t === "stats" || !!PUSHED_TABS[t]; }
@@ -295,8 +295,8 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // visually hidden (the top bar already names the page, as on the
     // reference pages) and tabs + Settings / Help share one row.
     var tabsHtml = '<div class="fc-tabs" role="tablist">' +
-      // What you do first, your collection last: Library (every table, what's
-      // in your flashcards, what's archived) is the Music / Books tab's name
+      // What I do first, my collection last: Library (every table, what's
+      // in my flashcards, what's archived) is the Music / Books tab's name
       // for it -- "Manage" read as a settings verb. Its key stays "manage".
       [["dashboard", "Dashboard"], ["kana", "Kana"], ["crosswords", "Puzzles"], ["games", "Games"], ["manage", "Library"]].map(function (t) {
         return '<button type="button" class="fc-tab' + (activeTab === t[0] ? " active" : "") + '" data-tab="' + t[0] + '" role="tab" aria-selected="' + (activeTab === t[0]) + '">' + t[1] + "</button>";
@@ -503,7 +503,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // Signing out never loses anything still queued (an offline review, a
   // word, a setting): it waits on this device, out of view, and syncs the
   // next time this account signs in here (store.resetCacheForUser). Still
-  // say so first -- it won't reach your other devices until then.
+  // say so first -- it won't reach my other devices until then.
   S.signOut = function () {
     var pending = getSyncState().pending;
     if (!pending) { signOut(); return; }
@@ -552,7 +552,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // indicator outside this page -- table renames and custom vocabulary sync
   // from the reference/Customize pages, nowhere near the Flashcards sync
   // chip, so this is the only place a reader editing there would ever see
-  // "that hasn't reached your account yet". interactions.js wires its click
+  // "that hasn't reached my account yet". interactions.js wires its click
   // before this file loads; this is just the state (colour + label), since
   // only this module knows auth/sync state. Green dot = signed in, nothing
   // pending; amber = signed in but offline or something still queued
@@ -574,7 +574,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
     // The phone's account menu header says the same, in two lines.
     var name = document.getElementById("accountMenuName"), status = document.getElementById("accountMenuStatus");
     if (name) name.textContent = signedIn ? currentUser().email : "Guest";
-    // Sign out lives here, under who you are and whether you're synced.
+    // Sign out lives here, under who I am and whether I'm synced.
     document.querySelectorAll("#accountMenu [data-signed-in-only]").forEach(function (el) { el.hidden = !signedIn; });
     var go = document.querySelector('#accountMenu [data-menu-go="account"]');
     if (go && go.firstChild) go.firstChild.textContent = signedIn ? "Account" : "Sign in";
@@ -629,7 +629,7 @@ window.RaumeStudy.flashcards = window.RaumeStudy.flashcards || {};
   // App-icon badge, as Mail counts unread: what Study now and the Kana
   // drill hold right now, on the home-screen / dock icon. Off until turned
   // on in Settings (per device -- an iPhone needs notification permission
-  // for it, asked when you turn it on). Recounted after every save, when
+  // for it, asked when I turn it on). Recounted after every save, when
   // the app is left or reopened, and every few minutes while it's open;
   // a closed app can't recount, so overnight it can only read low, never
   // high. Nothing shows where the browser has no badge (the row hides).

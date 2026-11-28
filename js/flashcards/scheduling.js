@@ -127,7 +127,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // has nothing left in study (deleted, paused, every word archived) reads
   // as every flashcard, so Study now never goes quiet over a stale pick.
   // Only what a session holds follows it; the rings, stats and Library
-  // still count everything you've studied.
+  // still count everything I've studied.
   function studyTables() {
     var index = vidx.getVocabIndex(), has = {};
     studyableCards().forEach(function (card) { has[String(index[card.vocabId].tableId)] = true; });
@@ -135,7 +135,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
       .map(function (t) { return { id: String(t.id), title: t.title, category: t.category || "" }; });
   }
   // Or JLPT levels' words, across every table -- one ("jlpt:4") or several
-  // ("jlpt:5,4"): the levels your cards in study have, easiest first.
+  // ("jlpt:5,4"): the levels my cards in study have, easiest first.
   function studyLevels() {
     var index = vidx.getVocabIndex(), has = {};
     studyableCards().forEach(function (card) { has[index[card.vocabId].jlpt || 0] = true; });
@@ -160,7 +160,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
     if (lv) return cards.filter(function (card) { return lv.indexOf(index[card.vocabId].jlpt) !== -1; });
     return cards.filter(function (card) { return String(index[card.vocabId].tableId) === id; });
   }
-  // Leeches: words you keep forgetting. A card "lapses" each time a card you'd
+  // Leeches: words I keep forgetting. A card "lapses" each time a card I'd
   // already learned is rated Again, so a high count means the word isn't
   // sticking however often it's shown. Per word (pausing is per word), by its
   // worst studied direction. 8 lapses is Anki's default; after the reader
@@ -246,7 +246,7 @@ window.RaumeStudy.flashcards.scheduling = (function () {
   // New cards introduced today, across every session -- not just the one
   // being built right now. Without this, "New cards per day" only capped a
   // single queue build: study three short sessions in a day instead of one
-  // and you'd get three times the configured new-card allowance. Same
+  // and I'd get three times the configured new-card allowance. Same
   // {date, count} tracker as the Kana trainer (js/flashcards/kana.js
   // todayNew/bumpNew), reset the first time a new day sees a bump.
   // It also keeps which cards were introduced (`fresh`) and which were

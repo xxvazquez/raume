@@ -203,9 +203,9 @@ window.RaumeStudy.flashcards.views = (function () {
   };
   function statusIndicatorHtml(vocabId, tablePaused) {
     var s = vocabStatus(vocabId);
-    // A word that's in your deck but its whole table is paused reads as
+    // A word that's in my deck but its whole table is paused reads as
     // dormant, not "in flashcards" -- but a word never added still reads as
-    // "not added" (○), so you can tell progress from a clean slate.
+    // "not added" (○), so I can tell progress from a clean slate.
     if (tablePaused && s !== "none") s = "archived";
     var m = STATUS_META[s] || STATUS_META.none;
     return '<span class="fc-status fc-status-' + s + '" aria-label="' + esc(m.label) + '">' + m.glyph + '</span>';
@@ -318,7 +318,7 @@ window.RaumeStudy.flashcards.views = (function () {
           // Table-level actions per filter. A paused table (only ever shown
           // under "all") gets just Resume. Otherwise "all" is for adding: Add
           // table until it's full, then nothing -- never Pause in Add's place,
-          // where a second tap would pause what you just added. "My
+          // where a second tap would pause what I just added. "My
           // flashcards" gets Pause table; "Archived" gets Restore table
           // (un-pause the words paused one at a time).
           if (tablePaused) {
@@ -550,7 +550,7 @@ window.RaumeStudy.flashcards.views = (function () {
   // Settings follows iOS Settings: a grey group header, a white card of 44px
   // rows (label left, value or control right), and a short grey footnote
   // under the card -- instead of a paragraph under every field. Changes save
-  // as you make them; there's no Save button, same as iOS.
+  // as I make them; there's no Save button, same as iOS.
   // iOS Settings marks each row with a tile: a white glyph on its own hue
   // (the table rows' --tile palette), the row's hairline inset to its text.
   var SET_TILES = {
@@ -698,7 +698,7 @@ window.RaumeStudy.flashcards.views = (function () {
         reportSettingsError(e);
       }
     }
-    // A number saves when you leave its field (or press Return); a tick or
+    // A number saves when I leave its field (or press Return); a tick or
     // switch saves at once. Settings in the Back up card aren't settings.
     panel.addEventListener("change", function (e) {
       if (!e.target.closest(".set-card")) return;
@@ -889,8 +889,8 @@ window.RaumeStudy.flashcards.views = (function () {
 
   // "Add table to flashcards" -- the common case (add everything at once)
   // instead of requiring one click per word. Skips rows currently hidden in
-  // that table (the vocabulary page's own eye icon) -- if you've already
-  // hidden a row because you know it, a bulk add shouldn't pull it back in.
+  // that table (the vocabulary page's own eye icon) -- if I've already
+  // hidden a row because I know it, a bulk add shouldn't pull it back in.
   document.addEventListener("click", async function (event) {
     var btn = event.target.closest && event.target.closest(".fc-add-table-btn");
     if (!btn || btn.disabled) return;

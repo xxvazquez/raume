@@ -331,7 +331,7 @@ def lst(rows, cols="qa", head=None, lead="em"):
     out = []
     for l, cells in rows:
         cells = list(cells)
-        # Quiz covers the Japanese you should produce: the answer column, or
+        # Quiz covers the Japanese I should produce: the answer column, or
         # every cell of a one-column list.
         if cols == "qa" and lead != "lbl":
             cells[-1] = cells[-1].replace('class="rn-st"', 'class="rn-st rn-ans"', 1)

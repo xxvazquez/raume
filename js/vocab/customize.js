@@ -161,9 +161,9 @@ window.RaumeStudy.customize = (function () {
 
   // The reverse of parseFurigana -- segments back to the single-line
   // "japanese(furigana),romaji,english" form the add-word / import forms use,
-  // so editing a row starts from text in the same format you'd type to add it.
+  // so editing a row starts from text in the same format I'd type to add it.
   // Plain Japanese for a list row -- no furigana, the way Flashcards › Manage
-  // lists words (the reference tables are where you read them).
+  // lists words (the reference tables are where I read them).
   function segmentsToPlain(jp) {
     return (jp || []).map(function (s) { return s.kanji ? s.kanji : (s.text || s.p || ""); }).join("");
   }
@@ -318,7 +318,7 @@ window.RaumeStudy.customize = (function () {
     });
     // Open on the current table (past Recent, in its category). A pointer
     // device types straight away; on touch the search field is one tap, so
-    // the keyboard doesn't cover the list before you've seen it.
+    // the keyboard doesn't cover the list before I've seen it.
     var cur = body.querySelectorAll('.tpick-row[aria-current="true"]');
     if (cur.length && cur[cur.length - 1].scrollIntoView) cur[cur.length - 1].scrollIntoView({ block: "center" });
     if (window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) search.focus();
@@ -341,7 +341,7 @@ window.RaumeStudy.customize = (function () {
       "</li>";
   }
 
-  // Swipe one of your words left to Delete it -- the row's own trash button
+  // Swipe one of my words left to Delete it -- the row's own trash button
   // (deleted at once, with Undo). See shared.swipeRows.
   window.RaumeStudy.shared.swipeRows({
     rows: "#customizePage .cv-owned-row:not(.cv-owned-row-edit):not(.cv-owned-row-empty)",
@@ -372,7 +372,7 @@ window.RaumeStudy.customize = (function () {
   // custom) -- one collapsed-by-default <details> per table, so a long list
   // (hundreds of words across many tables) stays a list of tables to open,
   // not one scroll through every word at once. Searching switches to a
-  // flat, always-visible list of just the matches (collapsing what you just
+  // flat, always-visible list of just the matches (collapsing what I just
   // searched for would defeat the point); sort applies either way.
   function customListHtml() {
     var query = cvOwnedQuery.trim().toLowerCase();
@@ -411,7 +411,7 @@ window.RaumeStudy.customize = (function () {
       var summary = '<summary class="cv-owned-head disclosure-caret"><span class="cv-owned-title">' + esc(titleOf(t)) + "</span>" +
         '<span class="cv-owned-count">' + count + "</span>" +
         (t.__custom ? '<button type="button" class="cv-del-table" data-table="' + esc(t.id) + '">Delete table</button>' : "") + "</summary>";
-      // Your own table can move to another category (an existing group, the
+      // My own table can move to another category (an existing group, the
       // Grammar page, or a new name); saved on change, as in Settings.
       var cat = t.__custom ? categoryFieldHtml("cv-cat-input", t.category, t.id) : "";
       return '<details class="cv-owned-group" data-open-key="owned:' + esc(t.id) + '">' + summary + cat + '<ul class="cv-owned-list">' + ownedRowsHtml(grp.rows) + "</ul></details>";
@@ -512,7 +512,7 @@ window.RaumeStudy.customize = (function () {
   // ships as a single category literally called "Grammar" etc.) skips the
   // redundant eyebrow-then-identical-row and renders as one merged heading
   // instead; Vocabulary's three real subcategories keep both levels, since
-  // there they're each telling you something the eyebrow doesn't.
+  // there they're each telling me something the eyebrow doesn't.
   function sectionRuns() {
     var runs = [];
     grouped().forEach(function (g) {
@@ -657,7 +657,7 @@ window.RaumeStudy.customize = (function () {
     var ctx = dragTarget(handle);
     if (!ctx || !ctx.list) return;
     // Picking up an open category collapses it -- a tall expanded accordion
-    // isn't something you can usefully drag past its neighbours, and this
+    // isn't something I can usefully drag past its neighbours, and this
     // matches the closed state it lands in anyway.
     if (ctx.kind === "category" && ctx.item.open) ctx.item.open = false;
     var items = Array.prototype.slice.call(ctx.list.children);

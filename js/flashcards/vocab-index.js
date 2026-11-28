@@ -419,9 +419,9 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   }
   // Same "which language" cue as the label above the prompt, but repeated
   // right inside the input itself -- the label can be easy to skim past,
-  // and this is exactly where your eyes are when you start typing.
+  // and this is exactly where my eyes are when I start typing.
   // Answer in kana (store.answerInKana): an English → Romaji card takes the
-  // reading in kana. Romaji typed into it turns into kana as you go
+  // reading in kana. Romaji typed into it turns into kana as I go
   // (kanaRomaji.toKana, as a Japanese keyboard does), or a Japanese keyboard
   // types kana straight in. Japanese → Romaji stays romaji: its prompt
   // already shows the kana.
@@ -449,7 +449,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     return direction === "jp-en" || direction === "ro-en" ? entry.englishDisplay : entry.romajiDisplay;
   }
   // One extra field for the answer reveal, beyond the one actually tested --
-  // so a review reinforces the whole word, not just the half you typed.
+  // so a review reinforces the whole word, not just the half I typed.
   // Whichever of Japanese/romaji/English isn't already on screen as the
   // prompt: jp-en and jp-ro both prompt with Japanese, so they add the other
   // of {romaji, English}; ro-en and en-ro both prompt with something already
@@ -510,7 +510,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
   // the romaji typed on a card that asks for the English, or the English on
   // one that asks for the romaji. Both card kinds can show the same kanji, so
   // this is a mix-up about the question, not a lapse in memory: the review
-  // says which one it wants and lets you answer again instead of grading it.
+  // says which one it wants and lets me answer again instead of grading it.
   function otherLanguageHint(entry, direction, input) {
     var isRomajiTarget = direction === "jp-ro" || direction === "en-ro";
     if (isKanaTarget(direction)) {
@@ -629,7 +629,7 @@ window.RaumeStudy.flashcards.vocabIndex = (function () {
     var pairs = aligned.pairs;
     var bad = pairs.filter(function (p) { return p.bad; });
     // Only the clean single-substitution case gets a note spelling it out --
-    // "N letters off" for anything messier wasn't telling you anything the
+    // "N letters off" for anything messier wasn't telling me anything the
     // marked letters above it don't already show, so it's left blank instead.
     var note = "";
     if (bad.length === 1 && bad[0].you != null && bad[0].co != null) {

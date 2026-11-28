@@ -216,7 +216,7 @@ window.RaumeStudy.icons = (function () {
   }
 
   // ---- Suggesting an icon from a table's name ---------------------------------
-  // A table you create is named in plain English ("Animals", "Family members",
+  // A table I create is named in plain English ("Animals", "Family members",
   // "At the hospital"); this picks the icon that fits so it never starts blank.
   // Each word of the name is tried in order -- an alias first, then an icon of
   // that very name -- and the first hit wins, so "Kitchen tools" finds the

@@ -335,7 +335,7 @@ window.RaumeStudy.notes = (function () {
   function isLessonTitle(note) { return note.title === lessonName(note.note_date) || note.title === oldLessonName(note.note_date); }
   // What a note is shown as: one called by its date shows the date as the
   // device writes it, as iOS does ("Sat 21 Nov 2026", or "Sat, Nov 21, 2026"
-  // on a US iPhone) -- never "21st". A name of your own shows as it is.
+  // on a US iPhone) -- never "21st". A name of my own shows as it is.
   function titleOf(note) {
     var d = isLessonTitle(note) && dateOf(note.note_date);
     return d ? d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : note.title;
@@ -505,8 +505,8 @@ window.RaumeStudy.notes = (function () {
     setTimeout(function () { el.classList.remove("rn-speaking"); }, 1200);
     shared.speech.speak(text);
   }
-  // Editing a lesson note changes its own HTML: every piece of text you can
-  // edit, and every row you can delete, is numbered (data-eid) in the parsed
+  // Editing a lesson note changes its own HTML: every piece of text I can
+  // edit, and every row I can delete, is numbered (data-eid) in the parsed
   // note before it's drawn, so Done can carry the changes back to the same
   // element and save the note whole. The numbers never reach the saved file.
   var EDIT_SEL = ".rn-jp, .rn-ro, .rn-en, .rn-fj, .rn-fr, .rn-tip > div:last-child, .rn-kind-sub, .rn-top h1, .rn-desc, .rn-tag";
@@ -1338,7 +1338,7 @@ window.RaumeStudy.notes = (function () {
     }).then(function () {
       flash = null;
       // In the reader only its title and date change -- the note stays
-      // where you were reading it.
+      // where I was reading it.
       var h1 = openId === note.id && hostEl && hostEl.querySelector(".notes-title-tx");
       if (!h1) { rerender(); return; }
       h1.textContent = titleOf(note);
@@ -1574,7 +1574,7 @@ window.RaumeStudy.notes = (function () {
         '<p class="notes-loading" role="status">' + (notes ? "This note isn’t in your account any more." : "Loading…") + "</p>";
     }
     // As in Notes, the bar holds the note's actions: back on the left; Quiz
-    // (the study action you take mid-note, a plain tinted word that shows
+    // (the study action I take mid-note, a plain tinted word that shows
     // when it's on), Search this note and ⋯ trailing. Quiz and Search show
     // only for a lesson note (showLesson unhides them).
     return '<div class="notes-nav">' + head + '<div class="notes-tools">' +
@@ -1651,7 +1651,7 @@ window.RaumeStudy.notes = (function () {
       host.innerHTML = '<div class="notes-wrap">' + listHtml() + "</div>";
       showTopics(host);
       if (listQuery) searchNotes(listQuery);
-      // Back from a note: the list where you left it.
+      // Back from a note: the list where I left it.
       if (wasNote && !opts.keepScroll) window.scrollTo(0, listScroll);
     }
     if (flash && !flash.busy) flash = null; // said once

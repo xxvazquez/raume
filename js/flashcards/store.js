@@ -294,7 +294,7 @@ window.RaumeStudy.flashcards.store = (function () {
 
   // Guest mode and signed-in mode keep entirely separate caches (different
   // localStorage keys) so switching between them never overwrites or mixes
-  // the other's data -- both are simply preserved, whichever you come back to.
+  // the other's data -- both are simply preserved, whichever I come back to.
   function cacheKey() { return isGuestMode() ? GUEST_CACHE_KEY : CACHE_KEY; }
   var cache = null;
   var cacheLoadedKey = null;
@@ -378,8 +378,8 @@ window.RaumeStudy.flashcards.store = (function () {
     return list;
   }
   // Study from: the one table Study now draws on, or null for every
-  // flashcard. A per-device choice like the theme -- what you drill on the
-  // way to class needn't follow you to the desk -- kept beside, not in, the
+  // flashcard. A per-device choice like the theme -- what I drill on the
+  // way to class needn't follow me to the desk -- kept beside, not in, the
   // card cache, so it never syncs and never touches a card.
   // Held in memory too, so the pick still works for the visit where
   // storage is blocked.

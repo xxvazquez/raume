@@ -1,6 +1,6 @@
 -- raume study: Flashcards schema
 --
--- Run this once in your Supabase project's SQL editor (Dashboard -> SQL Editor
+-- Run this once in my Supabase project's SQL editor (Dashboard -> SQL Editor
 -- -> New query -> paste -> Run). See SUPABASE_SETUP.md for the full setup walkthrough.
 --
 -- Supabase is the sole authoritative store for user learning data. It never
@@ -113,14 +113,14 @@ alter table public.flashcards drop constraint if exists flashcards_direction_che
 alter table public.flashcards add constraint flashcards_direction_check
   check (direction in ('jp-en', 'jp-ro', 'ro-en', 'en-ro', 'en-wr', 'en-wk', 'jp-vf', 'jp-vn'));
 
--- Per-table personalisation for the vocabulary page (the icon you pick for a
+-- Per-table personalisation for the vocabulary page (the icon I pick for a
 -- table header, keyed by the table's permanent id). Not a flashcards concept
 -- -- it just rides along in this per-user settings row so it syncs across
 -- devices without a table of its own. Shape: { "<tableId>": { "icon": "..." } }.
 alter table public.flashcard_settings add column if not exists table_custom jsonb not null default '{}'::jsonb;
 
 -- Kana trainer (the Flashcards "Kana" tab) group picker state, so
--- it follows you across devices like the other settings. Shape:
+-- it follows me across devices like the other settings. Shape:
 -- { "groups": ["hira-gojuon", ...] } (older rows may still carry a "dirs" object from
 -- the dropped romaji -> kana direction; it is ignored).
 alter table public.flashcard_settings add column if not exists kana_prefs jsonb not null default '{}'::jsonb;
@@ -273,7 +273,7 @@ create index if not exists notes_user_idx on public.notes (user_id);
 alter table public.notes add column if not exists source text
   check (source in ('sakura', 'wsjj', 'mine'));
 create index if not exists custom_rows_user_idx on public.custom_rows (user_id);
--- A verb of your own carries its polite form and group too:
+-- A verb of my own carries its polite form and group too:
 -- { jp, romaji, verbClass } (js/vocab/custom-vocab.js). Null for other words.
 alter table public.custom_rows add column if not exists verb jsonb;
 

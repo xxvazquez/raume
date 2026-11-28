@@ -395,14 +395,14 @@ window.RaumeStudy.flashcards.kana = (function () {
     }
 
     // Checked: the field collapses -- the "You wrote" line below now carries
-    // what you typed -- but stays in the DOM and focused, so a phone's
+    // what I typed -- but stays in the DOM and focused, so a phone's
     // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
     if (form) form.classList.add("fc-answer-form-checked");
     var expected = item.romaji;
     var typedRaw = session.userAnswer && session.userAnswer.trim() ? session.userAnswer : "";
     // Same merged reveal as the vocabulary word card: an icon-only verdict,
-    // the ANSWER big and first, what you typed a quiet struck-through line
+    // the ANSWER big and first, what I typed a quiet struck-through line
     // below it (kana/romaji typos aren't diffed letter-by-letter here the
     // way a romaji vocabulary answer is, just shown plain).
     var stageHtml = session.correct

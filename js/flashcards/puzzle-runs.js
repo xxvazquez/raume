@@ -7,8 +7,8 @@
 //     taken, miss: wrong pairs (Match), right: correct answers (Listening),
 //     help: letters / words revealed (grids; hints in typed Word chain), setup: source|script|count
 //     (for comparing like with like), splits: time at each round's end
-//     (Match, for the live split against your best), missed: vocab ids
-//     the game caught you on -- a wrong pair, a wrong answer, a word or
+//     (Match, for the live split against my best), missed: vocab ids
+//     the game caught me on -- a wrong pair, a wrong answer, a word or
 //     letter revealed, a square Check marked wrong (for Tricky words),
 //     ended: true for a Match / Listening game stopped early -- only its
 //     finished rounds / answered words, so it counts everywhere except
@@ -258,7 +258,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     });
     if (mode === "match") st.bestRound = bestRound();
     st.trend = runs.slice(-30).map(function (r) { return { at: r.at, value: measure(r) }; });
-    // "Faster / more accurate than your first 10": only once there are 20
+    // "Faster / more accurate than my first 10": only once there are 20
     // games, so the two tens don't overlap, and only when it's true.
     if (runs.length >= 20) {
       var first = average(runs.slice(0, 10).map(measure)), last = average(runs.slice(-10).map(measure));
@@ -274,7 +274,7 @@ window.RaumeStudy.flashcards.puzzleRuns = (function () {
     }).filter(Boolean).sort(function (a, b) { return a.best.at < b.best.at ? 1 : -1; });
     return st;
   }
-  // The words that trip you up most, across every puzzle and game: each
+  // The words that trip me up most, across every puzzle and game: each
   // vocab id and how many games it was missed in -- twice or more unless
   // `min` says otherwise (Practise these tops up with words missed once).
   function trickyWords(limit, min) {

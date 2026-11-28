@@ -1,4 +1,4 @@
-// Your own changes to the built-in words -- a row's Japanese, romaji, English
+// My own changes to the built-in words -- a row's Japanese, romaji, English
 // or note, edited from its hold menu (js/vocab/interactions.js). Layered over
 // the Git-only dataset the way js/vocab/table-custom.js layers names and
 // icons: data/vocabulary.js is never touched; each edit is keyed by the row's

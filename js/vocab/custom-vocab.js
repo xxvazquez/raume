@@ -1,7 +1,7 @@
 // Custom vocabulary -- the reader's own words and tables, layered over the
 // Git-only dataset the same way js/vocab/table-custom.js layers icons/names.
 //
-// Two ways in: a single row added to any table, or a whole table of your own
+// Two ways in: a single row added to any table, or a whole table of my own
 // (signed-in only). Bulk import parses a paste / CSV in the format
 //   japanese(furigana),romaji,english
 // where each kanji run carries its reading in ( ) straight after it --
@@ -53,7 +53,7 @@ window.RaumeStudy.customVocab = (function () {
       return null;
     }).filter(Boolean);
   }
-  // A verb of your own carries its polite form too, like the built-in verbs:
+  // A verb of my own carries its polite form too, like the built-in verbs:
   // verb = { jp: the -masu form's segments, romaji, verbClass }.
   var VERB_CLASSES = { godan: 1, ichidan: 1, irregular: 1 };
   function cleanVerb(v) {
@@ -230,7 +230,7 @@ window.RaumeStudy.customVocab = (function () {
     return inData || load().tables.some(function (t) { return t.id === tableId; });
   }
 
-  // A table of your own has no way to say up front "this is going to be
+  // A table of my own has no way to say up front "this is going to be
   // whole sentences, not headwords" (unlike the built-in Phrases table,
   // which is simply authored with tableClass: "vocab-sentences"). Guess it
   // instead from what actually ended up in it -- a real sentence runs past
@@ -248,7 +248,7 @@ window.RaumeStudy.customVocab = (function () {
   // Merge every custom table + row into RaumeStudy.data.vocabularyTables in
   // place. Idempotent -- strips whatever it injected last time first (marked
   // __custom), so it's safe to call on every change and after every sync.
-  // A word of your own takes the JLPT level of the same word in raume's
+  // A word of my own takes the JLPT level of the same word in raume's
   // tables -- written the same (先生), or, failing that, read the same when
   // that reading has one level only (せんせい). Every class word is also in
   // raume's own tables, so a class table is levelled like the rest; a word

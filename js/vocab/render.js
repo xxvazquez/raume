@@ -383,11 +383,11 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     return '<button type="button" class="row-hide-btn" aria-label="Hide this row">' + EYE_ICON + '</button>';
   }
   // The add-to-flashcards toggle. Always in the DOM but hidden by CSS unless a
-  // search is running (body.is-searching) -- the moment you want it is right
+  // search is running (body.is-searching) -- the moment I want it is right
   // after finding a word, and a permanent third icon on every row was judged
   // clutter. Its state (plus / green check) and click are owned by
   // js/flashcards/views.js (refreshRowToggleButtons + the delegated handler).
-  // Add / in your flashcards: a + and, once added, the Practice tab's own
+  // Add / in my flashcards: a + and, once added, the Practice tab's own
   // cards glyph (its front card filled) in Practice's tone -- never a ✓,
   // which would read as the known mark on the same row. One <i>, its mask
   // swapped by aria-pressed (css/site.css .ic-add).
@@ -431,7 +431,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       (badges ? '<span class="row-badges">' + badges + '</span>' : '') + rowActions(vocabId, !!badges) + '</div></td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
-  // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's
+  // [{ p: 'を', role: 'what I eat' }]. Each is a small blue chip (the app's
   // particle blue, bold) beside the row icons, drawn from data-badge like the
   // adjective badge. Each is a real button: tapping (or clicking, or hovering
   // with a mouse) opens a small popover with what the particle marks
@@ -443,7 +443,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return '<button type="button" class="particle-chip" data-badge="' + esc(tight(q.p)) + '" data-role="' + esc(q.role) + '" aria-label="' + esc('Particle ' + q.p + ': ' + q.role) + '" aria-expanded="false"></button>';
     }).join('');
   }
-  // Word rows and sentence rows (a custom table of your own sentences) share
+  // Word rows and sentence rows (a custom table of my own sentences) share
   // this -- both render as Japanese (with a romaji reveal next to the speaker
   // button) + English, two columns, no separate Romaji column.
   function wordRow(row) {
@@ -736,7 +736,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // standalone icon is hidden.
     var menuItems = controls.viewMode ? COL_MENU_ITEMS.slice() : [];
     // Choose icon lives in the menu, not as its own always-visible button on
-    // the header, so normal browsing stays clean -- only a table you can
+    // the header, so normal browsing stays clean -- only a table I can
     // actually customise (controls.addTable, i.e. a real table, never a
     // synthetic one like Flashcards' Words to review) gets it. Reuses
     // .section-icon-btn so the existing delegated click handler
@@ -782,7 +782,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       '</tr></thead><tbody>\n    ' +
       o.rowsHtml + '\n  </tbody></table></section>';
   }
-  // Sentence tables (your own, see js/vocab/custom-vocab.js) keep their
+  // Sentence tables (my own, see js/vocab/custom-vocab.js) keep their
   // authored order -- a run of sentences reads in the order it was written.
   // Kanji tables keep theirs too: 一 二 三 in order, not eight, five, four.
   // So does a table marked `ordered` -- a sequence taught in its own order
@@ -1039,7 +1039,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
   // The internal table index: a visual directory that stands in for a
   // redundant page heading. Closed, it's one small control (showing the
-  // table you're currently on); open, it lays out the whole active section
+  // table I'm currently on); open, it lays out the whole active section
   // at once -- every category, every table, nothing to expand -- linked to
   // #table-N. One panel per section; showSection reveals the active one.
   // Panels with more than a handful of tables are marked --wide so CSS flows
@@ -1078,7 +1078,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // A permanent button in the sticky search bar (not a row of its own that
     // came and went as tables opened, shoving the page down): a list glyph
     // and "Tables".
-    return '<button type="button" class="tindex-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
+    return '<button type="button" class="tindex-trigger"' + (document.body.classList.contains('is-searching') ? ' disabled' : '') + ' aria-haspopup="true" aria-expanded="false" aria-controls="tindexMenu" title="Jump to a table">' +
       TINDEX_ICON + '<span class="tindex-trigger-label">Tables</span><span class="tindex-trigger-short" aria-hidden="true">Tables</span>' + CHEVRON_ICON + '</button>' +
       '<div class="tindex-menu" id="tindexMenu" hidden>' +
       // Decorative only -- a native bottom-sheet grab handle, shown by CSS

@@ -41,9 +41,9 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     document.querySelectorAll('.table-section').forEach(s=>s.classList.remove('print-target'));
   });
 
-  // Once you've opened/closed tables in a section (or used Expand all), that
-  // section keeps its layout when you navigate away and back -- only a section
-  // you've never touched falls to the first-table default.
+  // Once I've opened/closed tables in a section (or used Expand all), that
+  // section keeps its layout when I navigate away and back -- only a section
+  // I've never touched falls to the first-table default.
   const sectionLayout = {}; // name -> { touched: true, expandAll: bool }
   function noteSectionLayout(name) {
     if (!name) return;
@@ -51,7 +51,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   }
 
   function toggleSection(section) {
-    // Keep the row you tapped under your finger: opening restyles its header
+    // Keep the row I tapped under my finger: opening restyles its header
     // and the accordion may close a table above it, both of which would
     // otherwise slide it away -- scroll by however far it moved.
     const head = section.querySelector('.section-head') || section;
@@ -94,7 +94,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   function visibleSectionTables() {
     return [...document.querySelectorAll('#vocabulary .table-section:not(.page-hidden):not(.search-hidden)')];
   }
-  // Land collapsed: every table closed until you open one -- no table's
+  // Land collapsed: every table closed until I open one -- no table's
   // content is presumed more relevant than another's. One click (or Expand
   // all) opens any of them; opening one still collapses its category
   // siblings (collapseSiblingSections), so it stays a one-open accordion
@@ -374,17 +374,17 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   vocab.closeKanjiSheet = closeKanjiSheet;
   // A Known change -- here or synced from another device -- repaints the
   // tiles and the open sheet's button in place.
-  // Known words: a soft green wash and a ✓ on every row you know, nothing
-  // hidden. You know a word if you said so (the hold menu's Mark as known /
-  // not known, kept in RaumeStudy.knownKanji with the kanji) -- or, if you
-  // never said either way, once you understand it on sight for good: its
+  // Known words: a soft green wash and a ✓ on every row I know, nothing
+  // hidden. I know a word if I said so (the hold menu's Mark as known /
+  // not known, kept in RaumeStudy.knownKanji with the kanji) -- or, if I
+  // never said either way, once I understand it on sight for good: its
   // Japanese -> English card is mature, remembered three weeks or more (FSRS
   // stability >= 21 days, in review). A word studied without that card
   // counts when all its cards are. Flashcards loads later, so it's read at
   // repaint time only.
   const MATURE_DAYS = 21;
   // Tricky words: ones that aren't sticking -- a card of the word forgotten
-  // twice after you'd learned it (FSRS lapses), or rated Again / Hard so
+  // twice after I'd learned it (FSRS lapses), or rated Again / Hard so
   // often it sits near the top of FSRS's difficulty scale (8 of 10, after a
   // few reviews, so one bad first day doesn't count). Amber, unless Known.
   const TRICKY_LAPSES = 2, TRICKY_DIFFICULTY = 8, TRICKY_MIN_REPS = 3;
@@ -1218,14 +1218,14 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       list.forEach(x => { const r = fn(x); if (r !== null && (best === null || r < best)) best = r; });
       return best;
     }
-    // Your own tables (class tables included) have ct- ids.
+    // My own tables (class tables included) have ct- ids.
     function isOwnTable(section) {
       return /^ct-/.test(section.dataset.table || '') ? 1 : 0;
     }
     // The same word twice: read the same, and either written the same in
     // kanji (先生) or sharing a meaning -- one reading alone isn't enough,
     // はし is chopsticks in one table and bridge in another. Records the
-    // row when it's the first of its word. Only a row of your own is ever
+    // row when it's the first of its word. Only a row of my own is ever
     // dropped -- a word raume files under two tables shows in both. Returns
     // the kept row's entry (its .row -- the search's result for it -- and
     // the .also tables it stands for).
@@ -1512,8 +1512,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         const fcNs = window.RaumeStudy.flashcards;
         if (fcNs && fcNs.refreshRowToggleButtons) fcNs.refreshRowToggleButtons();
         // Search opens every table it matches in; clearing it puts back the
-        // tables you had open -- leaving thirty tables open was both a
-        // different page from the one you left and a long one to lay out.
+        // tables I had open -- leaving thirty tables open was both a
+        // different page from the one I left and a long one to lay out.
         preSearch = {
           open: new Set(sections.filter(s => !s.classList.contains('collapsed'))),
           expandAll: document.body.classList.contains('expand-all-mode')
@@ -1555,9 +1555,13 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         h.classList.toggle('search-hidden', Boolean(q));
         if (!q) h.classList.toggle('page-hidden', h.dataset.section !== activeSection);
       });
+      // Tables stays in the bar, dimmed: results span every section, so
+      // there's no one section to jump in -- but a bar that drops a button
+      // and widens its field on the first letter typed jumps under the thumb.
       const tableIndexEl = document.getElementById('tableIndex');
       if (tableIndexEl) {
-        tableIndexEl.classList.toggle('search-hidden', Boolean(q));
+        const trigger = tableIndexEl.querySelector('.tindex-trigger');
+        if (trigger) trigger.disabled = Boolean(q);
         if (q) closeTableIndexMenu();
         else tableIndexEl.querySelectorAll('.tindex-panel').forEach(p => p.classList.toggle('page-hidden', p.dataset.section !== activeSection));
       }
@@ -1568,8 +1572,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
       // A word in raume's tables and again in a class table (Sakura, WSJJ --
       // which hold every word that class taught) turns up once: raume's
-      // row, then the first table of your own it's in. raume's tables are
-      // searched first so theirs is the one kept; a raume table you hid, or
+      // row, then the first table of my own it's in. raume's tables are
+      // searched first so theirs is the one kept; a raume table I hid, or
       // a level filtered out, leaves the class row showing.
       const seen = new Map();
       const passOrder = sections.map((section, originalIndex) => ({ section, originalIndex }))
@@ -1634,7 +1638,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         section.classList.remove('page-hidden');
         section.classList.toggle('search-hidden', sectionRows === 0);
         if (sectionRows > 0) { totalTables++; totalRows += sectionRows; expandSection(section); }
-        // A sentence table (Everyday Sentences, or one of your own) follows the
+        // A sentence table (Everyday Sentences, or one of my own) follows the
         // word tables: "beer" finds the word first, then sentences using it.
         sectionOrder.push({ section, rank: sectionBest === null ? Infinity : sectionBest, originalIndex, sentences: !!section.querySelector('table.vocab-sentences') });
       });
@@ -1711,7 +1715,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // them. A query is kept once it was really used -- Enter, a tap on a
     // result, or leaving the field -- and only if it found something, so
     // the half-typed text on the way to it never lands in the list. This
-    // device only: it's a convenience, not part of your study record.
+    // device only: it's a convenience, not part of my study record.
     const RECENTS_KEY = 'raume-recent-searches';
     const RECENTS_MAX = 8;
     const recentsEl = document.getElementById('searchRecents');
@@ -2010,8 +2014,8 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // Table-index dropdown -- rendered once. The trigger opens/closes the
     // menu; picking a table jumps to it and closes; outside-click / Esc
     // close it. The menu's `.current` mark tracks whichever table is in view
-    // as you scroll; the trigger always reads "Tables" -- a bar button that
-    // renamed itself as you scrolled changed width under your thumb, and an
+    // as I scroll; the trigger always reads "Tables" -- a bar button that
+    // renamed itself as I scrolled changed width under my thumb, and an
     // open table's own title already pins under the bar.
     const tableIndex = document.getElementById('tableIndex');
     // Every table link in the visible panel -- the directory shows them all,
@@ -2094,7 +2098,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
     // Expand all / collapse all -- read a whole category (or section) straight
     // through, then snap back to every table closed. It lives in the Options
-    // sheet; the sheet closes so the result is what you see.
+    // sheet; the sheet closes so the result is what I see.
     const expandAllBtn = document.getElementById('expandAllBtn');
     if (expandAllBtn) {
       expandAllBtn.addEventListener('click', function () {
@@ -2183,7 +2187,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         applyThemeChoice(THEME_ORDER[(THEME_ORDER.indexOf(currentThemeChoice()) + 1) % THEME_ORDER.length]);
       });
     }
-    // The account menu (index.html #accountMenu): who you are and the sync
+    // The account menu (index.html #accountMenu): who I am and the sync
     // state (filled in by js/flashcards/bootstrap.js), Account, Support and
     // Sign out -- plus, on a phone, Customize tables / Help (the pages the
     // wider masthead's glyphs open), Practice settings while on Practice
@@ -2223,7 +2227,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
         else if (go.dataset.menuGo === 'customize') { const c = document.getElementById('customizeToggle'); if (c) c.click(); }
         else if (go.dataset.menuGo === 'practice-settings') openPracticeScreen('settings');
         else if (go.dataset.menuGo === 'help') {
-          // Help for the screen you're on: on Practice, the Flashcards Help
+          // Help for the screen I'm on: on Practice, the Flashcards Help
           // (already open: stay there); anywhere else, the reference Help.
           // (Before Practice has a title bar -- the sign-in choice -- the
           // reference Help instead of a tap that does nothing.)
@@ -2525,7 +2529,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // every badge type behaves identically -- one badge, one popover, about
     // that badge alone (a word with two particles opens two different
     // popovers, one per chip, never both roles in one). Suppressed while the
-    // English is hidden or covered (a role like "what you eat" would give the
+    // English is hidden or covered (a role like "what I eat" would give the
     // answer away).
     const BADGE_SEL = 'button.particle-chip, button.adj-badge, button.verb-badge';
     let pop = null, popOwner = null, popPinned = false;
@@ -2538,7 +2542,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       return document.body.classList.contains('hide-english') || document.body.classList.contains('selftest-mode');
     }
     // The popover's glyph reuses the badge's own classes so it renders as the
-    // same tinted capsule as the thing you just tapped, not a plain word --
+    // same tinted capsule as the thing I just tapped, not a plain word --
     // the one exception is a verb badge, whose glyph spells its reading out
     // in parentheses (data-reading) since 五段/一段/変格 are kanji a reader who
     // doesn't read kanji can't sound out from the 20px tile alone. That used

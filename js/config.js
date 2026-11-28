@@ -1,6 +1,6 @@
 // Supabase connection config, published as RaumeStudy.config.
 //
-// Fill these in after creating your Supabase project -- see SUPABASE_SETUP.md.
+// Fill these in after creating my Supabase project -- see SUPABASE_SETUP.md.
 // The anon/public key is meant to be embedded in client-side code like this;
 // it is safe to commit because Row Level Security (supabase/schema.sql) is
 // what actually protects the data, not secrecy of this key. Never put the

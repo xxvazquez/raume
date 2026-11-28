@@ -12,7 +12,7 @@ cooking or studying, and for printing clean A4 study sheets.
 | --------------- | ---------------------------------------------------------------- |
 | **Reference**   | Vocabulary, Grammar and Kanji tables — furigana, search, audio, print |
 | **Practice**    | FSRS-6 flashcards (up to six directions per word, plus verb forms), a kana drill, puzzles and games |
-| **Notes**       | Your own class notes, private to your account                    |
+| **Notes**       | My own class notes, private to my account                    |
 | **Storage**     | Guest (this browser only) or a Supabase account that syncs       |
 | **Stack**       | Plain HTML, CSS and `<script>` tags — no framework, no build step |
 
@@ -22,7 +22,7 @@ cooking or studying, and for printing clean A4 study sheets.
 - [The reference](#the-reference)
   - [Sections](#sections) · [Finding words](#finding-words) ·
     [Reading the tables](#reading-the-tables) · [Kanji](#kanji) ·
-    [Options](#options) · [Making it yours](#making-it-yours) ·
+    [Options](#options) · [Making it mine](#making-it-mine) ·
     [Class notes](#class-notes) · [Around the app](#around-the-app)
 - [Practice](#practice)
   - [How cards work](#how-cards-work) · [Reviewing](#reviewing) ·
@@ -55,7 +55,7 @@ python3 -m http.server
 | **Vocabulary** | The landing page: words grouped by topic — Around Town, Food & Ingredients, Kitchen & Dining, Numbers & Counting, People & Daily Life, Time & Calendar. People & Daily Life ends with **Everyday Sentences**: 211 N5 sentences, polite and casual (casual ones marked in grey) |
 | **Grammar**    | How words change and join: Adjectives (い / な), Verbs (plain and polite), Particles, Question Words and This / That / Over There (こそあど) |
 | **Kanji**      | The 102 N5 kanji in seven themes — see [Kanji](#kanji) |
-| **Notes**      | Your own class notes — see [Class notes](#class-notes) |
+| **Notes**      | My own class notes — see [Class notes](#class-notes) |
 | **Practice**   | Flashcards, the Kana drill, Puzzles and Games — see [Practice](#practice) |
 
 In sentence tables (Everyday Sentences) each row's ⓘ names
@@ -65,15 +65,15 @@ the grammar it shows.
 
 | | |
 | --- | --- |
-| **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. A word that's also in a table of your own (a class table) shows once, in raume's table, with "Also in: Sakura" under its meaning. Clearing the search puts back the tables you had open. |
+| **Search** | One field for every section — Japanese, kana, romaji or English; <kbd>/</kbd> jumps to it. Results rank exact → starts with → ends with → contains, words before sentences, with the match highlighted. A single letter only finds words that start with it. A word that's also in a table of my own (a class table) shows once, in raume's table, with "Also in: Sakura" under its meaning. The search bar stays as it is while I type (**Tables** dims), and the results read as one list under one set of column headers. Clearing the search puts back the tables I had open. |
 | **JLPT level** | Type **n5** … **n1** as a word of its own for that level's words: **n4** lists them all, **n4 eat** only those matching *eat*. **n0** finds the words not on the JLPT lists. |
 | **What it understands** | Kana finds a kanji word by its reading (たべ → 食べる). Romaji works with or without long vowels and in a Japanese keyboard's spellings (*kohi*, *mittu*, *honnya*), and finds a verb's polite form (*tabemasu*). English matches where a word starts (*eat* finds *to eat*, not *heat*), a verb's *to* is never needed, and any one meaning typed whole is an exact match (*see* finds *to see, to watch* first). Only visible columns are searched, plus romaji. |
 | **+ on a result** | Adds the word to flashcards; it turns into Practice's cards icon (tap again to pause). |
-| **Recent searches** | Tap the empty field for your last eight — tap one to rerun it, **×** removes one, **Clear** all. Only searches you used (Return or a tap on a result) that found something are kept, on this device. |
-| **Tables** | The list button in the pinned search bar: every table in the section, with entry counts, the one you're in marked. |
-| **Topic headers** | In Vocabulary, tap one to fold its tables away until you tap it again. Search still looks inside, and jumping to one of its tables opens it. |
-| **Opening a table** | The row you tapped stays put. While it's open, its title pins under the search bar; closing it from there keeps your place. |
-| **Back to top** | Tap the section you're on to scroll to the top; tap again to go to its start. |
+| **Recent searches** | Tap the empty field for my last eight — tap one to rerun it, **×** removes one, **Clear** all. Only searches I used (Return or a tap on a result) that found something are kept, on this device. |
+| **Tables** | The list button in the pinned search bar: every table in the section, with entry counts, the one I'm in marked. |
+| **Topic headers** | In Vocabulary, tap one to fold its tables away until I tap it again. Search still looks inside, and jumping to one of its tables opens it. |
+| **Opening a table** | The row I tapped stays put. While it's open, its title pins under the search bar; closing it from there keeps my place. |
+| **Back to top** | Tap the section I'm on to scroll to the top; tap again to go to its start. |
 | **URL** | Follows the view (`#grammar`, `#kanji`, `#table-15`, `#practice`), so any view can be bookmarked. |
 
 ### Reading the tables
@@ -84,11 +84,11 @@ the grammar it shows.
 | **Furigana** | Always shown. Consecutive kanji share one reading (三十三歳 → さんじゅうさんさい), and each reading starts where its kanji start. |
 | **Katakana** | Hover or tap any katakana to see its romaji. |
 | **Particles** | Blue and bold everywhere; tap one for how it’s read (は is “wa”). |
-| **Speaker** | Plays a recorded native-voice clip; your own words use the device's voice. A particle on its own is said as a particle: は “wa”, へ “e” (歯, tooth, stays “ha”). |
+| **Speaker** | Plays a recorded native-voice clip; my own words use the device's voice. A particle on its own is said as a particle: は “wa”, へ “e” (歯, tooth, stays “ha”). |
 | **Sorting** | The English header sorts A–Z / Z–A. Tables taught as a sequence (counting, days, こそあど, particles, family…) open in that order. |
-| **Sentence tables** | A table of your own that's mostly sentences shows the Japanese on its own line, English under it. |
+| **Sentence tables** | A table of my own that's mostly sentences shows the Japanese on its own line, English under it. |
 | **ⓘ on a row** | The row's grammar and its JLPT level in one popover — hidden while the English is covered, so it can't give the answer away. |
-| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times, country names with their 〜人 and 〜語) counts as N5. A sentence takes the level of its grammar or of its hardest word, whichever is harder (〜てる, 〜にします, 〜ことがすき are N4). City and sight names, and foods the lists leave out, say plainly that they're **not on the JLPT lists** — topic words, as textbooks treat them, never given a guessed level. Your own words — class tables included — take the level of the same word in raume's tables. |
+| **JLPT levels** | Each word carries its level, N5 to N1, from the widely used Tanos / Waller lists; what an N5 class teaches first (greetings, counters, numbers, dates, times, country names with their 〜人 and 〜語) counts as N5. A sentence takes the level of its grammar or of its hardest word, whichever is harder (〜てる, 〜にします, 〜ことがすき are N4). City and sight names, and foods the lists leave out, say plainly that they're **not on the JLPT lists** — topic words, as textbooks treat them, never given a guessed level. My own words — class tables included — take the level of the same word in raume's tables. |
 
 The ⓘ lists:
 
@@ -96,7 +96,7 @@ The ⓘ lists:
 | ----- | ------- | -------------- |
 | **い** / **な** | Adjective type | It breaks the pattern: a な-adjective ending in い (きれい), or irregular いい |
 | **五段** / **一段** / **変格** | u-verb, ru-verb, irregular verb | The group is easy to mistake (切る, 帰る), or the verb is 来る |
-| **を** **に** **が** … | The particles a word takes, e.g. 聞く: を *what you listen to*, に *who you ask* | — |
+| **を** **に** **が** … | The particles a word takes, e.g. 聞く: を *what I listen to*, に *who I ask* | — |
 | **Forms** | A verb's polite 〜ません, 〜ました, 〜ませんでした, its plain 〜ない, 〜た, 〜なかった (書かない, 行った, 来(こ)ない, ある → ない) and its て-form (行って, 来(き)て) | — |
 
 Usage traps get a plain line of their own (多い doesn't go right before a
@@ -129,14 +129,14 @@ dot on it means something is off its default.
 | **Expand all · Print** | Open every table; print the section or everything as A4. |
 | **Legends** | **Row icons** (each glyph named) and **Row colours** (Known green, Tricky amber, Irregular red). |
 
-### Making it yours
+### Making it mine
 
 | | |
 | --- | --- |
 | **Hold a word** | Hold a row (or right-click it): **Play**, **Copy**, **Add to flashcards** / **Pause**, **Mark as known**, **Edit**, **Hide row**. |
 | **Edit a word** | Change a built-in word's Japanese (readings in brackets: お茶(ちゃ)), romaji, English and grey note. It changes everywhere — tables, search, print, flashcards (history kept). **Restore original** undoes it. Synced when signed in. |
-| **Known words** | A soft green wash. Mark them yourself, or a word turns green once you've known its meaning in flashcards for three weeks. **Mark as not known** always wins. |
-| **Tricky words** | A soft amber wash for a word you keep forgetting in flashcards. Known wins over it. |
+| **Known words** | A soft green wash. Mark them myself, or a word turns green once I've known its meaning in flashcards for three weeks. **Mark as not known** always wins. |
+| **Tricky words** | A soft amber wash for a word I keep forgetting in flashcards. Known wins over it. |
 | **Irregular words** | Exceptions (irregular verbs, 4 / 7 / 9) are written in red. |
 | **Hide a row** | The eye icon takes a row out of view; **Show all** brings them back. |
 | **Hide a table** | ⋯ › **Hide table** removes it from the pages, Tables list and search; **Show** on Customize brings it back. Flashcards aren't affected (that's Pause table). |
@@ -147,19 +147,19 @@ dot on it means something is off its default.
 
 | | |
 | --- | --- |
-| **Icon and colour** | About 165 icons or your own upload, and nine muted colours. Also from ⋯ › **Choose icon…** on a table. |
+| **Icon and colour** | About 165 icons or my own upload, and nine muted colours. Also from ⋯ › **Choose icon…** on a table. |
 | **Name and order** | Rename any table; drag the grip (or ↑ / ↓) to reorder tables and categories. |
 | **Add a word** | To any table. The **Table** picker searches by name or category, with recent picks on top. |
 | **Import a list** | Paste text or a `.csv` / `.txt`, one word per line: `帰(かえ)る,kaeru,to return`. A verb can bring its polite form: `帰(かえ)る / 帰(かえ)ります,kaeru / kaerimasu,to go home`. Three columns pasted from a spreadsheet work too. Rows that don't parse are listed with the reason. |
-| **New table** | Needs an account. Its **Category** is a Vocabulary category, Grammar, or a new one you name. |
-| **Words you've added** | Search, sort, edit or delete your words (on a phone, swipe left). Deleting a word has **Undo**; deleting a table asks first. |
+| **New table** | Needs an account. Its **Category** is a Vocabulary category, Grammar, or a new one I name. |
+| **Words you've added** | Search, sort, edit or delete my words (on a phone, swipe left). Deleting a word has **Undo**; deleting a table asks first. |
 
-Your own words work everywhere — furigana, search, print, audio, every
+My own words work everywhere — furigana, search, print, audio, every
 flashcard direction — and sync when signed in.
 
 ### Class notes
 
-The **Notes** tab: your class notes as HTML files, **private to your
+The **Notes** tab: my class notes as HTML files, **private to my
 account** (Supabase behind Row Level Security — never in Git or on the public
 site). Needs an account.
 
@@ -168,9 +168,9 @@ site). Needs an account.
 | **Add** | Pick where they're from (Sakura, WSJJ, Mine or none), then one or more `.html` files, up to 5 MB each. |
 | **List** | Newest lesson first, by month. A note's date is its lesson date, else the file's; ⋯ › **Lesson date** changes it. **All · Sakura · WSJJ · Mine** filters once any note is marked. |
 | **Lesson notes** | Notes built with `scripts/note_kit.py` are drawn as raume screens: one card per section — Grammar, Conversation, Vocabulary, Practice, Watch out, Reference — always in that order and colour. Word lists and practice pages fold; patterns, rules and tips always show. Tap the Japanese for romaji; the speaker reads a line. |
-| **Reading bar** | **Quiz** covers the Japanese you should produce; the search glyph searches the note; **⋯** › **English** / **Furigana** cover or hide those lines. |
+| **Reading bar** | **Quiz** covers the Japanese I should produce; the search glyph searches the note; **⋯** › **English** / **Furigana** cover or hide those lines. |
 | **Edit** | Every line becomes editable, with ⊖ to delete a row. **Done** saves, **Cancel** puts it back. |
-| **Search all notes** | The field over the list searches every note (offline too) and carries the search into the note you open. |
+| **Search all notes** | The field over the list searches every note (offline too) and carries the search into the note I open. |
 | **⋯ on a note** | **Add words to Practice** (the note's words raume has; sentences skipped), **Mark as**, **Rename**, **Lesson date**, **Replace**, **Delete** (asks first). |
 | **Other HTML** | Older lesson-kit pages are drawn the same way. Anything else shows as written, in a sealed frame where nothing runs. |
 | **Offline** | Every note is also kept on the device; signing out removes that copy. |
@@ -190,13 +190,13 @@ of what that class taught. Lesson files stay in gitignored `private-notes/`.
 | --- | --- |
 | **Print** | A4: one table (its printer icon; ⋯ › Print on a phone), the section or everything (Options). Folded tables still print. |
 | **Theme** | System, Light or Dark, applied before the first paint. |
-| **Help** | The **?** at the top: four topics, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)) and the licences. Practice has its own Help; on a phone, the account menu's **Help** opens the one for the screen you're on. |
+| **Help** | The **?** at the top: four topics, then **Support raume** ([Ko-fi](https://ko-fi.com/raume)) and the licences. Practice has its own Help; on a phone, the account menu's **Help** opens the one for the screen I'm on. |
 | **Text size** | Follows the iPhone / iPad text size, up to about a third larger; print keeps its own size. |
 | **Screen sizes** | Phone: a tab bar at the bottom and a large title per screen. Tablet: captioned top icons. Desktop: a floating section bar at the top. |
 | **Version** | The deployed commit and its date, at the foot of every page. |
 
 The **account button** (the person icon; its dot is **green** when synced,
-**amber** when something is waiting) opens one menu: who you're signed in as,
+**amber** when something is waiting) opens one menu: who I'm signed in as,
 **Account** (or **Sign in**), **Support raume** and **Sign out** — plus, on a
 phone only, **Customize tables**, **Help** and **Appearance**. Sign out asks
 first if something hasn't synced.
@@ -220,12 +220,12 @@ to flashcards**, or single words from **Library** or a search result.
   **EN → Japanese (kanji)**. A verb can add two more, each asking a
   different form every time, typed in romaji: **Verb → polite form** (〜ません,
   〜ました, 〜ませんでした, the て-form) and **Verb → plain form** (〜ない, 〜た,
-  〜なかった). Typed answers are romaji, unless you turn on **Answer in
+  〜なかった). Typed answers are romaji, unless I turn on **Answer in
   kana**.
-- **Study directions** in Settings picks which you get; the handwritten two
-  and verb forms are off until you turn them on.
+- **Study directions** in Settings picks which I get; the handwritten two
+  and verb forms are off until I turn them on.
 - **Answer in kana** (Settings, per device) has EN → Romaji cards take the
-  reading in kana instead: romaji you type turns into kana as you go, as a
+  reading in kana instead: romaji I type turns into kana as I go, as a
   Japanese keyboard does, or type with a Japanese keyboard. It counts when it
   spells the reading or sounds like it (こうひい for コーヒー); the reveal
   shows the reading in kana.
@@ -233,7 +233,7 @@ to flashcards**, or single words from **Library** or a search result.
   minutes) with the day's new cards, freshly shuffled, never the same word
   twice in a row. A review is ready all day on its due date, whatever hour it
   was set at.
-- A new word starts **JP → EN**; its other directions join once you've seen
+- A new word starts **JP → EN**; its other directions join once I've seen
   it.
 
 ### Reviewing
@@ -282,7 +282,7 @@ card  →  type answer (or leave it blank), Return or ↑  →  verdict + answer
 <summary><b>What the answer reveals</b></summary>
 
 - Japanese → English shows the English under the word (a miss shows the
-  right meaning first, then what you typed), with the romaji underneath — or
+  right meaning first, then what I typed), with the romaji underneath — or
   a bare kanji's kana reading.
 - Romaji and English prompts reveal the Japanese, always with its furigana.
 
@@ -315,28 +315,28 @@ menu). Settings, Help, Awards and Stats slide in as pushed screens with a
 | Screen | What it does |
 | --- | ------------ |
 | **Library** | Every table by category, filtered All / My flashcards / Archived. Add a table (**Pause** it under My flashcards), **Add all** a category, or open a table for single words — on a phone, swipe a word left for Pause / Add / Restore |
-| **Settings** | Study directions, **Answer in kana** (per device), and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). **Back up & restore** saves one JSON file (on iPhone, Save to Files / iCloud Drive), its row saying when this device last made one: a guest's copy of this browser, or everything in the account, notes included. Changes save as you make them |
+| **Settings** | Study directions, **Answer in kana** (per device), and FSRS settings (retention, max interval, fuzz — on by default — new cards per day), separately for words and kana. **App icon › Badge** shows the cards to study on the app's icon (off by default, per device). **Back up & restore** saves one JSON file (on iPhone, Save to Files / iCloud Drive), its row saying when this device last made one: a guest's copy of this browser, or everything in the account, notes included. Changes save as I make them |
 | **Help** | Adding & pausing, Library icons, reviewing, Dashboard, each tab, syncing |
 | **Awards** | Every award by kind — from the Dashboard's **Show all** |
 | **Stats** | Per puzzle or game style — see [Stats](#stats) |
 
 **Pausing** keeps everything: a paused word moves to *Archived*, a paused
-table drops out of reviews until you resume it, and FSRS history is always
+table drops out of reviews until I resume it, and FSRS history is always
 kept. **Undo** takes a pause back.
 
 ### Dashboard
 
 | Card | Shows |
 | --- | --- |
-| **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of your daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
-| **Study from** | Once your cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…), **Words not on the JLPT lists**, or one table. Study now follows it; everything else still counts all cards |
-| **Streak** | One streak for all study — a day counts for a flashcard review, a kana review or a finished puzzle or game (one ended early doesn't). Days in a row, this week as seven dots, and your best |
-| **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under your target) |
+| **Today's rings** | **Review** (today's due cards done), **Learn** (new cards, of my daily number) and **Play** (a finished puzzle or game), beside how many cards **Study now** holds |
+| **Study from** | Once my cards span two tables or two JLPT levels: **All flashcards**, one JLPT level's words (**N5 words**…), the easiest levels together (**N5 + N4 words**, **N5 + N4 + N3 words**…), **Words not on the JLPT lists**, or one table. Study now follows it; everything else still counts all cards |
+| **Streak** | One streak for all study — a day counts for a flashcard review, a kana review or a finished puzzle or game (one ended early doesn't). Days in a row, this week as seven dots, and my best |
+| **Progress** | Kana started, Kanji known, Words mastered, cards, reviews and retention (FSRS's forecast; coral with ↓ under my target) |
 | **Awards** | The newest six and the nearest to go; **Show all** for the rest |
 | **Highlights** | One line, only when there's news |
 
 Under **Details**: card progress, reviews this week, due next 7 days,
-**Trends** (last 90 days against your year — reviews a day, recall, study
+**Trends** (last 90 days against my year — reviews a day, recall, study
 days a week — after 120 days of history), Kana (every basic kana started —
 the same count as Kana started — and how many to study now), Puzzles and
 Games (results, how many this week, the last three, **See stats**), Kanji, **JLPT
@@ -366,7 +366,7 @@ Choices are remembered on this device.
 
 | Setting | Choices |
 | --- | --- |
-| **Words from** | *Flashcards* (leaning toward words you're still learning) or any number of tables, in or out of flashcards |
+| **Words from** | *Flashcards* (leaning toward words I'm still learning) or any number of tables, in or out of flashcards |
 | **JLPT level** | *All*, or tick one level or several (N5 + N4, or *Not on the lists*) to play only their words. Puzzles and every game, Sentences included (its sentences' levels) |
 | **Script** | *Romaji* (long vowels spelled out: *koohii*), *Japanese* (as written — Match and Word search only), *Hiragana* or *Katakana*. A word is never forced into a script it isn't written in |
 | **Word count** | 10–40; Match and Listening up to 100 or *All* |
@@ -384,7 +384,7 @@ sit beside the grid.
 - A right square turns green; the last right square solves it.
 - Keys: arrows move, Tab / Shift-Tab next / previous word, Space switches
   direction, Backspace steps back, Delete clears.
-- **Hint** fills the square you're on (or the next wrong one); **Check**
+- **Hint** fills the square I'm on (or the next wrong one); **Check**
   marks filled squares.
 - **Save as PDF**: an A4 worksheet with an Answers page (on a phone, the
   share sheet).
@@ -407,7 +407,7 @@ sit beside the grid.
 **Match**, **Listening**, **Kana tiles**, **Odd one out**, **Speed sort**,
 **Word chain** and **Sentences** — same setup screen and toolbar as Puzzles. On a keyboard,
 arrows move, Enter or Space picks and 1–4 picks a choice. Switching tab
-pauses a game; coming back finds it where you left it. Nothing is scheduled;
+pauses a game; coming back finds it where I left it. Nothing is scheduled;
 every finished game goes to the Dashboard and [Stats](#stats).
 
 A right answer washes green with a ✓, a wrong one red with a ✕. Five dots by
@@ -419,9 +419,9 @@ confetti; reduced motion is honoured.
 
 - Tap a word, then its meaning. A wrong pair shakes and adds a second.
 - Rounds of up to 6 pairs, with a break between them; **⏸** pauses.
-- A chip by the clock says how far ahead or behind your best you are.
-- The end card: your time, pairs, misses, and a pace medal — **gold** under
-  2s a pair, **silver** under 3s, **bronze** under 4s — with your last ten
+- A chip by the clock says how far ahead or behind my best I am.
+- The end card: my time, pairs, misses, and a pace medal — **gold** under
+  2s a pair, **silver** under 3s, **bronze** under 4s — with my last ten
   games on the same words.
 
 </details>
@@ -430,8 +430,8 @@ confetti; reduced motion is honoured.
 <summary><b>Listening</b></summary>
 
 - Tap **▶** to hear a word and pick its English from four; nothing written
-  shows until you answer.
-- The end card: score, accuracy against your average, and the missed words
+  shows until I answer.
+- The end card: score, accuracy against my average, and the missed words
   to hear again.
 
 </details>
@@ -469,20 +469,20 @@ confetti; reduced motion is honoured.
 <summary><b>Word chain</b></summary>
 
 - しりとり: type a word that starts with the kana the last one ended on.
-  Romaji turns into kana as you type; **あ | ア** picks the script.
+  Romaji turns into kana as I type; **あ | ア** picks the script.
 - Any word in the whole vocabulary counts; *Words from* picks the first word
   and the hints.
 - Rules (also behind the ⓘ): a final ー doesn't count, a final small ゃゅょ
   counts as its big kana, and a word ending in ん isn't accepted.
 - **Hint** shows one fitting word's English, then the word; ⋯ › *Skip* plays
-  a link for you. Only a link with no miss, hint or skip scores.
+  a link for me. Only a link with no miss, hint or skip scores.
 
 </details>
 
 <details>
 <summary><b>Sentences</b></summary>
 
-- **Exercise** picks how you practise the Everyday Sentences table:
+- **Exercise** picks how I practise the Everyday Sentences table:
   - *Build*: see the English, tap the Japanese pieces into order. The pieces
     carry their furigana; particles are blue. Tap a placed piece to send it
     back. Sentences of three pieces or more.
@@ -499,12 +499,12 @@ confetti; reduced motion is honoured.
   - *Meaning*: read the Japanese (▶ plays it) and pick its English from
     three. The wrong two are the sentences that look most like it — the
     same words or pattern, a question among questions, from either
-    register — never one that means the same. The romaji shows once you
+    register — never one that means the same. The romaji shows once I
     answer.
 - **Register** picks *Polite*, *Casual* or both; no *Words from*.
 - Each answer shows the romaji and ▶ (and, after a miss, the sentence as it
   should be). A miss (or **Show answer**) comes back at the end; missed
-  sentences join Tricky words. A sentence whose Japanese you edited sits out
+  sentences join Tricky words. A sentence whose Japanese I edited sits out
   of Build and Verb form, whose pieces no longer match it.
 
 </details>
@@ -521,7 +521,7 @@ confetti; reduced motion is honoured.
   plays just them.
 - **Reset** — clears that style's stats on every device, after asking.
 
-Nothing here touches your flashcard schedule.
+Nothing here touches my flashcard schedule.
 
 <sub>[↑ Contents](#contents)</sub>
 
@@ -529,13 +529,13 @@ Nothing here touches your flashcard schedule.
 
 ## Accounts and storage
 
-Practice starts by asking you to pick one of two modes. The two never mix.
+Practice starts by asking me to pick one of two modes. The two never mix.
 
 |  | **Guest** | **Signed in** |
 | --- | --- | --- |
-| Where data lives | This browser's `localStorage` | Your own [Supabase](SUPABASE_SETUP.md) project, per account via Row Level Security |
+| Where data lives | This browser's `localStorage` | My own [Supabase](SUPABASE_SETUP.md) project, per account via Row Level Security |
 | Network | None | Syncs; works offline and catches up on reconnect |
-| First visit | Starts with the Fruits table added | Your own deck |
+| First visit | Starts with the Fruits table added | My own deck |
 | Backup | Settings › Back up & restore — restoring replaces this browser's data | Settings › Back up & restore — one file with every note, card, review and setting; restoring merges (adds what's missing, never deletes) |
 | Custom tables, class notes | — | Yes |
 | New accounts | — | Off by default: `allowSignups: false` hides "Sign up" ([setup](SUPABASE_SETUP.md)) |
@@ -543,12 +543,12 @@ Practice starts by asking you to pick one of two modes. The two never mix.
 - **Local-first** — every change applies immediately; anything that couldn't
   sync is queued, survives a reload and retries on its own.
 - **Nothing unsynced is lost** — signing out (or the session ending offline)
-  keeps queued changes on this device, hidden from anyone else, until you
+  keeps queued changes on this device, hidden from anyone else, until I
   sign in here again.
 - **Sync status** — the account dot is green when synced. Otherwise a chip on
   Practice shows *Syncing N…*, *Offline* or *couldn't sync* with **Sync
-  now**; **What's pending?** lists what hasn't reached your account.
-- **Nothing is hard-deleted**, except your own words and tables you delete.
+  now**; **What's pending?** lists what hasn't reached my account.
+- **Nothing is hard-deleted**, except my own words and tables I delete.
 - The browser is asked to keep raume's storage when space runs low.
 - The anon key in `js/config.js` is safe to commit (RLS protects the data).
   Never commit the service-role key.

@@ -92,7 +92,7 @@
   --section-soft: var(--sec-vocabulary-soft);
   --section-strong: var(--sec-vocabulary-strong);
   --section-ink: var(--ink);
-  /* The tint: what iOS paints everything you can act on in -- action rows,
+  /* The tint: what iOS paints everything I can act on in -- action rows,
      plain buttons, checkmarks, a switch that's on, the row speaker. One per
      section, a more saturated sibling of its tone: the muted -strong tones
      sit too close to ink to read as "tap me", and the mid tones fall under
@@ -628,7 +628,7 @@ body {
    was open, shoving the page down on every open/close, and scrolled away
    just when you wanted it. Always there now, always reachable. */
 .table-index { position: relative; flex: 0 0 auto; }
-.table-index.search-hidden { display: none; }
+.tindex-trigger:disabled { opacity: .35; cursor: default; }
 .tindex-trigger {
   appearance: none;
   display: inline-flex;
@@ -647,8 +647,8 @@ body {
 }
 .tindex-trigger-icon { flex: 0 0 auto; }
 .tindex-trigger-short { display: none; }
-@media (hover: hover) { .tindex-trigger:hover { opacity: .7; } }
-.tindex-trigger:active { opacity: .5; }
+@media (hover: hover) { .tindex-trigger:not(:disabled):hover { opacity: .7; } }
+.tindex-trigger:not(:disabled):active { opacity: .5; }
 .tindex-trigger-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tindex-trigger svg:last-child { flex: 0 0 auto; color: var(--section); transition: transform .15s ease; }
 .tindex-trigger[aria-expanded="true"] svg:last-child { transform: rotate(180deg); }
@@ -717,11 +717,11 @@ body {
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
-/* A name wraps rather than truncates -- "Signs, Doors & Pla…" told you nothing. */
+/* A name wraps rather than truncates -- "Signs, Doors & Pla…" told me nothing. */
 .tindex-tname { min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
 @media (hover: hover) { .tindex-menu a:hover { background: var(--row-hover-overlay); } }
 @media (hover: none) { .tindex-menu a:active { background: var(--row-hover-overlay); } }
-/* The table you're viewing now -- the neutral selection pill with its name
+/* The table I'm viewing now -- the neutral selection pill with its name
    in the section tone, instantly locatable in the directory. */
 .tindex-menu a.current {
   background: var(--tab-select);
@@ -1338,7 +1338,7 @@ body.selftest-mode .selftest-hint { display: block; }
   border-bottom: 1px solid var(--row-line);
 }
 #vocabulary .table-section .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
-/* An open table's title row pins under the search bar while you scroll
+/* An open table's title row pins under the search bar while I scroll
    through it (sticky inside its own section, so the next table's title
    takes over), so you always know which table you're in and can close it
    from anywhere. --vocab-toolbar-h is the search bar's fixed height. */
@@ -2217,7 +2217,7 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 }
 .fc-manage-table-icon .si { display: block; width: 100%; height: 100%; }
 
-/* --- Customize: your own vocabulary ----------------------------- */
+/* --- Customize: my own vocabulary ----------------------------- */
 /* One large title per screen: "Your vocabulary" is a group header like
    every other section in the app (13px grey over its card), not a second
    bold title mid-page. */
@@ -2442,7 +2442,7 @@ body.tpick-open { overflow: hidden; }
 @media (hover: hover) { .cv-del-table:hover { color: var(--wrong-strong); } }
 @media (hover: none) { .cv-del-table:active { color: var(--wrong-strong); } }
 .cv-owned-list { list-style: none; margin: 0; padding: 0; }
-/* Your own table's Category, first thing inside it when opened. */
+/* My own table's Category, first thing inside it when opened. */
 .cv-table-cat { margin: 8px 0 6px; }
 /* A list row, as in Flashcards › Manage: the Japanese in ink with its romaji
    small and grey beside it (wrapping under it only when there's no room),
@@ -2455,7 +2455,7 @@ body.tpick-open { overflow: hidden; }
 }
 .cv-owned-row-empty { display: block; color: var(--faint); }
 .cv-owned-main { grid-area: main; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-width: 0; }
-/* Wrap between phrases, not inside one: your own sentences are often typed
+/* Wrap between phrases, not inside one: my own sentences are often typed
    with spaces between phrases (どこで ハンバーガーを 食べますか。), so break
    only at those (keep-all) -- never leaving か。 alone -- and anywhere only
    when a line has no space to break at. */
@@ -2624,7 +2624,6 @@ body.tpick-open { overflow: hidden; }
 .set-foot { margin: 6px 16px 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.4; }
 .set-foot[hidden] { display: none; }
 .set-head { display: flex; align-items: center; gap: 2px; }
-.set-foot-alone { margin-top: 0; }
 /* The save is silent, as on iOS -- this only speaks to a screen reader. */
 .set-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
 #fcPanelSettings .fc-auth-error { margin: 8px 16px 0; }
@@ -2887,7 +2886,7 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
 .jpword ruby { ruby-position: over; ruby-align: start; }
 .jpmain { line-height: 1.05; }
 
-/* Sentence tables (tableClass "vocab-sentences" -- a custom table of your
+/* Sentence tables (tableClass "vocab-sentences" -- a custom table of my
    own sentences, js/vocab/custom-vocab.js): a stacked row, not two cramped columns --
      私の家族は四人です。                 🔈
      There are four people in my family. ⊘
@@ -2899,6 +2898,12 @@ body.is-searching .table-section:not(:has(~ .table-section:not(.search-hidden):n
    No column headers -- there's nothing to sort, sentences keep their
    authored order. */
 .vocab.vocab-sentences thead { display: none; }
+/* Search results read as one list: the column headers head it once, over
+   the first result table, and every column is the same width in every
+   table, so they line up with all the rows under them. Ranked by match,
+   the results have no sort to change -- the headers are plain labels. */
+body.is-searching #vocabulary .table-section:not(.search-hidden):not(.user-hidden) ~ .table-section .vocab thead { display: none; }
+body.is-searching #vocabulary .vocab .sort-button { display: none; }
 .vocab.vocab-sentences, .vocab.vocab-sentences tbody { display: block; }
 .vocab.vocab-sentences tr { display: block; border-bottom: 1px solid var(--row-line); }
 .vocab.vocab-sentences tbody tr:last-child { border-bottom: 0; }
@@ -3853,13 +3858,13 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     position: static; width: auto; height: auto; margin: 0; padding: 0;
     overflow: visible; clip: auto; white-space: normal; border: 0;
   }
-  body.is-searching .screen-title { display: none; }
   /* iOS navigation: the large title's small copy, centred in a glass bar at
      the top once the large one has scrolled under it (interactions.js sets
      title-collapsed). Clear and empty until then -- at the top of a screen
      the large title is the title. It holds no controls, so taps go through.
-     While searching it steps aside like the account button: the search bar
-     has the top to itself. */
+     A search keeps the title, the account button and the bar's Tables as
+     they were: dropping them on the first letter typed moved the field
+     under the thumb. */
   .compact-title {
     position: fixed; top: 0; left: 0; right: 0; z-index: 46;
     height: var(--compact-h); padding: env(safe-area-inset-top, 0px) 64px 0;
@@ -3879,8 +3884,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
     body.title-collapsed .compact-title { background: var(--group-ground); }
   }
   @media (prefers-reduced-motion: reduce) { .compact-title { transition: none; } }
-  body.is-searching { --nav-h: 1px; }
-  body.is-searching .compact-title { display: none; }
   body .screen-title, body .page-flashcards h1, body .cz-intro h1, body .page-help h1, body .page-notes .notes-titlebar h1 {
     font-size: var(--fs-large-title); font-weight: 600; letter-spacing: -.01em; line-height: 1.15;
     margin: 4px 0 12px;
@@ -3912,7 +3915,6 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
   .masthead, .site-nav, .compact-title, .screen-title, .vocab-toolbar, .cat-heading, .table-index, .site-footer { display: none !important; }
   .app-frame { max-width: none; margin: 0; border: 0; border-radius: 0; }
   .page { padding: 0; }
-  .page-title { display: none; }
   /* Undo the on-screen short-section centering above -- a printed page has
      no viewport to center within, and it would just push content down the
      sheet with blank space above it. */
@@ -4223,7 +4225,7 @@ body.selftest-mode .vocab .row-info-btn { visibility: hidden; }
 /* Only while searching (body.is-searching) -- see js/vocab/render.js. */
 .vocab .fc-toggle-btn { display: none; }
 body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
-/* Row icons (speaker, ⓘ, eye, + / in your flashcards) are one empty <i>
+/* Row icons (speaker, ⓘ, eye, + / in my flashcards) are one empty <i>
    each, drawn by a CSS mask in currentColor -- not an inline <svg> per row:
    2,500 rows of SVG were half the page's elements. The button's colour,
    opacity and hover rules apply unchanged. */
@@ -4241,7 +4243,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .ks-reading .jp-speak-btn .ic { --ic-size: 18px; }
 @media (hover: hover) { .fc-toggle-btn:hover { color: var(--accent-dark) !important; } }
 @media (hover: none) { .fc-toggle-btn:active { color: var(--accent-dark) !important; } }
-/* Already in your flashcards: the Practice tab's cards glyph in Practice's
+/* Already in my flashcards: the Practice tab's cards glyph in Practice's
    own tone -- green is the known-word mark, so this stays clear of it.
    Quiet enough not to speckle the table, clear enough to pick out the rows
    you've added. */
@@ -4299,7 +4301,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-xw-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .fc-xw-actions-end { position: relative; margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .fc-xw-actions .fc-btn { min-height: 34px; padding: 7px 16px; }
-/* The clue you're on, spelled out above the grid -- on a phone the clue
+/* The clue I'm on, spelled out above the grid -- on a phone the clue
    list is a scroll away below it, and an arroword's in-cell clues are
    thumbnail-sized. */
 .fc-xw-current {
@@ -4707,7 +4709,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-tile:disabled { opacity: .3; cursor: default; }
 .fc-sb-tile:focus-visible { outline: 2px solid var(--section); outline-offset: 2px; }
 .fc-sb-placed { box-shadow: none; background: var(--paper); }
-/* What you built stays readable once the round locks: only the bank dims. */
+/* What I built stays readable once the round locks: only the bank dims. */
 .fc-sb-placed:disabled { opacity: 1; cursor: default; }
 .fc-sb-right .fc-sb-placed { color: var(--right-strong); }
 .fc-sb-answer { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; text-align: center; }
@@ -5134,7 +5136,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-week-col-today .fc-week-label, .fc-due-col-today .fc-due-label { color: var(--accent-strong); font-weight: 500; }
 
 .fc-cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.fc-cta-row-spaced { margin-top: 12px; margin-bottom: 0; }
 /* The dashboard's primary action, sitting right under the due / next-review
    summary -- a little room below it before the slower stat tiles begin. */
 .fc-cta-row-primary { margin-bottom: 18px; }
@@ -5183,7 +5184,6 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   color: var(--paper);
 } }
 .fc-note { color: var(--muted); font-size: var(--fs-small); }
-.fc-legend-term { color: var(--accent-dark); }
 
 /* Manage: reuses the overview list-row pattern. The filter is the shared
    segmented control (see above), one segment raised at a time. */
@@ -5337,7 +5337,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-manage-row + .fc-manage-row::before {
   content: ""; position: absolute; top: 0; left: 42px; right: 0; border-top: 1px solid var(--row-line);
 }
-/* Two lines, so you can see what you're adding: the Japanese with its romaji
+/* Two lines, so I can see what I'm adding: the Japanese with its romaji
    right after it (small, faint -- the reading, not a second answer), then the
    English under them. */
 .fc-manage-word {
@@ -5612,7 +5612,7 @@ mark.fc-diff-co {
 .fc-done-news .set-row { cursor: default; }
 .fc-session-done .fc-cta-row { justify-content: center; margin-top: 18px; }
 
-/* The prompt is the single thing you're being tested on, alone on the card --
+/* The prompt is the single thing I'm being tested on, alone on the card --
    real presence (up from the 19px the size pass lower in this file leaves the
    generic .fc-prompt at), and it stays on screen unchanged through the
    checked/rating state too (nothing echoes it again below) -- 26px, not
@@ -5733,7 +5733,7 @@ mark.fc-diff-co {
 .fc-auth { max-width: 380px; margin: 40px auto 0; }
 .fc-auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .fc-auth-field label { font-size: var(--fs-small); font-weight: 500; color: var(--muted); }
-/* iOS fields: a borderless fill, 44pt tall -- the same field as Your
+/* iOS fields: a borderless fill, 44pt tall -- the same field as My
    vocabulary's (.cv-field), no bordered rectangle. */
 .fc-auth-field input {
   height: 44px; border: 0; border-radius: 10px; padding: 0 14px;
@@ -5767,7 +5767,6 @@ mark.fc-diff-co {
 .fc-sync-chip:not(:has(.fc-sync-now)) { padding-right: 12px; }
 .fc-sync-chip-offline { background: var(--warn-soft); color: var(--warn-strong); }
 .fc-sync-chip-syncing { background: var(--accent-soft); color: var(--accent-dark); }
-.fc-sync-chip-synced { background: var(--right-soft); color: var(--right-strong); }
 .fc-sync-now {
   appearance: none; border: 0; background: color-mix(in srgb, currentColor 14%, transparent);
   color: inherit; font: 600 var(--fs-micro)/1 var(--font-ui);
@@ -5791,68 +5790,8 @@ mark.fc-diff-co {
 .fc-sync-detail[hidden] { display: none; }
 .fc-sync-detail li { padding: 1px 0; }
 
-/* Settings */
-.fc-settings-section { background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 16px; }
-/* --fs-card-heading, not --fs-subhead -- the number fields below
-   (.fc-settings-field input[type="number"]) are forced to 16px on a touch
-   screen; see --fs-card-heading's own comment in the type scale. */
-.fc-settings-section h3 { margin: 0 0 2px; font-size: var(--fs-card-heading); color: var(--ink); font-weight: 500; }
-/* Explanatory prose under a heading/control shouldn't compete with it -- a
-   true caption size + the tertiary (--faint) tone, not the --muted/--fs-small
-   pairing .fc-note uses elsewhere (dashboard status lines, auth notices),
-   which still want their normal secondary weight. */
-.fc-settings-section p.fc-note { margin: 0 0 14px; font-size: var(--fs-micro); color: var(--faint); }
-.fc-settings-save + .fc-backup-section { margin-top: 24px; }
-.fc-settings-field { padding: 10px 0; border-top: 1px solid var(--row-line); }
-.fc-settings-field:first-of-type { border-top: 0; }
-/* Label and control sit together, not flung to opposite edges of the row --
-   the label names the control right next to it, and the helper paragraph
-   (capped at 56ch) reads as continuing that same left-anchored line rather
-   than starting under a wide, mostly-empty gap. */
-.fc-settings-field-row { display: flex; align-items: center; gap: 12px; }
-.fc-settings-field label { color: var(--ink); font: 500 var(--fs-small)/1.3 var(--font-ui); }
-/* Same fill / ink as every other flashcards input (it had none, so it showed
-   as a white box in dark mode); color-scheme keeps the kept native spinner
-   legible against that fill on both themes. */
-.fc-settings-field input[type="number"] {
-  width: 80px; height: 30px; border: 1px solid var(--field-line); border-radius: 6px;
-  padding: 0 8px; font-size: var(--fs-small);
-  color: var(--ink); background: var(--field-fill);
-}
-:root[data-theme="dark"] .fc-settings-field input[type="number"] { color-scheme: dark; }
-/* Standalone Fuzz toggle -- a single on/off setting, not a picker list, so it
-   is an iOS switch rather than the checkmark-row treatment below.
-   appearance:none + a CSS track and thumb (no inline SVG, so it stays within
-   the style-src 'self' CSP); the global :focus-visible outline covers focus. */
-.fc-settings-field input[type="checkbox"] {
-  appearance: none;
-  flex: 0 0 auto;
-  width: 38px; height: 22px;
-  margin: 0;
-  border: 0;
-  border-radius: 11px;
-  background: var(--switch-off);
-  cursor: pointer;
-  position: relative;
-  transition: background .15s ease;
-}
-.fc-settings-field input[type="checkbox"]::after {
-  content: "";
-  position: absolute;
-  left: 2px; top: 2px;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--switch-thumb);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
-  transition: transform .15s ease;
-}
-.fc-settings-field input[type="checkbox"]:checked { background: var(--switch-on); }
-.fc-settings-field input[type="checkbox"]:checked::after { transform: translateX(16px); }
-.fc-settings-help { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-micro); line-height: 1.5; max-width: 56ch; }
-.fc-direction-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2px 16px; }
 /* One column on a phone, so the rows read as a list with inset hairlines. */
 @media (max-width: 560px) {
-  .fc-direction-checks { grid-template-columns: 1fr; gap: 0; }
   .fc-direction-check { border-radius: 0; padding: 11px 6px; }
   .fc-direction-check + .fc-direction-check { border-top: 1px solid var(--row-line); }
 }
@@ -5909,9 +5848,6 @@ mark.fc-diff-co {
 .fc-direction-check:has(input:focus-visible) {
   outline: 2px solid var(--section); outline-offset: 2px;
 }
-/* One Save for the whole tab, with an inline acknowledgement. */
-.fc-settings-save { align-items: center; }
-.fc-settings-saved { color: var(--accent-strong); font-size: var(--fs-small); font-weight: 500; }
 
 /* ---------------------------------------------------------------------
    Flashcards additions: Help tab, Manage status dots, and the Dashboard's
@@ -6176,7 +6112,7 @@ mark.fc-diff-co {
 .fc-leech-meta { flex-basis: 100%; color: var(--muted); font-size: var(--fs-micro); }
 .fc-leech-actions { display: flex; gap: 8px; flex: 0 0 auto; }
 
-/* Trends (Fitness): your last 90 days against your year. One 52px row per
+/* Trends (Fitness): my last 90 days against my year. One 52px row per
    measure -- a round tile with the arrow (the measure's hue going up or
    steady, grey going down, as in Fitness; the arrow's direction and the
    grey line say it in words too), the measure over "Up from 35 over the
@@ -6377,7 +6313,6 @@ mark.fc-diff-co {
   :root { --glass-bg: color-mix(in srgb, var(--paper) 62%, transparent); }
   :root[data-theme="dark"] { --glass-bg: color-mix(in srgb, var(--paper) 58%, transparent); }
 }
-.glass-surface,
 .options-sheet, .tindex-menu, .section-menu-list, .search-recents {
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
@@ -6793,10 +6728,6 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
   }
   .masthead .masthead-account svg { width: 18px; height: 18px; }
   .masthead .masthead-account .masthead-cap { display: none; }
-  /* The button sits beside the large title, which a search hides -- it
-     would then float over the search bar's Options. Like an iOS search,
-     the bar has the top to itself until it's cleared. */
-  body.is-searching .masthead { display: none; }
   .masthead .masthead-account .masthead-account-dot { top: 0; right: 0; border-color: var(--group-ground); }
   .page { padding-top: 16px; }
   /* Room for the button at the end of every large-title row. */

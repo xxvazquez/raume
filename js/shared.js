@@ -381,7 +381,7 @@ window.RaumeStudy.shared = (function () {
   // Placed through one constructed sheet, never a style attribute.
   var TIP_TARGETS = 'button, a[href], [role="button"], [role="tab"], [role="menuitem"], [role="img"][aria-label], [data-tip]';
   function iconLabel(el) {
-    // A surface you draw on (the writing pads) is no glyph: a finger
+    // A surface I draw on (the writing pads) is no glyph: a finger
     // resting to start a stroke mustn't pop its name over the writing.
     if (!el || el.disabled || el.hasAttribute("data-no-tip")) return "";
     var text = el.innerText != null ? el.innerText : el.textContent;
@@ -480,8 +480,8 @@ window.RaumeStudy.shared = (function () {
     if (btn) btn.addEventListener("mousedown", function (e) { e.preventDefault(); });
   }
 
-  // Tapping the tab you're already on scrolls back to the top, as in every
-  // iOS app; only once you're at the top does a second tap do the tab's
+  // Tapping the tab I'm already on scrolls back to the top, as in every
+  // iOS app; only once I'm at the top does a second tap do the tab's
   // own thing (re-open the section, back to the tab's first screen).
   // Returns true when it scrolled, so the caller stops there.
   function scrollToTopFirst() {

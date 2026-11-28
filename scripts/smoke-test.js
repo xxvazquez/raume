@@ -61,7 +61,7 @@ function check(label, cond) {
 // asserting on the DOM right after can read a stale render. A real macrotask
 // tick (not just a microtask) guarantees every pending render has landed.
 function flush() { return new Promise((resolve) => setTimeout(resolve, 0)); }
-// Playing a whole game waits out its "see what you got" pause after every
+// Playing a whole game waits out its "see what I got" pause after every
 // answer (about a second, 10-15 times a game) -- real for a learner, dead
 // time for a test that checks the game moves on, not how long it lingers.
 // Inside fastGamePauses(window, ...) those pauses fire almost at once.
@@ -1285,7 +1285,7 @@ async function main() {
   check("the trigger is a permanent button in the sticky search bar, not a row of its own above it",
     !!document.querySelector(".vocab-toolbar .vocab-bar #tableIndex .tindex-trigger") && document.querySelector(".tindex-trigger").hidden === false);
   check("the control is named 'Jump to a table' wherever that name is fixed", (() => {
-    // The visible label is dynamic (it names the table you're on); the tooltip
+    // The visible label is dynamic (it names the table I'm on); the tooltip
     // and the landmark aria-label are the fixed identifiers and must agree.
     return document.querySelector(".tindex-trigger").title === "Jump to a table"
       && document.getElementById("tableIndex").getAttribute("aria-label") === "Jump to a table";
@@ -1415,7 +1415,7 @@ async function main() {
     count("");
     return straight > 0 && curly === straight;
   })());
-  check("a phone's small title bar: aria-hidden, fixed, never takes a tap, and its height reserved under the sticky search bar (stepping aside while searching)", (() => {
+  check("a phone's small title bar: aria-hidden, fixed, never takes a tap, and its height reserved under the sticky search bar, searching or not", (() => {
     const bar = document.getElementById("compactTitle");
     const phone = allCssRules.filter(r => r.media && /max-width: 640px/.test(r.media.mediaText)).flatMap(r => [...r.cssRules]);
     const rule = sel => phone.find(r => r.selectorText === sel);
@@ -1424,7 +1424,7 @@ async function main() {
       && !!base && base.style.position === "fixed" && base.style.pointerEvents === "none"
       && !!rule("body.title-collapsed .compact-title")
       && !!root && /--compact-h/.test(root.style.getPropertyValue("--nav-h"))
-      && !!search && search.style.getPropertyValue("--nav-h").trim() === "1px"
+      && !search
       && allCssRules.some(r => r.selectorText === ".compact-title" && !r.media && r.style.display === "none");
   })());
   // Recents live in localStorage, which this harness can't always reach
@@ -1649,9 +1649,21 @@ async function main() {
   check("the match is highlighted", visibleRows[0] && !!visibleRows[0].querySelector("mark.search-hit"));
   check("the match (a Food table) is revealed even though Grammar was open", !document.querySelector('.table-section[data-table="1"]').classList.contains("page-hidden"));
   check("category sub-headings are hidden during a search", [...document.querySelectorAll("#vocabulary .cat-heading")].every(h => h.classList.contains("search-hidden")));
-  check("the table-index dropdown is hidden during a search", document.getElementById("tableIndex").classList.contains("search-hidden"));
+  check("Tables stays in the bar during a search, dimmed and disabled -- nothing in the bar moves", (() => {
+    const ti = document.getElementById("tableIndex"), trig = ti.querySelector(".tindex-trigger");
+    return !ti.classList.contains("search-hidden") && !!trig && trig.disabled
+      && allCssRules.some(r => r.selectorText === ".tindex-trigger:disabled" && r.style.opacity);
+  })());
+  check("the large title and the account button aren't hidden by a search", !allCssRules.some(r => r.selectorText
+    && /body\.is-searching (\.masthead|\.screen-title|\.compact-title)\b/.test(r.selectorText) && r.style.display === "none"));
+  check("results are one list: column headers once, over the first result table, with no sort control", (() => {
+    const hide = allCssRules.find(r => r.selectorText === "body.is-searching #vocabulary .table-section:not(.search-hidden):not(.user-hidden) ~ .table-section .vocab thead");
+    const sort = allCssRules.find(r => r.selectorText === "body.is-searching #vocabulary .vocab .sort-button");
+    return !!hide && hide.style.display === "none" && !!sort && sort.style.display === "none";
+  })());
   input.value = "";
   input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  check("clearing the search enables Tables again", !document.querySelector("#tableIndex .tindex-trigger").disabled);
   // A katakana query spans several .kr units, so its highlight lands on the
   // spans (not a split <mark>); the row must still surface and clear cleanly.
   input.value = "ケチャップ";
@@ -2417,7 +2429,7 @@ async function main() {
       const own = document.getElementById("table-" + newTable.id);
       const ownRow = own && own.querySelector("tbody tr");
       const raume = document.querySelector('#vocabulary .table-section:not([data-table^="ct-"]) tr[data-vocab-id="v0485"]');
-      // Your table has no match left, so it isn't even built for this search.
+      // My table has no match left, so it isn't even built for this search.
       const ok = !!own && (!ownRow || ownRow.classList.contains("search-hidden")) && own.classList.contains("search-hidden")
         && window.RaumeStudy.vocab.tableRows(newTable.id).some(r => r.romaji === "ue")
         && !!raume && !raume.classList.contains("search-hidden");
@@ -3188,7 +3200,7 @@ async function main() {
     }
   })();
   // Settings and Help open like a pushed screen from the title bar; Back
-  // returns to the segment you came from.
+  // returns to the segment I came from.
   check("the Flashcards sub-tabs are five segments -- Settings and Help moved to the title bar",
     [...document.querySelectorAll("#flashcardsPage .fc-tab")].map(b => b.textContent).join("|") === "Dashboard|Kana|Puzzles|Games|Library"
     && [...document.querySelectorAll("#flashcardsPage .fc-titlebar-btn")].map(b => b.textContent).join("|") === "Settings|Help");
@@ -4782,7 +4794,7 @@ async function main() {
     first.focus();
     key(pl.dir === "down" ? "ArrowDown" : "ArrowRight");
     const moved = document.activeElement !== first;
-    // Hint fills the square you're on even when it holds a wrong kana.
+    // Hint fills the square I'm on even when it holds a wrong kana.
     first.value = "ぬ" === pl.answer[0] ? "ね" : "ぬ";
     first.dispatchEvent(new window.Event("input", { bubbles: true }));
     first.focus();

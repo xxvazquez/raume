@@ -5,7 +5,7 @@
 // arroword, word search) or "Game stats" (Match, Listening), a segmented
 // control to pick the style, then iOS Settings groups off puzzle-runs.js --
 // Overview, the trend over the last 30 games, personal bests per setup
-// (tap one for its history), the words you miss most across every puzzle
+// (tap one for its history), the words I miss most across every puzzle
 // and game (with Practise these), and Reset. Practice only: nothing here
 // touches FSRS.
 window.RaumeStudy = window.RaumeStudy || {};
@@ -37,7 +37,7 @@ window.RaumeStudy.flashcards.puzzleStats = (function () {
   function kindOf(mode) { return runs().isGameMode(mode) ? "games" : "puzzles"; }
   function title() { return view.kind === "games" ? "Game stats" : "Puzzle stats"; }
 
-  // Opens on a style: the one asked for, else the one you played last.
+  // Opens on a style: the one asked for, else the one I played last.
   function open(kind, mode) {
     view.kind = kind;
     var modes = MODES[kind].map(function (m) { return m[0]; });

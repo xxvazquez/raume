@@ -1,6 +1,6 @@
 // Global pull-to-refresh (touch only): pulling down at the very top of any
 // page reloads it -- the same "everything's current now" a native app's
-// pull-to-refresh gives you, not a background ping that leaves the page as
+// pull-to-refresh gives me, not a background ping that leaves the page as
 // it was. A plain reload already gets both halves on its own: sw.js's
 // navigation handler is network-first, so it fetches whatever's actually
 // deployed right now (a new git push included) instead of a cached shell;

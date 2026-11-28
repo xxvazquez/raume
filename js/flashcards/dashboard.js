@@ -48,9 +48,9 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // or fail -- same stroke style as the two icons above.
   var VERDICT_ALMOST_ICON = '<svg width="11" height="11" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.5L16 15.5H2z"/><path d="M9 7.2v3.4"/><path d="M9 13.1v.1"/></svg>';
 
-  // The Dashboard is a snapshot -- if you sit on it while a learning step's
+  // The Dashboard is a snapshot -- if I sit on it while a learning step's
   // due time passes, "Study now" should light up on its own rather than
-  // staying dead until you navigate. A slow poll re-renders only when the
+  // staying dead until I navigate. A slow poll re-renders only when the
   // ready-to-study count actually changes, so it's a no-op almost always.
   var dashboardTimer = null;
   var lastReadyCount = -1;
@@ -143,13 +143,13 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // it never disagree.
     var ready = readyToStudy(now);
     var canStudy = ready.length + newInSession > 0;
-    // Order matches the way you actually use this page: read the due / next-review
+    // Order matches the way I actually use this page: read the due / next-review
     // summary, act on it (Study now), then the slower-moving context below --
     // stat tiles, charts, and finally the Words to Review table.
     // The dashboard's ~9 pieces used to each carry their own border+shadow,
     // reading as a stack of independent widgets. They're grouped into 3
     // cards instead -- "right now" (next review / today / Study now),
-    // "your stats" (the 4 tiles) and "your progress" (the charts) -- each
+    // "my stats" (the 4 tiles) and "my progress" (the charts) -- each
     // item keeping its own colour/accent but losing its individual box.
     var rings = todayRings(now, stats);
     var forecast = dueForecast(now);
@@ -262,7 +262,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     "Day streak": "orange", "Total cards": "blue", "Reviews": "green", "Retention": "indigo",
     "Games played": "purple", "Puzzles solved": "teal", "This week": "amber"
   };
-  // `below`: why a figure is flagged ("below your 90% target") -- a down
+  // `below`: why a figure is flagged ("below my 90% target") -- a down
   // arrow beside it and the words for VoiceOver, so the state never rests
   // on the coral alone.
   var BELOW_ARROW = '<svg class="fc-stat-below" viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3.5v11M4.5 10l4.5 4.5 4.5-4.5"/></svg>';
@@ -318,7 +318,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
   // --- Dashboard: Today's rings and the streak strip ---------------------
   // Apple Fitness, not a points game: three rings to close each day, outer
-  // to inner -- Review (the cards due today you've cleared, of those due
+  // to inner -- Review (the cards due today I've cleared, of those due
   // today), Learn (new cards introduced, of the day's allowance) and Play
   // (one finished puzzle or game). All counted from what the app already
   // keeps: today's tracker in scheduling.js (`fresh` / `reviewed` ids), the
@@ -395,11 +395,11 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // Study from: a pop-up row (the value and ⌃⌄ over the native picker) for
   // drilling one table -- a class's list before the lesson -- then back to
   // everything. Tables grouped by category, named as Customize names them.
-  // Only there when your flashcards span two tables or more.
+  // Only there when my flashcards span two tables or more.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
   // JLPT levels are choices too (their words from every table), grouped
   // first, above the tables: each level alone, then the easiest ones
-  // together -- N5 + N4, N5 + N4 + N3 -- the way you climb them.
+  // together -- N5 + N4, N5 + N4 + N3 -- the way I climb them.
   // Not on the JLPT lists (0) is a choice of its own, never part of a climb.
   function levelSets(levels) {
     var sets = levels.map(function (n) { return [n]; }), real = levels.filter(function (n) { return n; });
@@ -454,7 +454,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
 
   // The streak: the number with a flame, then this week as seven dots --
-  // filled for a day you studied, hollow for one you didn't, today half
+  // filled for a day I studied, hollow for one I didn't, today half
   // until its Review ring closes, the days ahead a grey track. One streak
   // for all study: a day counts for flashcard reviews, kana reviews or a
   // finished puzzle or game (data-ops recordStudyActivity). The week
@@ -515,7 +515,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
 
   // --- Dashboard: the N5 journey, awards and highlights -------------------
-  // Where you stand in Kana, Kanji and Words; the awards to collect (each
+  // Where I stand in Kana, Kanji and Words; the awards to collect (each
   // celebrated once: its id is noted the day it's earned); and one
   // Highlights row only when there's real news. All derived from what the
   // app already keeps, except the journey record (getCache().journey: every
@@ -667,7 +667,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     studyableCards().forEach(function (c) { inDeck[c.vocabId] = true; });
     var cols = [];
     // Every basic kana, hiragana and katakana -- not just the groups ticked on
-    // the Kana tab, so unticking one never shrinks what you've done (the same
+    // the Kana tab, so unticking one never shrinks what I've done (the same
     // count as the Hiragana / Katakana awards).
     var kanaAll = fc.kana && fc.kana.scriptProgress
       ? ["hiragana", "katakana"].map(fc.kana.scriptProgress).reduce(function (t, p) { return { started: t.started + p.started, total: t.total + p.total }; }, { started: 0, total: 0 })
@@ -1018,10 +1018,10 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
 
   // -----------------------------------------------------------------------
-  // Trends, as in Fitness: your last 90 days against your year (or all the
-  // time since you started, if that's shorter), one row per measure with an
+  // Trends, as in Fitness: my last 90 days against my year (or all the
+  // time since I started, if that's shorter), one row per measure with an
   // arrow -- reviews a day, recall (of cards already in review, how many
-  // you remembered), and study days a week. Real counts from the review
+  // I remembered), and study days a week. Real counts from the review
   // history only: nothing appears until there are 120 days of it to
   // compare, and recall waits for enough reviews to mean something.
   // Day totals are { date: [reviews, of cards in review, remembered] } --
@@ -1207,8 +1207,8 @@ window.RaumeStudy.flashcards.dashboard = (function () {
       '<h4 class="fc-pz-sub">Recent puzzles</h4><ul class="fc-pz-list">' + sum.recent.slice(0, 3).map(runRowHtml).join("") + "</ul>" +
       pzActionsHtml("puzzles") + "</div>";
   }
-  // Games: Match and Listening -- how many and when, how well you hear
-  // words, how fast you match them, and the last few.
+  // Games: Match and Listening -- how many and when, how well I hear
+  // words, how fast I match them, and the last few.
   function gamesCardHtml(now) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     if (!runs) return "";
@@ -1227,7 +1227,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
 
   // --- Dashboard: Kanji ---
-  // How many of the N5 kanji you've marked Known (js/vocab/kanji-known.js),
+  // How many of the N5 kanji I've marked Known (js/vocab/kanji-known.js),
   // as a count and a sage bar -- the tiles' own colour.
   function kanjiCardHtml() {
     var kj = kanjiCounts();
@@ -1240,7 +1240,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
   // --- Dashboard: JLPT levels ---
   // Each level's words in the reference and how many of them are Known --
-  // the same Known as the green row wash (marked by you, or every card of
+  // the same Known as the green row wash (marked by I, or every card of
   // the word remembered three weeks or more). A level the reference has no
   // words for doesn't show; the card waits for a first known word.
   // Words only, each counted once: sentences stay out, and a word that sits
@@ -1698,7 +1698,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // dropped onto it between cards knows what they're answering.
     input.setAttribute("aria-label", askLabelFor(dir, entry) + ": " + (prompt.text || entry.jpPlain));
     input.placeholder = answerPlaceholderFor(dir);
-    // Answer in kana: the field converts romaji as you type (renderReview).
+    // Answer in kana: the field converts romaji as I type (renderReview).
     var kanaField = vidx.isKanaTarget(dir);
     input.dataset.kana = kanaField ? "1" : "";
     if (kanaField) input.setAttribute("lang", "ja"); else input.removeAttribute("lang");
@@ -1735,7 +1735,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     }
 
     // Checked: the field collapses -- the "You wrote" line below now carries
-    // what you typed -- but stays in the DOM and focused, so a phone's
+    // what I typed -- but stays in the DOM and focused, so a phone's
     // on-screen keyboard doesn't drop between cards.
     input.classList.add("fc-answer-locked");
     if (form) form.classList.add("fc-answer-form-checked");
@@ -1745,7 +1745,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     // synonyms -- diffing characters against just one of them isn't fair).
     // Correct answers need none of that -- just the answer, once, restated.
     var cmp = session.correct ? null : answerCompareHtml(entry, dir, session.userAnswer);
-    // The ANSWER is the focus -- big, first thing the eye lands on. What you
+    // The ANSWER is the focus -- big, first thing the eye lands on. What I
     // typed is one quiet line below it, never struck through (hard to read):
     // the romaji diff marks the bad letters (cmp.marked), and otherwise the
     // verdict icon above already says it's wrong. A single letter off is "Almost";
@@ -1753,7 +1753,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
     var stageHtml = session.correct
       ? '<div class="fc-stage-expected">' + esc(expected) + "</div>"
       : '<div class="fc-stage-compare"><div class="fc-answer-row fc-answer-right"><span class="fc-answer-text">' + cmp.correctHtml + "</span></div>" +
-          // What you typed, set off in quotes (“You wrote test” read as one phrase);
+          // What I typed, set off in quotes (“You wrote test” read as one phrase);
           // a blank answer just says so.
           '<div class="fc-stage-typed">' + ((session.userAnswer || "").trim() ? "You wrote “" + cmp.youHtml + "”" : "No answer") + "</div>" +
           (cmp.note ? '<div class="fc-diff-note">' + cmp.note + "</div>" : "") + "</div>";
@@ -1844,7 +1844,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   // Rating immediately commits the review and advances to the next card --
   // no separate "next review" confirmation screen to click through. The
   // interval each rating will produce is already shown on its own button
-  // (from previewRatings, before you pick), so nothing is lost by not
+  // (from previewRatings, before I pick), so nothing is lost by not
   // pausing here -- and the whole session can run keyboard-only: type,
   // Enter to check, 1-4 to rate and move on, repeat.
   function rate(ratingKey) {

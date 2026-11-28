@@ -6,8 +6,8 @@ system across the whole app — a grey grouped ground, white borderless cards
 at the text, running to the card's trailing edge),
 capsule controls, and floating chrome (the sticky search band, sheets, ⋯ menus)
 in translucent glass. A small set of muted tones carries hierarchy — dusty
-lavender for what you act on, soft sage for progress, muted coral for attention,
-deep ink for anything you read. Calm, not washed out. This note records the
+lavender for what I act on, soft sage for progress, muted coral for attention,
+deep ink for anything I read. Calm, not washed out. This note records the
 rules so they stay consistent; it is the single source for the system, and the
 sections below cover each part of it.
 
@@ -81,7 +81,7 @@ and fixed glyphs keep their size, as iOS's do.
   A miss is never red-washed: the card flash is a 5% tint and the icon alone
   carries the coral/ochre. The answer field collapses out of the way once
   checked (opacity + height, never display/visibility, so it stays focused
-  and a phone's on-screen keyboard doesn't close) and what you typed becomes
+  and a phone's on-screen keyboard doesn't close) and what I typed becomes
   one quiet secondary line below the answer — never struck through, which
   was hard to read (a one-letter romaji slip gets the same letter-level
   marks as the answer above it). Japanese → English adds no kana line under
@@ -95,7 +95,7 @@ and fixed glyphs keep their size, as iOS's do.
   when the answer drops in), and a `<progress>` bar under the meta line shows
   the session. On a phone the chrome (meta line, padding, rating row, the
   "stage" panel) tightens but the prompt keeps its full size and air. Past
-  700px the reading text you rate from (the stage panel, rating labels) steps
+  700px the reading text I rate from (the stage panel, rating labels) steps
   up a size off the shared `--fs-*` scale — but not the prompt, which stays
   26px at every width; a roomier window doesn't need a bigger word, and it
   read as oversized when it scaled up too. That scale is tuned for the
@@ -132,7 +132,7 @@ the ground is *darker* than the card). All CSS custom properties in
 Functional roles, each one job — all muted:
 
 - **sage green** (`--right` / `-soft` / `-strong`) — right answer, and everywhere
-  "done / on schedule / progressing": the Library "in your deck" glyph, the
+  "done / on schedule / progressing": the Library "in my deck" glyph, the
   in-flashcards row toggle, the Reviews-completed stat rule, a cleared queue;
 - **coral** (`--warn` / `-soft` / `-strong`, the same values as `--wrong`) — one
   warm attention family: cards due, words missed, retention slipping, the sync
@@ -145,7 +145,10 @@ Functional roles, each one job — all muted:
   leaving the row's background for progress (known green / tricky amber);
 - the search-match highlight is a soft coral tint (`--hl` / `--hl-ink`) behind
   only the matched run — romaji included — never an underline or a whole-cell bar.
-  While searching on a phone the account button steps aside so the search bar has the top.
+  A search changes nothing above the results: the large title, the account
+  button and the bar's **Tables** stay where they were (Tables dimmed and
+  disabled -- results span every section), so the field never moves or
+  widens on the first letter typed.
 
 ### Per-section tone
 
@@ -165,7 +168,7 @@ The five hues sit well over 20° apart (the smoke test enforces it), light and
 dark, so moving between sections reads as a change of place.
 
 **The tint** (`--tint`, switched with the section): what iOS paints
-everything you can act on in — filled and secondary buttons, plain action
+everything I can act on in — filled and secondary buttons, plain action
 rows (Options › Expand all / Print, Settings › Back up, Library's Add and
 Add all), every text bar button (Tables, Options, ‹ Practice, Settings /
 Help, Done, Show all), checkmarks, a switch that's on, and the table rows'
@@ -178,7 +181,7 @@ to read as "tap me". Each clears 4.5:1 on the card and the grouped ground.
 ### Kanji grid and sheet
 
 A Kanji table is a row like any other table's -- same tile, title, ⋯, print
-and chevron, closed until you open it -- and opens as a grid of tiles inside
+and chevron, closed until I open it -- and opens as a grid of tiles inside
 its card, like a Photos grid, on the title row's 16px edge with 10px between
 tiles: each tile a `--group-ground` rounded square (14px), the character at 34px in
 ink, its on readings (katakana) on one line and its kun readings (hiragana)
@@ -205,7 +208,7 @@ reading, as Contacts lists phone numbers: a small grey *on’yomi* / *kun’yomi
 the 19px kana, okurigana lighter, its romaji grey beside it, and a tinted speaker
 trailing — the row plays on tap, the speaker is what says so), Writing (Strokes,
 Radical, with a grey line under the radical row when it's the kanji itself or
-only there for sorting), Example, and In your
+only there for sorting), Example, and In my
 tables: one *Words with 新 · 17* disclosure row that unfolds the whole list as
 compact rows — and one full-width filled capsule, **Add to flashcards**, that
 turns white (secondary) once added. Under the title sits a small white capsule,
@@ -269,7 +272,7 @@ and Help.
   `#bb7f74` clay, N5 Kanji `#8493a3` slate). The tile key is
   `data-tile` on the `.table-section` (and the Customize row), resolved in
   `render.js` `tableTile()`: the reader's pick, else the category's, else — a
-  table of your own — the hue of its icon's group (Food & drink green, Travel
+  table of my own — the hue of its icon's group (Food & drink green, Travel
   teal, Home & objects orange, Nature & weather blue, the rest slate). The
   picker's nine swatches add clay `#bb7f74` and slate `#8493a3`; the hues are
   `--tile-<key>` tokens, dark mode dims the fill to 80%, print drops the tile).
@@ -350,7 +353,7 @@ and Help.
   field is narrow), a 13px grey "Recent" header with a plain tinted **Clear**,
   then 44px rows — faint magnifier, the query, a 44pt **×** — on inset
   hairlines. A dropdown at every width: a bottom sheet would sit under the
-  phone keyboard. The glyph comes from a default per shipped table, or — for a table of your own —
+  phone keyboard. The glyph comes from a default per shipped table, or — for a table of my own —
   `icons.suggest(name)` (keyword aliases over the icon set, `js/vocab/icons.js`),
   (`DEFAULT_TABLE_ICONS` in `js/vocab/render.js`) unless the reader picked one.
   The category name is a quiet label above its card, and a button: tapping
@@ -372,7 +375,7 @@ and Help.
   "Tricky". Known wins. Options › Study ›
   **Highlight progress** turns both washes off together (`body.no-progress-hl`).
 - **Sentence tables** (`tableClass: "vocab-sentences"` — Everyday
-  Sentences, or a table of your own that is mostly sentences): stacked rows, not two columns —
+  Sentences, or a table of my own that is mostly sentences): stacked rows, not two columns —
   the Japanese full width at 17px / line-height 1.9 (at 16 a reading like わたし
   outran 私は and the readings rule pushed gaps into the sentence), the English under it at 14px
   in the meaning colour (`--ink-2`; secondary grey read too faint), alone on its
@@ -402,8 +405,8 @@ and Help.
   full-width hairline; the table's own row hairlines are inset 16px, like
   every other list separator. (Previously an open table broke out into its own card
   with a 20px title and a 16–24px gap above, so every tap made the page jump.)
-  While a table is open its title row pins under the search bar as you scroll
-  through it (sticky within its own table), so you always know where you are
+  While a table is open its title row pins under the search bar as I scroll
+  through it (sticky within its own table), so I always know where I am
   and can close it from anywhere — closing keeps that row where it was, and
   the next tables follow straight under it. A pinned title that opens its
   card keeps the card's round top corners (the ground is painted back into
@@ -418,9 +421,9 @@ and Help.
   over each white card of 44px rows (label left, value or control right); the
   card's explainer sits behind a small ⓘ after its header (`.set-info`, the
   Dashboard's retention ⓘ) and shows as a grey footnote only when tapped. Numbers are plain right-aligned values
-  you tap to edit (no grey box), on/off is a 51×31 iOS switch (`.set-switch`),
+  I tap to edit (no grey box), on/off is a 51×31 iOS switch (`.set-switch`),
   study directions are checkmark rows, Back up & restore is two tint-text action
-  rows. Changes save as you make them — a number when you leave its field, a
+  rows. Changes save as I make them — a number when I leave its field, a
   tick or switch at once — with no Save button; the last direction can't be
   unticked.
 - **Grammar notes** — a row's badges (い / な, 五段 / 一段 / 変格, particle
@@ -503,14 +506,15 @@ and Help.
     bar is one row — the search capsule, then one shared glass capsule
     (`.bar-capsule`, iOS 26's grouped bar buttons) holding **Tables** and
     **Options**, no rule between them — the **Jump to a table** button (`.tindex-trigger`: a
-    list glyph and "Tables", never renamed as you scroll — an open table's title
+    list glyph and "Tables", never renamed as I scroll — an open table's title
     already pins under the bar; its menu lifts the bar the same way,
     `.tindex-open`, and wraps a long table name rather than truncating it), then
     Options. Both buttons are permanent —
     nothing in the bar appears or disappears as tables open and close, and
     opening a table scroll-compensates so the tapped row stays put. A dot
     (`.options-dot`) on Options flags a non-default state. Rows that don't apply hide (Show polite
-    outside a verb table; the Expand / Print group while searching).
+    outside a verb table; the Expand / Print group while searching). A search
+    dims Tables (disabled) rather than removing it.
   - **Menus** (the table ⋯ menu): a glass popover (`--radius-menu`), items
     15px in 12px×14px rows separated by hairlines, label first and its glyph
     trailing. The ⋯ trigger itself is a bare glyph. A popover with no room
@@ -546,7 +550,7 @@ and Help.
   containing block for its `position: fixed` bottom sheets. Radii: cards 20px
   (`--radius-card`), menus 22px, sheet tops 30px, buttons / segmented controls
   / the search field are capsules.
-- **Swipe actions** (`shared.swipeRows`): a Library word or one of your own
+- **Swipe actions** (`shared.swipeRows`): a Library word or one of my own
   words slides left on a touch screen to show its action, an 88px block on
   the right edge in white text — red Delete, orange Pause, the section tone
   for Add / Restore — exactly the row's own button. Past halfway it stays
@@ -609,7 +613,7 @@ and Help.
   screen, and one 34px round white account button (`--control-lift`, the sync
   dot on its corner) sits at the title row's trailing edge (the masthead is
   pinned over it; titles leave 48px for it). It opens `#accountMenu`, a glass
-  menu of words: who you are + sync state, Account (reads "Sign in" for a guest
+  menu of words: who I am + sync state, Account (reads "Sign in" for a guest
   and opens the sign-in screen) / Practice settings (on Practice only — its
   title bar keeps no Settings / Help buttons on a phone) / Customize tables /
   Help (Practice's own Help while on Practice) — plain rows, no › chevrons
@@ -619,7 +623,7 @@ and Help.
   `--wrong-strong`, iOS's destructive position at the bottom. Wider windows
   open the same menu under the account glyph, minus the rows their own glyphs
   already are (`data-phone-only`: Customize tables, Help, Appearance). Because
-  the menu says who you are and holds Sign out, Practice has no "Signed in
+  the menu says who I am and holds Sign out, Practice has no "Signed in
   as…" line at any width. The button scrolls away with the title, as on iOS. **The rule app-wide: no
   unexplained icon-only control on touch.** The sticky bar's Tables / Options
   become text bar buttons on a phone; Library's buttons keep a one-word label
@@ -646,7 +650,7 @@ and Help.
   with the phone tab bar), `--section-strong` text, weight 500 — instead of a
   tinted block over a 3px underline; the rest are plain secondary text. Its
   label is the one place a section tone is spent on the chrome. The table
-  index marks the table you're in the same way. That is the layout from 641px up.
+  index marks the table I'm in the same way. That is the layout from 641px up.
 - **On a phone (≤640px) the same `#siteNav` becomes an iOS 26 tab bar**: a
   floating Liquid Glass capsule (`position: fixed`), 12px in from the sides (five tabs need the width; labels 10px) and
   just above the home indicator (`--tabbar-gap`: the bottom safe-area inset less
@@ -695,7 +699,10 @@ and Help.
   pinned table title stop under it and nothing moves when it appears; at
   the top it is clear and empty. It takes no taps, is `aria-hidden` (the
   `<h1>` stays the heading), fades in (just appears with reduced motion),
-  and steps aside while searching, when the search bar has the top.
+  and works the same while searching.
+- **Search results are one list**: the column headers show once, over the
+  first result table (every table's columns are the same widths), as plain
+  labels -- results are ranked by match, so there's no sort to change.
 - **Table column headers** (`.vocab th`) are the list's header row in the iOS
   voice: 13px sentence-case medium-weight secondary text ("Japanese",
   "English" — never a tracked ALL-CAPS micro-label) in a ~44px-tall row, closed by
@@ -728,7 +735,7 @@ and Help.
   small white rounded surface with the menu shadow and an arrow at its
   trigger; it closes on an outside tap, Escape, scroll, resize or hash change
   and is suppressed while the English is hidden or covered (a role like "what
-  you eat" would give the answer away). The legends show only while the table
+  I eat" would give the answer away). The legends show only while the table
   under the sticky bar has that kind of badge (`updateAdjLegend()`); a screen
   reader gets each row's type from its visually-hidden note instead.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a
@@ -847,7 +854,7 @@ and Help.
     table" tag on each row — the section is already titled "Words you've
     added", so it said nothing a reader didn't already know. Searching swaps
     to a flat always-open layout (`.cv-owned-group-flat`) instead, since
-    collapsing what you just searched for would defeat the point. Editing a
+    collapsing what I just searched for would defeat the point. Editing a
     word swaps its row for a single text field (same line format as adding
     one) with Save/Cancel, reusing the trash icon's stroke style for a
     matching pencil icon. Deleting a word asks first with the iOS action
@@ -864,7 +871,7 @@ and Help.
   sage tone, `--sec-notes`, a document glyph in the phone tab bar) is an inset-grouped list
   like Help: a month list header over a white card of 44px rows (indigo
   document tile — or the note's mark: a cherry blossom on clay for Sakura,
-  a wave on blue for WSJJ, a panda on slate for your own — the note's name,
+  a wave on blue for WSJJ, a panda on slate for my own — the note's name,
   its lesson date in grey, a chevron), newest
   first; **Add** is a tinted text bar button with a plus at the title's
   trailing edge, opening an iOS action sheet — "Where are they from?":
@@ -1010,8 +1017,8 @@ CSS). Fitness-quiet, never Duolingo: each motion under half a second and only
 in answer to a tap; colour only means right, wrong or the section. A tile
 scales to .97 while pressed. Once answered, the right tile's sage wash grows
 from its middle (a layer under the label, so nothing moves) and a ✓ draws
-itself in its top-right corner — with a springy .95 press if it was your pick,
-or a sage ring pulsing to 2px if you picked another; a wrong pick washes coral
+itself in its top-right corner — with a springy .95 press if it was my pick,
+or a sage ring pulsing to 2px if I picked another; a wrong pick washes coral
 with a firmer decaying shake (8px) and a drawn ✕. The other two step back to
 45%. The English under a word and the explanation line rise 4px into place;
 the counter's number rolls up. In the pick-one games a white capsule of five
@@ -1122,7 +1129,7 @@ be scannable at a glance:
   leads with a 12px `--faint` glyph (flame, cards, check, target), as iOS
   Health marks its summary cards — never coloured. The empty dashboard ("No
   flashcards yet") carries the one large muted glyph (44px). Colour stays
-  sparing: section tone only for what you can act on (tint, hover, current,
+  sparing: section tone only for what I can act on (tint, hover, current,
   focus); semantic green / red / amber only for state (a table's complete
   "N / N" count is `--right-strong`, not the section tone); titles are ink.
   Settings value rows carry no icon tiles — iOS puts tiles only on rows
@@ -1169,7 +1176,7 @@ primary (44px, full width) and Sign in stays the white secondary.
 **Puzzles** (and Games) open on their **setup screen** (above, Controls);
 **Start** puts the puzzle first, under one toolbar row, as an iOS game
 screen: **‹ and the name** leading (back to setup), and trailing
-only what you use mid-play — **Hint** (white, lightbulb + word; "Reveal a
+only what I use mid-play — **Hint** (white, lightbulb + word; "Reveal a
 letter" / "Reveal a word" as its title), filled **Check** (or the quiet
 count / clock) — then ⋯. A wide window adds a white **New puzzle** before
 Hint. The ⋯ menu: New puzzle (phone only), then How to play (a
@@ -1177,11 +1184,11 @@ small glass note under the toolbar), Reveal puzzle / Clear / Save as PDF,
 Stats. **Words from** is one multi-select checklist (Mail's mailbox picker,
 not a menu of one): Flashcards ticked on top, then every table by category
 as checkmark rows under a "Words from" title and a Done button — tick as
-many tables as you like; ticking one leaves Flashcards, ticking Flashcards
+many tables as I like; ticking one leaves Flashcards, ticking Flashcards
 clears the tables, unticking the last table goes back to Flashcards — in a
 glass popover under the setup screen's Words from row
 (`.fc-xw-sheet`, the Options pattern) — a bottom sheet over a scrim on a
-phone — staying open while you tick, closing on Done, an outside tap or
+phone — staying open while I tick, closing on Done, an outside tap or
 Escape. The title and search stay put; the list scrolls inside, about
 four tables tall with half the next peeking, so the popover never covers
 half the screen. No pills over the content: an earlier row of four setting pills
@@ -1264,20 +1271,20 @@ then, over a hairline, "Last 10 games" / "Your 2nd fastest of 14" and a
 full-width sparkline of those runs in the section tint (higher is faster) that
 draws itself, this run's dot popping last; then a filled Play again and white
 Stats. Listening's end card has two quiet stat cells (this game's accuracy,
-your average over all games). **Pause and breaks** use that same white card over
+my average over all games). **Pause and breaks** use that same white card over
 the board: *Paused* (a small grey title, the clock large, "Round 2 of 3",
 a filled Resume, then white Restart and End game), the board's tiles hidden
 rather than dimmed so a stopped clock isn't study time; between rounds,
 "Round 1 of 3 done" with that round's time large, its misses and the split
-against your best on one grey line, "Your fastest round yet" in sage when it
+against my best on one grey line, "Your fastest round yet" in sage when it
 is, and a filled Next round — the clock stopped. A game ended early shows its
 card with "Ended after 1 of 3 rounds" and a faint line saying what counts
-("The 5 pairs you finished count in your stats; a best time needs the whole
+("The 5 pairs I finished count in my stats; a best time needs the whole
 game.").
 
 **Speed sort** keeps Match's toolbar (the clock, ⏸) and Listening's card:
 "7 of 20" small over the word at 30px, then the buckets as a row of Match's
-white tiles, 64px tall, 2 or 3 across. The bucket you tap washes sage
+white tiles, 64px tall, 2 or 3 across. The bucket I tap washes sage
 (right) or coral with the shake (wrong), and on a miss the right one takes a
 2px sage ring for a moment before the next word. *Sort by* is a ⋯ value row
 offered only for this game, listing only the sorts the words can fill. Its
@@ -1293,7 +1300,7 @@ a quiet "Starts with", the kana at 44px in `--section-strong`, the last
 word and its English as one grey line, and a bare ⓘ in its corner opening
 the rules as a glass note. Then the field: a 44px white capsule like the
 search field (15px text, a section ring on focus) with a 36px filled ↑
-circle inside its trailing end; romaji turns into kana in it as you type.
+circle inside its trailing end; romaji turns into kana in it as I type.
 One line under it (kept tall enough not to jump) says what went wrong in
 coral, with Speed sort's shake on the field, or shows a hint. Under the finish card, a "Your chain"
 list header and a white inset-grouped card in Settings' tiled-row style:
@@ -1321,7 +1328,7 @@ row width) — never one tile left alone on a row (2026-09-28). Its
 Stats hue is green.
 
 **Sentences** keeps Kana tiles' toolbar and card: the English at 19px, then
-the line you build — a `--group-ground` well (14px corners, at least 60px
+the line I build — a `--group-ground` well (14px corners, at least 60px
 tall) that wraps like text, "Tap the pieces in order" in grey while empty;
 right washes it sage, wrong coral with the shake. The bank below is Kana
 tiles' white capsules sized to their words (44px tall, 12px corners, the
@@ -1331,12 +1338,12 @@ order stays readable. The answer — "The sentence" in grey after a miss, the
 sentence at 19px, its romaji, ▶ — rises in under the line; a right answer
 shows only the romaji and ▶, since the line already reads as the sentence.
 Their room is held, unseen, from the start in every exercise, so the
-choices under the card never drop when you answer (a miss in Build or
+choices under the card never drop when I answer (a miss in Build or
 Particles still grows by the sentence it adds). Its Stats hue is
 blue (puzzles' blue never shares the Game stats screen). Its **Particles**
 exercise sets the sentence at 22px with each particle a **circle** to fill —
 how a Japanese worksheet marks one (2026-11-26), never [ ＿ ] — a kana
-wide: an outline while empty (the next one a thicker tint ring), your choice
+wide: an outline while empty (the next one a thicker tint ring), my choice
 inside in particle blue once filled; marked, it fills sage or coral, a wrong
 one struck through with the right particle bold and small under it. Six
 choices under the card are the bank's capsules, particle blue, always in
@@ -1440,7 +1447,7 @@ Match game so far is cleared…") and a red **Reset Stats**, then **Cancel**
 as its own solid white group (focused, so Return backs out); a centred
 320px alert of the same parts on a wide window. It's the one confirmation
 in the app (`RaumeStudy.shared.confirmSheet`, optional semibold title over
-the message) — Restore a guest backup (**Restore**) and deleting one of your own
+the message) — Restore a guest backup (**Restore**) and deleting one of my own
 tables (**Delete Table**) use it too; never the browser's `window.confirm`.
 With `safe: true`, for the rare sheet whose action destroys nothing (an
 account backup's **Save…**, its merging **Restore**), the button is the
@@ -1463,7 +1470,7 @@ its date and value replace the best, as Health shows a selected bar. A
 finished game's card puts a white Stats beside Play again.
 
 The sub-tabs are five segments (Dashboard / Kana / Puzzles / Games / Library —
-what you do first, your collection last; Library is the Music / Books tab's
+what I do first, my collection last; Library is the Music / Books tab's
 name for it, "Manage" read as a settings verb — 2026-09-29) —
 the most an iOS segmented control holds and still reads at a glance, so
 nothing more joins without restructuring. Settings and Help
@@ -1472,7 +1479,7 @@ bar's right-hand items) and open as pushed screens: a "‹ Practice" back
 button above their own large title, no segmented control. A pushed screen
 (Settings, Help, Stats, Awards) slides in from the right over the screen it
 came from, which eases a third left and dims; Back runs it in reverse and
-puts you back where you were scrolled; as a session ends the review card
+puts me back where I was scrolled; as a session ends the review card
 turns into the wrap-up. A View Transition (`bootstrap.js` `render`,
 `html[data-vt]`), the tab bar and top bar held still as their own layers
 (named only while it runs — a named element is a backdrop root and would
@@ -1493,7 +1500,7 @@ Not just an inverted palette — a few weights are tuned separately where the
 light logic doesn't carry over:
 
 - text fields get their own fill (`--field-fill`) and border (`--field-line`) —
-  a well *below* the page ground, so an input reads as something you type into
+  a well *below* the page ground, so an input reads as something I type into
   rather than a raised panel;
 - the grouped ground is *darker* than the cards (`--page-bg` under `--paper`), so
   cards read as raised without borders or shadows, while table row rules gain a

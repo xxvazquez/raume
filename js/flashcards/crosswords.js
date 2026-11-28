@@ -4,7 +4,7 @@
 //
 // A printable crossword / arroword generator, built from either of two word
 // sources: whatever's currently in flashcards (every added word, minus
-// individually paused words and whole paused tables -- the same "in your
+// individually paused words and whole paused tables -- the same "in my
 // deck" set vocabState() in views.js reads), or a single vocabulary table
 // picked straight from the reference data, flashcards status aside -- for a
 // themed puzzle ("Numbers", "Drinks"...) without first adding the table to
@@ -155,7 +155,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       // speak: the exact reading the speaker buttons play (it keys the
       // prerendered clip), 〜 and all.
       // romajiShown: the romaji as the tables print it (ōi, not the typeable
-      // grid spelling ooi) -- for the games you tap rather than type.
+      // grid spelling ooi) -- for the games I tap rather than type.
       var shownRomaji = romaji ? String(entry.romajiDisplay).split(" / ")[0].replace(/^~/, "").trim() : "";
       pool.push({ id: entry.vocabId, answer: reading, clue: clue, romaji: romaji || null, romajiShown: shownRomaji || null, tableId: entry.tableId, speak: entry.jpSpoken || entry.jpReading });
     });
@@ -165,7 +165,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // its whole table paused) -- read straight off the cards, same "active"
   // flag scheduling.js's activeCards() checks.
   // Each word also gets a `weight` from its weakest active card, so games
-  // lean toward what you're still learning: new / learning / relearning 3,
+  // lean toward what I'm still learning: new / learning / relearning 3,
   // review under three weeks' stability 2, mastered 1 -- plus 1 for a
   // Tricky word. Mastered words still come up, about one pick in six.
   var MASTERED_DAYS = 21;
@@ -454,7 +454,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Word search -- the third style. Same word pool and scripts, but the
   // answers hide in a square block of letters instead of crossing on an
   // open grid. An easy word search teaches nothing, so every choice here
-  // leans hard: the list gives only the English clue (you have to know the
+  // leans hard: the list gives only the English clue (I have to know the
   // reading to look for it), words run in all eight directions -- backwards
   // and diagonally too -- each word prefers the spot where it shares the
   // most letters with words already down (a dense tangle, not ten tidy
@@ -742,7 +742,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // phone without scrolling; each round lays the readings out in one column
   // and the English in the other, each shuffled on its own. Tap a tile and
   // then its partner, from either side: a right pair clears (its tiles keep
-  // their place, so nothing under your finger moves), a wrong one costs a
+  // their place, so nothing under my finger moves), a wrong one costs a
   // second. The clock starts on the first tap, not on render. The best time
   // per word set (source + script + pair count) comes from the game log --
   // practice only, never an FSRS review.
@@ -794,7 +794,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th");
   }
   // Under a finished Listening or Kana tiles game: this game's accuracy
-  // beside your average over every game of that style so far.
+  // beside my average over every game of that style so far.
   function accuracyStatsHtml(mode, right, n, run) {
     var runs = window.RaumeStudy.flashcards.puzzleRuns;
     var all = runs ? runs.live(mode) : [];
@@ -816,7 +816,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     return { key: tier ? tier[0] : "none", name: tier ? tier[1] + " pace" : "",
       next: up ? up[1] + " is under " + up[2].toFixed(1) + "s a pair" : tier ? "The fastest tier" : "Bronze is under " + PACE_TIERS[2][2].toFixed(1) + "s a pair" };
   }
-  // The finish card's middle: your pace per pair inside a ring that draws
+  // The finish card's middle: my pace per pair inside a ring that draws
   // closed in the tier's hue, the tier named under it.
   function paceRingHtml(perPair) {
     var t = paceTier(perPair);
@@ -866,7 +866,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Answer feel, shared by the pick-one games (Listening, Odd one out,
   // Speed sort): the right tile washes sage from the middle out and
   // a ✓ draws itself in its corner -- with a small springy press if it was
-  // your pick, or a sage ring if you picked another; a wrong pick washes
+  // my pick, or a sage ring if I picked another; a wrong pick washes
   // coral with a shake and a ✕. Colours and marks come from the existing
   // fc-mt-right / fc-mt-wrong classes; this adds only the motion.
   var MARK_RIGHT = '<svg class="fc-fb-mark" viewBox="0 0 18 18" aria-hidden="true"><path pathLength="100" d="M4 9.5l3.2 3L14 5.5"/></svg>';
@@ -944,7 +944,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   function stopMatchTimer() { if (matchTimer) { clearInterval(matchTimer); matchTimer = null; } }
 
   // The split chip: at each round's end, how far ahead of (−) or behind (+)
-  // your best run on these same words you were at that point -- a speedrun
+  // my best run on these same words I was at that point -- a speedrun
   // split. Only once a best with splits exists; the clock itself never
   // jumps or grows.
   function bestSplits(key, rounds) {
@@ -994,7 +994,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }).observe(document.body, { attributes: true, attributeFilter: ["data-active-page"] });
 
   function wireMatch(boardEl, clockEl, p, romajiMode) {
-    // The clock only runs while you play: `acc` holds the time banked
+    // The clock only runs while I play: `acc` holds the time banked
     // before the last stop, `runAt` when it last started (null = stopped
     // -- before the first tap, during a round break, paused, finished).
     var round, acc, runAt, started, penalty, misses, roundMisses, selected, left, game = 0, splits, pb, missedIds, phase;
@@ -1050,7 +1050,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         "</div>";
     }
     // Between rounds: a breather, Duolingo-style, the clock stopped -- how
-    // that round went and where you stand against your best so far.
+    // that round went and where I stand against my best so far.
     function roundBreak() {
       setPhase("break");
       var at = splits[round], prev = round ? splits[round - 1] : 0;
@@ -1083,7 +1083,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped before the last round: the rounds you finished count -- their
+    // Stopped before the last round: the rounds I finished count -- their
     // pairs, time, misses, their place in Fastest round -- logged as ended,
     // so they never set a best time (that takes the whole game).
     function endEarly() {
@@ -1167,8 +1167,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         penalty += MATCH_PENALTY_MS;
         misses++;
         roundMisses++;
-        // Both words of a wrong pair count as missed: the reading you
-        // didn't know, and the meaning you took it for.
+        // Both words of a wrong pair count as missed: the reading I
+        // didn't know, and the meaning I took it for.
         pair.forEach(function (t) { missedIds[p.rounds[round][+t.dataset.i].id] = true; });
         tick();
         pair.forEach(function (t) { t.classList.remove("fc-mt-wrong"); void t.offsetWidth; t.classList.add("fc-mt-wrong"); });
@@ -1195,8 +1195,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   // -----------------------------------------------------------------------
   // Listening -- the app says a word (RaumeStudy.shared.speech: the same
-  // prerendered clip or Japanese voice the speaker buttons use) and you pick
-  // its English from four. Nothing written shows until you answer; then the
+  // prerendered clip or Japanese voice the speaker buttons use) and I pick
+  // its English from four. Nothing written shows until I answer; then the
   // word appears as written, with its kana and romaji, so the sound gets
   // tied to the word. A right answer moves on by itself; a wrong one waits
   // for Next. Practice only, like Match -- never an FSRS review.
@@ -1307,7 +1307,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the words you answered count (logged as ended, so
+    // Stopped part-way: the words I answered count (logged as ended, so
     // never a best -- see Match's).
     function endEarly() {
       done = true;
@@ -1384,7 +1384,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // The last slot filled checks it: right moves on by itself; wrong shakes,
   // shows the spelling, waits for Next and brings the word back once at the
   // end of the round. Show answer (stuck, or never met the word) counts as
-  // a miss the same way, so you see it now and spell it again later. Small ゃゅょっ and ー are tiles of their own. Only
+  // a miss the same way, so I see it now and spell it again later. Small ゃゅょっ and ー are tiles of their own. Only
   // words really written in the script (as the grids' Hiragana/Katakana).
   // Practice only -- never an FSRS review.
   // -----------------------------------------------------------------------
@@ -1561,7 +1561,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the words you finished count (see Listening's).
+    // Stopped part-way: the words I finished count (see Listening's).
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -1597,7 +1597,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   // -----------------------------------------------------------------------
   // Sentences -- build a sentence. The English on top; under it the line
-  // you build, and a bank of the sentence's own pieces (row.tiles in
+  // I build, and a bank of the sentence's own pieces (row.tiles in
   // data/vocabulary.js), shuffled, each with its furigana and its particles
   // blue. Tap pieces in order; tap a placed one to send it back. The last
   // piece placed checks the order: right or wrong, the sentence then shows
@@ -1619,7 +1619,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // -- whichever set the sentence's own form is in. Every choice is real
   // Japanese; only the English (tense, "not", "want") tells them apart.
   // The Meaning exercise turns it round: the Japanese (▶ to hear it, its
-  // romaji kept back until you answer) and three English sentences stacked
+  // romaji kept back until I answer) and three English sentences stacked
   // full width. The two wrong ones are the sentences that look most like
   // it -- the same words, the same pattern, a question among questions, a
   // negative among negatives -- so the Japanese has to be read; never one
@@ -1852,7 +1852,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         '<span class="jpword">' + V.jpSegmentsHtml(cur.word.segs[i]) + "</span></button>";
     }
     // The sentence with its blanks: each a circle, as a Japanese worksheet
-    // marks a particle to fill in, holding your choice; the one to fill next
+    // marks a particle to fill in, holding my choice; the one to fill next
     // is outlined in the tint. Once marked, a wrong one shows the right
     // particle under it.
     function blankLineHtml(cur, marked) {
@@ -2019,7 +2019,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         (canSpeak() && !meaning ? '<button type="button" class="fc-kt-say fc-sb-say" aria-label="Hear it">' + SPEAKER_ICON + "</button>" : "");
     }
     // Their room is held, unseen, from the start (css/site.css), so the
-    // choices under the card never drop when you answer.
+    // choices under the card never drop when I answer.
     function answerSlotHtml(cur) {
       return '<p class="fc-sb-answer" aria-live="polite" hidden>' + romajiSayHtml(cur).replace("<button ", '<button tabindex="-1" ') + "</p>";
     }
@@ -2142,7 +2142,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the sentences you finished count.
+    // Stopped part-way: the sentences I finished count.
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -2317,7 +2317,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the sets you answered count (see Listening's).
+    // Stopped part-way: the sets I answered count (see Listening's).
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -2519,7 +2519,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the words you sorted count (see Listening's).
+    // Stopped part-way: the words I sorted count (see Listening's).
     function endEarly() {
       setPhase("done");
       halt();
@@ -2553,8 +2553,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
 
   // -----------------------------------------------------------------------
   // Word chain (しりとり) -- each word starts with the kana the one before
-  // it ends on, and you type it: recall, not recognition. Romaji turns into
-  // kana as you go (kanaRomaji.toKana, a Japanese keyboard's romaji input);
+  // it ends on, and I type it: recall, not recognition. Romaji turns into
+  // kana as I go (kanaRomaji.toKana, a Japanese keyboard's romaji input);
   // kana or kanji from a real Japanese keyboard work too. Any word in the
   // whole vocabulary counts, matched on its reading (katakana folded to
   // hiragana, ー read as the vowel it lengthens, so koohii is コーヒー) --
@@ -2868,7 +2868,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
         end: endEarly
       });
     }
-    // Stopped part-way: the links you made count (see Listening's).
+    // Stopped part-way: the links I made count (see Listening's).
     function endEarly() {
       done = true;
       document.getElementById("fcMtPause").disabled = true;
@@ -3022,7 +3022,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (roomy) state.tables = [roomy.id];
     }
     var pool = wordPool();
-    // Listening: you hear the word, so the script doesn't narrow anything --
+    // Listening: I hear the word, so the script doesn't narrow anything --
     // every word in the pool, deduped on the English (a question can't have
     // two right answers).
     if (state.mode === "listening") {
@@ -3076,7 +3076,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (state.mode === "wordsearch" && state.script === "romaji") candidates = candidates.filter(function (w) { return w.answer.length >= 3; });
     // Likewise a one-kanji word (水) is a single square to spot.
     if (state.mode === "wordsearch" && state.script === "native") candidates = candidates.filter(function (w) { return w.answer.length >= 2; });
-    // Match shows clues side by side, and Kana tiles asks you to spell the
+    // Match shows clues side by side, and Kana tiles asks me to spell the
     // English: two words that share a meaning would be a coin toss, so
     // keep only the first of them.
     if (state.mode === "match" || state.mode === "kanatiles") {
@@ -3134,8 +3134,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // A native <select> laid invisibly over a control, so a tap opens the
   // platform's own picker (the wheel/menu on iOS). 16px so iOS never zooms.
   var UPDOWN_ICON = '<svg class="fc-xw-updown" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 7 9 3.5 12.5 7M5.5 11 9 14.5 12.5 11"/></svg>';
-  // The toolbar's title: the puzzle or game you're on, as an iOS title
-  // menu ("Word search ⌄") -- the one setting you switch often.
+  // The toolbar's title: the puzzle or game I'm on, as an iOS title
+  // menu ("Word search ⌄") -- the one setting I switch often.
   // In play it leads back to the setup screen, ‹ and the name, as an iOS
   // back button -- a different game or other words start from there.
   var BACK_ICON = '<svg class="fc-xw-title-back" viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 3.5 6 9l5.5 5.5"/></svg>';
@@ -3165,8 +3165,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
     var cats = Object.keys(byCategory).sort(function (a, b) { return a.localeCompare(b); });
     var selected = state.source === "table" ? state.tables.map(String) : [];
-    // Where the words come from: your flashcards (or, after Stats' Practise
-    // these, your tricky words) on top, then any number of tables.
+    // Where the words come from: my flashcards (or, after Stats' Practise
+    // these, my tricky words) on top, then any number of tables.
     var top = '<div class="fc-xw-table-cat">' +
       '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-source="flashcards"' + (state.source === "flashcards" ? " checked" : "") + ">Flashcards</label>" +
       (state.source === "tricky" ? '<label class="fc-direction-check fc-xw-table-check"><input type="checkbox" data-source="tricky" checked>Tricky words</label>' : "") +
@@ -3185,7 +3185,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // Words from: a row that opens the checklist -- Flashcards, or any
   // number of tables ticked at once (Mail's mailbox picker, not a menu of
   // one); the row names what's picked. A search field over the list
-  // narrows 30-odd tables to the one you're after.
+  // narrows 30-odd tables to the one I'm after.
   var ROW_CHEVRON = '<svg class="fc-xw-row-chev" viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5 11.5 9 7 13.5"/></svg>';
   function sourceLabel() {
     return state.source === "table" ? tablesSummary() : state.source === "tricky" ? "Tricky words" : "Flashcards";
@@ -3428,8 +3428,8 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   // already solves elsewhere in Flashcards -- see js/flashcards/kana.js).
   //
   // Typing runs along one direction at a time, like any crossword app: the
-  // direction of the clue you tapped, of the only word through a cell, or --
-  // where an across and a down word cross -- whichever you were already
+  // direction of the clue I tapped, of the only word through a cell, or --
+  // where an across and a down word cross -- whichever I was already
   // going; tapping that crossing cell again flips it.
   //
   // On a hardware keyboard a kana grid takes romaji, the way a Japanese
@@ -3528,7 +3528,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       if (onSolved && [].every.call(gridEl.querySelectorAll(".fc-xw-cell-input"), rightAt)) onSolved();
     }
     function kanaFor(s) { return script === "katakana" ? toKatakana(s) : toHiragana(s); }
-    // Feed romaji into the square you're on: each finished kana fills a
+    // Feed romaji into the square I'm on: each finished kana fills a
     // square and moves along the word; what's left (k, ky, n) waits.
     function feedRomaji(input, buf) {
       var out = kr.toKana(buf, false), kana = out.replace(/[a-z'\-]+$/, ""), rest = out.slice(kana.length);
@@ -3571,7 +3571,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     gridEl.addEventListener("focusout", function () {
       window.setTimeout(function () { if (!gridEl.contains(document.activeElement)) clearWordHighlight(); }, 0);
     });
-    // A second tap on the cell you're already in flips direction, when an
+    // A second tap on the cell I'm already in flips direction, when an
     // across and a down word both run through it.
     gridEl.addEventListener("pointerdown", function (e) {
       var input = e.target.closest(".fc-xw-cell-input");
@@ -3616,7 +3616,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     });
 
     // The keyboard coming up (or the window resizing) can leave the square
-    // you're on, or its clue, under it: once it settles, bring them back.
+    // I'm on, or its clue, under it: once it settles, bring them back.
     var vvTimer = null;
     function onViewport() {
       if (!gridEl.isConnected) { window.visualViewport.removeEventListener("resize", onViewport); return; }
@@ -3707,7 +3707,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       var move = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] }[e.key];
       if (move) {
         e.preventDefault();
-        // An arrow across the way you're typing turns first, where a word
+        // An arrow across the way I'm typing turns first, where a word
         // runs that way, as crossword apps do; the next press moves.
         var want = move[0] ? "down" : "across";
         if (want !== dir && placementsAt(input.dataset.r + "," + input.dataset.c).some(function (pl) { return pl.dir === want; })) {
@@ -3761,7 +3761,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
       cell.classList.add("fc-xw-cell-correct");
     });
   }
-  // One cell at a time, not the whole solution: the square you're on unless
+  // One cell at a time, not the whole solution: the square I'm on unless
   // it's already right (empty or wrong alike), else the next not-right
   // square of that word, else the first in reading order.
   function hintGrid(gridEl, p, nav) {
@@ -3789,12 +3789,12 @@ window.RaumeStudy.flashcards.crosswords = (function () {
   }
 
   // The toolbar: one row, as an iOS game screen has it. Leading, the title
-  // menu (the puzzle or game); trailing, what you use mid-play -- Hint,
+  // menu (the puzzle or game); trailing, what I use mid-play -- Hint,
   // Check (or the count / clock) -- and ⋯. Everything else is in ⋯: New
   // puzzle (its own button too on a wide window), the settings as a group
   // of value rows, How to play, Reveal / Clear / Save as PDF, and Stats.
   var NEW_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v10M4 9h10"/></svg>';
-  // A page with a folded corner and a down arrow: a file you keep.
+  // A page with a folded corner and a down arrow: a file I keep.
   var PDF_ICON = '<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2H5a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 5 16h8a1.5 1.5 0 0 0 1.5-1.5V6Z"/><path d="M10.5 2v4h4"/><path d="M9 8.5v4.5M7 11l2 2 2-2"/></svg>';
   var MENU_ACTIONS = [["howto", "How to play", INFO_ICON], ["reveal", "Reveal puzzle", EYE_ICON], ["reset", "Clear answers", RESET_ICON], ["print", "Save as PDF", PDF_ICON], ["stats", "Stats", STATS_ICON]];
   // A word search has no letters to type, so its Hint reveals a whole word.
@@ -3926,7 +3926,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     if (scrim && !state.tablesOpen) scrim.hidden = true;
     if (row) { row.setAttribute("aria-expanded", "false"); if (refocus) row.focus({ preventScroll: true }); }
   }
-  // Search narrows the checklist as you type: a table shows when its name
+  // Search narrows the checklist as I type: a table shows when its name
   // (or its category's) has the words; a category with none left hides.
   function filterTables(panel, query) {
     tablesQuery = query;
@@ -4098,7 +4098,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // Ticking a table switches to tables and adds it; Flashcards (or
     // Tricky words) and tables don't mix -- ticking Flashcards clears the
     // tables, unticking the last table goes back to Flashcards. The game
-    // rebuilds as you tick; the sheet stays open until Done.
+    // rebuilds as I tick; the sheet stays open until Done.
     panel.querySelectorAll("#fcXwTablePicker input[type=checkbox]").forEach(function (cb) {
       cb.addEventListener("change", function () {
         if (cb.dataset.source) {
@@ -4317,7 +4317,7 @@ window.RaumeStudy.flashcards.crosswords = (function () {
     // puzzle: the time from when it appeared and how many letters / words
     // were revealed. Revealing the whole puzzle means it wasn't solved.
     var solve = { start: Date.now(), help: 0, done: false, missed: {} };
-    // A word you needed a letter of, or got a square of wrong, is missed.
+    // A word I needed a letter of, or got a square of wrong, is missed.
     function missCells(keys) {
       p.placements.forEach(function (pl) {
         var cells = cellsForPlacement(pl);
