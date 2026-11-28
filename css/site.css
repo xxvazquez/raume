@@ -60,7 +60,7 @@
   --line-strong: #c8cfd8;    /* borders, header + nav underlines */
 
   /* Primary accent -- the dusty lavender #82799B. The colour of everything
-     you act on: active tabs, progress fills, focus, key interactive edges;
+     I act on: active tabs, progress fills, focus, key interactive edges;
      also the generic accent where nothing section-specific applies. Primary
      buttons use `-strong` so white text on the fill clears AA. */
   --accent: #82799b;
@@ -111,7 +111,7 @@
   --row-press-overlay: color-mix(in srgb, var(--ink) 13%, transparent);
 
   /* Irregular rows: their text in red, no wash -- the row's background is
-     left free for your progress (known green / tricky amber), so both read
+     left free for my progress (known green / tricky amber), so both read
      at once. */
   --irregular-ink: #b8392f;
 
@@ -619,14 +619,14 @@ body {
 
 /* --- Internal table index: a visual directory of every table ---------- */
 /* Stands in for a page heading. Closed: one small control naming the table
-   you're on -- very little vertical weight. Open: the whole active section
+   I'm on -- very little vertical weight. Open: the whole active section
    laid out at once, categories as quiet labels with every table listed
    beneath and nothing to expand. Multi-column on a wide screen; a bounded,
    internally-scrolling bottom sheet on a phone. */
 /* A permanent button in the sticky search bar, between search and Options --
    it used to be its own row above the bar that appeared only once a table
    was open, shoving the page down on every open/close, and scrolled away
-   just when you wanted it. Always there now, always reachable. */
+   just when I wanted it. Always there now, always reachable. */
 .table-index { position: relative; flex: 0 0 auto; }
 .tindex-trigger:disabled { opacity: .35; cursor: default; }
 .tindex-trigger {
@@ -1273,7 +1273,7 @@ body.selftest-mode .selftest-hint { display: block; }
 .page-vocab .cat-heading { border-bottom: 0; padding: 0 0 0 16px; margin-bottom: 8px; }
 /* iOS / macOS list-header voice: a step smaller than the rows beneath it, in
    secondary grey, inset to line up with the row content -- the header labels
-   the group, the rows are what you read. */
+   the group, the rows are what I read. */
 .page-vocab .cat-heading { font-size: calc(12px * var(--dt)); font-weight: 500; letter-spacing: 0; color: var(--muted); }
 /* The header is one button that folds its group away, chevron at the
    trailing edge in line with the rows' own (down = open, right = folded).
@@ -1340,7 +1340,7 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 37px; }
 /* An open table's title row pins under the search bar while I scroll
    through it (sticky inside its own section, so the next table's title
-   takes over), so you always know which table you're in and can close it
+   takes over), so I always know which table I'm in and can close it
    from anywhere. --vocab-toolbar-h is the search bar's fixed height. */
 #vocabulary .table-section:not(.collapsed) > .section-head {
   position: sticky; top: calc(var(--nav-h) - 1px + var(--vocab-toolbar-h)); z-index: 40;
@@ -1366,7 +1366,7 @@ body.selftest-mode .selftest-hint { display: block; }
 #vocabulary .table-section:not(.collapsed) > .section-head:has(> .section-icon:not(.section-icon-empty))::after { left: 53px; }
 #vocabulary .table-section.menu-open:not(.collapsed) > .section-head { z-index: 44; }
 /* Open or closed, the row's title is the same 14px -- growing it on open
-   would move the row you just tapped. */
+   would move the row I just tapped. */
 #vocabulary .table-section .section-title-text { font-size: var(--fs-nav); font-weight: 400; }
 #vocabulary .table-section.collapsed:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.level-empty):not(:has(+ .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.level-empty))) .section-head::after { display: none; }
 #vocabulary .table-section:not(.collapsed):not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.level-empty) + .table-section:not(.page-hidden):not(.search-hidden):not(.user-hidden):not(.level-empty) { box-shadow: inset 0 1px 0 var(--row-line); }
@@ -1385,7 +1385,7 @@ body.selftest-mode .selftest-hint { display: block; }
 }
 /* A closed row is one tap target: the tile, its name and the chevron. The
    table's ⋯ (with Print in it) appears on its title row once it's open --
-   the actions belong to the table you're looking at, not to every row of
+   the actions belong to the table I'm looking at, not to every row of
    the list. */
 #vocabulary .table-section.collapsed > .section-head .section-menu,
 #vocabulary .table-section.collapsed > .section-head .section-menu ~ .print-icon-btn { display: none; }
@@ -1737,7 +1737,7 @@ body.icon-picker-open { overflow: hidden; }
    are text led by a glyph (orange ⚠ watch out, a lightbulb, or a number).
    Every Japanese item is Japanese (with furigana) and its speaker, then
    English; tap the Japanese for its romaji, as in the tables. Quiz covers
-   the Japanese you should produce, English off covers that line; a
+   the Japanese I should produce, English off covers that line; a
    covered item uncovers on a tap. Colour comes only from the section's
    tile hue (--rn), so it follows light and dark like everything else. */
 .rn { --rn: var(--tile-blue); --rn-strong: color-mix(in srgb, var(--rn) 80%, var(--ink)); --rn-soft: color-mix(in srgb, var(--rn) 14%, var(--paper)); color: var(--ink); padding-bottom: 30px; }
@@ -2180,7 +2180,7 @@ body.cz-drag-active { user-select: none; -webkit-user-select: none; }
 .cz-row-original[hidden] { display: none; }
 /* The name reads as the row's plain title (ink, no box) -- the shipped name
    is the placeholder, so it shows in ink too -- and turns into a field only
-   while you're editing it, like renaming a list in iOS. A grey box per row
+   while I'm editing it, like renaming a list in iOS. A grey box per row
    read as a disabled form. */
 .cz-row-name {
   appearance: none; width: calc(100% + 6px); margin-left: -6px;
@@ -2425,7 +2425,7 @@ body.tpick-open { overflow: hidden; }
    otherwise be one long unbroken scroll). Each keeps its hairline even
    closed, so consecutive tables still read as separate entries, not one
    run-on list. Searching swaps to .cv-owned-group-flat (a plain div, always
-   open) instead -- there's no point collapsing what you just searched for. */
+   open) instead -- there's no point collapsing what I just searched for. */
 .cv-owned-group + .cv-owned-group, .cv-owned-group-flat + .cv-owned-group-flat { margin-top: 10px; }
 .cv-owned-head {
   display: flex; align-items: center; gap: 10px;
@@ -2572,7 +2572,7 @@ body.tpick-open { overflow: hidden; }
 .help-card { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 /* Settings rows (iOS Settings): 44px, label left, value or control right,
    hairlines inset from the leading edge, a short grey footnote under each
-   card. Numbers are plain right-aligned values -- no grey box -- that you
+   card. Numbers are plain right-aligned values -- no grey box -- that I
    tap to edit; on/off is an iOS switch; directions are checkmark rows. */
 .set-card, .set-card-actions { background: var(--paper); border-radius: var(--radius-card); overflow: hidden; }
 .set-row {
@@ -3201,7 +3201,7 @@ body.ja-voice-ready .vocab:not(.vocab-sentences) .jp-speak-btn {
    ("なな ・ ななつ"); pull them in so the group reads as one list. */
 .kanji-readings .kanji-sep { margin: 0 -.3em; }
 /* A kanji reads top to bottom -- the character, its kana readings, then
-   the romaji when you tap it (the character's own reveal, moved below the
+   the romaji when I tap it (the character's own reveal, moved below the
    readings: display: contents lets its ::after be ordered as a sibling). */
 .kanji-stack { display: flex; flex-direction: column; align-items: flex-start; }
 body:not(.is-searching) .vocab-kanji .kanji-stack { align-items: center; }
@@ -3597,7 +3597,7 @@ body.ja-voice-ready .ks-reading .jp-speak-btn {
 .we-restore:active { background-color: var(--row-press); }
 /* A phone: the form is a full-height sheet from the top, as iOS's own edit
    forms are -- a bottom sheet ends up under the keyboard, every field hidden
-   while you type. */
+   while I type. */
 @media (max-width: 640px) {
   .kanji-sheet.word-edit-sheet {
     width: auto; top: calc(env(safe-area-inset-top, 0px) + 10px);
@@ -4076,7 +4076,7 @@ body.selftest-mode .vocab tbody td:nth-child(2) .fc-toggle-btn { color: var(--fa
    only when it doesn't fit does it drop -- whole -- under it. A note under
    every such row made those rows taller than their neighbours. */
 .meaning-note { display: inline-block; max-width: 100%; color: var(--muted); font-size: var(--fs-small); letter-spacing: .005em; }
-/* Search only: the tables of yours a result's word is also in (their own
+/* Search only: the tables of mine a result's word is also in (their own
    rows are left out of the results). A line of its own under the meaning,
    the row icons staying on the first line. */
 .meaning-cell.has-also { flex-wrap: wrap; }
@@ -4246,7 +4246,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 /* Already in my flashcards: the Practice tab's cards glyph in Practice's
    own tone -- green is the known-word mark, so this stays clear of it.
    Quiet enough not to speckle the table, clear enough to pick out the rows
-   you've added. */
+   I've added. */
 .fc-toggle-btn[aria-pressed="true"] { color: var(--sec-flashcards) !important; }
 .vocab tbody tr:focus-within .row-hide-btn, .row-hide-btn:focus-visible { opacity: 1; }
 @media (hover: hover) { .vocab tbody tr:hover .row-hide-btn { opacity: 1; } }
@@ -4412,7 +4412,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
   .fc-xw-clues-arroword .fc-xw-arrow-svg { width: 12px; height: 12px; color: var(--muted); }
 }
 /* Clue list: iOS inset-grouped -- a 13px secondary header over a white
-   card of hairline rows; the clue you're on is tinted. Across and Down sit
+   card of hairline rows; the clue I'm on is tinted. Across and Down sit
    side by side when there's room (a 40-word puzzle is two short lists, not
    one very long one); rows are compact, the number a quiet tabular column
    the text hangs from. */
@@ -4509,7 +4509,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 @media (prefers-reduced-motion: reduce) { .fc-mt-wrong { animation: none; } .fc-mt-tile { transition: none; } }
 .fc-mt-clock { min-width: 4.5ch; text-align: right; }
 /* The live split beside the clock: a small tabular capsule, sage when
-   ahead of your best at this round, coral when behind. */
+   ahead of my best at this round, coral when behind. */
 .fc-mt-split {
   display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px;
   font: 500 var(--fs-micro)/1.2 var(--font-ui); font-variant-numeric: tabular-nums;
@@ -4552,7 +4552,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-mt-done-note { margin: -6px 0 12px; color: var(--faint); font-size: var(--fs-micro); }
 /* Match's finish card plays once, in order: the time counts up (JS), a
    "New best" capsule pops in, the line under it rises, a ring draws closed
-   around your pace per pair in its medal's hue -- gold / silver / bronze
+   around my pace per pair in its medal's hue -- gold / silver / bronze
    from the --tile family's amber / slate / clay, the section tint when no
    medal yet -- the tier named under it, then the last ten games draw
    themselves as a line and this game's dot pops. No confetti, no sound;
@@ -4680,7 +4680,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 @media (prefers-reduced-motion: reduce) { .fc-kt-wrong { animation: none; } .fc-kt-tile { transition: none; } }
 
 /* Sentences (crosswords.js wireSentences): the English in the card, the
-   line you build under it -- a ground-grey well that holds the placed
+   line I build under it -- a ground-grey well that holds the placed
    pieces and wraps like text -- and the bank of pieces below, Kana tiles'
    white capsules sized to their words, furigana over the kanji, particles
    in their blue. Right washes the line sage, wrong coral with the shake;
@@ -4732,7 +4732,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-sb-answer:not([hidden]) { animation: fc-fb-rise .3s .2s ease-out both; }
 /* Particles: the sentence at 22px with each particle a circle -- how a
    Japanese worksheet marks one to fill in -- a kana wide, an outline while
-   empty (the next one in the tint, thicker), your choice inside once
+   empty (the next one in the tint, thicker), my choice inside once
    filled; marked, it fills sage or coral, a wrong one with the right
    particle small under it. The six choices are the bank's capsules. */
 .fc-sp-line { margin: 0; text-align: center; font: 400 22px/2.1 var(--font-jp); color: var(--ink); }
@@ -4790,7 +4790,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 }
 /* Odd one out: a quiet question over a 2 × 2 of Match's white tiles, the
    word centred and large; answering drops each word's English under it,
-   washes the odd one sage (your wrong pick coral, with ✕), and one grey
+   washes the odd one sage (my wrong pick coral, with ✕), and one grey
    line under the grid names the tables. */
 .fc-oo-ask { margin: 0 0 10px; color: var(--muted); font-size: var(--fs-small); text-align: center; }
 .fc-oo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -4805,7 +4805,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 .fc-oo-reveal[hidden] { display: none; }
 /* Speed sort: Listening's white card with "7 of 20" and the word large,
    then the buckets as a row of Match's white tiles (2 or 3 across). The
-   bucket you tapped washes sage (right) or coral with a shake (wrong); on a
+   bucket I tapped washes sage (right) or coral with a shake (wrong); on a
    miss the right one takes a sage ring for a moment before the next word. */
 .fc-ss-card { gap: 6px; padding: 18px 16px 22px; }
 .fc-ss-count { margin: 0; color: var(--muted); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
@@ -4894,7 +4894,7 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
    tile squeezes a little under a finger; once answered, the right tile's
    sage wash grows from its middle (the colour on a layer under the label,
    so the label never moves) and a ✓ draws itself in its corner -- a short
-   springy press if it was your pick, a sage ring if you picked another --
+   springy press if it was my pick, a sage ring if I picked another --
    and a wrong pick washes coral with a firmer shake and a ✕. The English
    and the line under the grid rise into place. All under half a second,
    only in answer to a tap; reduced motion leaves the end state. */
@@ -5000,12 +5000,12 @@ body.is-searching .vocab .fc-toggle-btn { display: inline-flex; }
 
 /* The dashboard's ~9 pieces (next review, today, Study now, 4 stat tiles,
    3 charts) used to each carry their own border and shadow, reading as a stack of independent widgets instead of one screen.
-   They now share 3 cards -- "right now", "your stats", "your progress" --
+   They now share 3 cards -- "right now", "my stats", "my progress" --
    each item below keeping its own colour/accent but losing its individual
    box; last-child's bottom margin is zeroed so it doesn't double up with
    the card's own bottom padding. */
 /* iOS: white 12px cards straight on the grey ground -- no border, no shadow.
-   "Right now" and "your stats" are one card each; "your progress" is a stack
+   "Right now" and "my stats" are one card each; "my progress" is a stack
    of cards, one per chart / list (see .fc-viz-grid below). */
 .fc-dash-now, .fc-dash-stats {
   background: var(--paper); border-radius: var(--radius-card); padding: 16px 18px; margin-bottom: 16px;
@@ -5426,7 +5426,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 }
 /* The card is anchored near the top, not centred: centring re-centred it every
    time the verdict and ratings dropped in, so the prompt jumped upward under
-   your thumb. Anchored, the prompt and the field never move; the answer just
+   my thumb. Anchored, the prompt and the field never move; the answer just
    grows downward. (The wrap-up screen stays centred.) */
 .fc-tabpanel:not([hidden]):has(> .fc-review-card) { justify-content: flex-start; padding-top: clamp(4px, 5svh, 48px); }
 .fc-review-meta {
@@ -5494,13 +5494,13 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    quietened: the rating row below is the live control now. */
 .fc-answer-form input.fc-answer-locked { color: var(--muted); }
 /* The field's whole row collapses once checked -- the "You wrote" line in
-   the stage below now carries what you typed, so the field itself doesn't
+   the stage below now carries what I typed, so the field itself doesn't
    need to stay visible, just present (opacity/max-height, never
    display/visibility, so the input stays focused and a phone's on-screen
    keyboard doesn't close). */
 .fc-answer-form.fc-answer-form-checked { max-height: 0; margin: 0; opacity: 0; overflow: hidden; pointer-events: none; }
 /* One-shot wash of the whole card in the study-feedback tone when a check
-   lands -- held for a beat, then faded out; gone by the time you rate.
+   lands -- held for a beat, then faded out; gone by the time I rate.
    (--right-soft / --wrong-soft are too near paper in light mode to register,
    so mix a stronger-but-still-soft tint.) Shared by both review cards via
    .fc-verdict-ok/-bad below. */
@@ -5523,7 +5523,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
    in, the way the approved design shows them. */
 .fc-review-verdict { align-self: stretch; display: flex; flex-direction: column; align-items: center; margin-bottom: 4px; }
 /* The verdict is a small coloured mark alone -- no text, no pill. The
-   "You wrote" line below already says what happened; this just tells you
+   "You wrote" line below already says what happened; this just tells me
    which way it went at a glance. */
 .fc-verdict-badge {
   display: flex; align-items: center; justify-content: center;
@@ -5542,7 +5542,7 @@ body:has(#flashcardsPage:not([hidden]) :is(.fc-review-card, .fc-session-done))
 .fc-prompt-note { display: block; margin-top: 4px; font: 400 15px/1.3 var(--font-ui); letter-spacing: 0; color: var(--muted); }
 .fc-stage-note { margin: -2px 0 6px; font: 400 15px/1.3 var(--font-ui); color: var(--muted); }
 /* Wrong answer: the ANSWER is the focus -- big, in ink, first thing the eye
-   lands on. What you typed is one quiet secondary line below it (the wrong
+   lands on. What I typed is one quiet secondary line below it (the wrong
    word struck through), never a competing red banner. */
 .fc-stage-compare { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 6px; }
 .fc-answer-row { display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -5641,7 +5641,7 @@ mark.fc-diff-co {
   .fc-stage { padding: 0 0 8px; }
 }
 /* Desktop: the shared --fs-* scale is tuned for the reference tables, and on a
-   roomy window the study card's reading text (the answer you type, the revealed
+   roomy window the study card's reading text (the answer I type, the revealed
    answer, the verdict, the rating labels) sat too small to study from
    comfortably. Bump those up a step past 700px -- but not the word prompt
    itself, which stays 26px at every width now: a roomier window doesn't need
@@ -5867,7 +5867,7 @@ mark.fc-diff-co {
   line-height: 1;
 }
 /* Status colours carry meaning, not decoration: neutral for absent/paused,
-   sage for "in your deck and on schedule", coral for "due now" -- a due
+   sage for "in my deck and on schedule", coral for "due now" -- a due
    review wants a glance, and coral is the attention tone everywhere on the
    dashboard too. */
 .fc-status-none { color: var(--faint); }
@@ -5876,7 +5876,7 @@ mark.fc-diff-co {
 .fc-status-archived { color: var(--faint); }
 
 /* "Right now": the count (or All caught up) and Study now share one row --
-   the headline and the thing you do about it side by side -- then today's
+   the headline and the thing I do about it side by side -- then today's
    progress as one quiet footer line under a hairline. */
 .fc-now-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 /* Every Dashboard card's one action is the same size as Study now. */
@@ -6407,7 +6407,7 @@ mark.fc-diff-co {
 }
 /* Desktop: one glass top bar, like an iPadOS 26 / macOS window -- the
    wordmark leading, the four sections as a white floating capsule in the
-   middle, the utility glyphs trailing -- pinned while you scroll, so the
+   middle, the utility glyphs trailing -- pinned while I scroll, so the
    sections are always one click away. The masthead and #siteNav share the
    first grid row (the nav laid over the masthead's centre), so the markup
    and the phone's bottom tab bar are untouched. */
@@ -6460,7 +6460,7 @@ mark.fc-diff-co {
    Settings / Help on the first row, the tabs full width under them. Wider:
    the title is visually hidden (the top bar names the page, as on the
    reference pages -- it stays in the accessibility tree), tabs leading and
-   Settings / Help trailing on one row. Who you are and Sign out live in the
+   Settings / Help trailing on one row. Who I am and Sign out live in the
    masthead's account menu, so the first card follows straight on. */
 .fc-titlebar:not(.fc-titlebar-pushed) { flex-wrap: wrap; row-gap: 10px; align-items: center; }
 .fc-titlebar > .fc-tabs { order: 3; flex: 1 1 100%; margin: 0; }
@@ -6477,7 +6477,7 @@ mark.fc-diff-co {
    Each tab opens on a setup screen (iOS Settings cards: the puzzle or game
    as checkmark rows, then Words from / Script / Word count, then Start).
    In play, one toolbar row: ‹ and the name leading (back to setup), and
-   trailing only what you use mid-play: Hint, Check (or the count / clock)
+   trailing only what I use mid-play: Hint, Check (or the count / clock)
    and ⋯ -- New puzzle on a phone, How to play, Reveal / Clear / Save as
    PDF, Stats. */
 .fc-gs { max-width: 560px; } /* leading-aligned under the segment bar, as Dashboard, Kana and Library */
@@ -6819,7 +6819,7 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
 .fc-st-best .set-label { min-width: 0; }
 
 /* iOS confirmation (shared.js confirmSheet -- Reset stats, Restore a backup,
-   deleting one of your own tables): an action sheet up from the bottom on a
+   deleting one of my own tables): an action sheet up from the bottom on a
    phone -- a glass group holding the optional semibold title, the grey
    message and the red destructive button, and Cancel as its own solid group
    under it; a centred alert of the same parts on a wide window. The page
@@ -6856,7 +6856,7 @@ body:not(:has(#flashcardsPage .fc-titlebar)) .account-menu [data-practice-only] 
 }
 
 /* Undo (shared.js undoToast -- Hide row, Hide table, Pause, deleting one of
-   your own words): a glass capsule centred near the bottom, as in Mail --
+   my own words): a glass capsule centred near the bottom, as in Mail --
    what happened on the left, a tinted Undo on the right. On a phone it
    floats just above the tab bar. Rises in; reduced motion just shows it. */
 .undo-toast {

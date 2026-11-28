@@ -431,7 +431,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
       (badges ? '<span class="row-badges">' + badges + '</span>' : '') + rowActions(vocabId, !!badges) + '</div></td>';
   }
   // The particles a verb (or a な-adjective like 好き) takes -- row.particles is
-  // [{ p: 'を', role: 'what I eat' }]. Each is a small blue chip (the app's
+  // [{ p: 'を', role: 'what you eat' }]. Each is a small blue chip (the app's
   // particle blue, bold) beside the row icons, drawn from data-badge like the
   // adjective badge. Each is a real button: tapping (or clicking, or hovering
   // with a mouse) opens a small popover with what the particle marks

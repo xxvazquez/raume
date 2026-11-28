@@ -96,7 +96,7 @@ The ⓘ lists:
 | ----- | ------- | -------------- |
 | **い** / **な** | Adjective type | It breaks the pattern: a な-adjective ending in い (きれい), or irregular いい |
 | **五段** / **一段** / **変格** | u-verb, ru-verb, irregular verb | The group is easy to mistake (切る, 帰る), or the verb is 来る |
-| **を** **に** **が** … | The particles a word takes, e.g. 聞く: を *what I listen to*, に *who I ask* | — |
+| **を** **に** **が** … | The particles a word takes, e.g. 聞く: を *what you listen to*, に *who you ask* | — |
 | **Forms** | A verb's polite 〜ません, 〜ました, 〜ませんでした, its plain 〜ない, 〜た, 〜なかった (書かない, 行った, 来(こ)ない, ある → ない) and its て-form (行って, 来(き)て) | — |
 
 Usage traps get a plain line of their own (多い doesn't go right before a

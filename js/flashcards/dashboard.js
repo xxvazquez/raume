@@ -1240,7 +1240,7 @@ window.RaumeStudy.flashcards.dashboard = (function () {
   }
   // --- Dashboard: JLPT levels ---
   // Each level's words in the reference and how many of them are Known --
-  // the same Known as the green row wash (marked by I, or every card of
+  // the same Known as the green row wash (marked by me, or every card of
   // the word remembered three weeks or more). A level the reference has no
   // words for doesn't show; the card waits for a first known word.
   // Words only, each counted once: sentences stay out, and a word that sits

@@ -1178,7 +1178,7 @@ window.RaumeStudy.notes = (function () {
   function noteWordIds() { return wordIdsIn(hostEl && hostEl.querySelector(".rn")); }
   function wordIdsIn(body) {
     if (!body) return [];
-    wordMap = buildWordMap(); // fresh each time: your own words may have synced in since
+    wordMap = buildWordMap(); // fresh each time: my own words may have synced in since
     var seen = {}, ids = [];
     body.querySelectorAll(".rn-jp").forEach(function (el) {
       var shown = shownText(el).split(PAIR_SPLIT), spoken = spokenText(el).split(PAIR_SPLIT);

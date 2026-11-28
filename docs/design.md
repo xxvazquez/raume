@@ -735,7 +735,7 @@ and Help.
   small white rounded surface with the menu shadow and an arrow at its
   trigger; it closes on an outside tap, Escape, scroll, resize or hash change
   and is suppressed while the English is hidden or covered (a role like "what
-  I eat" would give the answer away). The legends show only while the table
+  you eat" would give the answer away). The legends show only while the table
   under the sticky bar has that kind of badge (`updateAdjLegend()`); a screen
   reader gets each row's type from its visually-hidden note instead.
 - **Every vocab table is two columns, Japanese and English** — romaji isn't a

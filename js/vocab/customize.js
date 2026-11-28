@@ -418,7 +418,7 @@ window.RaumeStudy.customize = (function () {
     }).join("");
   }
 
-  // Category: where a table of yours shows up -- a pop-up row of the
+  // Category: where a table of mine shows up -- a pop-up row of the
   // places that exist (each Vocabulary group, the Grammar page), plus New
   // category… which opens a name field. A free-text box with suggestions
   // read as a mystery ("which category? what does it do?"). Not the Kanji

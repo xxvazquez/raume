@@ -673,7 +673,7 @@ npm run generate:launch     # rebuild icons/launch/ (--group-ground launch image
 npm run vendor:libs         # re-copy the vendored libs after a version bump
 ```
 
-Verb rows also carry `particles: [{ p: "を", role: "what I eat" }]` — the core
+Verb rows also carry `particles: [{ p: "を", role: "what you eat" }]` — the core
 arguments a verb takes (`p` may be a pair like `"に / へ"`), `[]` for none — and 好き /
 嫌い / 上手 / 下手 carry `が`. `npm run validate` requires the field on every verb and
 checks each entry is a known particle with a role.

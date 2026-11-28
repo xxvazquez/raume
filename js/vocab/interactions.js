@@ -714,10 +714,10 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
   /* Edit a word -- the hold menu's Edit. The word opens in the sheet the
      kanji use (#kanjiSheet) as an iOS form: Cancel / the title / Save along
      the top, then the Japanese with each kanji's reading in ( ) after it
-     (as when you add a word), its romaji, the English and its note. A
+     (as when I add a word), its romaji, the English and its note. A
      built-in word's change is kept by js/vocab/word-edits.js, which puts
      it over the dataset for every page (Restore original takes it back
-     off); a word of your own is changed at its source,
+     off); a word of my own is changed at its source,
      js/vocab/custom-vocab.js. Only a change that is really stored closes
      the sheet -- otherwise it stays open and says why. */
   const wordEdits = window.RaumeStudy.wordEdits;
@@ -1036,7 +1036,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
 
   /* iOS navigation on a phone: once the screen's large title has scrolled
      up under the top edge, a small centred copy of it shows in a glass bar
-     there (css/site.css .compact-title) -- you always know where you are.
+     there (css/site.css .compact-title) -- I always know where I am.
      The bar's height is reserved for good (the sticky search bar stops
      under it), so nothing moves when it appears. The large title itself
      stays the screen's real heading; the bar is aria-hidden. Whichever
@@ -2529,7 +2529,7 @@ window.RaumeStudy.vocab = window.RaumeStudy.vocab || {};
     // every badge type behaves identically -- one badge, one popover, about
     // that badge alone (a word with two particles opens two different
     // popovers, one per chip, never both roles in one). Suppressed while the
-    // English is hidden or covered (a role like "what I eat" would give the
+    // English is hidden or covered (a role like "what you eat" would give the
     // answer away).
     const BADGE_SEL = 'button.particle-chip, button.adj-badge, button.verb-badge';
     let pop = null, popOwner = null, popPinned = false;
